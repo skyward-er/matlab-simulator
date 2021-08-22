@@ -115,22 +115,22 @@ if settings.plots && not(settings.electronics)
     figure('Name', 'Velocity-Abs, Acceleration-Abs - ascent Phase', 'NumberTitle', 'off');
     subplot(1, 2, 1)
     plot(Tf(flagMatr(:, 2)), abs_V(flagMatr(:, 2))), grid on;
-    xlabel('time [s]'), ylabel('|V| [m/s]');
+    xlabel('Time [s]'), ylabel('|V| [m/s]');
     
     subplot(1, 2, 2)
     plot(Tf(flagMatr(:, 2)), abs_A/9.81), grid on;
-    xlabel('time [s]'), ylabel('|A| [g]');
+    xlabel('Time [s]'), ylabel('|A| [g]');
     
     % ANGULAR VELOCITIES
     
     figure('Name', 'Angular Velocities - ascent Phase', 'NumberTitle', 'off');
     subplot(3, 1, 1)
     plot(Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), 7)*180/pi), grid on;
-    xlabel('time [s]'), ylabel('p [deg/s]');
+    xlabel('Time [s]'), ylabel('p [deg/s]');
     
     subplot(3, 1, 2)
     plot(Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), 8)*180/pi), grid on;
-    xlabel('time [s]'), ylabel('p [deg/s]');
+    xlabel('Time [s]'), ylabel('p [deg/s]');
         
     subplot(3, 1, 3)
     plot(Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), 9)*180/pi), grid on;
@@ -141,15 +141,15 @@ if settings.plots && not(settings.electronics)
     figure('Name', 'Body frame Velocities - ascent Phase', 'NumberTitle', 'off');
     subplot(3, 1, 1)
     plot(Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), 4)), grid on;
-    xlabel('time [s]'), ylabel('v [m/s]');
+    xlabel('Time [s]'), ylabel('v [m/s]');
     
     subplot(3, 1, 2)
     plot(Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), 5)), grid on;
-    xlabel('time [s]'), ylabel('v [m/s]');
+    xlabel('Time [s]'), ylabel('v [m/s]');
         
     subplot(3, 1, 3)
     plot(Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), 6)), grid on;
-    xlabel('time [s]'), ylabel('v [m/s]');
+    xlabel('Time [s]'), ylabel('v [m/s]');
        
        
 end
