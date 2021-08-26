@@ -27,8 +27,8 @@ contSettings.starting_index = 0;
 contSettings.sample_time         =  0.1;
 
 % PI controler tune parameter
-contSettings.Kp_1    =   50;  % 20   (50 con U_ref)                        % using Fdrag nel pid --> da migliorare (magari si può ottenere variabile controllo più smooth)
-contSettings.Ki_1    =    1;  % 1    (20 senza U_ref)                      % using Fdrag nel pid
+contSettings.Kp_1    =   20;  % 20   (50 con U_ref)                        % using Fdrag nel pid --> da migliorare (magari si può ottenere variabile controllo più smooth)
+contSettings.Ki_1    =    5;  % 1    (20 senza U_ref)                      % using Fdrag nel pid
 contSettings.Kp_2    =   50;                                               % using u nel pid --> da migliorare (magari si può ottenere variabile controllo più smooth)
 contSettings.Ki_2    =   40;                                               % using u nel pid
 contSettings.Kp_3    =   20;                                               % using alfa_degree nel pid --> ancora da tunare
@@ -53,7 +53,7 @@ contSettings.S0 = (pi*contSettings.D^2)/4;
 contSettings.a  = -9.43386/1000;                                            
 contSettings.b  = 19.86779/1000;                                           
 
-contSettings.rate_limiter      =    60/0.2;                                % datasheet: 60deg/0.13s --> increased for robustness
+contSettings.rate_limiter      =    15/0.1;                                % datasheet: 60deg/0.13s --> increased for robustness
 contSettings.filter_coeff      =    0.85;
 
 % Possible range of values for the control variable

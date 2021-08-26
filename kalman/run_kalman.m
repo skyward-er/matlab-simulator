@@ -138,21 +138,21 @@ for i=2:length(tv)
                                            
  
 %Corrections
-%      if tv(i) >= t_gpstemp(index_GPS)              %Comparison to see the there's a new measurement
-%        [x_lin(i,:),P_lin(:,:,i),~]     = correctionGPS(x_lin(i,:),P_lin(:,:,i),sp.gps(index_GPS,1:2),...
-%                                                         sp.gpsv(index_GPS,1:2),kalman.sigma_GPS,nsat,fix);
-%         index_GPS   =  index_GPS + 1;
-%      end
-%      
-%     if tv(i) >= t_barotemp(index_bar)              %Comparison to see the there's a new measurement
-%        [x_lin(i,:),P_lin(:,:,i),~]     = correctionBarometer(x_lin(i,:),P_lin(:,:,i),sp.h_baro(index_bar),kalman.sigma_baro);
-%         index_bar   =  index_bar + 1;     
-%     end
-%          
-%     if tv(i) >= t_magtemp(index_mag)               %Comparison to see the there's a new measurement
-%        [xq(i,:),P_q(:,:,i),~,~]    = correctorQuat(xq(i,:),P_q(:,:,i),sp.mag(index_mag,:),kalman.sigma_mag,mag_NED);
-%        index_mag    =  index_mag + 1;  
-%     end
+     if tv(i) >= t_gpstemp(index_GPS)              %Comparison to see the there's a new measurement
+       [x_lin(i,:),P_lin(:,:,i),~]     = correctionGPS(x_lin(i,:),P_lin(:,:,i),sp.gps(index_GPS,1:2),...
+                                                        sp.gpsv(index_GPS,1:2),kalman.sigma_GPS,nsat,fix);
+        index_GPS   =  index_GPS + 1;
+     end
+     
+    if tv(i) >= t_barotemp(index_bar)              %Comparison to see the there's a new measurement
+       [x_lin(i,:),P_lin(:,:,i),~]     = correctionBarometer(x_lin(i,:),P_lin(:,:,i),sp.h_baro(index_bar),kalman.sigma_baro);
+        index_bar   =  index_bar + 1;     
+    end
+         
+    if tv(i) >= t_magtemp(index_mag)               %Comparison to see the there's a new measurement
+       [xq(i,:),P_q(:,:,i),~,~]    = correctorQuat(xq(i,:),P_q(:,:,i),sp.mag(index_mag,:),kalman.sigma_mag,mag_NED);
+       index_mag    =  index_mag + 1;  
+    end
     
     x_c(i,:) = [x_lin(i,:),xq(i,:)];
     P_c(1:6,1:6,i)   = P_lin(:,:,i);
