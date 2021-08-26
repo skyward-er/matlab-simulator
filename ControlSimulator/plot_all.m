@@ -9,7 +9,7 @@ time = c.ctr_start:0.1:c.ctr_end;
 
 %% Control variable: servo angle
 figure('Name','Servo angle after burning phase');
-plot(time, c.alpha_degree_tot);grid on;xlabel('time [s]');ylabel('|alfa| [°]');
+plot(time, c.alpha_degree_tot);grid on;xlabel('Time [s]');ylabel('|Alpha| [deg]');
 title('Servo control action');
 
 if c.flagPID ~= 3
@@ -18,28 +18,28 @@ if c.flagPID ~= 3
     plot(time, c.U_lin_tot, 'DisplayName','Linearized','LineWidth',0.8), grid on;
     hold on
     plot(time, c.pid_tot, 'DisplayName','PID','LineWidth',0.8), grid on;
-    xlabel('time [s]'), ylabel('U [N]');
+    xlabel('Time [s]'), ylabel('U [N]');
     hold off
     legend('Location','northeast')
 
     % delta_S
     figure('Name','Delta_S','NumberTitle','off');
     plot(time, c.dS_tot), grid on;
-    xlabel('time [s]'), ylabel('A [m^2]');
+    xlabel('Time [s]'), ylabel('A [m^2]');
 
     % Cd
     figure('Name','Cd','NumberTitle','off');
     plot(time, c.Cd_tot), grid on;
-    xlabel('time [s]'), ylabel('Cd []');
+    xlabel('Time [s]'), ylabel('Cd []');
 end
 
 % Altitude real vs setpoint
 figure('Name','Altitude real vs setpoint after burning phase');
-plot(time, c.z_tot,'DisplayName','real','LineWidth',0.8), grid on;
+plot(time, c.z_tot,'DisplayName','Real altitude','LineWidth',0.8), grid on;
 hold on
-plot(time, c.z_setpoint_tot,'DisplayName','setpoint','LineWidth',0.8), grid on;
+plot(time, c.z_setpoint_tot,'DisplayName','Reference altitude','LineWidth',0.8), grid on;
 % plot(time_setpoint, csett.data_trajectories(csett.chosen_trajectory).Z_ref(csett.starting_index:end),'DisplayName','setpoint choosen trajectory','LineWidth',0.8), grid on;
-xlabel('time [s]'), ylabel('z [m]');
+xlabel('Time [s]'), ylabel('z [m]');
 hold off
 legend('Location','southeast')
     
@@ -47,7 +47,7 @@ legend('Location','southeast')
 figure('Name','Vertical velocity real vs setpoint after burning phase');
 plot(time, c.vz_tot,'DisplayName','real','LineWidth',0.8), grid on;
 hold on
-plot(time, c.vz_setpoint_tot, 'DisplayName','setpoint', 'LineWidth',0.8), grid on;xlabel('time [s]'), ylabel('Vz [m/s]');
+plot(time, c.vz_setpoint_tot, 'DisplayName','setpoint', 'LineWidth',0.8), grid on;xlabel('Time [s]'), ylabel('Vz [m/s]');
 % plot(time_setpoint, csett.data_trajectories(csett.chosen_trajectory).V_ref(csett.starting_index:end),'DisplayName','setpoint choosen trajectory','LineWidth',0.8), grid on;
 hold off
 legend
