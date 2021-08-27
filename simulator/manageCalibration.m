@@ -11,7 +11,7 @@ q   = eul2quat([phi,ome,0],'ZYX');
 q   = [q(2:4), q(1)];
 A   = cdmrot(q);
 for i =  1:Na
-    SensorData.accelerometer.measures(i,:) = (A*[0; 0; +9.81])';
+    SensorData.accelerometer.measures(i,:) = (A*[0; 0; -9.81])';
     SensorData.gyro.measures(i,:) = [0, 0, 0];
 end
     SensorData.accelerometer.time = zeros(1,Na);
