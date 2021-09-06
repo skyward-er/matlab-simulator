@@ -91,7 +91,7 @@ addpath('../simulationData');
 %% CONTROL INIT
 addpath('../control');
 addpath('../control/Cd_rho_computation');
-csett  = controlConfig;
+csett  = controlConfig(settings.flight);
 %% MAGNETIC FIELD MODEL
 hmax   =   6000;
 

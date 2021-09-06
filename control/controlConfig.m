@@ -1,4 +1,4 @@
-function contSettings = controlConfig
+function contSettings = controlConfig(flight)
 
 % Author: Alessandro Del Duca
 % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@kywarder.eu
@@ -13,7 +13,13 @@ All the parameters are stored in the "contSetting" structure.
  %}
 
 % Load coefficients for Cd
-data                    =     load('coeffs.mat');
+switch flight
+    case 'Roccaraso'
+    data                    =     load('coeffsRoccaraso.mat');
+    case 'Euroc'
+    data                    =     load('coeffsEuroc.mat');
+end
+
 contSettings.coeff_Cd   =     data.coeffs;
 
 % Load the trajectories

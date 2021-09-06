@@ -151,11 +151,11 @@ subplot(3,1,3);plot(c.t_est_tot(1:c.i_apo_est+1),-c.x_est_tot(1:c.i_apo_est+1,6)
 legend('Upward','Ground-truth','location','best'); title('EstimatedUpward velocity vs ground-truth'); 
 %% FIGURE: Estimated body velocities vs ground-truth 
 figure('Name','Estimated body velocities vs ground-truth')
-subplot(3,1,1);plot(c.t_est_tot(1:c.i_apo_est),c.vels_tot(1:c.i_apo_est,1),c.Tf_tot(1:c.i_apo), c.Yf_tot(1:c.i_apo,4));grid on;xlabel('time [s]');ylabel('|Vn| [m/s]');
+subplot(3,1,1);plot(c.t_est_tot(1:c.i_apo_est),c.vels_tot(1:c.i_apo_est,1),c.Tf_tot(1:c.i_apo), c.Yf_tot(1:c.i_apo,4));grid on;xlabel('time [s]');ylabel('|Vx| [m/s]');
 legend('x','Ground-truth','location','best'); title('Estimated x velocity vs ground-truth'); 
-subplot(3,1,2);plot(c.t_est_tot(1:c.i_apo_est),c.vels_tot(1:c.i_apo_est,2),c.Tf_tot(1:c.i_apo), c.Yf_tot(1:c.i_apo,5));grid on;xlabel('time [s]');ylabel('|Ve| [m/s]');
+subplot(3,1,2);plot(c.t_est_tot(1:c.i_apo_est),c.vels_tot(1:c.i_apo_est,2),c.Tf_tot(1:c.i_apo), c.Yf_tot(1:c.i_apo,5));grid on;xlabel('time [s]');ylabel('|Vy| [m/s]');
 legend('y','Ground-truth','location','best'); title('Estimated y velocity vs ground-truth');
-subplot(3,1,3);plot(c.t_est_tot(1:c.i_apo_est+1),c.vels_tot(1:c.i_apo_est+1,3),c.Tf_tot(1:c.i_apo),c.Yf_tot(1:c.i_apo,6));grid on;xlabel('time [s]');ylabel('|Vu| [m/s]');
+subplot(3,1,3);plot(c.t_est_tot(1:c.i_apo_est+1),c.vels_tot(1:c.i_apo_est+1,3),c.Tf_tot(1:c.i_apo),c.Yf_tot(1:c.i_apo,6));grid on;xlabel('time [s]');ylabel('|Vz| [m/s]');
 legend('z','Ground-truth','location','best'); title('Estimated z velocity vs ground-truth'); 
 
 %% FIGURE: Estimated quaternions vs ground-truth 
