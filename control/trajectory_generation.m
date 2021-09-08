@@ -7,12 +7,24 @@ addpath('Cd_rho_computation');
 
 % Impose the final condition I want to reach.
 % Then I start integrating backwards until I reach z = 0
-Vz_final =  0;
-z_final  =  1300;
-Vx_final =  40;  
-x_final  =  500;  
-Vy_final =  0;  
-y_final  =  0;  
+flight = 'Roccaraso';
+    switch flight
+        case 'Roccaraso'
+            Vz_final =  0;
+            z_final  =  1350;
+            Vx_final =  40;  
+            x_final  =  500;  
+            Vy_final =  0;  
+            y_final  =  0;  
+        case 'Euroc'
+            Vz_final =  0;
+            z_final  =  3000;
+            Vx_final =  70;  
+            x_final  =  1500;  
+            Vy_final =  0;  
+            y_final  =  0; 
+    end
+    
 
 %% Compute the trajectories by back integration
 
@@ -26,7 +38,7 @@ deltaS = deltaS_values(index);
 generation = sim('Trajectory_generation');
 
 % Get the output of the simulation
-t_ref = flip(16 - generation.tout); % (30seconds - time) In this way a plot the trajectories in a clearer way
+t_ref = flip(30 - generation.tout); % (30seconds - time) In this way a plot the trajectories in a clearer way
 Z_ref = flip(generation.z_simul); 
 VZ_ref = flip(generation.Vz_simul);
 X_ref = flip(generation.x_simul); 
@@ -42,8 +54,12 @@ trajectories_saving(index) = struct('Z_ref',Z_ref,'VZ_ref',VZ_ref,'X_ref',X_ref,
 end
 
 % % Save the trajectories in a unique file
-save('Trajectories_XYZ.mat','trajectories_saving');
-
+switch flight
+    case 'Roccaraso'
+        save('Trajectories_roccaraso.mat','trajectories_saving');
+    case 'Euroc'
+        save('Trajectories_euroc.mat','trajectories_saving')
+end
 
 %% Plot trajectories
 

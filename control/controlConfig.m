@@ -16,14 +16,16 @@ All the parameters are stored in the "contSetting" structure.
 switch flight
     case 'Roccaraso'
     data                    =     load('coeffsRoccaraso.mat');
+    struct_trajectories              =	load('Trajectories_roccaraso');
     case 'Euroc'
     data                    =     load('coeffsEuroc.mat');
+    struct_trajectories              =	load('Trajectories_euroc');
 end
 
 contSettings.coeff_Cd   =     data.coeffs;
 
 % Load the trajectories
-struct_trajectories              =	load('Trajectories');
+
 contSettings.data_trajectories   =  struct_trajectories.trajectories_saving;
 
 % Just for plotting the setpoints of the chosen trajectory without spikes
