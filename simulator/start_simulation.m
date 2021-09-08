@@ -18,7 +18,7 @@ path = genpath(pwd);
 addpath(path);
 
 %% LOAD DATA
-run('config.m');
+run('configRoccaraso.m');
 
 %% START THE CHOSEN SIMULATION
 % T = vector of time used by ODE, [s] also for Tf Ta
