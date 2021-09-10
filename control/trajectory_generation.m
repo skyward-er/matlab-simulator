@@ -3,11 +3,14 @@ close all
 clc
 
 addpath('Cd_rho_computation');
+addpath('../simulator')
+run('configEuroc.m')
+
 %% Parameters needed for simulation
 
 % Impose the final condition I want to reach.
 % Then I start integrating backwards until I reach z = 0
-flight = 'Roccaraso';
+flight = 'Euroc';
     switch flight
         case 'Roccaraso'
             Vz_final =  0;
@@ -24,7 +27,6 @@ flight = 'Roccaraso';
             Vy_final =  0;  
             y_final  =  0; 
     end
-    
 
 %% Compute the trajectories by back integration
 
@@ -38,14 +40,14 @@ deltaS = deltaS_values(index);
 generation = sim('Trajectory_generation');
 
 % Get the output of the simulation
-t_ref = flip(30 - generation.tout); % (30seconds - time) In this way a plot the trajectories in a clearer way
-Z_ref = flip(generation.z_simul); 
-VZ_ref = flip(generation.Vz_simul);
-X_ref = flip(generation.x_simul); 
-VX_ref = flip(generation.Vx_simul);
-Y_ref = flip(generation.y_simul); 
-VY_ref = flip(generation.Vy_simul);
-cd = flip(generation.cd);
+t_ref   = flip(30 - generation.tout); % (30seconds - time) In this way a plot the trajectories in a clearer way
+Z_ref   = flip(generation.z_simul); 
+VZ_ref  = flip(generation.Vz_simul);
+X_ref   = flip(generation.x_simul); 
+VX_ref  = flip(generation.Vx_simul);
+Y_ref   = flip(generation.y_simul); 
+VY_ref  = flip(generation.Vy_simul);
+cd      = flip(generation.cd);
 
 % Save the trajectories in a struct. Easier to plot
 trajectories(index) = struct('t_ref',t_ref,'Z_ref',Z_ref,'VZ_ref',VZ_ref,'X_ref',X_ref,'VX_ref',VX_ref, 'Y_ref',Y_ref,'VY_ref',VY_ref);
