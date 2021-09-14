@@ -445,7 +445,7 @@ if settings.control
     c.flagPID      =  csett.flagPID;
 end
 
-c.plot_ada     =  settings.Ada && false; 
+c.plot_ada     =  settings.Ada && true; 
 c.plot_sensors =  settings.dataNoise && false; 
 c.plot_kalman  =  settings.Kalman && true;
 c.plot_control =  settings.control && true;
