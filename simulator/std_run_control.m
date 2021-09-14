@@ -86,7 +86,7 @@ addpath('../kalman');
 addpath('../sensors');
 addpath('../sensors/data/MS580301BA01');
 addpath('../simulationData');
-[s, c] = initSensors;
+[s, c] = initSensors(settings.lat0,settings.lon0,settings.z0);
 
 %% CONTROL INIT
 addpath('../control');

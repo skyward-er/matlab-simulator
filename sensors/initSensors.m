@@ -1,4 +1,4 @@
-function [s, sensorTot]  = initSensors
+function [s, sensorTot]  = initSensors(lat0, lon0, z0)
 % Initialize all sensors
     
 % Author: Jan Hammelman
@@ -66,6 +66,10 @@ s.MAGN_LSM9DS1.transMatrix          =   diag([1 1 1]);          % axis transform
 s.GPS_NEOM9N = Sensor3D();                                      % lon, in degree lat in deree, alt in m
 s.GPS_NEOM9N.noiseVariance          =   2;                      % in m
 s.GPS_NEOM9N.transMatrix            =   diag([1 1 1]);          % axis transformation
+s.lat0                              =   lat0;
+s.lon0                              =   lon0;
+s.z0                                =   z0;
+s.spheroid                          =   wgs84Ellipsoid;
 
 % initial megnetometer sensor from IIS2MDC: TODO
 s.MAGN_IIS2MDC = Sensor3D();                                    % magnetic field in mgauss, temp should be in C°-25C°

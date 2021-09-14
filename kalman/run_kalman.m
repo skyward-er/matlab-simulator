@@ -126,6 +126,8 @@ index_mag=1;
 t_gpstemp  = [sp.t_gps  tv(end) + dt_k];
 t_barotemp = [sp.t_baro tv(end) + dt_k];
 t_magtemp  = [sp.t_mag   tv(end) + dt_k];
+
+[sp.gps(:,1),sp.gps(:,2),sp.gps(:,3)]  = geodetic2ned(sp.gps(:,1), sp.gps(:,2), sp.gps(:,3), kalman.lat0, kalman.lon0, kalman.z0, kalman.spheroid, 'degrees');
 for i=2:length(tv)
     %Prediction part
 %     [x_lin(i,:),v(i,:),P_lin(:,:,i)] = predictorLinear(x_lin(i-1,:),v(i-1,:),P_lin(:,:,i-1),...
