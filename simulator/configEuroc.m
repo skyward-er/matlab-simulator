@@ -144,6 +144,11 @@ settings.kalman.counter       =   0;
 settings.kalman.t_kalman      =   -1;                                      % Apogee detection timestamp
 settings.kalman.flag_apo      =   false;                                   % True when the apogee is detected
 
+settings.kalman.lat0          = settings.lat0;
+settings.kalman.lon0          = settings.lon0;
+settings.kalman.z0            = -settings.z0;
+settings.kalman.spheroid      = wgs84Ellipsoid;
+
 % Process noise covariance matrix for the linear dynamics
 settings.kalman.QLinear       =   1*...
                                  [0       0       0        0        0       0;

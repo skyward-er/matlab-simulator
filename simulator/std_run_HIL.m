@@ -87,7 +87,7 @@ addpath('../control');
 %% SENSORS DEFINITION
 addpath('../sensors');
 addpath('../sensors/data/MS580301BA01');
-[s, tot] = initSensors;
+[s, tot] = initSensors(settings.lat0, settings.lon0, settings.z0);
 
 %% MAGNETIC FIELD MODEL
 hmax = 6000;
