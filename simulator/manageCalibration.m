@@ -24,7 +24,7 @@ end
     
 for i = 1:Ngps
     SensorData.gps.velocityMeasures(i,:)  = [0,0,0];
-    SensorData.gps.positionMeasures(i,:)  = [0,0,settings.z0];
+    SensorData.gps.positionMeasures(i,:)  = [settings.lat0,settings.lon0,settings.z0];
 end
     SensorData.gps.time = zeros(1,Ngps);
     

@@ -64,7 +64,7 @@ s.MAGN_LSM9DS1.transMatrix          =   diag([1 1 1]);          % axis transform
 
 % initial GPS sensor from NEO-M9N
 s.GPS_NEOM9N = Sensor3D();                                      % lon, in degree lat in deree, alt in m
-s.GPS_NEOM9N.noiseVariance          =   2;                      % in m
+s.GPS_NEOM9N.noiseVariance          =   20;                      % in m
 s.GPS_NEOM9N.transMatrix            =   diag([1 1 1]);          % axis transformation
 s.lat0                              =   lat0;
 s.lon0                              =   lon0;
