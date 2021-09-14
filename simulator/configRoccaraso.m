@@ -167,14 +167,14 @@ settings.kalman.Qq              =   [(settings.kalman.sigma_w^2*settings.kalman.
 settings.ada.Q           =   [1     0       0;                             % Process noise covariance matrix
                               0     1       0;
                               0     0       1;];
-settings.ada.R           =   10;                                            % Measurement noise covariance matrix
-settings.ada.P0          =   [  0.1    0      0;                            % Initial condition fo the 
-                                0      0.1     0;                            % state covariance matrix 
+settings.ada.R           =   10;                                           % Measurement noise covariance matrix
+settings.ada.P0          =   [  0.1    0      0;                           % Initial condition fo the 
+                                0      0.1     0;                          % state covariance matrix 
                                 0      0      0.1;];
 [settings.ada.temp_ref, ~,...
  settings.ada.p_ref, ~]  =   atmosisa(0);                                  % Reference temperature in kelvin and pressure in Pa 
 
-settings.ada.v0          =   -10;                                         % Vertical velocity initial condition
+settings.ada.v0          =   -10;                                          % Vertical velocity initial condition
 settings.ada.a0          =   -100;                                         % Acceleration velocity initial condition
 settings.ada.x0          =  [settings.ada.p_ref, settings.ada.v0, settings.ada.a0];         
                                                                            % Ada initial condition
