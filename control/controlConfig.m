@@ -52,7 +52,12 @@ contSettings.iteration_flag      =   1;
 contSettings.saturation          =   false;
 
 % Physical parameters of the rocket
-contSettings.m  = 22;
+if strcmp(fligth, 'Euroc')
+contSettings.m  = 27;
+elseif strcmp(fligth, 'Roccaraso')
+    contSettings.m  = 27;
+end
+
 contSettings.g  = 9.81;
 contSettings.D  = 0.15; 
 contSettings.S0 = (pi*contSettings.D^2)/4; 
