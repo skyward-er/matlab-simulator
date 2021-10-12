@@ -22,8 +22,8 @@ flight = 'Euroc';
         case 'Euroc'
             Vz_final =  0;
             z_final  =  3000;
-            Vx_final =  70;  
-            x_final  =  1500;  
+            Vx_final =  20;  
+            x_final  =  600;  
             Vy_final =  0;  
             y_final  =  0; 
     end

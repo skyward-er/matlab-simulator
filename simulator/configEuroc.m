@@ -22,9 +22,9 @@ settings.Ada                =   true;                                     % Swit
 
 %% LAUNCH SETUP
 % launchpad for Pont De Sor
-settings.z0            =   109;                                            %[m] Launchpad Altitude
+settings.z0            =   160;                                            %[m] Launchpad Altitude
 lpin                   =   1.150;                                          %[m] Distance from base of second pin
-settings.lrampa        =   5.9 - lpin;                                     %[m] LaunchPad route (total available route)
+settings.lrampa        =   12 - lpin;                                     %[m] LaunchPad route (total available route)
 settings.lat0          =   39.201778;                                      %[°] Launchpad latitude
 settings.lon0          =  -8.138368;                                       %[°] Launchpad longitude
 settings.launchDate    =  [2021, 10, 15];                                  %[YYYY, mm, dd] date of launch
@@ -32,7 +32,7 @@ settings.launchDate    =  [2021, 10, 15];                                  %[YYY
 settings.g0 = gravitywgs84(settings.z0, settings.lat0);                    % Gravity costant at launch latitude and altitude
 
 % launchpad directions
-settings.OMEGA         =   84*pi/180;                                      %[rad] Minimum Elevation Angle, user input in degrees (ex. 80)
+settings.OMEGA         =   85*pi/180;                                      %[rad] Minimum Elevation Angle, user input in degrees (ex. 80)
 settings.PHI           =   0*pi/180;                                       %[rad] Minimum Azimuth Angle from North Direction, user input in degrees (ex. 90)
 
 
@@ -56,9 +56,9 @@ settings.motor.exp_m        =    Motors(n_name).m;
 settings.mp                 =    Motors(n_name).mp;                        % [kg]   Propellant Mass                                                
 settings.tb                 =    Motors(n_name).t(end) ;                   % [s]    Burning time
 mm                          =    Motors(n_name).mm;                        % [kg]   Total Mass of the Motor 
-settings.ms                 =    17.873 + mm - settings.mp;                % [kg]   Structural Mass
+settings.ms                 =    21.42;                                    % [kg]   Structural Mass
 settings.m0                 =    settings.ms + settings.mp;                % [kg]   Total Mass
-settings.mnc                =    0.400;                                    % [kg]   Nosecone Mass
+settings.mnc                =    0;                                        % [kg]   Nosecone Mass
 
 clear ('Motors','name')
 
@@ -76,14 +76,14 @@ settings.S = pi*settings.C^2/4;                                            % [m^
 % z-axis: downward
 
 % inertias for full configuration (with all the propellant embarqued) obtained with CAD's
-settings.Ixxf = 0.08;                                                      % [kg*m^2] Inertia to x-axis
-settings.Iyyf = 13.05;                                                     % [kg*m^2] Inertia to y-axis
-settings.Izzf = 13.05;                                                     % [kg*m^2] Inertia to z-axis
+settings.Ixxf = 0.076;                                                      % [kg*m^2] Inertia to x-axis
+settings.Iyyf = 12.972;                                                     % [kg*m^2] Inertia to y-axis
+settings.Izzf = 12.972;                                                     % [kg*m^2] Inertia to z-axis
 
 % inertias for empty configuration (all the propellant consumed) obtained with CAD's
-settings.Ixxe = 0.07;                                                      % [kg*m^2] Inertia to x-axis
-settings.Iyye = 10.06;                                                     % [kg*m^2] Inertia to y-axis
-settings.Izze = 10.06;                                                     % [kg*m^2] Inertia to z-axis
+settings.Ixxe = 0.0722;                                                      % [kg*m^2] Inertia to x-axis
+settings.Iyye = 10.041;                                                     % [kg*m^2] Inertia to y-axis
+settings.Izze = 10.042;                                                     % [kg*m^2] Inertia to z-axis
 
 
 %% AERODYNAMICS DETAILS
@@ -188,11 +188,11 @@ settings.ada.flag_apo    =   false;                                        % Tru
 
 %% CONTROL SETTINGS 
 
-settings.Mach_control    =   0.7;                                          % Mach of activation of aerobrakes 
+settings.Mach_control    =   0.8;                                          % Mach of activation of aerobrakes 
 settings.brakesWidth     =   0.088;                                        % [m] aerobrakes width (the fixed in-plane length)
 settings.brakesHeigth    =   0.0387;                                       % [m] max aerobrakes heigth (the control action)
 settings.Atot            =   settings.brakesWidth*settings.brakesHeigth*3; % [m^2] total area of aerobrakes (100% out)
-settings.flight          =   'Roccaraso';
+settings.flight          =   'Euroc';
 %% PARACHUTES DETAILS
 % parachute 1
 settings.para(1).S      =    0.4;                                          % [m^2]   Surface
@@ -226,7 +226,7 @@ settings.ode.optionsasc1 = odeset('Events',@event_mach,'InitialStep',1);   % ODE
 % select which model you want to use:
 
 %%%%% Input wind
-settings.wind.input = true;
+settings.wind.input = false;
 % Wind is generated for every altitude interpolating with the coefficient defined below
 
 settings.wind.input_ground  = 7;                                           % wind magnitude at the ground [m/s]
@@ -244,12 +244,12 @@ settings.wind.input_uncertainty = [1, 1];
 
 % Wind is generated randomly from the minimum to the maximum parameters which defines the wind.
 % Setting the same values for min and max will fix the parameters of the wind.
-settings.wind.MagMin    =   1;                                             % [m/s] Minimum Magnitude
-settings.wind.MagMax    =   1;                                             % [m/s] Maximum Magnitude
+settings.wind.MagMin    =   4;                                             % [m/s] Minimum Magnitude
+settings.wind.MagMax    =   4;                                             % [m/s] Maximum Magnitude
 settings.wind.ElMin     =   0*pi/180;                                      % [rad] Minimum Elevation, user input in degrees (ex. 0)
 settings.wind.ElMax     =   0*pi/180;                                      % [rad] Maximum Elevation, user input in degrees (ex. 0) (Max == 90 Deg)
-settings.wind.AzMin     =  (360)*pi/180;                                   % [rad] Minimum Azimuth, user input in degrees (ex. 90)
-settings.wind.AzMax     =  (360)*pi/180;                                   % [rad] Maximum Azimuth, user input in degrees (ex. 90)
+settings.wind.AzMin     =  (180)*pi/180;                                   % [rad] Minimum Azimuth, user input in degrees (ex. 90)
+settings.wind.AzMax     =  (180)*pi/180;                                   % [rad] Maximum Azimuth, user input in degrees (ex. 90)
 
 % NOTE: wind azimuth angle indications (wind directed towards):
 % 0 deg (use 360 instead of 0)  -> North

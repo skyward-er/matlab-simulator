@@ -51,8 +51,8 @@ else
 
     % 1) Find the value of the altitude in z_reference nearer to z_misured 
     [~, current_index_min_value] = min(abs(z_ref(csett.index_min_value:end) - z));
-    csett.index_min_value = csett.index_min_value + current_index_min_value -1; 
-    
+     csett.index_min_value = csett.index_min_value + current_index_min_value -1; 
+%      csett.index_min_value = current_index_min_value;
     % 2) Find the reference using Vz(z)
     z_setpoint  =  z_ref(csett.index_min_value);
     Vz_setpoint = Vz_ref(csett.index_min_value);

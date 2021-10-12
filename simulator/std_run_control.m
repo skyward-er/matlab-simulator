@@ -165,7 +165,7 @@ while flagStopIntegration || n_old < nmax
         flagBurning = false;
     end
     
-    if flagAscent && not(flagBurning) && mach <=0.7
+    if flagAscent && not(flagBurning) && mach <=0.8
         flagAeroBrakes = true;
     else
         flagAeroBrakes = false;
@@ -273,7 +273,7 @@ while flagStopIntegration || n_old < nmax
     end
 %% Control algorithm
 
-    if flagAeroBrakes && settings.Kalman && settings.control
+    if flagAeroBrakes && mach < 0.7 && settings.Kalman && settings.control
          zc    =    exp_mean(-x_c(:,3),0.8);
          vzc   =    exp_mean(-x_c(:,6),0.8);
          vc    =    exp_mean(sqrt(x_c(:,4).^2+x_c(:,5).^2+x_c(:,6).^2),0.8);
@@ -313,11 +313,13 @@ while flagStopIntegration || n_old < nmax
          
          x = extension_From_Angle(alpha_degree);
          i = i + 1; 
+    elseif flagAeroBrakes && mach < 0.8
+        x  = extension_From_Angle(17.1771);
     else 
         x = 0;
     end    
     
-    if settings.control == true  && flagAeroBrakes == 1    
+    if settings.control == true  && flagAeroBrakes == 1 && mach < 0.7   
          % Save the values to plot them
          c.vz_tot(i)    =  vz;
          c.z_tot(i)     =  z;
@@ -445,9 +447,9 @@ if settings.control
     c.flagPID      =  csett.flagPID;
 end
 
-c.plot_ada     =  settings.Ada && true; 
+c.plot_ada     =  settings.Ada && false; 
 c.plot_sensors =  settings.dataNoise && false; 
-c.plot_kalman  =  settings.Kalman && true;
+c.plot_kalman  =  settings.Kalman && false;
 c.plot_control =  settings.control && true;
 
 %% RETRIVE PARAMETERS FROM THE ODE

@@ -22,9 +22,9 @@ path = genpath(pwd);
 addpath(path);
 
 %% LOAD DATA
-flight = 'Roccaraso';
+flight = 'Euroc';
 switch flight
-    case 'euroc'
+    case 'Euroc'
         run('configEuroc.m');
     case 'Roccaraso'
         run('configRoccaraso.m');

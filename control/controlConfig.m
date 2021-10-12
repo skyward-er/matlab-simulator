@@ -52,9 +52,9 @@ contSettings.iteration_flag      =   1;
 contSettings.saturation          =   false;
 
 % Physical parameters of the rocket
-if strcmp(fligth, 'Euroc')
-contSettings.m  = 27;
-elseif strcmp(fligth, 'Roccaraso')
+if strcmp(flight, 'Euroc')
+contSettings.m  = 21.9560;
+elseif strcmp(flight, 'Roccaraso')
     contSettings.m  = 27;
 end
 
@@ -70,5 +70,5 @@ contSettings.rate_limiter      =    15/0.1;                                % dat
 contSettings.filter_coeff      =    0.85;
 
 % Possible range of values for the control variable
-contSettings.delta_S_available = (0.0:0.001/2:0.01)'; 
+contSettings.delta_S_available = (0.0:0.001/4:0.01017)'; 
 
