@@ -67,23 +67,30 @@ Y0 = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf];
 [uw, vw, ww, ~] = windConstGenerator(settings.wind);
 settings.constWind = [uw, vw, ww];
 
-% Simulate a 5% Itot more
-settings.motor.expThrust = settings.motor.expThrust*1.05;
 [T, Y] = ode113(@ascent, [0, 60], Y0, settings.ode.optionsascTrajGen, settings);
 vels = quatrotate(quatconj(Y(end, 10:13)),Y(end, 4:6));
 
 Vz_initial = -vels(3);
 
-%% INTERPOLATED CA
-coeffsCA = 
+% Increasing the value
+Vz_initial = Vz_initial * (1 + settings.Vz_initialPerc);
 
+%% INTERPOLATED CA
+coeffsCA = load(strcat(dataPath, '/CAinterpCoeffs.mat'));
+
+%% NEEDED PARAMETERS
+settingsSim.ms = settings.ms;
+settingsSim.g0 = settings.g0;
+settingsSim.z0 = settings.z0;
+settingsSim.C  = settings.C;
 
 %% COMPUTE THE TRAJECTORIES BY BACK INTEGRATION
 Ntraj = length(deltaX_values);
+deltaX = 0;
 
 % Pre-allocation
-trajectories = zeros(Ntraj, 1);
-trajectories_saving = zeros(Ntraj, 1);
+trajectories = cell(Ntraj, 1);
+trajectories_saving = cell(Ntraj, 1);
 
 for index = 1:Ntraj
 
@@ -103,9 +110,20 @@ VY_ref  = flip(generation.Vy_simul);
 cd      = flip(generation.cd);
 
 % Save the trajectories in a struct. Easier to plot
-trajectories(index)        = struct('t_ref', t_ref,  'Z_ref',  Z_ref, 'VZ_ref', VZ_ref,  'X_ref',  X_ref, 'VX_ref', VX_ref,  'Y_ref',  Y_ref, 'VY_ref', VY_ref);
-trajectories_saving(index) = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref',  X_ref, 'VX_ref', VX_ref,  'Y_ref',  Y_ref, 'VY_ref', VY_ref);
+trajectories{index}        = struct('t_ref', t_ref,  'Z_ref',  Z_ref, 'VZ_ref', VZ_ref,  'X_ref',  X_ref, 'VX_ref', VX_ref,  'Y_ref',  Y_ref, 'VY_ref', VY_ref);
+trajectories_saving{index} = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref',  X_ref, 'VX_ref', VX_ref,  'Y_ref',  Y_ref, 'VY_ref', VY_ref);
 
 end
 
+%% SAVING
+save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
+
+%% PLOT
+plotTrajectoryGeneration
+
+%% DELETE USELESS FILES
+warning off
+delete('Trajectory_generation.slxc')
+rmdir('slprj', 's')
+warning on
 

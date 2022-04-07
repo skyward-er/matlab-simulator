@@ -1,4 +1,4 @@
-function [value, isterminal, direction] = eventBurnOff(t, ~, settings, varargin)
+function [value, isterminal, direction] = eventAirBrake(t, Y, settings, varargin)
 %{
 eventApogee - Event function to stop simulation at burn out
 
@@ -30,7 +30,41 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 
-value = settings.tb - t;
+if t > settings.tb
+    
+    %% RECALL THE STATE
+    z = -Y(3);
+    u = Y(4);
+    v = Y(5);
+    w = Y(6);
+    q0 = Y(10);
+    q1 = Y(11);
+    q2 = Y(12);
+    q3 = Y(13);
+    
+    %% QUATERION ATTITUDE
+    Q = [q0 q1 q2 q3];
+    Q = Q/norm(Q);
+    
+    %% WIND (supposed constant)
+    uw = settings.constWind(1); vw = settings.constWind(2); ww = settings.constWind(3);
+    dcm = quatToDcm(Q);
+    wind = dcm*[uw; vw; ww];
+   
+    %% RELATIVE VELOCITIES (plus wind);
+    ur = u - wind(1);
+    vr = v - wind(2);
+    wr = w - wind(3);
+
+    V_norm = norm([ur vr wr]);
+    Mach = getMach(V_norm, z + settings.z0);
+    
+    value = Mach - settings.MachControl;
+    
+else
+    value = 1;
+end
+
 
 isterminal = 1;
 direction = 0;

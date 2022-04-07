@@ -9,7 +9,7 @@ Date of launch:                        TBD
 
 Last update:                    20/11/2021
 
-Copyright © 2021, Skyward Experimental Rocketry, AFD department
+Copyright © 2021, Skyward Experimental Rocketry, SCS department
 All rights reserved
 
 SPDX-License-Identifier: GPL-3.0-or-later

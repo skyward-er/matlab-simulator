@@ -16,9 +16,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
 %% MISSION FILE
 % Choose the mision you want to simulate from rocketsData folder
 % settings.mission = 'Lynx_Roccaraso_September_2021';
-settings.mission = 'Lynx_Portugal_October_2021';
+% settings.mission = 'Lynx_Portugal_October_2021';
 % settings.mission = 'Pyxis_Portugal_October_2022';
-% settings.mission = 'Pyxis_Roccaraso_September_2022';
+settings.mission = 'Pyxis_Roccaraso_September_2022';
 
 %% LOAD DATA
 % Retrieve MSA-Toolkit rocket data
@@ -29,13 +29,17 @@ simulationsData
 commonFunctionsPath = '../data/msa-toolkit/commonFunctions';
 addpath(genpath(commonFunctionsPath))
 % Retrieve Control rocket data
-dataPath = strcat('../data/', settings.mission);
-addpath(dataPath);
+ConDataPath = strcat('../data/', settings.mission);
+addpath(ConDataPath);
 run(strcat('config',settings.mission));
+
 
 %% AEROBRAKES EXTENSION DISCRETIZATION
 % Lower and upper boundaries are set in rocket simulationsData file
-settings.dX = 0.001;          % [m] Discretization of airbrakes radial extension
+settings.dX = 0.001;                              % [m] Discretization of airbrakes radial extension
+
+%% FINAL VERTICAL VELOCITY
+settings.Vz_initialPerc = 0.05;                   % [-] Percentage of increasing the initial vertical velocity
 
 %% COMPATIBILITY SETTINGS !! DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING !!
 %%% VERTICAL VELOCITY FOR BACK PROPAGATION
@@ -50,10 +54,12 @@ settings.wind.ElMax = 0*pi/180;                   % [rad] Maximum Elevation, use
 settings.wind.AzMin = (360)*pi/180;               % [rad] Minimum Azimuth, user input in degrees (ex. 90)
 settings.wind.AzMax = (360)*pi/180;
 % Event function
-settings.ode.optionsascTrajGen = odeset('Events', @eventBurnOff);
+settings.ode.optionsascTrajGen = odeset('Events', @eventAirBrake);
+% Compatibility Settings
 settings.stoch.N = 1;
 settings.wind.input = false;
 settings.wind.model = false;
+settings.control = 1;
 
 
 
