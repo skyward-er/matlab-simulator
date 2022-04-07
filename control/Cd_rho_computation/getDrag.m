@@ -1,4 +1,4 @@
-function cd = getDrag(v,h,S, coeffs)
+function cd = getDrag(v, h, S, coeffs)
 
 % Function to compute the CA through a correlation.
 % INPUT:    
@@ -13,7 +13,7 @@ function cd = getDrag(v,h,S, coeffs)
 
 x = getEstension(S);
 
-M    = getMach(v,h);
+M    = getMach(v, h);
 
   
 cd   =  coeffs.n000 + ...

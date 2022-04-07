@@ -1,0 +1,111 @@
+%{
+
+mainTrajectoryGeneration - this is the main script; it generates the trajectories that have been chosen in config.m
+
+CALLED SCRIPTS: configTrajectoryGeneration, simulationsData
+
+CALLED FUNCTIONS: Trajectory_generation (SIMULINK model)
+
+REVISIONS:
+- 0     16/04/2021, Release,    Alessandro Del Duca
+- 1     07/04/2022, update      Davide Rosato
+                    Compatibility with common functions folder
+
+Copyright © 2022, Skyward Experimental Rocketry, SCS department
+All rights reserved
+
+SPDX-License-Identifier: GPL-3.0-or-later
+
+%}
+
+clear all
+close all
+clc
+
+filePath = fileparts(mfilename('fullpath'));
+currentPath = pwd;
+if not(strcmp(filePath, currentPath))
+    cd (filePath);
+    currentPath = filePath;
+end
+
+addpath(genpath(currentPath));
+
+%% LOAD DATA
+configTrajectoryGeneration;
+
+%% AIRBRAKES RADIAL EXTENSION
+% Airbrakes extension vector
+deltaX_values = settings.hprot(1) : settings.dX : settings.hprot(end);
+% I exclude the limits for robustness
+deltaX_values = deltaX_values(2:end-1);
+
+%% FINAL CONDITIONS
+% Impose the final condition I want to reach.
+Vz_final =  settings.Vz_final;
+z_final  =  settings.z_final;
+Vx_final =  settings.Vx_final;  
+x_final  =  settings.x_final;  
+Vy_final =  settings.Vy_final;  
+y_final  =  settings.y_final;  
+
+%% INITIAL VELOCITY
+% Calculate vertical velocity at which the back propagation must end
+settings.OMEGA = settings.OMEGA;
+settings.PHI = settings.PHI;
+
+%%% Attitude
+Q0 = angleToQuat(settings.PHI, settings.OMEGA, 0*pi/180)';
+
+%%% State
+X0 = [0 0 0]';
+V0 = [0 0 0]';
+W0 = [0 0 0]';
+
+Y0 = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf];
+
+[uw, vw, ww, ~] = windConstGenerator(settings.wind);
+settings.constWind = [uw, vw, ww];
+
+% Simulate a 5% Itot more
+settings.motor.expThrust = settings.motor.expThrust*1.05;
+[T, Y] = ode113(@ascent, [0, 60], Y0, settings.ode.optionsascTrajGen, settings);
+vels = quatrotate(quatconj(Y(end, 10:13)),Y(end, 4:6));
+
+Vz_initial = -vels(3);
+
+%% INTERPOLATED CA
+coeffsCA = 
+
+
+%% COMPUTE THE TRAJECTORIES BY BACK INTEGRATION
+Ntraj = length(deltaX_values);
+
+% Pre-allocation
+trajectories = zeros(Ntraj, 1);
+trajectories_saving = zeros(Ntraj, 1);
+
+for index = 1:Ntraj
+
+deltaX = deltaX_values(index);
+
+% Start simulink simulation
+generation = sim('Trajectory_generation');
+
+% Get the output of the simulation
+t_ref   = flip(30 - generation.tout); % (30seconds - time) In this way a plot the trajectories in a clearer way
+Z_ref   = flip(generation.z_simul); 
+VZ_ref  = flip(generation.Vz_simul);
+X_ref   = flip(generation.x_simul); 
+VX_ref  = flip(generation.Vx_simul);
+Y_ref   = flip(generation.y_simul); 
+VY_ref  = flip(generation.Vy_simul);
+cd      = flip(generation.cd);
+
+% Save the trajectories in a struct. Easier to plot
+trajectories(index)        = struct('t_ref', t_ref,  'Z_ref',  Z_ref, 'VZ_ref', VZ_ref,  'X_ref',  X_ref, 'VX_ref', VX_ref,  'Y_ref',  Y_ref, 'VY_ref', VY_ref);
+trajectories_saving(index) = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref',  X_ref, 'VX_ref', VX_ref,  'Y_ref',  Y_ref, 'VY_ref', VY_ref);
+
+end
+
+
