@@ -2,13 +2,14 @@
 
 mainTrajectoryGeneration - this is the main script; it generates the trajectories that have been chosen in config.m
 
-CALLED SCRIPTS: configTrajectoryGeneration, simulationsData
+CALLED SCRIPTS: configTrajectoryGeneration, simulationsData, plots
 
-CALLED FUNCTIONS: Trajectory_generation (SIMULINK model)
+CALLED FUNCTIONS: Trajectory_generation (SIMULINK model), getDrag, getRho,
+getMach
 
 REVISIONS:
 - 0     16/04/2021, Release,    Alessandro Del Duca
-- 1     07/04/2022, update      Davide Rosato
+- 1     07/04/2022, update      Davide Rosato, AFD Department
                     Compatibility with common functions folder
 
 Copyright © 2022, Skyward Experimental Rocketry, SCS department
@@ -119,7 +120,7 @@ end
 save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
 
 %% PLOT
-plotTrajectoryGeneration
+plots
 
 %% DELETE USELESS FILES
 warning off

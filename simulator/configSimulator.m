@@ -1,0 +1,110 @@
+%{
+
+CONFIG - This script sets up all the parameters for the simulation
+All the parameters are stored in the "settings" structure.
+
+REVISIONS:
+- #0 07/04/2022, Release, Davide Rosato, AFD Department
+
+Copyright © 2022, Skyward Experimental Rocketry, SCS department
+All rights reserved
+
+SPDX-License-Identifier: GPL-3.0-or-later
+
+%}
+
+%% MISSION FILE
+% Choose the mision you want to simulate from rocketsData folder
+% settings.mission = 'Lynx_Roccaraso_September_2021';
+settings.mission = 'Lynx_Portugal_October_2021';
+% settings.mission = 'Pyxis_Portugal_October_2022';
+% settings.mission = 'Pyxis_Roccaraso_September_2022';
+
+%% LOAD DATA
+% Retrieve MSA-Toolkit rocket data
+dataPath = strcat('../data/msa-toolkit/data/', settings.mission);
+addpath(dataPath);
+simulationsData
+
+commonFunctionsPath = '../data/msa-toolkit/commonFunctions';
+addpath(genpath(commonFunctionsPath))
+
+% Retrieve Control rocket data
+ConDataPath = strcat('../data/', settings.mission);
+addpath(ConDataPath);
+run(strcat('config', settings.mission));
+
+% Control common functions
+commonFunctionsPath = '../commonFunctions';
+addpath(genpath(commonFunctionsPath))
+
+%% ALGORITHM TUNING
+settings.tuning = false;                 % [-] True if you want to tune the algorithm
+
+%% SIMULATION SETTINGS
+settings.electronics        =   false;   % Switch on when testing with Hardware in the loop HIL
+settings.ascentOnly         =   true;    % Switch on to simulate only the ascent phase untill the apogee
+settings.ballisticFligth    =   true;    % Switch on to simulate the balistic fligth without any parachute
+settings.control            =   true;    % Switch on to simulate the control
+settings.dataNoise          =   true;    % Switch on to simulate the data acquisiton from sensors
+settings.launchWindow       =   false;   % Switch off this to avoid pausing the launch till you press the launch button
+settings.Kalman             =   true;    % Switch on to run the kalman algorithm
+settings.Ada                =   true;    % Switch on to run the apogee detection algorithm
+
+%% LAUNCH SETUP
+% launchpad directions
+% for a single run the maximum and the minimum value of the following angles must be the same.
+settings.OMEGA = 85*pi/180;              % [rad] Minimum Elevation Angle, user input in degrees (ex. 80)
+settings.PHI = 0*pi/180;                 % [rad] Minimum Azimuth Angle from North Direction, user input in degrees (ex. 90)
+
+%% WIND DETAILS
+% select which model you want to use:
+%%%%% Matlab Wind Model
+settings.wind.model = false;
+% matlab hswm model, wind model on altitude based on historical data
+
+% input Day and Hour as arrays to run stochastic simulations
+settings.wind.DayMin = 105;                    % [d] Minimum Day of the launch
+settings.wind.DayMax = 105;                    % [d] Maximum Day of the launch
+settings.wind.HourMin = 4;                     % [h] Minimum Hour of the day
+settings.wind.HourMax = 4;                     % [h] Maximum Hour of the day
+settings.wind.ww = 0;                          % [m/s] Vertical wind speed
+
+%%%%% Input wind
+settings.wind.input = false;
+% Wind is generated for every altitude interpolating with the coefficient defined below
+
+settings.wind.input_ground  = 7;                                         % [m/s] Wind magnitude at the ground
+settings.wind.input_alt     = [0 100 600 750 900 1500 2500 3000 3500];   % [m] Altitude vector
+settings.wind.input_mult    = [0 0 5 5 10 10 15 15 15];                  % [-] Percentage of increasing magnitude at each altitude
+settings.wind.input_azimut  = [0 0 0 0 0 0 0 0 0];                       % [deg] Wind azimut angle at each altitude (toward wind incoming direction)
+
+settings.wind.input_uncertainty = [1, 1];
+% settings.wind.input_uncertainty = [a,b];      wind uncertanties:
+% - a, wind magnitude percentage uncertanty: magn = magn *(1 +- a)
+% - b, wind direction band uncertanty: dir = dir 1 +- b
+
+%%%%% Random wind model
+% if both the model above are false
+
+% Wind is generated randomly from the minimum to the maximum parameters which defines the wind.
+% Setting the same values for min and max will fix the parameters of the wind.
+settings.wind.MagMin    =   4;                        % [m/s] Minimum Magnitude
+settings.wind.MagMax    =   4;                        % [m/s] Maximum Magnitude
+settings.wind.ElMin     =   0*pi/180;                 % [rad] Minimum Elevation, user input in degrees (ex. 0)
+settings.wind.ElMax     =   0*pi/180;                 % [rad] Maximum Elevation, user input in degrees (ex. 0) (Max == 90 Deg)
+settings.wind.AzMin     =  (180)*pi/180;              % [rad] Minimum Azimuth, user input in degrees (ex. 90)
+settings.wind.AzMax     =  (180)*pi/180;              % [rad] Maximum Azimuth, user input in degrees (ex. 90)
+
+% NOTE: wind azimuth angle indications (wind directed towards):
+% 0 deg (use 360 instead of 0)  -> North
+% 90 deg                        -> East
+% 180 deg                       -> South
+% 270 deg                       -> West
+
+%% PLOT DETAILS
+settings.plots   =   true;
+
+
+
+
