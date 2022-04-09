@@ -37,7 +37,7 @@ configTrajectoryGeneration;
 
 %% AIRBRAKES RADIAL EXTENSION
 % Airbrakes extension vector
-deltaX_values = settings.hprot(1) : settings.dX : settings.hprot(end);
+deltaX_values = linspace(settings.hprot(1), settings.hprot(end), settings.Ndx+2);
 % I exclude the limits for robustness
 deltaX_values = deltaX_values(2:end-1);
 

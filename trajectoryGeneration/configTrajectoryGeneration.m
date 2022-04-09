@@ -40,8 +40,7 @@ addpath(genpath(commonFunctionsPath))
 
 
 %% AEROBRAKES EXTENSION DISCRETIZATION
-% Lower and upper boundaries are set in rocket simulationsData file
-settings.dX = 0.001;                              % [m] Discretization of airbrakes radial extension
+settings.Ndx = 10;                                % [m] Number of trajectories
 
 %% FINAL VERTICAL VELOCITY
 settings.Vz_initialPerc = 0.05;                   % [-] Percentage of increasing the initial vertical velocity
