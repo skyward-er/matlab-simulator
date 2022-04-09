@@ -1,4 +1,4 @@
-function [dY, parout] = ascent(t, Y, settings, c, tLaunch)
+function [dY, parout] = ascentContr(t, Y, settings, c, tLaunch)
 %{
 
 ASCENT - ode function of the 6DOF Rigid Rocket Model

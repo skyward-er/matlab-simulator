@@ -174,10 +174,10 @@ while flagStopIntegration && n_old < nmax
     % dynamics
     if flagFligth
         if settings.ballisticFligth
-            [Tf, Yf] = ode113(@ascent, [t0, t1], Y0, [], settings, x, tLaunch);
+            [Tf, Yf] = ode113(@ascentContr, [t0, t1], Y0, [], settings, x, tLaunch);
         else
             if flagAscent
-                [Tf, Yf] = ode113(@ascent, [t0, t1], Y0, [], settings, x, tLaunch);
+                [Tf, Yf] = ode113(@ascentContr, [t0, t1], Y0, [], settings, x, tLaunch);
             else
                 if flagPara1
                     para = 1;
@@ -430,7 +430,7 @@ c.plot_control =  settings.control && true;
 %% RETRIVE PARAMETERS FROM THE ODE
 
 if not(settings.electronics)
-    dataBallisticFlight = RecallOdeFcn(@ascent, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings, C, tLaunch);
+    dataBallisticFlight = RecallOdeFcn(@ascentContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings, C, tLaunch);
 end
 if ~settings.electronics 
     plots
