@@ -73,6 +73,8 @@ Iyy = Y(15);
 Izz = Y(16);
 ap = Y(17);
 
+
+
 % da aggiungere: 
 % - costante di tempo del servo
 % - dinamica del servo
@@ -195,10 +197,12 @@ end
 CmatE = CoeffsE(:, :, :, :, :, :);                                          
 CmatF = CoeffsF(:, :, :, :, :);                                             
 
-if ap_ref == 0
+ext = extension_From_Angle_Pyxis(ap,settings);
+
+if ext == 0
     VE = CmatE(:, index(1), index(2), index(3), index(4), 1);               % from coeffsE (Empty rocket) takes the aerodynamic coefficients
 else
-    c_cmp = C_datcom(ap > C_datcom);                                    
+    c_cmp = C_datcom(ext > C_datcom);                                    
     n0 = length(c_cmp);                                                     
     n1 = n0 + 1;                                                            
     c0 = c_cmp(end);                                                        
@@ -218,9 +222,9 @@ end
 
 % Retrieve Coefficients
 % CA = coeffsValues(1); 
-ext = extension_From_Angle_2022(ap,settings);
 
-CA = getDrag(-w,-z,ext,settings.getDragCoeffs); % i coefficienti del CA vengono richiamati in configControl all'inizio
+
+CA = getDrag(-w,-z,ext,settings.getDragCoeffs); % i coefficienti del CA vengono richiamati nel main all'inizio
 
 CYB = coeffsValues(2); CY0 = coeffsValues(3);                               
 CNA = coeffsValues(4); CN0 = coeffsValues(5); Cl = coeffsValues(6);         
@@ -287,13 +291,19 @@ else %%% rocket out of the launchpad
         -Izzdot*r/Izz;
 
     if  M_value < 0.8
-        dap = (ap_ref-ap)/settings.tauServo;
-        if abs(dap) <settings.maxServoSpeed
+        dap = (ap_ref-ap)/settings.servo.tau;
+        if abs(dap) <settings.servo.maxSpeed
             dap = dap;
         else
-            dap = settings.maxServoSpeed;
+            dap = settings.servo.maxSpeed;
         end
     else 
+        dap = 0;
+    end
+
+    if ap > settings.servo.maxAngle
+        dap = 0;
+    elseif ap < settings.servo.minAngle
         dap = 0;
     end
 end

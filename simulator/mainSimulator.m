@@ -1,15 +1,24 @@
 %{
 
-mainTrajectoryGeneration - this is the main script; it generates the trajectories that have been chosen in config.m
+mainSimulator - this is the main script; it runs the rocket ascent with
+every possible feature simulated (i.e. burning phase, attitude, air
+braking, ADA, NAS, Kalman, Parafoil, landing)
 
 CALLED SCRIPTS: configSimulator, simulationsData
+                in configSimulator are set all the options for the
+                simulation, which basically choose if kalman, ADA, NAS, air
+                brake system and all the rest is simulated or not.
 
 CALLED FUNCTIONS: 
 
 REVISIONS:
 - 0     16/04/2021, Release,    Alessandro Del Duca
-- 1     07/04/2022, update      Davide Rosato, AFD Department
+
+- 1     07/04/2022, update,     Davide Rosato, AFD Department
                     Compatibility with common functions folder
+
+- 2     15/04/2022, update,     Marco Marchesi, SCS department
+                    Latest control algorithms
 
 Copyright © 2022, Skyward Experimental Rocketry, SCS department
 All rights reserved
@@ -18,9 +27,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 
-close all
-clear all
-clc
+close all; clear all; clc;
 
 filePath = fileparts(mfilename('fullpath'));
 currentPath = pwd;
@@ -38,6 +45,8 @@ configReferences;
 % Servo (MARK STAR - HBL 3850)
 settings.servo.tau = 0.1;                                               % Servo motor time constant 
 settings.servo.maxSpeed = deg2rad(300);                                 % max rpm speed of the servo motor
+settings.servo.maxAngle = deg2rad(68);                                  % max servo angle
+settings.servo.minAngle = 0;                                            % min servo angle
 
 % Servo angle to extension of the air brakes (PYXIS)
 settings.arb.extPol(1) = -0.009216;

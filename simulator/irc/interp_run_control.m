@@ -215,11 +215,11 @@ while flagStopIntegration && n_old < nmax
         Tf = [t0, t1];
         Yf = [initialCond'; initialCond'];
     end
-    ext = extension_From_Angle_2022(ap_ref,settings);
+    ext = extension_From_Angle_Pyxis(ap_ref,settings);
     [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Yf, Tf, ext);
     [~, ~, p, ~] = atmosisa(-Yf(:,3)) ;
 
-
+  
     if settings.dataNoise
         [sp, c] = acquisition_Sys(sensorData, s, c);
     end
@@ -232,15 +232,15 @@ while flagStopIntegration && n_old < nmax
         Pada_prev =   P_ada(:,:,end);
     end
 
-    if iTimes==1 && settings.Kalman
-        x_prev    =  [X0; V0; Q0(2:4); Q0(1);0;0;0];
-        vels_prev =  [0;0;0];
-        P_prev    =   0.01*eye(12);
-    elseif iTimes ~= 1 && settings.Kalman
-        x_prev    =   x_est_tot(end,:);
-        vels_prev =   vels_tot(end,:);
-        P_prev    =   P_c(:,:,end);
-    end
+%     if iTimes==1 && settings.Kalman
+%         x_prev    =  [X0; V0; Q0(2:4); Q0(1);0;0;0];
+%         vels_prev =  [0;0;0];
+%         P_prev    =   0.01*eye(12);
+%     elseif iTimes ~= 1 && settings.Kalman
+%         x_prev    =   x_est_tot(end,:);
+%         vels_prev =   vels_tot(end,:);
+%         P_prev    =   P_c(:,:,end);
+%     end
     %% ADA
     if settings.Ada && settings.dataNoise
         [xp_ada, xv_ada, P_ada, settings.ada]   =  run_ADA(ada_prev, Pada_prev,                ...
@@ -264,12 +264,31 @@ while flagStopIntegration && n_old < nmax
         c.n_est_old = c.n_est_old + size(x_c,1);
 
     end
+
+    % vertical velocity and position
+    if flagAscent || (not(flagAscent) && settings.ballisticFligth)
+        Q    =   Yf(end, 10:13);
+        vels =   quatrotate(quatconj(Q), Yf(:, 4:6));
+        vz   = - vels(end,3);   % down
+        vxxx =   vels(end,2);   % north
+        vyyy =   vels(end,1);   % east
+    else
+        vz   = - Yf(end, 6);
+        %         vx = Yf(end, 5);
+        %         vy = Yf(end, 4);
+    end
+
+    v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
+
+    z    = -Yf(end, 3);
+    xxx  =  Yf(end, 2);
+    yyy  =  Yf(end, 1);
     %% Control algorithm
 
     if flagAeroBrakes && mach < 0.7 && settings.Kalman && settings.control
-        zc    =    exp_mean(-x_c(:,3),0.8);
-        vzc   =    exp_mean(-x_c(:,6),0.8);
-        vc    =    exp_mean(sqrt(x_c(:,4).^2+x_c(:,5).^2+x_c(:,6).^2),0.8);
+%         zc    =    exp_mean(-x_c(:,3),0.8);
+%         vzc   =    exp_mean(-x_c(:,6),0.8);
+%         vc    =    exp_mean(sqrt(x_c(:,4).^2+x_c(:,5).^2+x_c(:,6).^2),0.8);
         %         if c.ctr_start == -1
         %             c.ctr_start = 0.1*(n - 1);
         %         end
@@ -292,7 +311,7 @@ while flagStopIntegration && n_old < nmax
         %                 [alpha_degree, vz_setpoint, z_setpoint, pid,U_linear, Cdd, delta_S, contSettings] =   control_PID     (z, vz, sqrt(vxxx^2 + vyyy^2 + vz^2),  contSettings);
         %             case 4
         N_forward = 3;
-        [ap_ref] = trajectoryChoice2bis(-Y0(3),-Y0(6),reference.altitude_ref,reference.vz_ref,' sinusoidal',N_forward); % cambiare nome alla funzione tra le altre cose
+        [ap_ref] = trajectoryChoice2bis(-Y0(3),vz,reference.altitude_ref,reference.vz_ref,'sinusoidal',N_forward); % cambiare nome alla funzione tra le altre cose
     end
 
 
@@ -324,24 +343,7 @@ while flagStopIntegration && n_old < nmax
 %         end
     end
 
-    % vertical velocity and position
-    if flagAscent || (not(flagAscent) && settings.ballisticFligth)
-        Q    =   Yf(end, 10:13);
-        vels =   quatrotate(quatconj(Q), Yf(:, 4:6));
-        vz   = - vels(end,3);   % down
-        vxxx =   vels(end,2);   % north
-        vyyy =   vels(end,1);   % east
-    else
-        vz   = - Yf(end, 6);
-        %         vx = Yf(end, 5);
-        %         vy = Yf(end, 4);
-    end
-
-    v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
-
-    z    = -Yf(end, 3);
-    xxx  =  Yf(end, 2);
-    yyy  =  Yf(end, 1);
+    
 
 
     if lastFlagAscent && not(flagAscent)
@@ -409,21 +411,21 @@ t_ada    = settings.ada.t_ada;
 t_kalman = settings.kalman.t_kalman;
 i_apo = find(Tf < 24.8);
 i_apo = max(i_apo);
-if settings.Kalman
-    i_apo_est = find(t_est_tot < Tf(i_apo));
-    i_apo_est = max(i_apo_est);
-end
+% if settings.Kalman
+%     i_apo_est = find(t_est_tot < Tf(i_apo));
+%     i_apo_est = max(i_apo_est);
+% end
 flagMatr = flagMatr(1:n_old, :);
 
 %% SAVE THE VARIABLES FOR PLOT PURPOSE
 % kalman state plot
-if settings.Kalman
-    c.x_est_tot    =  x_est_tot;
-    c.vels_tot     =  vels_tot;
-    c.t_est_tot    =  t_est_tot;
-    c.i_apo        =  i_apo;
-    c.i_apo_est    =  i_apo_est;
-end
+% if settings.Kalman
+%     c.x_est_tot    =  x_est_tot;
+%     c.vels_tot     =  vels_tot;
+%     c.t_est_tot    =  t_est_tot;
+%     c.i_apo        =  i_apo;
+%     c.i_apo_est    =  i_apo_est;
+% end
 
 % ada state for plot
 if settings.Ada
@@ -448,7 +450,7 @@ if not(settings.electronics)
     dataBallisticFlight = RecallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings, c.ap_tot, tLaunch);
 end
 if ~settings.electronics
-    plots
+    interpPlots
 end
 
 % save('results/Ground_truth.mat','sensorData');

@@ -48,7 +48,7 @@ settings.ballisticFligth    =   true;    % Switch on to simulate the balistic fl
 settings.control            =   true;    % Switch on to simulate the control
 settings.dataNoise          =   false;    % Switch on to simulate the data acquisiton from sensors
 settings.launchWindow       =   false;   % Switch off this to avoid pausing the launch till you press the launch button
-settings.Kalman             =   false;    % Switch on to run the kalman algorithm
+settings.Kalman             =   true;    % Switch on to run the kalman algorithm - note, also to run the airbrakes control algorithm this is needed true
 settings.Ada                =   false;    % Switch on to run the apogee detection algorithm
 
 %% LAUNCH SETUP

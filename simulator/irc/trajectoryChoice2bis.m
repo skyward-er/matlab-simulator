@@ -1,4 +1,4 @@
-function [alpha0] = trajectoryChoice2bis(z,V,z_ref,V_ref,interpolation,N_forward,deltaZ)
+function [alpha0] = trajectoryChoice2bis(z,Vz,z_ref,V_ref,interpolation,N_forward,deltaZ)
 
 % HELP
 %
@@ -59,16 +59,16 @@ V_ref = [V_ref ; zeros(N_forward,size(V_rescale,2))];
 V_extrema = V_ref(index_z+N_forward,[1,end]); %select the reference point on the trajectories to use for fuzzy logic
 
 
-if V(end)<V_extrema(1) % use the vertical component of vector V, check if it is the first or second
+if Vz<V_extrema(1) % use the vertical component of vector V, check if it is the first or second
 
     percentage = 0;
 
-elseif V(end)>=V_extrema(1) && V(end)<V_extrema(end)
+elseif Vz>=V_extrema(1) && Vz<V_extrema(end)
     switch interpolation
         case 'linear'
-            percentage = (V(end)-V_extrema(1))/(V_extrema(2)-V_extrema(1)); % percentage = 0 if completely on trajectory 1, percentage = 1 if completely on trajectory 2
+            percentage = (Vz-V_extrema(1))/(V_extrema(2)-V_extrema(1)); % percentage = 0 if completely on trajectory 1, percentage = 1 if completely on trajectory 2
         case 'sinusoidal'
-            percentage = 0.5+0.5*cos(-pi+pi*(V(end)-V_extrema(1))/(V_extrema(2)-V_extrema(1))); % same as choice 1, but with a sinusoidal approach
+            percentage = 0.5+0.5*cos(-pi+pi*(Vz-V_extrema(1))/(V_extrema(2)-V_extrema(1))); % same as choice 1, but with a sinusoidal approach
     end
 else
     percentage = 1;
