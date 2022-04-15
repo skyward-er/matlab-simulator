@@ -1,4 +1,4 @@
-function [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, dataBallisticFlight] = std_run_control(settings, contSettings)
+function [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, dataBallisticFlight] = interp_run_control(settings, contSettings, reference)
 %{
 
 STD_RUN_BALLISTIC - This function runs a standard ballistic (non-stochastic) simulation
@@ -33,6 +33,11 @@ Skyward Experimental Rocketry | AFD Dept
 email: davide.rosato@skywarder.eu
 Revision date: 08/04/2022
 
+Author: Marco Marchesi
+Skyward Experimental Rocketry | ELC-SCS Dept
+email: marco.marchesi@skywarder.eu
+Revision date: 11/04/2022
+
 %}
 
 if not(settings.ballisticFligth) && settings.ascentOnly
@@ -41,14 +46,15 @@ end
 
 %% STARTING CONDITIONS
 % Attitude
-Q0 = angle2quat(settings.PHI, settings.OMEGA, 0*pi/180, 'ZYX')';           % Attitude initial condition
+Q0 = angle2quat(settings.PHI, settings.OMEGA, 0*pi/180, 'ZYX')';            % Attitude initial condition
 
 % State
-X0 = [0; 0; 0];                                                           % Position initial condition
-V0 = [0; 0; 0];                                                           % Velocity initial condition
-W0 = [0; 0; 0];                                                           % Angular speed initial condition
+X0 = [0; 0; 0];                                                             % Position initial condition
+V0 = [0; 0; 0];                                                             % Velocity initial condition
+W0 = [0; 0; 0];                                                             % Angular speed initial condition
+ap0 = 0;                                                                    % Control servo angle initial condition
 
-initialCond = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf];
+initialCond = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf; ap0];
 Y0 = initialCond;
 
 %% WIND GENERATION
@@ -89,16 +95,17 @@ vz          =       1;                                                      % Ve
 z           =       1;                                                      % Altitude
 nmax        =       10000;                                                  % Max iteration number - stops the integration if reached
 mach        =       0;                                                      % Mach number
-x           =       0;                                                      % air brake extension (it is called "c" in ascentContr)
+ext           =       0;                                                %???  % air brake extension?
 n_old       =       1;                                                      % Iteration number (first iter-> n=1)
-Yf_tot      =       zeros(nmax, 16);                                        % State vector for ode integration
+Yf_tot      =       zeros(nmax, length(Y0));                                        % State vector for ode integration
 Tf_tot      =       zeros(nmax, 1);                                         % Time vector for ode integration
-C           =       zeros(nmax, 1);                                   %???  % Air brake control parameter
+ext_tot           =       zeros(nmax, 1);                                   %???  % Air brake control parameter
 cpuTimes    =       zeros(nmax,1);                                          % Vector of iterations
 iTimes      =       0;                                                      % Iteration
 c.ctr_start =      -1;                                                      % Air brake control parameter initial condition
 i           =       1;                                                      % Index for while loop
 settings.kalman.pn_prec  =       settings.ada.p_ref;                        % settings for ADA and KALMAN
+ap_ref = 0;                                                                 % air brakes closed until Mach <0.7
 
 %% Flag initializations
 flagStopIntegration     =   true;                                           % while this is true the integration runs
@@ -113,6 +120,7 @@ if settings.launchWindow
 else
     launchFlag = true;
 end
+
 
 fprintf('START:\n\n\n');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -153,7 +161,7 @@ while flagStopIntegration && n_old < nmax
     end
 
     if vz(end) >= 0 && launchFlag
-        flagAscent = true;                                                  % Ascent 
+        flagAscent = true;                                                  % Ascent
     else
         flagAscent = false;                                                 % Descent
     end
@@ -173,11 +181,21 @@ while flagStopIntegration && n_old < nmax
 
     % dynamics
     if flagFligth
+
+        %   QUI aggiungere la trajectory choice
+        %   - TODO trajcetory generation as needed (all'inizio si può provare a
+        %     mettere quelle generate con l'altro modello)
+
+        %% trajectory choice -> chooses at which angle to open the airbrakes
+
+
+
+
         if settings.ballisticFligth
-            [Tf, Yf] = ode113(@ascentContr, [t0, t1], Y0, [], settings, x, tLaunch);
+            [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, ap_ref, tLaunch);
         else
             if flagAscent
-                [Tf, Yf] = ode113(@ascentContr, [t0, t1], Y0, [], settings, x, tLaunch);
+                [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, ap_ref, tLaunch);
             else
                 if flagPara1
                     para = 1;
@@ -197,8 +215,8 @@ while flagStopIntegration && n_old < nmax
         Tf = [t0, t1];
         Yf = [initialCond'; initialCond'];
     end
-
-    [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Yf, Tf, x);
+    ext = extension_From_Angle_2022(ap_ref,settings);
+    [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Yf, Tf, ext);
     [~, ~, p, ~] = atmosisa(-Yf(:,3)) ;
 
 
@@ -252,61 +270,58 @@ while flagStopIntegration && n_old < nmax
         zc    =    exp_mean(-x_c(:,3),0.8);
         vzc   =    exp_mean(-x_c(:,6),0.8);
         vc    =    exp_mean(sqrt(x_c(:,4).^2+x_c(:,5).^2+x_c(:,6).^2),0.8);
-        if c.ctr_start == -1
-            c.ctr_start = 0.1*(n - 1);
-        end
-        %% selection of controler type
-        switch contSettings.flagPID
-            case 1
-                [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_PID    (zc, vzc, vc, contSettings);
-            case 2
-                [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_Lin    (zc, vzc, vc, contSettings);
-            case 3
-                [alpha_degree, vz_setpoint, z_setpoint, contSettings]                              = control_Servo  (zc, vzc,  contSettings);
-        end
-        input_output_test(indice_test) = struct('alpha_degree', alpha_degree, 'vz_setpoint', vz_setpoint, 'z_setpoint', z_setpoint, 'z', zc, 'vz', vzc, 'Vmod', sqrt(vxxx^2 + vyyy^2 + vz^2));
-        indice_test = indice_test +1;
-
-        x = extension_From_Angle(alpha_degree);
-        i = i + 1;
-    elseif flagAeroBrakes && ~settings.Kalman && settings.control
-        if c.ctr_start == -1
-            c.ctr_start = 0.1*(n - 1);
-        end
-        switch contSettings.flagPID
-            case 1
-                [alpha_degree, vz_setpoint, z_setpoint, pid,U_linear, Cdd, delta_S, contSettings] =   control_PID     (z, vz, sqrt(vxxx^2 + vyyy^2 + vz^2),  contSettings);
-            case 2
-                [alpha_degree, vz_setpoint, z_setpoint, pid,U_linear, Cdd, delta_S, contSettings] =   control_Lin     (z, vz, sqrt(vxxx^2 + vyyy^2 + vz^2),  contSettings);
-            case 3
-                [alpha_degree, vz_setpoint, z_setpoint, contSettings]                             =   control_Servo   (z, vz(end),  contSettings);
-        end
-
-        % Salvo input/output per testare algoritmo cpp
-        input_output_test(indice_test) = struct('alpha_degree', alpha_degree, 'vz_setpoint', vz_setpoint, 'z_setpoint', z_setpoint, 'z', z, 'vz', vz, 'Vmod', sqrt(vxxx^2 + vyyy^2 + vz^2));
-        indice_test = indice_test +1;
-
-        x = extension_From_Angle(alpha_degree);
-        i = i + 1;
-    elseif flagAeroBrakes && mach < 0.8
-        x  = extension_From_Angle(17.1771);
-    else
-        x = 0;
+        %         if c.ctr_start == -1
+        %             c.ctr_start = 0.1*(n - 1);
+        %         end
+        %         %% selection of controler type
+        %         switch contSettings.flagPID
+        %             case 1
+        %                 [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_PID    (zc, vzc, vc, contSettings);
+        %         end
+        %         input_output_test(indice_test) = struct('ap_ref', ap_ref, 'vz_setpoint', vz_setpoint, 'z_setpoint', z_setpoint, 'z', zc, 'vz', vzc, 'Vmod', sqrt(vxxx^2 + vyyy^2 + vz^2));
+        %         indice_test = indice_test +1;
+        %
+        %         ext = extension_From_Angle_2022(ap_ref,contSettings);
+        %         i = i + 1;
+        %     elseif flagAeroBrakes && ~settings.Kalman && settings.control
+        %         if c.ctr_start == -1
+        %             c.ctr_start = 0.1*(n - 1);
+        %         end
+        %         switch contSettings.flagPID
+        %             case 1
+        %                 [alpha_degree, vz_setpoint, z_setpoint, pid,U_linear, Cdd, delta_S, contSettings] =   control_PID     (z, vz, sqrt(vxxx^2 + vyyy^2 + vz^2),  contSettings);
+        %             case 4
+        N_forward = 3;
+        [ap_ref] = trajectoryChoice2bis(-Y0(3),-Y0(6),reference.altitude_ref,reference.vz_ref,' sinusoidal',N_forward); % cambiare nome alla funzione tra le altre cose
     end
 
+
+    % Salvo input/output per testare algoritmo cpp
+    %         input_output_test(indice_test) = struct('alpha_degree', alpha_degree, 'vz_setpoint', vz_setpoint, 'z_setpoint', z_setpoint, 'z', z, 'vz', vz, 'Vmod', sqrt(vxxx^2 + vyyy^2 + vz^2));
+    %         indice_test = indice_test +1;
+
+    %         ext = extension_From_Angle_2022(alpha_degree,contSettings);
+%     i = i + 1;
+    %     elseif flagAeroBrakes && mach < 0.8
+    %         ext  = extension_From_Angle_2022(17.1771,contSettings); % ????
+    %     else
+    %         ext = 0;
+    %     end
+
+  
     if settings.control == true  && flagAeroBrakes == 1 && mach < 0.7
         % Save the values to plot them
         c.vz_tot(i)    =  vz;
         c.z_tot(i)     =  z;
-        c.vz_setpoint_tot(i)  =  vz_setpoint;
-        c.z_setpoint_tot(i)   =  z_setpoint;
-        c.alpha_degree_tot(i) =  alpha_degree;
-        if contSettings.flagPID ~= 3
-            c.Cd_tot(i)    =  Cdd;
-            c.pid_tot(i)   =  pid;
-            c.U_lin_tot(i) =  U_linear;
-            c.dS_tot(i)    =  delta_S;
-        end
+%         c.vz_setpoint_tot(i)  =  vz_setpoint;
+%         c.z_setpoint_tot(i)   =  z_setpoint;
+        c.ap_ref_tot(i) =  ap_ref;
+%         if contSettings.flagPID ~= 3
+%             c.Cd_tot(i)    =  Cdd;
+%             c.pid_tot(i)   =  pid;
+%             c.U_lin_tot(i) =  U_linear;
+%             c.dS_tot(i)    =  delta_S;
+%         end
     end
 
     % vertical velocity and position
@@ -351,7 +366,7 @@ while flagStopIntegration && n_old < nmax
     c.Yf_tot(n_old:n_old+n-1, :) =  Yf(1:end, :);
     c.Tf_tot(n_old:n_old+n-1, 1) =  Tf(1:end, 1);
     c.p_tot(n_old:n_old+n-1, 1)  =  p(1:end, 1);
-    C(n_old:n_old+n-1) = x;
+    c.ap_tot(n_old:n_old+n-1) = Yf(1:end,17);
     c.v_ned_tot(n_old:n_old+n-1,:) = v_ned;
 
     n_old = n_old + n -1;
@@ -430,16 +445,16 @@ c.plot_control =  settings.control && true;
 %% RETRIVE PARAMETERS FROM THE ODE
 
 if not(settings.electronics)
-    dataBallisticFlight = RecallOdeFcn(@ascentContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings, C, tLaunch);
+    dataBallisticFlight = RecallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings, c.ap_tot, tLaunch);
 end
 if ~settings.electronics
     plots
 end
 
-save('results/Ground_truth.mat','sensorData');
-if settings.dataNoise
-    save('results/Sensors.mat','c');
-end
+% save('results/Ground_truth.mat','sensorData');
+% if settings.dataNoise
+%     save('results/Sensors.mat','c');
+% end
 
 
 

@@ -56,5 +56,6 @@ contSettings.filter_coeff      =    0.85;
 % Possible range of values for the control variable
 contSettings.delta_S_available = (0.0:0.001/4:0.01017)'; 
 
+
 %% MAGNETIC MAP
 settings.hmax = 6000;                % [m] Max altitude at which the world magnetic map must be computed

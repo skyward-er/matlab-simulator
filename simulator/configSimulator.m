@@ -16,8 +16,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 %% MISSION FILE
 % Choose the mision you want to simulate from rocketsData folder
 % settings.mission = 'Lynx_Roccaraso_September_2021';
-settings.mission = 'Lynx_Portugal_October_2021';
-% settings.mission = 'Pyxis_Portugal_October_2022';
+% settings.mission = 'Lynx_Portugal_October_2021';
+settings.mission = 'Pyxis_Portugal_October_2022';
 % settings.mission = 'Pyxis_Roccaraso_September_2022';
 
 %% LOAD DATA
@@ -46,10 +46,10 @@ settings.electronics        =   false;   % Switch on when testing with Hardware 
 settings.ascentOnly         =   true;    % Switch on to simulate only the ascent phase untill the apogee
 settings.ballisticFligth    =   true;    % Switch on to simulate the balistic fligth without any parachute
 settings.control            =   true;    % Switch on to simulate the control
-settings.dataNoise          =   true;    % Switch on to simulate the data acquisiton from sensors
+settings.dataNoise          =   false;    % Switch on to simulate the data acquisiton from sensors
 settings.launchWindow       =   false;   % Switch off this to avoid pausing the launch till you press the launch button
-settings.Kalman             =   true;    % Switch on to run the kalman algorithm
-settings.Ada                =   true;    % Switch on to run the apogee detection algorithm
+settings.Kalman             =   false;    % Switch on to run the kalman algorithm
+settings.Ada                =   false;    % Switch on to run the apogee detection algorithm
 
 %% LAUNCH SETUP
 % launchpad directions

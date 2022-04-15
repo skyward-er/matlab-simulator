@@ -1,4 +1,4 @@
-function acc = accelerometerAscent(t, Y, settings, c)
+function acc = accelerometerAscent(t, Y, settings, ext)
 %{ 
 
 Author: Adriano Filippo Inno
@@ -129,17 +129,17 @@ end
 CmatE = CoeffsE(:, :, :, :, :, :);
 CmatF = CoeffsF(:, :, :, :, :);
 
-if c == 0
+if ext == 0
     VE = CmatE(:, index(1), index(2), index(3), index(4), 1);
 else
-    c_cmp = C_datcom(c > C_datcom);
+    c_cmp = C_datcom(ext > C_datcom);
     n0 = length(c_cmp);
     n1 = n0 + 1;
-    c0 = c_cmp(end);
+    c0 = c_cmp(end); 
     c1 = C_datcom(n1);
     C0 =  CmatE(:, index(1), index(2), index(3), index(4), n0);
     C1 =  CmatE(:, index(1), index(2), index(3), index(4), n1);
-    VE = C1 + ((C1 - C0)./(c1 - c0)).*(c - c1);
+    VE = C1 + ((C1 - C0)./(c1 - c0)).*(ext - c1);
 end
 
 if t <= tb

@@ -1,12 +1,15 @@
 if c.plot_control
 %% PLOT THE RESULTS  
-c.ctr_end = 0.1*(length(c.alpha_degree_tot) - 1) + c.ctr_start;
+% c.ctr_end = 0.1*(length(c.alpha_degree_tot) - 1) + c.ctr_start;
+c.ctr_end = 0.1*(length(c.ap_tot) - 1) + c.ctr_start;
+
+
 time = c.ctr_start:0.1:c.ctr_end;
 % time_setpoint = 0:0.05:0.05*(length(csett.data_trajectories(csett.chosen_trajectory).V_ref(csett.starting_index:end))-1); % 0.05 discretization step fro trajectory generation
 
 %% Control variable: servo angle
 figure('Name','Servo angle after burning phase');
-plot(time, c.alpha_degree_tot);grid on;xlabel('Time [s]');ylabel('|Alpha| [deg]');
+plot(time, c.ap_tot,'*');grid on;xlabel('Time [s]');ylabel('|Alpha| [deg]');
 title('Servo control action');
 
 if c.flagPID ~= 3
