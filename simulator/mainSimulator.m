@@ -42,17 +42,7 @@ configSimulator;
 configControl;
 configReferences;
 
-% Servo (MARK STAR - HBL 3850)
-settings.servo.tau = 0.1;                                               % Servo motor time constant 
-settings.servo.maxSpeed = deg2rad(300);                                 % max rpm speed of the servo motor
-settings.servo.maxAngle = deg2rad(68);                                  % max servo angle
-settings.servo.minAngle = 0;                                            % min servo angle
 
-% Servo angle to extension of the air brakes (PYXIS)
-settings.arb.extPol(1) = -0.009216;
-settings.arb.extPol(2) = 0.02492;
-settings.arb.extPol(3) = -0.01627;
-settings.arb.extPol(4) = 0.03191;
 
 %coefficients (LYNX)
 load getDragCoeffsOldcoeffs.mat
@@ -66,10 +56,20 @@ end
 % T = vector of time used by ODE, [s] also for Tf Ta
 % Y = State = ( x y z | u v w | p q r | q0 q1 q2 q3 | thetax thetay thetaz | ap_ref ) also for Ya,Yf corresponding to T
 
-if settings.electronics
-    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = interp_run_control(settings, contSettings, reference);
-else
-    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = interp_run_control(settings,contSettings, reference);
+algorithm = 'std';
+switch algorithm
+    case 'interp'
+        if settings.electronics
+            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = interp_run_control(settings, contSettings,reference);
+        else
+            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = interp_run_control(settings,contSettings,reference);
+        end
+    case 'std'
+        if settings.electronics
+            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = std_run_control(settings, contSettings);
+        else
+            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = std_run_control(settings,contSettings);
+        end
 end
 
 %% DATA-PRINTING

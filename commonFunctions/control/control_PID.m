@@ -40,9 +40,9 @@ controler to follow the trejectory and then transfere it with a to a force
 ro = getRho(z);
 
 % Control variable limits
-delta_S_max = 0.01;
+delta_S_max = deg2rad(68)*0.009564;
 Cd_min = getDrag(V_mod,z,0, csett.coeff_Cd);
-Cd_max = getDrag(V_mod,z,delta_S_max, csett.coeff_Cd);
+Cd_max = getDrag(V_mod,z,delta_S_max, csett.coeff_Cd); % coefficients for getDrag are set in configSimulator -> settings.mission
 Umin = 0.5*ro*Cd_min*csett.S0*Vz*V_mod;    
 Umax = 0.5*ro*Cd_max*csett.S0*Vz*V_mod;
 
@@ -89,10 +89,14 @@ Cd = Cd_available(index_minimum);
 
 %% TRANSFORMATION FROM delta_S to SERVOMOTOR ANGLE DEGREES 
 
-alpha_rad      = (-csett.b + sqrt(csett.b^2 + 4*csett.a*delta_S)) / (2*csett.a);
-
+switch 'pyxis'
+    case 'lynx'
+        alpha_rad      = (-csett.b + sqrt(csett.b^2 + 4*csett.a*delta_S)) / (2*csett.a);
+    case 'pyxis'
+        alpha_rad = delta_S/0.009564;
+end
 % Alpha saturation 
-[alpha_rad, ~] = Saturation(alpha_rad, 0, 0.89);
+[alpha_rad, ~] = Saturation(alpha_rad, 0, deg2rad(68));
 
 alpha_degree   = (alpha_rad*180)/pi;
 

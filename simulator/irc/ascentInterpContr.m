@@ -73,14 +73,9 @@ Iyy = Y(15);
 Izz = Y(16);
 ap = Y(17);
 
-
-
-% da aggiungere: 
-% - costante di tempo del servo
-% - dinamica del servo
-% - angolo di riferimento ap_ref
-
 t = t - tLaunch;
+
+
 
 %% CONSTANTS
 S = settings.S;              % [m^2] cross surface
@@ -183,6 +178,7 @@ B_datcom = settings.Betas*pi/180;
 H_datcom = settings.Altitudes;
 M_datcom = settings.Machs;
 C_datcom = settings.Controls;
+C_datcom(end) = extension_From_Angle_Pyxis(deg2rad(68),settings); % per correggere l'errore sul C_datcom, che da exceed index
 
 cellT = {A_datcom, M_datcom, B_datcom, H_datcom};
 inst = [alpha, M, beta, -z];
@@ -209,7 +205,7 @@ else
     c1 = C_datcom(n1);  % this line gives errors                            
     C0 =  CmatE(:, index(1), index(2), index(3), index(4), n0);             
     C1 =  CmatE(:, index(1), index(2), index(3), index(4), n1);             
-    VE = C1 + ((C1 - C0)./(c1 - c0)).*(ap - c1);                        % interpolation of the coefficients
+    VE = C1 + ((C1 - C0)./(c1 - c0)).*(ext - c1);                           % interpolation of the coefficients
 end
 
 
@@ -290,7 +286,7 @@ else %%% rocket out of the launchpad
     dr = (Ixx-Iyy)/Izz*p*q + qdynL_V/Izz*(V_norm*Cn + (Cnr*r+Cnp*p)*C/2)...
         -Izzdot*r/Izz;
 
-    if  M_value < 0.8
+    if  M_value < 0.8 && t>tb
         dap = (ap_ref-ap)/settings.servo.tau;
         if abs(dap) <settings.servo.maxSpeed
             dap = dap;
@@ -305,7 +301,10 @@ else %%% rocket out of the launchpad
         dap = 0;
     elseif ap < settings.servo.minAngle
         dap = 0;
+    else 
+        dap = dap;
     end
+  
 end
 
 

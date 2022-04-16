@@ -188,14 +188,18 @@ while flagStopIntegration && n_old < nmax
 
         %% trajectory choice -> chooses at which angle to open the airbrakes
 
-
-
-
         if settings.ballisticFligth
             [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, ap_ref, tLaunch);
         else
             if flagAscent
                 [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, ap_ref, tLaunch);
+                
+                % saturation on servo angle
+                if Yf(end,17) > settings.servo.maxAngle
+                    Yf(end,17) = settings.servo.maxAngle;
+                elseif Yf(end,17)< settings.servo.minAngle
+                    Yf(end,17) = settings.servo.minAngle;
+                end
             else
                 if flagPara1
                     para = 1;
@@ -215,6 +219,7 @@ while flagStopIntegration && n_old < nmax
         Tf = [t0, t1];
         Yf = [initialCond'; initialCond'];
     end
+    
     ext = extension_From_Angle_Pyxis(ap_ref,settings);
     [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Yf, Tf, ext);
     [~, ~, p, ~] = atmosisa(-Yf(:,3)) ;
