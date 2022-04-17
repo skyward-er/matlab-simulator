@@ -57,6 +57,12 @@ settings.wind.ElMax = 0*pi/180;                   % [rad] Maximum Elevation, use
 settings.wind.AzMin = (360)*pi/180;               % [rad] Minimum Azimuth, user input in degrees (ex. 90)
 settings.wind.AzMax = (360)*pi/180;
 
+%% SAVINGS
+settings.save = true;
+
+%% PLOT
+settings.plots = false;
+
 %% ODE SETTINGS
 settings.ode.optionsascTrajGen = odeset('Events', @eventAirBrake);
 

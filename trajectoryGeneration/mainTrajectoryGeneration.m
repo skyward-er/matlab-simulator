@@ -19,21 +19,21 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 
-clear all
-close all
-clc
+% clear all
+% close all
+% clc
 
-filePath = fileparts(mfilename('fullpath'));
-currentPath = pwd;
-if not(strcmp(filePath, currentPath))
-    cd (filePath);
-    currentPath = filePath;
-end
-
-addpath(genpath(currentPath));
-
-%% LOAD DATA
-configTrajectoryGeneration;
+% filePath = fileparts(mfilename('fullpath'));
+% currentPath = pwd;
+% if not(strcmp(filePath, currentPath))
+%     cd (filePath);
+%     currentPath = filePath;
+% end
+% 
+% addpath(genpath(currentPath));
+% 
+% %% LOAD DATA
+% configTrajectoryGeneration;
 
 %% AIRBRAKES RADIAL EXTENSION
 % Airbrakes extension vector
@@ -117,10 +117,14 @@ trajectories_saving{index} = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref', 
 end
 
 %% SAVING
-save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
+if settings.save
+    save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
+end
 
 %% PLOT
-plots
+if settings.plots
+    plots
+end
 
 %% DELETE USELESS FILES
 warning off
