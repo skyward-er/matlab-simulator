@@ -19,9 +19,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 
-clear all
-close all
-clc
+clear all; close all; clc;
 
 filePath = fileparts(mfilename('fullpath'));
 currentPath = pwd;
@@ -32,7 +30,7 @@ end
 
 addpath(genpath(currentPath));
 
-%% LOAD DATA
+% %% LOAD DATA
 configTrajectoryGeneration;
 
 %% AIRBRAKES RADIAL EXTENSION
@@ -121,7 +119,7 @@ end
 
 %% SAVING
 
-save(strcat(ConDataPath, '/Trajectories_to0.mat'), 'trajectories_saving')
+
 
 if settings.save
     save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')

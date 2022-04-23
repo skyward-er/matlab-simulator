@@ -61,7 +61,7 @@ settings.wind.AzMax = (360)*pi/180;
 settings.save = true;
 
 %% PLOT
-settings.plots = false;
+settings.plots = true;
 
 %% ODE SETTINGS
 settings.ode.optionsascTrajGen = odeset('Events', @eventAirBrake);
