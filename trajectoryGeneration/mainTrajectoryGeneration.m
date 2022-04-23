@@ -120,10 +120,17 @@ trajectories_saving{index} = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref', 
 end
 
 %% SAVING
+
 save(strcat(ConDataPath, '/Trajectories_to0.mat'), 'trajectories_saving')
 
+if settings.save
+    save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
+end
+
 %% PLOT
-plots
+if settings.plots
+    plots
+end
 
 %% DELETE USELESS FILES
 warning off
