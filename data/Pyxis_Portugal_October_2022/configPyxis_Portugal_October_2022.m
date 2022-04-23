@@ -27,7 +27,7 @@ settings.Vy_final = 0;
 settings.y_final  = 0;
 
 %% CONTROL AND SENSOR FREQUENCIES
-settings.frequencies.controlFrequency           =   10;                    % [hz] control action frequency 
+settings.frequencies.controlFrequency           =   5;                    % [hz] control action frequency 
 settings.frequencies.accelerometerFrequency     =   100;                   % [hz] control action frequency 
 settings.frequencies.gyroFrequency              =   100;                   % [hz] control action frequency 
 settings.frequencies.magnetometerFrequency      =   100;                   % [hz] control action frequency 

@@ -5,9 +5,23 @@ function [z_setpoint, Vz_setpoint, csett] = set_Trajectory(z, Vz, csett)
 % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@kywarder.eu
 % email: leonardo.bertelli@skywarder.eu, alessandro.delduca@skywarder.eu
 % Release date: 01/03/2021
+%
+% update: Marco Marchesi, Giuseppe Brentino | ELC-SCS Dept |
+% electronics@skywarder.eu, marco.marchesi@skywarder.eu,
+% giuseppe.brentino@skywarder.eu
+% Update date: 23/04/2022
+
+%%% new trajectory choice
+
+if z-csett.z_trajChoice>0
+   csett.iteration_flag = 1;
+   csett.z_trajChoice = csett.z_trajChoice + csett.deltaZ_change;
+end
+
 
 if csett.iteration_flag == 1
     
+    % 
     best_min   = inf;
     best_index = inf;
 

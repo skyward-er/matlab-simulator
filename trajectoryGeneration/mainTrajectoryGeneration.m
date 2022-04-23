@@ -63,18 +63,21 @@ X0 = [0 0 0]';
 V0 = [0 0 0]';
 W0 = [0 0 0]';
 
+%%% composing initial conditions for ode
 Y0 = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf];
 
+%%% wind initialization
 [uw, vw, ww, ~] = windConstGenerator(settings.wind);
 settings.constWind = [uw, vw, ww];
 
+%%% running the preliminar simulation that stops when air brakes open
 [T, Y] = ode113(@ascent, [0, 60], Y0, settings.ode.optionsascTrajGen, settings);
 vels = quatrotate(quatconj(Y(end, 10:13)),Y(end, 4:6));
 
-Vz_initial = -vels(3);
+Vz_initial = 0;%-vels(3);
 
 % Increasing the value
-Vz_initial = Vz_initial * (1 + settings.Vz_initialPerc);
+%Vz_initial = Vz_initial * (1 + settings.Vz_initialPerc);
 
 %% INTERPOLATED CA
 coeffsCA = load(strcat(dataPath, '/CAinterpCoeffs.mat'));
@@ -117,7 +120,7 @@ trajectories_saving{index} = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref', 
 end
 
 %% SAVING
-save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
+save(strcat(ConDataPath, '/Trajectories_to0.mat'), 'trajectories_saving')
 
 %% PLOT
 plots

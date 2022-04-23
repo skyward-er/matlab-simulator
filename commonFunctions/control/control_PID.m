@@ -8,11 +8,11 @@ function [alpha_degree, Vz_setpoint, z_setpoint, pid, U_linear, Cd, delta_S, cse
 
 %{
 CONTROL_ALGORITHM  Finds trejectory (z-Vz) to follow and uses a PI
-controler to follow the trejectory and then transfere it with a to a force
+controller to follow the trajectory and then transfers it with a to a force
 
 
   INPUTS:
-  z               acutal hight of the rocket
+  z               actual hight of the rocket
   Vz              actual vertical velocity of the rocket
   V_mod           actual roket velocity in the direction of the main axis
   sample_time     sample time of the control system

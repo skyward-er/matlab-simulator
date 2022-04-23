@@ -53,8 +53,9 @@ X0 = [0; 0; 0];                                                             % Po
 V0 = [0; 0; 0];                                                             % Velocity initial condition
 W0 = [0; 0; 0];                                                             % Angular speed initial condition
 ap0 = 0;                                                                    % Control servo angle initial condition
+dap0 = 0;                                                                   % Control servo speed initial condition
 
-initialCond = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf; ap0];
+initialCond = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf; ap0; dap0];
 Y0 = initialCond;
 
 %% WIND GENERATION
@@ -95,17 +96,17 @@ vz          =       1;                                                      % Ve
 z           =       1;                                                      % Altitude
 nmax        =       10000;                                                  % Max iteration number - stops the integration if reached
 mach        =       0;                                                      % Mach number
-ext           =       0;                                                %???  % air brake extension?
+ext         =       0;                                                %???  % air brake extension?
 n_old       =       1;                                                      % Iteration number (first iter-> n=1)
-Yf_tot      =       zeros(nmax, length(Y0));                                        % State vector for ode integration
+Yf_tot      =       zeros(nmax, length(Y0));                                % State vector for ode integration
 Tf_tot      =       zeros(nmax, 1);                                         % Time vector for ode integration
-ext_tot           =       zeros(nmax, 1);                                   %???  % Air brake control parameter
+ext_tot     =       zeros(nmax, 1);                                   %???  % Air brake control parameter
 cpuTimes    =       zeros(nmax,1);                                          % Vector of iterations
 iTimes      =       0;                                                      % Iteration
 c.ctr_start =      -1;                                                      % Air brake control parameter initial condition
 i           =       1;                                                      % Index for while loop
 settings.kalman.pn_prec  =       settings.ada.p_ref;                        % settings for ADA and KALMAN
-ap_ref = 0;                                                                 % air brakes closed until Mach <0.7
+ap_ref = 0;                                                                 % air brakes closed until Mach < settings.MachControl
 
 %% Flag initializations
 flagStopIntegration     =   true;                                           % while this is true the integration runs
@@ -182,24 +183,28 @@ while flagStopIntegration && n_old < nmax
     % dynamics
     if flagFligth
 
-        %   QUI aggiungere la trajectory choice
-        %   - TODO trajcetory generation as needed (all'inizio si può provare a
-        %     mettere quelle generate con l'altro modello)
-
-        %% trajectory choice -> chooses at which angle to open the airbrakes
-
         if settings.ballisticFligth
-            [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, ap_ref, tLaunch);
+            [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings,contSettings, ap_ref, tLaunch);
+            % saturation on servo angle
+%                 if Yf(end,17) > settings.servo.maxAngle
+%                     Yf(end,17) = settings.servo.maxAngle;
+%                     Yf(end,18) = 0;
+%                 elseif Yf(end,17)< settings.servo.minAngle
+%                     Yf(end,17) = settings.servo.minAngle;
+%                     Yf(end,18) = 0;
+%                 end
         else
             if flagAscent
-                [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, ap_ref, tLaunch);
+                [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, contSettings, ap_ref, tLaunch);
                 
                 % saturation on servo angle
-                if Yf(end,17) > settings.servo.maxAngle
-                    Yf(end,17) = settings.servo.maxAngle;
-                elseif Yf(end,17)< settings.servo.minAngle
-                    Yf(end,17) = settings.servo.minAngle;
-                end
+%                 if Yf(end,17) > settings.servo.maxAngle
+%                     Yf(end,17) = settings.servo.maxAngle;
+%                     Yf(end,18) = 0;
+%                 elseif Yf(end,17)< settings.servo.minAngle
+%                     Yf(end,17) = settings.servo.minAngle;
+%                     Yf(end,18) = 0;
+%                 end
             else
                 if flagPara1
                     para = 1;
@@ -220,7 +225,7 @@ while flagStopIntegration && n_old < nmax
         Yf = [initialCond'; initialCond'];
     end
     
-    ext = extension_From_Angle_Pyxis(ap_ref,settings);
+    ext = extension_From_Angle_2022(ap_ref,settings);
     [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Yf, Tf, ext);
     [~, ~, p, ~] = atmosisa(-Yf(:,3)) ;
 
@@ -237,15 +242,15 @@ while flagStopIntegration && n_old < nmax
         Pada_prev =   P_ada(:,:,end);
     end
 
-%     if iTimes==1 && settings.Kalman
-%         x_prev    =  [X0; V0; Q0(2:4); Q0(1);0;0;0];
-%         vels_prev =  [0;0;0];
-%         P_prev    =   0.01*eye(12);
-%     elseif iTimes ~= 1 && settings.Kalman
-%         x_prev    =   x_est_tot(end,:);
-%         vels_prev =   vels_tot(end,:);
-%         P_prev    =   P_c(:,:,end);
-%     end
+    if iTimes==1 && settings.Kalman
+        x_prev    =  [X0; V0; Q0(2:4); Q0(1);0;0;0];
+        vels_prev =  [0;0;0];
+        P_prev    =   0.01*eye(12);
+    elseif iTimes ~= 1 && settings.Kalman
+        x_prev    =   x_est_tot(end,:);
+        vels_prev =   vels_tot(end,:);
+        P_prev    =   P_c(:,:,end);
+    end
     %% ADA
     if settings.Ada && settings.dataNoise
         [xp_ada, xv_ada, P_ada, settings.ada]   =  run_ADA(ada_prev, Pada_prev,                ...
@@ -290,7 +295,7 @@ while flagStopIntegration && n_old < nmax
     yyy  =  Yf(end, 1);
     %% Control algorithm
 
-    if flagAeroBrakes && mach < 0.7 && settings.Kalman && settings.control
+    if flagAeroBrakes && mach < settings.MachControl && settings.Kalman && settings.control
 %         zc    =    exp_mean(-x_c(:,3),0.8);
 %         vzc   =    exp_mean(-x_c(:,6),0.8);
 %         vc    =    exp_mean(sqrt(x_c(:,4).^2+x_c(:,5).^2+x_c(:,6).^2),0.8);
@@ -315,8 +320,21 @@ while flagStopIntegration && n_old < nmax
         %             case 1
         %                 [alpha_degree, vz_setpoint, z_setpoint, pid,U_linear, Cdd, delta_S, contSettings] =   control_PID     (z, vz, sqrt(vxxx^2 + vyyy^2 + vz^2),  contSettings);
         %             case 4
-        N_forward = 3;
-        [ap_ref] = trajectoryChoice2bis(-Y0(3),vz,reference.altitude_ref,reference.vz_ref,'sinusoidal',N_forward); % cambiare nome alla funzione tra le altre cose
+
+        N_forward = 2;
+        if z<2500
+            deltaZ = 10;
+        else 
+            deltaZ = 1;
+        end
+        [ap_ref] = trajectoryChoice2bis(-Y0(3),vz,reference.altitude_ref,reference.vz_ref,'linear',N_forward,deltaZ); % cambiare nome alla funzione tra le altre cose
+        
+        if z> 2500
+            delta_ap_limiter = 0.3;
+            if abs(ap_ref - Yf(end,17))>delta_ap_limiter
+                ap_ref = Yf(end,17)+sign(ap_ref - Yf(end,17))*delta_ap_limiter;
+            end
+        end
     end
 
 
@@ -333,7 +351,7 @@ while flagStopIntegration && n_old < nmax
     %     end
 
   
-    if settings.control == true  && flagAeroBrakes == 1 && mach < 0.7
+    if settings.control == true  && flagAeroBrakes == 1 && mach < settings.MachControl
         % Save the values to plot them
         c.vz_tot(i)    =  vz;
         c.z_tot(i)     =  z;
@@ -452,7 +470,7 @@ c.plot_control =  settings.control && true;
 %% RETRIVE PARAMETERS FROM THE ODE
 
 if not(settings.electronics)
-    dataBallisticFlight = RecallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings, c.ap_tot, tLaunch);
+    dataBallisticFlight = RecallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings,contSettings, c.ap_tot, tLaunch);
 end
 if ~settings.electronics
     interpPlots

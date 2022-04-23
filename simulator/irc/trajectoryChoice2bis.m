@@ -17,7 +17,7 @@ function [alpha0] = trajectoryChoice2bis(z,Vz,z_ref,V_ref,interpolation,N_forwar
 % v_ref:    vertical velocity array reference (N x n, where n is the number
 %           of trajectories generated, it can be changed into only 2
 %           (airbrakes always opened and airbrakes always closed)
-% choice:   = 1 if linear interpolation, = 2 if sinusoidal interpolation
+% interpolation:   = 'linear' or 'sinusoidal'
 %
 % OUTPUTS:
 % alpha0:   reference angle for the PID controller
@@ -48,7 +48,6 @@ z_ref = heights;
 
 %%% TO HERE
 
-% [~, index_z] = min(abs(z_ref - z));
 index_z = floor(z/deltaZ);
 if index_z > length(z_ref)
     index_z = length(z_ref);

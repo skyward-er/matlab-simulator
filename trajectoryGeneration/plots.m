@@ -69,8 +69,9 @@ xlabel('Time [s]'); ylabel('$V_{y}$ [m/s]'); title('Horizontal velocity vs Time'
 % Vz(z)
 figure('Name','Vertical velocity vs Altitude','NumberTitle','off');
 for i = 1:Ntraj
-    indexes = find(trajectories{i}.VZ_ref < Vz_initial);
-    plot(trajectories{i}.Z_ref(indexes), trajectories{i}.VZ_ref(indexes));
+%     indexes = find(trajectories{i}.VZ_ref < Vz_initial);
+%     plot(trajectories{i}.Z_ref(indexes), trajectories{i}.VZ_ref(indexes));
+plot(trajectories{i}.Z_ref, trajectories{i}.VZ_ref);
     grid on; hold on;
 end
 xlabel('Altitude [m]'); ylabel('$V_{z}$ [m/s]'); title('Vertical velocity vs Altitude')

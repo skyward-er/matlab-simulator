@@ -1,4 +1,4 @@
-function [dY, parout] = ascentInterpContr(t, Y, settings, ap_ref, tLaunch)
+function [dY, parout] = ascentInterpContr(t, YY, settings,contSettings, ap_ref, tLaunch)
 %{
 
 ASCENT - ode function of the 6DOF Rigid Rocket Model
@@ -57,25 +57,33 @@ Revision date: 11/04/2022
 % recalling the states
 % x = Y(1);
 % y = Y(2);
-z = Y(3);
-u = Y(4);
-v = Y(5);
-w = Y(6);
-p = Y(7);
-q = Y(8);
-r = Y(9);
-q0 = Y(10);
-q1 = Y(11);
-q2 = Y(12);
-q3 = Y(13);
-Ixx = Y(14);
-Iyy = Y(15);
-Izz = Y(16);
-ap = Y(17);
+z = YY(3);
+u = YY(4);
+v = YY(5);
+w = YY(6);
+p = YY(7);
+q = YY(8);
+r = YY(9);
+q0 = YY(10);
+q1 = YY(11);
+q2 = YY(12);
+q3 = YY(13);
+Ixx = YY(14);
+Iyy = YY(15);
+Izz = YY(16);
+ap = YY(17);
+dap = YY(18);
 
 t = t - tLaunch;
 
-
+% saturation on servo angle
+if ap > settings.servo.maxAngle
+    ap = settings.servo.maxAngle;
+    dap = 0;
+elseif ap< settings.servo.minAngle
+    ap = settings.servo.minAngle;
+    dap = 0;
+end
 
 %% CONSTANTS
 S = settings.S;              % [m^2] cross surface
@@ -178,7 +186,7 @@ B_datcom = settings.Betas*pi/180;
 H_datcom = settings.Altitudes;
 M_datcom = settings.Machs;
 C_datcom = settings.Controls;
-C_datcom(end) = extension_From_Angle_Pyxis(deg2rad(68),settings); % per correggere l'errore sul C_datcom, che da exceed index
+C_datcom(end) = extension_From_Angle_2022(deg2rad(68),settings); % per correggere l'errore sul C_datcom, che da exceed index
 
 cellT = {A_datcom, M_datcom, B_datcom, H_datcom};
 inst = [alpha, M, beta, -z];
@@ -193,7 +201,7 @@ end
 CmatE = CoeffsE(:, :, :, :, :, :);                                          
 CmatF = CoeffsF(:, :, :, :, :);                                             
 
-ext = extension_From_Angle_Pyxis(ap,settings);
+ext = extension_From_Angle_2022(ap,settings);
 
 if ext == 0
     VE = CmatE(:, index(1), index(2), index(3), index(4), 1);               % from coeffsE (Empty rocket) takes the aerodynamic coefficients
@@ -220,7 +228,7 @@ end
 % CA = coeffsValues(1); 
 
 
-CA = getDrag(-w,-z,ext,settings.getDragCoeffs); % i coefficienti del CA vengono richiamati nel main all'inizio
+CA = getDrag(-w,-z,ext, contSettings.coeff_Cd); % i coefficienti del CA vengono richiamati nel main all'inizio
 
 CYB = coeffsValues(2); CY0 = coeffsValues(3);                               
 CNA = coeffsValues(4); CN0 = coeffsValues(5); Cl = coeffsValues(6);         
@@ -250,6 +258,7 @@ if -z < settings.lrampa*sin(OMEGA)                                          % No
     dq = 0;                                                                 
     dr = 0;                                                                 
     dap = 0;                                                                
+    ddap = 0;
 
     alpha_value = NaN;                                                      
     beta_value = NaN;                                                       
@@ -286,25 +295,26 @@ else %%% rocket out of the launchpad
     dr = (Ixx-Iyy)/Izz*p*q + qdynL_V/Izz*(V_norm*Cn + (Cnr*r+Cnp*p)*C/2)...
         -Izzdot*r/Izz;
 
-    if  M_value < 0.8 && t>tb
-        dap = (ap_ref-ap)/settings.servo.tau;
-        if abs(dap) <settings.servo.maxSpeed
-            dap = dap;
-        else
-            dap = settings.servo.maxSpeed;
+    
+
+    if  M_value < settings.MachControl && t>tb
+        dap_ref = (ap_ref-ap)/settings.servo.tau;
+        if abs(dap_ref) >settings.servo.maxSpeed
+            dap_ref = sign(ap_ref-ap)*settings.servo.maxSpeed;
         end
     else 
-        dap = 0;
+        dap_ref = 0;
     end
 
     if ap > settings.servo.maxAngle
+        dap_ref = 0;
         dap = 0;
     elseif ap < settings.servo.minAngle
+        dap_ref = 0;
         dap = 0;
-    else 
-        dap = dap;
     end
   
+    ddap = (dap_ref-dap)/settings.servo.tau_acc;
 end
 
 
@@ -329,6 +339,7 @@ dY(14) = Ixxdot;
 dY(15) = Iyydot;
 dY(16) = Izzdot;
 dY(17) = dap;
+dY(18) = ddap;
 
 dY = dY';
 

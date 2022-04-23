@@ -39,7 +39,7 @@ commonFunctionsPath = '../commonFunctions';
 addpath(genpath(commonFunctionsPath))
 
 %% ALGORITHM TUNING
-settings.tuning = false;                 % [-] True if you want to tune the algorithm
+settings.tuning = true;                 % [-] True if you want to tune the algorithm
 
 %% SIMULATION SETTINGS
 settings.electronics        =   false;   % Switch on when testing with Hardware in the loop HIL
@@ -59,6 +59,7 @@ settings.PHI = 0*pi/180;                 % [rad] Minimum Azimuth Angle from Nort
 
 %% WIND DETAILS
 % select which model you want to use:
+% three different models, 
 %%%%% Matlab Wind Model
 settings.wind.model = false;
 % matlab hswm model, wind model on altitude based on historical data
@@ -73,6 +74,9 @@ settings.wind.ww = 0;                          % [m/s] Vertical wind speed
 %%%%% Input wind
 settings.wind.input = false;
 % Wind is generated for every altitude interpolating with the coefficient defined below
+if settings.wind.input == true && settings.wind.model == true
+    warning("you are trying to use 'input model' but is shadowed by 'wind model' ")
+end
 
 settings.wind.input_ground  = 7;                                         % [m/s] Wind magnitude at the ground
 settings.wind.input_alt     = [0 100 600 750 900 1500 2500 3000 3500];   % [m] Altitude vector
