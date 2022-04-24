@@ -109,6 +109,8 @@ settings.wind.AzMax     =  (180)*pi/180;              % [rad] Maximum Azimuth, u
 %% PLOT DETAILS
 settings.plots   =   true;
 
+%% MONTECARLO 
+settings.montecarlo = false;                                                % set to true to run and save montecarlo simulation plots
 
 
 

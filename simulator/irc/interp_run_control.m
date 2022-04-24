@@ -472,7 +472,7 @@ c.plot_control =  settings.control && true;
 if not(settings.electronics)
     dataBallisticFlight = RecallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings,contSettings, c.ap_tot, tLaunch);
 end
-if ~settings.electronics
+if ~settings.electronics && ~settings.montecarlo
     interpPlots
 end
 
@@ -480,6 +480,7 @@ end
 % if settings.dataNoise
 %     save('results/Sensors.mat','c');
 % end
+
 
 
 
