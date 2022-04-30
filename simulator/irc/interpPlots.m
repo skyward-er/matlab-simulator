@@ -14,7 +14,7 @@ figure('Name','Servo angle after burning phase');
 plot(c.Tf_tot, c.ap_tot);
 grid on;
 xlabel('Time [s]');
-ylabel('|Alpha| [deg]');
+ylabel('\alpha [rad]');
 title('Servo control action');
 
 % if c.flagPID ~= 3

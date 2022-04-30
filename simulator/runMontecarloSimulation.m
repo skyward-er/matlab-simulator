@@ -32,8 +32,8 @@ configReferences;
 settings.montecarlo = true;
 
 %% MONTECARLO SETTINGS
-thrust_percentage = linspace(0.95,1.05,50)';                                            % defined for plot purposes
-tauServo_percentage = linspace(0.8,1.2,50);                                             % defined for plot purposes
+thrust_percentage = linspace(0.95,1.05,2)';                                            % defined for plot purposes
+tauServo_percentage = linspace(0.8,1.2,2);                                             % defined for plot purposes
 
 stoch.thrust = thrust_percentage*settings.motor.expThrust;                              % thrust
 stoch.wind = [1,2,3]; % set to 1 for 'wind model', 2 for 'input model', 3 for randomic  % wind model 
@@ -55,28 +55,51 @@ end
 
 algorithm = 'interp';
 
-for i = 1:size(stoch.thrust,1) 
-settings.motor.expThrust = stoch.thrust(i,:);
+save.thrust.time = zeros(size(stoch.thrust,1));
+save.thrust.control = zeros(size(stoch.thrust,1));
+save.thrust.position = [];
+save.thrust.speed = [];
+
+parfor i = 1:size(stoch.thrust,1) 
+
+    settings_mont = settings;
+    contSettings_mont = contSettings;
+    reference_mont = reference;
+
+
+    settings_mont.motor.expThrust = stoch.thrust(i,:);
     switch algorithm
         case 'interp'
             if settings.electronics
-                [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = interp_run_control(settings, contSettings,reference);
+                [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = interp_run_control(settings_mont, contSettings_mont,reference_mont);
             else
-                [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = interp_run_control(settings,contSettings,reference);
+                [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = interp_run_control(settings_mont,contSettings_mont,reference_mont);
             end
         case 'std'
             if settings.electronics
-                [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = std_run_control(settings, contSettings);
+                [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = std_run_control(settings_mont, contSettings_mont);
             else
-                [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = std_run_control(settings,contSettings);
+                [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = std_run_control(settings_mont,contSettings_mont);
             end
     end
     
+    time_interp = interp1(linspace(Tf(1),Tf(end),1000),Tf);
+    control_interp = interp1(linspace(Yf(1,17),Yf(end,17),1000),Yf(:,17));
+    
+    position_interp = zeros(1000,3);
+    for ind = 1:3
+    position_interp(ind) = interp1(linspace(Yf(1,ind),Yf(end,ind),1000),Yf(:,ind));
+    end
+    speed_interp = zeros(1000,3);
+    for ind2 = 4:6
+    speed_interp(ind2) = interp1(linspace(Yf(1,ind2),Yf(end,ind2),1000),Yf(:,ind2));
+    end
 
-    save.thrust{i}.time = Tf;
-    save.thrust{i}.control = Yf(:,17);
-    save.thrust{i}.position = Yf(:,1:3);
-    save.thrust{i}.speed = Yf(:,4:6);
+    save.thrust.time(:,i) = time_interp;
+    save.thrust.control(:,i) = control_interp;
+%     save.thrust.position(i) = position_interp;
+%     save.thrust.speed(i) = speed_interp;
+
 end
 
 plotControl = figure;

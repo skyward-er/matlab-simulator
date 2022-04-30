@@ -11,9 +11,9 @@ called reference
 
 %% LOAD REFERENCES
 % select the trajectories for the rocket used in the simulation
-switch settings.rocketName
+switch settings.mission
 
-    case 'Lynx'
+    case 'Lynx_Portugal_October_2021'
 
         load("reference_gdtozero.mat")
         for i = 1:size(all_Vz,2)
@@ -23,9 +23,9 @@ switch settings.rocketName
         reference.z_min = 466.738;
         reference.z_max = 1307.4;
 
-    case 'Pyxis'
+    case 'Pyxis_Portugal_October_2022'
         
-        load("Trajectories_to0.mat")
+        load("Trajectories_to0_onlyVz.mat")
         for i = 1:size(trajectories_saving,1)
             reference.vz_ref{i,1} = trajectories_saving{i}.VZ_ref;
             reference.vy_ref{i,1} = trajectories_saving{i}.VY_ref;
@@ -40,5 +40,7 @@ switch settings.rocketName
         
         reference.z_min = 466.738;
         reference.z_max = 1307.4;
+     
+    case 'Pyxis_Roccaraso_September_2022'
 
 end

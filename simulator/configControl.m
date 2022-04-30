@@ -58,15 +58,23 @@ contSettings.rate_limiter      =    60/0.13;                                 % d
 contSettings.filter_coeff      =    0.85;
 
 % Possible range of values for the control variable
-switch settings.rocketName
+switch settings.mission
 
-    case 'Lynx'
+    case 'Lynx_Portugal_October_2021'
 
         contSettings.delta_S_available = (0.0:0.001/4:0.01017)';
     
-    case 'Pyxis'
+    case 'Lynx_Roccaraso_September_2021'
+
+        contSettings.delta_S_available = (0.0:0.001/4:0.01017)';
+    
+    case 'Pyxis_Portugal_October_2022'
         
         contSettings.delta_S_available = (0.0:0.001/4:0.009564*deg2rad(68))'; 
+
+    case 'Pyxis_Roccaraso_September_2022'
+    
+    contSettings.delta_S_available = (0.0:0.001/4:0.009564*deg2rad(68))'; 
 
 end
 %% MAGNETIC MAP

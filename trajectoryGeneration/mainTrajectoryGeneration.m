@@ -121,9 +121,9 @@ end
 
 
 
-if settings.save
-    save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
-end
+% if settings.save
+%     save(strcat(ConDataPath, '/Trajectories_to0_.mat'), 'trajectories_saving')
+% end
 
 %% PLOT
 if settings.plots
