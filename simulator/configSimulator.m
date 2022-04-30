@@ -61,7 +61,7 @@ settings.PHI = 0*pi/180;                 % [rad] Minimum Azimuth Angle from Nort
 % select which model you want to use:
 % three different models, 
 %%%%% Matlab Wind Model
-settings.wind.model = false;
+settings.wind.model = true;
 % matlab hswm model, wind model on altitude based on historical data
 
 % input Day and Hour as arrays to run stochastic simulations

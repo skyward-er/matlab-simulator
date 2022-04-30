@@ -1,4 +1,4 @@
-function [alpha_degree, Vz_setpoint, z_setpoint, pid, U_linear, Cd, delta_S, csett] = control_PID(z, Vz, V_mod, csett)
+function [alpha_degree_out, Vz_setpoint, z_setpoint, pid, U_linear, Cd, delta_S, csett] = control_PID(z, Vz, V_mod, csett, alpha_degree_in)
 
 % Author: Leonardo Bertelli
 % Co-Author: Alessandro Del Duca
@@ -39,12 +39,22 @@ controller to follow the trajectory and then transfers it with a to a force
 % Parameters
 ro = getRho(z);
 
-% Control variable limits
+% Geometric constraints
 delta_S_max = deg2rad(68)*0.009564;
-Cd_min = getDrag(V_mod,z,0, csett.coeff_Cd);
-Cd_max = getDrag(V_mod,z,delta_S_max, csett.coeff_Cd); % coefficients for getDrag are set in configSimulator -> settings.mission
-Umin = 0.5*ro*Cd_min*csett.S0*Vz*V_mod;    
-Umax = 0.5*ro*Cd_max*csett.S0*Vz*V_mod;
+ext_max = 0.0383;
+
+% Control variable limits
+SMin = max(0,(csett.chosen_trajectory-1)/9*delta_S_max-0.1*delta_S_max);
+SMax = min(delta_S_max,(csett.chosen_trajectory-1)/9*delta_S_max+0.1*delta_S_max);
+
+extMin = max(0,(csett.chosen_trajectory-1)/9*ext_max-0.1*ext_max);
+extMax = min(ext_max,(csett.chosen_trajectory-1)/9*ext_max+0.1*ext_max);
+
+Cd_min = getDrag(V_mod,z,extMin, csett.coeff_Cd);
+Cd_max = getDrag(V_mod,z,extMax, csett.coeff_Cd); % coefficients for getDrag are set in configSimulator -> settings.mission
+
+Umin = 0.5*ro*Cd_min*csett.S0*Vz*V_mod;     % min force
+Umax = 0.5*ro*Cd_max*csett.S0*Vz*V_mod;     % max force
 
 % Input for PI controler
 error = (Vz - Vz_setpoint); % > 0 (in teoria)
@@ -57,8 +67,9 @@ if csett.saturation == false
     csett.I = csett.I + csett.Ki_1*error;
 end
 
+
 % Compute U_ref 
-Cd_ref = getDrag(V_mod,z,csett.chosen_trajectory*0.001, csett.coeff_Cd);
+Cd_ref = getDrag(V_mod,z,(csett.chosen_trajectory-1)/9*ext_max, csett.coeff_Cd); % perché *0.001?
 U_ref = 0.5*ro*Cd_ref*csett.S0*Vz*V_mod; 
 % U_ref = 0; % TESTING
 
@@ -70,17 +81,18 @@ U = U_ref + P + csett.I;
 
 %% TRANSFORMATION FROM U to delta_S 
 
+delta_S_available = linspace(SMin,SMax,20);
 % Get the Cd for each possible aerobrake surface
-Cd_available = 1:length(csett.delta_S_available);
-for ind = 1:length(csett.delta_S_available)
-    Cd_available(ind) = getDrag(V_mod,z,csett.delta_S_available(ind), csett.coeff_Cd);
+Cd_available = 1:length(delta_S_available);
+for ind = 1:length(delta_S_available)
+    Cd_available(ind) = getDrag(V_mod,z,delta_S_available(ind), csett.coeff_Cd);
 end
 Cd_available = Cd_available';
 
 % For all possible delta_S compute Fdrag
 % Then choose the delta_S which gives an Fdrag which has the minimum error if compared with F_drag_pid
 [~, index_minimum] = min( abs(U - 0.5*ro*csett.S0*Cd_available*Vz*V_mod) );
-delta_S = csett.delta_S_available(index_minimum); 
+delta_S = delta_S_available(index_minimum); 
 
 % Just for plotting
 pid = U;
@@ -98,13 +110,20 @@ end
 % Alpha saturation 
 [alpha_rad, ~] = Saturation(alpha_rad, 0, deg2rad(68));
 
-alpha_degree   = (alpha_rad*180)/pi;
+alpha_degree_out   = (alpha_rad*180)/pi;
+
 
 %% LIMIT THE RATE OF THE CONTROL VARIABLE 
 
-alpha_degree = rate_Limiter(alpha_degree, csett.alpha_degree_prec, csett.rate_limiter, csett.sample_time);
+alpha_degree_out = rate_Limiter(alpha_degree_out, csett.alpha_degree_prec, csett.rate_limiter, csett.sample_time);
 
-alpha_degree = smooth_Control(alpha_degree, csett.alpha_degree_prec, csett.filter_coeff);
-csett.alpha_degree_prec = alpha_degree;
+alpha_degree_out = smooth_Control(alpha_degree_out, csett.alpha_degree_prec, csett.filter_coeff);
+csett.alpha_degree_prec = alpha_degree_out;
 
+%limiting the difference from the previous step
+if alpha_degree_out > alpha_degree_in + 0.2*68
+    alpha_degree_out = alpha_degree_in+0.2*68;
+elseif alpha_degree_out < alpha_degree_in-0.2*68
+    alpha_degree_out = alpha_degree_in-0.2*68;
+end
 end

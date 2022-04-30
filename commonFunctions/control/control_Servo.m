@@ -1,4 +1,4 @@
-function [alpha_degree, Vz_setpoint, z_setpoint, csett] = control_Servo(z, Vz, csett)
+function [alpha_degree, Vz_setpoint, z_setpoint, csett] = control_Servo(z, Vz, csett,settings)
 
 % Author: Leonardo Bertelli
 % Co-Author: Alessandro Del Duca
@@ -31,8 +31,28 @@ CONTROL_ALGORITHM_SERVO_DEGREE  Finds trejectory (z-Vz) to follow and uses a PI 
 %%%%%%%%%%%%%%%%%%%% PID ALGORITHM %%%%%%%%%%%%%%%%%%%%
 
 % Control variable limits
-Umin = 0;  % degrees   
-Umax = 48; % degrees
+
+  
+switch settings.mission
+    case 'Pyxis_Portugal_October_2022'
+        alphaMax= 68; % degrees
+    case 'Pyxis_Roccaraso_September_2022'
+        alphaMax = 68;
+    case 'Lynx_Portugal_October_2021'
+        alphaMax = 48; % degrees
+    case 'Lynx_Roccaraso_September_2021'
+        alphaMax = 48;
+end
+
+Umin =  (csett.chosen_trajectory-1)/9*alphaMax * 0.8 ;  % degrees 
+Umax =  (csett.chosen_trajectory-1)/9*alphaMax * 1.2 ;
+
+if Umin<0
+    Umin = 0;
+end
+if Umax > 68
+    Umax = 68;
+end
 
 % PID
 error = (Vz - Vz_setpoint); % > 0 (in teoria)

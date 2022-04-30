@@ -72,7 +72,7 @@ settings.constWind = [uw, vw, ww];
 [T, Y] = ode113(@ascent, [0, 60], Y0, settings.ode.optionsascTrajGen, settings);
 vels = quatrotate(quatconj(Y(end, 10:13)),Y(end, 4:6));
 
-Vz_initial = 0;%-vels(3);
+Vz_initial = -vels(3);
 
 % Increasing the value
 %Vz_initial = Vz_initial * (1 + settings.Vz_initialPerc);
@@ -122,7 +122,7 @@ end
 
 
 % if settings.save
-%     save(strcat(ConDataPath, '/Trajectories_to0_.mat'), 'trajectories_saving')
+%     save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
 % end
 
 %% PLOT

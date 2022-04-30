@@ -60,7 +60,7 @@ end
 % T = vector of time used by ODE, [s] also for Tf Ta
 % Y = State = ( x y z | u v w | p q r | q0 q1 q2 q3 | thetax thetay thetaz | ap_ref ) also for Ya,Yf corresponding to T
 
-algorithm = 'interp';
+algorithm = 'std';
 switch algorithm
     case 'interp'
         if settings.electronics

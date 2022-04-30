@@ -28,8 +28,8 @@ if csett.iteration_flag == 1
     for ind = 1:length(csett.data_trajectories)
        
         % Select a z trajectory and a Vz trajectory (to speed up select only the first values, not ALL)
-        z_ref  = csett.data_trajectories{ind}.Z_ref(1:150); 
-        Vz_ref = csett.data_trajectories{ind}.VZ_ref(1:150); 
+        z_ref  = csett.data_trajectories{ind}.Z_ref; 
+        Vz_ref = csett.data_trajectories{ind}.VZ_ref; 
         err    = (z_ref-z).^2 + (Vz_ref-Vz).^2; 
 
         % Find the nearest point to the current trajectory

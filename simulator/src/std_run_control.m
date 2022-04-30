@@ -101,7 +101,7 @@ iTimes      =       0;                                                      % It
 c.ctr_start =      -1;                                                      % Air brake control parameter initial condition
 i           =       1;                                                      % Index for while loop
 settings.kalman.pn_prec  =       settings.ada.p_ref;                        % settings for ADA and KALMAN
-
+alpha_degree_old = 0;
 %% Flag initializations
 flagStopIntegration     =   true;                                           % while this is true the integration runs
 flagAscent              =   false;                                          % while this is false...
@@ -261,18 +261,20 @@ while flagStopIntegration && n_old < nmax
         %% selection of controler type
         switch contSettings.flagPID
             case 1
-                [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_PID    (zc, vzc, vc, contSettings);
+                [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_PID    (zc, vzc, vc, contSettings,alpha_degree_old);
                 ap_ref = deg2rad(alpha_degree);
             case 2
                 [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_Lin    (zc, vzc, vc, contSettings);
             case 3
-                [alpha_degree, vz_setpoint, z_setpoint, contSettings]                              = control_Servo  (zc, vzc,  contSettings);
+                [alpha_degree, vz_setpoint, z_setpoint, contSettings]                              = control_Servo  (zc, vzc,  contSettings,settings);
+                ap_ref = deg2rad(alpha_degree);
         end
         input_output_test(indice_test) = struct('alpha_degree', alpha_degree, 'vz_setpoint', vz_setpoint, 'z_setpoint', z_setpoint, 'z', zc, 'vz', vzc, 'Vmod', sqrt(vxxx^2 + vyyy^2 + vz^2));
         indice_test = indice_test +1;
 
         ext = extension_From_Angle_2022(ap_ref,settings);
         i = i + 1;
+        alpha_degree_old = alpha_degree;
     elseif flagAeroBrakes && ~settings.Kalman && settings.control
         if c.ctr_start == -1
             c.ctr_start = 0.1*(n - 1);
@@ -282,12 +284,13 @@ while flagStopIntegration && n_old < nmax
 
         switch contSettings.flagPID
             case 1
-                [alpha_degree, vz_setpoint, z_setpoint, pid,U_linear, Cdd, delta_S, contSettings] =   control_PID     (z, vz, sqrt(vxxx^2 + vyyy^2 + vz^2),  contSettings);
+                [alpha_degree, vz_setpoint, z_setpoint, pid,U_linear, Cdd, delta_S, contSettings] =   control_PID     (z, vz, sqrt(vxxx^2 + vyyy^2 + vz^2),  contSettings,alpha_degree_old);
                 ap_ref = deg2rad(alpha_degree);
-                %             case 2
-%                 [alpha_degree, vz_setpoint, z_setpoint, pid,U_linear, Cdd, delta_S, contSettings] =   control_Lin     (z, vz, sqrt(vxxx^2 + vyyy^2 + vz^2),  contSettings);
-%             case 3
-%                 [alpha_degree, vz_setpoint, z_setpoint, contSettings]                             =   control_Servo   (z, vz(end),  contSettings);
+            case 2
+                [alpha_degree, vz_setpoint, z_setpoint, pid,U_linear, Cdd, delta_S, contSettings] =   control_Lin     (z, vz, sqrt(vxxx^2 + vyyy^2 + vz^2),  contSettings);
+            case 3
+                [alpha_degree, vz_setpoint, z_setpoint, contSettings]                             =   control_Servo   (z, vz(end),  contSettings,settings);
+                ap_ref = deg2rad(alpha_degree);
         end
 
         % Salvo input/output per testare algoritmo cpp
@@ -296,8 +299,7 @@ while flagStopIntegration && n_old < nmax
         
         ext = extension_From_Angle_2022(ap_ref,settings);
         i = i + 1;
-%     elseif flagAeroBrakes && mach < 0.8
-%         ext  = extension_From_Angle(17.1771);
+        alpha_degree_old = alpha_degree;
     else
         ext = 0;
     end
