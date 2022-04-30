@@ -1,4 +1,4 @@
-function [z_setpoint, Vz_setpoint, csett] = set_Trajectory(z, Vz, csett)
+function [z_setpoint, Vz_setpoint, csett] = set_Trajectory(time,z, Vz, csett)
 
 % Author: Leonardo Bertelli
 % Co-Author: Alessandro Del Duca
@@ -13,7 +13,7 @@ function [z_setpoint, Vz_setpoint, csett] = set_Trajectory(z, Vz, csett)
 
 %%% new trajectory choice
 
-if z-csett.z_trajChoice>0
+if time-csett.z_trajChoice>0
    csett.iteration_flag = 1;
    csett.z_trajChoice = csett.z_trajChoice + csett.deltaZ_change;
 end

@@ -39,7 +39,7 @@ commonFunctionsPath = '../commonFunctions';
 addpath(genpath(commonFunctionsPath))
 
 %% ALGORITHM TUNING
-settings.tuning = true;                 % [-] True if you want to tune the algorithm
+settings.tuning = false;                 % [-] True if you want to tune the algorithm
 
 %% SIMULATION SETTINGS
 settings.electronics        =   false;   % Switch on when testing with Hardware in the loop HIL
@@ -61,7 +61,7 @@ settings.PHI = 0*pi/180;                 % [rad] Minimum Azimuth Angle from Nort
 % select which model you want to use:
 % three different models, 
 %%%%% Matlab Wind Model
-settings.wind.model = true;
+settings.wind.model = false;
 % matlab hswm model, wind model on altitude based on historical data
 
 % input Day and Hour as arrays to run stochastic simulations
@@ -72,18 +72,18 @@ settings.wind.HourMax = 4;                     % [h] Maximum Hour of the day
 settings.wind.ww = 0;                          % [m/s] Vertical wind speed
 
 %%%%% Input wind
-settings.wind.input = false;
+settings.wind.input = true;
 % Wind is generated for every altitude interpolating with the coefficient defined below
 if settings.wind.input == true && settings.wind.model == true
     warning("you are trying to use 'input model' but is shadowed by 'wind model' ")
 end
 
-settings.wind.input_ground  = 7;                                         % [m/s] Wind magnitude at the ground
-settings.wind.input_alt     = [0 100 600 750 900 1500 2500 3000 3500];   % [m] Altitude vector
-settings.wind.input_mult    = [0 0 5 5 10 10 15 15 15];                  % [-] Percentage of increasing magnitude at each altitude
-settings.wind.input_azimut  = [0 0 0 0 0 0 0 0 0];                       % [deg] Wind azimut angle at each altitude (toward wind incoming direction)
+settings.wind.inputGround  = 7;                                         % [m/s] Wind magnitude at the ground
+settings.wind.inputAlt     = [0 100 600 750 900 1500 2500 3000 3500];   % [m] Altitude vector
+settings.wind.inputMult    = [0 0 5 5 10 10 15 15 15];                  % [-] Percentage of increasing magnitude at each altitude
+settings.wind.inputAzimut  = [0 0 0 0 0 0 0 0 0];                       % [deg] Wind azimut angle at each altitude (toward wind incoming direction)
 
-settings.wind.input_uncertainty = [1, 1];
+settings.wind.input_uncertainty = [2, 2];
 % settings.wind.input_uncertainty = [a,b];      wind uncertanties:
 % - a, wind magnitude percentage uncertanty: magn = magn *(1 +- a)
 % - b, wind direction band uncertanty: dir = dir 1 +- b

@@ -259,9 +259,10 @@ while flagStopIntegration && n_old < nmax
             c.ctr_start = 0.1*(n - 1);
         end
         %% selection of controler type
+        time = Tf(end);
         switch contSettings.flagPID
             case 1
-                [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_PID    (zc, vzc, vc, contSettings,alpha_degree_old);
+                [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_PID    (time,zc, vzc, vc, contSettings,alpha_degree_old);
                 ap_ref = deg2rad(alpha_degree);
             case 2
                 [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_Lin    (zc, vzc, vc, contSettings);
@@ -284,7 +285,7 @@ while flagStopIntegration && n_old < nmax
 
         switch contSettings.flagPID
             case 1
-                [alpha_degree, vz_setpoint, z_setpoint, pid,U_linear, Cdd, delta_S, contSettings] =   control_PID     (z, vz, sqrt(vxxx^2 + vyyy^2 + vz^2),  contSettings,alpha_degree_old);
+                [alpha_degree, vz_setpoint, z_setpoint, pid,U_linear, Cdd, delta_S, contSettings] =   control_PID     (time,z, vz, sqrt(vxxx^2 + vyyy^2 + vz^2),  contSettings,alpha_degree_old);
                 ap_ref = deg2rad(alpha_degree);
             case 2
                 [alpha_degree, vz_setpoint, z_setpoint, pid,U_linear, Cdd, delta_S, contSettings] =   control_Lin     (z, vz, sqrt(vxxx^2 + vyyy^2 + vz^2),  contSettings);

@@ -1,4 +1,4 @@
-function [alpha_degree_out, Vz_setpoint, z_setpoint, pid, U_linear, Cd, delta_S, csett] = control_PID(z, Vz, V_mod, csett, alpha_degree_in)
+function [alpha_degree_out, Vz_setpoint, z_setpoint, pid, U_linear, Cd, delta_S, csett] = control_PID(time,z, Vz, V_mod, csett, alpha_degree_in)
 
 % Author: Leonardo Bertelli
 % Co-Author: Alessandro Del Duca
@@ -29,7 +29,7 @@ controller to follow the trajectory and then transfers it with a to a force
 
 %% CHOOSE THE SETPOINTS
 
-[z_setpoint, Vz_setpoint, csett] = set_Trajectory(z, Vz, csett);
+[z_setpoint, Vz_setpoint, csett] = set_Trajectory(time,z, Vz, csett);
 
 %% PI ALGORITHM 
 
@@ -44,11 +44,16 @@ delta_S_max = deg2rad(68)*0.009564;
 ext_max = 0.0383;
 
 % Control variable limits
-SMin = max(0,(csett.chosen_trajectory-1)/9*delta_S_max-0.1*delta_S_max);
-SMax = min(delta_S_max,(csett.chosen_trajectory-1)/9*delta_S_max+0.1*delta_S_max);
-
-extMin = max(0,(csett.chosen_trajectory-1)/9*ext_max-0.1*ext_max);
-extMax = min(ext_max,(csett.chosen_trajectory-1)/9*ext_max+0.1*ext_max);
+SMin = max(0,(csett.chosen_trajectory-1)/9*delta_S_max-0.2*delta_S_max);
+SMax = min(delta_S_max,(csett.chosen_trajectory-1)/9*delta_S_max+0.00*delta_S_max);
+extMin = max(0,(csett.chosen_trajectory-1)/9*ext_max-0.2*ext_max);
+extMax = min(ext_max,(csett.chosen_trajectory-1)/9*ext_max+0.00*ext_max);
+%%%%%% test
+% % SMin = 0;
+% % SMax = deg2rad(68);
+% % extMin = 0;
+% % extMax = ext_max;
+%%%%%%%
 
 Cd_min = getDrag(V_mod,z,extMin, csett.coeff_Cd);
 Cd_max = getDrag(V_mod,z,extMax, csett.coeff_Cd); % coefficients for getDrag are set in configSimulator -> settings.mission
@@ -82,10 +87,11 @@ U = U_ref + P + csett.I;
 %% TRANSFORMATION FROM U to delta_S 
 
 delta_S_available = linspace(SMin,SMax,20);
+ext_available = linspace(extMin,extMax,20);
 % Get the Cd for each possible aerobrake surface
 Cd_available = 1:length(delta_S_available);
 for ind = 1:length(delta_S_available)
-    Cd_available(ind) = getDrag(V_mod,z,delta_S_available(ind), csett.coeff_Cd);
+    Cd_available(ind) = getDrag(V_mod,z,ext_available(ind), csett.coeff_Cd);
 end
 Cd_available = Cd_available';
 
