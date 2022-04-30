@@ -27,12 +27,25 @@ settings.Vy_final = 0;
 settings.y_final  = 0;
 
 %% CONTROL AND SENSOR FREQUENCIES
-settings.frequencies.controlFrequency           =   5;                    % [hz] control action frequency 
+settings.frequencies.controlFrequency           =   10;                    % [hz] control action frequency 
 settings.frequencies.accelerometerFrequency     =   100;                   % [hz] control action frequency 
 settings.frequencies.gyroFrequency              =   100;                   % [hz] control action frequency 
 settings.frequencies.magnetometerFrequency      =   100;                   % [hz] control action frequency 
 settings.frequencies.gpsFrequency               =   10;                    % [hz] control action frequency 
 settings.frequencies.barometerFrequency         =   20;                    % [hz] control action frequency 
+
+% Servo (MARK STAR - HBL 3850)
+settings.servo.tau = 0.05;                                                  % Servo motor time constant 
+settings.servo.tau_acc = 0.01;                                              % Servo motor acceleration time constant
+settings.servo.maxSpeed = deg2rad(300);                     %[rad/s]        % max rpm speed of the servo motor
+settings.servo.maxAngle = deg2rad(68);                                      % max servo angle
+settings.servo.minAngle = 0;                                                % min servo angle
+
+% Servo angle to extension of the air brakes (PYXIS)
+settings.arb.extPol(1) = -0.009216;
+settings.arb.extPol(2) = 0.02492;
+settings.arb.extPol(3) = -0.01627;
+settings.arb.extPol(4) = 0.03191;
 
 %% KALMAN TUNING PARAMETERS
 settings.kalman.dt_k          =   0.01;                                    % [s]        kalman time step

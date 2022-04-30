@@ -263,10 +263,10 @@ while flagStopIntegration && n_old < nmax
             case 1
                 [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_PID    (zc, vzc, vc, contSettings);
                 ap_ref = deg2rad(alpha_degree);
-%             case 2
-%                 [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_Lin    (zc, vzc, vc, contSettings);
-%             case 3
-%                 [alpha_degree, vz_setpoint, z_setpoint, contSettings]                              = control_Servo  (zc, vzc,  contSettings);
+            case 2
+                [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_Lin    (zc, vzc, vc, contSettings);
+            case 3
+                [alpha_degree, vz_setpoint, z_setpoint, contSettings]                              = control_Servo  (zc, vzc,  contSettings);
         end
         input_output_test(indice_test) = struct('alpha_degree', alpha_degree, 'vz_setpoint', vz_setpoint, 'z_setpoint', z_setpoint, 'z', zc, 'vz', vzc, 'Vmod', sqrt(vxxx^2 + vyyy^2 + vz^2));
         indice_test = indice_test +1;
