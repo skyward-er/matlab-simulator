@@ -3,7 +3,7 @@ function [res] = newShooting2(ap,settings,coeffs,k,y0,targ)
 
 v0 = y0(2);
 h0 = abs(y0(1));
-
+% ciao
 g = 9.81;
 S = (pi/4) * settings.C^2;
 m = settings.ms;
