@@ -61,7 +61,7 @@ settings.PHI = 0*pi/180;                 % [rad] Minimum Azimuth Angle from Nort
 % select which model you want to use:
 % three different models, 
 %%%%% Matlab Wind Model
-settings.wind.model = false;
+settings.wind.model = true;
 % matlab hswm model, wind model on altitude based on historical data
 
 % input Day and Hour as arrays to run stochastic simulations
@@ -72,7 +72,7 @@ settings.wind.HourMax = 4;                     % [h] Maximum Hour of the day
 settings.wind.ww = 0;                          % [m/s] Vertical wind speed
 
 %%%%% Input wind
-settings.wind.input = true;
+settings.wind.input = false;
 % Wind is generated for every altitude interpolating with the coefficient defined below
 if settings.wind.input == true && settings.wind.model == true
     warning("you are trying to use 'input model' but is shadowed by 'wind model' ")

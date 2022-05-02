@@ -186,25 +186,25 @@ while flagStopIntegration && n_old < nmax
         if settings.ballisticFligth
             [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings,contSettings, ap_ref, tLaunch);
             % saturation on servo angle
-%                 if Yf(end,17) > settings.servo.maxAngle
-%                     Yf(end,17) = settings.servo.maxAngle;
-%                     Yf(end,18) = 0;
-%                 elseif Yf(end,17)< settings.servo.minAngle
-%                     Yf(end,17) = settings.servo.minAngle;
-%                     Yf(end,18) = 0;
-%                 end
+            %                 if Yf(end,17) > settings.servo.maxAngle
+            %                     Yf(end,17) = settings.servo.maxAngle;
+            %                     Yf(end,18) = 0;
+            %                 elseif Yf(end,17)< settings.servo.minAngle
+            %                     Yf(end,17) = settings.servo.minAngle;
+            %                     Yf(end,18) = 0;
+            %                 end
         else
             if flagAscent
                 [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, contSettings, ap_ref, tLaunch);
-                
+
                 % saturation on servo angle
-%                 if Yf(end,17) > settings.servo.maxAngle
-%                     Yf(end,17) = settings.servo.maxAngle;
-%                     Yf(end,18) = 0;
-%                 elseif Yf(end,17)< settings.servo.minAngle
-%                     Yf(end,17) = settings.servo.minAngle;
-%                     Yf(end,18) = 0;
-%                 end
+                %                 if Yf(end,17) > settings.servo.maxAngle
+                %                     Yf(end,17) = settings.servo.maxAngle;
+                %                     Yf(end,18) = 0;
+                %                 elseif Yf(end,17)< settings.servo.minAngle
+                %                     Yf(end,17) = settings.servo.minAngle;
+                %                     Yf(end,18) = 0;
+                %                 end
             else
                 if flagPara1
                     para = 1;
@@ -224,12 +224,12 @@ while flagStopIntegration && n_old < nmax
         Tf = [t0, t1];
         Yf = [initialCond'; initialCond'];
     end
-    
+
     ext = extension_From_Angle_2022(ap_ref,settings);
     [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Yf, Tf, ext);
     [~, ~, p, ~] = atmosisa(-Yf(:,3)) ;
 
-  
+
     if settings.dataNoise
         [sp, c] = acquisition_Sys(sensorData, s, c);
     end
@@ -294,41 +294,26 @@ while flagStopIntegration && n_old < nmax
     xxx  =  Yf(end, 2);
     yyy  =  Yf(end, 1);
     %% Control algorithm
-
+    flag_inizio = 1;
     if flagAeroBrakes && mach < settings.MachControl && settings.Kalman && settings.control
-%         zc    =    exp_mean(-x_c(:,3),0.8);
-%         vzc   =    exp_mean(-x_c(:,6),0.8);
-%         vc    =    exp_mean(sqrt(x_c(:,4).^2+x_c(:,5).^2+x_c(:,6).^2),0.8);
-        %         if c.ctr_start == -1
-        %             c.ctr_start = 0.1*(n - 1);
-        %         end
-        %         %% selection of controler type
-        %         switch contSettings.flagPID
-        %             case 1
-        %                 [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_PID    (zc, vzc, vc, contSettings);
-        %         end
-        %         input_output_test(indice_test) = struct('ap_ref', ap_ref, 'vz_setpoint', vz_setpoint, 'z_setpoint', z_setpoint, 'z', zc, 'vz', vzc, 'Vmod', sqrt(vxxx^2 + vyyy^2 + vz^2));
-        %         indice_test = indice_test +1;
-        %
-        %         ext = extension_From_Angle_2022(ap_ref,contSettings);
-        %         i = i + 1;
-        %     elseif flagAeroBrakes && ~settings.Kalman && settings.control
-        %         if c.ctr_start == -1
-        %             c.ctr_start = 0.1*(n - 1);
-        %         end
-        %         switch contSettings.flagPID
-        %             case 1
-        %                 [alpha_degree, vz_setpoint, z_setpoint, pid,U_linear, Cdd, delta_S, contSettings] =   control_PID     (z, vz, sqrt(vxxx^2 + vyyy^2 + vz^2),  contSettings);
-        %             case 4
 
         N_forward = 2;
         if z<2500
             deltaZ = 10;
-        else 
+        else
             deltaZ = 1;
         end
-        [ap_ref] = trajectoryChoice2bis(-Y0(3),vz,reference.altitude_ref,reference.vz_ref,'linear',N_forward,deltaZ); % cambiare nome alla funzione tra le altre cose
-        
+        %%%%%%%%% CAMBIA QUI L'ALGORITMO
+%                  [ap_ref] = trajectoryChoice2bis(-Y0(3),vz,reference.altitude_ref,reference.vz_ref,'linear',N_forward,deltaZ); % cambiare nome alla funzione tra le altre cose
+        if flag_inizio == 1
+            init.options = optimoptions("lsqnonlin","Display","off");
+            flag_inizio = 0;
+            [ap_ref] = trajectoryChoice2bis(-Y0(3),vz,reference.altitude_ref,reference.vz_ref,'linear',N_forward,deltaZ); % cambiare nome alla funzione tra le altre cose
+        end
+        tic
+        [ap_ref] = shootingControl([-Y0(3),vz],ap_ref,settings,contSettings.coeff_Cd,settings.arb,init);
+        toc
+        %%%%%%%%%
         if z> 2500
             delta_ap_limiter = 0.3;
             if abs(ap_ref - Yf(end,17))>delta_ap_limiter
@@ -343,30 +328,30 @@ while flagStopIntegration && n_old < nmax
     %         indice_test = indice_test +1;
 
     %         ext = extension_From_Angle_2022(alpha_degree,contSettings);
-%     i = i + 1;
+    %     i = i + 1;
     %     elseif flagAeroBrakes && mach < 0.8
     %         ext  = extension_From_Angle_2022(17.1771,contSettings); % ????
     %     else
     %         ext = 0;
     %     end
 
-  
+
     if settings.control == true  && flagAeroBrakes == 1 && mach < settings.MachControl
         % Save the values to plot them
         c.vz_tot(i)    =  vz;
         c.z_tot(i)     =  z;
-%         c.vz_setpoint_tot(i)  =  vz_setpoint;
-%         c.z_setpoint_tot(i)   =  z_setpoint;
+        %         c.vz_setpoint_tot(i)  =  vz_setpoint;
+        %         c.z_setpoint_tot(i)   =  z_setpoint;
         c.ap_ref_tot(i) =  ap_ref;
-%         if contSettings.flagPID ~= 3
-%             c.Cd_tot(i)    =  Cdd;
-%             c.pid_tot(i)   =  pid;
-%             c.U_lin_tot(i) =  U_linear;
-%             c.dS_tot(i)    =  delta_S;
-%         end
+        %         if contSettings.flagPID ~= 3
+        %             c.Cd_tot(i)    =  Cdd;
+        %             c.pid_tot(i)   =  pid;
+        %             c.U_lin_tot(i) =  U_linear;
+        %             c.dS_tot(i)    =  delta_S;
+        %         end
     end
 
-    
+
 
 
     if lastFlagAscent && not(flagAscent)
