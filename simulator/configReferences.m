@@ -44,3 +44,16 @@ switch settings.mission
     case 'Pyxis_Roccaraso_September_2022'
 
 end
+
+
+reference.deltaZ = 10;
+heights = [0:reference.deltaZ:3000]';
+
+V_rescale = zeros(length(heights),size(reference.altitude_ref,1));
+for ii = 1:size(reference.altitude_ref,1)
+    V_rescale(:,ii) = interp1(reference.altitude_ref{ii},reference.vz_ref{ii},heights);
+end
+
+
+settings.reference.Vz = V_rescale;
+settings.reference.Z = heights;

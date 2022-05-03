@@ -1,4 +1,4 @@
-function [alpha0] = trajectoryChoice2bis(z,Vz,z_ref,V_ref,interpolation,N_forward,deltaZ)
+function [alpha0] = trajectoryChoice2bis(z,Vz,z_ref,V_ref,interpolation,N_forward,settings,deltaZ)
 
 % HELP
 %
@@ -12,7 +12,7 @@ function [alpha0] = trajectoryChoice2bis(z,Vz,z_ref,V_ref,interpolation,N_forwar
 % INPUTS:
 % z:        measured altitude
 % V:        speed (vector of two components)
-% z_ref:    altitude array reference (N x 1, where N is the set number of
+% z_ref:    altitude array reference (N x 1, where N is the number of
 %           point the trajectories are divided into)
 % v_ref:    vertical velocity array reference (N x n, where n is the number
 %           of trajectories generated, it can be changed into only 2
@@ -22,31 +22,26 @@ function [alpha0] = trajectoryChoice2bis(z,Vz,z_ref,V_ref,interpolation,N_forwar
 % OUTPUTS:
 % alpha0:   reference angle for the PID controller
 
-% make it offline :
-
-%%%FROM HERE
-
-if nargin<7
+if nargin<8
     deltaZ = 10;
 end
 
-alpha_min = 0;
-alpha_max = deg2rad(68);
-
-heights = [0:deltaZ:3000]';
-
-
-
-V_rescale = zeros(length(heights),size(z_ref,1));
-for ii = 1:size(z_ref,1)
-    V_rescale(:,ii) = interp1(z_ref{ii},V_ref{ii},heights);
-end
-
-
-V_ref = V_rescale;
-z_ref = heights;
-
-%%% TO HERE
+% 
+% alpha_min = 0;
+% alpha_max = deg2rad(68);
+% 
+% heights = [0:deltaZ:3000]';
+% 
+% 
+% 
+% V_rescale = zeros(length(heights),size(z_ref,1));
+% for ii = 1:size(z_ref,1)
+%     V_rescale(:,ii) = interp1(z_ref{ii},V_ref{ii},heights);
+% end
+% 
+% 
+% V_ref = V_rescale;
+% z_ref = heights;
 
 index_z = floor(z/deltaZ);
 if index_z > length(z_ref)
@@ -54,7 +49,7 @@ if index_z > length(z_ref)
 end
 
 % sets how many points in advance it has to check
-V_ref = [V_ref ; zeros(N_forward,size(V_rescale,2))];
+V_ref = [V_ref ; zeros(N_forward,size(V_ref,2))];
 V_extrema = V_ref(index_z+N_forward,[1,end]); %select the reference point on the trajectories to use for fuzzy logic
 
 
@@ -73,9 +68,10 @@ else
     percentage = 1;
 end
 
-alpha0 = alpha_min* (1-percentage) + alpha_max * percentage;
+alpha0 = settings.servo.minAngle* (1-percentage) + settings.servo.maxAngle * percentage;
 
-if z>3000
-    alpha0 = alpha_max;
+% if we are too high
+if z>settings.z_final
+    alpha0 = settings.servo.maxAngle;
 end
 end

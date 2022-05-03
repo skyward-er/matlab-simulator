@@ -63,7 +63,7 @@ if not(settings.wind.model) && not(settings.wind.input)
 
     [uw, vw, ww, ~] = windConstGenerator(settings.wind);
     settings.constWind = [uw, vw, ww];
-    if ww ~= 0
+    if not(settings.montecarlo) && ww ~= 0
         warning('Pay attention using vertical wind, there might be computational errors')
     end
 
@@ -123,7 +123,9 @@ else
 end
 
 
-fprintf('START:\n\n\n');
+if not(settings.montecarlo)
+    fprintf('START:\n\n\n');
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Salvo input/output per testare algoritmo cpp
@@ -294,28 +296,24 @@ while flagStopIntegration && n_old < nmax
     xxx  =  Yf(end, 2);
     yyy  =  Yf(end, 1);
     %% Control algorithm
-    flag_inizio = 1;
+    %  flag_inizio = 1;
     if flagAeroBrakes && mach < settings.MachControl && settings.Kalman && settings.control
 
         N_forward = 2;
-        if z<2500
-            deltaZ = 10;
-        else
-            deltaZ = 1;
-        end
+
         %%%%%%%%% CAMBIA QUI L'ALGORITMO
-%                  [ap_ref] = trajectoryChoice2bis(-Y0(3),vz,reference.altitude_ref,reference.vz_ref,'linear',N_forward,deltaZ); % cambiare nome alla funzione tra le altre cose
-        if flag_inizio == 1
-            init.options = optimoptions("lsqnonlin","Display","off");
-            flag_inizio = 0;
-            [ap_ref] = trajectoryChoice2bis(-Y0(3),vz,reference.altitude_ref,reference.vz_ref,'linear',N_forward,deltaZ); % cambiare nome alla funzione tra le altre cose
-        end
-        tic
-        [ap_ref] = shootingControl([-Y0(3),vz],ap_ref,settings,contSettings.coeff_Cd,settings.arb,init);
-        toc
+        %         [ap_ref] = trajectoryChoice2bis(-Y0(3),vz,reference.altitude_ref,reference.vz_ref,'linear',N_forward,deltaZ); % cambiare nome alla funzione tra le altre cose
+        %         if flag_inizio == 1
+        %             init.options = optimoptions("lsqnonlin","Display","off");
+        %             flag_inizio = 0;
+        [ap_ref] = trajectoryChoice2bis(-Y0(3),vz,settings.reference.Z,settings.reference.Vz,'linear',N_forward,settings); % cambiare nome alla funzione tra le altre cose
+        %         end
+        %         tic
+        %         [ap_ref] = shootingControl([-Y0(3),vz],ap_ref,settings,contSettings.coeff_Cd,settings.arb,init);
+        %         toc
         %%%%%%%%%
         if z> 2500
-            delta_ap_limiter = 0.3;
+            delta_ap_limiter = 0.2;
             if abs(ap_ref - Yf(end,17))>delta_ap_limiter
                 ap_ref = Yf(end,17)+sign(ap_ref - Yf(end,17))*delta_ap_limiter;
             end
@@ -396,7 +394,9 @@ while flagStopIntegration && n_old < nmax
     else
         flagStopIntegration = flagFligth;
     end
-    z
+    if not(settings.montecarlo)
+        z
+    end
     flagMatr(n_old:n_old+n-1, :) = repmat([flagFligth, flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2], n, 1);
 end
 if settings.control == true
@@ -454,9 +454,10 @@ c.plot_control =  settings.control && true;
 
 %% RETRIVE PARAMETERS FROM THE ODE
 
-if not(settings.electronics)
+if not(settings.electronics) && ~settings.montecarlo
     dataBallisticFlight = RecallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings,contSettings, c.ap_tot, tLaunch);
 end
+
 if ~settings.electronics && ~settings.montecarlo
     interpPlots
 end
