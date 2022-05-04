@@ -128,9 +128,9 @@ alpha_degree_out = smooth_Control(alpha_degree_out, csett.alpha_degree_prec, cse
 csett.alpha_degree_prec = alpha_degree_out;
 
 %limiting the difference from the previous step
-if alpha_degree_out > alpha_degree_in + 0.2*68
-    alpha_degree_out = alpha_degree_in+0.2*68;
-elseif alpha_degree_out < alpha_degree_in-0.2*68
-    alpha_degree_out = alpha_degree_in-0.2*68;
-end
+% % if alpha_degree_out > alpha_degree_in + 0.2*68
+% %     alpha_degree_out = alpha_degree_in+0.2*68;
+% % elseif alpha_degree_out < alpha_degree_in-0.2*68
+% %     alpha_degree_out = alpha_degree_in-0.2*68;
+% % end
 end

@@ -41,12 +41,12 @@ configReferences;
 settings.montecarlo = true;
 
 % how many simulations (parfor loop)
-N_Threads = 1; % number of threads of your computer (change it to run the simulation)
-N_IterPerThread = 1;
+N_Threads = 4; % number of threads of your computer (change it to run the simulation)
+N_IterPerThread = 3;
 
 % how many simulations do you want to run with different wind (per thrust
 % percentage)? (inner loop)
-N_windSim = 2;
+N_windSim = 5;
 
 
 %thrust_percentage = linspace(0.95,1.05,N_Threads*N_IterPerThread)';                     % defined for plot purposes
@@ -107,7 +107,7 @@ flagSave = true;
 
 if run_Thrust == true
 
-    for alg_index = 1:length(algorithm_vec)
+    for alg_index = 3:length(algorithm_vec)
         algorithm = algorithm_vec(alg_index);
 
         
@@ -214,7 +214,7 @@ if run_Thrust == true
             save("MontecarloResults\Thrust\"+algorithm+"\saveThrust.mat","save_thrust","apogee")    
         end
         for i = 1    % Save results.txt
-            fid = fopen( "MontecarloResults\Thrust\"+algorithm+"\"+algorithm+"Results1.txt", 'wt' );  % CAMBIA IL NOME
+            fid = fopen( "MontecarloResults\Thrust\"+algorithm+"\"+algorithm+"Results2.txt", 'wt' );  % CAMBIA IL NOME
             fprintf(fid,'Algorithm: %s \n',algorithm );
             fprintf(fid,'Number of simulations: %d \n \n',N_Threads*N_IterPerThread*N_windSim); % Cambia n_sim
             fprintf(fid,'Parameters: \n');

@@ -39,7 +39,7 @@ commonFunctionsPath = '../commonFunctions';
 addpath(genpath(commonFunctionsPath))
 
 %% ALGORITHM TUNING
-settings.tuning = false;                 % [-] True if you want to tune the algorithm
+settings.tuning = true;                 % [-] True if you want to tune the algorithm
 
 %% SIMULATION SETTINGS
 settings.electronics        =   false;   % Switch on when testing with Hardware in the loop HIL
@@ -61,7 +61,7 @@ settings.PHI = 0*pi/180;                 % [rad] Minimum Azimuth Angle from Nort
 % select which model you want to use:
 % three different models, 
 %%%%% Matlab Wind Model
-settings.wind.model = true;
+settings.wind.model = false;
 % matlab hswm model, wind model on altitude based on historical data
 
 % input Day and Hour as arrays to run stochastic simulations
@@ -93,8 +93,8 @@ settings.wind.input_uncertainty = [2, 2];
 
 % Wind is generated randomly from the minimum to the maximum parameters which defines the wind.
 % Setting the same values for min and max will fix the parameters of the wind.
-settings.wind.MagMin    =   4;                        % [m/s] Minimum Magnitude
-settings.wind.MagMax    =   4;                        % [m/s] Maximum Magnitude
+settings.wind.MagMin    =   0;                        % [m/s] Minimum Magnitude
+settings.wind.MagMax    =   0;                        % [m/s] Maximum Magnitude
 settings.wind.ElMin     =   0*pi/180;                 % [rad] Minimum Elevation, user input in degrees (ex. 0)
 settings.wind.ElMax     =   0*pi/180;                 % [rad] Maximum Elevation, user input in degrees (ex. 0) (Max == 90 Deg)
 settings.wind.AzMin     =  (180)*pi/180;              % [rad] Minimum Azimuth, user input in degrees (ex. 90)
