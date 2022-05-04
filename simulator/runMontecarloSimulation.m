@@ -39,8 +39,14 @@ configReferences;
 
 settings.montecarlo = true;
 
+% how many simulations (parfor loop)
 N_Threads = 1; % number of threads of your computer (change it to run the simulation)
 N_IterPerThread = 1;
+
+% how many simulations do you want to run with different wind (per thrust
+% percentage)? (inner loop)
+N_windSim = 1;
+
 
 thrust_percentage = linspace(0.95,1.05,N_Threads*N_IterPerThread)';                     % defined for plot purposes
 % sigma_t = (1.20-1)/3;             % thrust_percentage standard deviation
@@ -86,8 +92,7 @@ if run_Thrust == true
     for alg_index = 1%:length(algorithm_vec)
         algorithm = algorithm_vec(alg_index);
 
-        % how many simulations do you want to run with different wind (per thrust percentage)?
-        N_windSim = 1;
+        
         save_thrust = cell(size(stoch.thrust,1),N_windSim);
 
         for i = 1:size(stoch.thrust,1)
@@ -119,13 +124,13 @@ if run_Thrust == true
                 % invece di avere i valori centrati sulla gaussiana, però
                 % per adesso lo teniamo così
                 switch algorithm
-                    case 'interp'
+                    case "interp"
                         [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams] = interp_run_control(settings_mont,contSettings_mont);
 
-                    case 'std0'
+                    case "std0"
                         [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams] = std_run_control(settings_mont,contSettings_mont);
 
-                    case 'std2s'
+                    case "std2s"
                         [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams] = std_new_run_control(settings_mont,contSettings_mont);
 
                 end
@@ -177,36 +182,36 @@ if run_Thrust == true
         ylabel('y')
         zlabel('z')
     
-        save_thrust_apogee_probability = figure;
-        pd = fitdist(apogee.thrust','Normal');    % create normal distribution object to compute mu and sigma
-        % probability to reach an apogee between 2950 and 3050
-        p = normcdf([2950 3050],apogee.thrust_mean,apogee.thrust_variance);
-        accuracy =( p(2) - p(1) )*100;
-        x_values = linspace(2800,3200,1000);   % possible apogees
-        y = pdf(pd,x_values);                  %array of values of the probability density function
-        hold on
-        xlabel('Reached apogee','Interpreter','latex','FontSize',15,'FontWeight','bold')
-        ylabel('Probability density','Interpreter','latex','FontSize',15,'FontWeight','bold')
-        plot(x_values,y)
+%         save_thrust_apogee_probability = figure;
+%         pd = fitdist(apogee.thrust','Normal');    % create normal distribution object to compute mu and sigma
+%         % probability to reach an apogee between 2950 and 3050
+%         p = normcdf([2950 3050],apogee.thrust_mean,apogee.thrust_variance);
+%         accuracy =( p(2) - p(1) )*100;
+%         x_values = linspace(2800,3200,1000);   % possible apogees
+%         y = pdf(pd,x_values);                  %array of values of the probability density function
+%         hold on
+%         xlabel('Reached apogee','Interpreter','latex','FontSize',15,'FontWeight','bold')
+%         ylabel('Probability density','Interpreter','latex','FontSize',15,'FontWeight','bold')
+%         plot(x_values,y)
 
         % save plots
         if flagSave == true
             saveas(save_thrust_plotControl,"MontecarloResults\Thrust\"+algorithm+"\controlPlot")
             saveas(save_thrust_plotApogee,"MontecarloResults\Thrust\"+algorithm+"\apogeelPlot")
             saveas(save_thrust_plotTrajectory,"MontecarloResults\Thrust\"+algorithm+"\TrajectoryPlot")
-            saveas(save_thrust_apogee_probability,"MontecarloResults\Thrust\"+algorithm+"\ApogeeProbabilityPlot")
+%             saveas(save_thrust_apogee_probability,"MontecarloResults\Thrust\"+algorithm+"\ApogeeProbabilityPlot")
             save("MontecarloResults\Thrust\"+algorithm+"\saveThrust.mat","save_thrust","apogee")    
         end
         for i = 1    % Save results.txt
-            fid = fopen( "MontecarloResults\Thrust\"+algorithm+"\"+algorithm+"Results.txt", 'wt' );  % CAMBIA IL NOME
-            fprintf(fid,'Algorithm: %s',algorithm );
+            fid = fopen( "MontecarloResults\Thrust\"+algorithm+"\"+algorithm+"Results1.txt", 'wt' );  % CAMBIA IL NOME
+            fprintf(fid,'Algorithm: %s \n',algorithm );
             fprintf(fid,'Number of simulations: %d \n \n',N_Threads*N_IterPerThread*N_windSim); % Cambia n_sim
             fprintf(fid,'Parameters: \n');
             fprintf(fid,'Thrust: +-20%% at 3*sigma, total impulse constant \n');
-            fprintf(fid,'Control frequency: %d Hz \n',settings.controlFrequency);
-            fprintf(fid,'Initial Mach number at which the control algorithm start: %.1f \n\n',settings.MachControl);
-            fprintf(fid,'Wind model parameters: \n '); % inserisci tutti i parametri del vento
-            fprintf(fid,'Wind Magnitude: 0-%d \n',settings_mont.wind.MagMax);
+            fprintf(fid,'Control frequency: %d Hz \n',settings.frequencies.controlFrequency);
+            fprintf(fid,'Initial Mach number at which the control algorithm starts: %.1f \n\n',settings.MachControl);
+            fprintf(fid,'Wind model parameters: \n'); % inserisci tutti i parametri del vento
+            fprintf(fid,'Wind Magnitude: 0-%d m/s\n',settings_mont.wind.MagMax);
             fprintf(fid,'Wind minimum azimuth: %d degrees \n',settings_mont.wind.AzMin);
             fprintf(fid,'Wind maximum azimuth: %d degrees \n',settings_mont.wind.AzMax);
             fprintf(fid,'Wind minimum elevation: %d degrees \n', settings_mont.wind.ElMin);
