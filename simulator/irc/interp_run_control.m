@@ -1,4 +1,4 @@
-function [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, dataBallisticFlight] = interp_run_control(settings, contSettings, reference)
+function [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, dataBallisticFlight,saveConstWind] = interp_run_control(settings, contSettings, reference)
 %{
 
 STD_RUN_BALLISTIC - This function runs a standard ballistic (non-stochastic) simulation
@@ -61,8 +61,9 @@ Y0 = initialCond;
 %% WIND GENERATION
 if not(settings.wind.model) && not(settings.wind.input)
 
-    [uw, vw, ww, ~] = windConstGenerator(settings.wind);
+    [uw, vw, ww, Az, El] = windConstGenerator(settings.wind);
     settings.constWind = [uw, vw, ww];
+    saveConstWind =  [uw, vw, ww, Az, El];
     if not(settings.montecarlo) && ww ~= 0
         warning('Pay attention using vertical wind, there might be computational errors')
     end
