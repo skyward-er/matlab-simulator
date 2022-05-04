@@ -75,7 +75,7 @@ if run_Thrust == true
     algorithm = 'interp';
 
     % how many simulations do you want to run with different wind (per thrust percentage)?
-    N_windSim = 5;
+    N_windSim = 10;
     save_thrust = cell(size(stoch.thrust,1),N_windSim);
 
     parfor i = 1:size(stoch.thrust,1)
