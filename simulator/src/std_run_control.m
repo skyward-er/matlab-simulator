@@ -1,4 +1,4 @@
-function [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, dataBallisticFlight] = std_run_control(settings, contSettings)
+function [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, dataBallisticFlight,saveConstWind] = std_run_control(settings, contSettings)
 %{
 
 STD_RUN_BALLISTIC - This function runs a standard ballistic (non-stochastic) simulation
@@ -55,14 +55,14 @@ Y0 = initialCond;
 %% WIND GENERATION
 if not(settings.wind.model) && not(settings.wind.input)
 
-    [uw, vw, ww, ~] = windConstGenerator(settings.wind);
+    [uw, vw, ww, Az, El] = windConstGenerator(settings.wind);
     settings.constWind = [uw, vw, ww];
-    if ww ~= 0
+    saveConstWind =  [uw, vw, ww, Az, El];
+    if not(settings.montecarlo) && ww ~= 0
         warning('Pay attention using vertical wind, there might be computational errors')
     end
 
 end
-
 
 %% SENSORS INIT
 [s, c] = initSensors(settings.lat0, settings.lon0, settings.z0);
@@ -383,7 +383,9 @@ while flagStopIntegration && n_old < nmax
     else
         flagStopIntegration = flagFligth;
     end
-    z
+     if not(settings.montecarlo)
+        z
+    end
     flagMatr(n_old:n_old+n-1, :) = repmat([flagFligth, flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2], n, 1);
 end
 if settings.control == true
@@ -441,10 +443,14 @@ c.plot_control =  settings.control && true;
 
 %% RETRIVE PARAMETERS FROM THE ODE
 
-if not(settings.electronics)
+
+if not(settings.electronics) && ~settings.montecarlo
     dataBallisticFlight = RecallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings,contSettings, c.ap_tot, tLaunch);
+else
+    dataBallisticFlight = [];
 end
-if ~settings.electronics
+
+if ~settings.electronics && ~settings.montecarlo
     interpPlots
 end
 

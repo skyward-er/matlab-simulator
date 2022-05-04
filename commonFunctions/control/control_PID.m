@@ -44,15 +44,16 @@ delta_S_max = deg2rad(68)*0.009564;
 ext_max = 0.0383;
 
 % Control variable limits
-SMin = max(0,(csett.chosen_trajectory-1)/9*delta_S_max-0.2*delta_S_max);
-SMax = min(delta_S_max,(csett.chosen_trajectory-1)/9*delta_S_max+0.00*delta_S_max);
-extMin = max(0,(csett.chosen_trajectory-1)/9*ext_max-0.2*ext_max);
-extMax = min(ext_max,(csett.chosen_trajectory-1)/9*ext_max+0.00*ext_max);
+SMin = 0;
+SMax = deg2rad(68);
+extMin = 0;
+extMax = ext_max;
+
 %%%%%% test
-% % SMin = 0;
-% % SMax = deg2rad(68);
-% % extMin = 0;
-% % extMax = ext_max;
+% % % SMin = max(0,(csett.chosen_trajectory-1)/9*delta_S_max-0.2*delta_S_max);
+% % % SMax = min(delta_S_max,(csett.chosen_trajectory-1)/9*delta_S_max+0.00*delta_S_max);
+% % % extMin = max(0,(csett.chosen_trajectory-1)/9*ext_max-0.2*ext_max);
+% % % extMax = min(ext_max,(csett.chosen_trajectory-1)/9*ext_max+0.00*ext_max);
 %%%%%%%
 
 Cd_min = getDrag(V_mod,z,extMin, csett.coeff_Cd);

@@ -51,9 +51,10 @@ if csett.iteration_flag == 1
     Vz_setpoint =  csett.data_trajectories{csett.chosen_trajectory}.VZ_ref(csett.index_min_value);
     
     % Just for plot
-    csett.starting_index = best_index;
-    disp('trajectory chosen:')
-    disp(csett.chosen_trajectory)
+  
+% % %     csett.starting_index = best_index;
+% % %     disp('trajectory chosen:')
+% % %     disp(csett.chosen_trajectory)
     
 %% For the following iterations keep tracking the chosen trajectory
 else

@@ -5,6 +5,7 @@ algorithms. Same as main, but some parameters are cicled.
 CALLED FUNCTIONS: 
 
 0 -     Marco Marchesi, SCS department, marco.marchesi@skywarder.eu
+        Giuseppe Brentino, SCS department, giuseppe.brentino@skywarder.eu
         Latest control algorithms
 
 Copyright © 2022, Skyward Experimental Rocketry, SCS department
@@ -45,29 +46,46 @@ N_IterPerThread = 1;
 
 % how many simulations do you want to run with different wind (per thrust
 % percentage)? (inner loop)
-N_windSim = 1;
+N_windSim = 2;
 
 
-thrust_percentage = linspace(0.95,1.05,N_Threads*N_IterPerThread)';                     % defined for plot purposes
-% sigma_t = (1.20-1)/3;             % thrust_percentage standard deviation
-% mu_t = 1;                         %thrust_percentage mean value
-% thrust_percentage= normrnd(mu_t,sigma_t,N_Threads*N_IterPerThread,1); %generate normally distributed values ( [0.8 1.20] = 3sigma) % serve il toolbox
+%thrust_percentage = linspace(0.95,1.05,N_Threads*N_IterPerThread)';                     % defined for plot purposes
+sigma_t = (1.20-1)/3;             % thrust_percentage standard deviation
+mu_t = 1;                         %thrust_percentage mean value
+thrust_percentage= normrnd(mu_t,sigma_t,N_Threads*N_IterPerThread,1); %generate normally distributed values ( [0.8 1.20] = 3sigma) % serve il toolbox
 tauServo_percentage = linspace(0.8,1.2,N_Threads*N_IterPerThread);                      % defined for plot purposes
 
 % stochastic parameters
 stoch.thrust = thrust_percentage*settings.motor.expThrust;                              % thrust - the notation used creates a matrix where each row is the expThrust multiplied by one coefficient in the thrust percentage array
 stoch.expThrust = (1./thrust_percentage) * settings.motor.expTime;                      % burning time - same notation as thrust here
 
-for i = 1:size(stoch.thrust)
+for i = 1:size(stoch.thrust,1)
     plot(stoch.expThrust(i,:),stoch.thrust(i,:))
     hold on;
+    grid on;
+    legend
+    %check on total impulse: trapezoidal integration:
+    for jj = 1:length(stoch.thrust(i,:))-1
+        deltaT = stoch.expThrust(i,jj+1)-stoch.expThrust(i,jj);
+        I(jj) = (stoch.thrust(i,jj+1)+stoch.thrust(i,jj))*deltaT/2;
+    end
+    Itot(i) = sum(I);
 end
-legend
+
 stoch.wind = [1,2,3]; % set to 1 for 'wind model', 2 for 'input model', 3 for randomic  % wind model
 stoch.tauServo = tauServo_percentage * settings.servo.tau;                              % servo motor time constant
 stoch.controlFrequency = [1, 2, 5, 10];                             % control frequency (sets how fast the control input reference is given to the servo)
 stoch.MachControl = [0.6:0.05:1];                                                       % Mach at which the air brakes can be deployed
 
+contSettings.deltaZ_change = 2; % change reference every 2seconds
+
+% wind parameters
+settings.wind.MagMin = 0; % [m/s] Minimum Magnitude
+settings.wind.MagMax = 12; % [m/s] Maximum Magnitude
+settings.wind.ElMin  = - 45;
+settings.wind.ElMax  = + 45;
+settings.wind.AzMin  = - 180;
+settings.wind.AzMax  = + 180;
 % save arrays
 save_thrust = cell(size(stoch.thrust,1),1);
 
@@ -89,13 +107,13 @@ flagSave = true;
 
 if run_Thrust == true
 
-    for alg_index = 1%:length(algorithm_vec)
+    for alg_index = 1:length(algorithm_vec)
         algorithm = algorithm_vec(alg_index);
 
         
         save_thrust = cell(size(stoch.thrust,1),N_windSim);
 
-        for i = 1:size(stoch.thrust,1)
+        parfor i = 1:size(stoch.thrust,1)
 
             settings_mont = settings;
             contSettings_mont = contSettings;
@@ -107,31 +125,24 @@ if run_Thrust == true
 
             settings_mont.wind.model = false;
             settings_mont.wind.input = false;
-
+                    
+          
+            
             for ww = 1:N_windSim
 
-                fprintf("simulation = " + num2str((i-1)*N_windSim + ww) + " of " + num2str(size(stoch.thrust,1)*N_windSim) + "\n")
-
-                % wind parameters (randomized)
-
-                settings_mont.wind.MagMin = 0; % [m/s] Minimum Magnitude
-                settings_mont.wind.MagMax = 12; % [m/s] Maximum Magnitude
-                settings_mont.wind.ElMin  = - 45;
-                settings_mont.wind.ElMax  = + 45;
-                settings_mont.wind.AzMin  = - 180;
-                settings_mont.wind.AzMax  = + 180;
-                % meglio crearli fuori dal for così crea tutta la gaussiana,
-                % invece di avere i valori centrati sulla gaussiana, però
-                % per adesso lo teniamo così
+                fprintf("simulation = " + num2str((i-1)*N_windSim + ww) + " of " + num2str(size(stoch.thrust,1)*N_windSim) + "\n");
+            
                 switch algorithm
                     case "interp"
                         [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams] = interp_run_control(settings_mont,contSettings_mont);
 
                     case "std0"
+                        contSettings_mont.z_trajChoice = 500;  % when time of flight is grater than 500s (never) change reference trajectory
                         [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams] = std_run_control(settings_mont,contSettings_mont);
 
                     case "std2s"
-                        [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams] = std_new_run_control(settings_mont,contSettings_mont);
+                        contSettings_mont.z_trajChoice = 3; % from 3s after lift off it's possible to change reference trajectory
+                        [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams] = std_run_control(settings_mont,contSettings_mont);
 
                 end
                 save_thrust{i,ww} = struct('time',Tf,'control',Yf(:,17),'position',Yf(:,1:3), 'windParams', windParams, 'thrust_percentage', thrust_percentage(i)); 
@@ -182,24 +193,24 @@ if run_Thrust == true
         ylabel('y')
         zlabel('z')
     
-%         save_thrust_apogee_probability = figure;
-%         pd = fitdist(apogee.thrust','Normal');    % create normal distribution object to compute mu and sigma
-%         % probability to reach an apogee between 2950 and 3050
-%         p = normcdf([2950 3050],apogee.thrust_mean,apogee.thrust_variance);
-%         accuracy =( p(2) - p(1) )*100;
-%         x_values = linspace(2800,3200,1000);   % possible apogees
-%         y = pdf(pd,x_values);                  %array of values of the probability density function
-%         hold on
-%         xlabel('Reached apogee','Interpreter','latex','FontSize',15,'FontWeight','bold')
-%         ylabel('Probability density','Interpreter','latex','FontSize',15,'FontWeight','bold')
-%         plot(x_values,y)
+        save_thrust_apogee_probability = figure;
+        pd = fitdist(apogee.thrust','Normal');    % create normal distribution object to compute mu and sigma
+        % probability to reach an apogee between 2950 and 3050
+        p = normcdf([2950 3050],apogee.thrust_mean,apogee.thrust_variance);
+        accuracy =( p(2) - p(1) )*100;
+        x_values = linspace(2800,3200,1000);   % possible apogees
+        y = pdf(pd,x_values);                  %array of values of the probability density function
+        hold on
+        xlabel('Reached apogee','Interpreter','latex','FontSize',15,'FontWeight','bold')
+        ylabel('Probability density','Interpreter','latex','FontSize',15,'FontWeight','bold')
+        plot(x_values,y)
 
         % save plots
         if flagSave == true
             saveas(save_thrust_plotControl,"MontecarloResults\Thrust\"+algorithm+"\controlPlot")
             saveas(save_thrust_plotApogee,"MontecarloResults\Thrust\"+algorithm+"\apogeelPlot")
             saveas(save_thrust_plotTrajectory,"MontecarloResults\Thrust\"+algorithm+"\TrajectoryPlot")
-%             saveas(save_thrust_apogee_probability,"MontecarloResults\Thrust\"+algorithm+"\ApogeeProbabilityPlot")
+            saveas(save_thrust_apogee_probability,"MontecarloResults\Thrust\"+algorithm+"\ApogeeProbabilityPlot")
             save("MontecarloResults\Thrust\"+algorithm+"\saveThrust.mat","save_thrust","apogee")    
         end
         for i = 1    % Save results.txt
@@ -209,13 +220,23 @@ if run_Thrust == true
             fprintf(fid,'Parameters: \n');
             fprintf(fid,'Thrust: +-20%% at 3*sigma, total impulse constant \n');
             fprintf(fid,'Control frequency: %d Hz \n',settings.frequencies.controlFrequency);
-            fprintf(fid,'Initial Mach number at which the control algorithm starts: %.1f \n\n',settings.MachControl);
+            fprintf(fid,'Initial Mach number at which the control algorithm starts: %.1f \n',settings.MachControl);
+            switch alg_index
+                case 2
+                    fprintf(fid,'P = %d \n',contSettings.Kp_1 );
+                    fprintf(fid,'I = %d \n',contSettings.Ki_1 );
+                    fprintf(fid,'Never change reference trajectory \n\n' );
+                case 3
+                    fprintf(fid,'P = %d \n',contSettings.Kp_1 );
+                    fprintf(fid,'I = %d \n',contSettings.Ki_1 );
+                    fprintf(fid,'Change reference trajectory every %d seconds \n\n',contSettings.deltaZ_change );
+            end
             fprintf(fid,'Wind model parameters: \n'); % inserisci tutti i parametri del vento
-            fprintf(fid,'Wind Magnitude: 0-%d m/s\n',settings_mont.wind.MagMax);
-            fprintf(fid,'Wind minimum azimuth: %d degrees \n',settings_mont.wind.AzMin);
-            fprintf(fid,'Wind maximum azimuth: %d degrees \n',settings_mont.wind.AzMax);
-            fprintf(fid,'Wind minimum elevation: %d degrees \n', settings_mont.wind.ElMin);
-            fprintf(fid,'Wind maximum elevation: %d degrees \n\n',settings_mont.wind.ElMax);
+            fprintf(fid,'Wind Magnitude: 0-%d m/s\n',settings.wind.MagMax);
+            fprintf(fid,'Wind minimum azimuth: %d degrees \n',settings.wind.AzMin);
+            fprintf(fid,'Wind maximum azimuth: %d degrees \n',settings.wind.AzMax);
+            fprintf(fid,'Wind minimum elevation: %d degrees \n', settings.wind.ElMin);
+            fprintf(fid,'Wind maximum elevation: %d degrees \n\n',settings.wind.ElMax);
             fprintf(fid,'Results: \n');
             fprintf(fid,'Max apogee: %.1f \n',max(apogee.thrust));
             fprintf(fid,'Min apogee: %.1f \n',min(apogee.thrust));
