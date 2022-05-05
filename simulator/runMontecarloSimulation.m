@@ -37,12 +37,13 @@ configReferences;
 
 
 %% MONTECARLO SETTINGS
+rng default
 
 settings.montecarlo = true;
 
 % how many simulations (parfor loop)
-N_Threads = 11; % number of threads of your computer (change it to run the simulation)
-N_IterPerThread = 1;
+N_Threads = 4; % number of threads of your computer (change it to run the simulation)
+N_IterPerThread = 20;
 
 % how many simulations do you want to run with different wind (per thrust percentage)? (inner loop)
 N_windSim = 10;
@@ -82,7 +83,7 @@ contSettings.deltaZ_change = 2;                                         % change
 
 %% wind parameters
 settings.wind.MagMin = 0;                                               % [m/s] Minimum Wind Magnitude
-settings.wind.MagMax = 12;                                              % [m/s] Maximum Wind Magnitude
+settings.wind.MagMax = 9;                                              % [m/s] Maximum Wind Magnitude
 settings.wind.ElMin  = - 45;
 settings.wind.ElMax  = + 45;
 settings.wind.AzMin  = - 180;
@@ -95,7 +96,6 @@ if N_windSim ~=10
     error('you are tryng to use a wind vector which is not equal to the other simulations! \n Set it to 10!')
 end
 
-rng default
 [stoch.wind.uw, stoch.wind.vw, stoch.wind.ww, stoch.wind.Az, stoch.wind.El] = windConstGeneratorMontecarlo(settings.wind,N_windSim);
 
 %% save arrays
@@ -134,7 +134,7 @@ if run_Thrust == true
     % other parameters you want to set for the particular simulation:
     settings.MachControl = 0.7;
 
-    for alg_index = 1%:length(algorithm_vec)
+    for alg_index = 2:length(algorithm_vec)
         algorithm = algorithm_vec(alg_index);
 
         save_thrust = cell(size(stoch.thrust,1),N_windSim);

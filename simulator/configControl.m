@@ -26,7 +26,7 @@ contSettings.starting_index = 0;
 contSettings.sample_time         =  0.1;
 
 % PI controler tune parameter
-contSettings.Kp_1    =   100;  % 20   (50 con U_ref)                         % using Fdrag nel pid --> da migliorare (magari si può ottenere variabile controllo più smooth)
+contSettings.Kp_1    =   70;  % 20   (50 con U_ref)                         % using Fdrag nel pid --> da migliorare (magari si può ottenere variabile controllo più smooth)
 contSettings.Ki_1    =   50;  % 5   (20 senza U_ref)                        % using Fdrag nel pid
 contSettings.Kp_2    =   50;                                                % using u nel pid --> da migliorare (magari si può ottenere variabile controllo più smooth)
 contSettings.Ki_2    =   40;                                                % using u nel pid
