@@ -41,8 +41,8 @@ configReferences;
 settings.montecarlo = true;
 
 % how many simulations (parfor loop)
-N_Threads = 4; % number of threads of your computer (change it to run the simulation)
-N_IterPerThread = 3;
+N_Threads = 22; % number of threads of your computer (change it to run the simulation)
+N_IterPerThread = 2;
 
 % how many simulations do you want to run with different wind (per thrust
 % percentage)? (inner loop)
@@ -91,7 +91,7 @@ save_thrust = cell(size(stoch.thrust,1),1);
 
 save_Mach = cell(size(stoch.MachControl,1),1);
 
-algorithm_vec = ["interp"; "std0";"std2s"]; % interpolation, PID no change, PID change every 2s
+algorithm_vec = ["interp"; "std0"; "std2s"]; % interpolation, PID no change, PID change every 2s
 
 %% which montecarlo do you want to run?
 
@@ -101,13 +101,25 @@ run_ControlFrequency = false;
 
 %% do you want to save the results?
 
-flagSave = true;
+flagSave = input('do you want to save the results? ("yes" or "no"): ','s');
+
+if flagSave == "yes"
+    % check in which directory you want to save:
+    flagMakeDir = input('Does the folder you want to save in exist? ("yes" or "no"): ','s');
+    if flagMakeDir == "yes"
+        folder = input('What is the name of the folder? ');
+    else
+        folder = input('how do you want to call the new folder?');
+        mkdir = folder;
+    end
+end
+
 
 %% MONTECARLO 1 - THRUST
 
 if run_Thrust == true
 
-    for alg_index = 3:length(algorithm_vec)
+    for alg_index = 1%:length(algorithm_vec)
         algorithm = algorithm_vec(alg_index);
 
         
@@ -157,7 +169,6 @@ if run_Thrust == true
                 grid on;
             end
         end
-    
         title('Control action')
         xlabel('Time [s]')
         ylabel('Servo angle [\alpha]')
@@ -200,10 +211,12 @@ if run_Thrust == true
         accuracy =( p(2) - p(1) )*100;
         x_values = linspace(2800,3200,1000);   % possible apogees
         y = pdf(pd,x_values);                  %array of values of the probability density function
-        hold on
+        hold on; grid on;
         xlabel('Reached apogee','Interpreter','latex','FontSize',15,'FontWeight','bold')
         ylabel('Probability density','Interpreter','latex','FontSize',15,'FontWeight','bold')
         plot(x_values,y)
+        xline(3000,'r--')
+        legend('Apogee Gaussian distribution','Target')
 
         % save plots
         if flagSave == true
@@ -214,7 +227,7 @@ if run_Thrust == true
             save("MontecarloResults\Thrust\"+algorithm+"\saveThrust.mat","save_thrust","apogee")    
         end
         for i = 1    % Save results.txt
-            fid = fopen( "MontecarloResults\Thrust\"+algorithm+"\"+algorithm+"Results2.txt", 'wt' );  % CAMBIA IL NOME
+            fid = fopen( "MontecarloResults\Thrust\"+algorithm+"\"+algorithm+"Results_Mach_0_7.txt", 'wt' );  % CAMBIA IL NOME
             fprintf(fid,'Algorithm: %s \n',algorithm );
             fprintf(fid,'Number of simulations: %d \n \n',N_Threads*N_IterPerThread*N_windSim); % Cambia n_sim
             fprintf(fid,'Parameters: \n');
@@ -276,9 +289,11 @@ end
 
 %% MONTECARLO 2 - Mach Control
 
+clearvars Yf Tf t_ada t_kalman cpuTimes flagMatr
+
 if run_Mach == true
 
-    clearvars Yf Tf t_ada t_kalman cpuTimes flagMatr
+    
     algorithm = 'interp';
 
     maxP = 1; % wind "for" parameter
