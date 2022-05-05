@@ -103,26 +103,28 @@ run_ControlFrequency = false;
 
 flagSave = input('do you want to save the results? ("yes" or "no"): ','s');
 
-if flagSave == "yes"
-    % check in which directory you want to save:
-    flagMakeDir = input('Does the folder you want to save in exist? ("yes" or "no"): ','s');
-    if flagMakeDir == "yes"
-        folder = input('What is the name of the folder? ');
-    else
-        folder = input('how do you want to call the new folder?');
-        mkdir = folder;
-    end
-end
-
 
 %% MONTECARLO 1 - THRUST
 
+
 if run_Thrust == true
+
+    % check on the directory you want to save in:
+    if flagSave == "yes"
+        
+        flagMakeDir = input('Does the folder you want to save in already exist? ("yes" or "no"): ','s');
+        if flagMakeDir == "no"
+            folder = input('how do you want to call the new folder? ','s');
+            mkdir("MontecarloResults\Thrust\"+folder);
+        end
+    end
+
+    % other parameters you want to set for the particular simulation:
+    settings.MachControl = 0.7;
 
     for alg_index = 1%:length(algorithm_vec)
         algorithm = algorithm_vec(alg_index);
 
-        
         save_thrust = cell(size(stoch.thrust,1),N_windSim);
 
         parfor i = 1:size(stoch.thrust,1)
@@ -137,8 +139,7 @@ if run_Thrust == true
 
             settings_mont.wind.model = false;
             settings_mont.wind.input = false;
-                    
-          
+            
             
             for ww = 1:N_windSim
 
@@ -219,7 +220,7 @@ if run_Thrust == true
         legend('Apogee Gaussian distribution','Target')
 
         % save plots
-        if flagSave == true
+        if flagSave == "yes"
             saveas(save_thrust_plotControl,"MontecarloResults\Thrust\"+algorithm+"\controlPlot")
             saveas(save_thrust_plotApogee,"MontecarloResults\Thrust\"+algorithm+"\apogeelPlot")
             saveas(save_thrust_plotTrajectory,"MontecarloResults\Thrust\"+algorithm+"\TrajectoryPlot")
