@@ -54,14 +54,24 @@ Y0 = initialCond;
 
 %% WIND GENERATION
 if not(settings.wind.model) && not(settings.wind.input)
+    
+    if settings.montecarlo
+        uw = settings.wind.uw;
+        vw = settings.wind.vw;
+        ww = settings.wind.ww;
+        Az = settings.wind.Az;
+        El = settings.wind.El;
 
-    [uw, vw, ww, Az, El] = windConstGenerator(settings.wind);
-    settings.constWind = [uw, vw, ww];
-    saveConstWind =  [uw, vw, ww, Az, El];
-    if not(settings.montecarlo) && ww ~= 0
-        warning('Pay attention using vertical wind, there might be computational errors')
+        settings.constWind = [uw, vw, ww];
+        saveConstWind =  [uw, vw, ww, Az, El];
+    else
+        [uw, vw, ww, Az, El] = windConstGenerator(settings.wind);
+        settings.constWind = [uw, vw, ww];
+        saveConstWind =  [uw, vw, ww, Az, El];
+        if not(settings.montecarlo) && ww ~= 0
+            warning('Pay attention using vertical wind, there might be computational errors')
+        end
     end
-
 end
 
 %% SENSORS INIT

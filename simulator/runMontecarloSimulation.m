@@ -41,13 +41,11 @@ configReferences;
 settings.montecarlo = true;
 
 % how many simulations (parfor loop)
-N_Threads = 22; % number of threads of your computer (change it to run the simulation)
-N_IterPerThread = 2;
+N_Threads = 11; % number of threads of your computer (change it to run the simulation)
+N_IterPerThread = 1;
 
-% how many simulations do you want to run with different wind (per thrust
-% percentage)? (inner loop)
-N_windSim = 5;
-
+% how many simulations do you want to run with different wind (per thrust percentage)? (inner loop)
+N_windSim = 10;
 
 %thrust_percentage = linspace(0.95,1.05,N_Threads*N_IterPerThread)';                     % defined for plot purposes
 sigma_t = (1.20-1)/3;             % thrust_percentage standard deviation
@@ -59,11 +57,16 @@ tauServo_percentage = linspace(0.8,1.2,N_Threads*N_IterPerThread);              
 stoch.thrust = thrust_percentage*settings.motor.expThrust;                              % thrust - the notation used creates a matrix where each row is the expThrust multiplied by one coefficient in the thrust percentage array
 stoch.expThrust = (1./thrust_percentage) * settings.motor.expTime;                      % burning time - same notation as thrust here
 
+stoch.tauServo = tauServo_percentage * settings.servo.tau;              % servo motor time constant
+stoch.controlFrequency = [1, 2, 5, 10];                                 % control frequency (sets how fast the control input reference is given to the servo)
+stoch.MachControl = 0.6:0.05:1;                                         % Mach at which the air brakes can be deployed
+
+% check on thrust - all of them must have the same total impulse
 for i = 1:size(stoch.thrust,1)
-    plot(stoch.expThrust(i,:),stoch.thrust(i,:))
-    hold on;
-    grid on;
-    legend
+%     plot(stoch.expThrust(i,:),stoch.thrust(i,:))
+%     hold on;
+%     grid on;
+%     legend
     %check on total impulse: trapezoidal integration:
     for jj = 1:length(stoch.thrust(i,:))-1
         deltaT = stoch.expThrust(i,jj+1)-stoch.expThrust(i,jj);
@@ -71,26 +74,35 @@ for i = 1:size(stoch.thrust,1)
     end
     Itot(i) = sum(I);
 end
+if Itot - Itot(1)>0.0001
+    warning('The thrust vector does not return equal total impulse for each simulation')
+end
 
-stoch.wind = [1,2,3]; % set to 1 for 'wind model', 2 for 'input model', 3 for randomic  % wind model
-stoch.tauServo = tauServo_percentage * settings.servo.tau;                              % servo motor time constant
-stoch.controlFrequency = [1, 2, 5, 10];                             % control frequency (sets how fast the control input reference is given to the servo)
-stoch.MachControl = [0.6:0.05:1];                                                       % Mach at which the air brakes can be deployed
+contSettings.deltaZ_change = 2;                                         % change reference every 2seconds
 
-contSettings.deltaZ_change = 2; % change reference every 2seconds
-
-% wind parameters
-settings.wind.MagMin = 0; % [m/s] Minimum Magnitude
-settings.wind.MagMax = 12; % [m/s] Maximum Magnitude
+%% wind parameters
+settings.wind.MagMin = 0;                                               % [m/s] Minimum Wind Magnitude
+settings.wind.MagMax = 12;                                              % [m/s] Maximum Wind Magnitude
 settings.wind.ElMin  = - 45;
 settings.wind.ElMax  = + 45;
 settings.wind.AzMin  = - 180;
 settings.wind.AzMax  = + 180;
-% save arrays
-save_thrust = cell(size(stoch.thrust,1),1);
 
+% set the wind parameters so that every simulation has always the same
+% vector of winds. NOTE: this is true only if the same number N_windSim is
+% given! so DON'T CHANGE IT. set number for N_windSim = 10;
+if N_windSim ~=10
+    error('you are tryng to use a wind vector which is not equal to the other simulations! \n Set it to 10!')
+end
+
+rng default
+[stoch.wind.uw, stoch.wind.vw, stoch.wind.ww, stoch.wind.Az, stoch.wind.El] = windConstGeneratorMontecarlo(settings.wind,N_windSim);
+
+%% save arrays
+save_thrust = cell(size(stoch.thrust,1),1);
 save_Mach = cell(size(stoch.MachControl,1),1);
 
+% algorithms
 algorithm_vec = ["interp"; "std0"; "std2s"]; % interpolation, PID no change, PID change every 2s
 
 %% which montecarlo do you want to run?
@@ -142,6 +154,14 @@ if run_Thrust == true
             
             
             for ww = 1:N_windSim
+                
+                % set the wind parameters
+                settings_mont.wind.uw = stoch.wind.uw(ww);
+                settings_mont.wind.vw = stoch.wind.vw(ww);
+                settings_mont.wind.ww = stoch.wind.ww(ww);
+                settings_mont.wind.Az = stoch.wind.Az(ww);
+                settings_mont.wind.El = stoch.wind.El(ww);
+
 
                 fprintf("simulation = " + num2str((i-1)*N_windSim + ww) + " of " + num2str(size(stoch.thrust,1)*N_windSim) + "\n");
             
