@@ -48,19 +48,19 @@ N_IterPerThread = 20;
 % how many simulations do you want to run with different wind (per thrust percentage)? (inner loop)
 N_windSim = 10;
 
-%thrust_percentage = linspace(0.95,1.05,N_Threads*N_IterPerThread)';                     % defined for plot purposes
+%thrust_percentage = linspace(0.95,1.05,N_Threads*N_IterPerThread)';        % defined for plot purposes
 sigma_t = (1.20-1)/3;             % thrust_percentage standard deviation
-mu_t = 1;                         %thrust_percentage mean value
-thrust_percentage= normrnd(mu_t,sigma_t,N_Threads*N_IterPerThread,1); %generate normally distributed values ( [0.8 1.20] = 3sigma) % serve il toolbox
-tauServo_percentage = linspace(0.8,1.2,N_Threads*N_IterPerThread);                      % defined for plot purposes
+mu_t = 1;                         % thrust_percentage mean value
+thrust_percentage= normrnd(mu_t,sigma_t,N_Threads*N_IterPerThread,1);       %generate normally distributed values ( [0.8 1.20] = 3sigma) % serve il toolbox
+tauServo_percentage = linspace(0.8,1.2,N_Threads*N_IterPerThread);          % defined for plot purposes
 
 % stochastic parameters
-stoch.thrust = thrust_percentage*settings.motor.expThrust;                              % thrust - the notation used creates a matrix where each row is the expThrust multiplied by one coefficient in the thrust percentage array
-stoch.expThrust = (1./thrust_percentage) * settings.motor.expTime;                      % burning time - same notation as thrust here
+stoch.thrust = thrust_percentage*settings.motor.expThrust;                  % thrust - the notation used creates a matrix where each row is the expThrust multiplied by one coefficient in the thrust percentage array
+stoch.expThrust = (1./thrust_percentage) * settings.motor.expTime;          % burning time - same notation as thrust here
 
-stoch.tauServo = tauServo_percentage * settings.servo.tau;              % servo motor time constant
-stoch.controlFrequency = [1, 2, 5, 10];                                 % control frequency (sets how fast the control input reference is given to the servo)
-stoch.MachControl = 0.6:0.05:1;                                         % Mach at which the air brakes can be deployed
+stoch.tauServo = tauServo_percentage * settings.servo.tau;                  % servo motor time constant
+stoch.controlFrequency = [1, 2, 5, 10];                                     % control frequency (sets how fast the control input reference is given to the servo)
+stoch.MachControl = 0.6:0.05:1;                                             % Mach at which the air brakes can be deployed
 
 % check on thrust - all of them must have the same total impulse
 for i = 1:size(stoch.thrust,1)
@@ -83,7 +83,7 @@ contSettings.deltaZ_change = 2;                                         % change
 
 %% wind parameters
 settings.wind.MagMin = 0;                                               % [m/s] Minimum Wind Magnitude
-settings.wind.MagMax = 9;                                              % [m/s] Maximum Wind Magnitude
+settings.wind.MagMax = 9;                                               % [m/s] Maximum Wind Magnitude
 settings.wind.ElMin  = - 45;
 settings.wind.ElMax  = + 45;
 settings.wind.AzMin  = - 180;
@@ -96,10 +96,9 @@ if N_windSim ~=10
     error('you are tryng to use a wind vector which is not equal to the other simulations! \n Set it to 10!')
 end
 
-[stoch.wind.uw, stoch.wind.vw, stoch.wind.ww, stoch.wind.Az, stoch.wind.El] = windConstGeneratorMontecarlo(settings.wind,N_windSim);
+[stoch.wind.uw, stoch.wind.vw, stoch                .wind.ww, stoch.wind.Az, stoch.wind.El] = windConstGeneratorMontecarlo(settings.wind,N_windSim);
 
 %% save arrays
-save_thrust = cell(size(stoch.thrust,1),1);
 save_Mach = cell(size(stoch.MachControl,1),1);
 
 % algorithms
@@ -115,7 +114,7 @@ run_ControlFrequency = false;
 
 flagSave = input('do you want to save the results? ("yes" or "no"): ','s');
 
-
+displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
 %% MONTECARLO 1 - THRUST
 
 
@@ -134,16 +133,19 @@ if run_Thrust == true
     % other parameters you want to set for the particular simulation:
     settings.MachControl = 0.7;
 
-    for alg_index = 2:length(algorithm_vec)
+    for alg_index = 1:2% :length(algorithm_vec)
         algorithm = algorithm_vec(alg_index);
-
+        
+        %save arrays
         save_thrust = cell(size(stoch.thrust,1),N_windSim);
+        apogee.thrust = [];
+
 
         parfor i = 1:size(stoch.thrust,1)
 
             settings_mont = settings;
             contSettings_mont = contSettings;
-            reference_mont = reference;
+            reference_mont = reference; 
 
             settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
             settings_mont.motor.expTime = stoch.expThrust(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
@@ -162,9 +164,9 @@ if run_Thrust == true
                 settings_mont.wind.Az = stoch.wind.Az(ww);
                 settings_mont.wind.El = stoch.wind.El(ww);
 
-
-                fprintf("simulation = " + num2str((i-1)*N_windSim + ww) + " of " + num2str(size(stoch.thrust,1)*N_windSim) + "\n");
-            
+                if displayIter == true
+                    fprintf("simulation = " + num2str((i-1)*N_windSim + ww) + " of " + num2str(size(stoch.thrust,1)*N_windSim) + ", algorithm:" + algorithm(alg_index) +"\n");
+                end
                 switch algorithm
                     case "interp"
                         [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams] = interp_run_control(settings_mont,contSettings_mont);
@@ -194,7 +196,7 @@ if run_Thrust == true
         xlabel('Time [s]')
         ylabel('Servo angle [\alpha]')
     
-        apogee.thrust = [];
+        %%% plots
         save_thrust_plotApogee = figure;
         for i = 1:size(save_thrust,1)
             for j = 1: size(save_thrust,2)
@@ -279,8 +281,7 @@ if run_Thrust == true
             fprintf(fid,'Apogees within +-50m from target: %.2f %% \n',accuracy);
             fclose(fid);
         end
-        save_thrust = cell(size(stoch.thrust,1),1);
-
+              
     end
 end
 
