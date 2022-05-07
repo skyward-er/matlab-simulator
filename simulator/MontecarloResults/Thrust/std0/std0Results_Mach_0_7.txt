@@ -1,0 +1,24 @@
+Algorithm: std0 
+Number of simulations: 4 
+ 
+Parameters: 
+Thrust: +-20% at 3*sigma, total impulse constant 
+Control frequency: 10 Hz 
+Initial Mach number at which the control algorithm starts: 0.7 
+P = 70 
+I = 50 
+Never change reference trajectory 
+
+Wind model parameters: 
+Wind Magnitude: 0-9 m/s
+Wind minimum azimuth: -180 degrees 
+Wind maximum azimuth: 180 degrees 
+Wind minimum elevation: -45 degrees 
+Wind maximum elevation: 45 degrees 
+
+Results: 
+Max apogee: 2998.2 
+Min apogee: 2981.2 
+Mean apogee: 2990.1 
+Apogee standard deviation 3sigma: 22.2464 
+Apogees within +-50m from target: 100.00 % 
