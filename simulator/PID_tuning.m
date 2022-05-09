@@ -36,8 +36,8 @@ N_p = 44;
 N_i = 20;
 N_tot = N_p*N_i;
 
-Kp_vec = linspace(0,500,N_p);
-Ki_vec = linspace(0,500,N_i);
+Kp_vec = linspace(100,400,N_p);
+Ki_vec = linspace(100,400,N_i);
 
 contSettings.deltaZ_change = 2;                                         % change reference every 2seconds
 
@@ -116,12 +116,17 @@ zlabel('error_apogee')
 view(30,20)
 
 %% save
-save_tuning_struct = struct('params',save_tuning,'error',err_apogee,'Kp_best',Kp_best,'Ki_best',Ki_best,'best_error',err_apogee_best);
+save_tuning_struct.params = save_tuning;
+save_tuning_struct.error = err_apogee;
+save_tuning_struct.Kp_best = Kp_best;
+save_tuning_struct.Ki_best = Ki_best;
+save_tuning_struct.best_error = err_apogee_best;
+
 if flagSave == "yes"
     saveas(tuning_apogee_KpKiError,'tuningPI\KpKiError_plot' )
-    save("tuningPI\PI_tuningStruct.mat","save_tuning_struct")
+    save("tuningPI\PI_tuningStruct1.mat","save_tuning_struct")
 
-    fid = fopen( "tuningPI\PItuningResults.txt", 'wt' );  % CAMBIA IL NOME
+    fid = fopen( "tuningPI\PItuningResults1.txt", 'wt' );  % CAMBIA IL NOME
                 fprintf(fid,'Searching for best Kp, Ki parameters\n\n');
                 fprintf(fid,'Range on Kp: [%d %d] \n',min(Kp_vec),max(Kp_vec));
                 fprintf(fid,'Range on Ki: [%d %d] \n\n',min(Ki_vec),max(Ki_vec));
