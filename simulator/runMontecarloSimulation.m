@@ -41,34 +41,31 @@ rng default
 
 settings.montecarlo = true;
 
-% how many simulations (parfor loop)
-N_Threads = 4; % number of threads of your computer (change it to run the simulation)
-N_IterPerThread = 1;
+%% how many simulations
+N_sim = 200; % set to at least 500
 
-% how many simulations do you want to run with different wind (per thrust percentage)? (inner loop)
-N_sim = N_Threads*N_IterPerThread;
-
-%thrust_percentage = linspace(0.95,1.05,N_Threads*N_IterPerThread)';        % defined for plot purposes
+%% stochastic parameters
 sigma_t = (1.20-1)/3;             % thrust_percentage standard deviation
 mu_t = 1;                         % thrust_percentage mean value
-thrust_percentage= normrnd(mu_t,sigma_t,N_Threads*N_IterPerThread,1);       %generate normally distributed values ( [0.8 1.20] = 3sigma) % serve il toolbox
-tauServo_percentage = linspace(0.8,1.2,N_Threads*N_IterPerThread);          % defined for plot purposes
+thrust_percentage= normrnd(mu_t,sigma_t,N_sim,1);       %generate normally distributed values ( [0.8 1.20] = 3sigma) % serve il toolbox
+tauServo_percentage = linspace(0.8,1.2,N_sim);          % defined for plot purposes
 
-% stochastic parameters
+%%%
 stoch.thrust = thrust_percentage*settings.motor.expThrust;                  % thrust - the notation used creates a matrix where each row is the expThrust multiplied by one coefficient in the thrust percentage array
-stoch.expThrust = (1./thrust_percentage) * settings.motor.expTime;          % burning time - same notation as thrust here
+impulse_uncertainty = normrnd(1,0.05/3,N_sim,1);
+stoch.expThrust = diag(impulse_uncertainty)*((1./thrust_percentage) * settings.motor.expTime);          % burning time - same notation as thrust here
 
 stoch.tauServo = tauServo_percentage * settings.servo.tau;                  % servo motor time constant
 stoch.controlFrequency = [1, 2, 5, 10];                                     % control frequency (sets how fast the control input reference is given to the servo)
 stoch.MachControl = 0.6:0.05:1;                                             % Mach at which the air brakes can be deployed
 
-% check on thrust - all of them must have the same total impulse
+%%% check on thrust - all of them must have the same total impulse
 for i = 1:size(stoch.thrust,1)
 %     plot(stoch.expThrust(i,:),stoch.thrust(i,:))
 %     hold on;
 %     grid on;
 %     legend
-    %check on total impulse: trapezoidal integration:
+%%% check on total impulse: trapezoidal integration:
     for jj = 1:length(stoch.thrust(i,:))-1
         deltaT = stoch.expThrust(i,jj+1)-stoch.expThrust(i,jj);
         I(jj) = (stoch.thrust(i,jj+1)+stoch.thrust(i,jj))*deltaT/2;
@@ -91,7 +88,8 @@ settings.wind.AzMax  = + 180;
 
 
 [stoch.wind.uw, stoch.wind.vw, stoch.wind.ww, stoch.wind.Az, stoch.wind.El] = windConstGeneratorMontecarlo(settings.wind,N_sim);
-% fare shuffle
+% fare shuffle - edit: sono già non correlate, non serve in teoria
+
 %% save arrays
 save_Mach = cell(size(stoch.MachControl,1),1);
 
@@ -106,28 +104,32 @@ run_ControlFrequency = false;
 
 %% do you want to save the results?
 
-flagSave = "no";%input('do you want to save the results? ("yes" or "no"): ','s');
+% flagSave = input('do you want to save the results? ("yes" or "no"): ','s');
+flagSave = "yes";
 
 displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
-%% MONTECARLO 1 - THRUST
 
+%% MONTECARLO 1 - THRUST
 
 if run_Thrust == true
 
     % check on the directory you want to save in:
-    if flagSave == "yes"
-        
-        flagMakeDir = input('Does the folder you want to save in already exist? ("yes" or "no"): ','s');
-        if flagMakeDir == "no"
-            folder = input('how do you want to call the new folder? ','s');
-            mkdir("MontecarloResults\Thrust\"+folder);
-        end
-    end
+%     if flagSave == "yes"
+%         
+%         flagMakeDir = input('Does the folder you want to save in already exist? ("yes" or "no"): ','s');
+%         while flagOtherFolders == "yes"
+%             if flagMakeDir == "no"
+%                 folder = input('how do you want to call the new folder? ','s');
+%                 mkdir("MontecarloResults\Thrust\"+folder);
+%             end
+%             flagOtherFolders = input('Do you want to create other folders? ("yes" or "no") ','s');
+%         end
+%     end
  
     % other parameters you want to set for the particular simulation:
     settings.MachControl = 0.7;
 
-    for alg_index = 2:4%length(algorithm_vec)
+    for alg_index = 1:length(algorithm_vec)
         algorithm = algorithm_vec(alg_index);
         
         %save arrays
@@ -141,7 +143,7 @@ if run_Thrust == true
 
             settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
             settings_mont.motor.expTime = stoch.expThrust(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
-            settings_mont.tb = settings.tb/thrust_percentage(i);                    % initialize the burning time of the current simulation (parfor purposes)
+            settings_mont.tb = stoch.expThrust(i,end);                    % initialize the burning time of the current simulation (parfor purposes)
 
             settings_mont.wind.model = false;
             settings_mont.wind.input = false;
@@ -154,7 +156,7 @@ if run_Thrust == true
             settings_mont.wind.El = stoch.wind.El(i);
 
             if displayIter == true
-                fprintf("simulation = " + num2str(i) + " of " + num2str(N_sim) + ", algorithm:" + algorithm +"\n");
+                fprintf("simulation = " + num2str(i) + " of " + num2str(N_sim) + ", algorithm: " + algorithm +"\n");
             end
             switch algorithm
                 case "interp"
@@ -192,17 +194,21 @@ if run_Thrust == true
     
         %%% plots
         save_thrust_plotApogee = figure;
-        for i = 1:size(save_thrust,1)
+        for i = 1:N_sim
             apogee.thrust(i) = max(-save_thrust{i}.position(:,3));
             plot(thrust_percentage(i),apogee.thrust(i),'*')
             hold on;
             grid on;
         end
+        yline(2950,'r--')
+        yline(3050,'r--')
         title('Apogee w.r.t. thrust')
         xlabel('Thrust percentage w.r.t. nominal')
         ylabel('Apogee [m]')
         xlim([min(thrust_percentage)-0.01,max(thrust_percentage)+0.01])
-    
+        ylim([2800,3200])
+        
+
         apogee.thrust_mean = mean(apogee.thrust);
         apogee.thrust_variance = std(apogee.thrust);
     
@@ -222,12 +228,16 @@ if run_Thrust == true
         grid on
         wind_Mag = zeros(N_sim,1);
         for i = 1:N_sim
-            wind_Mag(i) = norm([stoch.wind.uw(i), stoch.wind.vw(i), stoch.wind.ww(i)]);
+            wind_Mag(i) = norm([stoch.wind.uw(i), stoch.wind.vw(i), stoch.wind.ww(i)]);          
         end
-        plot3(wind_Mag,thrust_percentage*100,apogee.thrust,'*')
+        plot3(wind_Mag,thrust_percentage*100,apogee.thrust','*')
         xlabel('Wind magnitude [m/s]')
         ylabel('Thrust percentage')
         zlabel('Apogee')
+        zlim([2800,3200])
+        view(30,20)
+        %safe ellipses?
+
 
         save_thrust_apogee_probability = figure;
         pd = fitdist(apogee.thrust','Normal');    % create normal distribution object to compute mu and sigma
@@ -281,7 +291,8 @@ if run_Thrust == true
         end
 
             for i = 1    % Save results.txt
-                fid = fopen( "MontecarloResults\Thrust\"+algorithm+"\"+algorithm+"Results_Mach_0_7.txt", 'wt' );  % CAMBIA IL NOME
+                saveDate = string(date);
+                fid = fopen( "MontecarloResults\Thrust\"+algorithm+"\"+algorithm+"Results"+saveDate+".txt", 'wt' );  % CAMBIA IL NOME
                 fprintf(fid,'Algorithm: %s \n',algorithm );
                 fprintf(fid,'Number of simulations: %d \n \n',N_sim); % Cambia n_sim
                 fprintf(fid,'Parameters: \n');
@@ -340,223 +351,223 @@ end
 
 
 
-%% MONTECARLO 2 - Mach Control
-
-clearvars Yf Tf t_ada t_kalman cpuTimes flagMatr
-
-if run_Mach == true
-
-    
-    algorithm = 'interp';
-
-    maxP = 1; % wind "for" parameter
-    maxS = 1; % wind "for" parameter
-
-    parfor i = 1:length(stoch.MachControl)
-
-        settings_mont = settings;
-        contSettings_mont = contSettings;
-        reference_mont = reference;
-
-        settings_mont.MachControl = stoch.MachControl(i);                      % initialize the thrust vector of the current simulation (parfor purposes)
-
-        for p = 1:maxP
-            for s = 1:maxS
-                settings_mont.wind.MagMin = p; % [m/s] Minimum Magnitude
-                settings_mont.wind.MagMax = p; % [m/s] Maximum Magnitude
-                settings_mont.wind.ElMin  = s;
-                settings_mont.wind.ElMax  = 2*s;
-                switch algorithm
-                    case 'interp'
-                        if settings.electronics
-                            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = interp_run_control(settings_mont, contSettings_mont,reference_mont);
-                        else
-                            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = interp_run_control(settings_mont,contSettings_mont,reference_mont);
-                        end
-                    case 'std'
-                        if settings.electronics
-                            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = std_run_control(settings_mont, contSettings_mont);
-                        else
-                            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = std_run_control(settings_mont,contSettings_mont);
-                        end
-                end
-
-                save_Mach_interp{i} = struct('time',Tf,'control',Yf(:,17),'position',Yf(:,1:3),'speed',Yf(:,4:6)); % da capire come salvare per i diversi valori di vento, in un modo sensato che vada bene anche per plottarli poi
-            end
-        end
-
-    end
-
-    save_Mach_plotControl = figure;
-    for i = 1:length(save_Mach_interp)
-        for p = 1: maxP
-            for s = 1:maxS
-                plot(save_Mach_interp{i}.time,save_Mach_interp{i}.control)
-                hold on;
-                grid on;
-            end
-        end
-    end
-    title('Control action')
-    xlabel('Time [s]')
-    ylabel('Servo angle [\alpha]')
-
-    mean_apogee.Mach = [];
-    save_Mach_plotApogee = figure;
-    for i = 1:length(save_Mach_interp)
-        plot(stoch.MachControl(i),max(-save_Mach_interp{i}.position(:,3)),'*')
-        hold on;
-        grid on;
-        mean_apogee.Mach = [mean_apogee.Mach max(-save_Mach_interp{i}.position(:,3))];
-    end
-    title('Apogee w.r.t. MachControl')
-    xlabel('MachControl')
-    ylabel('Apogee [m]')
-
-    mean_apogee.Mach = mean(mean_apogee.Mach);
-
-    save_Mach_plotTrajectory = figure;
-    for i = 1:length(save_Mach_interp)
-        plot3(save_Mach_interp{i}.position(:,1),save_Mach_interp{i}.position(:,2),-save_Mach_interp{i}.position(:,3));
-        hold on;
-        grid on;
-    end
-    title('Trajectories')
-    xlabel('x')
-    ylabel('y')
-    zlabel('z')
-
-
-    save_Mach_plotSpeed = figure;
-    for i = 1:length(save_Mach_interp)
-        plot(save_Mach_interp{i}.time,save_Mach_interp{i}.speed(:,1));
-        hold on;
-        grid on;
-    end
-    title('speed')
-    xlabel('time')
-    ylabel('Vx body [m/s]')
-
-    % save plots
-    if flagSave == true
-        saveas(save_Mach_plotControl,'MontecarloResults\MachControl\controlPlot')
-        saveas(save_Mach_plotApogee,'MontecarloResults\MachControl\apogeelPlot')
-        saveas(save_Mach_plotTrajectory,'MontecarloResults\MachControl\TrajectoryPlot')
-        saveas(save_Mach_plotSpeed,'MontecarloResults\MachControl\speedPlot')
-    end
-end
-
-
-%% MONTECARLO 3 - Control Frequency
-
-if run_ControlFrequency == true
-
-    clearvars Yf Tf t_ada t_kalman cpuTimes flagMatr
-    algorithm = 'interp';
-
-    maxP = 1; % wind "for" parameter
-    maxS = 1; % wind "for" parameter
-
-    parfor i = 1:length(stoch.controlFrequency)
-
-        settings_mont = settings;
-        contSettings_mont = contSettings;
-        reference_mont = reference;
-
-        settings_mont.frequencies.controlFrequency = stoch.controlFrequency(i);                      % control frequency parameter
-
-        for p = 1:maxP
-            for s = 1:maxS
-                settings_mont.wind.MagMin = p; % [m/s] Minimum Magnitude
-                settings_mont.wind.MagMax = p; % [m/s] Maximum Magnitude
-                settings_mont.wind.ElMin  = s;
-                settings_mont.wind.ElMax  = 2*s;
-                switch algorithm
-                    case 'interp'
-                        if settings.electronics
-                            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = interp_run_control(settings_mont, contSettings_mont,reference_mont);
-                        else
-                            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = interp_run_control(settings_mont,contSettings_mont,reference_mont);
-                        end
-                    case 'std'
-                        if settings.electronics
-                            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = std_run_control(settings_mont, contSettings_mont);
-                        else
-                            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = std_run_control(settings_mont,contSettings_mont);
-                        end
-                end
-
-                save_ControlFrequency{i} = struct('time',Tf,'control',Yf(:,17),'position',Yf(:,1:3),'speed',Yf(:,4:6));
-            end
-        end
-
-    end
-
-    save_ControlFrequency_plotControl = figure;
-    for i = 1:length(save_ControlFrequency)
-        for p = 1: maxP
-            for s = 1:maxS
-                plot(save_ControlFrequency{i}.time,save_ControlFrequency{i}.control)
-                hold on;
-                grid on;
-            end
-        end
-    end
-    title('Control action')
-    xlabel('Time [s]')
-    ylabel('Servo angle [\alpha]')
-
-    mean_apogee.ControlFrequency = [];
-    save_ControlFrequency_plotApogee = figure;
-    for i = 1: length(save_ControlFrequency)
-        plot(stoch.controlFrequency(i),max(-save_ControlFrequency{i}.position(:,3)),'*')
-        hold on;
-        grid on;
-        mean_apogee.ControlFrequency = [mean_apogee.ControlFrequency max(-save_ControlFrequency{i}.position(:,3))];
-    end
-    title('Apogee w.r.t. ControlFrequency')
-    xlabel('Control Frequency')
-    ylabel('Apogee [m]')
-
-    mean_apogee.ControlFrequency = mean(mean_apogee.ControlFrequency);
-
-    save_ControlFrequency_plotTrajectory = figure;
-    for i = 1:length(save_ControlFrequency)
-        plot3(save_ControlFrequency{i}.position(:,1),save_ControlFrequency{i}.position(:,2),-save_ControlFrequency{i}.position(:,3));
-        hold on;
-        grid on;
-    end
-    title('Trajectories')
-    xlabel('x')
-    ylabel('y')
-    zlabel('z')
-
-
-    save_ControlFrequency_plotSpeed = figure;
-    for i = 1:length(save_ControlFrequency)
-        plot(save_ControlFrequency{i}.time,save_ControlFrequency{i}.speed(:,1));
-        hold on;
-        grid on;
-    end
-    title('speed')
-    xlabel('time')
-    ylabel('Vx body [m/s]')
-
-    % save plots
-    if flagSave == true
-        saveas(save_ControlFrequency_plotControl,'MontecarloResults\ControlFrequency\controlPlot')
-        saveas(save_ControlFrequency_plotApogee,'MontecarloResults\ControlFrequency\apogeelPlot')
-        saveas(save_ControlFrequency_plotTrajectory,'MontecarloResults\ControlFrequency\TrajectoryPlot')
-        saveas(save_ControlFrequency_plotSpeed,'MontecarloResults\ControlFrequency\speedPlot')
-    end
-
-end
-
-
-
-
-
-
-
-
-
+% %% MONTECARLO 2 - Mach Control
+% 
+% clearvars Yf Tf t_ada t_kalman cpuTimes flagMatr
+% 
+% if run_Mach == true
+% 
+%     
+%     algorithm = 'interp';
+% 
+%     maxP = 1; % wind "for" parameter
+%     maxS = 1; % wind "for" parameter
+% 
+%     parfor i = 1:length(stoch.MachControl)
+% 
+%         settings_mont = settings;
+%         contSettings_mont = contSettings;
+%         reference_mont = reference;
+% 
+%         settings_mont.MachControl = stoch.MachControl(i);                      % initialize the thrust vector of the current simulation (parfor purposes)
+% 
+%         for p = 1:maxP
+%             for s = 1:maxS
+%                 settings_mont.wind.MagMin = p; % [m/s] Minimum Magnitude
+%                 settings_mont.wind.MagMax = p; % [m/s] Maximum Magnitude
+%                 settings_mont.wind.ElMin  = s;
+%                 settings_mont.wind.ElMax  = 2*s;
+%                 switch algorithm
+%                     case 'interp'
+%                         if settings.electronics
+%                             [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = interp_run_control(settings_mont, contSettings_mont,reference_mont);
+%                         else
+%                             [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = interp_run_control(settings_mont,contSettings_mont,reference_mont);
+%                         end
+%                     case 'std'
+%                         if settings.electronics
+%                             [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = std_run_control(settings_mont, contSettings_mont);
+%                         else
+%                             [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = std_run_control(settings_mont,contSettings_mont);
+%                         end
+%                 end
+% 
+%                 save_Mach_interp{i} = struct('time',Tf,'control',Yf(:,17),'position',Yf(:,1:3),'speed',Yf(:,4:6)); % da capire come salvare per i diversi valori di vento, in un modo sensato che vada bene anche per plottarli poi
+%             end
+%         end
+% 
+%     end
+% 
+%     save_Mach_plotControl = figure;
+%     for i = 1:length(save_Mach_interp)
+%         for p = 1: maxP
+%             for s = 1:maxS
+%                 plot(save_Mach_interp{i}.time,save_Mach_interp{i}.control)
+%                 hold on;
+%                 grid on;
+%             end
+%         end
+%     end
+%     title('Control action')
+%     xlabel('Time [s]')
+%     ylabel('Servo angle [\alpha]')
+% 
+%     mean_apogee.Mach = [];
+%     save_Mach_plotApogee = figure;
+%     for i = 1:length(save_Mach_interp)
+%         plot(stoch.MachControl(i),max(-save_Mach_interp{i}.position(:,3)),'*')
+%         hold on;
+%         grid on;
+%         mean_apogee.Mach = [mean_apogee.Mach max(-save_Mach_interp{i}.position(:,3))];
+%     end
+%     title('Apogee w.r.t. MachControl')
+%     xlabel('MachControl')
+%     ylabel('Apogee [m]')
+% 
+%     mean_apogee.Mach = mean(mean_apogee.Mach);
+% 
+%     save_Mach_plotTrajectory = figure;
+%     for i = 1:length(save_Mach_interp)
+%         plot3(save_Mach_interp{i}.position(:,1),save_Mach_interp{i}.position(:,2),-save_Mach_interp{i}.position(:,3));
+%         hold on;
+%         grid on;
+%     end
+%     title('Trajectories')
+%     xlabel('x')
+%     ylabel('y')
+%     zlabel('z')
+% 
+% 
+%     save_Mach_plotSpeed = figure;
+%     for i = 1:length(save_Mach_interp)
+%         plot(save_Mach_interp{i}.time,save_Mach_interp{i}.speed(:,1));
+%         hold on;
+%         grid on;
+%     end
+%     title('speed')
+%     xlabel('time')
+%     ylabel('Vx body [m/s]')
+% 
+%     % save plots
+%     if flagSave == true
+%         saveas(save_Mach_plotControl,'MontecarloResults\MachControl\controlPlot')
+%         saveas(save_Mach_plotApogee,'MontecarloResults\MachControl\apogeelPlot')
+%         saveas(save_Mach_plotTrajectory,'MontecarloResults\MachControl\TrajectoryPlot')
+%         saveas(save_Mach_plotSpeed,'MontecarloResults\MachControl\speedPlot')
+%     end
+% end
+% 
+% 
+% %% MONTECARLO 3 - Control Frequency
+% 
+% if run_ControlFrequency == true
+% 
+%     clearvars Yf Tf t_ada t_kalman cpuTimes flagMatr
+%     algorithm = 'interp';
+% 
+%     maxP = 1; % wind "for" parameter
+%     maxS = 1; % wind "for" parameter
+% 
+%     parfor i = 1:length(stoch.controlFrequency)
+% 
+%         settings_mont = settings;
+%         contSettings_mont = contSettings;
+%         reference_mont = reference;
+% 
+%         settings_mont.frequencies.controlFrequency = stoch.controlFrequency(i);                      % control frequency parameter
+% 
+%         for p = 1:maxP
+%             for s = 1:maxS
+%                 settings_mont.wind.MagMin = p; % [m/s] Minimum Magnitude
+%                 settings_mont.wind.MagMax = p; % [m/s] Maximum Magnitude
+%                 settings_mont.wind.ElMin  = s;
+%                 settings_mont.wind.ElMax  = 2*s;
+%                 switch algorithm
+%                     case 'interp'
+%                         if settings.electronics
+%                             [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = interp_run_control(settings_mont, contSettings_mont,reference_mont);
+%                         else
+%                             [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = interp_run_control(settings_mont,contSettings_mont,reference_mont);
+%                         end
+%                     case 'std'
+%                         if settings.electronics
+%                             [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = std_run_control(settings_mont, contSettings_mont);
+%                         else
+%                             [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = std_run_control(settings_mont,contSettings_mont);
+%                         end
+%                 end
+% 
+%                 save_ControlFrequency{i} = struct('time',Tf,'control',Yf(:,17),'position',Yf(:,1:3),'speed',Yf(:,4:6));
+%             end
+%         end
+% 
+%     end
+% 
+%     save_ControlFrequency_plotControl = figure;
+%     for i = 1:length(save_ControlFrequency)
+%         for p = 1: maxP
+%             for s = 1:maxS
+%                 plot(save_ControlFrequency{i}.time,save_ControlFrequency{i}.control)
+%                 hold on;
+%                 grid on;
+%             end
+%         end
+%     end
+%     title('Control action')
+%     xlabel('Time [s]')
+%     ylabel('Servo angle [\alpha]')
+% 
+%     mean_apogee.ControlFrequency = [];
+%     save_ControlFrequency_plotApogee = figure;
+%     for i = 1: length(save_ControlFrequency)
+%         plot(stoch.controlFrequency(i),max(-save_ControlFrequency{i}.position(:,3)),'*')
+%         hold on;
+%         grid on;
+%         mean_apogee.ControlFrequency = [mean_apogee.ControlFrequency max(-save_ControlFrequency{i}.position(:,3))];
+%     end
+%     title('Apogee w.r.t. ControlFrequency')
+%     xlabel('Control Frequency')
+%     ylabel('Apogee [m]')
+% 
+%     mean_apogee.ControlFrequency = mean(mean_apogee.ControlFrequency);
+% 
+%     save_ControlFrequency_plotTrajectory = figure;
+%     for i = 1:length(save_ControlFrequency)
+%         plot3(save_ControlFrequency{i}.position(:,1),save_ControlFrequency{i}.position(:,2),-save_ControlFrequency{i}.position(:,3));
+%         hold on;
+%         grid on;
+%     end
+%     title('Trajectories')
+%     xlabel('x')
+%     ylabel('y')
+%     zlabel('z')
+% 
+% 
+%     save_ControlFrequency_plotSpeed = figure;
+%     for i = 1:length(save_ControlFrequency)
+%         plot(save_ControlFrequency{i}.time,save_ControlFrequency{i}.speed(:,1));
+%         hold on;
+%         grid on;
+%     end
+%     title('speed')
+%     xlabel('time')
+%     ylabel('Vx body [m/s]')
+% 
+%     % save plots
+%     if flagSave == true
+%         saveas(save_ControlFrequency_plotControl,'MontecarloResults\ControlFrequency\controlPlot')
+%         saveas(save_ControlFrequency_plotApogee,'MontecarloResults\ControlFrequency\apogeelPlot')
+%         saveas(save_ControlFrequency_plotTrajectory,'MontecarloResults\ControlFrequency\TrajectoryPlot')
+%         saveas(save_ControlFrequency_plotSpeed,'MontecarloResults\ControlFrequency\speedPlot')
+%     end
+% 
+% end
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 

@@ -1,4 +1,4 @@
-function [alpha_degree_out, Vz_setpoint, z_setpoint, pid, U_linear, Cd, delta_S, csett] = control_PID(time,z, Vz, V_mod, csett, alpha_degree_in)
+function [alpha_degree_out, Vz_setpoint, z_setpoint, pid, U_linear, Cd, delta_S, csett] = control_PID(time,z, Vz, V_mod, csett, alpha_degree_in,settings)
 
 % Author: Leonardo Bertelli
 % Co-Author: Alessandro Del Duca
@@ -45,7 +45,7 @@ ext_max = 0.0383;
 
 % Control variable limits
 SMin = 0;
-SMax = deg2rad(68);
+SMax = deg2rad(68)*0.009564;
 extMin = 0;
 extMax = ext_max;
 
@@ -88,7 +88,13 @@ U = U_ref + P + csett.I;
 %% TRANSFORMATION FROM U to delta_S 
 
 delta_S_available = linspace(SMin,SMax,20);
-ext_available = linspace(extMin,extMax,20);
+ext_available = zeros(length(delta_S_available),1);
+
+for i = 1:length(delta_S_available)
+    ext_available(i) = extension_From_Angle_2022(delta_S_available(i)/0.009564,settings); % pyxis has surface linear with angle, for lynx it won't work anymore, but do we care? no
+end
+
+
 % Get the Cd for each possible aerobrake surface
 Cd_available = 1:length(delta_S_available);
 for ind = 1:length(delta_S_available)
@@ -100,6 +106,7 @@ Cd_available = Cd_available';
 % Then choose the delta_S which gives an Fdrag which has the minimum error if compared with F_drag_pid
 [~, index_minimum] = min( abs(U - 0.5*ro*csett.S0*Cd_available*Vz*V_mod) );
 delta_S = delta_S_available(index_minimum); 
+ext = ext_available(index_minimum);
 
 % Just for plotting
 pid = U;

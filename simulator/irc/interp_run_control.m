@@ -199,26 +199,11 @@ while flagStopIntegration && n_old < nmax
 
         if settings.ballisticFligth
             [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings,contSettings, ap_ref, tLaunch);
-            % saturation on servo angle
-            %                 if Yf(end,17) > settings.servo.maxAngle
-            %                     Yf(end,17) = settings.servo.maxAngle;
-            %                     Yf(end,18) = 0;
-            %                 elseif Yf(end,17)< settings.servo.minAngle
-            %                     Yf(end,17) = settings.servo.minAngle;
-            %                     Yf(end,18) = 0;
-            %                 end
+            
         else
             if flagAscent
                 [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, contSettings, ap_ref, tLaunch);
 
-                % saturation on servo angle
-                %                 if Yf(end,17) > settings.servo.maxAngle
-                %                     Yf(end,17) = settings.servo.maxAngle;
-                %                     Yf(end,18) = 0;
-                %                 elseif Yf(end,17)< settings.servo.minAngle
-                %                     Yf(end,17) = settings.servo.minAngle;
-                %                     Yf(end,18) = 0;
-                %                 end
             else
                 if flagPara1
                     para = 1;
@@ -282,11 +267,10 @@ while flagStopIntegration && n_old < nmax
 
         [x_c, vels, P_c, settings.kalman]   =  run_kalman(x_prev, vels_prev, P_prev, sp, settings.kalman, XYZ0*0.01);
 
-        x_est_tot(c.n_est_old:c.n_est_old + size(x_c(:,1),1)-1,:)  = x_c(1:end,:);
-        vels_tot(c.n_est_old:c.n_est_old + size(vels(:,1),1)-1,:)  = vels(1:end,:);
-        t_est_tot(c.n_est_old:c.n_est_old + size(x_c(:,1),1)-1)    = sensorData.accelerometer.time;
-        c.n_est_old = c.n_est_old + size(x_c,1);
-
+        x_est_tot(c.n_est_old:c.n_est_old + size(x_c(:,1),1)-1,:)  = x_c(1:end,:); % NAS position output
+        vels_tot(c.n_est_old:c.n_est_old + size(vels(:,1),1)-1,:)  = vels(1:end,:); % NAS speed output
+        t_est_tot(c.n_est_old:c.n_est_old + size(x_c(:,1),1)-1)    = sensorData.accelerometer.time; % NAS time output
+        c.n_est_old = c.n_est_old + size(x_c,1); 
     end
 
     % vertical velocity and position
@@ -304,7 +288,7 @@ while flagStopIntegration && n_old < nmax
 
     v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
 
-    z    = -Yf(end, 3);
+    z    = -x_est_tot(end, 3);
     xxx  =  Yf(end, 2);
     yyy  =  Yf(end, 1);
     %% Control algorithm
@@ -318,7 +302,7 @@ while flagStopIntegration && n_old < nmax
         %         if flag_inizio == 1
         %             init.options = optimoptions("lsqnonlin","Display","off");
         %             flag_inizio = 0;
-        [ap_ref] = trajectoryChoice2bis(-Y0(3),vz,settings.reference.Z,settings.reference.Vz,'linear',N_forward,settings); % cambiare nome alla funzione tra le altre cose
+        [ap_ref] = trajectoryChoice2bis(z,vz,settings.reference.Z,settings.reference.Vz,'linear',N_forward,settings); % cambiare nome alla funzione tra le altre cose
         %         end
         %         tic
         %         [ap_ref] = shootingControl([-Y0(3),vz],ap_ref,settings,contSettings.coeff_Cd,settings.arb,init);

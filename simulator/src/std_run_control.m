@@ -272,7 +272,7 @@ while flagStopIntegration && n_old < nmax
         time = Tf(end);
         switch contSettings.flagPID
             case 1
-                [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_PID    (time,zc, vzc, vc, contSettings,alpha_degree_old);
+                [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_PID    (time,zc, vzc, vc, contSettings,alpha_degree_old,settings);
                 ap_ref = deg2rad(alpha_degree);
             case 2
                 [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_Lin    (zc, vzc, vc, contSettings);
