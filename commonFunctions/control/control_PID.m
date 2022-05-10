@@ -106,7 +106,7 @@ Cd_available = Cd_available';
 % Then choose the delta_S which gives an Fdrag which has the minimum error if compared with F_drag_pid
 [~, index_minimum] = min( abs(U - 0.5*ro*csett.S0*Cd_available*Vz*V_mod) );
 delta_S = delta_S_available(index_minimum); 
-ext = ext_available(index_minimum);
+% ext = ext_available(index_minimum);
 
 % Just for plotting
 pid = U;
@@ -115,16 +115,20 @@ Cd = Cd_available(index_minimum);
 
 %% TRANSFORMATION FROM delta_S to SERVOMOTOR ANGLE DEGREES 
 
-switch 'pyxis'
-    case 'lynx'
+switch settings.mission
+    case 'Lynx_Roccaraso_September_2021'
         alpha_rad      = (-csett.b + sqrt(csett.b^2 + 4*csett.a*delta_S)) / (2*csett.a);
-    case 'pyxis'
+    case 'Lynx_Portugal_October_2021'
+        alpha_rad      = (-csett.b + sqrt(csett.b^2 + 4*csett.a*delta_S)) / (2*csett.a);
+    case 'Pyxis_Portugal_October_2022'
+        alpha_rad = delta_S/0.009564;
+    case 'Pyxis_Roccaraso_September_2022'
         alpha_rad = delta_S/0.009564;
 end
 % Alpha saturation 
 [alpha_rad, ~] = Saturation(alpha_rad, 0, deg2rad(68));
 
-alpha_degree_out   = (alpha_rad*180)/pi;
+alpha_degree_out = (alpha_rad*180)/pi;
 
 
 %% LIMIT THE RATE OF THE CONTROL VARIABLE 
