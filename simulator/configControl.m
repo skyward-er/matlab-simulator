@@ -55,7 +55,10 @@ contSettings.a  = -9.43386/1000;
 contSettings.b  = 19.86779/1000;                                           
 
 contSettings.rate_limiter      =    60/0.13;                                 % datasheet: 60deg/0.13s --> increased for robustness
-contSettings.filter_coeff      =    0.85;
+
+% Filtering
+contSettings.flagFilter = true; %set to true to filter out the interp algorithm with the following filter coefficient:
+contSettings.filter_coeff      =    0.6;
 
 % Possible range of values for the control variable
 switch settings.mission

@@ -31,7 +31,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 
 
-close all; clear all; clc;
+% close all;
+clear all; clc;
 
 filePath = fileparts(mfilename('fullpath'));
 currentPath = pwd;
@@ -60,13 +61,19 @@ end
 % T = vector of time used by ODE, [s] also for Tf Ta
 % Y = State = ( x y z | u v w | p q r | q0 q1 q2 q3 | thetax thetay thetaz | ap_ref ) also for Ya,Yf corresponding to T
 
-algorithm = 'std';
+algorithm = 'interp';
 switch algorithm
     case 'interp'
         if settings.electronics
             [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = interp_run_control(settings, contSettings);
         else
             [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = interp_run_control(settings,contSettings);
+        end
+    case 'interp_F'
+        if settings.electronics
+            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = interpFilter_run_control(settings, contSettings);
+        else
+            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = interpFilter_run_control(settings,contSettings);
         end
     case 'std'
         if settings.electronics

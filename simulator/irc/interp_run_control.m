@@ -294,25 +294,29 @@ while flagStopIntegration && n_old < nmax
     %% Control algorithm
     %  flag_inizio = 1;
     if flagAeroBrakes && mach < settings.MachControl && settings.Kalman && settings.control
-
+        
         N_forward = 2;
-
-        %%%%%%%%% CAMBIA QUI L'ALGORITMO
-        %         [ap_ref] = trajectoryChoice2bis(-Y0(3),vz,reference.altitude_ref,reference.vz_ref,'linear',N_forward,deltaZ); % cambiare nome alla funzione tra le altre cose
-        %         if flag_inizio == 1
-        %             init.options = optimoptions("lsqnonlin","Display","off");
-        %             flag_inizio = 0;
-        [ap_ref] = trajectoryChoice2bis(z,vz,settings.reference.Z,settings.reference.Vz,'linear',N_forward,settings); % cambiare nome alla funzione tra le altre cose
-        %         end
-        %         tic
-        %         [ap_ref] = shootingControl([-Y0(3),vz],ap_ref,settings,contSettings.coeff_Cd,settings.arb,init);
-        %         toc
-        %%%%%%%%%
-        if z> 2500
-            delta_ap_limiter = 0.2;
-            if abs(ap_ref - Yf(end,17))>delta_ap_limiter
-                ap_ref = Yf(end,17)+sign(ap_ref - Yf(end,17))*delta_ap_limiter;
+        if not(contSettings.flagFilter)
+            %%%%%%%%% CAMBIA QUI L'ALGORITMO
+            %         [ap_ref] = trajectoryChoice2bis(-Y0(3),vz,reference.altitude_ref,reference.vz_ref,'linear',N_forward,deltaZ); % cambiare nome alla funzione tra le altre cose
+            %         if flag_inizio == 1
+            %             init.options = optimoptions("lsqnonlin","Display","off");
+            %             flag_inizio = 0;
+            [ap_ref] = trajectoryChoice2bis(z,vz,settings.reference.Z,settings.reference.Vz,'linear',N_forward,settings); % cambiare nome alla funzione tra le altre cose
+            %         end
+            %         tic
+            %         [ap_ref] = shootingControl([-Y0(3),vz],ap_ref,settings,contSettings.coeff_Cd,settings.arb,init);
+            %         toc
+            %%%%%%%%%
+            if z> 2500
+                delta_ap_limiter = 0.2;
+                if abs(ap_ref - Yf(end,17))>delta_ap_limiter
+                    ap_ref = Yf(end,17)+sign(ap_ref - Yf(end,17))*delta_ap_limiter;
+                end
             end
+        else
+            [ap_base_filter] = trajectoryChoice2bis(z,vz,settings.reference.Z,settings.reference.Vz,'linear',N_forward,settings); % cambiare nome alla funzione tra le altre cose
+            ap_ref = ap_ref + (ap_base_filter -ap_ref)*contSettings.filter_coeff;
         end
     end
 
