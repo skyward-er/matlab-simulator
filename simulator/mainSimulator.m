@@ -69,12 +69,6 @@ switch algorithm
         else
             [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = interp_run_control(settings,contSettings);
         end
-    case 'interp_F'
-        if settings.electronics
-            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = interpFilter_run_control(settings, contSettings);
-        else
-            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = interpFilter_run_control(settings,contSettings);
-        end
     case 'std'
         if settings.electronics
             [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = std_run_control(settings, contSettings);

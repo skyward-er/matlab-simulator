@@ -58,7 +58,7 @@ contSettings.rate_limiter      =    60/0.13;                                 % d
 
 % Filtering
 contSettings.flagFilter = true; %set to true to filter out the interp algorithm with the following filter coefficient:
-contSettings.filter_coeff      =    0.6;
+contSettings.filter_coeff      =    0.85;
 
 % Possible range of values for the control variable
 switch settings.mission
