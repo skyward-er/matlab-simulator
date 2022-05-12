@@ -39,15 +39,11 @@ controller to follow the trajectory and then transfers it with a to a force
 % Parameters
 ro = getRho(z);
 
-% Geometric constraints
-delta_S_max = deg2rad(68)*0.009564;
-ext_max = 0.0383;
-
 % Control variable limits
 SMin = 0;
-SMax = deg2rad(68)*0.009564;
+SMax = settings.servo.maxAngle*0.009564;
 extMin = 0;
-extMax = ext_max;
+extMax = 0.0373;
 
 %%%%%% test
 % % % SMin = max(0,(csett.chosen_trajectory-1)/9*delta_S_max-0.2*delta_S_max);
@@ -75,7 +71,7 @@ end
 
 
 % Compute U_ref 
-Cd_ref = getDrag(V_mod,z,(csett.chosen_trajectory-1)/9*ext_max, csett.coeff_Cd); % perché *0.001?
+Cd_ref = getDrag(V_mod,z,(csett.chosen_trajectory-1)/9*extMax, csett.coeff_Cd); % perché *0.001?
 U_ref = 0.5*ro*Cd_ref*csett.S0*Vz*V_mod; 
 % U_ref = 0; % TESTING
 
