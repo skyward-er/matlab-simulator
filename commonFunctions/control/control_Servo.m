@@ -44,6 +44,8 @@ switch settings.mission
         alphaMax = 48;
 end
 
+alphaMax = rad2deg(settings.servo.maxAngle);
+
 Umin =  (csett.chosen_trajectory-1)/9*alphaMax * 0.8 ;  % degrees 
 Umax =  (csett.chosen_trajectory-1)/9*alphaMax * 1.2 ;
 

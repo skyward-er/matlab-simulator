@@ -1,4 +1,4 @@
-function [x] = extension_From_Angle_2022(alpha,settings)
+function [x] = extension_From_Angle_2022(alpha, settings)
 % HELP
 % alpha must be already in radiants
 %

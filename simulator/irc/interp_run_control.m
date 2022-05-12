@@ -163,7 +163,7 @@ while flagStopIntegration && n_old < nmax
         flagBurning = false;                                                % Motor ends thrust
     end
 
-    if flagAscent && not(flagBurning) && mach <=0.8
+    if flagAscent && not(flagBurning) && mach <= settings.MachControl
         flagAeroBrakes = true;                                              % Allows airbrakes to open
     else
         flagAeroBrakes = false;
@@ -198,8 +198,7 @@ while flagStopIntegration && n_old < nmax
     if flagFligth
 
         if settings.ballisticFligth
-            [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings,contSettings, ap_ref, tLaunch);
-            
+            [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, contSettings, ap_ref, tLaunch);
         else
             if flagAscent
                 [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, contSettings, ap_ref, tLaunch);
@@ -455,7 +454,7 @@ c.plot_control =  settings.control && true;
 %% RETRIVE PARAMETERS FROM THE ODE
 
 if not(settings.electronics) && ~settings.montecarlo
-    dataBallisticFlight = RecallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings,contSettings, c.ap_tot, tLaunch);
+    dataBallisticFlight = recallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings,contSettings, c.ap_tot, tLaunch, 'apVec');
 else
     dataBallisticFlight = [];
 end

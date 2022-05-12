@@ -1,4 +1,4 @@
-function [dY, parout] = ascentInterpContr(t, YY, settings,contSettings, ap_ref, tLaunch)
+function [dY, parout] = ascentInterpContr(t, YY, settings, contSettings, ap_ref, tLaunch)
 %{
 
 ASCENT - ode function of the 6DOF Rigid Rocket Model
@@ -151,7 +151,7 @@ M = V_norm/a;
 M_value = M;
 
 %% TIME-DEPENDENT VARIABLES
-dI = 1/tb*([Ixxf Iyyf Izzf]'-[Ixxe Iyye Izze]');
+dI = 1/tb*([Ixxf Iyyf Izzf]' - [Ixxe Iyye Izze]');
 
 if t<tb
     m = settings.ms + interp1(settings.motor.expTime, settings.motor.expM, t);
@@ -186,7 +186,6 @@ B_datcom = settings.Betas*pi/180;
 H_datcom = settings.Altitudes;
 M_datcom = settings.Machs;
 C_datcom = settings.Controls;
-C_datcom(end) = extension_From_Angle_2022(deg2rad(68),settings); % per correggere l'errore sul C_datcom, che da exceed index
 
 cellT = {A_datcom, M_datcom, B_datcom, H_datcom};
 inst = [alpha, M, beta, -z];
@@ -201,7 +200,7 @@ end
 CmatE = CoeffsE(:, :, :, :, :, :);                                          
 CmatF = CoeffsF(:, :, :, :, :);                                             
 
-ext = extension_From_Angle_2022(ap,settings);
+ext = extension_From_Angle_2022(ap, settings);
 
 if ext == 0
     VE = CmatE(:, index(1), index(2), index(3), index(4), 1);               % from coeffsE (Empty rocket) takes the aerodynamic coefficients
@@ -225,11 +224,7 @@ else
 end
 
 % Retrieve Coefficients
-% CA = coeffsValues(1); 
-
-
-CA = getDrag(-w,-z,ext, contSettings.coeff_Cd); % i coefficienti del CA vengono richiamati nel main all'inizio
-
+CA = coeffsValues(1);
 CYB = coeffsValues(2); CY0 = coeffsValues(3);                               
 CNA = coeffsValues(4); CN0 = coeffsValues(5); Cl = coeffsValues(6);         
 Clp = coeffsValues(7); Cma = coeffsValues(8); Cm0 = coeffsValues(9);        

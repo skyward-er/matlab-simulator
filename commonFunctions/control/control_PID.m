@@ -125,8 +125,9 @@ switch settings.mission
     case 'Pyxis_Roccaraso_September_2022'
         alpha_rad = delta_S/0.009564;
 end
+
 % Alpha saturation 
-[alpha_rad, ~] = Saturation(alpha_rad, 0, deg2rad(68));
+[alpha_rad, ~] = Saturation(alpha_rad, 0, settings.servo.maxAngle);
 
 alpha_degree_out = (alpha_rad*180)/pi;
 

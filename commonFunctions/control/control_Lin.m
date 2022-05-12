@@ -87,7 +87,7 @@ Cd = Cd_available(index_minimum);
 alpha_rad      = (-csett.b + sqrt(csett.b^2 + 4*csett.a*delta_S)) / (2*csett.a);
 
 % Alpha saturation ( possibili problemi per azione integrale ? )
-[alpha_rad, ~] = Saturation(alpha_rad, 0, 0.89);
+[alpha_rad, ~] = Saturation(alpha_rad, 0, settings.servo.maxAngle);
 
 alpha_degree   = (alpha_rad*180)/pi;
 

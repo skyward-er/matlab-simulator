@@ -38,7 +38,6 @@ settings.frequencies.barometerFrequency         =   20;                    % [hz
 settings.servo.tau = 0.05;                                                  % Servo motor time constant 
 settings.servo.tau_acc = 0.01;                                              % Servo motor acceleration time constant
 settings.servo.maxSpeed = deg2rad(300);                     %[rad/s]        % max rpm speed of the servo motor
-settings.servo.maxAngle = deg2rad(68);                                      % max servo angle
 settings.servo.minAngle = 0;                                                % min servo angle
 
 % Servo angle to extension of the air brakes (PYXIS)
@@ -46,6 +45,13 @@ settings.arb.extPol(1) = -0.009216;
 settings.arb.extPol(2) = 0.02492;
 settings.arb.extPol(3) = -0.01627;
 settings.arb.extPol(4) = 0.03191;
+
+% Get maximum extension angle
+x = @(alpha) settings.arb.extPol(1)*alpha.^4 + ...
+    settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + ...
+    settings.arb.extPol(4).*alpha;
+fun = @(alpha) x(alpha) - settings.Controls(end);
+settings.servo.maxAngle = fzero(fun, deg2rad(50));
 
 %% KALMAN TUNING PARAMETERS
 settings.kalman.dt_k          =   0.01;                                    % [s]        kalman time step

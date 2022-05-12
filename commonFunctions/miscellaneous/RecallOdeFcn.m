@@ -1,64 +1,115 @@
-function [all_steps] = RecallOdeFcn(fun, T, Y, settings, contSettings, C, varargin)
+function [allSteps] = recallOdeFcn(fun, T, Y, varargin)
 %{
-
-RECALLODEFCN - This function allows to compute some parameters used
-inside the ODE integrations
+recallOdeFcn - This function allows to compute some parameters used
+               inside the ODE integrations.
 
 INPUTS:
-            - fun, ode function used;
-            - T, integration time vector;
-            - Y, state matrix.
+        - fun, function, ode function used;
+        - T, double [n° variation, 1], integration time vector;
+        - Y, double [n° variation, 16], state matrix,
+                            [ x y z | u v w | p q r | q0 q1 q2 q3 | m | Ixx Iyy Izz ]:
+                            * (x y z), NED{north, east, down} horizontal frame;
+                            * (u v w), body frame velocities;
+                            * (p q r), body frame angular rates;
+                            * m , total mass;
+                            * (Ixx Iyy Izz), Inertias;
+                            * (q0 q1 q2 q3), attitude unit quaternion.
 
 OUTPUTS:
-            - all_steps, structure which contains all the parameters needed.
+        - allSteps, struct, which contains all the parameters needed.
 
-Author: Adriano Filippo Inno
-Skyward Experimental Rocketry | AFD Dept
-email: adriano.filippo.inno@skywarder.eu
-Release date: 16/11/2018
+CALLED FUNCTIONS: -
+
+REVISIONS:
+- #0    12/05/2022, Release, Davide Rosato
+Copyright © 2021, Skyward Experimental Rocketry, AFD department
+All rights reserved
+
 
 %}
-
-NT = length(T);
-% fun_info = functions(fun);
-
-for i = 1:NT
-    
-    [~,single_step] = fun(T(i),Y(i,:), settings, contSettings, C(i), varargin{:});
-    
-    all_steps.integration.t(i) = single_step.integration.t;
-    all_steps.interp.alt(i) = single_step.interp.alt;
-    all_steps.wind.body_wind(1:3,i) = single_step.wind.body_wind;
-    all_steps.wind.NED_wind(1:3,i) = single_step.wind.NED_wind;
-    all_steps.velocities(i, 1:3) = single_step.velocities;
-    
-    all_steps.air.rho(i) = single_step.air.rho;
-    all_steps.air.P(i) = single_step.air.P;
-    
-    all_steps.accelerations.body_acc(i, 1:3) = single_step.accelerations.body_acc;
-    
-    all_steps.interp.M(i) = single_step.interp.M;
-    all_steps.interp.alpha(i) = single_step.interp.alpha;
-    all_steps.interp.beta(i) = single_step.interp.beta;
-    
-    all_steps.forces.AeroDyn_Forces(i, 1:3) = single_step.forces.AeroDyn_Forces;
-    all_steps.forces.T(i) = single_step.forces.T;
-    
-    all_steps.accelerations.ang_acc(i, 1:3) = single_step.accelerations.ang_acc;
-    
-    all_steps.coeff.CA(i) = single_step.coeff.CA;
-%     all_steps.coeff.CYB(i) = single_step.coeff.CYB;
-%     all_steps.coeff.CNA(i) = single_step.coeff.CNA;
-%     all_steps.coeff.Cl(i) = single_step.coeff.Cl;
-%     all_steps.coeff.Clp(i) = single_step.coeff.Clp;
-%     all_steps.coeff.Cma(i) = single_step.coeff.Cma;
-%     all_steps.coeff.Cmad(i) = single_step.coeff.Cmad;
-%     all_steps.coeff.Cmq(i) = single_step.coeff.Cmq;
-%     all_steps.coeff.Cnb(i) = single_step.coeff.Cnb;
-%     all_steps.coeff.Cnr(i) = single_step.coeff.Cnr;
-%     all_steps.coeff.Cnp(i) = single_step.coeff.Cnp;
-    
-%     if isfield(single_step.coeff, 'XCP')
-%         all_steps.coeff.XCP(i) = single_step.coeff.XCP;
-%     end
+flagApVec = false;
+if strcmp(varargin{end}, 'apVec')
+    apVec = varargin{end - 2};
+    flagApVec = true;
 end
+varargin = varargin(1:end-1);
+
+if flagApVec
+    [~,firstStep] = fun(T(1), Y(1,:), varargin{1:2}, apVec(1), varargin{end});
+else
+    [~,firstStep] = fun(T(1), Y(1,:), varargin{:});
+end
+
+namesFields = fieldnames(firstStep);
+NT = length(T);
+
+steps = cell(NT,1);
+
+for k = 1:NT
+    if flagApVec
+        [~,steps{k}] = fun(T(k), Y(k,:), varargin{1:2}, apVec(k), varargin{end});
+    else
+        [~,steps{k}] = fun(T(k), Y(k,:), varargin{:});
+    end
+end
+
+for i = 1:numel(namesFields)
+    currentFieldName = namesFields{i};
+    currentField = firstStep.(currentFieldName);
+    
+    if isstruct(currentField)
+        namesArrays = fieldnames(currentField);
+        
+        for j = 1:numel(namesArrays)
+            currentArrayName = namesArrays{j};
+            currentArray = currentField.(currentArrayName);
+            sizeArray = size(currentArray);
+            sizeArrayCut = sizeArray;
+            
+            if any(sizeArray == 1)
+                sizeArrayCut = max(sizeArray);
+            end
+            
+            allSteps.(currentFieldName).(currentArrayName) = zeros([sizeArrayCut,NT]);
+            
+            for k = 1:NT
+                currentStep = steps{k};
+                
+                if all(sizeArray ~= 1)
+                    allSteps.(currentFieldName).(currentArrayName)(:,:,k) =...
+                        currentStep.(currentFieldName).(currentArrayName);
+                else
+                    allSteps.(currentFieldName).(currentArrayName)(:,k) =...
+                        currentStep.(currentFieldName).(currentArrayName);
+                end
+            end
+            
+        end
+        
+    else
+        sizeArray = size(currentField);
+        
+        sizeArrayCut = sizeArray;
+        if any(sizeArray == 1)
+            sizeArrayCut = max(sizeArray);
+        end
+        
+        allSteps.(currentFieldName) = zeros([sizeArrayCut,NT]);
+        
+        for k = 1:NT
+            currentStep = steps{k};
+            
+            if all(sizeArray ~= 1)
+                allSteps.(currentFieldName)(:,:,k) =...
+                    currentStep.(currentFieldName);
+            else
+                allSteps.(currentFieldName)(:,k) =...
+                    currentStep.(currentFieldName);
+            end
+        end
+        
+    end
+    
+end
+end
+

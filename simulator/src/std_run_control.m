@@ -152,7 +152,7 @@ while flagStopIntegration && n_old < nmax
         flagBurning = false;                                                % Motor ends thrust
     end
 
-    if flagAscent && not(flagBurning) && mach <=0.8
+    if flagAscent && not(flagBurning) && mach <= settings.MachControl
         flagAeroBrakes = true;                                              % Allows airbrakes to open
     else
         flagAeroBrakes = false;
@@ -455,7 +455,7 @@ c.plot_control =  settings.control && true;
 
 
 if not(settings.electronics) && ~settings.montecarlo
-    dataBallisticFlight = RecallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings,contSettings, c.ap_tot, tLaunch);
+    dataBallisticFlight = recallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings,contSettings, c.ap_tot, tLaunch, 'apVec');
 else
     dataBallisticFlight = [];
 end

@@ -42,7 +42,7 @@ rng default
 settings.montecarlo = true;
 
 %% how many simulations
-N_sim = 200; % set to at least 500
+N_sim = 50; % set to at least 500
 
 %% stochastic parameters
 sigma_t = (1.20-1)/3;             % thrust_percentage standard deviation
@@ -98,8 +98,8 @@ algorithm_vec = [ "interp"; "std0"; "std2s";"NoControl"]; % interpolation, PID n
 
 %% which montecarlo do you want to run?
 
-run_Thrust = false;
-run_Filter = true;
+run_Thrust = true;
+run_Filter = false;
 
 
 %% do you want to save the results?
@@ -347,7 +347,7 @@ end
 %% MONTECARLO 2 - Tuning filter coeffs
 if run_Filter == true
 
-    check on the directory you want to save in:
+%    check on the directory you want to save in:
     if flagSave == "yes"
         
         flagMakeDir = input('Does the folder you want to save in already exist? ("yes" or "no"): ','s');
