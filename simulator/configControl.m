@@ -76,11 +76,11 @@ switch settings.mission
     
     case 'Pyxis_Portugal_October_2022'
         
-        contSettings.delta_S_available = (0.0:0.001/4:0.009564*deg2rad(68))'; 
+        contSettings.delta_S_available = (0.0:0.001/4:0.009564*settings.servo.maxAngle)'; 
 
     case 'Pyxis_Roccaraso_September_2022'
     
-    contSettings.delta_S_available = (0.0:0.001/4:0.009564*deg2rad(68))'; 
+    contSettings.delta_S_available = (0.0:0.001/4:0.009564*settings.servo.maxAngle)'; 
 
 end
 %% MAGNETIC MAP

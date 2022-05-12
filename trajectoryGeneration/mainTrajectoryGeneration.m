@@ -37,7 +37,7 @@ configTrajectoryGeneration;
 % Airbrakes extension vector
 deltaX_values = linspace(settings.hprot(1), settings.hprot(end), settings.Ndx+2);
 % I exclude the limits for robustness
-deltaX_values = deltaX_values(2:end-1);
+% deltaX_values = deltaX_values(2:end-1);
 
 %% FINAL CONDITIONS
 % Impose the final condition I want to reach.
@@ -73,7 +73,7 @@ settings.constWind = [uw, vw, ww];
 vels = quatrotate(quatconj(Y(end, 10:13)),Y(end, 4:6));
 
 Vz_initial = -vels(3);
-
+Z_initial = 0;
 % Increasing the value
 %Vz_initial = Vz_initial * (1 + settings.Vz_initialPerc);
 

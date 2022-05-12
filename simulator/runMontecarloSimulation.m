@@ -42,7 +42,7 @@ rng default
 settings.montecarlo = true;
 
 %% how many simulations
-N_sim = 5; % set to at least 500
+N_sim = 200; % set to at least 500
 
 %% stochastic parameters
 sigma_t = (1.20-1)/3;             % thrust_percentage standard deviation
@@ -115,8 +115,8 @@ if run_Thrust == true
 
     
     % other parameters you want to set for the particular simulation:
-    settings.MachControl = 0.85;
-    contSettings.N_forward = 1;
+%     settings.MachControl = 0.85; % commented -> use same as MSA
+    contSettings.N_forward = 2;
     contSettings.filter_coeff = 0.3;
 
     %simulation
@@ -130,11 +130,11 @@ if run_Thrust == true
         parfor i = 1:N_sim%size(stoch.thrust,1)
             settings_mont = settings;
             contSettings_mont = contSettings;
-            reference_mont = reference;
+            reference_mont = reference;                                                                                                                                                                                                                     
 
             settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
             settings_mont.motor.expTime = stoch.expThrust(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
-            settings_mont.tb = stoch.expThrust(i,end);                    % initialize the burning time of the current simulation (parfor purposes)
+            settings_mont.tb = stoch.expThrust(i,end);                              % initialize the burning time of the current simulation (parfor purposes)
 
             settings_mont.wind.model = false;
             settings_mont.wind.input = false;
