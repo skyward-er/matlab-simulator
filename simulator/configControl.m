@@ -58,7 +58,10 @@ contSettings.rate_limiter      =    60/0.13;                                 % d
 
 % Filtering
 contSettings.flagFilter = true; %set to true to filter out the interp algorithm with the following filter coefficient:
-contSettings.filter_coeff      =    0.85;
+contSettings.filter_coeff      =    0.6;
+
+% For interpolation reference algorithm only:
+contSettings.N_forward = 2; % how many steps in advance have to check on speed to interpolate
 
 % Possible range of values for the control variable
 switch settings.mission

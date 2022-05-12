@@ -294,14 +294,14 @@ while flagStopIntegration && n_old < nmax
     %  flag_inizio = 1;
     if flagAeroBrakes && mach < settings.MachControl && settings.Kalman && settings.control
         
-        N_forward = 2;
+        
         if not(contSettings.flagFilter)
             %%%%%%%%% CAMBIA QUI L'ALGORITMO
             %         [ap_ref] = trajectoryChoice2bis(-Y0(3),vz,reference.altitude_ref,reference.vz_ref,'linear',N_forward,deltaZ); % cambiare nome alla funzione tra le altre cose
             %         if flag_inizio == 1
             %             init.options = optimoptions("lsqnonlin","Display","off");
             %             flag_inizio = 0;
-            [ap_ref] = trajectoryChoice2bis(z,vz,settings.reference.Z,settings.reference.Vz,'linear',N_forward,settings); % cambiare nome alla funzione tra le altre cose
+            [ap_ref] = trajectoryChoice2bis(z,vz,settings.reference.Z,settings.reference.Vz,'linear',contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
             %         end
             %         tic
             %         [ap_ref] = shootingControl([-Y0(3),vz],ap_ref,settings,contSettings.coeff_Cd,settings.arb,init);
@@ -314,7 +314,8 @@ while flagStopIntegration && n_old < nmax
                 end
             end
         else
-            [ap_base_filter] = trajectoryChoice2bis(z,vz,settings.reference.Z,settings.reference.Vz,'linear',N_forward,settings); % cambiare nome alla funzione tra le altre cose
+            [ap_base_filter] = trajectoryChoice2bis(z,vz,settings.reference.Z,settings.reference.Vz,'linear',contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
+            % filter control action
             ap_ref = ap_ref + (ap_base_filter -ap_ref)*contSettings.filter_coeff;
         end
     end
@@ -323,7 +324,7 @@ while flagStopIntegration && n_old < nmax
     % Salvo input/output per testare algoritmo cpp
     %         input_output_test(indice_test) = struct('alpha_degree', alpha_degree, 'vz_setpoint', vz_setpoint, 'z_setpoint', z_setpoint, 'z', z, 'vz', vz, 'Vmod', sqrt(vxxx^2 + vyyy^2 + vz^2));
     %         indice_test = indice_test +1;
-
+    %
     %         ext = extension_From_Angle_2022(alpha_degree,contSettings);
     %     i = i + 1;
     %     elseif flagAeroBrakes && mach < 0.8
@@ -337,15 +338,7 @@ while flagStopIntegration && n_old < nmax
         % Save the values to plot them
         c.vz_tot(i)    =  vz;
         c.z_tot(i)     =  z;
-        %         c.vz_setpoint_tot(i)  =  vz_setpoint;
-        %         c.z_setpoint_tot(i)   =  z_setpoint;
         c.ap_ref_tot(i) =  ap_ref;
-        %         if contSettings.flagPID ~= 3
-        %             c.Cd_tot(i)    =  Cdd;
-        %             c.pid_tot(i)   =  pid;
-        %             c.U_lin_tot(i) =  U_linear;
-        %             c.dS_tot(i)    =  delta_S;
-        %         end
     end
 
 

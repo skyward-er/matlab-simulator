@@ -42,7 +42,7 @@ rng default
 settings.montecarlo = true;
 
 %% how many simulations
-N_sim = 50; % set to at least 500
+N_sim = 5; % set to at least 500
 
 %% stochastic parameters
 sigma_t = (1.20-1)/3;             % thrust_percentage standard deviation
@@ -104,8 +104,8 @@ run_Filter = false;
 
 %% do you want to save the results?
 
-% flagSave = input('do you want to save the results? ("yes" or "no"): ','s');
-flagSave = "yes";
+flagSave = input('do you want to save the results? ("yes" or "no"): ','s');
+% flagSave = "yes";
 
 displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
 
@@ -113,23 +113,14 @@ displayIter = true; % set to false if you don't want to see the iteration number
 
 if run_Thrust == true
 
-    % check on the directory you want to save in:
-%     if flagSave == "yes"
-%         
-%         flagMakeDir = input('Does the folder you want to save in already exist? ("yes" or "no"): ','s');
-%         while flagOtherFolders == "yes"
-%             if flagMakeDir == "no"
-%                 folder = input('how do you want to call the new folder? ','s');
-%                 mkdir("MontecarloResults\Thrust\"+folder);
-%             end
-%             flagOtherFolders = input('Do you want to create other folders? ("yes" or "no") ','s');
-%         end
-%     end
- 
+    
     % other parameters you want to set for the particular simulation:
-    settings.MachControl = 0.7;
+    settings.MachControl = 0.85;
+    contSettings.N_forward = 1;
+    contSettings.filter_coeff = 0.3;
 
-    for alg_index = 1:length(algorithm_vec)
+    %simulation
+    for alg_index = 1%:length(algorithm_vec)
         algorithm = algorithm_vec(alg_index);
         
         %save arrays
@@ -250,7 +241,7 @@ if run_Thrust == true
             x_values = linspace(2800,3200,1000);
         end
 
-        y = pdf(pd,x_values);                  %array of values of the probability density function
+        y = pdf(pd,x_values);                  % array of values of the probability density function
         hold on; grid on;
         xlabel('Reached apogee','Interpreter','latex','FontSize',15,'FontWeight','bold')
         ylabel('Probability density','Interpreter','latex','FontSize',15,'FontWeight','bold')
@@ -279,20 +270,22 @@ if run_Thrust == true
         ylabel('Apogee standard deviation')
 
         % save plots
+        folder = "MontecarloResults\Thrust\"+algorithm;
         if flagSave == "yes"
-            saveas(save_thrust_plotControl,"MontecarloResults\Thrust\"+algorithm+"\controlPlot")
-            saveas(save_thrust_plotApogee,"MontecarloResults\Thrust\"+algorithm+"\apogeelPlot")
-            saveas(save_thrust_plotTrajectory,"MontecarloResults\Thrust\"+algorithm+"\TrajectoryPlot")
-            saveas(save_thrust_apogee_probability,"MontecarloResults\Thrust\"+algorithm+"\ApogeeProbabilityPlot")
-            saveas(save_thrust_apogee_mean,"MontecarloResults\Thrust\"+algorithm+"\ApogeeMeanOverNsimPlot")
-            saveas(save_thrust_apogee_std,"MontecarloResults\Thrust\"+algorithm+"\ApogeeStdOverNsimPlot")
-            saveas( save_thrust_apogee_3D,"MontecarloResults\Thrust\"+algorithm+"\ApogeeWindThrust")
-            save("MontecarloResults\Thrust\"+algorithm+"\saveThrust.mat","save_thrust","apogee")
+            mkdir(folder)
+            saveas(save_thrust_plotControl,folder+"\controlPlot")
+            saveas(save_thrust_plotApogee,folder+"\apogeelPlot")
+            saveas(save_thrust_plotTrajectory,folder+"\TrajectoryPlot")
+            saveas(save_thrust_apogee_probability,folder+"\ApogeeProbabilityPlot")
+            saveas(save_thrust_apogee_mean,folder+"\ApogeeMeanOverNsimPlot")
+            saveas(save_thrust_apogee_std,folder+"\ApogeeStdOverNsimPlot")
+            saveas( save_thrust_apogee_3D,folder+"\ApogeeWindThrust")
+            save(folder+"\saveThrust.mat","save_thrust","apogee")
         end
 
             for i = 1    % Save results.txt
                 saveDate = string(date);
-                fid = fopen( "MontecarloResults\Thrust\"+algorithm+"\"+algorithm+"Results"+saveDate+".txt", 'wt' );  % CAMBIA IL NOME
+                fid = fopen( folder+"\"+algorithm+"Results"+saveDate+".txt", 'wt' );  % CAMBIA IL NOME
                 fprintf(fid,'Algorithm: %s \n',algorithm );
                 fprintf(fid,'Number of simulations: %d \n \n',N_sim); % Cambia n_sim
                 fprintf(fid,'Parameters: \n');
@@ -320,7 +313,11 @@ if run_Thrust == true
                 fprintf(fid,'Min apogee: %.1f \n',min(apogee.thrust));
                 fprintf(fid,'Mean apogee: %.1f \n',apogee.thrust_mean);
                 fprintf(fid,'Apogee standard deviation 3sigma: %.4f \n',3*apogee.thrust_variance);
-                fprintf(fid,'Apogees within +-50m from target: %.2f %% \n',accuracy);
+                fprintf(fid,'Apogees within +-50m from target: %.2f %% \n\n\n',accuracy);
+                fprintf(fid,'Other parameters specific of the simulation: \n\n');
+                fprintf(fid,'N_forward: %d \n', contSettings.N_forward);
+                fprintf(fid,'Delta Z (reference): %d \n',reference.deltaZ);
+                fprintf(fid,'Filter coefficient: %d \n', contSettings.filter_coeff);
                 fclose(fid);
             end
      
@@ -344,6 +341,7 @@ end
 
 
 
+
 %% MONTECARLO 2 - Tuning filter coeffs
 if run_Filter == true
 
@@ -361,7 +359,7 @@ if run_Filter == true
     end
  
     % other parameters you want to set for the particular simulation:
-    settings.MachControl = 0.7;
+    settings.MachControl = 0.85;
 
     for filter_index = 1:length(filterCoeffs_vec)
         algorithm = algorithm_vec(alg_index);
