@@ -352,7 +352,8 @@ while flagStopIntegration && n_old < nmax
 
     % atmosphere
     [~, a, ~, ~] = atmosisa(z);        % pressure and temperature at each sample time
-    normV = norm(Yf(end, 4:6));
+%     normV = norm(Yf(end, 4:6));
+    normV = norm([vz vxxx vyyy]);
     mach = normV/a;
 
     % time update
