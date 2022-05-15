@@ -23,7 +23,7 @@ contSettings.starting_index = 0;
 
 %% CONTROL PARAMETERS
 % Control time sample
-contSettings.sample_time         =  0.1;
+contSettings.sample_time         =  0.3;
 
 % PI controler tune parameter
 contSettings.Kp_1    =   20;  % 20   (50 con U_ref)                         % using Fdrag nel pid --> da migliorare (magari si può ottenere variabile controllo più smooth)
@@ -58,10 +58,11 @@ contSettings.rate_limiter      =    60/0.13;                                 % d
 
 % Filtering
 contSettings.flagFilter = true; %set to true to filter out the interp algorithm with the following filter coefficient:
-contSettings.filter_coeff      =    0.6;
+contSettings.filter_coeff      =    0.1;
 
 % For interpolation reference algorithm only:
 contSettings.N_forward = 2; % how many steps in advance have to check on speed to interpolate
+contSettings.interpType = 'linear'; % choose between: 'linear' , 'sinusoidal'
 
 % Possible range of values for the control variable
 switch settings.mission

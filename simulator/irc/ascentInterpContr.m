@@ -1,4 +1,4 @@
-function [dY, parout] = ascentInterpContr(t, YY, settings, contSettings, ap_ref, tLaunch)
+function [dY, parout] = ascentInterpContr(t, YY, settings, contSettings, ap_ref, tLaunch,varargin)
 %{
 
 ASCENT - ode function of the 6DOF Rigid Rocket Model
@@ -301,6 +301,7 @@ else %%% rocket out of the launchpad
         dap_ref = 0;
     end
 
+
     if ap > settings.servo.maxAngle
         dap_ref = 0;
         dap = 0;
@@ -308,8 +309,10 @@ else %%% rocket out of the launchpad
         dap_ref = 0;
         dap = 0;
     end
-  
+    
+    
     ddap = (dap_ref-dap)/settings.servo.tau_acc;
+
 end
 
 

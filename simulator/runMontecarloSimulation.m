@@ -115,15 +115,15 @@ if run_Thrust == true
 
 
     % other parameters you want to set for the particular simulation:
-    settings.MachControl = 0.85; % MSA sets it at 0.8
+    settings.MachControl = 0.8; % MSA sets it at 0.8
     contSettings.N_forward = 2;
     contSettings.filter_coeff = 0.3; % 1 = no filter
-
+    contSettings.interpType = 'sinusoidal'; % set if the interp algorithm does a linear or sinusoidal interpolation of the references
 
 
 
     %simulation
-    for alg_index = 1:length(algorithm_vec)
+    for alg_index = 1%:length(algorithm_vec)
         algorithm = algorithm_vec(alg_index);
 
         %save arrays
@@ -333,6 +333,7 @@ if run_Thrust == true
             fprintf(fid,'N_forward: %d \n', contSettings.N_forward);
             fprintf(fid,'Delta Z (reference): %d \n',reference.deltaZ);
             fprintf(fid,'Filter coefficient: %.3f \n', contSettings.filter_coeff);
+            fprintf(fid,'Interpolation type: %s \n', contSettings.interpType);
             fclose(fid);
         end
 

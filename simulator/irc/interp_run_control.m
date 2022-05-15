@@ -143,6 +143,7 @@ end
 % Salvo input/output per testare algoritmo cpp
 indice_test = 1;
 
+settings.MachControl = 0.85;
 while flagStopIntegration && n_old < nmax
     tic                                                                     % Starts CHRONO
     iTimes = iTimes + 1;                                                    % Advance the steps
@@ -223,7 +224,7 @@ while flagStopIntegration && n_old < nmax
         Yf = [initialCond'; initialCond'];
     end
 
-    ext = extension_From_Angle_2022(ap_ref,settings);
+    ext = extension_From_Angle_2022(Yf(end,17),settings);
     [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Yf, Tf, ext);
     [~, ~, p, ~] = atmosisa(-Yf(:,3)) ;
 
@@ -314,9 +315,10 @@ while flagStopIntegration && n_old < nmax
                 end
             end
         else
-            [ap_base_filter] = trajectoryChoice2bis(z,vz,settings.reference.Z,settings.reference.Vz,'linear',contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
+            [ap_base_filter] = trajectoryChoice2bis(z,vz,settings.reference.Z,settings.reference.Vz,contSettings.interpType,contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
             % filter control action
             ap_ref = ap_ref + (ap_base_filter -ap_ref)*contSettings.filter_coeff;
+
         end
     end
 
@@ -448,7 +450,7 @@ c.plot_control =  settings.control && true;
 %% RETRIVE PARAMETERS FROM THE ODE
 
 if not(settings.electronics) && ~settings.montecarlo
-    dataBallisticFlight = recallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings,contSettings, c.ap_tot, tLaunch, 'apVec');
+    dataBallisticFlight = recallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings,contSettings, c.ap_tot, tLaunch,'apVec');
 else
     dataBallisticFlight = [];
 end
