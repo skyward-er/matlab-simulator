@@ -64,9 +64,9 @@ algorithm = 'interp';
 switch algorithm
     case 'interp'
         if settings.electronics
-            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = interp_run_control(settings, contSettings);
+            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = interp_run_control_test(settings, contSettings);
         else
-            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = interp_run_control(settings,contSettings);
+            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = interp_run_control_test(settings,contSettings);
         end
     case 'std'
         if settings.electronics
@@ -137,7 +137,7 @@ if not(settings.electronics)
     fprintf('Kalman apogee detection time: %g [sec] \n', t_kalman)
     fprintf('Simulated apogee time : %g [sec] \n', T_apo)
 end
-
+fprintf('apogee: %.1f [m] \n', max_z);
 delete('launchFlag.txt')
 
 clearvars -except Yf data_flight settings

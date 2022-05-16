@@ -58,11 +58,14 @@ contSettings.rate_limiter      =    60/0.13;                                 % d
 
 % Filtering
 contSettings.flagFilter = true; %set to true to filter out the interp algorithm with the following filter coefficient:
-contSettings.filter_coeff      =    0.1;
+contSettings.filter_coeff = 0.3;    
+contSettings.filterRatio = 2;
+contSettings.Zfilter = 2000; % starting point from which the coefficient is diminished.
+contSettings.deltaZfilter = 250; % every deltaZfilter the filter coefficient is diminished by a ratio of filterRatio
 
 % For interpolation reference algorithm only:
 contSettings.N_forward = 2; % how many steps in advance have to check on speed to interpolate
-contSettings.interpType = 'linear'; % choose between: 'linear' , 'sinusoidal'
+contSettings.interpType = 'sinusoidal'; % choose between: 'linear' , 'sinusoidal'
 
 % Possible range of values for the control variable
 switch settings.mission
