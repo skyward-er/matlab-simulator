@@ -119,6 +119,9 @@ if run_Thrust == true
     contSettings.N_forward = 2;
     contSettings.filter_coeff = 0.3; % 1 = no filter
     contSettings.interpType = 'sinusoidal'; % set if the interp algorithm does a linear or sinusoidal interpolation of the references
+    contSettings.filterRatio = 2;
+    contSettings.Zfilter = 2000; % starting point from which the coefficient is diminished.
+    contSettings.deltaZfilter = 250; % every deltaZfilter the filter coefficient is diminished by a ratio of filterRatio
 
 
 
@@ -175,6 +178,8 @@ if run_Thrust == true
 
         end
 
+        %%% plots
+        %%%%%%%%%
         save_thrust_plotControl = figure;
         for i = 1:size(save_thrust,1)
             plot(save_thrust{i}.time,save_thrust{i}.control)
@@ -187,7 +192,7 @@ if run_Thrust == true
         legend(algorithm);
 
 
-        %%% plots
+        
         %%%%%%%%%%
         save_thrust_plotApogee = figure;
         for i = 1:N_sim
@@ -334,6 +339,9 @@ if run_Thrust == true
             fprintf(fid,'Delta Z (reference): %d \n',reference.deltaZ);
             fprintf(fid,'Filter coefficient: %.3f \n', contSettings.filter_coeff);
             fprintf(fid,'Interpolation type: %s \n', contSettings.interpType);
+            fprintf(fid,'Filter diminished every: %d \n', contSettings.deltaZfilter);
+            fprintf(fid,'Filter diminished by ratio: %d \n', contSettings.filterRatio);
+            fprintf(fid,'Filter diminishing starts at: %d m \n', contSettings.Zfilter);
             fclose(fid);
         end
 

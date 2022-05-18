@@ -57,7 +57,6 @@ Revision date: 11/04/2022
 % recalling the states
 % x = Y(1);
 % y = Y(2);
-ap_ref = ap_ref(1);  % We need this because RecallOdeFcn uses a vector of all the inputs     
 z = YY(3);
 u = YY(4);
 v = YY(5);

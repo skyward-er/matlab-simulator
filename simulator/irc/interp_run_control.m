@@ -119,7 +119,8 @@ c.ctr_start =      -1;                                                      % Ai
 i           =       1;                                                      % Index for while loop
 settings.kalman.pn_prec  =       settings.ada.p_ref;                        % settings for ADA and KALMAN
 ap_ref = 0;                                                                 % air brakes closed until Mach < settings.MachControl
-
+filterCoeff = contSettings.filter_coeff;
+Zfilter = contSettings.Zfilter;
 %% Flag initializations
 flagStopIntegration     =   true;                                           % while this is true the integration runs
 flagAscent              =   false;                                          % while this is false...
@@ -317,7 +318,12 @@ while flagStopIntegration && n_old < nmax
         else
             [ap_base_filter] = trajectoryChoice2bis(z,vz,settings.reference.Z,settings.reference.Vz,contSettings.interpType,contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
             % filter control action
-            ap_ref = ap_ref + (ap_base_filter -ap_ref)*contSettings.filter_coeff;
+            ap_ref = ap_ref + (ap_base_filter -ap_ref)*filterCoeff;
+            
+           if z>Zfilter
+               Zfilter = Zfilter+contSettings.deltaZfilter;
+               filterCoeff = filterCoeff/contSettings.filterRatio;
+           end
 
         end
     end
@@ -414,21 +420,21 @@ t_ada    = settings.ada.t_ada;
 t_kalman = settings.kalman.t_kalman;
 i_apo = find(Tf < 24.8);
 i_apo = max(i_apo);
-% if settings.Kalman
-%     i_apo_est = find(t_est_tot < Tf(i_apo));
-%     i_apo_est = max(i_apo_est);
-% end
+if settings.Kalman
+    i_apo_est = find(t_est_tot < Tf(i_apo));
+    i_apo_est = max(i_apo_est);
+end
 flagMatr = flagMatr(1:n_old, :);
 
 %% SAVE THE VARIABLES FOR PLOT PURPOSE
 % kalman state plot
-% if settings.Kalman
-%     c.x_est_tot    =  x_est_tot;
-%     c.vels_tot     =  vels_tot;
-%     c.t_est_tot    =  t_est_tot;
-%     c.i_apo        =  i_apo;
-%     c.i_apo_est    =  i_apo_est;
-% end
+if settings.Kalman
+    c.x_est_tot    =  x_est_tot;
+    c.vels_tot     =  vels_tot;
+    c.t_est_tot    =  t_est_tot;
+    c.i_apo        =  i_apo;
+    c.i_apo_est    =  i_apo_est;
+end
 
 % ada state for plot
 if settings.Ada

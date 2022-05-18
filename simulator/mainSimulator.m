@@ -64,9 +64,9 @@ algorithm = 'interp';
 switch algorithm
     case 'interp'
         if settings.electronics
-            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = interp_run_control_test(settings, contSettings);
+            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = interp_run_control(settings, contSettings);
         else
-            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = interp_run_control_test(settings,contSettings);
+            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = interp_run_control(settings,contSettings);
         end
     case 'std'
         if settings.electronics
