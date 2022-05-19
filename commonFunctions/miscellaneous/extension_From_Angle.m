@@ -1,4 +1,4 @@
-function [x] = extension_From_Angle(alpha_degree)
+function [x,varargout] = extension_From_Angle(alpha_degree)
 
 % Transform the angle in radiants
 alpha_rad = (alpha_degree*pi)/180;
@@ -7,6 +7,7 @@ alpha_rad = (alpha_degree*pi)/180;
 a = -9.43386/1000;
 b = 19.86779/1000;
 delta_S = a*(alpha_rad^2) + b*alpha_rad;
+varargout{1} = delta_S;
 % delta_S [m^2] = (-9.43386 * alpha^2 + 19.86779 * alpha) * 10^(-3), with alpha in [rad] from 0 to 0.89 rad.
 
 % Obtain aerobrakes extension given the delta_S

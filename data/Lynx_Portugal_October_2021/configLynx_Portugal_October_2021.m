@@ -34,6 +34,15 @@ settings.frequencies.magnetometerFrequency      =   100;                   % [hz
 settings.frequencies.gpsFrequency               =   10;                    % [hz] control action frequency 
 settings.frequencies.barometerFrequency         =   20;                    % [hz] control action frequency 
 
+% Servo (MARK STAR - HBL 3850) (PYXIS - just for testing, change to the right one)
+settings.servo.tau = 0.05;                                                  % Servo motor time constant 
+settings.servo.tau_acc = 0.01;                                              % Servo motor acceleration time constant
+settings.servo.maxSpeed = deg2rad(300);                     %[rad/s]        % max rpm speed of the servo motor
+settings.servo.minAngle = 0;                                                % min servo angle
+settings.servo.maxAngle = 0.89;
+settings.servo.maxTorque = 51*9.81/100;                                     % max torque guaranteed (given as 51 kg-cm)
+
+
 %% KALMAN TUNING PARAMETERS
 settings.kalman.dt_k          =   0.01;                                    % [s]        kalman time step
 settings.kalman.sigma_baro    =   5;                                       % [m/2]   estimated barometer variance    

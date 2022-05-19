@@ -1,4 +1,4 @@
-function [x] = extension_From_Angle_2022(alpha, settings)
+function [x,varargout] = extension_From_Angle_2022(alpha, settings)
 % HELP
 % alpha must be already in radiants
 %
@@ -11,38 +11,42 @@ switch settings.mission
     case 'Pyxis_Portugal_October_2022'
 
         x = settings.arb.extPol(1)*alpha.^4 + settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + settings.arb.extPol(4).*alpha;
-    
+        deltaS = alpha * 0.009564;
+        varargout{1} = deltaS;
     case 'Pyxis_Roccaraso_September_2022'
 
         x = settings.arb.extPol(1)*alpha.^4 + settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + settings.arb.extPol(4).*alpha;
-    
+        deltaS = alpha * 0.009564;
+        varargout{1} = deltaS;
     
     case 'Lynx_Portugal_October_2021'
 
         % Obtain delta_S given the servomotor angle
         a = -9.43386/1000;
         b = 19.86779/1000;
-        delta_S = a*(alpha^2) + b*alpha;
+        deltaS = a*(alpha^2) + b*alpha;
+        varargout{1} = deltaS;
         % delta_S [m^2] = (-9.43386 * alpha^2 + 19.86779 * alpha) * 10^(-3), with alpha in [rad] from 0 to 0.89 rad.
         
         % Obtain aerobrakes extension given the delta_S
         a = -1.04034;
         b = 0.30548;
-        x = (-b + sqrt(b^2 + 4*a*delta_S)) / (2*a);
+        x = (-b + sqrt(b^2 + 4*a*deltaS)) / (2*a);
         % A [m^2] = -1.04034 * x^2 + 0.30548 * x, with x in [m] from 0 to 0.03866 m;
     
-        case 'Lynx_Roccaraso_September_2021'
+    case 'Lynx_Roccaraso_September_2021'
 
         % Obtain delta_S given the servomotor angle
         a = -9.43386/1000;
         b = 19.86779/1000;
-        delta_S = a*(alpha^2) + b*alpha;
+        deltaS = a*(alpha^2) + b*alpha;
+        varargout{1} = deltaS;
         % delta_S [m^2] = (-9.43386 * alpha^2 + 19.86779 * alpha) * 10^(-3), with alpha in [rad] from 0 to 0.89 rad.
         
         % Obtain aerobrakes extension given the delta_S
         a = -1.04034;
         b = 0.30548;
-        x = (-b + sqrt(b^2 + 4*a*delta_S)) / (2*a);
+        x = (-b + sqrt(b^2 + 4*a*deltaS)) / (2*a);
         % A [m^2] = -1.04034 * x^2 + 0.30548 * x, with x in [m] from 0 to 0.03866 m;
 
 end
