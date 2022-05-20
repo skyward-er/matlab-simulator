@@ -227,7 +227,7 @@ while flagStopIntegration && n_old < nmax
 
     ext = extension_From_Angle_2022(Yf(end,17),settings);
     [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Yf, Tf, ext);
-    [~, ~, p, ~] = atmosisa(-Yf(:,3)) ;
+    [~, ~, p, ~] = atmosisa(-Yf(:,3) + settings.z0) ;  
 
 
     if settings.dataNoise
@@ -359,7 +359,7 @@ while flagStopIntegration && n_old < nmax
     end
 
     % atmosphere
-    [~, a, ~, ~] = atmosisa(z);        % pressure and temperature at each sample time
+    [~, a, ~, ~] = atmosisa(z + settings.z0);        % pressure and temperature at each sample time
 %     normV = norm(Yf(end, 4:6));
     normV = norm([vz vxxx vyyy]);
     mach = normV/a;

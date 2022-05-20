@@ -212,7 +212,7 @@ while flagStopIntegration && n_old < nmax
 
     [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Yf, Tf, ext);
     
-    [~, ~, p, ~] = atmosisa(-Yf(:,3)) ;
+    [~, ~, p, ~] = atmosisa(-Yf(:,3) + settings.z0) ;
 
 
     if settings.dataNoise
@@ -262,7 +262,7 @@ while flagStopIntegration && n_old < nmax
     %% Control algorithm
 
     if flagAeroBrakes && mach < settings.MachControl && settings.Kalman && settings.control
-        zc    =    exp_mean(-x_c(:,3),0.8); % what is this???????????????
+        zc    =    exp_mean(-x_c(:,3),0.8);
         vzc   =    exp_mean(-x_c(:,6),0.8);
         vc    =    exp_mean(sqrt(x_c(:,4).^2+x_c(:,5).^2+x_c(:,6).^2),0.8);
         if c.ctr_start == -1
@@ -357,7 +357,7 @@ while flagStopIntegration && n_old < nmax
     end
 
     % atmosphere
-    [~, a, ~, ~] = atmosisa(z);        % pressure and temperature at each sample time
+    [~, a, ~, ~] = atmosisa(z + settings.z0);        % pressure and temperature at each sample time
 %     normV = norm(Yf(end, 4:6));
     normV = norm([vz vxxx vyyy]);
     mach = normV/a;

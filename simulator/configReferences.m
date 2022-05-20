@@ -42,7 +42,17 @@ switch settings.mission
         reference.z_max = 1307.4;
      
     case 'Pyxis_Roccaraso_September_2022'
-
+        load('Trajectories.mat');
+        for i = 1:size(trajectories_saving,1)
+            reference.vz_ref{i,1} = trajectories_saving{i}.VZ_ref;
+            reference.vy_ref{i,1} = trajectories_saving{i}.VY_ref;
+            reference.vx_ref{i,1} = trajectories_saving{i}.VX_ref;
+            reference.altitude_ref{i,1} = trajectories_saving{i}.Z_ref;
+            
+            for j = 1:length(reference.vz_ref{i,1})
+            reference.Vnorm_ref{i,1}(j) = norm([reference.vz_ref{i,1}(j) reference.vx_ref{i,1}(j) reference.vy_ref{i,1}(j)]);
+            end
+        end
 end
 
 
