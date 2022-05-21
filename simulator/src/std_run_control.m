@@ -1,4 +1,4 @@
-function [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, dataBallisticFlight,saveConstWind] = std_run_control(settings, contSettings)
+function [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, dataBallisticFlight,saveConstWind,varargout] = std_run_control(settings, contSettings)
 %{
 
 STD_RUN_BALLISTIC - This function runs a standard ballistic (non-stochastic) simulation
@@ -96,6 +96,7 @@ magneticFieldApprox = @(zSlm) XYZ0 + (XYZh-XYZ0)./hmax.*zSlm;              % Mag
 dt          =       1/settings.frequencies.controlFrequency;                % Time step of the controller
 t0          =       0;                                                      % First time step - used in ode as initial time
 t1          =       t0 + dt;                                                % Second time step - used in ode as final time
+t_change_ref =      t0 + settings.servo.delay;
 vz          =       0;                                                      % Vertical velocity
 z           =       0;                                                      % Altitude
 nmax        =       10000;                                                  % Max iteration number - stops the integration if reached
@@ -111,6 +112,8 @@ iTimes      =       0;                                                      % It
 c.ctr_start =      -1;                                                      % Air brake control parameter initial condition
 i           =       1;                                                      % Index for while loop
 settings.kalman.pn_prec  =       settings.ada.p_ref;                        % settings for ADA and KALMAN
+ap_ref = 0;                                                                 % air brakes closed until Mach < settings.MachControl
+ap_ref_old = 0;
 alpha_degree_old = 0;
 %% Flag initializations
 flagStopIntegration     =   true;                                           % while this is true the integration runs
@@ -186,10 +189,10 @@ while flagStopIntegration && n_old < nmax
     % dynamics
     if flagFligth
         if settings.ballisticFligth
-            [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings,contSettings, ap_ref, tLaunch);
+            [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, ap_ref_old, ap_ref,t_change_ref, tLaunch);
         else
             if flagAscent
-                [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings,contSettings, ap_ref, tLaunch);
+                [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, ap_ref_old, ap_ref,t_change_ref, tLaunch);
             else
                 if flagPara1
                     para = 1;
@@ -270,6 +273,7 @@ while flagStopIntegration && n_old < nmax
         end
         %% selection of controler type
         time = Tf(end);
+        ap_ref_old = ap_ref;
         switch contSettings.flagPID
             case 1
                 [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_PID    (time,zc, vzc, vc, contSettings,alpha_degree_old,settings);
@@ -314,7 +318,7 @@ while flagStopIntegration && n_old < nmax
     else
         ext = 0;
     end
-
+    ap_ref_vec(iTimes) = ap_ref;
     if settings.control == true  && flagAeroBrakes == 1 && mach < settings.MachControl
         % Save the values to plot them
         c.vz_tot(i)    =  vz;
@@ -455,12 +459,12 @@ c.plot_control =  settings.control && true;
 %% RETRIVE PARAMETERS FROM THE ODE
 
 
-if not(settings.electronics) && ~settings.montecarlo
-    dataBallisticFlight = recallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings,contSettings, c.ap_tot, tLaunch, 'apVec');
-else
+% if not(settings.electronics) && ~settings.montecarlo
+%     dataBallisticFlight = recallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings,contSettings, c.ap_tot, tLaunch, 'apVec');
+% else
     dataBallisticFlight = [];
-end
-
+% end
+% 
 if ~settings.electronics && ~settings.montecarlo
     interpPlots
 end
@@ -470,6 +474,7 @@ end
 %     save('results/Sensors.mat','c');
 % end
 
+varargout{1} = ap_ref_vec;
 
 
 

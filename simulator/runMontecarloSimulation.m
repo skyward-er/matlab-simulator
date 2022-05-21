@@ -133,7 +133,7 @@ if run_Thrust == true
         save_thrust = cell(size(stoch.thrust,1),1);
         apogee.thrust = [];
 
-        parfor i = 1:N_sim%size(stoch.thrust,1)
+        for i = 1:N_sim%size(stoch.thrust,1)
             settings_mont = settings;
             contSettings_mont = contSettings;
             reference_mont = reference;
@@ -254,7 +254,7 @@ if run_Thrust == true
             wind_az(i) = save_thrust{i}.windParams(5);
         end
         plot3(wind_az,thrust_percentage*100,apogee.thrust','*')
-        xlabel('Wind magnitude [m/s]')
+        xlabel('Wind azimuth [m/s]')
         ylabel('Thrust percentage')
         zlabel('Apogee')
         zlim([2800,3200])

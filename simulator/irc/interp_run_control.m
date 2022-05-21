@@ -1,4 +1,4 @@
-function [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, dataBallisticFlight,saveConstWind] = interp_run_control(settings, contSettings)
+function [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, dataBallisticFlight,saveConstWind,varargout] = interp_run_control(settings, contSettings)
 %{
 
 STD_RUN_BALLISTIC - This function runs a standard ballistic (non-stochastic) simulation
@@ -104,6 +104,7 @@ magneticFieldApprox = @(zSlm) XYZ0 + (XYZh-XYZ0)./hmax.*zSlm;              % Mag
 dt          =       1/settings.frequencies.controlFrequency;                % Time step of the controller
 t0          =       0;                                                      % First time step - used in ode as initial time
 t1          =       t0 + dt;                                                % Second time step - used in ode as final time
+t_change_ref =      t0 + settings.servo.delay;
 vz          =       1;                                                      % Vertical velocity
 z           =       1;                                                      % Altitude
 nmax        =       10000;                                                  % Max iteration number - stops the integration if reached
@@ -119,6 +120,7 @@ c.ctr_start =      -1;                                                      % Ai
 i           =       1;                                                      % Index for while loop
 settings.kalman.pn_prec  =       settings.ada.p_ref;                        % settings for ADA and KALMAN
 ap_ref = 0;                                                                 % air brakes closed until Mach < settings.MachControl
+ap_ref_old = 0;
 filterCoeff = contSettings.filter_coeff;
 Zfilter = contSettings.Zfilter;
 %% Flag initializations
@@ -200,10 +202,10 @@ while flagStopIntegration && n_old < nmax
     if flagFligth
 
         if settings.ballisticFligth
-            [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, contSettings, ap_ref, tLaunch);
+            [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, ap_ref_old, ap_ref,t_change_ref, tLaunch);
         else
             if flagAscent
-                [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, contSettings, ap_ref, tLaunch);
+                [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings,  ap_ref_old, ap_ref,t_change_ref, tLaunch);
 
             else
                 if flagPara1
@@ -296,13 +298,14 @@ while flagStopIntegration && n_old < nmax
     %  flag_inizio = 1;
     if flagAeroBrakes && mach < settings.MachControl && settings.Kalman && settings.control
         
-        
+        ap_ref_old = ap_ref;
         if not(contSettings.flagFilter)
             %%%%%%%%% CAMBIA QUI L'ALGORITMO
             %         [ap_ref] = trajectoryChoice2bis(-Y0(3),vz,reference.altitude_ref,reference.vz_ref,'linear',N_forward,deltaZ); % cambiare nome alla funzione tra le altre cose
             %         if flag_inizio == 1
             %             init.options = optimoptions("lsqnonlin","Display","off");
             %             flag_inizio = 0;
+             
             [ap_ref] = trajectoryChoice2bis(z,vz,settings.reference.Z,settings.reference.Vz,'linear',contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
             %         end
             %         tic
@@ -324,9 +327,10 @@ while flagStopIntegration && n_old < nmax
                Zfilter = Zfilter+contSettings.deltaZfilter;
                filterCoeff = filterCoeff/contSettings.filterRatio;
            end
-
+  
         end
     end
+    ap_ref_vec(iTimes) = ap_ref;
 
 
     % Salvo input/output per testare algoritmo cpp
@@ -367,7 +371,7 @@ while flagStopIntegration && n_old < nmax
     % time update
     t0 = t0 + dt;
     t1 = t1 + dt;
-
+    t_change_ref = t0 + settings.servo.delay;
     % assemble total state
     [n, ~] = size(Yf);
     Yf_tot(n_old:n_old+n-1, :)   =  Yf(1:end, :);
@@ -455,11 +459,11 @@ c.plot_control =  settings.control && true;
 
 %% RETRIVE PARAMETERS FROM THE ODE
 
-if not(settings.electronics) && ~settings.montecarlo
-    dataBallisticFlight = recallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings,contSettings, c.ap_tot, tLaunch,'apVec');
-else
+% if not(settings.electronics) && ~settings.montecarlo
+%     dataBallisticFlight = recallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings,contSettings, c.ap_tot, tLaunch,'apVec');
+% else
     dataBallisticFlight = [];
-end
+% end
 
 if ~settings.electronics && ~settings.montecarlo
     interpPlots
@@ -470,7 +474,7 @@ end
 %     save('results/Sensors.mat','c');
 % end
 
-
+varargout{1} = ap_ref_vec;
 
 
 
