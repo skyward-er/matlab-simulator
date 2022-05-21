@@ -42,7 +42,7 @@ rng default
 settings.montecarlo = true;
 
 %% how many simulations
-N_sim = 200; % set to at least 500
+N_sim = 1; % set to at least 500
 
 %% stochastic parameters
 sigma_t = (1.20-1)/3;             % thrust_percentage standard deviation
@@ -158,24 +158,29 @@ if run_Thrust == true
             switch algorithm
                 case "interp"
                     contSettings_mont.filter_coeff = 1;
-                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams] = interp_run_control(settings_mont,contSettings_mont);
-
+                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref] = interp_run_control(settings_mont,contSettings_mont);
                 case "std0"
-                    contSettings_mont.z_trajChoice = 500  % when time of flight is grater than 500s (never) change reference trajectory
-                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams] = std_run_control(settings_mont,contSettings_mont);
-
+                    contSettings_mont.z_trajChoice = 500;  % when time of flight is grater than 500s (never) change reference trajectory
+                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref] = std_run_control(settings_mont,contSettings_mont);
                 case "std2s"
                     contSettings_mont.z_trajChoice = 3; % from 3s after lift off it's possible to change reference trajectory
-                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams] = std_run_control(settings_mont,contSettings_mont);
-
+                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref] = std_run_control(settings_mont,contSettings_mont);
                 case "NoControl"
                     settings_mont.control = false;
-                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams] = interp_run_control(settings_mont,contSettings_mont);
-
+                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref] = interp_run_control(settings_mont,contSettings_mont);
             end
-
-            save_thrust{i} = struct('time',Tf,'control',Yf(:,17),'position',Yf(:,1:3), 'windParams', windParams, 'thrust_percentage', thrust_percentage(i));
-
+            for k = 1:size(Yf,1)
+                [~,~,~,rho] = atmosisa(-Yf(k,3));
+                qdyn(k) = 1/2 * norm([Yf(k,4), Yf(k,5), Yf(k,6)])^2 * rho;
+            end
+            save_thrust{i}.time = Tf;
+            save_thrust{i}.control = Yf(:,17);
+            save_thrust{i}.position = Yf(:,1:3);
+            save_thrust{i}.speed = Yf(:,4:6); 
+            save_thrust{i}.windParams = windParams;
+            save_thrust{i}.thrust_percentage = thrust_percentage(i);
+            save_thrust{i}.qdyn = qdyn;
+            save_thrust{i}.ap_ref = ap_ref;
         end
 
         %%% plots
@@ -265,6 +270,7 @@ if run_Thrust == true
 
 
         %%%%%%%%%%
+        if N_sim>1
         save_thrust_apogee_probability = figure;
         pd = fitdist(apogee.thrust','Normal');    % create normal distribution object to compute mu and sigma
         % probability to reach an apogee between 2950 and 3050
@@ -282,7 +288,7 @@ if run_Thrust == true
         xline(10000000000)
         legend('Apogee Gaussian distribution','Target',algorithm)
         xlim([2000 4000])
-
+        end
         
         %%%%%%%%%%
         save_thrust_apogee_mean = figure;
@@ -306,7 +312,35 @@ if run_Thrust == true
         plot(1:N_sim,sigma)
         xlabel('Number of iterations')
         ylabel('Apogee standard deviation')
+        
+        %%%%%%%%%%%%%%%%%%%%%%%
+        save_dynamic_pressure_and_forces = figure;
+        subplot(1,2,1)
+        for i = 1:N_sim
+            plot(save_thrust{i}.time,save_thrust{i}.qdyn);
+            grid on;
+            hold on;
+        end
+        title('Dynamic Pressure')
+        xlabel('Time [s]')
+        ylabel('Dynamic Pressure [Pa]')
 
+        subplot(1,2,2)
+        for i = 1:N_sim
+            cd=1;% da mettere
+            dS = 0.009564 * save_thrust{i}.control;
+            force = save_thrust{i}.qdyn .* dS' .* cd;
+            force_kg = force/9.81;
+            plot(save_thrust{i}.time,force_kg);
+            grid on;
+            hold on;
+        end
+        title('Aerodynamic load')
+        xlabel('Time [s]')
+        ylabel('Aerodynamic load on airbrakes [kg]')
+
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % save plots
         saveDate = string(datestr(date,29));
         folder = "MontecarloResults\Thrust\"+algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+saveDate;
