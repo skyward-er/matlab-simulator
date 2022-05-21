@@ -181,7 +181,7 @@ if run_Thrust == true
         %%% plots
         %%%%%%%%%
         save_thrust_plotControl = figure;
-        for i = 1:size(save_thrust,1)
+        for i = 1%:size(save_thrust,1)
             plot(save_thrust{i}.time,save_thrust{i}.control)
             hold on;
             grid on;
@@ -229,12 +229,14 @@ if run_Thrust == true
 
 
         %%%%%%%%%%%
+
         save_thrust_apogee_3D = figure;
+        subplot(2,1,1)
         hold on
         grid on
         wind_Mag = zeros(N_sim,1);
         for i = 1:N_sim
-            wind_Mag(i) = norm([stoch.wind.uw(i), stoch.wind.vw(i), stoch.wind.ww(i)]);
+            wind_Mag(i) = norm([save_thrust{i}.windParams(1), save_thrust{i}.windParams(2), save_thrust{i}.windParams(3)]);
         end
         plot3(wind_Mag,thrust_percentage*100,apogee.thrust','*')
         xlabel('Wind magnitude [m/s]')
@@ -243,6 +245,22 @@ if run_Thrust == true
         zlim([2800,3200])
         view(30,20)
         legend(algorithm);
+%%%%%%%%%%%
+        subplot(2,1,2)
+        hold on
+        grid on
+        wind_az = zeros(N_sim,1);
+        for i = 1:N_sim
+            wind_az(i) = save_thrust{i}.windParams(5);
+        end
+        plot3(wind_az,thrust_percentage*100,apogee.thrust','*')
+        xlabel('Wind magnitude [m/s]')
+        ylabel('Thrust percentage')
+        zlabel('Apogee')
+        zlim([2800,3200])
+        view(30,20)
+        legend(algorithm);
+        %safe ellipses?
         %safe ellipses?
 
 

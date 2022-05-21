@@ -12,12 +12,13 @@ CALLED SCRIPTS: configSimulator, simulationsData
 CALLED FUNCTIONS: 
 
 REVISIONS:
-- 0     16/04/2021, Release,    Alessandro Del Duca
+- 0     xx/xx/xxxx, Release,    Ruben Di Battista
+- 1     16/04/2021, update,     Alessandro Del Duca
 
-- 1     07/04/2022, update,     Davide Rosato, AFD Department
+- 2     07/04/2022, update,     Davide Rosato, AFD Department
                     Compatibility with common functions folder
 
-- 2     15/04/2022, update,     Marco Marchesi, SCS department
+- 3     15/04/2022, update,     Marco Marchesi, SCS department
                     Latest control algorithms
 
 Copyright © 2022, Skyward Experimental Rocketry, SCS department
