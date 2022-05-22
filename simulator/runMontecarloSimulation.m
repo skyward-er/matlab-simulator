@@ -42,7 +42,7 @@ rng default
 settings.montecarlo = true;
 
 %% how many simulations
-N_sim = 1; % set to at least 500
+N_sim = 200; % set to at least 500
 
 %% stochastic parameters
 sigma_t = (1.20-1)/3;             % thrust_percentage standard deviation
@@ -133,7 +133,7 @@ if run_Thrust == true
         save_thrust = cell(size(stoch.thrust,1),1);
         apogee.thrust = [];
 
-        for i = 1:N_sim%size(stoch.thrust,1)
+        parfor i = 1:N_sim
             settings_mont = settings;
             contSettings_mont = contSettings;
             reference_mont = reference;
@@ -145,7 +145,7 @@ if run_Thrust == true
             settings_mont.wind.model = false;
             settings_mont.wind.input = false;
 
-            %           set the wind parameters
+            % set the wind parameters
             settings_mont.wind.uw = stoch.wind.uw(i);
             settings_mont.wind.vw = stoch.wind.vw(i);
             settings_mont.wind.ww = stoch.wind.ww(i);
@@ -158,21 +158,18 @@ if run_Thrust == true
             switch algorithm
                 case "interp"
                     contSettings_mont.filter_coeff = 1;
-                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref] = interp_run_control(settings_mont,contSettings_mont);
+                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = interp_run_control(settings_mont,contSettings_mont);
                 case "std0"
                     contSettings_mont.z_trajChoice = 500;  % when time of flight is grater than 500s (never) change reference trajectory
-                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref] = std_run_control(settings_mont,contSettings_mont);
+                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = std_run_control(settings_mont,contSettings_mont);
                 case "std2s"
                     contSettings_mont.z_trajChoice = 3; % from 3s after lift off it's possible to change reference trajectory
-                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref] = std_run_control(settings_mont,contSettings_mont);
+                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = std_run_control(settings_mont,contSettings_mont);
                 case "NoControl"
                     settings_mont.control = false;
-                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref] = interp_run_control(settings_mont,contSettings_mont);
+                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = interp_run_control(settings_mont,contSettings_mont);
             end
-            for k = 1:size(Yf,1)
-                [~,~,~,rho] = atmosisa(-Yf(k,3));
-                qdyn(k) = 1/2 * norm([Yf(k,4), Yf(k,5), Yf(k,6)])^2 * rho;
-            end
+            
             save_thrust{i}.time = Tf;
             save_thrust{i}.control = Yf(:,17);
             save_thrust{i}.position = Yf(:,1:3);
@@ -186,7 +183,7 @@ if run_Thrust == true
         %%% plots
         %%%%%%%%%
         save_thrust_plotControl = figure;
-        for i = 1%:size(save_thrust,1)
+        for i = floor(linspace(1,N_sim,5))
             plot(save_thrust{i}.time,save_thrust{i}.control)
             hold on;
             grid on;
@@ -316,7 +313,7 @@ if run_Thrust == true
         %%%%%%%%%%%%%%%%%%%%%%%
         save_dynamic_pressure_and_forces = figure;
         subplot(1,2,1)
-        for i = 1:N_sim
+        for i = floor(linspace(1,N_sim,5))
             plot(save_thrust{i}.time,save_thrust{i}.qdyn);
             grid on;
             hold on;
@@ -326,10 +323,9 @@ if run_Thrust == true
         ylabel('Dynamic Pressure [Pa]')
 
         subplot(1,2,2)
-        for i = 1:N_sim
-            cd=1;% da mettere
+        for i = floor(linspace(1,N_sim,5))
             dS = 0.009564 * save_thrust{i}.control;
-            force = save_thrust{i}.qdyn .* dS' .* cd;
+            force = save_thrust{i}.qdyn .* dS';
             force_kg = force/9.81;
             plot(save_thrust{i}.time,force_kg);
             grid on;
@@ -352,7 +348,8 @@ if run_Thrust == true
             saveas(save_thrust_apogee_probability,folder+"\ApogeeProbabilityPlot")
             saveas(save_thrust_apogee_mean,folder+"\ApogeeMeanOverNsimPlot")
             saveas(save_thrust_apogee_std,folder+"\ApogeeStdOverNsimPlot")
-            saveas( save_thrust_apogee_3D,folder+"\ApogeeWindThrust")
+            saveas(save_thrust_apogee_3D,folder+"\ApogeeWindThrust")
+            saveas(save_dynamic_pressure_and_forces,folder+"\save_dynamic_pressure_and_forces")
             save(folder+"\saveThrust.mat","save_thrust","apogee")
         end
 

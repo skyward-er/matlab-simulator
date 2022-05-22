@@ -330,23 +330,17 @@ while flagStopIntegration && n_old < nmax
            end
   
         end
-    end
-    ap_ref = [ ap_ref_old ap_ref_new ];
-    ap_ref_vec(iTimes,:) = ap_ref;
+    
+    
 
 
     % Salvo input/output per testare algoritmo cpp
-    %         input_output_test(indice_test) = struct('alpha_degree', alpha_degree, 'vz_setpoint', vz_setpoint, 'z_setpoint', z_setpoint, 'z', z, 'vz', vz, 'Vmod', sqrt(vxxx^2 + vyyy^2 + vz^2));
-    %         indice_test = indice_test +1;
-    %
-    %         ext = extension_From_Angle_2022(alpha_degree,contSettings);
-    %     i = i + 1;
-    %     elseif flagAeroBrakes && mach < 0.8
-    %         ext  = extension_From_Angle_2022(17.1771,contSettings); % ????
-    %     else
-    %         ext = 0;
-    %     end
-
+    i = i + 1;
+    else
+       ap_ref_new = 0;
+    end
+    ap_ref = [ ap_ref_old ap_ref_new ];
+    ap_ref_vec(iTimes,:) = ap_ref;
 
     if settings.control == true  && flagAeroBrakes == 1 && mach < settings.MachControl
         % Save the values to plot them
@@ -459,6 +453,13 @@ c.plot_sensors =  settings.dataNoise && false;
 c.plot_kalman  =  settings.Kalman && false;
 c.plot_control =  settings.control && true;
 
+
+%% other useful parameters:
+qdyn = zeros(size(Yf,1));
+for k = 1:size(Yf,1)
+    [~,~,~,rho] = atmosisa(-Yf(k,3));
+    qdyn(k) = 1/2 * norm([Yf(k,4), Yf(k,5), Yf(k,6)])^2 * rho;
+end
 %% RETRIVE PARAMETERS FROM THE ODE
 
 if not(settings.electronics) && ~settings.montecarlo
@@ -477,6 +478,7 @@ end
 % end
 
 varargout{1} = ap_ref_vec;
+varargout{2} = qdyn;
 
 
 
