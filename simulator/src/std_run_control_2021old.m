@@ -199,7 +199,7 @@ while flagStopIntegration && n_old < nmax
                 end
 
                 Y0 = Y0(1:6);
-                [Tf, Yd] = ode45(@descentParachute, [t0, t1], Y0, [], settings, uw, vw, ww, para, uncert);
+                [Tf, Yd] = ode45(@descentParachute, [t0, t1], Y0, [], settings, uw, vw, ww, para);
                 [nd, ~] = size(Yd);
                 Yf = [Yd, zeros(nd, 7), settings.Ixxe*ones(nd, 1), ...
                     settings.Iyye*ones(nd, 1), settings.Iyye*ones(nd, 1)];

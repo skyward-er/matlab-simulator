@@ -1,4 +1,4 @@
-function [dY, parout] = ascentInterpContr(t, YY, settings, ap_ref_old, ap_ref_new,t_change_ref, tLaunch,varargin)
+function [dY, parout] = ascentInterpContr(t, YY, settings, ap_ref_vec,t_change_ref, tLaunch,varargin)
 %{
 
 ASCENT - ode function of the 6DOF Rigid Rocket Model
@@ -293,10 +293,15 @@ else %%% rocket out of the launchpad
     
 
     if  M_value < settings.MachControl && t>tb
-        if t < t_change_ref
-            ap_ref = ap_ref_old;    
-        else
-            ap_ref = ap_ref_new;
+
+        if length(ap_ref_vec)==2 % for the recallOdeFunction
+            if t < t_change_ref
+                ap_ref = ap_ref_vec(1);    
+            else
+                ap_ref = ap_ref_vec(2);
+            end
+        else 
+            ap_ref = ap_ref_vec;
         end
         dap_ref = (ap_ref-ap)/settings.servo.tau;
         if abs(dap_ref) >settings.servo.maxSpeed

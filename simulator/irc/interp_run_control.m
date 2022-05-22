@@ -107,22 +107,24 @@ t1          =       t0 + dt;                                                % Se
 t_change_ref =      t0 + settings.servo.delay;
 vz          =       1;                                                      % Vertical velocity
 z           =       1;                                                      % Altitude
-nmax        =       10000;                                                  % Max iteration number - stops the integration if reached
+nmax        =       100000;                                                 % Max iteration number - stops the integration if reached
 mach        =       0;                                                      % Mach number
-ext         =       0;                                                %???  % air brake extension?
+ext         =       0;                                                      % air brake extension
 n_old       =       1;                                                      % Iteration number (first iter-> n=1)
 Yf_tot      =       zeros(nmax, length(Y0));                                % State vector for ode integration
 Tf_tot      =       zeros(nmax, 1);                                         % Time vector for ode integration
-ext_tot     =       zeros(nmax, 1);                                   %???  % Air brake control parameter
+ext_tot     =       zeros(nmax, 1);                                         % Air brake extension vector
 cpuTimes    =       zeros(nmax,1);                                          % Vector of iterations
 iTimes      =       0;                                                      % Iteration
 c.ctr_start =      -1;                                                      % Air brake control parameter initial condition
 i           =       1;                                                      % Index for while loop
 settings.kalman.pn_prec  =       settings.ada.p_ref;                        % settings for ADA and KALMAN
-ap_ref = 0;                                                                 % air brakes closed until Mach < settings.MachControl
+ap_ref_new = 0;                                                             % air brakes closed until Mach < settings.MachControl
 ap_ref_old = 0;
 filterCoeff = contSettings.filter_coeff;
 Zfilter = contSettings.Zfilter;
+
+ap_ref = [ ap_ref_old ap_ref_new ];
 %% Flag initializations
 flagStopIntegration     =   true;                                           % while this is true the integration runs
 flagAscent              =   false;                                          % while this is false...
@@ -146,7 +148,6 @@ end
 % Salvo input/output per testare algoritmo cpp
 indice_test = 1;
 
-settings.MachControl = 0.85;
 while flagStopIntegration && n_old < nmax
     tic                                                                     % Starts CHRONO
     iTimes = iTimes + 1;                                                    % Advance the steps
@@ -200,12 +201,12 @@ while flagStopIntegration && n_old < nmax
 
     % dynamics
     if flagFligth
-
+    
         if settings.ballisticFligth
-            [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, ap_ref_old, ap_ref,t_change_ref, tLaunch);
+            [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, ap_ref, t_change_ref, tLaunch);
         else
             if flagAscent
-                [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings,  ap_ref_old, ap_ref,t_change_ref, tLaunch);
+                [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings,  ap_ref, t_change_ref, tLaunch);
 
             else
                 if flagPara1
@@ -216,10 +217,10 @@ while flagStopIntegration && n_old < nmax
                 end
 
                 Y0 = Y0(1:6);
-                [Tf, Yd] = ode45(@descentParachute, [t0, t1], Y0, [], settings, uw, vw, ww, para, uncert);
+                [Tf, Yd] = ode45(@descentParachute, [t0, t1], Y0, [], settings, uw, vw, ww, para); % ..., para, uncert);
                 [nd, ~] = size(Yd);
                 Yf = [Yd, zeros(nd, 7), settings.Ixxe*ones(nd, 1), ...
-                    settings.Iyye*ones(nd, 1), settings.Iyye*ones(nd, 1)];
+                    settings.Iyye*ones(nd, 1), settings.Iyye*ones(nd, 1),zeros(nd,2)];
             end
         end
     else
@@ -298,7 +299,7 @@ while flagStopIntegration && n_old < nmax
     %  flag_inizio = 1;
     if flagAeroBrakes && mach < settings.MachControl && settings.Kalman && settings.control
         
-        ap_ref_old = ap_ref;
+        ap_ref_old = ap_ref_new;
         if not(contSettings.flagFilter)
             %%%%%%%%% CAMBIA QUI L'ALGORITMO
             %         [ap_ref] = trajectoryChoice2bis(-Y0(3),vz,reference.altitude_ref,reference.vz_ref,'linear',N_forward,deltaZ); % cambiare nome alla funzione tra le altre cose
@@ -306,7 +307,7 @@ while flagStopIntegration && n_old < nmax
             %             init.options = optimoptions("lsqnonlin","Display","off");
             %             flag_inizio = 0;
              
-            [ap_ref] = trajectoryChoice2bis(z,vz,settings.reference.Z,settings.reference.Vz,'linear',contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
+            [ap_ref_new] = trajectoryChoice2bis(z,vz,settings.reference.Z,settings.reference.Vz,'linear',contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
             %         end
             %         tic
             %         [ap_ref] = shootingControl([-Y0(3),vz],ap_ref,settings,contSettings.coeff_Cd,settings.arb,init);
@@ -314,14 +315,14 @@ while flagStopIntegration && n_old < nmax
             %%%%%%%%%
             if z> 2500
                 delta_ap_limiter = 0.2;
-                if abs(ap_ref - Yf(end,17))>delta_ap_limiter
-                    ap_ref = Yf(end,17)+sign(ap_ref - Yf(end,17))*delta_ap_limiter;
+                if abs(ap_ref_new - Yf(end,17))>delta_ap_limiter
+                    ap_ref_new = Yf(end,17)+sign(ap_ref_new - Yf(end,17))*delta_ap_limiter;
                 end
             end
         else
             [ap_base_filter] = trajectoryChoice2bis(z,vz,settings.reference.Z,settings.reference.Vz,contSettings.interpType,contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
             % filter control action
-            ap_ref = ap_ref + (ap_base_filter -ap_ref)*filterCoeff;
+            ap_ref_new = ap_ref_new + (ap_base_filter -ap_ref_new)*filterCoeff;
             
            if z>Zfilter
                Zfilter = Zfilter+contSettings.deltaZfilter;
@@ -330,7 +331,8 @@ while flagStopIntegration && n_old < nmax
   
         end
     end
-    ap_ref_vec(iTimes) = ap_ref;
+    ap_ref = [ ap_ref_old ap_ref_new ];
+    ap_ref_vec(iTimes,:) = ap_ref;
 
 
     % Salvo input/output per testare algoritmo cpp
@@ -350,7 +352,7 @@ while flagStopIntegration && n_old < nmax
         % Save the values to plot them
         c.vz_tot(i)    =  vz;
         c.z_tot(i)     =  z;
-        c.ap_ref_tot(i) =  ap_ref;
+        c.ap_ref_tot(i) =  ap_ref_new;
     end
 
 
@@ -459,11 +461,11 @@ c.plot_control =  settings.control && true;
 
 %% RETRIVE PARAMETERS FROM THE ODE
 
-% if not(settings.electronics) && ~settings.montecarlo
-%     dataBallisticFlight = recallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings,contSettings, c.ap_tot, tLaunch,'apVec');
-% else
+if not(settings.electronics) && ~settings.montecarlo
+    dataBallisticFlight = recallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings, c.ap_tot, settings.servo.delay,tLaunch,'apVec');
+else
     dataBallisticFlight = [];
-% end
+end
 
 if ~settings.electronics && ~settings.montecarlo
     interpPlots

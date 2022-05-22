@@ -61,7 +61,7 @@ end
 % T = vector of time used by ODE, [s] also for Tf Ta
 % Y = State = ( x y z | u v w | p q r | q0 q1 q2 q3 | thetax thetay thetaz | ap_ref ) also for Ya,Yf corresponding to T
 
-algorithm = 'std';
+algorithm = 'interp';
 switch algorithm
     case 'interp'
         if settings.electronics
@@ -103,6 +103,8 @@ abs_V = vecnorm(Va');
 [max_dist, imax_dist] = max(abs_X);
 [max_v, imax_v] = max(abs_V);
 
+
+
 % DATA RECORD (display)
 fprintf('OUTCOMES:\n\n\n')
 
@@ -140,6 +142,9 @@ if not(settings.electronics)
 end
 fprintf('apogee: %.1f [m] \n', max_z);
 delete('launchFlag.txt')
+
+% save data
+save("Simulation_log.mat","Tf","Yf","data_flight")
 
 clearvars -except Yf data_flight settings
  

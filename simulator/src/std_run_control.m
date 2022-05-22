@@ -112,8 +112,9 @@ iTimes      =       0;                                                      % It
 c.ctr_start =      -1;                                                      % Air brake control parameter initial condition
 i           =       1;                                                      % Index for while loop
 settings.kalman.pn_prec  =       settings.ada.p_ref;                        % settings for ADA and KALMAN
-ap_ref = 0;                                                                 % air brakes closed until Mach < settings.MachControl
-ap_ref_old = 0;
+ap_ref_old = 0;                                                                 % air brakes closed until Mach < settings.MachControl
+ap_ref_new = 0;
+ap_ref = [ ap_ref_old ap_ref_new ];
 alpha_degree_old = 0;
 %% Flag initializations
 flagStopIntegration     =   true;                                           % while this is true the integration runs
@@ -189,10 +190,10 @@ while flagStopIntegration && n_old < nmax
     % dynamics
     if flagFligth
         if settings.ballisticFligth
-            [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, ap_ref_old, ap_ref,t_change_ref, tLaunch);
+            [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, ap_ref,t_change_ref, tLaunch);
         else
             if flagAscent
-                [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, ap_ref_old, ap_ref,t_change_ref, tLaunch);
+                [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, ap_ref,t_change_ref, tLaunch);
             else
                 if flagPara1
                     para = 1;
@@ -202,10 +203,10 @@ while flagStopIntegration && n_old < nmax
                 end
 
                 Y0 = Y0(1:6);
-                [Tf, Yd] = ode45(@descentParachute, [t0, t1], Y0, [], settings, uw, vw, ww, para, uncert);
+                [Tf, Yd] = ode45(@descentParachute, [t0, t1], Y0, [], settings, uw, vw, ww, para); % ..., para, uncert);
                 [nd, ~] = size(Yd);
                 Yf = [Yd, zeros(nd, 7), settings.Ixxe*ones(nd, 1), ...
-                    settings.Iyye*ones(nd, 1), settings.Iyye*ones(nd, 1)];
+                    settings.Iyye*ones(nd, 1), settings.Iyye*ones(nd, 1),zeros(nd,2)];
             end
         end
     else
@@ -273,21 +274,21 @@ while flagStopIntegration && n_old < nmax
         end
         %% selection of controler type
         time = Tf(end);
-        ap_ref_old = ap_ref;
+        ap_ref_old = ap_ref_new;
         switch contSettings.flagPID
             case 1
                 [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_PID    (time,zc, vzc, vc, contSettings,alpha_degree_old,settings);
-                ap_ref = deg2rad(alpha_degree);
+                ap_ref_new = deg2rad(alpha_degree);
             case 2
                 [alpha_degree, vz_setpoint, z_setpoint, pid, U_linear, Cdd, delta_S, contSettings] = control_Lin    (zc, vzc, vc, contSettings);
             case 3
                 [alpha_degree, vz_setpoint, z_setpoint, contSettings]                              = control_Servo  (zc, vzc,  contSettings,settings);
-                ap_ref = deg2rad(alpha_degree);
+                ap_ref_new = deg2rad(alpha_degree);
         end
         input_output_test(indice_test) = struct('alpha_degree', alpha_degree, 'vz_setpoint', vz_setpoint, 'z_setpoint', z_setpoint, 'z', zc, 'vz', vzc, 'Vmod', sqrt(vxxx^2 + vyyy^2 + vz^2));
         indice_test = indice_test +1;
 
-        ext = extension_From_Angle_2022(ap_ref,settings);
+        ext = extension_From_Angle_2022(ap_ref_new,settings);
         i = i + 1;
         alpha_degree_old = alpha_degree;
     elseif flagAeroBrakes && ~settings.Kalman && settings.control
@@ -300,25 +301,27 @@ while flagStopIntegration && n_old < nmax
         switch contSettings.flagPID
             case 1
                 [alpha_degree, vz_setpoint, z_setpoint, pid,U_linear, Cdd, delta_S, contSettings] =   control_PID     (time,z, vz, sqrt(vxxx^2 + vyyy^2 + vz^2),  contSettings,alpha_degree_old);
-                ap_ref = deg2rad(alpha_degree);
+                ap_ref_new = deg2rad(alpha_degree);
             case 2
                 [alpha_degree, vz_setpoint, z_setpoint, pid,U_linear, Cdd, delta_S, contSettings] =   control_Lin     (z, vz, sqrt(vxxx^2 + vyyy^2 + vz^2),  contSettings);
             case 3
                 [alpha_degree, vz_setpoint, z_setpoint, contSettings]                             =   control_Servo   (z, vz(end),  contSettings,settings);
-                ap_ref = deg2rad(alpha_degree);
+                ap_ref_new = deg2rad(alpha_degree);
         end
 
         % Salvo input/output per testare algoritmo cpp
         input_output_test(indice_test) = struct('alpha_degree', alpha_degree, 'vz_setpoint', vz_setpoint, 'z_setpoint', z_setpoint, 'z', z, 'vz', vz, 'Vmod', sqrt(vxxx^2 + vyyy^2 + vz^2));
         indice_test = indice_test +1;
         
-        ext = extension_From_Angle_2022(ap_ref,settings);
+        ext = extension_From_Angle_2022(ap_ref_new,settings);
         i = i + 1;
         alpha_degree_old = alpha_degree;
     else
         ext = 0;
     end
-    ap_ref_vec(iTimes) = ap_ref;
+    ap_ref = [ ap_ref_old ap_ref_new ];
+    ap_ref_vec(iTimes,:) = ap_ref;
+    
     if settings.control == true  && flagAeroBrakes == 1 && mach < settings.MachControl
         % Save the values to plot them
         c.vz_tot(i)    =  vz;
@@ -459,14 +462,14 @@ c.plot_control =  settings.control && true;
 %% RETRIVE PARAMETERS FROM THE ODE
 
 
-% if not(settings.electronics) && ~settings.montecarlo
-%     dataBallisticFlight = recallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings,contSettings, c.ap_tot, tLaunch, 'apVec');
-% else
+if not(settings.electronics) && ~settings.montecarlo
+    dataBallisticFlight = recallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings, c.ap_tot, settings.servo.delay,tLaunch,'apVec');
+else
     dataBallisticFlight = [];
-% end
-% 
+end
+
 if ~settings.electronics && ~settings.montecarlo
-    interpPlots
+    plots
 end
 
 % save('results/Ground_truth.mat','sensorData');
