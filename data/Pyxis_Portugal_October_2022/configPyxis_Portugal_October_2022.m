@@ -47,6 +47,7 @@ settings.arb.extPol(1) = -0.009216;                                         % co
 settings.arb.extPol(2) = 0.02492;                                           % coefficient for extension - alpha^3
 settings.arb.extPol(3) = -0.01627;                                          % coefficient for extension - alpha^2
 settings.arb.extPol(4) = 0.03191;                                           % coefficient for extension - alpha
+settings.arb.maxExt = settings.Controls(end);
 
 % servo angle to exposed surface of the airbrakes (PYXIS)
 settings.arb.surfPol = 0.009564;                                            % coefficient for surface - alpha
@@ -67,6 +68,7 @@ x = @(alpha) settings.arb.extPol(1)*alpha.^4 + ...
     settings.arb.extPol(4).*alpha;
 fun = @(alpha) x(alpha) - settings.Controls(end);
 settings.servo.maxAngle = fzero(fun, deg2rad(50));
+settings.servo.maxAngle = fix(settings.servo.maxAngle*1e9)/1e9; % to avoid computational error propagation (truncates the angle to the ninth decimal)
 
 %% KALMAN TUNING PARAMETERS
 settings.kalman.dt_k          =   0.01;                                    % [s]        kalman time step

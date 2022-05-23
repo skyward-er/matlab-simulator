@@ -121,6 +121,7 @@ i           =       1;                                                      % In
 settings.kalman.pn_prec  =       settings.ada.p_ref;                        % settings for ADA and KALMAN
 ap_ref_new = 0;                                                             % air brakes closed until Mach < settings.MachControl
 ap_ref_old = 0;
+flagFirstControl = true;                                                    % if it is the first iter the control action is not filtered, then the filter acts
 filterCoeff = contSettings.filter_coeff;
 Zfilter = contSettings.Zfilter;
 
@@ -229,6 +230,9 @@ while flagStopIntegration && n_old < nmax
     end
 
     ext = extension_From_Angle_2022(Yf(end,17),settings);
+    if ext > settings.arb.maxExt&& ext < settings.arb.maxExt
+        error("the extension of the airbrakes exceeds the maximum value: ext = "+num2str(ext))
+    end
     [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Yf, Tf, ext);
     [~, ~, p, ~] = atmosisa(-Yf(:,3) + settings.z0) ;  
 
@@ -322,8 +326,10 @@ while flagStopIntegration && n_old < nmax
         else
             [ap_base_filter] = trajectoryChoice2bis(z,vz,settings.reference.Z,settings.reference.Vz,contSettings.interpType,contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
             % filter control action
-            ap_ref_new = ap_ref_new + (ap_base_filter -ap_ref_new)*filterCoeff;
-            
+            if flagFirstControl == false % the first reference is given the fastest possible (unfiltered), then filter
+                ap_ref_new = ap_ref_new + (ap_base_filter -ap_ref_new)*filterCoeff;
+            end
+            flagFirstControl = false;
            if z>Zfilter
                Zfilter = Zfilter+contSettings.deltaZfilter;
                filterCoeff = filterCoeff/contSettings.filterRatio;
@@ -455,10 +461,10 @@ c.plot_control =  settings.control && true;
 
 
 %% other useful parameters:
-qdyn = zeros(size(Yf,1));
+qdyn = zeros(size(Yf,1),1);
 for k = 1:size(Yf,1)
     [~,~,~,rho] = atmosisa(-Yf(k,3));
-    qdyn(k) = 1/2 * norm([Yf(k,4), Yf(k,5), Yf(k,6)])^2 * rho;
+    qdyn(k,1) = 1/2 * norm([Yf(k,4), Yf(k,5), Yf(k,6)])^2 * rho;
 end
 %% RETRIVE PARAMETERS FROM THE ODE
 

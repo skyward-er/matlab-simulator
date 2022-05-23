@@ -38,11 +38,10 @@ configReferences;
 
 %% MONTECARLO SETTINGS
 rng default
-
 settings.montecarlo = true;
 
 %% how many simulations
-N_sim = 200; % set to at least 500
+N_sim = 400; % set to at least 500
 
 %% stochastic parameters
 sigma_t = (1.20-1)/3;             % thrust_percentage standard deviation
@@ -80,11 +79,11 @@ contSettings.deltaZ_change = 2;                                         % change
 
 %% wind parameters
 settings.wind.MagMin = 0;                                               % [m/s] Minimum Wind Magnitude
-settings.wind.MagMax = 9;                                               % [m/s] Maximum Wind Magnitude
-settings.wind.ElMin  = - 45;
-settings.wind.ElMax  = + 45;
-settings.wind.AzMin  = - 180;
-settings.wind.AzMax  = + 180;
+settings.wind.MagMax = 10;                                               % [m/s] Maximum Wind Magnitude
+settings.wind.ElMin  = - deg2rad(45);
+settings.wind.ElMax  = + deg2rad(45);
+settings.wind.AzMin  = - deg2rad(180);
+settings.wind.AzMax  = + deg2rad(180);
 
 
 [stoch.wind.uw, stoch.wind.vw, stoch.wind.ww, stoch.wind.Az, stoch.wind.El] = windConstGeneratorMontecarlo(settings.wind,N_sim);
@@ -180,8 +179,7 @@ if run_Thrust == true
             save_thrust{i}.ap_ref = ap_ref;
         end
 
-        %%% plots
-        %%%%%%%%%
+        %% PLOT CONTROL
         save_thrust_plotControl = figure;
         for i = floor(linspace(1,N_sim,5))
             plot(save_thrust{i}.time,save_thrust{i}.control)
@@ -195,7 +193,7 @@ if run_Thrust == true
 
 
         
-        %%%%%%%%%%
+        %% PLOT APOGEE 2D
         save_thrust_plotApogee = figure;
         for i = 1:N_sim
             apogee.thrust(i) = max(-save_thrust{i}.position(:,3));
@@ -213,7 +211,7 @@ if run_Thrust == true
         legend(algorithm);
 
 
-        %%%%%%%%
+        %% PLOT TRAJECTORY
         apogee.thrust_mean = mean(apogee.thrust);
         apogee.thrust_variance = std(apogee.thrust);
 
@@ -230,10 +228,10 @@ if run_Thrust == true
         legend(algorithm);
 
 
-        %%%%%%%%%%%
+        %% PLOT APOGEE 3D
 
         save_thrust_apogee_3D = figure;
-        subplot(2,1,1)
+        subplot(2,2,1)
         hold on
         grid on
         wind_Mag = zeros(N_sim,1);
@@ -247,17 +245,43 @@ if run_Thrust == true
         zlim([2800,3200])
         view(30,20)
         legend(algorithm);
-%%%%%%%%%%%
-        subplot(2,1,2)
+        %%%%%%%%%%%
+        subplot(2,2,2)
         hold on
         grid on
         wind_az = zeros(N_sim,1);
         for i = 1:N_sim
-            wind_az(i) = save_thrust{i}.windParams(5);
+            wind_az(i) = rad2deg(save_thrust{i}.windParams(4));
         end
         plot3(wind_az,thrust_percentage*100,apogee.thrust','*')
-        xlabel('Wind azimuth [m/s]')
+        xlabel('Wind azimuth [°]')
         ylabel('Thrust percentage')
+        zlabel('Apogee')
+        zlim([2800,3200])
+        view(30,20)
+        legend(algorithm);
+        %%%%%%%%%%%%
+        subplot(2,2,3)
+        hold on
+        grid on
+        wind_el = zeros(N_sim,1);
+        for i = 1:N_sim
+            wind_el(i) = rad2deg(save_thrust{i}.windParams(5)); % in degrees
+        end
+        plot3(wind_el,thrust_percentage*100,apogee.thrust','*')
+        xlabel('Wind elevation [°]')
+        ylabel('Thrust percentage [%]')
+        zlabel('Apogee')
+        zlim([2800,3200])
+        view(30,20)
+        legend(algorithm);
+        %%%%%
+        subplot(2,2,4)
+        hold on
+        grid on
+        plot3(wind_el,wind_az,apogee.thrust','*')
+        xlabel('Wind elevation [°]')
+        ylabel('Wind azimuth [°]')
         zlabel('Apogee')
         zlim([2800,3200])
         view(30,20)
@@ -266,7 +290,7 @@ if run_Thrust == true
         %safe ellipses?
 
 
-        %%%%%%%%%%
+        %% PLOT PROBABILITY FUNCTION
         if N_sim>1
         save_thrust_apogee_probability = figure;
         pd = fitdist(apogee.thrust','Normal');    % create normal distribution object to compute mu and sigma
@@ -287,7 +311,7 @@ if run_Thrust == true
         xlim([2000 4000])
         end
         
-        %%%%%%%%%%
+        %% PLOT MEAN
         save_thrust_apogee_mean = figure;
         mu = zeros(N_sim,1);
         sigma = zeros(N_sim,1);
@@ -302,7 +326,7 @@ if run_Thrust == true
         ylabel('Apogee mean value')
 
 
-        %%%%%%%%%%%
+        %% PLOT STANDARD DEVIATION
         save_thrust_apogee_std = figure;
         hold on
         grid on
@@ -310,7 +334,7 @@ if run_Thrust == true
         xlabel('Number of iterations')
         ylabel('Apogee standard deviation')
         
-        %%%%%%%%%%%%%%%%%%%%%%%
+        %% PLOT DYNAMIC PRESSURE
         save_dynamic_pressure_and_forces = figure;
         subplot(1,2,1)
         for i = floor(linspace(1,N_sim,5))
@@ -324,8 +348,8 @@ if run_Thrust == true
 
         subplot(1,2,2)
         for i = floor(linspace(1,N_sim,5))
-            dS = 0.009564 * save_thrust{i}.control;
-            force = save_thrust{i}.qdyn .* dS';
+            dS = 3*0.009564 * save_thrust{i}.control; 
+            force = save_thrust{i}.qdyn .* dS;
             force_kg = force/9.81;
             plot(save_thrust{i}.time,force_kg);
             grid on;
@@ -333,15 +357,15 @@ if run_Thrust == true
         end
         title('Aerodynamic load')
         xlabel('Time [s]')
-        ylabel('Aerodynamic load on airbrakes [kg]')
+        ylabel('Total aerodynamic load on airbrakes [kg]')
 
 
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %% SAVE
         % save plots
         saveDate = string(datestr(date,29));
         folder = "MontecarloResults\Thrust\"+algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+saveDate;
         if flagSave == "yes"
-            mkdir(folder(1))
+            mkdir(folder)
             saveas(save_thrust_plotControl,folder+"\controlPlot")
             saveas(save_thrust_plotApogee,folder+"\apogeelPlot")
             saveas(save_thrust_plotTrajectory,folder+"\TrajectoryPlot")
@@ -349,11 +373,11 @@ if run_Thrust == true
             saveas(save_thrust_apogee_mean,folder+"\ApogeeMeanOverNsimPlot")
             saveas(save_thrust_apogee_std,folder+"\ApogeeStdOverNsimPlot")
             saveas(save_thrust_apogee_3D,folder+"\ApogeeWindThrust")
-            saveas(save_dynamic_pressure_and_forces,folder+"\save_dynamic_pressure_and_forces")
+            saveas(save_dynamic_pressure_and_forces,folder+"\dynamicPressureAndForces")
             save(folder+"\saveThrust.mat","save_thrust","apogee")
-        end
+       
 
-        for i = 1    % Save results.txt
+        % Save results.txt
             fid = fopen( folder+"\"+algorithm+"Results"+saveDate+".txt", 'wt' );  % CAMBIA IL NOME
             fprintf(fid,'Algorithm: %s \n',algorithm );
             fprintf(fid,'Number of simulations: %d \n \n',N_sim); % Cambia n_sim
@@ -393,7 +417,6 @@ if run_Thrust == true
             fprintf(fid,'Filter diminishing starts at: %d m \n', contSettings.Zfilter);
             fclose(fid);
         end
-
     end
 
 end
@@ -412,6 +435,8 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+
+
 
 
 

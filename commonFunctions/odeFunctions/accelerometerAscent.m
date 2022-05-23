@@ -117,7 +117,6 @@ B_datcom = settings.Betas*pi/180;
 H_datcom = settings.Altitudes;
 M_datcom = settings.Machs;
 C_datcom = settings.Controls;
-% C_datcom(end) = extension_From_Angle_2022(cont,settings); % per correggere l'errore sul C_datcom, che da exceed index
 
 cellT = {A_datcom, M_datcom, B_datcom, H_datcom};
 inst = [alpha, M, beta, -z];
