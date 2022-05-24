@@ -18,7 +18,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 close all; clear all; clc;
 
 %% recall the first part of the MAIN script
-% adds folders to the path and retrieves rocket, mission, simulation, etc
+% adds folder(i)s to the path and retrieves rocket, mission, simulation, etc
 % data.
 
 filePath = fileparts(mfilename('fullpath'));
@@ -41,7 +41,7 @@ rng default
 settings.montecarlo = true;
 
 %% how many simulations
-N_sim = 400; % set to at least 500
+N_sim = 200; % set to at least 500
 
 %% stochastic parameters
 sigma_t = (1.20-1)/3;             % thrust_percentage standard deviation
@@ -103,8 +103,14 @@ run_Filter = false;
 
 %% do you want to save the results?
 
-flagSave = input('do you want to save the results? ("yes" or "no"): ','s');
-% flagSave = "yes";
+flagSaveOffline = input('Do you want to save the results offline? ("yes" or "no"): ','s');
+flagSaveOnline = input('Do you want to save the resuts online? (oneDrive) ("yes" or "no"): ','s');
+
+if flagSaveOnline == "yes"
+    computer = input('Who is running the simulation? ("Marco" or "Giuseppe" or "Hpe" or whatever): ','s');
+else
+    computer = ["_"];
+end
 
 displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
 
@@ -114,7 +120,8 @@ if run_Thrust == true
 
 
     % other parameters you want to set for the particular simulation:
-    settings.MachControl = 0.8; % MSA sets it at 0.8
+    for MachControl = 0.82:0.01:0.85
+    settings.MachControl = MachControl; % MSA sets it at 0.8
     contSettings.N_forward = 2;
     contSettings.filter_coeff = 0.3; % 1 = no filter
     contSettings.interpType = 'sinusoidal'; % set if the interp algorithm does a linear or sinusoidal interpolation of the references
@@ -177,6 +184,7 @@ if run_Thrust == true
             save_thrust{i}.thrust_percentage = thrust_percentage(i);
             save_thrust{i}.qdyn = qdyn;
             save_thrust{i}.ap_ref = ap_ref;
+            save_thrust{i}.paroutFlight = data_flight;
         end
 
         %% PLOT CONTROL
@@ -363,22 +371,33 @@ if run_Thrust == true
         %% SAVE
         % save plots
         saveDate = string(datestr(date,29));
-        folder = "MontecarloResults\Thrust\"+algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+saveDate;
-        if flagSave == "yes"
-            mkdir(folder)
-            saveas(save_thrust_plotControl,folder+"\controlPlot")
-            saveas(save_thrust_plotApogee,folder+"\apogeelPlot")
-            saveas(save_thrust_plotTrajectory,folder+"\TrajectoryPlot")
-            saveas(save_thrust_apogee_probability,folder+"\ApogeeProbabilityPlot")
-            saveas(save_thrust_apogee_mean,folder+"\ApogeeMeanOverNsimPlot")
-            saveas(save_thrust_apogee_std,folder+"\ApogeeStdOverNsimPlot")
-            saveas(save_thrust_apogee_3D,folder+"\ApogeeWindThrust")
-            saveas(save_dynamic_pressure_and_forces,folder+"\dynamicPressureAndForces")
-            save(folder+"\saveThrust.mat","save_thrust","apogee")
+        folder = [];
+        
+        if flagSaveOffline == "yes"
+        folder = [folder ; "MontecarloResults\Thrust\"+algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+saveDate]; % offline
+        end
+        if flagSaveOnline == "yes"
+            if computer == "Marco" || computer == "marco"
+            folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\task 1 - motor model\montecarlo e tuning\"+algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+saveDate]; % online
+            end
+        end
+        
+        if flagSaveOffline == "yes" || flagSaveOnline == "yes"
+            for i = 1:length(folder)
+            mkdir(folder(i))
+            saveas(save_thrust_plotControl,folder(i)+"\controlPlot")
+            saveas(save_thrust_plotApogee,folder(i)+"\apogeelPlot")
+            saveas(save_thrust_plotTrajectory,folder(i)+"\TrajectoryPlot")
+            saveas(save_thrust_apogee_probability,folder(i)+"\ApogeeProbabilityPlot")
+            saveas(save_thrust_apogee_mean,folder(i)+"\ApogeeMeanOverNsimPlot")
+            saveas(save_thrust_apogee_std,folder(i)+"\ApogeeStdOverNsimPlot")
+            saveas(save_thrust_apogee_3D,folder(i)+"\ApogeeWindThrust")
+            saveas(save_dynamic_pressure_and_forces,folder(i)+"\dynamicPressureAndForces")
+            save(folder(i)+"\saveThrust.mat","save_thrust","apogee")
        
 
         % Save results.txt
-            fid = fopen( folder+"\"+algorithm+"Results"+saveDate+".txt", 'wt' );  % CAMBIA IL NOME
+            fid = fopen( folder(i)+"\"+algorithm+"Results"+saveDate+".txt", 'wt' );  % CAMBIA IL NOME
             fprintf(fid,'Algorithm: %s \n',algorithm );
             fprintf(fid,'Number of simulations: %d \n \n',N_sim); % Cambia n_sim
             fprintf(fid,'Parameters: \n');
@@ -416,9 +435,10 @@ if run_Thrust == true
             fprintf(fid,'Filter diminished by ratio: %d \n', contSettings.filterRatio);
             fprintf(fid,'Filter diminishing starts at: %d m \n', contSettings.Zfilter);
             fclose(fid);
+            end
         end
     end
-
+    end
 end
 
 
@@ -434,7 +454,7 @@ end
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 
