@@ -187,6 +187,22 @@ if run_Thrust == true
             save_thrust{i}.paroutFlight = data_flight;
         end
 
+        %% RETRIEVE INTERESING PARAMETERS:
+        for i = 1:N_sim
+            % apogee
+            apogee.thrust(i) = max(-save_thrust{i}.position(:,3));
+            % radius of apogee (horizontal) from the initial point
+            apogee.radius(i) = sqrt(save_thrust{i}.position(end,1)^2+save_thrust{i}.position(end,2)^2);
+            
+        end
+        apogee.thrust_mean = mean(apogee.thrust);
+        apogee.thrust_std = std(apogee.thrust);
+
+        apogee.radius_mean = mean(apogee.radius);
+        apogee.radius_std = std(apogee.radius);
+        
+
+
         %% PLOT CONTROL
         save_thrust_plotControl = figure;
         for i = floor(linspace(1,N_sim,5))
@@ -204,7 +220,6 @@ if run_Thrust == true
         %% PLOT APOGEE 2D
         save_thrust_plotApogee = figure;
         for i = 1:N_sim
-            apogee.thrust(i) = max(-save_thrust{i}.position(:,3));
             plot(thrust_percentage(i),apogee.thrust(i),'*')
             hold on;
             grid on;
@@ -220,9 +235,7 @@ if run_Thrust == true
 
 
         %% PLOT TRAJECTORY
-        apogee.thrust_mean = mean(apogee.thrust);
-        apogee.thrust_variance = std(apogee.thrust);
-
+        
         save_thrust_plotTrajectory = figure;
         for i = 1:size(save_thrust,1)
             plot3(save_thrust{i}.position(:,1),save_thrust{i}.position(:,2),-save_thrust{i}.position(:,3));
@@ -303,7 +316,7 @@ if run_Thrust == true
         save_thrust_apogee_probability = figure;
         pd = fitdist(apogee.thrust','Normal');    % create normal distribution object to compute mu and sigma
         % probability to reach an apogee between 2950 and 3050
-        p = normcdf([2950 3050],apogee.thrust_mean,apogee.thrust_variance);
+        p = normcdf([2950 3050],apogee.thrust_mean,apogee.thrust_std);
         accuracy =( p(2) - p(1) )*100;
         
         x_values = linspace(2000,4000,1000);   % possible apogees
@@ -367,6 +380,8 @@ if run_Thrust == true
         xlabel('Time [s]')
         ylabel('Total aerodynamic load on airbrakes [kg]')
 
+        
+
 
         %% SAVE
         % save plots
@@ -424,7 +439,7 @@ if run_Thrust == true
             fprintf(fid,'Max apogee: %.2f \n',max(apogee.thrust));
             fprintf(fid,'Min apogee: %.2f \n',min(apogee.thrust));
             fprintf(fid,'Mean apogee: %.2f \n',apogee.thrust_mean);
-            fprintf(fid,'Apogee standard deviation 3sigma: %.4f \n',3*apogee.thrust_variance);
+            fprintf(fid,'Apogee standard deviation 3sigma: %.4f \n',3*apogee.thrust_std);
             fprintf(fid,'Apogees within +-50m from target: %.2f %% \n\n\n',accuracy);
             fprintf(fid,'Other parameters specific of the simulation: \n\n');
             fprintf(fid,'N_forward: %d \n', contSettings.N_forward);
