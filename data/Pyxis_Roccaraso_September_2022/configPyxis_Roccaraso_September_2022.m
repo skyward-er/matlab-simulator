@@ -40,12 +40,27 @@ settings.servo.delay = 0.0468;                                              % Se
 settings.servo.tau_acc = 0.01;                                              % Servo motor acceleration time constant
 settings.servo.maxSpeed = deg2rad(300);                     %[rad/s]        % max rpm speed of the servo motor
 settings.servo.minAngle = 0;                                                % min servo angle
+settings.servo.maxTorque = 51*9.81/100;                                     % max torque guaranteed (given as 51 kg-cm)
 
 % Servo angle to extension of the air brakes (PYXIS)
 settings.arb.extPol(1) = -0.009216;
 settings.arb.extPol(2) = 0.02492;
 settings.arb.extPol(3) = -0.01627;
 settings.arb.extPol(4) = 0.03191;
+settings.arb.maxExt = settings.Controls(end);
+
+% servo angle to exposed surface of the airbrakes (PYXIS)
+settings.arb.surfPol = 0.009564;                                            % coefficient for surface - alpha
+
+% servo angle to guide angle (PYXIS)
+settings.arb.guidePol(1) = -9.4265;                                         % coefficient for guide - sin(alpha...)
+settings.arb.guidePol(2) = 0.5337;                                          % coefficient for guide - /
+
+% airbrake structural data
+settings.arb.ma = 150e-3;                                                   % airbrake mass
+settings.arb.mb = 20e-3;                                                    % tristar beam mass
+settings.arb.mu = 0.05;                                                     % friction coefficient between air brake and guide
+settings.arb.R = 66e-3;                                                     % tristar beam length (rod)
 
 % Get maximum extension angle
 x = @(alpha) settings.arb.extPol(1)*alpha.^4 + ...
@@ -53,6 +68,7 @@ x = @(alpha) settings.arb.extPol(1)*alpha.^4 + ...
     settings.arb.extPol(4).*alpha;
 fun = @(alpha) x(alpha) - settings.Controls(end);
 settings.servo.maxAngle = fzero(fun, deg2rad(50));
+settings.servo.maxAngle = fix(settings.servo.maxAngle*1e9)/1e9; % to avoid computational error propagation (truncates the angle to the ninth decimal)
 
 %% KALMAN TUNING PARAMETERS
 settings.kalman.dt_k          =   0.01;                                    % [s]        kalman time step

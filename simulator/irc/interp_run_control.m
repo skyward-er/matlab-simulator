@@ -124,6 +124,7 @@ ap_ref_old = 0;
 flagFirstControl = true;                                                    % if it is the first iter the control action is not filtered, then the filter acts
 filterCoeff = contSettings.filter_coeff;
 Zfilter = contSettings.Zfilter;
+Tfilter = contSettings.Tfilter;
 
 ap_ref = [ ap_ref_old ap_ref_new ];
 %% Flag initializations
@@ -330,8 +331,8 @@ while flagStopIntegration && n_old < nmax
                 ap_ref_new = ap_ref_new + (ap_base_filter -ap_ref_new)*filterCoeff;
             end
             flagFirstControl = false;
-           if z>Zfilter
-               Zfilter = Zfilter+contSettings.deltaZfilter;
+           if t1>Tfilter
+               Tfilter = Tfilter+contSettings.deltaTfilter;
                filterCoeff = filterCoeff/contSettings.filterRatio;
            end
   

@@ -459,6 +459,13 @@ c.plot_sensors =  settings.dataNoise && false;
 c.plot_kalman  =  settings.Kalman && false;
 c.plot_control =  settings.control && true;
 
+%% other useful parameters:
+qdyn = zeros(size(Yf,1),1);
+for k = 1:size(Yf,1)
+    [~,~,~,rho] = atmosisa(-Yf(k,3));
+    qdyn(k,1) = 1/2 * norm([Yf(k,4), Yf(k,5), Yf(k,6)])^2 * rho;
+end
+
 %% RETRIVE PARAMETERS FROM THE ODE
 
 
@@ -478,6 +485,7 @@ end
 % end
 
 varargout{1} = ap_ref_vec;
+varargout{2} = qdyn;
 
 
 

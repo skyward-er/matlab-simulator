@@ -59,9 +59,7 @@ contSettings.rate_limiter      =    60/0.13;                                 % d
 % Filtering
 contSettings.flagFilter = true; %set to true to filter out the interp algorithm with the following filter coefficient:
 contSettings.filter_coeff = 0.3;    
-contSettings.filterRatio = 2;
-contSettings.Zfilter = 2000; % starting point from which the coefficient is diminished.
-contSettings.deltaZfilter = 250; % every deltaZfilter the filter coefficient is diminished by a ratio of filterRatio
+% --------------- other filter parameters later in this script ---------------
 
 % For interpolation reference algorithm only:
 contSettings.N_forward = 2; % how many steps in advance have to check on speed to interpolate
@@ -81,10 +79,27 @@ switch settings.mission
     case 'Pyxis_Portugal_October_2022'
         
         contSettings.delta_S_available = (0.0:0.001/4:0.009564*settings.servo.maxAngle)'; 
-
+        
+        %filtering
+        contSettings.filterRatio = 2;
+        
+        contSettings.Zfilter = 2000; % starting point from which the coefficient is diminished.
+        contSettings.deltaZfilter = 250; % every deltaZfilter [m] the filter coefficient is diminished by a ratio of filterRatio
+        
+        contSettings.Tfilter = 12; % starting time from which the coefficient is diminished.
+        contSettings.deltaTfilter = 2.5; % every deltaTfilter [s] the filter coefficient is diminished by a ratio of filterRatio
+    
     case 'Pyxis_Roccaraso_September_2022'
     
-    contSettings.delta_S_available = (0.0:0.001/4:0.009564*settings.servo.maxAngle)'; 
+        contSettings.delta_S_available = (0.0:0.001/4:0.009564*settings.servo.maxAngle)'; 
+        
+        % filtering
+        contSettings.filterRatio = 2;
+        contSettings.Zfilter = 600; % starting point from which the coefficient is diminished.
+        contSettings.deltaZfilter = 100; % every deltaZfilter the filter coefficient is diminished by a ratio of filterRatio
+        
+        contSettings.Tfilter = 8; % starting time from which the coefficient is diminished.
+        contSettings.deltaTfilter = 2; % every deltaTfilter [s] the filter coefficient is diminished by a ratio of filterRatio
 
 end
 %% MAGNETIC MAP

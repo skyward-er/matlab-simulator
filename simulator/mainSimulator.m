@@ -32,7 +32,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 
 
-close all; clear all; clc;
+% close all; clear all; clc;
 
 filePath = fileparts(mfilename('fullpath'));
 currentPath = pwd;
@@ -46,7 +46,7 @@ addpath(genpath(currentPath));
 configSimulator; 
 configControl;
 configReferences;
-
+matlab_graphics;
 
 
 %% ALGORITHM TUNING

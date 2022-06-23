@@ -19,6 +19,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 
+% clearvars -except ZTARGET_CYCLE;
 clear all; close all; clc;
 
 filePath = fileparts(mfilename('fullpath'));
@@ -32,7 +33,7 @@ addpath(genpath(currentPath));
 
 % %% LOAD DATA
 configTrajectoryGeneration;
-
+matlab_graphics;
 %% AIRBRAKES RADIAL EXTENSION
 % Airbrakes extension vector
 deltaX_values = linspace(settings.hprot(1), settings.hprot(end), settings.Ndx+2);
@@ -41,9 +42,10 @@ deltaX_values = linspace(settings.hprot(1), settings.hprot(end), settings.Ndx+2)
 
 %% FINAL CONDITIONS
 % Impose the final condition I want to reach.
+
 Vz_final =  settings.Vz_final;
 z_final  =  settings.z_final;
-Vx_final =  settings.Vx_final;  
+Vx_final =  settings.Vx_final;   
 x_final  =  settings.x_final;  
 Vy_final =  settings.Vy_final;  
 y_final  =  settings.y_final;  
@@ -118,6 +120,10 @@ trajectories_saving{index} = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref', 
 end
 
 %% SAVING
+
+if ~settings.save
+    warning('save is set to false')
+end
 
 if settings.save
     save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
