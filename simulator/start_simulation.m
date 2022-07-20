@@ -14,9 +14,17 @@ clear
 clc
 delete('launchFlag.txt');
 
-path = genpath(pwd);
-addpath(path);
+% path = genpath(pwd);
+% addpath(path);
 
+filePath = fileparts(mfilename('fullpath'));
+currentPath = pwd;
+if not(strcmp(filePath, currentPath))
+    cd (filePath);
+    currentPath = filePath;
+end
+
+addpath(genpath(currentPath));
 %% LOAD DATA
 run('configRoccaraso.m');
 
@@ -28,7 +36,9 @@ if settings.electronics
     addpath('../hardware_in_the_loop/');
     addpath('../hardware_in_the_loop/serialbridge');
     run('HILconfig.m');
-    serialbridge("Open", hil_settings.serial_port, hil_settings.baudrate); % Initialization of the serial port
+
+%     serialbridge("Open", hil_settings.serial_port, hil_settings.baudrate); % Initialization of the serial port
+    %start simulation
     [Yf, Tf, cpuTimes, flagMatr, otherData] = std_run_HIL(settings);
 else
     [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = std_run_control(settings);
@@ -62,7 +72,7 @@ abs_V = vecnorm(Va');
 
 % closing the serial connection
 if settings.electronics
-    serialbridge("Close")
+%     serialbridge("Close")
 end
 
 % DATA RECORD (display)
