@@ -1,5 +1,9 @@
 classdef nasSys
-    % Navigation and attitude system
+% Navigation and attitude system - This class contains the MEKF implementing the NAS
+% Author: Angelo G. Gaillet
+% Skyward Experimental Rocketry | ELC-SCS Dept | electronics@skywarder.eu
+% email: angelo.gaillet@skywarder.eu
+% Release date: 24/07/2022
     properties(Constant)
         numberOfStates = 13;
         idxPos         = 1;
