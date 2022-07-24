@@ -4,7 +4,7 @@ function [x_nas, P_nas, kalman, nas] = run_kalman(sensorData, kalman, nas)
 % Co-Author: Alessandro Del Duca
 % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@kywarder.eu
 % email: alejandro.montero@skywarder.eu, alessandro.delduca@skywarder.eu, angelo.gaillet@skywarder.eu
-% Release date: 14/07/2022
+% Release date: 24/07/2022
 
 %{
 -----------DESCRIPTION OF FUNCTION:------------------
