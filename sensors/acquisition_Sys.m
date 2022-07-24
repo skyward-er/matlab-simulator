@@ -21,6 +21,11 @@ OUTPUT:
 % email: alessandro.delduca@skywarder.eu
 % Revision date: 18/03/2021
 
+% Author: Angelo G. Gaillet
+% Skyward Experimental Rocketry | ELC-SCS Dept
+% email: angelo.gaillet@skywarder.eu
+% Revision date: 24/07/2022
+
 %% Baro Acquisition loop
 
         for ii=1:length(sensorData.barometer.time)
@@ -91,7 +96,16 @@ OUTPUT:
         tot.ngps_old = tot.ngps_old + size(sensorData.gps.positionMeasures,1);
 
  %% Pitot Acquisition loop
- 
-    %TODO: add acquisition loop for pitot
 
+ if isfield(sensorData, 'pitot')
+        for ii=1:length(sensorData.pitot.time)
+                sensorData.pitot.measures(ii,:)        =      s.SSCDRRN015PDAD5.sens(sensorData.pitot.measures(ii)/100,...
+                                                                  sensorData.pitot.temperature(ii) - 273.15);  
+                sensorData.pitot.measures(ii,:)        =      sensorData.pitot.measures(ii)*100;
+        end 
+        tot.pitot_tot(tot.npitot_old:tot.npitot_old + size(sensorData.pitot.measures,1) - 1,1)    = sensorData.pitot.measures(1:end);
+        tot.time_pitot(tot.npitot_old:tot.npitot_old + size(sensorData.pitot.measures,1) - 1)   = sensorData.pitot.time ;
+        tot.npitot_old = tot.npitot_old + size(sensorData.pitot.measures,2);      
+ end
+ 
 end

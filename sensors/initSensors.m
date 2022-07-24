@@ -6,6 +6,11 @@ function [s, sensorTot]  = initSensors(lat0, lon0, z0)
 % email: jan.hammelmann@skywarder.eu,alessandro.delduca@skywarder.eu
 % Release date: 01/03/2021
 
+% Author: Angelo G. Gaillet, Marco Marchesi
+% Skyward Experimental Rocketry | ELC-SCS Dept
+% email: angelo.gaillet@skywarder.eu, marco.marchesi@skywarder.eu
+% Revision date: 24/07/2022
+
 % initial barometer sensor MS580301BA01
 ep_p_0     =  csvread('skyward-matlab-control-simulator/sensors/data/MS580301BA01/ep_p_0.csv');
 ep_p_25    =  csvread('skyward-matlab-control-simulator/sensors/data/MS580301BA01/ep_p_25.csv');
@@ -70,6 +75,7 @@ s.lat0                              =   lat0;
 s.lon0                              =   lon0;
 s.z0                                =   z0;
 s.spheroid                          =   wgs84Ellipsoid;
+
 % initial megnetometer sensor from IIS2MDC: TODO
 s.MAGN_IIS2MDC = Sensor3D();                                    % magnetic field in mgauss, temp should be in C°-25C°
 s.MAGN_IIS2MDC.maxMeasurementRange  =   49152;                  % in mgauss
@@ -85,14 +91,14 @@ s.MAGN_IIS2MDC.dt                   =   0.01;                   % sampling time
 s.MAGN_IIS2MDC.transMatrix          =   diag([1 1 1]);          % axis transformation
 s.MAGN_IIS2MDC.transMatrix          =   diag([1 1 1]);          % axis transformation
 
-% Pitot sensor (differential pressure sensor SSCDRRN015PDAD5)
-s.PITOT = Sensor(); % presure in mbar, temp should be in C°
-s.PITOT.maxMeasurementRange  =   1034;                   % in mbar (15 psi from datasheet)
-s.PITOT.minMeasurementRange  =   -1034;                  % in mbar (-15 psi from datasheet)
-s.PITOT.offset               =   -1.9327;                % in mbar
-s.PITOT.resolution           =   1;                      % in mbar
-s.PITOT.noiseVariance        =   42;                     % guess in mbar
-s.PITOT.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
+% initial Pitot sensor (differential pressure sensor SSCDRRN015PDAD5)
+s.SSCDRRN015PDAD5 = Sensor(); % presure in mbar, temp should be in C°
+s.SSCDRRN015PDAD5.maxMeasurementRange  =   1034;                   % in mbar (15 psi from datasheet)
+s.SSCDRRN015PDAD5.minMeasurementRange  =   -1034;                  % in mbar (-15 psi from datasheet)
+s.SSCDRRN015PDAD5.offset               =   -1.9327;                % in mbar
+s.SSCDRRN015PDAD5.resolution           =   1;                      % in mbar
+s.SSCDRRN015PDAD5.noiseVariance        =   42;                     % guess in mbar
+s.SSCDRRN015PDAD5.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
 
 
 

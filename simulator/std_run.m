@@ -263,7 +263,7 @@ while flagStopIntegration || n_old < nmax
     end
     
     if settings.dataNoise
-        [sensorData, tot] = acquisition_Sys(sensorData, s, tot);
+        [sensorData, tot] = acquisition_Sys(sensorData, s, tot); %#ok<ASGLU> 
     end
     
     %% STATE COMPUTATION

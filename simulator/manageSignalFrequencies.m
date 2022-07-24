@@ -19,6 +19,12 @@ Skyward Experimental Rocketry | AFD Dept
 email: adriano.filippo.inno@skywarder.eu
 Release date: 30/11/2020
 
+Author: Angelo G. Gaillet
+Skyward Experimental Rocketry | ELC-SCS Dept
+email: angelo.gaillet@skywarder.eu
+Release date: 24/07/2022
+
+
 %}
 
 freq = settings.frequencies;
@@ -248,3 +254,48 @@ end
 [Temp, ~, P, ~] = atmosisa(z + settings.z0);
 sensorData.barometer.measures = P;
 sensorData.barometer.temperature = Temp;
+
+%% pitot
+if isfield(freq, 'pitotFrequency')
+    if freq.pitotFrequency > freq.controlFrequency
+        N = freq.pitotFrequency/freq.controlFrequency;
+        vz = zeros(N, 1);
+        z = zeros(N, 1);
+        if N ~= round(N)
+            error('the sensor frequency must be a multiple of the control frequency');
+        end
+        sensorData.pitot.time = linspace(T(1), T(end) - 1/freq.pitotFrequency, N);
+        for i = 1:N
+            iTimePitot = sensorData.pitot.time(i);
+            if all(iTimePitot ~= T)
+                [index0] = find(iTimePitot < T);
+                index1 = index0(1);
+                index0 = index1 - 1;
+                Y1 = Y(index1, 6);
+                Y0 = Y(index0, 6);
+                T1 = T(index1);
+                T0 = T(index0);
+                % linear interpolation between the 2 states
+                m = (Y1 - Y0)./(T1 - T0);
+                q = Y1 - m*T1;
+                vz(i) = m*iTimePitot + q;
+                z(i) = m*iTimeBarometer + q;
+    
+            else
+                vz(i) = -Y(iTimePitot == T, 3);
+                z(i) = -Y(iTimeBarometer == T, 3);
+            end
+        end
+        
+    else
+        sensorData.pitot.time = T(end);
+        vz = Y(end, 6);
+        z = -Y(end, 3);
+    end
+    [Temp, ~, ~, rho] = atmosisa(z + settings.z0);
+    
+    v = vz; % We currently don't consider angle of attack and wind here
+    
+    sensorData.pitot.temperature = Temp;
+    sensorData.pitot.measures = 0.5*rho*v*v*sign(v); % differential pressure in Pascals
+end

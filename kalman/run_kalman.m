@@ -143,11 +143,14 @@ for i=1:length(tv)
        index_mag    =  index_mag + 1;  
     end
 
-%     if tv(i) >= t_pitot(index_mag) && nas.apogee             %Comparison to see the there's a new measurement
-%        [xq(i,:),P_q(:,:,i),~,nas] = correctPitot(nas, totP, p_baro(index_bar));
-%        index_pitot =  index_pitot + 1;  
-%     end
-    
+    if isfield(sensorData, "pitot")
+        t_pitot = [sensorData.pitot.time tv(end) + dt_k];
+        if tv(i) >= t_pitot(index_mag) && nas.apogee             %Comparison to see the there's a new measurement
+           [x_nas(i,:), P_nas(:,:,i), ~, nas] = correctPitot(nas, totP, p_baro(index_bar));
+           index_pitot =  index_pitot + 1;  
+        end
+    end
+
     if nas.apogee  == false
             if -x_nas(i,6) < kalman.v_thr && -x_nas(i,3) > 100
                 kalman.counter = kalman.counter + 1;
