@@ -85,11 +85,13 @@ s.MAGN_IIS2MDC.dt                   =   0.01;                   % sampling time
 s.MAGN_IIS2MDC.transMatrix          =   diag([1 1 1]);          % axis transformation
 s.MAGN_IIS2MDC.transMatrix          =   diag([1 1 1]);          % axis transformation
 
+% Pitot sensor (differential pressure sensor SSCDRRN015PDAD5)
 s.PITOT = Sensor(); % presure in mbar, temp should be in C°
-s.PITOT.maxMeasurementRange  =   1100;                   % 1100, 1300 in mbar
-s.PITOT.minMeasurementRange  =   300;                    % 300, 10 in mbar
-s.PITOT.resolution           =   0.012;                  % 0.012, 0.018, 0.027, 0.042, 0.065 in mbar
-s.PITOT.noiseVariance        =   1;                      % guess in mbar
+s.PITOT.maxMeasurementRange  =   1034;                   % in mbar (15 psi from datasheet)
+s.PITOT.minMeasurementRange  =   -1034;                  % in mbar (-15 psi from datasheet)
+s.PITOT.offset               =   -1.9327;                % in mbar
+s.PITOT.resolution           =   1;                      % in mbar
+s.PITOT.noiseVariance        =   42;                     % guess in mbar
 s.PITOT.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
 
 

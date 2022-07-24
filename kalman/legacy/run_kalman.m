@@ -1,10 +1,10 @@
-function [x_nas, P_nas, kalman, nas] = run_kalman(sensorData, kalman, nas)
+function [x_c, v, P_c, kalman] = run_kalman(x_prev, vels_prev, P_prev, sensorData, kalman, mag_NED)
 
-% Author: Alejandro Montero, Angelo G. Gaillet
+% Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
 % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@kywarder.eu
-% email: alejandro.montero@skywarder.eu, alessandro.delduca@skywarder.eu, angelo.gaillet@skywarder.eu
-% Release date: 14/07/2022
+% email: alejandro.montero@skywarder.eu, alessandro.delduca@skywarder.eu
+% Release date: 01/03/2021
 
 %{
 -----------DESCRIPTION OF FUNCTION:------------------
@@ -62,7 +62,6 @@ For more information check the navigation system report
                       [1x3] [m/s]
 
         - kalman:     STRUCT THAT CONTAIN ALL THE KALMAN PARAMETERS:
-            (at the moment the parameters are baked inside the NAS)
 
             - sigma_GPS:  STANDARD DEVIATION OF THE GPS (SQRT OF
                           VARIANCE) [1x1]
@@ -90,10 +89,10 @@ For more information check the navigation system report
 
 
       -OUTPUTS:
-        - x_nas:   CORRECTED VECTOR OF STATES OF THE ROCKET. CONTAINS ALL THE
+        - x_c:   CORRECTED VECTOR OF STATES OF THE ROCKET. CONTAINS ALL THE
                  ESTIMATIONS FOR EACH TIME INSTANT IN t_v --> [10x13]
 
-        - P_nas:   CORRECTED COVARIANCE MATRIX FOR EACH OF THE ESTIMATION TIME
+        - P_c:   CORRECTED COVARIANCE MATRIX FOR EACH OF THE ESTIMATION TIME
                  INSTANTS. [12x12x10]
 -----------------------------------------------------------------------
 %}
@@ -103,14 +102,28 @@ gyro        =   sensorData.gyro.measures;
 mag         =   sensorData.magnetometer.measures;
 gps         =   sensorData.gps.positionMeasures;
 gpsv        =   sensorData.gps.velocityMeasures;
-baro      =   sensorData.barometer.measures;
+baro        =   sensorData.barometer.measures;
+h_baro      =   sensorData.h_baro;
 
 
-dt_k        =   nas.dt;                 % Time step of the kalman
+dt_k        =   tv(2)-tv(1);                 % Time step of the kalman
+x_lin       =   zeros(length(tv),6);         % Pre-allocation of corrected estimation
+xq          =   zeros(length(tv),7);         % Pre-allocation of quaternions and biases
+x_c         =   zeros(length(tv),13);
+v           =   zeros(length(tv),3);
 
-x_nas         =   zeros(length(tv),13); %Pre-allocation of the state vector
+P_c         =   zeros(12,12,length(tv));
+P_lin       =   zeros(6,6,length(tv));       %Pre-allocation of the covariance matrix
+P_q         =   zeros(6,6,length(tv));
 
-P_nas         =   zeros(13,13,length(tv)); %Pre-allocation of the covariance matrix
+x_lin(1,:)  =   x_prev(1:6);                 % Allocation of the initial value
+xq(1,:)     =   x_prev(7:13);
+v(1,:)      =   vels_prev;
+x_c(1,:)    =   [x_lin(1,:),xq(1,:)];
+
+P_lin(:,:,1)=   P_prev(1:6,1:6);
+P_q(:,:,1)  =   P_prev(7:12,7:12);
+P_c(:,:,1)  =   P_prev;
 
 index_GPS=1;
 index_bar=1;
@@ -120,36 +133,41 @@ index_mag=1;
 t_gpstemp  = [sensorData.gps.time  tv(end) + dt_k];
 t_barotemp = [sensorData.barometer.time tv(end) + dt_k];
 t_magtemp  = [sensorData.magnetometer.time  tv(end) + dt_k];
-
-for i=1:length(tv)
-%% PREDICTION
+for i=2:length(tv)
+    %Prediction part
     
-[x_nas(i,:), P_nas(:,:,i), ~, nas] = predict(nas, accel(i,:)', gyro(i,:)'); 
+    
+    
+    [x_lin(i,:),v(i,:),P_lin(:,:,i)] = predictorLinear2(x_lin(i-1,:), P_lin(:,:,i-1), dt_k, ...
+                                                        accel(i-1,:), xq(i-1,1:4), kalman.QLinear);
+    
+    [xq(i,:),P_q(:,:,i)]             = predictorQuat(xq(i-1,:), P_q(:,:,i-1), dt_k, ...
+                                                     gyro(i-1,:), kalman.Qq);            
+                                           
  
-%% CORRECTIONS
-
+%Corrections
      if tv(i) >= t_gpstemp(index_GPS)              %Comparison to see the there's a new measurement
-       [x_nas(i,:), P_nas(:,:,i), ~, nas] = correctGPS(nas, [gps(index_GPS, 1:2), 0, gpsv(index_GPS, 1:2), 0], 1);
-       index_GPS   =  index_GPS + 1;
+       [x_lin(i,:),P_lin(:,:,i),~]     = correctionGPS(x_lin(i,:), P_lin(:,:,i), ...
+                                                       gps(index_GPS,1:2), gpsv(index_GPS,1:2), kalman.sigma_GPS, 5, 1);
+        index_GPS   =  index_GPS + 1;
      end
      
     if tv(i) >= t_barotemp(index_bar)              %Comparison to see the there's a new measurement
-        [x_nas(i,:), P_nas(:,:,i), ~, nas] = correctBaro(nas, baro(index_bar));
+       [x_lin(i,:),P_lin(:,:,i),~]     = correctionBarometer(x_lin(i,:) ,P_lin(:,:,i), h_baro(index_bar), kalman.sigma_baro);
         index_bar   =  index_bar + 1;     
     end
          
     if tv(i) >= t_magtemp(index_mag)               %Comparison to see the there's a new measurement
-       [x_nas(i,:), P_nas(:,:,i), nas] = correctMag(nas, mag(index_mag));
+       [xq(i,:),P_q(:,:,i),~,~]        = correctorQuat(xq(i,:), P_q(:,:,i), mag(index_mag,:), kalman.sigma_mag, mag_NED);
        index_mag    =  index_mag + 1;  
     end
-
-%     if tv(i) >= t_pitot(index_mag) && nas.apogee             %Comparison to see the there's a new measurement
-%        [xq(i,:),P_q(:,:,i),~,nas] = correctPitot(nas, totP, p_baro(index_bar));
-%        index_pitot =  index_pitot + 1;  
-%     end
     
-    if nas.apogee  == false
-            if -x_nas(i,6) < kalman.v_thr && -x_nas(i,3) > 100
+    x_c(i,:) = [x_lin(i,:),xq(i,:)];
+    P_c(1:6,1:6,i)   = P_lin(:,:,i);
+    P_c(7:12,7:12,i) = P_q(:,:,i);
+    
+    if kalman.flag_apo  == false
+            if -x_c(i,6) < kalman.v_thr && -x_c(i,3) > 100
                 kalman.counter = kalman.counter + 1;
             else
                 kalman.counter = 0;
@@ -157,7 +175,7 @@ for i=1:length(tv)
             if kalman.counter >= kalman.count_thr
                kalman.t_kalman = tv(i);
                kalman.flag_apo = true;
-               nas.apogee = true;
             end
     end
+end
 end

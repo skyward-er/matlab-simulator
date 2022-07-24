@@ -27,6 +27,13 @@ end
 addpath(genpath(currentPath));
 %% LOAD DATA
 run('configRoccaraso.m');
+settings.electronics = 0;
+settings.ascentOnly = 1;
+settings.ballisticFligth = 1;
+settings.plots = 0;
+settings.control = 0;
+settings.Kalman = 1;
+settings.Ada = 1;
 
 %% START THE CHOSEN SIMULATION
 % T = vector of time used by ODE, [s] also for Tf Ta
@@ -38,11 +45,19 @@ if settings.electronics
     run('HILconfig.m');
 
 %     serialbridge("Open", hil_settings.serial_port, hil_settings.baudrate); % Initialization of the serial port
-    %start simulation
-    [Yf, Tf, cpuTimes, flagMatr, otherData] = std_run_HIL(settings);
-else
-    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = std_run_control(settings);
 end
+
+
+%start simulation
+[Yf, Tf, cpuTimes, flagMatr, otherData] = std_run(settings);
+
+
+if not(settings.electronics)
+    data_flight = otherData.dataBallisticFlight;
+    t_ada = otherData.t_ada;
+    t_kalman = otherData.t_kalman;
+end
+
 
 %% DATA-PRINTING
 
@@ -77,40 +92,41 @@ end
 
 % DATA RECORD (display)
 if settings.electronics
-fprintf('OUTCOMES: (times dt from liftoff)\n\n')
 
-fprintf('total computational Time: %.3f [s]: \n', sum(cpuTimes))
-fprintf('mean step computational Time: %.3f [s]: \n', mean(cpuTimes))
-fprintf('max step computational Time: %.3f [s]: \n\n', max(cpuTimes(1:end-1)))
+    fprintf('OUTCOMES: (times dt from liftoff)\n\n')
+    
+    fprintf('total computational Time: %.3f [s]: \n', sum(cpuTimes))
+    fprintf('mean step computational Time: %.3f [s]: \n', mean(cpuTimes))
+    fprintf('max step computational Time: %.3f [s]: \n\n', max(cpuTimes(1:end-1)))
+    
+    fprintf('max speed reached: \n')
+    fprintf('@time: %g [sec] \n', Tf(imax_v) - otherData.tLaunch)
+    fprintf('@altitude: %g [m] \n', za(imax_v))
+    fprintf("@velocity: %g [m/s] \n\n", max_v);
+    
+    fprintf('activation airbrakes (end burning phase):\n');
+    fprintf('@time: %g [sec] \n', otherData.t_aerobrakes - otherData.tLaunch)
+    fprintf("@altitude: %g [m] \n", otherData.z_aerobrakes);
+    fprintf("@velocity: %g [m/s] \n\n", otherData.vz_aerobrakes);
+    
+    fprintf('apogee:\n');
+    fprintf('@time: %g [sec] \n', T_apo - otherData.tLaunch)
+    fprintf('@altitude: %.1f [m] \n\n', max_z)
+    
+    if(not(settings.ballisticFligth))
+        fprintf('parachute 1:\n');
+        fprintf('@time: %g [sec] \n', otherData.t_para1 - otherData.tLaunch)
+        fprintf("@altitude: %g [m] \n", otherData.z_para1);
+        fprintf("@velocity: %g [m/s] \n\n", otherData.vz_para1);
+    
+        fprintf('parachute 2:\n');
+        fprintf('@time: %g [sec] \n', otherData.t_para2 - otherData.tLaunch)
+        fprintf("@altitude: %g [m] \n", otherData.z_para2);
+        fprintf("@velocity: %g [m/s] \n\n", otherData.vz_para2);
+    end
 
-fprintf('max speed reached: \n')
-fprintf('@time: %g [sec] \n', Tf(imax_v) - otherData.tLaunch)
-fprintf('@altitude: %g [m] \n', za(imax_v))
-fprintf("@velocity: %g [m/s] \n\n", max_v);
+else
 
-fprintf('activation airbrakes (end burning phase):\n');
-fprintf('@time: %g [sec] \n', otherData.t_aerobrakes - otherData.tLaunch)
-fprintf("@altitude: %g [m] \n", otherData.z_aerobrakes);
-fprintf("@velocity: %g [m/s] \n\n", otherData.vz_aerobrakes);
-
-fprintf('apogee:\n');
-fprintf('@time: %g [sec] \n', T_apo - otherData.tLaunch)
-fprintf('@altitude: %.1f [m] \n\n', max_z)
-
-if(not(settings.ballisticFligth))
-    fprintf('parachute 1:\n');
-    fprintf('@time: %g [sec] \n', otherData.t_para1 - otherData.tLaunch)
-    fprintf("@altitude: %g [m] \n", otherData.z_para1);
-    fprintf("@velocity: %g [m/s] \n\n", otherData.vz_para1);
-
-    fprintf('parachute 2:\n');
-    fprintf('@time: %g [sec] \n', otherData.t_para2 - otherData.tLaunch)
-    fprintf("@altitude: %g [m] \n", otherData.z_para2);
-    fprintf("@velocity: %g [m/s] \n\n", otherData.vz_para2);
-end
-end
-
-if not(settings.electronics)
     M = data_flight.interp.M;
     [max_M, imax_M] = max(M);
     A = data_flight.accelerations.body_acc;
@@ -130,10 +146,11 @@ if not(settings.electronics)
     fprintf('@time: %g [sec] \n', T_apo)
     fprintf('@altitude: %.1f [m] \n\n', max_z)
 
-%% Apogee detection time
+    % Apogee detection time
     fprintf('ADA apogee detection time: %g [sec] \n', t_ada)
     fprintf('Kalman apogee detection time: %g [sec] \n', t_kalman)
     fprintf('Simulated apogee time : %g [sec] \n', T_apo)
+
 end
 
 %% PLOT 
@@ -194,5 +211,5 @@ if settings.plots && not(settings.electronics)
        
 end
 
-clearvars -except Yf data_flight settings
+clearvars -except Yf data_flight settings otherData
  

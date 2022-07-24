@@ -24,7 +24,7 @@ NT = length(T);
 
 for i = 1:NT
     
-    [~,single_step] = fun(T(i),Y(i,:), settings, C(i), varargin{:});
+    [~,single_step] = fun(T(i),Y(i,:), settings, C(i), varargin{:}, T(1));
     
     all_steps.integration.t(i) = single_step.integration.t;
     all_steps.interp.alt(i) = single_step.interp.alt;

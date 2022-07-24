@@ -94,7 +94,7 @@ csett  = controlConfig;
 %% MAGNETIC FIELD MODEL
 hmax   =   6000;
 
-%Use this lines if your MATLAB version is up to 2020
+%Use this lines if your MATLAB version is 2020 or higher
 dy     =    decyear(settings.launchDate);
 XYZ0   =    wrldmagm(0, settings.lat0, settings.lon0, dy, '2020');        % World magnetic map at h = 0
 XYZh   =    wrldmagm(hmax, settings.lat0, settings.lon0, dy, '2020');     % World magnetic map at h = 6000
@@ -115,16 +115,17 @@ z             =       1;
 nmax          =       10000;
 mach          =       0;
 x             =       0;
-n_old         =       1;
 Yf_tot        =       zeros(nmax, 16);
 Tf_tot        =       zeros(nmax, 1);
 C             =       zeros(nmax, 1);
+n_old         =       1;
 cpuTimes      =       zeros(nmax,1);
 iTimes        =       0;
+
 tot.ctr_start =      -1;
 i             =       1;
 tLaunch       =       0;
-settings.kalman.pn_prec  =       settings.ada.p_ref;
+
 %% Flag initializations
 flagStopIntegration     =   true;
 flagAscent              =   false;
@@ -140,27 +141,13 @@ else
     tLaunch    =    0;
 end
 
-if settings.launchWindow
-    launchWindow;
-    pause(0.01);
-    launchFlag = false;
-    lastLaunchflag = true;
-else
-    launchFlag = true;
-end
-
-fprintf('START:\n\n\n');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% Salvo input/output per testare algoritmo cpp
-indice_test = 1;
 
 while flagStopIntegration || n_old < nmax
     tic 
     iTimes = iTimes + 1;
     
     lastFlagAscent = flagAscent;
-
     if settings.launchWindow
         if not(lastLaunchflag) && launchFlag
             tLaunch = t0;
@@ -340,6 +327,23 @@ while flagStopIntegration || n_old < nmax
          end
     end
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
     % vertical velocity and position
     if flagAscent || (not(flagAscent) && settings.ballisticFligth)
         Q    =   Yf(end, 10:13);

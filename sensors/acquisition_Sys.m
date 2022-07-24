@@ -89,4 +89,9 @@ OUTPUT:
         tot.gpsv_tot(tot.ngps_old:tot.ngps_old + size(sensorData.gps.velocityMeasures,1) - 1,:)  =  sensorData.gps.velocityMeasures(1:end,:) ;
         tot.time_gps(tot.ngps_old:tot.ngps_old + size(sensorData.gps.velocityMeasures,1) - 1)    =  sensorData.gps.time;
         tot.ngps_old = tot.ngps_old + size(sensorData.gps.positionMeasures,1);
+
+ %% Pitot Acquisition loop
+ 
+    %TODO: add acquisition loop for pitot
+
 end
