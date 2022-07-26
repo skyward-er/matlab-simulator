@@ -58,7 +58,7 @@ settings.wind.AzMin = (360)*pi/180;               % [rad] Minimum Azimuth, user 
 settings.wind.AzMax = (360)*pi/180;
 
 %% SAVINGS
-settings.save = false;
+settings.save = true;
 
 %% PLOT
 settings.plots = true;

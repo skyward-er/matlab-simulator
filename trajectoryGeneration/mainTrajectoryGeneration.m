@@ -36,7 +36,7 @@ configTrajectoryGeneration;
 matlab_graphics;
 %% AIRBRAKES RADIAL EXTENSION
 % Airbrakes extension vector
-deltaX_values = linspace(settings.hprot(1), settings.hprot(end), settings.Ndx+2);
+deltaX_values = linspace(settings.hprot(1), settings.hprot(end), settings.Ndx);
 % I exclude the limits for robustness
 % deltaX_values = deltaX_values(2:end-1);
 
