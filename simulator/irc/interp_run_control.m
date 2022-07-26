@@ -470,7 +470,7 @@ end
 %% RETRIVE PARAMETERS FROM THE ODE
 
 if not(settings.electronics) && ~settings.montecarlo
-    dataBallisticFlight = recallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings, c.ap_tot, settings.servo.delay,tLaunch,'apVec');
+    dataBallisticFlight = recallOdeFcn2(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings, c.ap_tot, settings.servo.delay,tLaunch,'apVec');
 else
     dataBallisticFlight = [];
 end

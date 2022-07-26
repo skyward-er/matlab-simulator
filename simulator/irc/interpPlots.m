@@ -26,12 +26,26 @@ title('Trajectory');
 
 %% Velocities w.r.t. time
 figure('Name','Velocities');
-plot(c.Yf_tot(:,4))
+plot(c.Tf_tot,c.Yf_tot(:,4))
 hold on;
-plot(c.Yf_tot(:,5))
-plot(c.Yf_tot(:,6))
+plot(c.Tf_tot,c.Yf_tot(:,5))
+plot(c.Tf_tot,c.Yf_tot(:,6))
 grid on;
 xlabel('Time [s]');
-ylabel('V [m/2]');
+ylabel('Speed V [m/s]');
 title('Velocities');
 legend('Vx','Vy','Vz')
+
+%% Mach w.r.t. time
+figure('Name','Velocities');
+[~,a,~,~] = atmosisa(c.Yf_tot(:,3));
+v_norm_vec = zeros(length(c.Yf_tot(:,1)),1);
+for i = 1:length(c.Yf_tot(:,1))
+v_norm_vec(i) = norm([c.Yf_tot(i,4),c.Yf_tot(i,5),c.Yf_tot(i,6)]);
+end
+plot(c.Tf_tot,v_norm_vec./a)
+grid on;
+xlabel('Time t [s]');
+ylabel('Mach M(t) [-]');
+title('Velocities');
+legend('Mach')
