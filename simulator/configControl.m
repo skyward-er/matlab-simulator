@@ -15,7 +15,7 @@ data = load(strcat(dataPath, '/CAinterpCoeffs'));
 contSettings.coeff_Cd   =     data.coeffs;
 
 %% LOAD TRAJECTORIES
-struct_trajectories = load(strcat(ConDataPath, '/Trajectories.mat'));
+struct_trajectories = load(strcat(ConDataPath, '/Trajectories2022.mat'));
 contSettings.data_trajectories   =  struct_trajectories.trajectories_saving;
 
 % Just for plotting the setpoints of the chosen trajectory without spikes
@@ -23,7 +23,7 @@ contSettings.starting_index = 0;
 
 %% CONTROL PARAMETERS
 % Control time sample
-contSettings.sample_time         =  0.3;
+contSettings.sample_time         =  0.1;
 
 % PI controler tune parameter
 contSettings.Kp_1    =   20;  % 20   (50 con U_ref)                         % using Fdrag nel pid --> da migliorare (magari si può ottenere variabile controllo più smooth)

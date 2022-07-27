@@ -71,7 +71,7 @@ end
 
 
 % Compute U_ref 
-Cd_ref = getDrag(V_mod,z,(csett.chosen_trajectory-1)/9*extMax, csett.coeff_Cd); % perché *0.001?
+Cd_ref = getDrag(V_mod,z,(csett.chosen_trajectory-1)/10*extMax, csett.coeff_Cd); % perché *0.001?
 U_ref = 0.5*ro*Cd_ref*csett.S0*Vz*V_mod; 
 % U_ref = 0; % TESTING
 
