@@ -30,6 +30,16 @@ end
 
 addpath(genpath(currentPath));
 
+% Common Functions path
+addpath(genpath(commonFunctionsPath));
+
+%% CHECK IF MSA-TOOLKIT IS UPDATED
+msaToolkitURL = 'https://github.com/skyward-er/msa-toolkit';
+localRepoPath = '../data/msa-toolkit';
+status = checkLastCommit(msaToolkitURL, localRepoPath, pwd);
+submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
+
+%% CONFIGs
 configSimulator;
 configControl;
 configReferences;

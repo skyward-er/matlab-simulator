@@ -28,12 +28,22 @@ if not(strcmp(filePath, currentPath))
     cd (filePath);
     currentPath = filePath;
 end
-
+commonFunctionsPath = '../commonFunctions';
 addpath(genpath(currentPath));
 
-% %% LOAD DATA
+% Common Functions path
+addpath(genpath(commonFunctionsPath));
+
+%% CHECK IF MSA-TOOLKIT IS UPDATED
+msaToolkitURL = 'https://github.com/skyward-er/msa-toolkit';
+localRepoPath = '../data/msa-toolkit';
+status = checkLastCommit(msaToolkitURL, localRepoPath, pwd);
+submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
+
+%% LOAD DATA
 configTrajectoryGeneration;
 matlab_graphics;
+
 %% AIRBRAKES RADIAL EXTENSION
 % Airbrakes extension vector
 deltaX_values = linspace(settings.hprot(1), settings.hprot(end), settings.Ndx);
