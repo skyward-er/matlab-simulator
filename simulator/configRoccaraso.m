@@ -21,7 +21,7 @@ settings.Kalman             =   false;                                     % Swi
 settings.Ada                =   false;                                     % Switch on to run the apogee detection algorithm
 
 %% LAUNCH SETUP
-% launchpad for Pont De Sor
+% launchpad for Roccaraso
 settings.z0            =   1416;                                            %[m] Launchpad Altitude
 lpin                   =   1.150;                                          %[m] Distance from base of second pin
 settings.lrampa        =   5.9 - lpin;                                     %[m] LaunchPad route (total available route)
@@ -48,7 +48,8 @@ Motors      =   [Motors.Cesaroni, Motors.Aerotech];
 % name = 'M2020';
 % name = 'M1890';
 % name = 'M1800';
-name = 'L1350-CS';
+% name = 'L1350-CS';
+name = 'L820-SK';
 
 n_name = [Motors.MotorName] == name;
 settings.motor.exp_time     =    Motors(n_name).t;
@@ -123,21 +124,25 @@ settings.Controls   =       s.State.hprot';
 clear('s');
 
 %% CONTROL AND SENSOR FREQUENCIES
-settings.frequencies.controlFrequency           =   10;                    % [hz] control action frequency 
-settings.frequencies.accelerometerFrequency     =   100;                   % [hz] control action frequency 
-settings.frequencies.gyroFrequency              =   100;                   % [hz] control action frequency 
-settings.frequencies.magnetometerFrequency      =   100;                   % [hz] control action frequency 
-settings.frequencies.gpsFrequency               =   10;                    % [hz] control action frequency 
-settings.frequencies.barometerFrequency         =   20;                    % [hz] control action frequency 
+settings.frequencies.controlFrequency           =   10;                    % [hz] control action frequency
+settings.frequencies.accelerometerFrequency     =   100;                   % [hz] sensor frequency
+settings.frequencies.gyroFrequency              =   100;                   % [hz] sensor frequency
+settings.frequencies.magnetometerFrequency      =   100;                   % [hz] sensor frequency
+settings.frequencies.gpsFrequency               =   10;                    % [hz] sensor frequency
+settings.frequencies.barometerFrequency         =   20;                    % [hz] sensor frequency
+settings.frequencies.pitot                      =   20;                    % [hz] sensor frequency
 
 %% KALMAN TUNING PARAMETERS
-settings.kalman.dt_k          =   0.01;                                    % [s]        kalman time step
-settings.kalman.sigma_baro    =   5;                                       % [m/2]   estimated barometer variance    
-settings.kalman.sigma_mag     =   1;                                       % [mgauss^2] estimated magnetometer variance    
-settings.kalman.sigma_GPS     =   5;                                       % [mg^2]     estimated GPS variance
-settings.kalman.sigma_w       =   1;                                       % [rad^2/s^2]   estimated gyroscope variance;
-settings.kalman.sigma_beta    =   1e-4;                                    % [rad/s^2]   estimated gyroscope bias variance;
 
+% Currently this is done inside the nasSys class
+
+% settings.kalman.dt_k          =   0.01;                                    % [s]        kalman time step
+% settings.kalman.sigma_baro    =   5;                                       % [m/2]   estimated barometer variance    
+% settings.kalman.sigma_mag     =   1;                                       % [mgauss^2] estimated magnetometer variance    
+% settings.kalman.sigma_GPS     =   5;                                       % [mg^2]     estimated GPS variance
+% settings.kalman.sigma_w       =   1;                                       % [rad^2/s^2]   estimated gyroscope variance;
+% settings.kalman.sigma_beta    =   1e-4;                                    % [rad/s^2]   estimated gyroscope bias variance;
+% 
 settings.kalman.v_thr         =   2.5;                                     % Velocity threshold for the detected apogee
 settings.kalman.count_thr     =   5;                                       % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.kalman.counter       =   0;
@@ -148,20 +153,20 @@ settings.kalman.flag_apo      =   false;                                   % Tru
 settings.kalman.lat0          = settings.lat0;
 settings.kalman.lon0          = settings.lon0;
 settings.kalman.z0            = -settings.z0;
-settings.kalman.spheroid      = wgs84Ellipsoid;
-
-% Process noise covariance matrix for the linear dynamics
-settings.kalman.QLinear       =   0.005*...
-                                 [4       0       0        0        0       0;
-                                  0       4       0        0        0       0;
-                                  0       0       4        0        0       0;
-                                  0       0       0        2        0       0;
-                                  0       0       0        0        2       0;
-                                  0       0       0        0        0       2];
-
-% Process noise covariance matrix for the quaternion dynamics
-settings.kalman.Qq              =   [(settings.kalman.sigma_w^2*settings.kalman.dt_k+(1/3)*settings.kalman.sigma_beta^2*settings.kalman.dt_k^3)*eye(3)          0.5*settings.kalman.sigma_beta^2*settings.kalman.dt_k^2*eye(3);
-                                      0.5*settings.kalman.sigma_beta^2*settings.kalman.dt_k^2*eye(3)                                              settings.kalman.sigma_beta^2*settings.kalman.dt_k*eye(3)];
+% settings.kalman.spheroid      = wgs84Ellipsoid;
+% 
+% % Process noise covariance matrix for the linear dynamics
+% settings.kalman.QLinear       =   0.005*...
+%                                  [4       0       0        0        0       0;
+%                                   0       4       0        0        0       0;
+%                                   0       0       4        0        0       0;
+%                                   0       0       0        2        0       0;
+%                                   0       0       0        0        2       0;
+%                                   0       0       0        0        0       2];
+% 
+% % Process noise covariance matrix for the quaternion dynamics
+% settings.kalman.Qq              =   [(settings.kalman.sigma_w^2*settings.kalman.dt_k+(1/3)*settings.kalman.sigma_beta^2*settings.kalman.dt_k^3)*eye(3)          0.5*settings.kalman.sigma_beta^2*settings.kalman.dt_k^2*eye(3);
+%                                       0.5*settings.kalman.sigma_beta^2*settings.kalman.dt_k^2*eye(3)                                              settings.kalman.sigma_beta^2*settings.kalman.dt_k*eye(3)];
 %% ADA TUNING PARAMETER
 
 settings.ada.Q           =   [1     0       0;                             % Process noise covariance matrix

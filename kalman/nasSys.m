@@ -32,7 +32,7 @@ classdef nasSys
 %         temperature0 = % at Ground Level [K]
 %         launchDate = [] % [aaaa, mm, dd]
 
-        temperature0 = 300.190000000000; %Reference temperature at GL for Euroc[K]
+        temperature0 = 300.19; %Reference temperature at GL for Euroc[K]
         launchDate = [2021, 10, 15];
 
         latitude0 = 45.5;

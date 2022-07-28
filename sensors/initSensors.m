@@ -97,9 +97,9 @@ s.SSCDRRN015PDAD5.maxMeasurementRange  =   1034;                   % in mbar (15
 s.SSCDRRN015PDAD5.minMeasurementRange  =   -1034;                  % in mbar (-15 psi from datasheet)
 s.SSCDRRN015PDAD5.offset               =   -1.9327;                % in mbar
 s.SSCDRRN015PDAD5.resolution           =   1;                      % in mbar
-s.SSCDRRN015PDAD5.noiseVariance        =   42;                     % guess in mbar
+s.SSCDRRN015PDAD5.noiseVariance        =   75;                     % guess in mbar
 s.SSCDRRN015PDAD5.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
-
+% check 2d offset for pitot
 
 
 sensorTot.np_old        =   1;

@@ -259,7 +259,7 @@ sensorData.barometer.temperature = Temp;
 if isfield(freq, 'pitotFrequency')
     if freq.pitotFrequency > freq.controlFrequency
         N = freq.pitotFrequency/freq.controlFrequency;
-        vz = zeros(N, 1);
+        vx = zeros(N, 1);
         z = zeros(N, 1);
         if N ~= round(N)
             error('the sensor frequency must be a multiple of the control frequency');
@@ -271,30 +271,44 @@ if isfield(freq, 'pitotFrequency')
                 [index0] = find(iTimePitot < T);
                 index1 = index0(1);
                 index0 = index1 - 1;
-                Y1 = Y(index1, 6);
-                Y0 = Y(index0, 6);
                 T1 = T(index1);
                 T0 = T(index0);
-                % linear interpolation between the 2 states
+                % linear interpolation between x-body ned
+                Y1 = Y(index1, 4);
+                Y0 = Y(index0, 4);
                 m = (Y1 - Y0)./(T1 - T0);
                 q = Y1 - m*T1;
-                vz(i) = m*iTimePitot + q;
-                z(i) = m*iTimeBarometer + q;
-    
+                vx(i) = m*iTimePitot + q;
+                % linear interpolation between altitude
+                Y1 = Y(index1, 3);
+                Y0 = Y(index0, 3);
+                m = (Y1 - Y0)./(T1 - T0);
+                q = Y1 - m*T1;
+                z(i) = - m*iTimeBarometer + q;    
             else
-                vz(i) = -Y(iTimePitot == T, 3);
+                vx(i) = Y(iTimePitot == T, 4);
                 z(i) = -Y(iTimeBarometer == T, 3);
             end
         end
         
     else
         sensorData.pitot.time = T(end);
-        vz = Y(end, 6);
+        vx = Y(end, 4);
         z = -Y(end, 3);
     end
     [Temp, ~, ~, rho] = atmosisa(z + settings.z0);
     
-    v = vz; % We currently don't consider angle of attack and wind here
+    Q = Y(end, 10:13);
+
+    ned2body  = [Q(1)^2 - Q(2)^2 - Q(3)^2 + Q(4)^2,       2*(Q(1)*Q(2) - Q(3)*Q(4)),              2*(Q(1)*Q(3) + Q(2)*Q(4));
+                 2*(Q(1)*Q(2) + Q(3)*Q(4)),               -Q(1)^2 + Q(2)^2 - Q(3)^2 + Q(4)^2,     2*(Q(2)*Q(3) - Q(1)*Q(4));
+                 2*(Q(1)*Q(3) - Q(2)*Q(4)),               2*(Q(2)*Q(3) + Q(1)*Q(4)),              -Q(1)^2 - Q(2)^2 + Q(3)^2 + Q(4)^2]';
+
+    wind_ned = [uw, vw, ww]';
+
+    wind_body = ned2body*wind_ned;
+
+    v = vx + wind_body(1); % Speed x_body + wind in x_body direction
     
     sensorData.pitot.temperature = Temp;
     sensorData.pitot.measures = 0.5*rho*v*v*sign(v); % differential pressure in Pascals

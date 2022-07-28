@@ -1,4 +1,4 @@
-function [Yf, Tf, cpuTimes, flagMatr, otherData] = std_run(settings)
+function [Yf, Tf, cpuTimes, flagMatr, otherData] = std_run(settings, csett)
 %{
 
 STD_RUN_HIL - This function runs a hardware-in-the-loop simulation
@@ -263,7 +263,7 @@ while flagStopIntegration || n_old < nmax
     end
     
     if settings.dataNoise
-        [sensorData, tot] = acquisition_Sys(sensorData, s, tot); %#ok<ASGLU> 
+        [sensorData, tot] = acquisition_Sys(sensorData, s, tot);
     end
     
     %% STATE COMPUTATION
@@ -305,9 +305,24 @@ while flagStopIntegration || n_old < nmax
     %% CONTROL ALGORITHMS
     if settings.electronics
         % qua leggere da seriale e impostare i valori
-        runHIL
+        runHIL;
     else
-        runControl;
+        if iTimes==1 && settings.Ada
+            ada_prev  =   settings.ada.x0;
+            Pada_prev =   settings.ada.P0;
+        elseif iTimes ~= 1 && settings.Ada
+            ada_prev  =   xp_ada_tot(end,:);
+            Pada_prev =   P_ada(:,:,end);
+        end
+
+        if iTimes==1 && settings.Kalman
+            x_prev    =  [X0; V0; Q0(2:4); Q0(1);0;0;0];
+            nas = nasSys(x_prev);
+            nas.latitude0 = settings.kalman.lat0;
+            nas.longitude0 = settings.kalman.lon0;
+            nas.altitude0 = - settings.kalman.z0;
+        end
+        [t_est_tot, x_est_tot, xp_ada_tot, xv_ada_tot, t_ada_tot, nas, P_ada, P_c] = runControl(settings, nas, sensorData, tot, ada_prev, Pada_prev, flagAeroBrakes);
     end
 
     %% FULL STATE ASSEMBLY
@@ -371,13 +386,14 @@ if not(settings.electronics)
     i_apo = find(Tf < 24.8);
     i_apo = max(i_apo);
     if settings.Kalman
-    i_apo_est = find(t_est_tot < Tf(i_apo));
-    i_apo_est = max(i_apo_est);
+        i_apo_est = find(t_est_tot < Tf(i_apo));
+        i_apo_est = max(i_apo_est);
+    end
     %% SAVE THE VARIABLES FOR PLOT PURPOSE
     % kalman state plot
     if settings.Kalman
         tot.x_est_tot    =  x_est_tot;
-        tot.vels_tot     =  vels_tot;
+        tot.vels_tot     =  x_est_tot(:,4:6);
         tot.t_est_tot    =  t_est_tot;
         tot.i_apo        =  i_apo;
         tot.i_apo_est    =  i_apo_est; 
@@ -390,10 +406,10 @@ if not(settings.electronics)
         tot.t_ada_tot    =  t_ada_tot;
     end
     
-    % control
-    if settings.control
-        tot.flagPID      =  csett.flagPID;
-    end
+%     % control
+%     if settings.control
+%         tot.flagPID      =  0; %csett.flagPID; %%FIX IN MERGE WITH NEW SIM
+%     end
     
     tot.plot_ada     =  settings.Ada && false; 
     tot.plot_sensors =  settings.dataNoise && false; 
@@ -411,14 +427,14 @@ end
 otherData.tot = tot;
 
 %% PLOT THE RESULTS
-
-% Obtain the control variable
-time = 0:dt:(length(plot_control_variable)-1)*dt;  
-
-% Control variable: servo angle
-figure('Name','Servo angle after burning phase','NumberTitle','off');
-plot(time, plot_control_variable), grid on;
-axis([0,20, 0,60])
-xlabel('time [s]'), ylabel('Angle [deg]');
+% 
+% % Obtain the control variable
+% time = 0:dt:(length(plot_control_variable)-1)*dt;  
+% 
+% % Control variable: servo angle
+% figure('Name','Servo angle after burning phase','NumberTitle','off');
+% plot(time, plot_control_variable), grid on;
+% axis([0,20, 0,60])
+% xlabel('time [s]'), ylabel('Angle [deg]');
 
 end

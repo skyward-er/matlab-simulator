@@ -25,11 +25,13 @@ if not(strcmp(filePath, currentPath))
 end
 
 addpath(genpath(currentPath));
+
 %% LOAD DATA
 run('configRoccaraso.m');
 settings.electronics = 0;
 settings.ascentOnly = 1;
 settings.ballisticFligth = 1;
+settings.flagAeroBrakes = 0;
 settings.plots = 0;
 settings.control = 0;
 settings.Kalman = 1;
