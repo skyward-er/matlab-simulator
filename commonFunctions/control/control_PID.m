@@ -1,5 +1,4 @@
 function [alpha_degree_out, Vz_setpoint, z_setpoint, pid, U_linear, Cd, delta_S, csett] = control_PID(time,z, Vz, V_mod, csett, alpha_degree_in,settings)
-
 % Author: Leonardo Bertelli
 % Co-Author: Alessandro Del Duca
 % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@kywarder.eu

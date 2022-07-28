@@ -33,6 +33,10 @@ contSettings.Ki_2    =   40;                                                % us
 contSettings.Kp_3    =   20;                                                % using alfa_degree nel pid --> ancora da tunare
 contSettings.Ki_3    =   20;                                                % using alfa_degree nel pid
 
+% PID with 2 references coefficients
+contSettings.Kp_2ref_1 = 1;
+contSettings.Kp_2ref_2 = 1;         % these two coefficients are nonsense if set to 1, they're just here for reference, may edit later or delete.
+
 % Select the PID algorithm
 contSettings.flagPID           =    1;                                      % 1: control_PID (Fdrag);  2: control_LIN (u);  3: control_Servo (alfa_degree);
 

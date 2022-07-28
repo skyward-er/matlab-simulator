@@ -102,7 +102,6 @@ z           =       0;                                                      % Al
 nmax        =       10000;                                                  % Max iteration number - stops the integration if reached
 mach        =       0;                                                      % Mach number
 ext         =       0;                                                      % air brake extension (it is called "c" in ascentContr)
-ap_ref      =       0;                                                      % servo angle reference
 n_old       =       1;                                                      % Iteration number (first iter-> n=1)
 Yf_tot      =       zeros(nmax, size(Y0,1));                                % State vector for ode integration
 Tf_tot      =       zeros(nmax, 1);                                         % Time vector for ode integration
@@ -130,7 +129,9 @@ else
     launchFlag = true;
 end
 
-fprintf('START:\n\n\n');
+if not(settings.montecarlo)
+    fprintf('START:\n\n\n');
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Salvo input/output per testare algoritmo cpp
@@ -189,6 +190,7 @@ while flagStopIntegration && n_old < nmax
 
     % dynamics
     if flagFligth
+
         if settings.ballisticFligth
             [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, ap_ref,t_change_ref, tLaunch);
         else
@@ -214,6 +216,10 @@ while flagStopIntegration && n_old < nmax
         Yf = [initialCond'; initialCond'];
     end
 
+    ext = extension_From_Angle_2022(Yf(end,17),settings);
+    if ext > settings.arb.maxExt
+        error("the extension of the airbrakes exceeds the maximum value: ext = "+num2str(ext))
+    end
     [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Yf, Tf, ext);
     
     [~, ~, p, ~] = atmosisa(-Yf(:,3) + settings.z0) ;
@@ -470,7 +476,7 @@ end
 
 
 if not(settings.electronics) && ~settings.montecarlo
-    dataBallisticFlight = recallOdeFcn(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings, c.ap_tot, settings.servo.delay,tLaunch,'apVec');
+    dataBallisticFlight = recallOdeFcn2(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings, c.ap_tot, settings.servo.delay,tLaunch,'apVec');
 else
     dataBallisticFlight = [];
 end

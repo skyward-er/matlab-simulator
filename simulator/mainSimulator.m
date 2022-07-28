@@ -32,7 +32,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 
 
-% close all; clear all; clc;
+% close all; 
+clear; clc;
 
 filePath = fileparts(mfilename('fullpath'));
 currentPath = pwd;
@@ -40,7 +41,7 @@ if not(strcmp(filePath, currentPath))
     cd (filePath);
     currentPath = filePath;
 end
-
+commonFunctionsPath = '../commonFunctions';
 addpath(genpath(currentPath));
 
 % Common Functions path
@@ -64,29 +65,22 @@ matlab_graphics;
 % basically if this is true sets the randomic value of the wind to the same
 % values for each simulation, so it has the same atmospheric conditions
 % each time
-if settings.tuning
+
+% if settings.tuning
 	rng('default')
-end
+% end
 
 %% START THE CHOSEN SIMULATION
 % T = vector of time used by ODE, [s] also for Tf Ta
 % Y = State = ( x y z | u v w | p q r | q0 q1 q2 q3 | thetax thetay thetaz | ap_ref ) also for Ya,Yf corresponding to T
 
-algorithm = 'interp';
-switch algorithm
-    case 'interp'
-        if settings.electronics
-            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = interp_run_control(settings, contSettings);
-        else
-            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = interp_run_control(settings,contSettings);
-        end
-    case 'std'
-        if settings.electronics
-            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = std_run_control(settings, contSettings);
-        else
-            [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = std_run_control(settings,contSettings);
-        end
+algorithm = 'PID_2states';
+if settings.electronics
+    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = interp_run_control(settings, contSettings,algorithm);
+else
+    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = interp_run_control(settings,contSettings,algorithm);
 end
+
 
 %% DATA-PRINTING
 
