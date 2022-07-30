@@ -1,4 +1,4 @@
-function [alpha] = shootingControl(y0_new,alpha,settings,coeffs,k,init)
+function [alpha] = control_Shooting(y0_new,alpha,settings,coeffs,k,init)
 % this function computes online the best airbrakes aperture to reach the
 % target apogee
 %----- INPUT-----
@@ -22,6 +22,7 @@ targ = 3000;
 
 [alpha] = lsqnonlin(@(alpha)newShooting2(alpha,settings,coeffs,k,y0_new,targ),alpha0,lb,ub,opt);
 
-
+% saturation
+[alpha, ~] = Saturation(alpha,settings.servo.minAngle, settings.servo.maxAngle);
 end
 

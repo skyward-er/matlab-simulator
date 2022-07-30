@@ -40,7 +40,7 @@ ro = getRho(z);
 
 % Control variable limits
 SMin = 0;
-[extMax,SMax] = extension_From_Angle_2022(settings.servo.maxAngle,settings);
+[extMax,SMax] = extension_From_Angle(settings.servo.maxAngle,settings);
 extMin = 0;
 
 
@@ -61,11 +61,11 @@ Umax = 0.5*ro*Cd_max*csett.S0*Vz*V_mod;     % max force
 error = (Vz - Vz_setpoint); % > 0 (in teoria)
 
 % P part of controler
-P = csett.Kp_1*error;
+P = csett.Kp*error;
 
 % I part of controler
 if csett.saturation == false
-    csett.I = csett.I + csett.Ki_1*error;
+    csett.I = csett.I + csett.Ki*error;
 end
 
 
@@ -77,7 +77,7 @@ U_ref = 0.5*ro*Cd_ref*csett.S0*Vz*V_mod;
 % Final control action: U = U_ref + delta_U_pid
 U = U_ref + P + csett.I;
 
-% Anti-windup
+% Anti wind-up
 [U, csett.saturation] = Saturation(U, Umin, Umax);
 
 %% TRANSFORMATION FROM U to delta_S 
@@ -88,27 +88,27 @@ switch settings.mission
     case 'Lynx_Roccaraso_September_2021'
         alpha_available = linspace(0,0.89,20);
         for i = 1:length(alpha_available)
-            [ext_available(i),delta_S_available(i)] = extension_From_Angle_2022(alpha_avaliable(i),settings); % pyxis has surface linear with angle, for lynx it won't work anymore, but do we care? no
+            [ext_available(i),delta_S_available(i)] = extension_From_Angle(alpha_avaliable(i),settings); % pyxis has surface linear with angle, for lynx it won't work anymore, but do we care? no
         end
     
     case 'Lynx_Portugal_October_2021'
         alpha_available = linspace(0,0.89,20);
         for i = 1:length(alpha_available)
-            [ext_available(i),delta_S_available(i)] = extension_From_Angle_2022(alpha_available(i),settings); % pyxis has surface linear with angle, for lynx it won't work anymore, but do we care? no
+            [ext_available(i),delta_S_available(i)] = extension_From_Angle(alpha_available(i),settings); % pyxis has surface linear with angle, for lynx it won't work anymore, but do we care? no
         end
     
     case 'Pyxis_Portugal_October_2022'
         delta_S_available = linspace(SMin,SMax,20);
         ext_available = zeros(length(delta_S_available),1);
         for i = 1:length(delta_S_available)
-            ext_available(i) = extension_From_Angle_2022(delta_S_available(i)/0.009564,settings); % pyxis has surface linear with angle, for lynx it won't work anymore, but do we care? no
+            ext_available(i) = extension_From_Angle(delta_S_available(i)/0.009564,settings); % pyxis has surface linear with angle, for lynx it won't work anymore, but do we care? no
         end
 
     case 'Pyxis_Roccaraso_September_2022'
         delta_S_available = linspace(SMin,SMax,20);
         ext_available = zeros(length(delta_S_available),1);
         for i = 1:length(delta_S_available)
-            ext_available(i) = extension_From_Angle_2022(delta_S_available(i)/0.009564,settings); % pyxis has surface linear with angle, for lynx it won't work anymore, but do we care? no
+            ext_available(i) = extension_From_Angle(delta_S_available(i)/0.009564,settings); % pyxis has surface linear with angle, for lynx it won't work anymore, but do we care? no
         end
 
 end

@@ -1,4 +1,4 @@
-function [dY, parout] = ascentInterpContr(t, YY, settings, ap_ref_vec,t_change_ref, tLaunch,varargin)
+function [dY, parout] = ascentContr_2021old(t, Y, settings, c, tLaunch,varargin)
 %{
 
 ASCENT - ode function of the 6DOF Rigid Rocket Model
@@ -47,43 +47,27 @@ Author: Adriano Filippo Inno
 Skyward Experimental Rocketry | AFD Dept | crd@skywarder.eu
 email: adriano.filippo.inno@skywarder.eu
 
-Author: Marco Marchesi
-Skyward Experimental Rocketry | ELC-SCS Dept
-email: marco.marchesi@skywarder.eu
-Revision date: 11/04/2022
-
 %}
 
 % recalling the states
 % x = Y(1);
 % y = Y(2);
-z = YY(3);
-u = YY(4);
-v = YY(5);
-w = YY(6);
-p = YY(7);
-q = YY(8);
-r = YY(9);
-q0 = YY(10);
-q1 = YY(11);
-q2 = YY(12);
-q3 = YY(13);
-Ixx = YY(14);
-Iyy = YY(15);
-Izz = YY(16);
-ap = YY(17);
-dap = YY(18);
+z = Y(3);
+u = Y(4);
+v = Y(5);
+w = Y(6);
+p = Y(7);
+q = Y(8);
+r = Y(9);
+q0 = Y(10);
+q1 = Y(11);
+q2 = Y(12);
+q3 = Y(13);
+Ixx = Y(14);
+Iyy = Y(15);
+Izz = Y(16);
 
 t = t - tLaunch;
-
-% saturation on servo angle
-if ap > settings.servo.maxAngle
-    ap = settings.servo.maxAngle;
-    dap = 0;
-elseif ap< settings.servo.minAngle
-    ap = settings.servo.minAngle;
-    dap = 0;
-end
 
 %% CONSTANTS
 S = settings.S;              % [m^2] cross surface
@@ -140,7 +124,7 @@ Vels = dcm'*[u; v; w];
 V_norm = norm([ur vr wr]);
 
 %% ATMOSPHERE DATA
-if -z < 0       % z is directed as the gravity vector
+if -z < 0     % z is directed as the gravity vector
     z = 0;
 end
 
@@ -150,8 +134,8 @@ absoluteAltitude = -z + settings.z0;
 M = V_norm/a;
 M_value = M;
 
-%% TIME-DEPENDENT VARIABLES
-dI = 1/tb*([Ixxf Iyyf Izzf]' - [Ixxe Iyye Izze]');
+%% TIME-DEPENDENTS VARIABLES
+dI = 1/tb*([Ixxf Iyyf Izzf]'-[Ixxe Iyye Izze]');
 
 if t<tb
     m = settings.ms + interp1(settings.motor.expTime, settings.motor.expM, t);
@@ -160,7 +144,7 @@ if t<tb
     Izzdot = -dI(3);
     T = interp1(settings.motor.expTime, settings.motor.expThrust, t);
     
-else            % for t >= tb the fligth condition is the empty one (no interpolation needed)
+else             % for t >= tb the fligth condition is the empty one(no interpolation needed)
     m = settings.ms;
     Ixxdot = 0;
     Iyydot = 0;
@@ -168,7 +152,7 @@ else            % for t >= tb the fligth condition is the empty one (no interpol
     T = 0;
 end
 
-%% AERODYNAMIC ANGLES
+%% AERODYNAMICS ANGLES
 if not(ur < 1e-9 || V_norm < 1e-9)
     alpha = atan(wr/ur);
     beta = atan(vr/ur);             % beta = asin(vr/V_norm); is the classical notation, Datcom uses this one though.
@@ -195,93 +179,85 @@ for i = 1:4
     [~, index(i)] = min(abs(cellT{i} - inst(i)));
 end
 
+CmatE = CoeffsE(:, :, :, :, :, :);
+CmatF = CoeffsF(:, :, :, :, :);
 
-%% Aerodynamic coefficients
-CmatE = CoeffsE(:, :, :, :, :, :);                                          
-CmatF = CoeffsF(:, :, :, :, :);                                             
-
-ext = extension_From_Angle_2022(ap, settings);
-
-if ext == 0
-    VE = CmatE(:, index(1), index(2), index(3), index(4), 1);               % from coeffsE (Empty rocket) takes the aerodynamic coefficients
+if c == 0
+    VE = CmatE(:, index(1), index(2), index(3), index(4), 1);
 else
-    c_cmp = C_datcom(ext > C_datcom);                                    
-    n0 = length(c_cmp);                                                     
-    n1 = n0 + 1;                                                            
-    c0 = c_cmp(end);                                                        
-    c1 = C_datcom(n1);  % this line gives errors                            
-    C0 =  CmatE(:, index(1), index(2), index(3), index(4), n0);             
-    C1 =  CmatE(:, index(1), index(2), index(3), index(4), n1);             
-    VE = C1 + ((C1 - C0)./(c1 - c0)).*(ext - c1);                           % interpolation of the coefficients
+    c_cmp = C_datcom(c > C_datcom);
+    n0 = length(c_cmp);
+    n1 = n0 + 1;
+    c0 = c_cmp(end);
+    c1 = C_datcom(n1);
+    C0 =  CmatE(:, index(1), index(2), index(3), index(4), n0);
+    C1 =  CmatE(:, index(1), index(2), index(3), index(4), n1);
+    VE = C1 + ((C1 - C0)./(c1 - c0)).*(c - c1);
 end
 
-
 if t <= tb
-    VF = CmatF(:, index(1), index(2), index(3), index(4));                  % VF takes coefficients from CoeffsF where F stands for FULL
-    coeffsValues =  t/tb.*(VE-VF)+VF;                                       % interpolation between empty and full coefficients
+    VF = CmatF(:, index(1), index(2), index(3), index(4));
+
+    coeffsValues =  t/tb.*(VE-VF)+VF;
 else
-    coeffsValues = VE;                                                      
+    coeffsValues = VE;
 end
 
 % Retrieve Coefficients
-CA = coeffsValues(1);
-CYB = coeffsValues(2); CY0 = coeffsValues(3);                               
-CNA = coeffsValues(4); CN0 = coeffsValues(5); Cl = coeffsValues(6);         
-Clp = coeffsValues(7); Cma = coeffsValues(8); Cm0 = coeffsValues(9);        
-Cmad = coeffsValues(10); Cmq = coeffsValues(11); Cnb = coeffsValues(12);    
-Cn0 = coeffsValues(13); Cnr = coeffsValues(14); Cnp = coeffsValues(15);     
+CA = coeffsValues(1); 
+CYB = coeffsValues(2); CY0 = coeffsValues(3);
+CNA = coeffsValues(4); CN0 = coeffsValues(5); Cl = coeffsValues(6);
+Clp = coeffsValues(7); Cma = coeffsValues(8); Cm0 = coeffsValues(9);
+Cmad = coeffsValues(10); Cmq = coeffsValues(11); Cnb = coeffsValues(12);
+Cn0 = coeffsValues(13); Cnr = coeffsValues(14); Cnp = coeffsValues(15);
 
-alpha0 = A_datcom(index(1));                                                % zero lift angles
-beta0 = B_datcom(index(3));                                                 % 
+alpha0 = A_datcom(index(1)); beta0 = B_datcom(index(3));
 
-CN = (CN0 + CNA*(alpha-alpha0));                                            %  coefficient
-CY = (CY0 + CYB*(beta-beta0));                                              % Y Coefficient
-Cm = (Cm0 + Cma*(alpha-alpha0));                                            % ROLL moment coefficient
-Cn = (Cn0 + Cnb*(beta-beta0));                                              % yaw moment coefficient
+CN = (CN0 + CNA*(alpha-alpha0));
+CY = (CY0 + CYB*(beta-beta0));
+Cm = (Cm0 + Cma*(alpha-alpha0));
+Cn = (Cn0 + Cnb*(beta-beta0));
 
-%%% rocket on the launchpad
-if -z < settings.lrampa*sin(OMEGA)                                          % No torque on the Launch
+if -z < settings.lrampa*sin(OMEGA)      % No torque on the Launch
     
-    Fg = m*g*sin(OMEGA);                                                    % [N] force due to the gravity
-    X = 0.5*rho*V_norm^2*S*CA;                                              
-    F = -Fg +T -X;                                                          
-    du = F/m;                                                               
+    Fg = m*g*sin(OMEGA);                % [N] force due to the gravity
+    X = 0.5*rho*V_norm^2*S*CA;
+    F = -Fg +T -X;
+    du = F/m;
     
-    dv = 0;                                                                 
-    dw = 0;                                                                 
-    dp = 0;                                                                 
-    dq = 0;                                                                 
-    dr = 0;                                                                 
-    dap = 0;                                                                
-    ddap = 0;
-
-    alpha_value = NaN;                                                      
-    beta_value = NaN;                                                       
-    Y = 0;                                                                  
-    Z = 0;                                                                  
+    dv = 0;
+    dw = 0;
+    dp = 0;
+    dq = 0;
+    dr = 0;
+    
+    alpha_value = NaN;
+    beta_value = NaN;
+    Y = 0;
+    Z = 0;
     
     if T < Fg                           % No velocity untill T = Fg
-        du = 0;                                                             
+        du = 0;
     end
     
-else %%% rocket out of the launchpad
+else
     %% FORCES
     % first computed in the body-frame reference system
-    qdyn = 0.5*rho*V_norm^2;                                                %[Pa] dynamics pressure
-    qdynL_V = 0.5*rho*V_norm*S*C;                                           
+    qdyn = 0.5*rho*V_norm^2;        %[Pa] dynamics pressure
+    qdynL_V = 0.5*rho*V_norm*S*C;
     
-    X = qdyn*S*CA;                                                          %[N] x-body component of the aerodynamics force
-    Y = qdyn*S*CY;                                                          %[N] y-body component of the aerodynamics force
-    Z = qdyn*S*CN;                                                          %[N] z-body component of the aerodynamics force
-    Fg = quatrotate(Q,[0 0 m*g])';                                          %[N] force due to the gravity in body frame
+    X = qdyn*S*CA;              %[N] x-body component of the aerodynamics force
+    Y = qdyn*S*CY;            %[N] y-body component of the aerodynamics force
+    Z = qdyn*S*CN;           %[N] z-body component of the aerodynamics force
+    Fg = quatrotate(Q,[0 0 m*g])';  %[N] force due to the gravity in body frame
     
-    F = Fg +[-X+T,+Y,-Z]';                                                  %[N] total forces vector
+    F = Fg +[-X+T,+Y,-Z]';          %[N] total forces vector
     
     %% STATE DERIVATIVES
     % velocity
-    du = F(1)/m-q*w+r*v;                                                    
-    dv = F(2)/m-r*u+p*w;                                                    
-    dw = F(3)/m-p*v+q*u;                                                    
+    du = F(1)/m-q*w+r*v;
+    dv = F(2)/m-r*u+p*w;
+    dw = F(3)/m-p*v+q*u;
     
     % Rotation
     dp = (Iyy-Izz)/Ixx*q*r + qdynL_V/Ixx*(V_norm*Cl+Clp*p*C/2)-Ixxdot*p/Ixx;
@@ -289,43 +265,8 @@ else %%% rocket out of the launchpad
         -Iyydot*q/Iyy;
     dr = (Ixx-Iyy)/Izz*p*q + qdynL_V/Izz*(V_norm*Cn + (Cnr*r+Cnp*p)*C/2)...
         -Izzdot*r/Izz;
-
     
-
-    if  M_value < settings.MachControl && t>tb
-
-        if length(ap_ref_vec)==2 % for the recallOdeFunction
-            if t < t_change_ref
-                ap_ref = ap_ref_vec(1);    
-            else
-                ap_ref = ap_ref_vec(2);
-            end
-        else 
-            ap_ref = ap_ref_vec;
-        end
-        dap_ref = (ap_ref-ap)/settings.servo.tau;
-        if abs(dap_ref) >settings.servo.maxSpeed
-            dap_ref = sign(ap_ref-ap)*settings.servo.maxSpeed;
-        end
-    else 
-        dap_ref = 0;
-    end
-
-
-    if ap > settings.servo.maxAngle
-        dap_ref = 0;
-        dap = 0;
-    elseif ap < settings.servo.minAngle
-        dap_ref = 0;
-        dap = 0;
-    end
-    
-    
-    ddap = (dap_ref-dap)/settings.servo.tau_acc;
-
 end
-
-
 % Quaternions
 OM = [ 0 -p -q -r  ;
        p  0  r -q  ;
@@ -346,9 +287,6 @@ dY(10:13) = dQQ;
 dY(14) = Ixxdot;
 dY(15) = Iyydot;
 dY(16) = Izzdot;
-dY(17) = dap;
-dY(18) = ddap;
-
 dY = dY';
 
 %% SAVING QUANTITIES FOR PLOTS

@@ -27,7 +27,7 @@ if not(strcmp(filePath, currentPath))
     cd (filePath);
     currentPath = filePath;
 end
-
+commonFunctionsPath = '../commonFunctions';
 addpath(genpath(currentPath));
 
 % Common Functions path

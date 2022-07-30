@@ -1,8 +1,19 @@
-%this is a code that is pretty useless until you have to test the air
-%brakes from the simulations. Given the save_thrust from montecarlo
-%simulations, this code just picks one of the simulated trajectories and
-%save a log.m file that contains all data of that simulation.
+%{
 
+simulationLogRetriever: this is a code that is pretty useless until you have to test the air
+brakes from the simulations. Given the save_thrust from montecarlo
+simulations, this code just picks one of the simulated trajectories and
+save a log.m file that contains all data of that simulation.
+
+REVISIONS:
+- 0     xx/xx/xxxx, Release,    Marco Marchesi, SCS department
+
+Copyright © 2022, Skyward Experimental Rocketry, SCS department
+All rights reserved
+
+SPDX-License-Identifier: GPL-3.0-or-later
+
+%}
 
 %%
 % load("saveThrust.mat") % this needs to be in the folder, otherwise comment this line and just load it manually.

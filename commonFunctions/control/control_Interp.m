@@ -1,4 +1,4 @@
-function [alpha0] = trajectoryChoicePID2refs(z,Vz,z_ref,V_ref,N_forward,settings,deltaZ)
+function [alpha0] = control_Interp(z,Vz,z_ref,V_ref,interpolation,N_forward,settings,deltaZ)
 
 % HELP
 %
@@ -22,49 +22,54 @@ function [alpha0] = trajectoryChoicePID2refs(z,Vz,z_ref,V_ref,N_forward,settings
 % OUTPUTS:
 % alpha0:   reference angle for the PID controller
 
-if nargin<9
+if nargin<8
     deltaZ = 10;
 end
 
+% 
+% alpha_min = 0;
+% alpha_max = deg2rad(68);
+% 
+% heights = [0:deltaZ:3000]';
+% 
+% 
+% 
+% V_rescale = zeros(length(heights),size(z_ref,1));
+% for ii = 1:size(z_ref,1)
+%     V_rescale(:,ii) = interp1(z_ref{ii},V_ref{ii},heights);
+% end
+% 
+% 
+% V_ref = V_rescale;
+% z_ref = heights;
 
 index_z = floor(z/deltaZ);
 if index_z > length(z_ref)
     index_z = length(z_ref);
 end
 
-% sets how many points in advance it has to check:
+% sets how many points in advance it has to check
 V_ref = [V_ref ; zeros(N_forward,size(V_ref,2))];
-
-% set references:
 V_extrema = V_ref(index_z+N_forward,[1,end]); %select the reference point on the trajectories to use for fuzzy logic
 
-% errors w.r.t. references:
-error_1 = (V_extrema(1)-Vz); % error w.r.t. the 0% extension trajectory 
-error_2 = (V_extrema(2)-Vz); % error w.r.t. the 100% extension trajectory 
 
+if Vz<V_extrema(1) % use the vertical component of vector V, check if it is the first or second
 
-% Proportional action:
+    percentage = 0;
 
-den = V_extrema(2)-V_extrema(1);
-if den < 1
-    den = 1; % bug fix on too small denominator (at the end it explodes due to restringment of reference trajectories, in this way we accept a small error to save the code)
+elseif Vz>=V_extrema(1) && Vz<V_extrema(end)
+    switch interpolation
+        case 'linear'
+            percentage = (Vz-V_extrema(1))/(V_extrema(2)-V_extrema(1)); % percentage = 0 if completely on trajectory 1, percentage = 1 if completely on trajectory 2
+        case 'sinusoidal'
+            percentage = 0.5+0.5*cos(-pi+pi*(Vz-V_extrema(1))/(V_extrema(2)-V_extrema(1))); % same as choice 1, but with a sinusoidal approach
+    end
+else
+    percentage = 1;
 end
-P_1 = -settings.servo.maxAngle/den;
-P_2 = +settings.servo.minAngle/den;
 
-% note: like this it is a variable gain P, because P_1 and P_2 are chosen
-% w.r.t. the reference differences, we should study a method to keep the
-% gain constant and let the controller do its work
+alpha0 = settings.servo.minAngle* (1-percentage) + settings.servo.maxAngle * percentage;
 
-% Integral action:
-
-
-
-
-alpha0 = P_1*error_1 + P_2*error_2;
-if alpha0 > settings.servo.maxAngle
-    alpha0 = settings.servo.maxAngle;
-end
 % if we are too high
 if z>settings.z_final
     alpha0 = settings.servo.maxAngle;

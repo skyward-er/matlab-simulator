@@ -1,4 +1,4 @@
-function [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, dataBallisticFlight,saveConstWind,varargout] = interp_run_control(settings, contSettings,algorithm)
+function [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, dataBallisticFlight,saveConstWind,varargout] = run_control(settings, contSettings,algorithm)
 %{
 
 STD_RUN_BALLISTIC - This function runs a standard ballistic (non-stochastic) simulation
@@ -67,7 +67,7 @@ if not(settings.wind.model) && not(settings.wind.input)
         ww = settings.wind.ww;
         Az = settings.wind.Az;
         El = settings.wind.El;
-        
+
         settings.constWind = [uw, vw, ww];
         saveConstWind =  [uw, vw, ww, Az, El];
     else
@@ -204,12 +204,12 @@ while flagStopIntegration && n_old < nmax
 
     % dynamics
     if flagFligth
-    
+
         if settings.ballisticFligth
-            [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings, ap_ref, t_change_ref, tLaunch);
+            [Tf, Yf] = ode113(@ascentControl, [t0, t1], Y0, [], settings, ap_ref, t_change_ref, tLaunch);
         else
             if flagAscent
-                [Tf, Yf] = ode113(@ascentInterpContr, [t0, t1], Y0, [], settings,  ap_ref, t_change_ref, tLaunch);
+                [Tf, Yf] = ode113(@ascentControl, [t0, t1], Y0, [], settings,  ap_ref, t_change_ref, tLaunch);
 
             else
                 if flagPara1
@@ -231,7 +231,7 @@ while flagStopIntegration && n_old < nmax
         Yf = [initialCond'; initialCond'];
     end
 
-    ext = extension_From_Angle_2022(Yf(end,17),settings); % bug fix becaus sometimes happens that the integration returns a value slightly larger than the max value for airbrakes and this mess things up
+    ext = extension_From_Angle(Yf(end,17),settings); % bug fix becaus sometimes happens that the integration returns a value slightly larger than the max value for airbrakes and this mess things up
     if ext > settings.arb.maxExt
         error("the extension of the airbrakes exceeds the maximum value: ext = "+num2str(ext))
     end
@@ -239,7 +239,7 @@ while flagStopIntegration && n_old < nmax
     % fix on signal frequencies: this interpolates the values if the speed
     % of the sensor is lower than the control action (or whatever)
     [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Yf, Tf, ext);
-    [~, ~, p, ~] = atmosisa(-Yf(:,3) + settings.z0) ;  
+    [~, ~, p, ~] = atmosisa(-Yf(:,3) + settings.z0) ;
 
     % simulate sensor acquisition
     if settings.dataNoise
@@ -283,7 +283,7 @@ while flagStopIntegration && n_old < nmax
         x_est_tot(c.n_est_old:c.n_est_old + size(x_c(:,1),1)-1,:)  = x_c(:,:); % NAS position output
         vels_tot(c.n_est_old:c.n_est_old + size(vels(:,1),1)-1,:)  = vels(:,:); % NAS speed output
         t_est_tot(c.n_est_old:c.n_est_old + size(x_c(:,1),1)-1)    = sensorData.accelerometer.time; % NAS time output
-        c.n_est_old = c.n_est_old + size(x_c,1); 
+        c.n_est_old = c.n_est_old + size(x_c,1);
     end
 
     % vertical velocity and position
@@ -302,18 +302,22 @@ while flagStopIntegration && n_old < nmax
     v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
 
     z    = -x_est_tot(end, 3);
-%     xxx  =  Yf(end, 2);
-%     yyy  =  Yf(end, 1);
+    %     xxx  =  Yf(end, 2);
+    %     yyy  =  Yf(end, 1);
     %% Control algorithm
     if flagAeroBrakes && mach < settings.MachControl && settings.Kalman && settings.control
         ap_ref_old = ap_ref_new;
         switch algorithm
             case 'interp'
-                
+                % interpolation algorithm: takes two references (max and
+                % min extension) and decides how much to open with an
+                % interpolation at fixed altitude of the true velocity
+                % w.r.t. the two references.
+
                 if not(contSettings.flagFilter)
-                    
-                    [ap_ref_new] = trajectoryChoice2bis(z,vz,settings.reference.Z,settings.reference.Vz,'linear',contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
-                    
+
+                    [ap_ref_new] = control_Interp(z,vz,settings.reference.Z,settings.reference.Vz,'linear',contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
+
                     if z> 2500
                         delta_ap_limiter = 0.2;
                         if abs(ap_ref_new - Yf(end,17))>delta_ap_limiter
@@ -321,8 +325,8 @@ while flagStopIntegration && n_old < nmax
                         end
                     end
                 else
-                    [ap_base_filter] = trajectoryChoice2bis(z,vz,settings.reference.Z,settings.reference.Vz,contSettings.interpType,contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
-                    
+                    [ap_base_filter] = control_Interp(z,vz,settings.reference.Z,settings.reference.Vz,contSettings.interpType,contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
+
                     % filter control action
                     if flagFirstControl == false % the first reference is given the fastest possible (unfiltered), then filter
                         ap_ref_new = ap_ref_new + (ap_base_filter -ap_ref_new)*filterCoeff;
@@ -334,19 +338,24 @@ while flagStopIntegration && n_old < nmax
                     end
 
                 end
-                %    case 'shooting'
-                    %  flag_inizio = 1;
-                  
-                    %         [ap_ref_new] = trajectoryChoice2bis(-Y0(3),vz,reference.altitude_ref,reference.vz_ref,'linear',N_forward,deltaZ); % cambiare nome alla funzione tra le altre cose
-                    %         if flag_inizio == 1
-                    %             init.options = optimoptions("lsqnonlin","Display","off");
-                    %             flag_inizio = 0;
-                    %         end
-                    %         tic
-                    %         [ap_ref_new] = shootingControl([-Y0(3),vz],ap_ref,settings,contSettings.coeff_Cd,settings.arb,init);
-                    %         toc
-                   
+            case 'shooting'
+                % shooting algorithm: 
+                flag_firstIter = 1;
+
+                [ap_ref_new] = control_Interp(z,vz,settings.reference.Z,settings.reference.Vz,'linear',contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
+                if flag_firstIter == 1
+                    init.options = optimoptions("lsqnonlin","Display","off");
+                    flag_firstIter = 0;
+                end
+                tic
+                [ap_ref_new] = control_Shooting([-Y0(3),vz],ap_ref_new,settings,contSettings.coeff_Cd,settings.arb,init);
+                toc
+
             case 'PID_2021'
+                % PID algorithm: at first checks speed and altitude to find
+                % which of the tabulated references is the closest, then
+                % tries to follow it with a PI controller.
+
                 time = Tf(end);
                 V_norm = norm([vxxx, vyyy, vz]);
                 % still don't know what these are, but they are useful (at
@@ -362,20 +371,23 @@ while flagStopIntegration && n_old < nmax
                 indice_test = indice_test +1;
 
                 alpha_degree_old = alpha_degree;
-                
+
                 c.vz_setpoint_tot(i)  =  vz_setpoint;
                 c.z_setpoint_tot(i)   =  z_setpoint;
                 c.alpha_degree_tot(i) =  alpha_degree;
-                
-            case 'PID_2states'
-                % this is a generalization of the 'interp' algorithm
-                % formally defined as a controller (PID) with two
-                % reference states and one output fed back.
+
+            case 'PID_2refs'
+                % PID 2 references algorithm: this is a generalization of the 
+                % 'interp' algorithm formally defined as a controller (PI) 
+                % with two reference states and one output fed back.
+                % Basically takes two references that define an interval instead
+                % of one that only gives a point and tries to keep the state 
+                % inside that interval
 
                 if not(contSettings.flagFilter)
-                    
-                    [ap_ref_new] = trajectoryChoicePID2refs(z,vz,settings.reference.Z,settings.reference.Vz,contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
-                    
+
+                    [ap_ref_new] = control_PID2refs(z,vz,settings.reference.Z,settings.reference.Vz,contSettings.N_forward,settings,contSettings); % cambiare nome alla funzione tra le altre cose
+
                     if z> 2500
                         delta_ap_limiter = 0.2;
                         if abs(ap_ref_new - Yf(end,17))>delta_ap_limiter
@@ -383,8 +395,8 @@ while flagStopIntegration && n_old < nmax
                         end
                     end
                 else
-                    [ap_base_filter] = trajectoryChoicePID2refs(z,vz,settings.reference.Z,settings.reference.Vz,contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
-                    
+                    [ap_base_filter] = control_PID2refs(z,vz,settings.reference.Z,settings.reference.Vz,contSettings.N_forward,settings,contSettings); % cambiare nome alla funzione tra le altre cose
+
                     % filter control action
                     if flagFirstControl == false % the first reference is given the fastest possible (unfiltered), then filter
                         ap_ref_new = ap_ref_new + (ap_base_filter -ap_ref_new)*filterCoeff;
@@ -399,10 +411,10 @@ while flagStopIntegration && n_old < nmax
         end
 
 
-    % Salvo input/output per testare algoritmo cpp
-    i = i + 1;
+        % Salvo input/output per testare algoritmo cpp
+        i = i + 1;
     else
-       ap_ref_new = 0;
+        ap_ref_new = 0;
     end
     ap_ref = [ ap_ref_old ap_ref_new ];
     ap_ref_vec(iTimes,:) = ap_ref;
@@ -415,7 +427,7 @@ while flagStopIntegration && n_old < nmax
     end
 
 
-    
+
     % vertical velocity and position
     if flagAscent || (not(flagAscent) && settings.ballisticFligth)
         Q    =   Yf(end, 10:13);
@@ -438,7 +450,7 @@ while flagStopIntegration && n_old < nmax
 
     % atmosphere
     [~, a, ~, ~] = atmosisa(z + settings.z0);        % speed of sound at each sample time
-%   normV = norm(Yf(end, 4:6));
+    %   normV = norm(Yf(end, 4:6));
     normV = norm([vz vxxx vyyy]);
     mach = normV/a;
 
@@ -541,13 +553,13 @@ end
 %% RETRIVE PARAMETERS FROM THE ODE
 
 if not(settings.electronics) && ~settings.montecarlo
-    dataBallisticFlight = recallOdeFcn2(@ascentInterpContr, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings, c.ap_tot, settings.servo.delay,tLaunch,'apVec');
+    dataBallisticFlight = recallOdeFcn2(@ascentControl, Tf(flagMatr(:, 2)), Yf(flagMatr(:, 2), :), settings, c.ap_tot, settings.servo.delay,tLaunch,'apVec');
 else
     dataBallisticFlight = [];
 end
 
 if ~settings.electronics && ~settings.montecarlo
-    interpPlots
+    plots
 end
 
 % save('results/Ground_truth.mat','sensorData');

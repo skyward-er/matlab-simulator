@@ -7,6 +7,6 @@ elseif (u > umax)
     u = umax;
     saturation = true;    
 else 
-    saturation = false;    
+    saturation = false;
 end
 end
