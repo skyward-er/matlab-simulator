@@ -15,12 +15,12 @@ if(isfield(data, 'h_baro'))
     data = rmfield(data, 'h_baro');
 end
 
+temperature = data.barometer.temperature;
 if(isfield(data.barometer, 'temperature'))
     data.barometer = rmfield(data.barometer, 'temperature');
 end
 
 dataToBeSent.accelerometer = data.accelerometer;
-
 dataToBeSent.gyro = data.gyro;
 dataToBeSent.magnetometer = data.magnetometer;
 
@@ -30,6 +30,8 @@ dataToBeSent.gps.fix = data.gps.fix;
 dataToBeSent.gps.nsat = data.gps.nsat;
 
 dataToBeSent.barometer = data.barometer;
+
+dataToBeSent.temperature = temperature(1);
 
 dataToBeSent.kalman.z = data.kalman.z;
 dataToBeSent.kalman.vz = data.kalman.vz;
@@ -44,6 +46,8 @@ dataToBeSent.flags.flagAeroBrakes = cast(flags(4), "double");
 dataToBeSent.flags.flagPara1 = cast(flags(5), "double");
 dataToBeSent.flags.flagPara2 = cast(flags(6), "double");
 
-serialbridge("Write", structToSingles(dataToBeSent));
+arrayToBeSent = structToSingles(dataToBeSent);
+
+serialbridge("Write", arrayToBeSent);
 
 end

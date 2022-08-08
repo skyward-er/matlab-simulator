@@ -1,27 +1,21 @@
-            % TEMPORARY SOLUTION UNTIL WE DON'T HAVE THE OBSW KALMAN
-   if flagFligth
-            sensorData.kalman.z    = z;
-            sensorData.kalman.vz   = vz;
-            sensorData.kalman.vMod = normV;
-        else
-            sensorData.kalman.z    = 0;
-            sensorData.kalman.vz   = 0;
-            sensorData.kalman.vMod = 0;
-        end
+function [alpha_degree, t_est_tot, x_est_tot, xp_ada_tot, xv_ada_tot, t_ada_tot] = runHIL(sensorData, flagsArray)   
+% alpha_degree  -> percentage opening of the airbrakes (% 0<=alpha_degree<=1)
+% t_est_tot     -> timestamps NAS
+% x_est_tot     -> vettore stato NAS
+% xp_ada_tot    -> posizione ADA (mslAltitude)
+% xv_ada_tot    -> velocità ADA (verticalSpeed)
+% t_ada_tot     -> timestamps ADA
     
-    % getting the fix and nSatellites
+    % getting the fix and nSatellites 
+    sensorData.gps.fix = 1;
+    sensorData.gps.nsat = 0;
 
-    [fix,nsat] = gpsFix(sensorData.accelerometer.measures(end,:));
-    sensorData.gps.fix = fix;
-    sensorData.gps.nsat = nsat;
+    % sending sensor data over the serial port
+    sendDataOverSerial(sensorData, flagsArray);
 
-    %controllore
-%     sendDataOverSerial(sensorData, flagsArray);   
-%     
-%     alpha_degree = readControlOutputFromSerial();
-
-    
-        alpha_degree = 0;
+    % waiting for the response of the MCU
+    [alpha_degree, t_est_tot, n, e, d, vn, ve, vd, qx, qy, qz, qw, bx, by, bz, t_ada_tot, xp_ada_tot, xv_ada_tot] = readControlOutputFromSerial();
+    x_est_tot = [n, e, d, vn, ve, vd, qx, qy, qz, qw, bx, by, bz];
     
     % if the obsw sends an opening of -1 while the flag isLaunch is still
     % false, triggers the liftoff and the opening of aerobrake is set to 0
@@ -30,5 +24,3 @@
         isLaunch = true;
         disp("Liftoff (obsw signal)!");
     end
-    
-    x = extension_From_Angle(alpha_degree);

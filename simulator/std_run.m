@@ -1,4 +1,4 @@
-function [Yf, Tf, cpuTimes, flagMatr, otherData] = std_run(settings, csett)
+function [Yf, Tf, cpuTimes, flagMatr, otherData] = std_run(settings)
 %{
 
 STD_RUN_HIL - This function runs a hardware-in-the-loop simulation
@@ -305,7 +305,18 @@ while flagStopIntegration || n_old < nmax
     %% CONTROL ALGORITHMS
     if settings.electronics
         % qua leggere da seriale e impostare i valori
-        runHIL;
+        flagsArray = [flagFligth, flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2];
+        if flagsArray(1)
+            sensorData.kalman.z    = z;
+            sensorData.kalman.vz   = vz;
+            sensorData.kalman.vMod = normV;
+        else
+            sensorData.kalman.z    = 0;
+            sensorData.kalman.vz   = 0;
+            sensorData.kalman.vMod = 0;
+        end 
+        
+        [alpha_degree, t_est_tot, x_est_tot, xp_ada_tot, xv_ada_tot, t_ada_tot] = runHIL(sensorData, flagsArray);
     else
         if iTimes==1 && settings.Ada
             ada_prev  =   settings.ada.x0;
@@ -336,7 +347,9 @@ while flagStopIntegration || n_old < nmax
     Yf_tot(n_old:n_old+n-1, :) = Yf(1:end, :);
     Tf_tot(n_old:n_old+n-1,1) = Tf(1:end, 1);
     C(n_old:n_old+1) = x;
-    tot.p_tot(n_old:n_old+n-1, 1)  =  p(1:end, 1);
+    if flagFlight
+        tot.p_tot(n_old:n_old+n-1, 1)  =  p(1:end, 1);
+    end
 
     if not(settings.electronics)
         tot.Yf_tot(n_old:n_old+n-1, :) =  Yf(1:end, :);

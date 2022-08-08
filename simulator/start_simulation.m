@@ -12,7 +12,6 @@ Release date: 16/04/2016
 close all
 clear
 clc
-delete('launchFlag.txt');
 
 % path = genpath(pwd);
 % addpath(path);
@@ -28,8 +27,8 @@ addpath(genpath(currentPath));
 
 %% LOAD DATA
 run('configRoccaraso.m');
-settings.electronics = 0;
-settings.ascentOnly = 1;
+settings.electronics = 1;
+settings.ascentOnly = 0;
 settings.ballisticFligth = 1;
 settings.flagAeroBrakes = 0;
 settings.plots = 0;
@@ -46,7 +45,7 @@ if settings.electronics
     addpath('../hardware_in_the_loop/serialbridge');
     run('HILconfig.m');
 
-%     serialbridge("Open", hil_settings.serial_port, hil_settings.baudrate); % Initialization of the serial port
+    serialbridge("Open", hil_settings.serial_port, hil_settings.baudrate); % Initialization of the serial port
 end
 
 
@@ -89,7 +88,7 @@ abs_V = vecnorm(Va');
 
 % closing the serial connection
 if settings.electronics
-%     serialbridge("Close")
+    serialbridge("Close")
 end
 
 % DATA RECORD (display)
