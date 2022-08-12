@@ -11,32 +11,24 @@ Release date: 10/03/2021
 %}
 
 function [] = sendDataOverSerial(data, flags)
-if(isfield(data, 'h_baro'))
-    data = rmfield(data, 'h_baro');
-end
 
-temperature = data.barometer.temperature;
-if(isfield(data.barometer, 'temperature'))
-    data.barometer = rmfield(data.barometer, 'temperature');
-end
-
-dataToBeSent.accelerometer = data.accelerometer;
-dataToBeSent.gyro = data.gyro;
-dataToBeSent.magnetometer = data.magnetometer;
+dataToBeSent.accelerometer = data.accelerometer.measures;
+dataToBeSent.gyro = data.gyro.measures;
+dataToBeSent.magnetometer = data.magnetometer.measures;
 
 dataToBeSent.gps.positionMeasures = data.gps.positionMeasures;
 dataToBeSent.gps.velocityMeasures = data.gps.velocityMeasures;
 dataToBeSent.gps.fix = data.gps.fix;
 dataToBeSent.gps.nsat = data.gps.nsat;
 
-dataToBeSent.barometer = data.barometer;
+dataToBeSent.barometer = data.barometer.measures;
+dataToBeSent.pitot = data.pitot.measures;
 
-dataToBeSent.temperature = temperature(1);
+dataToBeSent.temperature = data.barometer.temperature(1);
 
 dataToBeSent.kalman.z = data.kalman.z;
 dataToBeSent.kalman.vz = data.kalman.vz;
 dataToBeSent.kalman.vMod = data.kalman.vMod;
-
 
 
 dataToBeSent.flags.flagFligth = cast(flags(1), "double");
