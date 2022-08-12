@@ -50,7 +50,7 @@ end
 
 
 %start simulation
-[Yf, Tf, cpuTimes, flagMatr, otherData] = std_run(settings);
+    [Yf, Tf, cpuTimes, flagMatr, otherData] = std_run(settings);
 
 
 if not(settings.electronics)

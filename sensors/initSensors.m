@@ -98,10 +98,10 @@ s.SSCDRRN015PDAD5.minMeasurementRange  =   -1034;                  % in mbar (-1
 s.SSCDRRN015PDAD5.offset               =   -1.9327;                % in mbar
 s.SSCDRRN015PDAD5.resolution           =   1;                      % in mbar
 s.SSCDRRN015PDAD5.noiseVariance        =   75;                     % guess in mbar
-s.SSCDRRN015PDAD5.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
+% s.SSCDRRN015PDAD5.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
 % check 2d offset for pitot
 
-
+sensorTot.npitot_old    =   1;
 sensorTot.np_old        =   1;
 sensorTot.na_old        =   1;
 sensorTot.ngps_old      =   1;

@@ -130,7 +130,7 @@ settings.frequencies.gyroFrequency              =   100;                   % [hz
 settings.frequencies.magnetometerFrequency      =   100;                   % [hz] sensor frequency
 settings.frequencies.gpsFrequency               =   10;                    % [hz] sensor frequency
 settings.frequencies.barometerFrequency         =   20;                    % [hz] sensor frequency
-settings.frequencies.pitot                      =   20;                    % [hz] sensor frequency
+settings.frequencies.pitotFrequency             =   20;                    % [hz] sensor frequency
 
 %% KALMAN TUNING PARAMETERS
 

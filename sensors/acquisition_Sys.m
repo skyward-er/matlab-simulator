@@ -99,11 +99,12 @@ OUTPUT:
 
  if isfield(sensorData, 'pitot')
         for ii=1:length(sensorData.pitot.time)
-                sensorData.pitot.measures(ii,:)        =      s.SSCDRRN015PDAD5.sens(sensorData.pitot.measures(ii)/100,...
+                asd = s.SSCDRRN015PDAD5.sens(sensorData.pitot.measures(ii)/100,...
                                                                   sensorData.pitot.temperature(ii) - 273.15);  
-                sensorData.pitot.measures(ii,:)        =      sensorData.pitot.measures(ii)*100;
+                sensorData.pitot.measures(ii,1)        =      asd;
+                sensorData.pitot.measures(ii,1)        =      sensorData.pitot.measures(ii)*100;
         end 
-        tot.pitot_tot(tot.npitot_old:tot.npitot_old + size(sensorData.pitot.measures,1) - 1,1)    = sensorData.pitot.measures(1:end);
+        tot.pitot_tot(tot.npitot_old:tot.npitot_old + size(sensorData.pitot.measures,1) - 1,1)    = sensorData.pitot.measures;
         tot.time_pitot(tot.npitot_old:tot.npitot_old + size(sensorData.pitot.measures,1) - 1)   = sensorData.pitot.time ;
         tot.npitot_old = tot.npitot_old + size(sensorData.pitot.measures,2);      
  end

@@ -287,7 +287,7 @@ if isfield(freq, 'pitotFrequency')
                 z(i) = - m*iTimeBarometer + q;    
             else
                 vx(i) = Y(iTimePitot == T, 4);
-                z(i) = -Y(iTimeBarometer == T, 3);
+                z(i) = -Y(iTimePitot == T, 3);
             end
         end
         
@@ -308,8 +308,8 @@ if isfield(freq, 'pitotFrequency')
 
     wind_body = ned2body*wind_ned;
 
-    v = vx + wind_body(1); % Speed x_body + wind in x_body direction
+    v = (vx + wind_body(1))'; % Speed x_body + wind in x_body direction
     
     sensorData.pitot.temperature = Temp;
-    sensorData.pitot.measures = 0.5*rho*v*v*sign(v); % differential pressure in Pascals
+    sensorData.pitot.measures = (0.5*rho'.*v.*v.*sign(v))'; % differential pressure in Pascals
 end
