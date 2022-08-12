@@ -5,7 +5,7 @@ for ii = 1:length(trajectories_saving)
 
 end
 for ii = 1:length(trajectories_saving)
-    filename = ['saving\Trajectory','_',num2str(ii-1)];
+    filename = ['saving\Trajectory','_',num2str(ii)];
     writematrix(trajectories_obsw{1,ii},[filename,'.csv']);
 
 end
