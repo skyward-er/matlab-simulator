@@ -5,6 +5,8 @@ function [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent,
 manageSignalFrequencies - This function interpolates the rocket State to
                           output the measures at different frequencies
 
+PLEASE MAKE BETTER 'HELP' INTERFACES
+
 INTPUTS:
             - freq, acquisition frequencies of the sensors;
             - Y, State Matrix containing the rocket states specified in     
@@ -19,9 +21,25 @@ Skyward Experimental Rocketry | AFD Dept
 email: adriano.filippo.inno@skywarder.eu
 Release date: 30/11/2020
 
+
+Author: Angelo G. Gaillet
+Skyward Experimental Rocketry | ELC-SCS Dept
+email: angelo.gaillet@skywarder.eu
+Release date: 24/08/2022
+
 %}
 
 % acc = accelerationOnlyAscent(t, Y, settings, c, uw, vw, ww, uncert)
+
+% HELP
+%
+%
+%
+%
+%
+%
+%
+
 
 freq = settings.frequencies;
 
@@ -56,7 +74,7 @@ if freq.accelerometerFrequency > freq.controlFrequency
     end
 else
     sensorData.accelerometer.measures(1, :) = accelerometerAscent...
-            (T(end), Y(end, :), settings, x);
+            (T(end), Y(end, :), settings, x); % checkare il tLaunch
     sensorData.accelerometer.time = T(end);
 end
 
@@ -249,3 +267,62 @@ end
 [Temp, ~, P, ~] = atmosisa(z);
 sensorData.barometer.measures = P;
 sensorData.barometer.temperature = Temp;
+
+%% pitot
+if isfield(freq, 'pitotFrequency')
+    if freq.pitotFrequency > freq.controlFrequency
+        N = freq.pitotFrequency/freq.controlFrequency;
+        vx = zeros(N, 1);
+        z = zeros(N, 1);
+        if N ~= round(N)
+            error('the sensor frequency must be a multiple of the control frequency');
+        end
+        sensorData.pitot.time = linspace(T(1), T(end) - 1/freq.pitotFrequency, N);
+        for i = 1:N
+            iTimePitot = sensorData.pitot.time(i);
+            if all(iTimePitot ~= T)
+                [index0] = find(iTimePitot < T);
+                index1 = index0(1);
+                index0 = index1 - 1;
+                T1 = T(index1);
+                T0 = T(index0);
+                % linear interpolation between x-body ned
+                Y1 = Y(index1, 4);
+                Y0 = Y(index0, 4);
+                m = (Y1 - Y0)./(T1 - T0);
+                q = Y1 - m*T1;
+                vx(i) = m*iTimePitot + q;
+                % linear interpolation between altitude
+                Y1 = Y(index1, 3);
+                Y0 = Y(index0, 3);
+                m = (Y1 - Y0)./(T1 - T0);
+                q = Y1 - m*T1;
+                z(i) = - m*iTimeBarometer + q;    
+            else
+                vx(i) = Y(iTimePitot == T, 4);
+                z(i) = -Y(iTimePitot == T, 3);
+            end
+        end
+        
+    else
+        sensorData.pitot.time = T(end);
+        vx = Y(end, 4);
+        z = -Y(end, 3);
+    end
+    [Temp, ~, ~, rho] = atmosisa(z + settings.z0);
+    
+    Q = Y(end, 10:13);
+
+    ned2body  = [Q(1)^2 - Q(2)^2 - Q(3)^2 + Q(4)^2,       2*(Q(1)*Q(2) - Q(3)*Q(4)),              2*(Q(1)*Q(3) + Q(2)*Q(4));
+                 2*(Q(1)*Q(2) + Q(3)*Q(4)),               -Q(1)^2 + Q(2)^2 - Q(3)^2 + Q(4)^2,     2*(Q(2)*Q(3) - Q(1)*Q(4));
+                 2*(Q(1)*Q(3) - Q(2)*Q(4)),               2*(Q(2)*Q(3) + Q(1)*Q(4)),              -Q(1)^2 - Q(2)^2 + Q(3)^2 + Q(4)^2]';
+
+    wind_ned = [uw, vw, ww]';
+
+    wind_body = ned2body*wind_ned;
+
+    v = (vx + wind_body(1))'; % Speed x_body + wind in x_body direction
+    
+    sensorData.pitot.temperature = Temp;
+    sensorData.pitot.measures = (0.5*rho'.*v.*v.*sign(v))'; % differential pressure in Pascals
+end

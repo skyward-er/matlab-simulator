@@ -1,4 +1,4 @@
-function [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, dataBallisticFlight,saveConstWind,varargout] = run_control(settings, contSettings,algorithm)
+function [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, dataBallisticFlight,saveConstWind,varargout] = std_run(settings, contSettings)
 %{
 
 STD_RUN_BALLISTIC - This function runs a standard ballistic (non-stochastic) simulation
@@ -58,6 +58,8 @@ dap0 = 0;                                                                   % Co
 initialCond = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf; ap0; dap0];
 Y0 = initialCond;
 
+% otherData.test_date = date;
+
 %% WIND GENERATION
 if not(settings.wind.model) && not(settings.wind.input)
 
@@ -105,8 +107,8 @@ dt          =       1/settings.frequencies.controlFrequency;                % Ti
 t0          =       0;                                                      % First time step - used in ode as initial time
 t1          =       t0 + dt;                                                % Second time step - used in ode as final time
 t_change_ref =      t0 + settings.servo.delay;
-vz          =       1;                                                      % Vertical velocity
-z           =       1;                                                      % Altitude
+sensorData.kalman.vz =       1;                                                      % Vertical velocity
+sensorData.kalman.z  =       1;                                                      % Altitude
 nmax        =       100000;                                                 % Max iteration number - stops the integration if reached
 mach        =       0;                                                      % Mach number
 ext         =       0;                                                      % air brake extension
@@ -118,20 +120,25 @@ cpuTimes    =       zeros(nmax,1);                                          % Ve
 iTimes      =       0;                                                      % Iteration
 c.ctr_start =      -1;                                                      % Air brake control parameter initial condition
 i           =       1;                                                      % Index for while loop
-settings.kalman.pn_prec  =       settings.ada.p_ref;                        % settings for ADA and KALMAN
+sensorData.kalman.pn_prec  =       settings.ada.p_ref;                        % settings for ADA and KALMAN
 ap_ref_new = 0;                                                             % air brakes closed until Mach < settings.MachControl
 ap_ref_old = 0;
-flagFirstControl = true;                                                    % if it is the first iter the control action is not filtered, then the filter acts
-filterCoeff = contSettings.filter_coeff;
-Zfilter = contSettings.Zfilter;
-Tfilter = contSettings.Tfilter;
+
+% filterCoeff = contSettings.filter_coeff;
+% Zfilter = contSettings.Zfilter;
+% Tfilter = contSettings.Tfilter;
 
 ap_ref = [ ap_ref_old ap_ref_new ];
 alpha_degree_old = 0;
+
 %% Flag initializations
+% global isLaunch
+% isLaunch = false;
+
 flagStopIntegration     =   true;                                           % while this is true the integration runs
 flagAscent              =   false;                                          % while this is false...
 flagMatr                =   false(nmax, 6);                                 % while this value are false...
+
 
 if settings.launchWindow
     launchWindow;
@@ -149,7 +156,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Salvo input/output per testare algoritmo cpp
-indice_test = 1;
+contSettings.indice_test = 1; % serve?
 
 while flagStopIntegration && n_old < nmax
     tic                                                                     % Starts CHRONO
@@ -177,20 +184,20 @@ while flagStopIntegration && n_old < nmax
         flagAeroBrakes = false;
     end
 
-    if z < 0 || not(launchFlag)
-        flagFligth = false;
+    if sensorData.kalman.z < 0 || not(launchFlag)
+        flagFlight = false;
     else
-        flagFligth = true;
+        flagFlight = true;
     end
 
-    if vz(end) >= 0 && launchFlag
+    if sensorData.kalman.vz(end) >= 0 && launchFlag
         flagAscent = true;                                                  % Ascent
     else
         flagAscent = false;                                                 % Descent
     end
 
     if not(flagAscent) && launchFlag
-        if z >= settings.para(1).z_cut
+        if sensorData.kalman.z >= settings.para(1).z_cut
             flagPara1 = true;
             flagPara2 = false;                                              % parafoil drogue
         else
@@ -203,7 +210,7 @@ while flagStopIntegration && n_old < nmax
     end
 
     % dynamics
-    if flagFligth
+    if flagFlight
 
         if settings.ballisticFligth
             [Tf, Yf] = ode113(@ascentControl, [t0, t1], Y0, [], settings, ap_ref, t_change_ref, tLaunch);
@@ -231,10 +238,13 @@ while flagStopIntegration && n_old < nmax
         Yf = [initialCond'; initialCond'];
     end
 
-    ext = extension_From_Angle(Yf(end,17),settings); % bug fix becaus sometimes happens that the integration returns a value slightly larger than the max value for airbrakes and this mess things up
+    ext = extension_From_Angle(Yf(end,17),settings); % bug fix, check why this happens because sometimes happens that the integration returns a value slightly larger than the max value of extension for airbrakes and this mess things up
     if ext > settings.arb.maxExt
-        error("the extension of the airbrakes exceeds the maximum value: ext = "+num2str(ext))
+        error("the extension of the airbrakes exceeds the maximum value of "+num2str(settings.arb.maxExt)+": ext = "+num2str(ext))
     end
+
+
+    
 
     % fix on signal frequencies: this interpolates the values if the speed
     % of the sensor is lower than the control action (or whatever)
@@ -263,6 +273,11 @@ while flagStopIntegration && n_old < nmax
         vels_prev =   vels_tot(end,:);
         P_prev    =   P_c(:,:,end);
     end
+
+
+    % SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU
+if not(settings.electronics)
+
     %% ADA
     if settings.Ada && settings.dataNoise
         [xp_ada, xv_ada, P_ada, settings.ada]   =  run_ADA(ada_prev, Pada_prev,                ...
@@ -278,151 +293,81 @@ while flagStopIntegration && n_old < nmax
     %% Navigation system
     if settings.Kalman && settings.dataNoise
 
-        [x_c, vels, P_c, settings.kalman]   =  run_kalman(x_prev, vels_prev, P_prev, sp, settings.kalman, XYZ0*0.01);
+        [sensorData.kalman.x_c, vels, P_c, settings.kalman]   =  run_kalman(x_prev, vels_prev, P_prev, sp, settings.kalman, XYZ0*0.01);
 
-        x_est_tot(c.n_est_old:c.n_est_old + size(x_c(:,1),1)-1,:)  = x_c(:,:); % NAS position output
+        x_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1,:)  = sensorData.kalman.x_c(:,:); % NAS position output
         vels_tot(c.n_est_old:c.n_est_old + size(vels(:,1),1)-1,:)  = vels(:,:); % NAS speed output
-        t_est_tot(c.n_est_old:c.n_est_old + size(x_c(:,1),1)-1)    = sensorData.accelerometer.time; % NAS time output
-        c.n_est_old = c.n_est_old + size(x_c,1);
+        t_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1)    = sensorData.accelerometer.time; % NAS time output
+        c.n_est_old = c.n_est_old + size(sensorData.kalman.x_c,1);
     end
 
     % vertical velocity and position
     if flagAscent || (not(flagAscent) && settings.ballisticFligth)
         Q    =   Yf(end, 10:13);
         vels =   quatrotate(quatconj(Q), Yf(:, 4:6));
-        vz   = - vels(end,3);   % down
-        vxxx =   vels(end,2);   % north
-        vyyy =   vels(end,1);   % east
+        sensorData.kalman.vz   = - vels(end,3);   % down
+        sensorData.kalman.vx =   vels(end,2);   % north
+        sensorData.kalman.vy =   vels(end,1);   % east
     else
-        vz   = - Yf(end, 6);
-        %         vx = Yf(end, 5);
-        %         vy = Yf(end, 4);
+        sensorData.kalman.vz   = - Yf(end, 6); % actually not coming from NAS in this case
+        sensorData.kalman.vxxx = Yf(end, 5);
+        sensorData.kalman.vyyy = Yf(end, 4);
     end
 
     v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
 
-    z    = -x_est_tot(end, 3);
-    %     xxx  =  Yf(end, 2);
-    %     yyy  =  Yf(end, 1);
+    sensorData.kalman.z    = -x_est_tot(end, 3);
+    sensorData.kalman.x  =  Yf(end, 2);
+    sensorData.kalman.y  =  Yf(end, 1);
+
     %% Control algorithm
+
+
+
     if flagAeroBrakes && mach < settings.MachControl && settings.Kalman && settings.control
+        sensorData.kalman.time = Tf(end);
         ap_ref_old = ap_ref_new;
-        switch algorithm
-            case 'interp'
-                % interpolation algorithm: takes two references (max and
-                % min extension) and decides how much to open with an
-                % interpolation at fixed altitude of the true velocity
-                % w.r.t. the two references.
-
-                if not(contSettings.flagFilter)
-
-                    [ap_ref_new] = control_Interp(z,vz,settings.reference.Z,settings.reference.Vz,'linear',contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
-
-                    if z> 2500
-                        delta_ap_limiter = 0.2;
-                        if abs(ap_ref_new - Yf(end,17))>delta_ap_limiter
-                            ap_ref_new = Yf(end,17)+sign(ap_ref_new - Yf(end,17))*delta_ap_limiter;
-                        end
-                    end
-                else
-                    [ap_base_filter] = control_Interp(z,vz,settings.reference.Z,settings.reference.Vz,contSettings.interpType,contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
-
-                    % filter control action
-                    if flagFirstControl == false % the first reference is given the fastest possible (unfiltered), then filter
-                        ap_ref_new = ap_ref_new + (ap_base_filter -ap_ref_new)*filterCoeff;
-                    end
-                    flagFirstControl = false;
-                    if t1>Tfilter
-                        Tfilter = Tfilter+contSettings.deltaTfilter;
-                        filterCoeff = filterCoeff/contSettings.filterRatio;
-                    end
-
-                end
-            case 'shooting'
-                % shooting algorithm: 
-                flag_firstIter = 1;
-
-                [ap_ref_new] = control_Interp(z,vz,settings.reference.Z,settings.reference.Vz,'linear',contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
-                if flag_firstIter == 1
-                    init.options = optimoptions("lsqnonlin","Display","off");
-                    flag_firstIter = 0;
-                end
-                tic
-                [ap_ref_new] = control_Shooting([-Y0(3),vz],ap_ref_new,settings,contSettings.coeff_Cd,settings.arb,init);
-                toc
-
-            case 'PID_2021'
-                % PID algorithm: at first checks speed and altitude to find
-                % which of the tabulated references is the closest, then
-                % tries to follow it with a PI controller.
-
-                time = Tf(end);
-                V_norm = norm([vxxx, vyyy, vz]);
-                % still don't know what these are, but they are useful (at
-                % least it seems):
-                zc    =    exp_mean(-x_c(:,3),0.8);
-                vzc   =    exp_mean(-x_c(:,6),0.8);
-                vc    =    exp_mean(sqrt(x_c(:,4).^2+x_c(:,5).^2+x_c(:,6).^2),0.8);
-
-                [alpha_degree, vz_setpoint, z_setpoint, pid,U_linear, Cdd, delta_S, contSettings] =   control_PID     (time,z, vz, V_norm,  contSettings,alpha_degree_old,settings);
-                ap_ref_new = deg2rad(alpha_degree);
-
-                input_output_test(indice_test) = struct('alpha_degree', alpha_degree, 'vz_setpoint', vz_setpoint, 'z_setpoint', z_setpoint, 'z', zc, 'vz', vzc, 'Vmod', V_norm);
-                indice_test = indice_test +1;
-
-                alpha_degree_old = alpha_degree;
-
-                c.vz_setpoint_tot(i)  =  vz_setpoint;
-                c.z_setpoint_tot(i)   =  z_setpoint;
-                c.alpha_degree_tot(i) =  alpha_degree;
-
-            case 'PID_2refs'
-                % PID 2 references algorithm: this is a generalization of the 
-                % 'interp' algorithm formally defined as a controller (PI) 
-                % with two reference states and one output fed back.
-                % Basically takes two references that define an interval instead
-                % of one that only gives a point and tries to keep the state 
-                % inside that interval
-
-                if not(contSettings.flagFilter)
-
-                    [ap_ref_new] = control_PID2refs(z,vz,settings.reference.Z,settings.reference.Vz,contSettings.N_forward,settings,contSettings); % cambiare nome alla funzione tra le altre cose
-
-                    if z> 2500
-                        delta_ap_limiter = 0.2;
-                        if abs(ap_ref_new - Yf(end,17))>delta_ap_limiter
-                            ap_ref_new = Yf(end,17)+sign(ap_ref_new - Yf(end,17))*delta_ap_limiter;
-                        end
-                    end
-                else
-                    [ap_base_filter] = control_PID2refs(z,vz,settings.reference.Z,settings.reference.Vz,contSettings.N_forward,settings,contSettings); % cambiare nome alla funzione tra le altre cose
-
-                    % filter control action
-                    if flagFirstControl == false % the first reference is given the fastest possible (unfiltered), then filter
-                        ap_ref_new = ap_ref_new + (ap_base_filter -ap_ref_new)*filterCoeff;
-                    end
-                    flagFirstControl = false;
-                    if t1>Tfilter
-                        Tfilter = Tfilter+contSettings.deltaTfilter;
-                        filterCoeff = filterCoeff/contSettings.filterRatio;
-                    end
-
-                end
-        end
-
-
-        % Salvo input/output per testare algoritmo cpp
-        i = i + 1;
+        [ap_ref_new,contSettings] = run_simulated_airbrakes(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
     else
         ap_ref_new = 0;
     end
-    ap_ref = [ ap_ref_old ap_ref_new ];
-    ap_ref_vec(iTimes,:) = ap_ref;
+    
+    
+
+else
+
+ % HIL HIL HIL HIL HIL HIL HIL HIL HIL HIL HIL
+  % qua leggere da seriale e impostare i valori
+        flagsArray = [flagFligth, flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2];
+        if flagsArray(1)
+            sensorData.kalman.z    = z;
+            sensorData.kalman.vz   = vz;
+            sensorData.kalman.vMod = normV;
+        else
+            sensorData.kalman.z    = 0;
+            sensorData.kalman.vz   = 0;
+            sensorData.kalman.vMod = 0;
+        end 
+        
+        [alpha_degree, t_est_tot, x_est_tot, xp_ada_tot, xv_ada_tot, t_ada_tot] = runHIL(sensorData, flagsArray);
+   
+
+
+
+
+end
+    
+% Salvo input/output per testare algoritmo cpp
+i = i + 1;
+
+ap_ref = [ ap_ref_old ap_ref_new ];
+ap_ref_vec(iTimes,:) = ap_ref;
+
 
     if settings.control == true  && flagAeroBrakes == 1 && mach < settings.MachControl
         % Save the values to plot them
-        c.vz_tot(i)    =  vz;
-        c.z_tot(i)     =  z;
+        c.vz_tot(i)    =  sensorData.kalman.vz;
+        c.z_tot(i)     =  sensorData.kalman.z;
         c.ap_ref_tot(i) =  ap_ref_new;
     end
 
@@ -432,13 +377,13 @@ while flagStopIntegration && n_old < nmax
     if flagAscent || (not(flagAscent) && settings.ballisticFligth)
         Q    =   Yf(end, 10:13);
         vels =   quatrotate(quatconj(Q), Yf(:, 4:6));
-        vz   = - vels(end,3);   % down
-        vxxx =   vels(end,2);   % north
-        vyyy =   vels(end,1);   % east
+        sensorData.kalman.vz   = - vels(end,3);   % down
+        sensorData.kalman.vx=   vels(end,2);   % north
+        sensorData.kalman.vy =   vels(end,1);   % east
     else
-        vz   = - Yf(end, 6);
-        %         vx = Yf(end, 5);
-        %         vy = Yf(end, 4);
+        sensorData.kalman.vz   = - Yf(end, 6); % still not NAS state here
+        sensorData.kalman.vx = Yf(end, 5);
+        sensorData.kalman.vy = Yf(end, 4);
     end
 
 
@@ -449,9 +394,9 @@ while flagStopIntegration && n_old < nmax
     end
 
     % atmosphere
-    [~, a, ~, ~] = atmosisa(z + settings.z0);        % speed of sound at each sample time
+    [~, a, ~, ~] = atmosisa(sensorData.kalman.z + settings.z0);        % speed of sound at each sample time
     %   normV = norm(Yf(end, 4:6));
-    normV = norm([vz vxxx vyyy]);
+    normV = norm([sensorData.kalman.vz sensorData.kalman.vx sensorData.kalman.vy]);
     mach = normV/a;
 
     % time update
@@ -483,12 +428,12 @@ while flagStopIntegration && n_old < nmax
     if settings.ascentOnly
         flagStopIntegration = flagAscent;
     else
-        flagStopIntegration = flagFligth;
+        flagStopIntegration = flagFlight;
     end
     if not(settings.montecarlo)
-        z
+        sensorData.kalman.z
     end
-    flagMatr(n_old:n_old+n-1, :) = repmat([flagFligth, flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2], n, 1);
+    flagMatr(n_old:n_old+n-1, :) = repmat([flagFlight, flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2], n, 1);
 end
 if settings.control == true
     % Salvo input/output per testare algoritmo cpp
@@ -507,7 +452,7 @@ Yf = Yf_tot(1:n_old, :);
 Tf = Tf_tot(1:n_old, :);
 
 t_ada    = settings.ada.t_ada;
-t_kalman = settings.kalman.t_kalman;
+t_kalman = sensorData.kalman.time;
 i_apo = find(Tf < 24.8);
 i_apo = max(i_apo);
 if settings.Kalman

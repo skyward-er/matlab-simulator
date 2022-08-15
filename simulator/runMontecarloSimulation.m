@@ -152,7 +152,7 @@ if run_Thrust == true
 
     %simulation
     for alg_index = [1, 2, 3] 
-        algorithm = algorithm_vec(alg_index);
+        contSettings.algorithm = algorithm_vec(alg_index);
 
         %save arrays
         save_thrust = cell(size(stoch.thrust,1),1);
@@ -183,16 +183,16 @@ if run_Thrust == true
             switch algorithm
                 case "interp"
                     contSettings_mont.filter_coeff = 1;
-                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = interp_run_control(settings_mont,contSettings_mont);
+                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = std_run(settings_mont,contSettings_mont);
                 case "std0"
                     contSettings_mont.z_trajChoice = 500;  % when time of flight is grater than 500s (never) change reference trajectory
-                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = std_run_control(settings_mont,contSettings_mont);
+                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = std_run(settings_mont,contSettings_mont);
                 case "std2s"
                     contSettings_mont.z_trajChoice = 3; % from 3s after lift off it's possible to change reference trajectory
-                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = std_run_control(settings_mont,contSettings_mont);
+                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = std_run(settings_mont,contSettings_mont);
                 case "NoControl"
                     settings_mont.control = false;
-                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = interp_run_control(settings_mont,contSettings_mont);
+                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = std_run(settings_mont,contSettings_mont);
             end
             
             save_thrust{i}.time = Tf;

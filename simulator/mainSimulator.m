@@ -70,16 +70,13 @@ if settings.tuning
 	rng('default')
 end
 
-%% START THE CHOSEN SIMULATION
+%% START THE SIMULATION
 % T = vector of time used by ODE, [s] also for Tf Ta
 % Y = State = ( x y z | u v w | p q r | q0 q1 q2 q3 | thetax thetay thetaz | ap_ref ) also for Ya,Yf corresponding to T
 
-algorithm = 'PID_2refs'; % choices: 'interp', 'PID_2021', 'PID_2refs', 'shooting'
-if settings.electronics
-    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr] = run_control(settings, contSettings,algorithm);
-else
-    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = run_control(settings,contSettings,algorithm);
-end
+% simulation:
+[Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = std_run(settings,contSettings);
+
 
 
 %% DATA-PRINTING

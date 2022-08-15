@@ -22,26 +22,31 @@ contSettings.data_trajectories   =  struct_trajectories.trajectories_saving;
 contSettings.starting_index = 0;
 
 %% CONTROL PARAMETERS
-% Control time sample
+
+% choose strategy:
+contSettings.algorithm = 'interp'; % choices: 'interp', 'PID_2021', 'PID_2refs', 'shooting'
+
+
+% Control time sample:
 contSettings.sample_time         =  0.1;
 
-% PI controler tune parameter
-contSettings.Kp    =   20;  % 20   (50 con U_ref)                           % using Fdrag nel pid --> da migliorare (magari si può ottenere variabile controllo più smooth)
-contSettings.Ki    =   5;  % 5   (20 senza U_ref)                           % using Fdrag nel pid
+% PI controler tune parameter:
+contSettings.Kp    =   20;                    % using Fdrag nel pid --> da migliorare (magari si può ottenere variabile controllo più smooth)
+contSettings.Ki    =   5;                     % using Fdrag nel pid
 
-% PI with 2 references tune parameters
+% PI with 2 references tune parameters:
 contSettings.Kp_2ref = [1, 1]; % these two coefficients are nonsense if set to 1, they're just here for reference, may edit later or delete.
 contSettings.Ki_2ref = [0, 0];
 
 
-% Select the PID algorithm
+% Select the PID algorithm:
 contSettings.flagPID           =    1;                                      % 1: control_PID (Fdrag);  2: control_LIN (u);  3: control_Servo (alfa_degree);
 
-% Trajectory change for PID
+% Trajectory change for PID:
 contSettings.z_trajChoice = 5;                                              % initial condition for trajectory choice for PID
 contSettings.deltaZ_change = 2;                                             % Value for which the trajectory choice is re-initialized
 
-% Internal parameter of controler
+% Internal parameter of controler:
 contSettings.I                   =   0; % PID 1 reference
 contSettings.I_2ref              =   [0, 0]; % PID 2 references (1)
 contSettings.alpha_degree_prec   =   0;
@@ -61,7 +66,10 @@ contSettings.rate_limiter      =    60/0.13;                                % da
 % Filtering
 contSettings.flagFilter = true; %set to true to filter out the interp algorithm with the following filter coefficient:
 contSettings.filter_coeff = 0.3;    
+contSettings.flagFirstControl = true;                                       % if it is the first iter the control action is not filtered, then the filter acts
+
 % --------------- other filter parameters later in this script ---------------
+
 
 % For interpolation reference algorithm only:
 contSettings.N_forward = 2; % how many steps in advance have to check on speed to interpolate

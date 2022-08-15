@@ -38,18 +38,32 @@ run(strcat('config', settings.mission));
 commonFunctionsPath = '../commonFunctions';
 addpath(genpath(commonFunctionsPath))
 
+
+
 %% ALGORITHM TUNING
 settings.tuning = true;                 % [-] True if you want to tune the algorithm
 
 %% SIMULATION SETTINGS
-settings.electronics        =   false;   % Switch on when testing with Hardware in the loop HIL
+settings.launchWindow       =   false;   % Switch off this to avoid pausing the launch till you press the launch button
+settings.electronics        =   false;    % Switch on when testing with Hardware in the loop HIL - NOT IMPLEMENTED YET, STILL TO BE MERGED
 settings.ascentOnly         =   true;    % Switch on to simulate only the ascent phase untill the apogee
 settings.ballisticFligth    =   true;    % Switch on to simulate the balistic fligth without any parachute
 settings.control            =   true;    % Switch on to simulate the control
 settings.dataNoise          =   true;    % Switch on to simulate the data acquisiton from sensors
-settings.launchWindow       =   false;   % Switch off this to avoid pausing the launch till you press the launch button
 settings.Kalman             =   true;    % Switch on to run the kalman algorithm - note, also to run the airbrakes control algorithm this is needed true
 settings.Ada                =   true;    % Switch on to run the apogee detection algorithm
+
+% compatibility check - do not change
+if settings.electronics
+    settings.launchWindow = true;
+
+    % add path for Hardware In the Loop
+    addpath('../hardware_in_the_loop/');
+    addpath('../hardware_in_the_loop/serialbridge');
+    run('HILconfig.m');
+    serialbridge("Open", hil_settings.serial_port, hil_settings.baudrate); % Initialization of the serial port
+
+end
 
 %% LAUNCH SETUP
 % launchpad directions

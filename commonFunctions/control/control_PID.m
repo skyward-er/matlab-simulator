@@ -1,4 +1,4 @@
-function [alpha_degree_out, Vz_setpoint, z_setpoint, pid, U_linear, Cd, delta_S, csett] = control_PID(time,z, Vz, V_mod, csett, alpha_degree_in,settings)
+function [alpha_degree_out, Vz_setpoint, z_setpoint, csett] = control_PID(nas_state, V_mod, csett, settings)
 % Author: Leonardo Bertelli
 % Co-Author: Alessandro Del Duca
 % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@kywarder.eu
@@ -27,6 +27,9 @@ controller to follow the trajectory and then transfers it with a to a force
 %}
 
 %% CHOOSE THE SETPOINTS
+time = nas_state.time;
+z = nas_state.z;
+Vz = nas_state.vz;
 
 [z_setpoint, Vz_setpoint, csett] = set_Trajectory(time,z, Vz, csett);
 
@@ -128,11 +131,6 @@ Cd_available = Cd_available';
 delta_S = delta_S_available(index_minimum); 
 % ext = ext_available(index_minimum);
 
-% Just for plotting
-pid = U;
-U_linear = 0.5*ro*csett.S0*Cd_available(index_minimum)*Vz*V_mod;
-Cd = Cd_available(index_minimum);
-
 %% TRANSFORMATION FROM delta_S to SERVOMOTOR ANGLE DEGREES 
 
 switch settings.mission
@@ -159,10 +157,4 @@ alpha_degree_out = rate_Limiter(alpha_degree_out, csett.alpha_degree_prec, csett
 alpha_degree_out = smooth_Control(alpha_degree_out, csett.alpha_degree_prec, csett.filter_coeff);
 csett.alpha_degree_prec = alpha_degree_out;
 
-%limiting the difference from the previous step
-% % if alpha_degree_out > alpha_degree_in + 0.2*68
-% %     alpha_degree_out = alpha_degree_in+0.2*68;
-% % elseif alpha_degree_out < alpha_degree_in-0.2*68
-% %     alpha_degree_out = alpha_degree_in-0.2*68;
-% % end
 end
