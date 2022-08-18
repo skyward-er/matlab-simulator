@@ -44,9 +44,9 @@ addpath(genpath(commonFunctionsPath))
 settings.tuning = true;                 % [-] True if you want to tune the algorithm
 
 %% SIMULATION SETTINGS
-settings.launchWindow       =   false;   % Switch off this to avoid pausing the launch till you press the launch button
-settings.electronics        =   false;    % Switch on when testing with Hardware in the loop HIL - NOT IMPLEMENTED YET, STILL TO BE MERGED
-settings.ascentOnly         =   true;    % Switch on to simulate only the ascent phase untill the apogee
+settings.launchWindow       =   true;   % Switch off this to avoid pausing the launch till you press the launch button
+settings.electronics        =   true;    % Switch on when testing with Hardware in the loop HIL - NOT IMPLEMENTED YET, STILL TO BE MERGED
+settings.ascentOnly         =   false;    % Switch on to simulate only the ascent phase untill the apogee
 settings.ballisticFligth    =   true;    % Switch on to simulate the balistic fligth without any parachute
 settings.control            =   true;    % Switch on to simulate the control
 settings.dataNoise          =   true;    % Switch on to simulate the data acquisiton from sensors
@@ -56,6 +56,10 @@ settings.Ada                =   true;    % Switch on to run the apogee detection
 % compatibility check - do not change
 if settings.electronics
     settings.launchWindow = true;
+    settings.Kalman       = false;
+    settings.Ada          = false;
+    settings.control      = true;
+
 
     % add path for Hardware In the Loop
     addpath('../hardware_in_the_loop/');

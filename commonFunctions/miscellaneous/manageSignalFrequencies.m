@@ -1,4 +1,4 @@
-function [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Y, T, x)
+function [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Y, T, x, uw, vw, ww)
 
 %{
 
@@ -297,7 +297,7 @@ if isfield(freq, 'pitotFrequency')
                 Y0 = Y(index0, 3);
                 m = (Y1 - Y0)./(T1 - T0);
                 q = Y1 - m*T1;
-                z(i) = - m*iTimeBarometer + q;    
+                z(i) = - m*iTimePitot + q;    
             else
                 vx(i) = Y(iTimePitot == T, 4);
                 z(i) = -Y(iTimePitot == T, 3);

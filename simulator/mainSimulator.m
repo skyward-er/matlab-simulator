@@ -143,7 +143,6 @@ if not(settings.electronics)
     fprintf('Simulated apogee time : %g [sec] \n', T_apo)
 end
 fprintf('apogee: %.1f [m] \n', max_z);
-delete('launchFlag.txt')
 
 % save data
 save("Simulation_log.mat","Tf","Yf","data_flight")

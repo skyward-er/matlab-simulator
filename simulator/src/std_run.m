@@ -44,6 +44,10 @@ if not(settings.ballisticFligth) && settings.ascentOnly
     error('To simulate a landing with the parachutes, settings.ascentOnly must be false')
 end
 
+
+global isLaunch
+isLaunch = false;
+
 %% STARTING CONDITIONS
 % Attitude
 Q0 = angle2quat(settings.PHI, settings.OMEGA, 0*pi/180, 'ZYX')';            % Attitude initial condition
@@ -113,6 +117,7 @@ nmax        =       100000;                                                 % Ma
 mach        =       0;                                                      % Mach number
 ext         =       0;                                                      % air brake extension
 n_old       =       1;                                                      % Iteration number (first iter-> n=1)
+% Yf          =       zeros(1, length(Y0));                                % State vector for ode integration
 Yf_tot      =       zeros(nmax, length(Y0));                                % State vector for ode integration
 Tf_tot      =       zeros(nmax, 1);                                         % Time vector for ode integration
 ext_tot     =       zeros(nmax, 1);                                         % Air brake extension vector
@@ -142,9 +147,9 @@ flagMatr                =   false(nmax, 6);                                 % wh
 
 if settings.launchWindow
     launchWindow;
-    pause(0.01);
     launchFlag = false;
     lastLaunchflag = true;
+    pause(1);
 else
     launchFlag = true;
 end
@@ -240,7 +245,8 @@ while flagStopIntegration && n_old < nmax
 
     ext = extension_From_Angle(Yf(end,17),settings); % bug fix, check why this happens because sometimes happens that the integration returns a value slightly larger than the max value of extension for airbrakes and this mess things up
     if ext > settings.arb.maxExt
-        error("the extension of the airbrakes exceeds the maximum value of "+num2str(settings.arb.maxExt)+": ext = "+num2str(ext))
+        ext = settings.arb.maxExt;
+%         error("the extension of the airbrakes exceeds the maximum value of "+num2str(settings.arb.maxExt)+": ext = "+num2str(ext))
     end
 
 
@@ -248,7 +254,7 @@ while flagStopIntegration && n_old < nmax
 
     % fix on signal frequencies: this interpolates the values if the speed
     % of the sensor is lower than the control action (or whatever)
-    [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Yf, Tf, ext);
+    [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Yf, Tf, ext, uw, vw, ww);
     [~, ~, p, ~] = atmosisa(-Yf(:,3) + settings.z0) ;
 
     % simulate sensor acquisition
@@ -256,112 +262,105 @@ while flagStopIntegration && n_old < nmax
         [sp, c] = acquisition_Sys(sensorData, s, c);
     end
 
-    if iTimes==1 && settings.Ada
-        ada_prev  =   settings.ada.x0;
-        Pada_prev =   settings.ada.P0;
-    elseif iTimes ~= 1 && settings.Ada
-        ada_prev  =   xp_ada_tot(end,:);
-        Pada_prev =   P_ada(:,:,end);
-    end
-
-    if iTimes==1 && settings.Kalman
-        x_prev    =  [X0; V0; Q0(2:4); Q0(1);0;0;0];
-        vels_prev =  [0;0;0];
-        P_prev    =   0.01*eye(12);
-    elseif iTimes ~= 1 && settings.Kalman
-        x_prev    =   x_est_tot(end,:);
-        vels_prev =   vels_tot(end,:);
-        P_prev    =   P_c(:,:,end);
-    end
-
-
     % SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU
-if not(settings.electronics)
-
-    %% ADA
-    if settings.Ada && settings.dataNoise
-        [xp_ada, xv_ada, P_ada, settings.ada]   =  run_ADA(ada_prev, Pada_prev,                ...
-            sp.pn, sensorData.barometer.time,   ...
-            settings.ada);
-
-        xp_ada_tot(c.n_ada_old:c.n_ada_old + size(xp_ada(:,1),1) -1,:)  = xp_ada(1:end,:);
-        xv_ada_tot(c.n_ada_old:c.n_ada_old + size(xv_ada(:,1),1)-1,:)  = xv_ada(1:end,:);
-        t_ada_tot(c.n_ada_old:c.n_ada_old + size(xp_ada(:,1),1)-1)     = sensorData.barometer.time;
-        c.n_ada_old = c.n_ada_old + size(xp_ada,1);
-
-    end
-    %% Navigation system
-    if settings.Kalman && settings.dataNoise
-
-        [sensorData.kalman.x_c, vels, P_c, settings.kalman]   =  run_kalman(x_prev, vels_prev, P_prev, sp, settings.kalman, XYZ0*0.01);
-
-        x_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1,:)  = sensorData.kalman.x_c(:,:); % NAS position output
-        vels_tot(c.n_est_old:c.n_est_old + size(vels(:,1),1)-1,:)  = vels(:,:); % NAS speed output
-        t_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1)    = sensorData.accelerometer.time; % NAS time output
-        c.n_est_old = c.n_est_old + size(sensorData.kalman.x_c,1);
-    end
-
-    % vertical velocity and position
-    if flagAscent || (not(flagAscent) && settings.ballisticFligth)
-        Q    =   Yf(end, 10:13);
-        vels =   quatrotate(quatconj(Q), Yf(:, 4:6));
-        sensorData.kalman.vz   = - vels(end,3);   % down
-        sensorData.kalman.vx =   vels(end,2);   % north
-        sensorData.kalman.vy =   vels(end,1);   % east
-    else
-        sensorData.kalman.vz   = - Yf(end, 6); % actually not coming from NAS in this case
-        sensorData.kalman.vxxx = Yf(end, 5);
-        sensorData.kalman.vyyy = Yf(end, 4);
-    end
-
-    v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
-
-    sensorData.kalman.z    = -x_est_tot(end, 3);
-    sensorData.kalman.x  =  Yf(end, 2);
-    sensorData.kalman.y  =  Yf(end, 1);
-
-    %% Control algorithm
-
-
-
-    if flagAeroBrakes && mach < settings.MachControl && settings.Kalman && settings.control
-        sensorData.kalman.time = Tf(end);
-        ap_ref_old = ap_ref_new;
-        [ap_ref_new,contSettings] = run_simulated_airbrakes(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
-    else
-        ap_ref_new = 0;
-    end
+    if not(settings.electronics)
+        if iTimes==1 && settings.Ada
+            ada_prev  =   settings.ada.x0;
+            Pada_prev =   settings.ada.P0;
+        elseif iTimes ~= 1 && settings.Ada
+            ada_prev  =   xp_ada_tot(end,:);
+            Pada_prev =   P_ada(:,:,end);
+        end
     
+        if iTimes==1 && settings.Kalman
+            x_prev    =  [X0; V0; Q0(2:4); Q0(1);0;0;0];
+            vels_prev =  [0;0;0];
+            P_prev    =   0.01*eye(12);
+        elseif iTimes ~= 1 && settings.Kalman
+            x_prev    =   x_est_tot(end,:);
+            vels_prev =   vels_tot(end,:);
+            P_prev    =   P_c(:,:,end);
+        end
+
+        %% ADA
+        if settings.Ada && settings.dataNoise
+            [xp_ada, xv_ada, P_ada, settings.ada]   =  run_ADA(ada_prev, Pada_prev,                ...
+                sp.pn, sensorData.barometer.time,   ...
+                settings.ada);
     
+            xp_ada_tot(c.n_ada_old:c.n_ada_old + size(xp_ada(:,1),1) -1,:)  = xp_ada(1:end,:);
+            xv_ada_tot(c.n_ada_old:c.n_ada_old + size(xv_ada(:,1),1)-1,:)  = xv_ada(1:end,:);
+            t_ada_tot(c.n_ada_old:c.n_ada_old + size(xp_ada(:,1),1)-1)     = sensorData.barometer.time;
+            c.n_ada_old = c.n_ada_old + size(xp_ada,1);
+        end
 
-else
+        %% Navigation system
+        if settings.Kalman && settings.dataNoise
+    
+            [sensorData.kalman.x_c, vels, P_c, settings.kalman]   =  run_kalman(x_prev, vels_prev, P_prev, sp, settings.kalman, XYZ0*0.01);
+    
+            x_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1,:)  = sensorData.kalman.x_c(:,:); % NAS position output
+            vels_tot(c.n_est_old:c.n_est_old + size(vels(:,1),1)-1,:)  = vels(:,:); % NAS speed output
+            t_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1)    = sensorData.accelerometer.time; % NAS time output
+            c.n_est_old = c.n_est_old + size(sensorData.kalman.x_c,1);
+        end
+    
+        % vertical velocity and position
+        if flagAscent || (not(flagAscent) && settings.ballisticFligth)
+            Q    =   Yf(end, 10:13);
+            vels =   quatrotate(quatconj(Q), Yf(:, 4:6));
+            sensorData.kalman.vz = - vels(end,3);   % down
+            sensorData.kalman.vx =   vels(end,2);   % north
+            sensorData.kalman.vy =   vels(end,1);   % east
+        else
+            sensorData.kalman.vz   = - Yf(end, 6); % actually not coming from NAS in this case
+            sensorData.kalman.vxxx = Yf(end, 5);
+            sensorData.kalman.vyyy = Yf(end, 4);
+        end
+    
+        v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
+    
+        sensorData.kalman.z    = -x_est_tot(end, 3);
+        sensorData.kalman.x  =  Yf(end, 2);
+        sensorData.kalman.y  =  Yf(end, 1);
+    
+        %% Control algorithm
+        if flagAeroBrakes && mach < settings.MachControl && settings.Kalman && settings.control
+            sensorData.kalman.time = Tf(end);
+            ap_ref_old = ap_ref_new;
+            [ap_ref_new,contSettings] = run_simulated_airbrakes(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
+        else
+            ap_ref_new = 0;
+        end
+    else
+        v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
+        % HIL HIL HIL HIL HIL HIL HIL HIL HIL HIL HIL
+        % qua leggere da seriale e impostare i valori
+        flagsArray = [flagFlight, flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2];
 
- % HIL HIL HIL HIL HIL HIL HIL HIL HIL HIL HIL
-  % qua leggere da seriale e impostare i valori
-        flagsArray = [flagFligth, flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2];
+        % [TODO] send data with noise
+%         sensorData = sp;
+
         if flagsArray(1)
-            sensorData.kalman.z    = z;
-            sensorData.kalman.vz   = vz;
-            sensorData.kalman.vMod = normV;
+            sensorData.kalman.z    = -Yf(end, 3);
+            sensorData.kalman.vz   = Yf(end, 6);
+            sensorData.kalman.vMod = norm(Yf(end, 4:6));
         else
             sensorData.kalman.z    = 0;
             sensorData.kalman.vz   = 0;
             sensorData.kalman.vMod = 0;
-        end 
+        end
+
+        ap_ref_old = ap_ref_new;
+        [alpha_aperture, t_est_tot, x_est_tot, xp_ada_tot, xv_ada_tot, t_ada_tot] = run_HIL_airbrakes(sensorData, flagsArray);
+        ap_ref_new = alpha_aperture * 66.4 % change with servo max aperture 
+    end
         
-        [alpha_degree, t_est_tot, x_est_tot, xp_ada_tot, xv_ada_tot, t_ada_tot] = runHIL(sensorData, flagsArray);
-   
-
-
-
-
-end
+    % Salvo input/output per testare algoritmo cpp
+    i = i + 1;
     
-% Salvo input/output per testare algoritmo cpp
-i = i + 1;
-
-ap_ref = [ ap_ref_old ap_ref_new ];
-ap_ref_vec(iTimes,:) = ap_ref;
+    ap_ref = [ ap_ref_old ap_ref_new ];
+    ap_ref_vec(iTimes,:) = ap_ref;
 
 
     if settings.control == true  && flagAeroBrakes == 1 && mach < settings.MachControl
@@ -415,26 +414,32 @@ ap_ref_vec(iTimes,:) = ap_ref;
 
     n_old = n_old + n -1;
 
-    cpuTimes(iTimes) = toc;                                                 % stops CHRONO and saves computational time
-
+    %% flags
     if settings.launchWindow
         lastLaunchflag = launchFlag;
         pause(1e-6);
-        if exist('launchFlag.txt','file') == 2
+        if(isLaunch)
             launchFlag = true;
         end
     end
 
     if settings.ascentOnly
-        flagStopIntegration = flagAscent;
+        flagStopIntegration = flagAscent || not(lastLaunchflag);
     else
-        flagStopIntegration = flagFlight;
+        flagStopIntegration = flagFlight || not(lastLaunchflag);
     end
+    
     if not(settings.montecarlo)
         sensorData.kalman.z
+%         disp("z: " + sensorData.kalman.z);
     end
     flagMatr(n_old:n_old+n-1, :) = repmat([flagFlight, flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2], n, 1);
+
+
+    cpuTimes(iTimes) = toc;                                                 % stops CHRONO and saves computational time
+    toc
 end
+
 if settings.control == true
     % Salvo input/output per testare algoritmo cpp
     % save('input_output_test_PID.mat','input_output_test');
@@ -442,7 +447,6 @@ end
 
 if settings.launchWindow
     fclose('all');
-    delete('launchFlag.txt');
 end
 
 cpuTimes = cpuTimes(1:iTimes);
@@ -451,8 +455,14 @@ cpuTimes = cpuTimes(1:iTimes);
 Yf = Yf_tot(1:n_old, :);
 Tf = Tf_tot(1:n_old, :);
 
+
+if not(settings.electronics)
+    t_kalman = sensorData.kalman.time;
+else
+    t_kalman = -1;
+end
 t_ada    = settings.ada.t_ada;
-t_kalman = sensorData.kalman.time;
+
 i_apo = find(Tf < 24.8);
 i_apo = max(i_apo);
 if settings.Kalman
