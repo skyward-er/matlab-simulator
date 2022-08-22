@@ -19,6 +19,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 % settings.mission = 'Lynx_Portugal_October_2021';
 settings.mission = 'Pyxis_Portugal_October_2022';
 % settings.mission = 'Pyxis_Roccaraso_September_2022';
+% settings.mission = 'NewRocket_2023';
 
 %% LOAD DATA
 % Retrieve MSA-Toolkit rocket data
@@ -52,6 +53,7 @@ settings.control            =   true;    % Switch on to simulate the control
 settings.dataNoise          =   true;    % Switch on to simulate the data acquisiton from sensors
 settings.Kalman             =   true;    % Switch on to run the kalman algorithm - note, also to run the airbrakes control algorithm this is needed true
 settings.Ada                =   true;    % Switch on to run the apogee detection algorithm
+settings.HRE                =   true;    % Switch on if the rocket is mounting a Hybrid Engine, which allows the possibility to shut down the engine
 
 % compatibility check - do not change
 if settings.electronics
@@ -66,8 +68,15 @@ if settings.electronics
     addpath('../hardware_in_the_loop/serialbridge');
     run('HILconfig.m');
     serialbridge("Open", hil_settings.serial_port, hil_settings.baudrate); % Initialization of the serial port
-
 end
+
+%%% uncomment when the MSA toolkit is updated
+
+% if settings.mission == 'NewRocket_2023' 
+%     settings.HRE = true;
+% else
+%     settings.HRE = false;
+% end
 
 %% LAUNCH SETUP
 % launchpad directions

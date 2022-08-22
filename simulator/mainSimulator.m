@@ -51,7 +51,7 @@ addpath(genpath(commonFunctionsPath));
 msaToolkitURL = 'https://github.com/skyward-er/msa-toolkit';
 localRepoPath = '../data/msa-toolkit';
 status = checkLastCommit(msaToolkitURL, localRepoPath, pwd);
-submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
+% submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
 
 %% CONFIGs
 
@@ -75,7 +75,7 @@ end
 % Y = State = ( x y z | u v w | p q r | q0 q1 q2 q3 | thetax thetay thetaz | ap_ref ) also for Ya,Yf corresponding to T
 
 % simulation:
-[Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = std_run(settings,contSettings);
+[Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight] = std_run_motorshutdownTesting(settings,contSettings);
 
 
 
