@@ -143,12 +143,12 @@ alpha_degree_old = 0;
 flagStopIntegration     =   true;                                           % while this is true the integration runs
 flagAscent              =   false;                                          % while this is false...
 flagMatr                =   false(nmax, 6);                                 % while this value are false...
+lastLaunchflag = true;
 
 
 if settings.launchWindow
     launchWindow;
     launchFlag = false;
-    lastLaunchflag = true;
     pause(1);
 else
     launchFlag = true;
@@ -284,9 +284,8 @@ while flagStopIntegration && n_old < nmax
 
         %% ADA
         if settings.Ada && settings.dataNoise
-            [xp_ada, xv_ada, P_ada, settings.ada]   =  run_ADA(ada_prev, Pada_prev,                ...
-                sp.pn, sensorData.barometer.time,   ...
-                settings.ada);
+            [xp_ada, xv_ada, P_ada, settings.ada]   =  run_ADA(ada_prev, Pada_prev, sp.pn, sensorData.barometer.time,   ...
+    settings.ada);
     
             xp_ada_tot(c.n_ada_old:c.n_ada_old + size(xp_ada(:,1),1) -1,:)  = xp_ada(1:end,:);
             xv_ada_tot(c.n_ada_old:c.n_ada_old + size(xv_ada(:,1),1)-1,:)  = xv_ada(1:end,:);
@@ -298,7 +297,7 @@ while flagStopIntegration && n_old < nmax
         if settings.Kalman && settings.dataNoise
     
             [sensorData.kalman.x_c, vels, P_c, settings.kalman]   =  run_kalman(x_prev, vels_prev, P_prev, sp, settings.kalman, XYZ0*0.01);
-    
+            sensorData.kalman.time(iTimes) = Tf(end);
             x_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1,:)  = sensorData.kalman.x_c(:,:); % NAS position output
             vels_tot(c.n_est_old:c.n_est_old + size(vels(:,1),1)-1,:)  = vels(:,:); % NAS speed output
             t_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1)    = sensorData.accelerometer.time; % NAS time output
@@ -314,8 +313,8 @@ while flagStopIntegration && n_old < nmax
             sensorData.kalman.vy =   vels(end,1);   % east
         else
             sensorData.kalman.vz   = - Yf(end, 6); % actually not coming from NAS in this case
-            sensorData.kalman.vxxx = Yf(end, 5);
-            sensorData.kalman.vyyy = Yf(end, 4);
+            sensorData.kalman.vx = Yf(end, 5);
+            sensorData.kalman.vy = Yf(end, 4);
         end
     
         v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
@@ -353,7 +352,7 @@ while flagStopIntegration && n_old < nmax
 
         ap_ref_old = ap_ref_new;
         [alpha_aperture, t_est_tot, x_est_tot, xp_ada_tot, xv_ada_tot, t_ada_tot] = run_HIL_airbrakes(sensorData, flagsArray);
-        ap_ref_new = alpha_aperture * 66.4 % change with servo max aperture 
+        ap_ref_new = alpha_aperture * settings.servo.maxAngle;  % alpha_aperture: 
     end
         
     % Salvo input/output per testare algoritmo cpp
@@ -437,13 +436,13 @@ while flagStopIntegration && n_old < nmax
 
 
     cpuTimes(iTimes) = toc;                                                 % stops CHRONO and saves computational time
-    toc
+%     toc
 end
 
-if settings.control == true
-    % Salvo input/output per testare algoritmo cpp
-    % save('input_output_test_PID.mat','input_output_test');
-end
+% if settings.control == true
+%     % Salvo input/output per testare algoritmo cpp
+%     save('input_output_test_PID.mat','input_output_test');
+% end
 
 if settings.launchWindow
     fclose('all');

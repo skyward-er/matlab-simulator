@@ -1,4 +1,4 @@
-function [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Y, T, x, uw, vw, ww)
+function [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Y, T, ext, uw, vw, ww)
 
 %{
 
@@ -67,14 +67,14 @@ if freq.accelerometerFrequency > freq.controlFrequency
                 
             end
             sensorData.accelerometer.measures(i, :) = accelerometerAscent...
-                (iTimeAcc, Yinterp, settings, x);
+                (iTimeAcc, Yinterp, settings, ext);
         end
     else
         sensorData.accelerometer.measures(1:N, 1:3) = repmat(zeros(1, 3), N, 1);
     end
 else
     sensorData.accelerometer.measures(1, :) = accelerometerAscent...
-            (T(end), Y(end, :), settings, x); % checkare il tLaunch
+            (T(end), Y(end, :), settings, ext); % checkare il tLaunch
     sensorData.accelerometer.time = T(end);
 end
 
