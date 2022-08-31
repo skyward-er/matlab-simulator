@@ -15,7 +15,7 @@ Release date: 10/03/2021
 
 % Windows, e.g. "COM6"
 % Linux, e.g. "/dev/ttyACM0"
-hil_settings.serial_port = "COM9";
+hil_settings.serial_port = "COM8";
 
 % Windows, e.g. 256000
 % Linux, e.g. 115200

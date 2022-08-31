@@ -147,11 +147,19 @@ lastLaunchflag = true;
 
 
 if settings.launchWindow
+    global windowCreated
+    
+    windowCreated = false;
     launchWindow;
+    while not(windowCreated)
+        pause(0.1);
+    end
+
     launchFlag = false;
-    pause(1);
+    lastLaunchflag = true;
 else
     launchFlag = true;
+    lastLaunchflag = false;
 end
 
 
@@ -512,7 +520,7 @@ else
     dataBallisticFlight = [];
 end
 
-if ~settings.electronics && ~settings.montecarlo
+if ~settings.montecarlo
     plots
 end
 
