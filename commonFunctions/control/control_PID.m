@@ -31,7 +31,7 @@ time = nas_state.time;
 z = nas_state.z;
 Vz = nas_state.vz;
 
-[z_setpoint, Vz_setpoint, csett] = set_Trajectory(time,z, Vz, csett);
+[z_setpoint, Vz_setpoint, csett] = set_Trajectory(time,z-settings.z0, Vz, csett);
 
 %% PI ALGORITHM 
 

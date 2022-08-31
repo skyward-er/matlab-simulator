@@ -102,7 +102,7 @@ switch contSettings.algorithm % set this value in configControl.m
         vc    =    exp_mean(sqrt(sensorData.kalman.x_c(:,4).^2+sensorData.kalman.x_c(:,5).^2+sensorData.kalman.x_c(:,6).^2),0.8);
 
 %         [alpha_degree, vz_setpoint, z_setpoint, pid,U_linear, Cdd, delta_S, contSettings] =   control_PID     (nas_state, V_norm,  contSettings,settings);
-        [alpha_degree, vz_setpoint, z_setpoint, contSettings] =   control_PID     (nas_state, V_norm,  contSettings,settings);
+        [alpha_degree, vz_setpoint, z_setpoint, contSettings] =   control_PID     (sensorData.kalman, V_norm,  contSettings,settings);
 
         ap_ref_new = deg2rad(alpha_degree);
 
