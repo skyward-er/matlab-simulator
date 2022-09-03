@@ -136,9 +136,9 @@ if ~settings.save
     warning('save is set to false')
 end
 
-% if settings.save
-%     save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
-% end
+if settings.save
+    save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
+end
 
 %% PLOT
 if settings.plots

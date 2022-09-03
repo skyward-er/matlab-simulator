@@ -1,4 +1,4 @@
-function [alpha0] = control_Interp(z,Vz,z_ref,V_ref,interpolation,N_forward,settings,deltaZ)
+function [alpha0] = control_Interp(z,Vz,z_ref,V_ref,interpolation,N_forward,settings,contSettings)
 
 % HELP
 %
@@ -22,27 +22,10 @@ function [alpha0] = control_Interp(z,Vz,z_ref,V_ref,interpolation,N_forward,sett
 % OUTPUTS:
 % alpha0:   reference angle for the PID controller
 
-if nargin<8
-    deltaZ = 10;
-end
+deltaZ = contSettings.reference.deltaZ;
 
-% 
-% alpha_min = 0;
-% alpha_max = deg2rad(68);
-% 
-% heights = [0:deltaZ:3000]';
-% 
-% 
-% 
-% V_rescale = zeros(length(heights),size(z_ref,1));
-% for ii = 1:size(z_ref,1)
-%     V_rescale(:,ii) = interp1(z_ref{ii},V_ref{ii},heights);
-% end
-% 
-% 
-% V_ref = V_rescale;
-% z_ref = heights;
 
+% find reference altitude index
 index_z = floor(z/deltaZ);
 if index_z > length(z_ref)
     index_z = length(z_ref);

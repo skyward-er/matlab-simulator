@@ -32,8 +32,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 
 
-% close all; 
-clear; clc;
+close all; clear; clc;
 
 filePath = fileparts(mfilename('fullpath'));
 currentPath = pwd;

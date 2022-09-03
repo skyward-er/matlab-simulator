@@ -25,7 +25,7 @@ switch settings.mission
 
     case 'Pyxis_Portugal_October_2022'
         
-        load("Trajectories_to0_onlyVz.mat")
+        load("Trajectories.mat")
         for i = 1:size(trajectories_saving,1)
             reference.vz_ref{i,1} = trajectories_saving{i}.VZ_ref;
             reference.vy_ref{i,1} = trajectories_saving{i}.VY_ref;
@@ -56,8 +56,8 @@ switch settings.mission
 end
 
 
-reference.deltaZ = 10;
-heights = [0:reference.deltaZ:3000]';
+contSettings.reference.deltaZ = 10;
+heights = [0:contSettings.reference.deltaZ:3000]';
 
 V_rescale = zeros(length(heights),size(reference.altitude_ref,1));
 for ii = 1:size(reference.altitude_ref,1)
@@ -65,8 +65,8 @@ for ii = 1:size(reference.altitude_ref,1)
 end
 
 
-settings.reference.Vz = V_rescale;
-settings.reference.Z = heights;
+contSettings.reference.Vz = V_rescale;
+contSettings.reference.Z = heights;
 
 
 
