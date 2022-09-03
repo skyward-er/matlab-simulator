@@ -77,6 +77,8 @@ m = YY(19);
 
 t = t - tLaunch;
 
+flagMotorShutdown = varargin{1};
+
 % saturation on servo angle
 if ap > settings.servo.maxAngle
     ap = settings.servo.maxAngle;
@@ -155,7 +157,7 @@ M_value = M;
 dI = 1/tb*([Ixxf Iyyf Izzf]' - [Ixxe Iyye Izze]');
  % per spegnimento motore c'è da capire come varia la massa nel viaggio,
  % ci serve la stima col modello preciso
-if (t<tb && m>settings.ms) && not(settings.flagMotorShutdown)
+if (t<tb && m>settings.ms) && not(flagMotorShutdown)
     T = interp1(settings.motor.expTime, settings.motor.expThrust, t);
     dm = -T/(g*settings.motor.Isp);
     Ixxdot = -dI(1);

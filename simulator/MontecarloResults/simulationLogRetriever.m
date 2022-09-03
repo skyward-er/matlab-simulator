@@ -39,4 +39,4 @@ time_vec = 0:1/obsw_freq * 1e6:time_max;
 log_sampled = interp1(llogg(:,1),llogg,time_vec);
 
 %export csv file
-csvwrite('MontecarloResults\log_simulation_std0.csv',log_sampled)
+csvwrite('log_simulation_std0.csv',log_sampled)

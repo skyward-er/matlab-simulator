@@ -148,7 +148,7 @@ alpha_degree_old = 0;
 flagStopIntegration         =   true;                                           % while this is true the integration runs
 flagAscent                  =   false;                                          % while this is false...
 flagMatr                    =   false(nmax, 6);                                 % while this value are false...
-settings.flagMotorShutdown  =   false;
+flagMotorShutdown           =   false;
 lastLaunchflag = true;
 
 
@@ -183,7 +183,7 @@ while flagStopIntegration && n_old < nmax
         tLaunch = 0;
     end
 
-    if launchFlag && (t0 - tLaunch) <= settings.tb && not(settings.flagMotorShutdown)
+    if launchFlag && (t0 - tLaunch) <= settings.tb && not(flagMotorShutdown)
         flagBurning = true;                                                 % Powered ascent
     else
         flagBurning = false;                                                % Motor ends thrust
@@ -225,10 +225,10 @@ while flagStopIntegration && n_old < nmax
 
         if settings.ballisticFligth
             
-            [Tf, Yf] = ode113(@ascentControl_testMotorShutdown, [t0, t1], Y0, [], settings, ap_ref, tLaunch);
+            [Tf, Yf] = ode113(@ascentControl_testMotorShutdown, [t0, t1], Y0, [], settings, ap_ref, tLaunch,flagMotorShutdown);
         else
             if flagAscent
-                [Tf, Yf] = ode113(@ascentControl_testMotorShutdown, [t0, t1], Y0, [], settings,  ap_ref, tLaunch);
+                [Tf, Yf] = ode113(@ascentControl_testMotorShutdown, [t0, t1], Y0, [], settings,  ap_ref, tLaunch,flagMotorShutdown);
 
             else
                 if flagPara1
@@ -334,19 +334,19 @@ while flagStopIntegration && n_old < nmax
         sensorData.kalman.x  =  Yf(end, 2);
         sensorData.kalman.y  =  Yf(end, 1);
     
-        %% Control algorithm
+        %% TRAJECTORY CONTROL
 
-        if settings.HRE
+        if settings.HRE && flagMotorShutdown == false
             m  =Yf(end,19); % sarà poi da stimare bene con un Kalman
-            [settings.flagMotorShutdown] = run_simulated_motorShutdown(sensorData.kalman.z,sensorData.kalman.vNorm,m,settings.g0,settings,contSettings,Yf(end,17));
+            [flagMotorShutdown] = run_simulated_motorShutdown(sensorData.kalman.z,sensorData.kalman.vNorm,m,settings.g0,settings,contSettings,Yf(end,17));
             
-            if t_shutdown == 0 && settings.flagMotorShutdown == true
+            if t_shutdown == 0 && flagMotorShutdown == true
                 t_shutdown = t1;
             end
         end
         
 
-        if flagAeroBrakes && mach < settings.MachControl && settings.Kalman && settings.control
+        if (flagAeroBrakes && mach < settings.MachControl && settings.Kalman && settings.control && flagMotorShutdown) % airbrakes can open only when the motor is shut down, but if something goes wrong and the rocket fires a lot
             sensorData.kalman.time = Tf(end);
             ap_ref_old = ap_ref_new;
             [ap_ref_new,contSettings] = run_simulated_airbrakes(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
@@ -549,6 +549,7 @@ end
 
 varargout{1} = ap_ref_vec;
 varargout{2} = qdyn;
+varargout{3} = t_shutdown;
 
 
 

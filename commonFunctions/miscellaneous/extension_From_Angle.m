@@ -11,12 +11,12 @@ switch settings.mission
     case 'Pyxis_Portugal_October_2022'
 
         x = settings.arb.extPol(1)*alpha.^4 + settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + settings.arb.extPol(4).*alpha;
-        deltaS = alpha * 0.009564;
+        deltaS = alpha * settings.arb.surfPol;
         varargout{1} = deltaS;
     case 'Pyxis_Roccaraso_September_2022'
 
         x = settings.arb.extPol(1)*alpha.^4 + settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + settings.arb.extPol(4).*alpha;
-        deltaS = alpha * 0.009564;
+        deltaS = alpha * settings.arb.surfPol;
         varargout{1} = deltaS;
     
     case 'Lynx_Portugal_October_2021'

@@ -47,7 +47,7 @@ matlab_graphics;
 % Airbrakes extension vector
 % deltaX_values = linspace(settings.hprot(1), settings.hprot(end), settings.Ndx+2);
 delta_alpha_values  = linspace(settings.servo.minAngle,settings.servo.maxAngle,11);
-[deltaX_values] = extension_From_Angle_2022(delta_alpha_values, settings);
+[deltaX_values] = extension_From_Angle(delta_alpha_values, settings);
 % I exclude the limits for robustness
 % deltaX_values = deltaX_values(2:end-1);
 
@@ -136,9 +136,9 @@ if ~settings.save
     warning('save is set to false')
 end
 
-if settings.save
-    save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
-end
+% if settings.save
+%     save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
+% end
 
 %% PLOT
 if settings.plots

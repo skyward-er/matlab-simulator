@@ -37,7 +37,7 @@ addpath(genpath(commonFunctionsPath));
 msaToolkitURL = 'https://github.com/skyward-er/msa-toolkit';
 localRepoPath = '../data/msa-toolkit';
 status = checkLastCommit(msaToolkitURL, localRepoPath, pwd);
-submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
+% submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
 
 %% CONFIGs
 configSimulator;
@@ -52,7 +52,7 @@ settings.montecarlo = true;
 
 %% how many simulations
 N_sim = 200; % set to at least 500
-simulationType_thrust = "gaussian";  % "gaussian", "exterme"
+simulationType_thrust = "extreme";  % "gaussian", "exterme"
 
 %% stochastic parameters
 
@@ -65,7 +65,10 @@ switch simulationType_thrust
         
         thrust_percentage = normrnd(mu_t,sigma_t,N_sim,1);       %generate normally distributed values ( [0.8 1.20] = 3sigma) % serve il toolbox
         stoch.thrust = thrust_percentage*settings.motor.expThrust;                  % thrust - the notation used creates a matrix where each row is the expThrust multiplied by one coefficient in the thrust percentage array
-        %%%
+       
+        %%% in questo modo però il burning time rimane fissato perchè è
+        %%% settato al'interno di simulationData.m -> possibili errori per
+        %%% le simulazioni con exp_thrust aumentato
         impulse_uncertainty = normrnd(1,0.05/3,N_sim,1);
         stoch.expThrust = diag(impulse_uncertainty)*((1./thrust_percentage) * settings.motor.expTime);          % burning time - same notation as thrust here
         
@@ -151,7 +154,7 @@ if run_Thrust == true
     contSettings.deltaZfilter = 250; % every deltaZfilter the filter coefficient is diminished by a ratio of filterRatio
 
     %simulation
-    for alg_index = [1, 2, 3] 
+    for alg_index = [1] 
         contSettings.algorithm = algorithm_vec(alg_index);
 
         %save arrays
@@ -178,21 +181,21 @@ if run_Thrust == true
             settings_mont.wind.El = stoch.wind.El(i);
 
             if displayIter == true
-                fprintf("simulation = " + num2str(i) + " of " + num2str(N_sim) + ", algorithm: " + algorithm +"\n");
+                fprintf("simulation = " + num2str(i) + " of " + num2str(N_sim) + ", algorithm: " + contSettings.algorithm +"\n");
             end
-            switch algorithm
+            switch contSettings.algorithm
                 case "interp"
                     contSettings_mont.filter_coeff = 1;
-                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = std_run(settings_mont,contSettings_mont);
+                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn,t_shutdown] = std_run_motorShutdownTesting(settings_mont,contSettings_mont);
                 case "std0"
                     contSettings_mont.z_trajChoice = 500;  % when time of flight is grater than 500s (never) change reference trajectory
-                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = std_run(settings_mont,contSettings_mont);
+                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = std_run_motorShutdownTesting(settings_mont,contSettings_mont);
                 case "std2s"
                     contSettings_mont.z_trajChoice = 3; % from 3s after lift off it's possible to change reference trajectory
-                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = std_run(settings_mont,contSettings_mont);
+                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = std_run_motorShutdownTesting(settings_mont,contSettings_mont);
                 case "NoControl"
                     settings_mont.control = false;
-                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = std_run(settings_mont,contSettings_mont);
+                    [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = std_run_motorShutdownTesting(settings_mont,contSettings_mont);
             end
             
             save_thrust{i}.time = Tf;
@@ -204,6 +207,7 @@ if run_Thrust == true
             save_thrust{i}.qdyn = qdyn;
             save_thrust{i}.ap_ref = ap_ref;
             save_thrust{i}.paroutFlight = data_flight;
+            save_thrust{i}.t_shutdown = t_shutdown;
         end
 
         %% RETRIEVE INTERESING PARAMETERS:
@@ -253,7 +257,7 @@ if run_Thrust == true
 
         %% PLOT CONTROL
         save_thrust_plotControl = figure;
-        for i = floor(linspace(1,N_sim,5))
+        for i = 1:10 %floor(linspace(1,N_sim,N_sim))
             plot(save_thrust{i}.time,save_thrust{i}.control)
             hold on;
             grid on;
@@ -261,7 +265,7 @@ if run_Thrust == true
         title('Control action')
         xlabel('Time [s]')
         ylabel('Servo angle [\alpha]')
-        legend(algorithm);
+        legend(contSettings.algorithm);
 
 
         
@@ -280,9 +284,46 @@ if run_Thrust == true
         xlim([min(thrust_percentage)-0.01,max(thrust_percentage)+0.01])
         ylim([settings.z_final-200,settings.z_final+200])
         text(1.1,settings.z_final + 100,"target apogee: "+num2str(settings.z_final))
-        legend(algorithm);
+        legend(contSettings.algorithm);
         
 
+
+        %% PLOT SHUTDOWN TIME 2D
+        save_thrust_tShutdown = figure;
+        subplot(1,3,1)
+        for i = 1:N_sim
+            plot(wind_el(i),save_thrust{i}.t_shutdown,'*')
+            hold on;
+            grid on;
+        end
+        title('shutdown time w.r.t. wind elevation')
+        xlabel('Wind elevation angle')
+        ylabel('Apogee [m]')
+        legend(contSettings.algorithm);
+        %%%
+        subplot(1,3,2)
+        for i = 1:N_sim
+            plot(wind_az(i),save_thrust{i}.t_shutdown,'*')
+            hold on;
+            grid on;
+        end
+        title('shutdown time w.r.t. wind azimuth')
+        xlabel('Wind azimuth angle')
+        ylabel('Apogee [m]')
+        xlim([min(wind_az)-0.01,max(wind_az)+0.01])
+        text(1.1,settings.z_final + 100,"target apogee: "+num2str(settings.z_final))
+        legend(contSettings.algorithm);
+        %%%
+        subplot(1,3,3)
+        for i = 1:N_sim
+            plot(thrust_percentage(i),save_thrust{i}.t_shutdown,'*')
+            hold on;
+            grid on;
+        end
+        title('shutdown time w.r.t. thrust')
+        xlabel('Thrust percentage w.r.t. nominal')
+        ylabel('Apogee [m]')
+        legend(contSettings.algorithm);
         %% PLOT TRAJECTORY
         
         save_thrust_plotTrajectory = figure;
@@ -295,7 +336,7 @@ if run_Thrust == true
         xlabel('x [m]')
         ylabel('y [m]')
         zlabel('z [m]')
-        legend(algorithm);
+        legend(contSettings.algorithm);
 
         %% PLOT VELOCITIES
         
@@ -311,7 +352,7 @@ if run_Thrust == true
         xlabel('Vx_b [m/s]')
         ylabel('Vy_b [m/s]')
         zlabel('Vz_b [m/s]')
-        legend(algorithm);
+        legend(contSettings.algorithm);
 
         %% PLOT APOGEE 3D
 
@@ -327,7 +368,7 @@ if run_Thrust == true
         zlim([settings.z_final-200,settings.z_final+200])
         view(30,20)
         text(min(wind_Mag),110,max(apogee.thrust) + 70,"target apogee: "+num2str(settings.z_final))
-        legend(algorithm);
+        legend(contSettings.algorithm);
         %%%%%%%%%%% wind azimuth - thrust - apogee
         subplot(2,2,2)
         hold on
@@ -338,7 +379,7 @@ if run_Thrust == true
         zlabel('Apogee')
         zlim([settings.z_final-200,settings.z_final+200])
         view(30,20)
-        legend(algorithm);
+        legend(contSettings.algorithm);
         %%%%%%%%%%%% wind elevation - thrust - apogee
         subplot(2,2,3)
         hold on
@@ -349,7 +390,7 @@ if run_Thrust == true
         zlabel('Apogee')
         zlim([settings.z_final-200,settings.z_final+200])
         view(30,20)
-        legend(algorithm);
+        legend(contSettings.algorithm);
         %%%%%
         subplot(2,2,4)
         hold on
@@ -360,7 +401,7 @@ if run_Thrust == true
         zlabel('Apogee')
         zlim([settings.z_final-200,settings.z_final+200])
         view(30,20)
-        legend(algorithm);
+        legend(contSettings.algorithm);
         %safe ellipses?
         %safe ellipses?
 
@@ -381,7 +422,7 @@ if run_Thrust == true
         plot(x_values,y)
         xline(settings.z_final,'r--')
         xline(10000000000)
-        legend('Apogee Gaussian distribution','Target',algorithm)
+        legend('Apogee Gaussian distribution','Target',contSettings.algorithm)
         xlim([min(x_values), max(x_values)])
         end
         
@@ -446,10 +487,10 @@ if run_Thrust == true
             switch  settings.mission 
                 
                 case 'Pyxis_Portugal_October_2022'
-                    folder = [folder ; "MontecarloResults\"+settings.mission+"\"+algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % offline
+                    folder = [folder ; "MontecarloResults\"+settings.mission+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % offline
                 
                 case 'Pyxis_Roccaraso_September_2022'
-                    folder = [folder ; "MontecarloResults\"+settings.mission+"\z_f_"+settings.z_final+"\"+algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % offline
+                    folder = [folder ; "MontecarloResults\"+settings.mission+"\z_f_"+settings.z_final+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % offline
             end
         
         end
@@ -458,10 +499,10 @@ if run_Thrust == true
                 switch  settings.mission 
                 
                     case 'Pyxis_Portugal_October_2022'
-                        folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\task 1 - motor model\montecarlo e tuning\"+settings.mission+"\"+algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % online
+                        folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\task 1 - motor model\montecarlo e tuning\"+settings.mission+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % online
                     
                     case 'Pyxis_Roccaraso_September_2022'
-                        folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\task 1 - motor model\montecarlo e tuning\"+settings.mission+"\z_f_"+settings.z_final+"\"+algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % online
+                        folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\task 1 - motor model\montecarlo e tuning\"+settings.mission+"\z_f_"+settings.z_final+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % online
                 end
             end
         end
@@ -481,8 +522,8 @@ if run_Thrust == true
        
 
         % Save results.txt
-            fid = fopen( folder(i)+"\"+algorithm+"Results"+saveDate+".txt", 'wt' );  % CAMBIA IL NOME
-            fprintf(fid,'Algorithm: %s \n',algorithm );
+            fid = fopen( folder(i)+"\"+contSettings.algorithm+"Results"+saveDate+".txt", 'wt' );  % CAMBIA IL NOME
+            fprintf(fid,'Algorithm: %s \n',contSettings.algorithm );
             fprintf(fid,'Number of simulations: %d \n \n',N_sim); % Cambia n_sim
             fprintf(fid,'Parameters: \n');
             fprintf(fid,'Target apogee: %d \n',settings.z_final);
@@ -520,7 +561,7 @@ if run_Thrust == true
             %%%%%%%%%%%%%%%
             fprintf(fid,'Other parameters specific of the simulation: \n\n');
             fprintf(fid,'Filter coefficient: %.3f \n', contSettings.filter_coeff);
-            if algorithm == "interp"
+            if contSettings.algorithm == "interp"
                 fprintf(fid,'N_forward: %d \n', contSettings.N_forward);
                 fprintf(fid,'Delta Z (reference): %d \n',reference.deltaZ);
                 fprintf(fid,'Filter diminished every: %d \n', contSettings.deltaZfilter);
