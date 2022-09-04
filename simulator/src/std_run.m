@@ -331,6 +331,7 @@ while flagStopIntegration && n_old < nmax
         else
             ap_ref_new = 0;
         end
+        
     else
         v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
         % HIL HIL HIL HIL HIL HIL HIL HIL HIL HIL HIL
@@ -516,10 +517,10 @@ if ~settings.electronics && ~settings.montecarlo
     plots
 end
 
-% save('results/Ground_truth.mat','sensorData');
-% if settings.dataNoise
-%     save('results/Sensors.mat','c');
-% end
+save('results/Ground_truth.mat','sensorData');
+if settings.dataNoise
+    save('results/Sensors.mat','c');
+end
 
 varargout{1} = ap_ref_vec;
 varargout{2} = qdyn;

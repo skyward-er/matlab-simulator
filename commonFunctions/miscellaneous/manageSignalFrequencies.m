@@ -267,13 +267,12 @@ end
 [Temp, ~, P, ~] = atmosisa(z+settings.z0);
 sensorData.barometer.measures = P;
 sensorData.barometer.temperature = Temp;
-
 %% pitot
 if isfield(freq, 'pitotFrequency')
     if freq.pitotFrequency > freq.controlFrequency
         N = freq.pitotFrequency/freq.controlFrequency;
         vx = zeros(N, 1);
-        z = zeros(N, 1);
+        z_pit = zeros(N, 1);
         if N ~= round(N)
             error('the sensor frequency must be a multiple of the control frequency');
         end
@@ -297,22 +296,22 @@ if isfield(freq, 'pitotFrequency')
                 Y0 = Y(index0, 3);
                 m = (Y1 - Y0)./(T1 - T0);
                 q = Y1 - m*T1;
-                z(i) = - m*iTimePitot + q;    
+                z_pit(i) = -(m*iTimePitot + q);    
             else
                 vx(i) = Y(iTimePitot == T, 4);
-                z(i) = -Y(iTimePitot == T, 3);
+                z_pit(i) = -Y(iTimePitot == T, 3);
             end
         end
         
     else
         sensorData.pitot.time = T(end);
         vx = Y(end, 4);
-        z = -Y(end, 3);
+        z_pit  = -Y(end, 3);
     end
-    [Temp, ~, ~, rho] = atmosisa(z + settings.z0);
+    [Temp, ~, P, rho] = atmosisa(z_pit + settings.z0);
     
-    Q = Y(end, 10:13);
-
+    Q = [Y(end, 11:13),Y(end, 10)];
+    
     ned2body  = [Q(1)^2 - Q(2)^2 - Q(3)^2 + Q(4)^2,       2*(Q(1)*Q(2) - Q(3)*Q(4)),              2*(Q(1)*Q(3) + Q(2)*Q(4));
                  2*(Q(1)*Q(2) + Q(3)*Q(4)),               -Q(1)^2 + Q(2)^2 - Q(3)^2 + Q(4)^2,     2*(Q(2)*Q(3) - Q(1)*Q(4));
                  2*(Q(1)*Q(3) - Q(2)*Q(4)),               2*(Q(2)*Q(3) + Q(1)*Q(4)),              -Q(1)^2 - Q(2)^2 + Q(3)^2 + Q(4)^2]';
@@ -324,5 +323,6 @@ if isfield(freq, 'pitotFrequency')
     v = (vx + wind_body(1))'; % Speed x_body + wind in x_body direction
     
     sensorData.pitot.temperature = Temp;
-    sensorData.pitot.measures = (0.5*rho'.*v.*v.*sign(v))'; % differential pressure in Pascals
+    sensorData.pitot.measures = (0.5*rho'.*v.*v.*sign(v))' + P; % differential pressure in Pascals
+%     (0.5*rho'.*v.*v.*sign(v))'
 end
