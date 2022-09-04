@@ -24,7 +24,7 @@ contSettings.starting_index = 0;
 %% CONTROL PARAMETERS
 
 % choose strategy:
-contSettings.algorithm = 'interp'; % choices: 'interp', 'PID_2021', 'PID_2refs', 'shooting'
+contSettings.algorithm = 'PID_2021'; % choices: 'interp', 'PID_2021', 'PID_2refs', 'shooting'
 
 
 % Control time sample:

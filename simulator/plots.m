@@ -13,7 +13,7 @@ figures.servo_control_action = figure('Name','Servo angle after burning phase');
 plot(c.Tf_tot, ap_tot_rescale);
 grid on;
 xlabel('Time [s]');
-ylabel('\extension [%]');
+ylabel('extension [%]');
 title('Servo control action');
 exportgraphics(figures.servo_control_action,'report_images\control_action.pdf','ContentType','vector')
 %% Airbrake surface

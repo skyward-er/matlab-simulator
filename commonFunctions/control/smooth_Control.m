@@ -4,5 +4,4 @@ function u = smooth_Control(u, uprev, filter)
 
 u = filter*u + (1 - filter)*uprev;
 
-u = round(u);
 end
