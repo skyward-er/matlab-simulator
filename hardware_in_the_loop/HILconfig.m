@@ -1,6 +1,6 @@
 %{
 
-HIL CONFIG - This script sets up all the parameters for the 
+HIL CONFIG - This script sets up all the parameters for the
 hardware-in-the-loop simulation.
 All the parameters are stored in the "hil_settings" structure.
 
@@ -15,7 +15,7 @@ Release date: 10/03/2021
 
 % Windows, e.g. "COM6"
 % Linux, e.g. "/dev/ttyACM0"
-hil_settings.serial_port = "COM8";
+hil_settings.serial_port = "/dev/tty.usbserial-DN037JYN";
 
 % Windows, e.g. 256000
 % Linux, e.g. 115200
