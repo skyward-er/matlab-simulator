@@ -1,21 +1,34 @@
-%% Control variable: servo angle
-figures.servo_angle = figure('Name', 'Servo angle after burning phase');
-plot(c.Tf_tot, c.ap_tot);
-grid on;
-xlabel('Time [s]');
-ylabel('\alpha [rad]');
-title('Servo angle');
-% exportgraphics(figures.servo_angle,'report_images\servo_angle.pdf','ContentType','vector')
+flagEXPORT = false; % do you want to export graphics?
 
-%% Control variable: servo angle
-% ap_tot_rescale = rescale(c.ap_tot, "InputMin", 0, "InputMax", settings.servo.maxAngle);
+%% Control variable: servo control action (percentage of angle max)
+ap_tot_rescale = rescale(c.ap_tot, "InputMin", 0, "InputMax", settings.servo.maxAngle);
 figures.servo_control_action = figure('Name', 'Servo angle after burning phase');
-plot(c.ap_ref_tot);
+plot(c.Tf_tot, ap_tot_rescale);
 grid on;
 xlabel('Time [s]');
 ylabel('Extension [%]');
-title('Servo control action');
-% exportgraphics(figures.servo_control_action,'report_images\control_action.pdf','ContentType','vector')
+title('Servo angle reference');
+
+if flagEXPORT == true
+    exportgraphics(figures.servo_control_action,'report_images\control_action.pdf','ContentType','vector')
+end
+
+%% Control variable: servo angle + reference values
+figures.servo_angle = figure('Name', 'Servo angle after burning phase');
+plot(c.Tf_tot, c.ap_tot);
+hold on; grid on;
+stairs(c.ap_ref_time,c.ap_ref_tot,'r');
+xlabel('Time [s]');
+ylabel('$\alpha$ [rad]');
+title('Servo angle');
+legend('simulated','reference values')
+if flagEXPORT == true
+    exportgraphics(figures.servo_angle,'report_images\servo_angle.pdf','ContentType','vector')
+end
+
+
+
+
 
 %% Airbrake surface
 figures.arb_exposed_surface = figure('Name', 'Airbrake exposed surface');
@@ -25,7 +38,11 @@ grid on;
 xlabel('Time [s]');
 ylabel('dS [m^2]');
 title('Airbrake exposed surface');
-% exportgraphics(figures.arb_exposed_surface,'report_images\arb_exposed_surface.pdf')
+
+if flagEXPORT == true
+    exportgraphics(figures.arb_exposed_surface,'report_images\arb_exposed_surface.pdf')
+end
+
 %% Trajectory
 figures.trajectory = figure('Name', 'Trajectory');
 plot3(c.Yf_tot(:, 1), c.Yf_tot(:, 2), -c.Yf_tot(:, 3));
@@ -34,8 +51,9 @@ xlabel('x [m]');
 ylabel('y [m]');
 zlabel('z [m]');
 title('Trajectory');
-% exportgraphics(figures.trajectory,'report_images\trajectory.pdf')
-
+if flagEXPORT == true
+    exportgraphics(figures.trajectory,'report_images\trajectory.pdf')
+end
 %% Velocities w.r.t. time
 figures.velocities = figure('Name', 'Velocities');
 plot(c.Tf_tot, c.Yf_tot(:, 4))
@@ -47,7 +65,10 @@ xlabel('Time [s]');
 ylabel('Speed V [m/s]');
 title('Velocities');
 legend('Vx', 'Vy', 'Vz')
-% exportgraphics(figures.velocities,'report_images\velocities.pdf')
+
+if flagEXPORT == true
+    exportgraphics(figures.velocities,'report_images\velocities.pdf')
+end
 
 %% Mach w.r.t. time
 figures.Mach_number = figure('Name', 'Velocities');
@@ -64,4 +85,7 @@ xlabel('Time t [s]');
 ylabel('Mach M(t) [-]');
 title('Velocities');
 legend('Mach')
-% exportgraphics(figures.Mach_number,'report_images\Mach_number.pdf')
+
+if flagEXPORT == true
+    exportgraphics(figures.Mach_number,'report_images\Mach_number.pdf')
+end

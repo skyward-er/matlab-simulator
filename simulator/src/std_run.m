@@ -381,6 +381,7 @@ while flagStopIntegration && n_old < nmax
         % Save the values to plot them
         c.vz_tot(i)    =  sensorData.kalman.vz;
         c.z_tot(i)     =  sensorData.kalman.z;
+        c.ap_ref_time(i) = sensorData.kalman.time;
         c.ap_ref_tot(i) =  ap_ref_new;
     end
 
