@@ -323,6 +323,6 @@ if isfield(freq, 'pitotFrequency')
     v = (vx + wind_body(1))'; % Speed x_body + wind in x_body direction
     
     sensorData.pitot.temperature = Temp;
-    sensorData.pitot.measures = (0.5*rho'.*v.*v.*sign(v))' + P; % differential pressure in Pascals
+    sensorData.pitot.measures = (0.5*rho'.*v.*v.*sign(v))'; % differential pressure in Pascals
 %     (0.5*rho'.*v.*v.*sign(v))'
 end
