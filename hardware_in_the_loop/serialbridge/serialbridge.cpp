@@ -32,10 +32,10 @@
 
 using namespace std;
 
-static constexpr int INDEX_FUN         = 0;
-static constexpr int INDEX_OPEN_PORT   = 1;
-static constexpr int INDEX_OPEN_BAUD   = 2;
-static constexpr int INDEX_READ_PARAM  = 1;
+static constexpr int INDEX_FUN = 0;
+static constexpr int INDEX_OPEN_PORT = 1;
+static constexpr int INDEX_OPEN_BAUD = 2;
+static constexpr int INDEX_READ_PARAM = 1;
 static constexpr int INDEX_WRITE_PARAM = 1;
 
 static serialib serial;
@@ -83,21 +83,19 @@ public:
         std::shared_ptr<matlab::engine::MATLABEngine> matlabPtr = getEngine();
         matlab::data::ArrayFactory factory;
 
-        checkArguments(outputs, inputs);
-
-        if (inputs[INDEX_FUN][0] == "Open")
+        if (inputs[INDEX_FUN][0] == std::string("Open"))
         {
             openSerial(inputs);
         }
-        else if (inputs[INDEX_FUN][0] == "Close")
+        else if (inputs[INDEX_FUN][0] == std::string("Close"))
         {
             closeSerial(inputs);
         }
-        else if (inputs[INDEX_FUN][0] == "Read")
+        else if (inputs[INDEX_FUN][0] == std::string("Read"))
         {
             read(outputs, inputs);
         }
-        else if (inputs[INDEX_FUN][0] == "Write")
+        else if (inputs[INDEX_FUN][0] == std::string("Write"))
         {
             write(inputs);
         }
@@ -116,7 +114,7 @@ public:
         matlab::data::ArrayFactory factory;
 
         string port = inputs[INDEX_OPEN_PORT][0];
-        int baud    = inputs[INDEX_OPEN_BAUD][0];
+        int baud = inputs[INDEX_OPEN_BAUD][0];
 
         if (opened)
         {
@@ -198,7 +196,7 @@ public:
             error("Serial port is not open!");
         }
 
-        size_t numin    = inputs[INDEX_READ_PARAM][0];
+        size_t numin = inputs[INDEX_READ_PARAM][0];
         uint8_t *datain = new uint8_t[sizeof(float) * numin];
         size_t numbytes = 0;
 
@@ -252,7 +250,7 @@ public:
         std::shared_ptr<matlab::engine::MATLABEngine> matlabPtr = getEngine();
         matlab::data::ArrayFactory factory;
 
-        if (inputs[INDEX_FUN][0] == "Open")
+        if (inputs[INDEX_FUN][0] == std::string("Open"))
         {
             if (inputs.size() != 3)
             {
@@ -274,7 +272,7 @@ public:
                     "Input 2 Must specify baud rate! (scalar double / int32)");
             }
         }
-        else if (inputs[INDEX_FUN][0] == "Close")
+        else if (inputs[INDEX_FUN][0] == std::string("Close"))
         {
             if (inputs.size() != 1)
             {
@@ -283,7 +281,7 @@ public:
                     "port.");
             }
         }
-        else if (inputs[INDEX_FUN][0] == "Read")
+        else if (inputs[INDEX_FUN][0] == std::string("Read"))
         {
             if (inputs.size() != 2)
             {
@@ -300,7 +298,7 @@ public:
                     "double / int32) ");
             }
         }
-        else if (inputs[INDEX_FUN][0] == "Write")
+        else if (inputs[INDEX_FUN][0] == std::string("Write"))
         {
             if (inputs.size() != 2)
             {

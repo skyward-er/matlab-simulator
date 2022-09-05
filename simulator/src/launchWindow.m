@@ -61,6 +61,8 @@ classdef launchWindow < matlab.apps.AppBase
             if nargout == 0
                 clear app
             end
+            global windowCreated
+            windowCreated = true;
         end
 
         % Code that executes before app deletion

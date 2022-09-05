@@ -28,10 +28,10 @@ better world.
 #include <chrono>
 int gettimeofday(struct timeval *tp, struct timezone *tzp)
 {
-    namespace sc                 = std::chrono;
+    namespace sc = std::chrono;
     sc::system_clock::duration d = sc::system_clock::now().time_since_epoch();
-    sc::seconds s                = sc::duration_cast<sc::seconds>(d);
-    tp->tv_sec                   = s.count();
+    sc::seconds s = sc::duration_cast<sc::seconds>(d);
+    tp->tv_sec = s.count();
     tp->tv_usec = sc::duration_cast<sc::microseconds>(d - s).count();
 
     return 0;
@@ -116,7 +116,7 @@ char serialib::openDevice(const char *Device, const unsigned int Bauds)
     if (hSerial == INVALID_HANDLE_VALUE)
     {
         if (GetLastError() == ERROR_FILE_NOT_FOUND)
-            return -1;  // Device not found
+            return -1; // Device not found
 
         // Error while opening the device
         return -2;
@@ -135,53 +135,53 @@ char serialib::openDevice(const char *Device, const unsigned int Bauds)
     // Set the speed (Bauds)
     switch (Bauds)
     {
-        case 110:
-            dcbSerialParams.BaudRate = CBR_110;
-            break;
-        case 300:
-            dcbSerialParams.BaudRate = CBR_300;
-            break;
-        case 600:
-            dcbSerialParams.BaudRate = CBR_600;
-            break;
-        case 1200:
-            dcbSerialParams.BaudRate = CBR_1200;
-            break;
-        case 2400:
-            dcbSerialParams.BaudRate = CBR_2400;
-            break;
-        case 4800:
-            dcbSerialParams.BaudRate = CBR_4800;
-            break;
-        case 9600:
-            dcbSerialParams.BaudRate = CBR_9600;
-            break;
-        case 14400:
-            dcbSerialParams.BaudRate = CBR_14400;
-            break;
-        case 19200:
-            dcbSerialParams.BaudRate = CBR_19200;
-            break;
-        case 38400:
-            dcbSerialParams.BaudRate = CBR_38400;
-            break;
-        case 56000:
-            dcbSerialParams.BaudRate = CBR_56000;
-            break;
-        case 57600:
-            dcbSerialParams.BaudRate = CBR_57600;
-            break;
-        case 115200:
-            dcbSerialParams.BaudRate = CBR_115200;
-            break;
-        case 128000:
-            dcbSerialParams.BaudRate = CBR_128000;
-            break;
-        case 256000:
-            dcbSerialParams.BaudRate = CBR_256000;
-            break;
-        default:
-            return -4;
+    case 110:
+        dcbSerialParams.BaudRate = CBR_110;
+        break;
+    case 300:
+        dcbSerialParams.BaudRate = CBR_300;
+        break;
+    case 600:
+        dcbSerialParams.BaudRate = CBR_600;
+        break;
+    case 1200:
+        dcbSerialParams.BaudRate = CBR_1200;
+        break;
+    case 2400:
+        dcbSerialParams.BaudRate = CBR_2400;
+        break;
+    case 4800:
+        dcbSerialParams.BaudRate = CBR_4800;
+        break;
+    case 9600:
+        dcbSerialParams.BaudRate = CBR_9600;
+        break;
+    case 14400:
+        dcbSerialParams.BaudRate = CBR_14400;
+        break;
+    case 19200:
+        dcbSerialParams.BaudRate = CBR_19200;
+        break;
+    case 38400:
+        dcbSerialParams.BaudRate = CBR_38400;
+        break;
+    case 56000:
+        dcbSerialParams.BaudRate = CBR_56000;
+        break;
+    case 57600:
+        dcbSerialParams.BaudRate = CBR_57600;
+        break;
+    case 115200:
+        dcbSerialParams.BaudRate = CBR_115200;
+        break;
+    case 128000:
+        dcbSerialParams.BaudRate = CBR_128000;
+        break;
+    case 256000:
+        dcbSerialParams.BaudRate = CBR_256000;
+        break;
+    default:
+        return -4;
     }
     // 8 bit data
     dcbSerialParams.ByteSize = 8;
@@ -199,9 +199,9 @@ char serialib::openDevice(const char *Device, const unsigned int Bauds)
     // Set the Timeout parameters
     timeouts.ReadIntervalTimeout = 0;
     // No TimeOut
-    timeouts.ReadTotalTimeoutConstant    = MAXDWORD;
-    timeouts.ReadTotalTimeoutMultiplier  = 0;
-    timeouts.WriteTotalTimeoutConstant   = MAXDWORD;
+    timeouts.ReadTotalTimeoutConstant = MAXDWORD;
+    timeouts.ReadTotalTimeoutMultiplier = 0;
+    timeouts.WriteTotalTimeoutConstant = MAXDWORD;
     timeouts.WriteTotalTimeoutMultiplier = 0;
 
     // Write the parameters
@@ -211,7 +211,7 @@ char serialib::openDevice(const char *Device, const unsigned int Bauds)
     // Opening successfull
     return 1;
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     // Structure with the device's options
     struct termios options;
 
@@ -232,41 +232,41 @@ char serialib::openDevice(const char *Device, const unsigned int Bauds)
     speed_t Speed;
     switch (Bauds)
     {
-        case 110:
-            Speed = B110;
-            break;
-        case 300:
-            Speed = B300;
-            break;
-        case 600:
-            Speed = B600;
-            break;
-        case 1200:
-            Speed = B1200;
-            break;
-        case 2400:
-            Speed = B2400;
-            break;
-        case 4800:
-            Speed = B4800;
-            break;
-        case 9600:
-            Speed = B9600;
-            break;
-        case 19200:
-            Speed = B19200;
-            break;
-        case 38400:
-            Speed = B38400;
-            break;
-        case 57600:
-            Speed = B57600;
-            break;
-        case 115200:
-            Speed = B115200;
-            break;
-        default:
-            return -4;
+    case 110:
+        Speed = B110;
+        break;
+    case 300:
+        Speed = B300;
+        break;
+    case 600:
+        Speed = B600;
+        break;
+    case 1200:
+        Speed = B1200;
+        break;
+    case 2400:
+        Speed = B2400;
+        break;
+    case 4800:
+        Speed = B4800;
+        break;
+    case 9600:
+        Speed = B9600;
+        break;
+    case 19200:
+        Speed = B19200;
+        break;
+    case 38400:
+        Speed = B38400;
+        break;
+    case 57600:
+        Speed = B57600;
+        break;
+    case 115200:
+        Speed = B115200;
+        break;
+    default:
+        return -4;
     }
     // Set the baud rate
     cfsetispeed(&options, Speed);
@@ -293,7 +293,7 @@ void serialib::closeDevice()
 #if defined(_WIN32) || defined(_WIN64)
     CloseHandle(hSerial);
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     close(fd);
 #endif
 }
@@ -319,7 +319,7 @@ char serialib::writeChar(const char Byte)
     // Write operation successfull
     return 1;
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     // Write the char
     if (write(fd, &Byte, 1) != 1)
         return -1;
@@ -350,7 +350,7 @@ char serialib::writeString(const char *receivedString)
     // Write operation successfull
     return 1;
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     // Lenght of the string
     int Lenght = strlen(receivedString);
     // Write the string
@@ -383,7 +383,7 @@ char serialib::writeBytes(const void *Buffer, const unsigned int NbBytes)
     // Write operation successfull
     return 1;
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     // Write data
     if (write(fd, Buffer, NbBytes) != (ssize_t)NbBytes)
         return -1;
@@ -426,7 +426,7 @@ char serialib::readChar(char *pByte, unsigned int timeOut_ms)
     // The byte is read
     return 1;
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     // Timer used for timeout
     timeOut timer;
     // Initialise the timer
@@ -437,10 +437,10 @@ char serialib::readChar(char *pByte, unsigned int timeOut_ms)
         // Try to read a byte on the device
         switch (read(fd, pByte, 1))
         {
-            case 1:
-                return 1;  // Read successfull
-            case -1:
-                return -2;  // Error while reading
+        case 1:
+            return 1; // Read successfull
+        case -1:
+            return -2; // Error while reading
         }
     }
     return 0;
@@ -606,7 +606,7 @@ int serialib::readBytes(void *buffer, unsigned int maxNbBytes,
     // Return the byte read
     return dwBytesRead;
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     // Timer used for timeout
     timeOut timer;
     // Initialise the timer
@@ -654,7 +654,7 @@ char serialib::flushReceiver()
     // Purge receiver
     return PurgeComm(hSerial, PURGE_RXCLEAR);
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     // Purge receiver
     tcflush(fd, TCIFLUSH);
     return true;
@@ -678,7 +678,7 @@ int serialib::available()
     // Return the number of pending bytes
     return commStatus.cbInQue;
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     int nBytes = 0;
     // Return number of pending bytes in the receiver
     ioctl(fd, FIONREAD, &nBytes);
@@ -721,7 +721,7 @@ bool serialib::setDTR()
     currentStateDTR = true;
     return EscapeCommFunction(hSerial, SETDTR);
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     // Set DTR
     int status_DTR = 0;
     ioctl(fd, TIOCMGET, &status_DTR);
@@ -744,7 +744,7 @@ bool serialib::clearDTR()
     currentStateDTR = true;
     return EscapeCommFunction(hSerial, CLRDTR);
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     // Clear DTR
     int status_DTR = 0;
     ioctl(fd, TIOCMGET, &status_DTR);
@@ -786,7 +786,7 @@ bool serialib::setRTS()
     currentStateRTS = false;
     return EscapeCommFunction(hSerial, SETRTS);
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     // Set RTS
     int status_RTS = 0;
     ioctl(fd, TIOCMGET, &status_RTS);
@@ -809,7 +809,7 @@ bool serialib::clearRTS()
     currentStateRTS = false;
     return EscapeCommFunction(hSerial, CLRRTS);
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     // Clear RTS
     int status_RTS = 0;
     ioctl(fd, TIOCMGET, &status_RTS);
@@ -831,7 +831,7 @@ bool serialib::isCTS()
     GetCommModemStatus(hSerial, &modemStat);
     return modemStat & MS_CTS_ON;
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     int status = 0;
     // Get the current status of the CTS bit
     ioctl(fd, TIOCMGET, &status);
@@ -851,7 +851,7 @@ bool serialib::isDSR()
     GetCommModemStatus(hSerial, &modemStat);
     return modemStat & MS_DSR_ON;
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     int status = 0;
     // Get the current status of the DSR bit
     ioctl(fd, TIOCMGET, &status);
@@ -872,7 +872,7 @@ bool serialib::isDCD()
     GetCommModemStatus(hSerial, &modemStat);
     return modemStat & MS_RLSD_ON;
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     int status = 0;
     // Get the current status of the DCD bit
     ioctl(fd, TIOCMGET, &status);
@@ -892,7 +892,7 @@ bool serialib::isRI()
     GetCommModemStatus(hSerial, &modemStat);
     return modemStat & MS_RING_ON;
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     int status = 0;
     // Get the current status of the RING bit
     ioctl(fd, TIOCMGET, &status);
@@ -911,7 +911,7 @@ bool serialib::isDTR()
 #if defined(_WIN32) || defined(_WIN64)
     return currentStateDTR;
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     int status = 0;
     // Get the current status of the DTR bit
     ioctl(fd, TIOCMGET, &status);
@@ -930,7 +930,7 @@ bool serialib::isRTS()
 #if defined(_WIN32) || defined(_WIN64)
     return currentStateRTS;
 #endif
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     int status = 0;
     // Get the current status of the CTS bit
     ioctl(fd, TIOCMGET, &status);
@@ -973,7 +973,7 @@ unsigned long int timeOut::elapsedTime_ms()
     gettimeofday(&CurrentTime, NULL);
 
     // Compute the number of seconds and microseconds elapsed since last call
-    sec  = CurrentTime.tv_sec - previousTime.tv_sec;
+    sec = CurrentTime.tv_sec - previousTime.tv_sec;
     usec = CurrentTime.tv_usec - previousTime.tv_usec;
 
     // If the previous usec is higher than the current one

@@ -29,6 +29,8 @@ deltaZ = contSettings.reference.deltaZ;
 index_z = floor(z/deltaZ);
 if index_z > length(z_ref)
     index_z = length(z_ref);
+elseif index_z < 0
+    index_z = 0;
 end
 
 % sets how many points in advance it has to check
