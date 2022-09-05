@@ -126,12 +126,9 @@ iTimes      =       0;                                                      % It
 c.ctr_start =      -1;                                                      % Air brake control parameter initial condition
 i           =       1;                                                      % Index for while loop
 sensorData.kalman.pn_prec  =       settings.ada.p_ref;                        % settings for ADA and KALMAN
+
 ap_ref_new = 0;                                                             % air brakes closed until Mach < settings.MachControl
 ap_ref_old = 0;
-
-% filterCoeff = contSettings.filter_coeff;
-% Zfilter = contSettings.Zfilter;
-% Tfilter = contSettings.Tfilter;
 
 ap_ref = [ ap_ref_old ap_ref_new ];
 alpha_degree_old = 0;
@@ -143,7 +140,7 @@ alpha_degree_old = 0;
 flagStopIntegration     =   true;                                           % while this is true the integration runs
 flagAscent              =   false;                                          % while this is false...
 flagMatr                =   false(nmax, 6);                                 % while this value are false...
-lastLaunchflag = true;
+lastLaunchflag = true; % LEAVE THIS TO TRUE UNLESS YOU KNOW WHAT YOU ARE DOING (other wise it won't stop if you set only ascent simulation)
 
 
 if settings.launchWindow
@@ -156,10 +153,8 @@ if settings.launchWindow
     end
 
     launchFlag = false;
-    lastLaunchflag = true;
 else
     launchFlag = true;
-    lastLaunchflag = false;
 end
 
 
@@ -339,7 +334,6 @@ while flagStopIntegration && n_old < nmax
         else
             ap_ref_new = 0;
         end
-        
     else
         v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
         % HIL HIL HIL HIL HIL HIL HIL HIL HIL HIL HIL
@@ -449,10 +443,9 @@ while flagStopIntegration && n_old < nmax
         flagStopIntegration = flagFlight || not(lastLaunchflag);
     end
     
-%     if not(settings.montecarlo)
-%         sensorData.kalman.z
-%         disp("z: " + sensorData.kalman.z);
-%     end
+    if not(settings.montecarlo)
+        disp("z: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new);
+    end
 
     flagMatr(n_old:n_old+n-1, :) = repmat([flagFlight, flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2], n, 1);
 
