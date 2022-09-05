@@ -359,6 +359,18 @@ while flagStopIntegration && n_old < nmax
             sensorData.kalman.vMod = 0;
         end
 
+        % Convert the gps position from meter to degreed
+        [latitude, longitude, ~] = ned2geodetic( ...
+            sensorData.gps.positionMeasures(1), ...
+            sensorData.gps.positionMeasures(2), ...
+            sensorData.gps.positionMeasures(3), ...
+            settings.lat0, settings.lon0, settings.z0, wgs84Ellipsoid);
+        sensorData.gps.latitude = latitude;
+        sensorData.gps.longitude = longitude;
+
+        % Add gravity acceleration
+        sensorData.accelerometer.measures = sensorData.accelerometer.measures + (quat2rotm(Yf(1,11:14)) * [0;0;9.81])';
+
         ap_ref_old = ap_ref_new;
         [alpha_aperture, t_est_tot, x_est_tot, xp_ada_tot, xv_ada_tot, t_ada_tot] = run_HIL_airbrakes(sensorData, flagsArray);
         ap_ref_new = alpha_aperture * settings.servo.maxAngle;  % alpha_aperture: 
@@ -437,10 +449,11 @@ while flagStopIntegration && n_old < nmax
         flagStopIntegration = flagFlight || not(lastLaunchflag);
     end
     
-    if not(settings.montecarlo)
-        sensorData.kalman.z
+%     if not(settings.montecarlo)
+%         sensorData.kalman.z
 %         disp("z: " + sensorData.kalman.z);
-    end
+%     end
+
     flagMatr(n_old:n_old+n-1, :) = repmat([flagFlight, flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2], n, 1);
 
 
