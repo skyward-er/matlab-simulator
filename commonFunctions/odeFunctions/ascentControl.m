@@ -292,7 +292,7 @@ else %%% rocket out of the launchpad
 
     
 
-    if (M_value < settings.MachControl && t>tb) || !settings.machControlActive
+    if (M_value < settings.MachControl && t>tb) || ~settings.machControlActive
         if length(ap_ref_vec)==2 % for the recallOdeFunction
             if t < t_change_ref
                 ap_ref = ap_ref_vec(1);    
@@ -309,7 +309,6 @@ else %%% rocket out of the launchpad
     else 
         dap_ref = 0;
     end
-
 
     if ap > settings.servo.maxAngle
         dap_ref = 0;
