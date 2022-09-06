@@ -80,9 +80,13 @@ t = t - tLaunch;
 if ap > settings.servo.maxAngle
     ap = settings.servo.maxAngle;
     dap = 0;
-elseif ap< settings.servo.minAngle
+    flagAngleSaturation = true;
+elseif ap < settings.servo.minAngle
     ap = settings.servo.minAngle;
     dap = 0;
+    flagAngleSaturation = true;
+else 
+    flagAngleSaturation = false;
 end
 
 %% CONSTANTS
@@ -291,8 +295,10 @@ else %%% rocket out of the launchpad
         -Izzdot*r/Izz;
 
     
-
-    if (M_value < settings.MachControl && t>tb) || ~settings.machControlActive
+    
+% flagSpeedSaturation = false;
+    if (M_value < settings.MachControl && t>tb) %|| ~settings.machControlActive
+        % set velocity of servo (air brakes)
         if length(ap_ref_vec)==2 % for the recallOdeFunction
             if t < t_change_ref
                 ap_ref = ap_ref_vec(1);    
@@ -300,26 +306,27 @@ else %%% rocket out of the launchpad
                 ap_ref = ap_ref_vec(2);
             end
         else 
-            ap_ref = ap_ref_vec;
+            ap_ref = ap_ref_vec; % don't delete this unless you change how the recall ode works.
         end
+        
+        
         dap_ref = (ap_ref-ap)/settings.servo.tau;
-        if abs(dap_ref) >settings.servo.maxSpeed
+        if abs(dap_ref) >settings.servo.maxSpeed || abs(dap) > settings.servo.maxSpeed
             dap_ref = sign(ap_ref-ap)*settings.servo.maxSpeed;
+%             flagSpeedSaturation = true;
         end
     else 
         dap_ref = 0;
     end
 
-    if ap > settings.servo.maxAngle
-        dap_ref = 0;
-        dap = 0;
-    elseif ap < settings.servo.minAngle
+    if flagAngleSaturation
         dap_ref = 0;
         dap = 0;
     end
     
     
-    ddap = (dap_ref-dap)/settings.servo.tau_acc;
+    ddap = (dap_ref-dap)/settings.servo.tau_acc; % if the speed of the simulated servo motor is higher than what it is capable of, then don't accelerate (saturation on acceleration)
+    
 
 end
 
