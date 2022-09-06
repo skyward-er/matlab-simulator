@@ -52,7 +52,7 @@ settings.montecarlo = true;
 
 %% how many simulations
 N_sim = 200; % set to at least 500
-simulationType_thrust = "extreme";  % "gaussian", "exterme"
+simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 
 %% stochastic parameters
 
@@ -255,6 +255,22 @@ if run_Thrust == true
 
         apogee.accuracy = N_ApogeeWithinTarget/N_sim*100; % percentage, so *100
 
+        %% PLOT HISTOGRAM
+        N_histCol = max(N_sim,200);
+        save_thrust_plot_histogram = figure;
+
+        hold on
+        grid on
+        
+        xline(3050, 'r--', 'LineWidth', 1)
+        xline(2950, 'r--', 'LineWidth', 1)
+        histogram(apogee.thrust,N_histCol)
+        
+        xlabel('Apogee value [m]')
+        ylabel('Number of apogees in the same interval')
+        title('Reached apogee distribution')
+        legend('Range of acceptable apogees')
+        
         %% PLOT CONTROL
         save_thrust_plotControl = figure;
         for i = 1:10 %floor(linspace(1,N_sim,N_sim))
@@ -425,6 +441,8 @@ if run_Thrust == true
         legend('Apogee Gaussian distribution','Target',contSettings.algorithm)
         xlim([min(x_values), max(x_values)])
         end
+
+   
         
         %% PLOT MEAN
         save_thrust_apogee_mean = figure;
@@ -510,6 +528,7 @@ if run_Thrust == true
         if flagSaveOffline == "yes" || flagSaveOnline == "yes"
             for i = 1:length(folder)
             mkdir(folder(i))
+            saveas(save_thrust_plot_histogram,folder(i)+"\histogramPlot")
             saveas(save_thrust_plotControl,folder(i)+"\controlPlot")
             saveas(save_thrust_plotApogee,folder(i)+"\apogeelPlot")
             saveas(save_thrust_plotTrajectory,folder(i)+"\TrajectoryPlot")
