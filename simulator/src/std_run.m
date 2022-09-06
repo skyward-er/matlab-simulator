@@ -57,9 +57,9 @@ X0 = [0; 0; 0];                                                             % Po
 V0 = [0; 0; 0];                                                             % Velocity initial condition
 W0 = [0; 0; 0];                                                             % Angular speed initial condition
 ap0 = 0;                                                                    % Control servo angle initial condition
-dap0 = 0;                                                                   % Control servo speed initial condition
 
-initialCond = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf; ap0; dap0];
+
+initialCond = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf; ap0;];
 Y0 = initialCond;
 
 % otherData.test_date = date;
@@ -121,7 +121,7 @@ n_old       =       1;                                                      % It
 Yf_tot      =       zeros(nmax, length(Y0));                                % State vector for ode integration
 Tf_tot      =       zeros(nmax, 1);                                         % Time vector for ode integration
 ext_tot     =       zeros(nmax, 1);                                         % Air brake extension vector
-cpuTimes    =       zeros(nmax,1);                                          % Vector of iterations
+cpuTimes    =       zeros(nmax, 1);                                          % Vector of iterations
 iTimes      =       0;                                                      % Iteration
 c.ctr_start =      -1;                                                      % Air brake control parameter initial condition
 i           =       1;                                                      % Index for while loop
@@ -131,7 +131,7 @@ ap_ref_new = 0;                                                             % ai
 ap_ref_old = 0;
 
 ap_ref = [ ap_ref_old ap_ref_new ];
-alpha_degree_old = 0;
+% alpha_degree_old = 0;
 
 %% Flag initializations
 % global isLaunch
@@ -238,7 +238,7 @@ while flagStopIntegration && n_old < nmax
                 [Tf, Yd] = ode45(@descentParachute, [t0, t1], Y0, [], settings, uw, vw, ww, para); % ..., para, uncert);
                 [nd, ~] = size(Yd);
                 Yf = [Yd, zeros(nd, 7), settings.Ixxe*ones(nd, 1), ...
-                    settings.Iyye*ones(nd, 1), settings.Iyye*ones(nd, 1),zeros(nd,2)];
+                    settings.Iyye*ones(nd, 1), settings.Iyye*ones(nd, 1),zeros(nd,1)];
             end
         end
     else
@@ -445,7 +445,7 @@ while flagStopIntegration && n_old < nmax
     end
     
     if not(settings.montecarlo)
-        disp("z: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new);
+        disp("z: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,end));
     end
 
     flagMatr(n_old:n_old+n-1, :) = repmat([flagFlight, flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2], n, 1);

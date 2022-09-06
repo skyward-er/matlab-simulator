@@ -3,11 +3,11 @@ flagEXPORT = false; % do you want to export graphics?
 %% Control variable: servo control action (percentage of angle max)
 ap_tot_rescale = rescale(c.ap_tot, "InputMin", 0, "InputMax", settings.servo.maxAngle);
 figures.servo_control_action = figure('Name', 'Servo angle after burning phase');
-plot(c.Tf_tot, ap_tot_rescale);
+plot(c.Tf_tot, ap_tot_rescale*100);
 grid on;
 xlabel('Time [s]');
 ylabel('Extension [%]');
-title('Servo angle reference');
+title('Servo control action [%]');
 
 if flagEXPORT == true
     exportgraphics(figures.servo_control_action,'report_images\control_action.pdf','ContentType','vector')

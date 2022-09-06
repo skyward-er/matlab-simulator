@@ -72,18 +72,15 @@ Ixx = YY(14);
 Iyy = YY(15);
 Izz = YY(16);
 ap = YY(17);
-dap = YY(18);
 
 t = t - tLaunch;
 
 % saturation on servo angle
 if ap > settings.servo.maxAngle
     ap = settings.servo.maxAngle;
-    dap = 0;
     flagAngleSaturation = true;
 elseif ap < settings.servo.minAngle
     ap = settings.servo.minAngle;
-    dap = 0;
     flagAngleSaturation = true;
 else 
     flagAngleSaturation = false;
@@ -257,7 +254,6 @@ if -z < settings.lrampa*sin(OMEGA)                                          % No
     dq = 0;                                                                 
     dr = 0;                                                                 
     dap = 0;                                                                
-    ddap = 0;
 
     alpha_value = NaN;                                                      
     beta_value = NaN;                                                       
@@ -309,23 +305,18 @@ else %%% rocket out of the launchpad
             ap_ref = ap_ref_vec; % don't delete this unless you change how the recall ode works.
         end
         
-        
-        dap_ref = (ap_ref-ap)/settings.servo.tau;
-        if abs(dap_ref) >settings.servo.maxSpeed || abs(dap) > settings.servo.maxSpeed
-            dap_ref = sign(ap_ref-ap)*settings.servo.maxSpeed;
-%             flagSpeedSaturation = true;
+        dap = (ap_ref-ap)/settings.servo.tau;
+        if abs(dap) >settings.servo.maxSpeed
+            dap = sign(ap_ref-ap)*settings.servo.maxSpeed;
         end
-    else 
-        dap_ref = 0;
-    end
+    
+        if flagAngleSaturation
+            dap = 0;
+        end
 
-    if flagAngleSaturation
-        dap_ref = 0;
+    else 
         dap = 0;
     end
-    
-    
-    ddap = (dap_ref-dap)/settings.servo.tau_acc; % if the speed of the simulated servo motor is higher than what it is capable of, then don't accelerate (saturation on acceleration)
     
 
 end
@@ -352,7 +343,6 @@ dY(14) = Ixxdot;
 dY(15) = Iyydot;
 dY(16) = Izzdot;
 dY(17) = dap;
-dY(18) = ddap;
 
 dY = dY';
 

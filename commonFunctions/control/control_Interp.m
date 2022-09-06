@@ -26,7 +26,7 @@ deltaZ = contSettings.reference.deltaZ;
 
 
 % find reference altitude index
-index_z = floor(z/deltaZ);
+index_z = floor(z/deltaZ) + N_forward;
 if index_z > length(z_ref)
     index_z = length(z_ref);
 elseif index_z < 0
@@ -34,8 +34,8 @@ elseif index_z < 0
 end
 
 % sets how many points in advance it has to check
-V_ref = [V_ref ; zeros(N_forward,size(V_ref,2))];
-V_extrema = V_ref(index_z+N_forward,[1,end]); %select the reference point on the trajectories to use for fuzzy logic
+% V_ref = [V_ref ; zeros(N_forward,size(V_ref,2))];
+V_extrema = V_ref(index_z,[1,end]); %select the reference point on the trajectories to use for fuzzy logic
 
 
 if Vz<V_extrema(1) % use the vertical component of vector V, check if it is the first or second

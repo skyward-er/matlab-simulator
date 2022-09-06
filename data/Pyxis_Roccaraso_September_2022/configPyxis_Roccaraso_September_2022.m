@@ -33,6 +33,7 @@ settings.frequencies.gyroFrequency              =   100;                   % [hz
 settings.frequencies.magnetometerFrequency      =   100;                   % [hz] control action frequency 
 settings.frequencies.gpsFrequency               =   10;                    % [hz] control action frequency 
 settings.frequencies.barometerFrequency         =   20;                    % [hz] control action frequency 
+settings.frequencies.pitotFrequency             =   20;                    % [hz] sensor frequency
 
 % Servo (MARK STAR - HBL 3850)
 settings.servo.tau = 0.0461;                                                % Servo motor time constant 

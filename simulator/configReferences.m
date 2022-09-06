@@ -68,8 +68,6 @@ end
 contSettings.reference.Vz = V_rescale;
 contSettings.reference.Z = heights;
 
-
-
 %% solo per HIL/ cpp
 % for i = 1: size(V_rescale,2)
 %     csvwrite("referenceInterp"+num2str(i)+".csv",[heights,V_rescale(:,i)])

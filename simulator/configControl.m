@@ -65,7 +65,7 @@ contSettings.rate_limiter      =    60/0.13;                                % da
 
 % Filtering
 contSettings.flagFilter = true; %set to true to filter out the interp algorithm with the following filter coefficient:
-contSettings.filter_coeff = 0.3;    
+contSettings.filter_coeff = 0.5;    
 contSettings.flagFirstControl = true;                                       % if it is the first iter the control action is not filtered, then the filter acts
 
 % --------------- other filter parameters later in this script ---------------
