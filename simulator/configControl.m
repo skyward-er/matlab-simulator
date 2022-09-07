@@ -24,7 +24,7 @@ contSettings.starting_index = 0;
 %% CONTROL PARAMETERS
 
 % choose strategy:
-contSettings.algorithm = 'PID_2021'; % choices: 'interp', 'PID_2021', 'PID_2refs', 'shooting'
+contSettings.algorithm = "interp"; % choices: "interp", "PID_2021", "PID_2refs", "shooting"
 
 
 % Control time sample:
@@ -64,7 +64,7 @@ contSettings.b  = 19.86779/1000;
 contSettings.rate_limiter      =    60/0.13;                                % datasheet: 60deg/0.13s --> increased for robustness
 
 % Filtering
-contSettings.flagFilter = true; %set to true to filter out the interp algorithm with the following filter coefficient:
+contSettings.flagFilter = false; %set to true to filter out the interp algorithm with the following filter coefficient:
 contSettings.filter_coeff = 0.5;    
 contSettings.flagFirstControl = true;                                       % if it is the first iter the control action is not filtered, then the filter acts
 

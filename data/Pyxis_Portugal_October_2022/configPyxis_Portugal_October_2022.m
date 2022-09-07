@@ -36,9 +36,8 @@ settings.frequencies.barometerFrequency         =   20;                    % [hz
 settings.frequencies.pitotFrequency             =   20;                    % [hz] sensor frequency
 
 % Servo (MARK STAR - HBL 3850)
-settings.servo.tau = 0.0461;                                                % Servo motor time constant 
-settings.servo.delay = 0.0468;                                              % Servo motor delay
-settings.servo.tau_acc = 0.01;                                              % Servo motor acceleration time constant
+settings.servo.tau = 0.05;                                                  % Servo motor time constant - a bit higher than identified value 0.0479
+settings.servo.delay = 0.045;                                               % Servo motor delay - a bit higher than identified value of 0.0412
 settings.servo.maxSpeed = deg2rad(300);                     %[rad/s]        % max rpm speed of the servo motor
 settings.servo.minAngle = 0;                                                % min servo angle
 settings.servo.maxTorque = 51*9.81/100;                                     % max torque guaranteed (given as 51 kg-cm)
