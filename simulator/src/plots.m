@@ -10,7 +10,7 @@ ylabel('Extension [%]');
 title('Servo control action [%]');
 
 if flagEXPORT == true
-    exportgraphics(figures.servo_control_action,'report_images\control_action.pdf','ContentType','vector')
+    exportgraphics(figures.servo_control_action,'report_images\src_control_action.pdf','ContentType','vector')
 end
 
 %% Control variable: servo angle + reference values
@@ -23,7 +23,7 @@ ylabel('$\alpha$ [rad]');
 title('Servo angle');
 legend('simulated','reference values')
 if flagEXPORT == true
-    exportgraphics(figures.servo_angle,'report_images\servo_angle.pdf','ContentType','vector')
+    exportgraphics(figures.servo_angle,'report_images\src_servo_angle.pdf','ContentType','vector')
 end
 
 
@@ -40,7 +40,7 @@ ylabel('dS [m^2]');
 title('Airbrake exposed surface');
 
 if flagEXPORT == true
-    exportgraphics(figures.arb_exposed_surface,'report_images\arb_exposed_surface.pdf')
+    exportgraphics(figures.arb_exposed_surface,'report_images\src_arb_exposed_surface.pdf')
 end
 
 %% Trajectory
@@ -52,7 +52,7 @@ ylabel('y [m]');
 zlabel('z [m]');
 title('Trajectory');
 if flagEXPORT == true
-    exportgraphics(figures.trajectory,'report_images\trajectory.pdf')
+    exportgraphics(figures.trajectory,'report_images\src_trajectory.pdf')
 end
 %% Velocities w.r.t. time
 figures.velocities = figure('Name', 'Velocities');
@@ -67,7 +67,7 @@ title('Velocities');
 legend('Vx', 'Vy', 'Vz')
 
 if flagEXPORT == true
-    exportgraphics(figures.velocities,'report_images\velocities.pdf')
+    exportgraphics(figures.velocities,'report_images\src_velocities.pdf')
 end
 
 %% Mach w.r.t. time
@@ -87,5 +87,5 @@ title('Velocities');
 legend('Mach')
 
 if flagEXPORT == true
-    exportgraphics(figures.Mach_number,'report_images\Mach_number.pdf')
+    exportgraphics(figures.Mach_number,'report_images\src_src_Mach_number.pdf')
 end

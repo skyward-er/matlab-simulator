@@ -296,6 +296,9 @@ for alg_index = 1
             saveas(save_dynamic_pressure_and_forces,folder(i)+"\dynamicPressureAndForces")
             save(folder(i)+"\saveThrust.mat","save_thrust","apogee")
 
+            exportgraphics(save_plot_histogram,'report_images\mc_Histogram.pdf','ContentType','vector')
+            exportgraphics(save_plotApogee,'report_images\mc_Apogees.pdf','ContentType','vector')
+
 
             % Save results.txt
             fid = fopen( folder(i)+"\"+contSettings.algorithm+"Results"+saveDate+".txt", 'wt' );  % CAMBIA IL NOME
@@ -349,8 +352,3 @@ for alg_index = 1
         end
     end
 end
-
-
-%% Notify the end of simulation:
-load gong.mat;
-sound(y);
