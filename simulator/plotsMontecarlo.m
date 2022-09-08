@@ -1,11 +1,11 @@
 %% PLOT HISTOGRAM
-N_histCol = min(N_sim,200); % best looking if we don't go higher than 200, but if N_sim is less than 200 it gives error if we set it to 200
+N_histCol = min(N_sim,100); % best looking if we don't go higher than 200, but if N_sim is less than 200 it gives error if we set it to 200
 save_plot_histogram = figure;
 hold on; grid on;
-xline(3050, 'r--', 'LineWidth', 1)
-xline(2950, 'r--', 'LineWidth', 1)
+xline(settings.z_final-50, 'r--', 'LineWidth', 1)
+xline(settings.z_final+50, 'r--', 'LineWidth', 1)
 histogram(apogee.thrust,N_histCol)
-
+xlim([settings.z_final-150 , settings.z_final+150])
 xlabel('Apogee value [m]')
 ylabel('Number of apogees in the same interval')
 title('Reached apogee distribution')
@@ -45,7 +45,7 @@ legend(contSettings.algorithm);
 %% PLOT APOGEE 2D
 save_plotApogee = figure;
 for i = 1:N_sim
-    plot(thrust_percentage(i),apogee.thrust(i),'*')
+    plot(thrust_percentage(i),apogee.thrust(i),'.')
     hold on; grid on;
 end
 yline(settings.z_final-50,'r--')
@@ -65,7 +65,7 @@ if settings.HRE
     save_tShutdown = figure;
     subplot(1,3,1)
     for i = 1:N_sim
-        plot(wind_el(i),save_thrust{i}.t_shutdown,'*')
+        plot(wind_el(i),save_thrust{i}.t_shutdown,'.')
         hold on; grid on;
     end
     title('shutdown time w.r.t. wind elevation')
@@ -75,7 +75,7 @@ if settings.HRE
     %%%
     subplot(1,3,2)
     for i = 1:N_sim
-        plot(wind_az(i),save_thrust{i}.t_shutdown,'*')
+        plot(wind_az(i),save_thrust{i}.t_shutdown,'.')
         hold on; grid on;
     end
     title('shutdown time w.r.t. wind azimuth')
@@ -87,7 +87,7 @@ if settings.HRE
     %%%
     subplot(1,3,3)
     for i = 1:N_sim
-        plot(thrust_percentage(i),save_thrust{i}.t_shutdown,'*')
+        plot(thrust_percentage(i),save_thrust{i}.t_shutdown,'.')
         hold on;
         grid on;
     end
@@ -99,7 +99,7 @@ end
 %% PLOT TRAJECTORY
 
 save_plotTrajectory = figure;
-for i = 1:size(save_thrust,1)
+for i = 1:round(N_sim/50):size(save_thrust,1)
     plot3(save_thrust{i}.position(:,1),save_thrust{i}.position(:,2),-save_thrust{i}.position(:,3));
     hold on; grid on;
 end
@@ -130,7 +130,7 @@ save_apogee_3D = figure;
 %%%%%%%%%% wind magnitude - thrust - apogee
 subplot(2,2,1)
 hold on; grid on;
-plot3(wind_Mag,thrust_percentage*100,apogee.thrust','*')
+plot3(wind_Mag,thrust_percentage*100,apogee.thrust','.')
 xlabel('Wind magnitude [m/s]')
 ylabel('Thrust percentage')
 zlabel('Apogee')
@@ -141,7 +141,7 @@ legend(contSettings.algorithm);
 %%%%%%%%%%% wind azimuth - thrust - apogee
 subplot(2,2,2)
 hold on; grid on;
-plot3(rad2deg(wind_az),thrust_percentage*100,apogee.thrust','*')
+plot3(rad2deg(wind_az),thrust_percentage*100,apogee.thrust','.')
 xlabel('Wind azimuth [°]')
 ylabel('Thrust percentage')
 zlabel('Apogee')
@@ -151,7 +151,7 @@ legend(contSettings.algorithm);
 %%%%%%%%%%%% wind elevation - thrust - apogee
 subplot(2,2,3)
 hold on; grid on;
-plot3(rad2deg(wind_el),thrust_percentage*100,apogee.thrust','*')
+plot3(rad2deg(wind_el),thrust_percentage*100,apogee.thrust','.')
 xlabel('Wind elevation [°]')
 ylabel('Thrust percentage [%]')
 zlabel('Apogee')
@@ -161,15 +161,13 @@ legend(contSettings.algorithm);
 %%%%%
 subplot(2,2,4)
 hold on; grid on;
-plot3(wind_el,wind_az,apogee.thrust','*')
+plot3(wind_el,wind_az,apogee.thrust','.')
 xlabel('Wind elevation [°]')
 ylabel('Wind azimuth [°]')
 zlabel('Apogee')
 zlim([settings.z_final-200,settings.z_final+200])
 view(30,20)
 legend(contSettings.algorithm);
-%safe ellipses?
-%safe ellipses?
 
 
 %% PLOT PROBABILITY FUNCTION

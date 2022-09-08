@@ -15,7 +15,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 clearvars -except ZTARGET_CYCLE
-% close all; clear all; clc;
+close all; clear all; clc;
 
 %% recall the first part of the MAIN script
 % adds folders to the path and retrieves rocket, mission, simulation, etc
@@ -37,7 +37,7 @@ addpath(genpath(commonFunctionsPath));
 msaToolkitURL = 'https://github.com/skyward-er/msa-toolkit';
 localRepoPath = '../data/msa-toolkit';
 status = checkLastCommit(msaToolkitURL, localRepoPath, pwd);
-submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
+% submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
 
 %% CONFIGs
 configSimulator;
@@ -154,7 +154,7 @@ contSettings.deltaZfilter = 250; % every deltaZfilter the filter coefficient is 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%CONFIG%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % start simulation
-for alg_index = 1
+for alg_index = 1:2
 
     contSettings.algorithm = algorithm_vec(alg_index);
 
@@ -311,12 +311,12 @@ for alg_index = 1
             fprintf(fid,'Initial Mach number at which the control algorithm starts: %.3f \n',settings.MachControl);
             switch alg_index
                 case 2
-                    fprintf(fid,'P = %d \n',contSettings.Kp_1 );
-                    fprintf(fid,'I = %d \n',contSettings.Ki_1 );
+                    fprintf(fid,'P = %d \n',contSettings.Kp );
+                    fprintf(fid,'I = %d \n',contSettings.Ki );
                     fprintf(fid,'Never change reference trajectory \n\n' );
                 case 3
-                    fprintf(fid,'P = %d \n',contSettings.Kp_1 );
-                    fprintf(fid,'I = %d \n',contSettings.Ki_1 );
+                    fprintf(fid,'P = %d \n',contSettings.Kp );
+                    fprintf(fid,'I = %d \n',contSettings.Ki );
                     fprintf(fid,'Change reference trajectory every %d seconds \n\n',contSettings.deltaZ_change );
             end
             fprintf(fid,'Wind model parameters: \n'); % inserisci tutti i parametri del vento
@@ -342,10 +342,10 @@ for alg_index = 1
             fprintf(fid,'Filter coefficient: %.3f \n', contSettings.filter_coeff);
             if contSettings.algorithm == "interp"
                 fprintf(fid,'N_forward: %d \n', contSettings.N_forward);
-                fprintf(fid,'Delta Z (reference): %d \n',reference.deltaZ);
-                fprintf(fid,'Filter diminished every: %d \n', contSettings.deltaZfilter);
+                fprintf(fid,'Delta Z (reference): %d \n',contSettings.reference.deltaZ);
+                fprintf(fid,'Filter diminished every: %d \n', contSettings.deltaTfilter);
                 fprintf(fid,'Filter diminished by ratio: %d \n', contSettings.filterRatio);
-                fprintf(fid,'Filter diminishing starts at: %d m \n', contSettings.Zfilter);
+                fprintf(fid,'Filter diminishing starts at: %d m \n', contSettings.Tfilter);
                 fprintf(fid,'Interpolation type: %s \n', contSettings.interpType);
             end
             fclose(fid);
