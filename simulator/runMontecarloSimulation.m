@@ -15,7 +15,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 clearvars -except ZTARGET_CYCLE
-close all; clear all; clc;
+% close all; clear all; clc;
 
 %% recall the first part of the MAIN script
 % adds folders to the path and retrieves rocket, mission, simulation, etc
@@ -294,7 +294,7 @@ for alg_index = 1:2
             saveas(save_thrust_apogee_std,folder(i)+"\ApogeeStdOverNsimPlot")
             saveas(save_apogee_3D,folder(i)+"\ApogeeWindThrust")
             saveas(save_dynamic_pressure_and_forces,folder(i)+"\dynamicPressureAndForces")
-            save(folder(i)+"\saveThrust.mat","save_thrust","apogee")
+            save(folder(i)+"\saveThrust.mat","save_thrust","apogee","N_sim","settings","thrust_percentage")
 
             exportgraphics(save_plot_histogram,'report_images\mc_Histogram.pdf','ContentType','vector')
             exportgraphics(save_plotApogee,'report_images\mc_Apogees.pdf','ContentType','vector')

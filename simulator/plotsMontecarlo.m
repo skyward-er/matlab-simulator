@@ -45,7 +45,7 @@ legend(contSettings.algorithm);
 %% PLOT APOGEE 2D
 save_plotApogee = figure;
 for i = 1:N_sim
-    plot(thrust_percentage(i),apogee.thrust(i),'.')
+    plot(thrust_percentage(i),apogee.thrust(i),'k.')
     hold on; grid on;
 end
 yline(settings.z_final-50,'r--')
