@@ -57,7 +57,7 @@ end
 
 
 contSettings.reference.deltaZ = 10;
-heights = [0:contSettings.reference.deltaZ:3000]';
+heights = [0:contSettings.reference.deltaZ:settings.z_final]';
 
 V_rescale = zeros(length(heights),size(reference.altitude_ref,1));
 for ii = 1:size(reference.altitude_ref,1)
@@ -68,7 +68,8 @@ end
 contSettings.reference.Vz = V_rescale;
 contSettings.reference.Z = heights;
 
-%% solo per HIL/ cpp
+%% solo per HIL/ cpp - scommentare all'occorrenza
+% mkdir(ConDataPath+"/Trajectories_CSV")
 % for i = 1: size(V_rescale,2)
-%     csvwrite("referenceInterp"+num2str(i)+".csv",[heights,V_rescale(:,i)])
+%     csvwrite(ConDataPath+"/Trajectories_CSV/referenceInterp"+num2str(i)+".csv",[heights,V_rescale(:,i)])
 % end
