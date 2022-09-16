@@ -1,4 +1,4 @@
-function [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, dataBallisticFlight,saveConstWind,varargout] = std_run(settings, contSettings)
+function [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, dataBallisticFlight,saveConstWind,varargout] = std_run(settings, contSettings, varargin)
 %{
 
 STD_RUN_BALLISTIC - This function runs a standard ballistic (non-stochastic) simulation
@@ -40,6 +40,13 @@ Revision date: 11/04/2022
 
 %}
 
+if nargin > 2
+    settings_mont = varargin{1};
+    settings.motor.expThrust = settings_mont.motor.expThrust;
+    settings.motor.expTime = settings_mont.motor.expTime;
+    settings.tb = settings_mont.tb;
+end
+
 if not(settings.ballisticFligth) && settings.ascentOnly
     error('To simulate a landing with the parachutes, settings.ascentOnly must be false')
 end
@@ -64,15 +71,16 @@ Y0 = initialCond;
 
 % otherData.test_date = date;
 
+
 %% WIND GENERATION
 if not(settings.wind.model) && not(settings.wind.input)
 
     if settings.montecarlo
-        uw = settings.wind.uw;
-        vw = settings.wind.vw;
-        ww = settings.wind.ww;
-        Az = settings.wind.Az;
-        El = settings.wind.El;
+        uw = settings_mont.wind.uw;
+        vw = settings_mont.wind.vw;
+        ww = settings_mont.wind.ww;
+        Az = settings_mont.wind.Az;
+        El = settings_mont.wind.El;
 
         settings.constWind = [uw, vw, ww];
         saveConstWind =  [uw, vw, ww, Az, El];

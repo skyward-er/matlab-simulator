@@ -51,7 +51,7 @@ rng default
 settings.montecarlo = true;
 
 %% how many simulations
-N_sim = 5000; % set to at least 500
+N_sim = 5; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 
 %% stochastic parameters
@@ -151,7 +151,12 @@ contSettings.filterRatio = 2;
 contSettings.Zfilter = 2000; % starting point from which the coefficient is diminished.
 contSettings.deltaZfilter = 250; % every deltaZfilter the filter coefficient is diminished by a ratio of filterRatio
 
+settings.wind.model = false;
+settings.wind.input = false;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%CONFIG%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+settings_mont_init = struct('x',[]);
 
 % start simulation
 for alg_index = 1:2
@@ -162,18 +167,17 @@ for alg_index = 1:2
     save_thrust = cell(size(stoch.thrust,1),1);
     apogee.thrust = [];
 
+
     parfor i = 1:N_sim
-        settings_mont = settings;
-        contSettings_mont = contSettings;
-        reference_mont = reference;
+        settings_mont = settings_mont_init;
+%         contSettings_mont = contSettings;
+%         reference_mont = reference;
 
         settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
         settings_mont.motor.expTime = stoch.expThrust(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
         settings_mont.tb = stoch.expThrust(i,end);                              % initialize the burning time of the current simulation (parfor purposes)
 
-        settings_mont.wind.model = false;
-        settings_mont.wind.input = false;
-
+       
         % set the wind parameters
         settings_mont.wind.uw = stoch.wind.uw(i);
         settings_mont.wind.vw = stoch.wind.vw(i);
@@ -186,7 +190,7 @@ for alg_index = 1:2
         end
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STD_RUN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = std_run(settings_mont,contSettings_mont);
+        [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = std_run(settings,contSettings,settings_mont);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STD_RUN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
 
