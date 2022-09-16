@@ -83,7 +83,7 @@ end
 % launchpad directions
 % for a single run the maximum and the minimum value of the following angles must be the same.
 settings.OMEGA = 83*pi/180;              % [rad] Minimum Elevation Angle, user input in degrees (ex. 80)
-settings.PHI = 0*pi/180;                 % [rad] Minimum Azimuth Angle from North Direction, user input in degrees (ex. 90)
+settings.PHI = 170*pi/180;                 % [rad] Minimum Azimuth Angle from North Direction, user input in degrees (ex. 90)
 
 %% WIND DETAILS
 % select which model you want to use:
@@ -100,16 +100,16 @@ settings.wind.HourMax = 4;                     % [h] Maximum Hour of the day
 settings.wind.ww = 0;                          % [m/s] Vertical wind speed
 
 %%%%% Input wind
-settings.wind.input = false;
+settings.wind.input = true;
 % Wind is generated for every altitude interpolating with the coefficient defined below
 if settings.wind.input == true && settings.wind.model == true
     warning("you are trying to use 'input model' but is shadowed by 'wind model' ")
 end
 
-settings.wind.inputGround  = 7;                                         % [m/s] Wind magnitude at the ground
-settings.wind.inputAlt     = [0 100 600 750 900 1500 2500 3000 3500];   % [m] Altitude vector
-settings.wind.inputMult    = [0 0 5 5 10 10 15 15 15];                  % [-] Percentage of increasing magnitude at each altitude
-settings.wind.inputAzimut  = [0 0 0 0 0 0 0 0 0];                       % [deg] Wind azimut angle at each altitude (toward wind incoming direction)
+settings.wind.inputGround  = 4;                                         % [m/s] Wind magnitude at the ground
+settings.wind.inputAlt     = [0 50 100 200 350 500 700 900 1100];   % [m] Altitude vector
+settings.wind.inputMult    = [1 2 3 3.5 4 4.5 5 5.5 6];                  % [-] Percentage of increasing magnitude at each altitude
+settings.wind.inputAzimut  = 45*pi/180*rand(1,9);%[0 0 0 0 0 0 0 0 0];         % [deg] Wind azimut angle at each altitude (toward wind incoming direction)
 
 settings.wind.input_uncertainty = [2, 2];
 % settings.wind.input_uncertainty = [a,b];      wind uncertanties:

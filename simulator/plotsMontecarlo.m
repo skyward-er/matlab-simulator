@@ -125,7 +125,7 @@ zlabel('Vz_b [m/s]')
 legend(contSettings.algorithm);
 
 %% PLOT APOGEE 3D
-
+if ~settings.wind.model && ~settings.wind.input
 save_apogee_3D = figure;
 %%%%%%%%%% wind magnitude - thrust - apogee
 subplot(2,2,1)
@@ -168,7 +168,7 @@ zlabel('Apogee')
 zlim([settings.z_final-200,settings.z_final+200])
 view(30,20)
 legend(contSettings.algorithm);
-
+end
 
 %% PLOT PROBABILITY FUNCTION
 if N_sim>1
@@ -216,3 +216,5 @@ end
 title('Aerodynamic load')
 xlabel('Time [s]')
 ylabel('Total aerodynamic load on airbrakes [kg]')
+
+

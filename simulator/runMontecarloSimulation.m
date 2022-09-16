@@ -15,7 +15,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 clearvars -except ZTARGET_CYCLE
-% close all; clear all; clc;
+close all; clear all; clc;
 
 %% recall the first part of the MAIN script
 % adds folders to the path and retrieves rocket, mission, simulation, etc
@@ -51,7 +51,7 @@ rng default
 settings.montecarlo = true;
 
 %% how many simulations
-N_sim = 5; % set to at least 500
+N_sim = 100; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 
 %% stochastic parameters
@@ -144,7 +144,7 @@ displayIter = true; % set to false if you don't want to see the iteration number
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%CONFIG%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % other parameters you want to set for the particular simulation:
 
-contSettings.N_forward = 2;
+contSettings.N_forward = 0;
 contSettings.filter_coeff = 0.3; % 1 = no filter
 contSettings.interpType = 'linear'; % set if the interp algorithm does a linear or sinusoidal interpolation of the references
 contSettings.filterRatio = 2;
@@ -152,7 +152,7 @@ contSettings.Zfilter = 2000; % starting point from which the coefficient is dimi
 contSettings.deltaZfilter = 250; % every deltaZfilter the filter coefficient is diminished by a ratio of filterRatio
 
 settings.wind.model = false;
-settings.wind.input = false;
+settings.wind.input = true; % occhio che per ora non è settato esternamente con le montecarlo, quindi se questo viene settato a true abbiamo solamente incertezza sulla spinta.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%CONFIG%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -190,7 +190,7 @@ for alg_index = 1:2
         end
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STD_RUN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn] = std_run(settings,contSettings,settings_mont);
+        [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn,windMag,windAz] = std_run(settings,contSettings,settings_mont);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STD_RUN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
 
@@ -198,7 +198,13 @@ for alg_index = 1:2
         save_thrust{i}.control = Yf(:,17);
         save_thrust{i}.position = Yf(:,1:3);
         save_thrust{i}.speed = Yf(:,4:6);
+        if ~settings.wind.model && ~settings.wind.input
         save_thrust{i}.windParams = windParams;
+        end
+        if settings.wind.input
+            save_thrust{i}.windMag = windMag;
+            save_thrust{i}.windAz = windAz;
+        end
         save_thrust{i}.thrust_percentage = thrust_percentage(i);
         save_thrust{i}.qdyn = qdyn;
         save_thrust{i}.ap_ref = ap_ref;
@@ -225,13 +231,17 @@ for alg_index = 1:2
         apogee.radius(i) = sqrt(save_thrust{i}.position(end,1)^2+save_thrust{i}.position(end,2)^2);
         % horizontal speed at apogee
         apogee.horizontalSpeed(i) = norm(save_thrust{i}.speed(end,1:3)); % in theory this is the body frame, but as the last point is the apogee we should have only  horizontal velocity, so all the components must be taken
+        if ~settings.wind.model && ~settings.wind.input
         % wind magnitude
         wind_Mag(i) = norm([save_thrust{i}.windParams(1), save_thrust{i}.windParams(2), save_thrust{i}.windParams(3)]);
         % wind azimuth
         wind_az(i) = save_thrust{i}.windParams(4);
         %wind elevation
         wind_el(i) = save_thrust{i}.windParams(5);
-
+        end
+        if settings.wind.input
+            
+        end
         % within +-50 meters target apogees:
         if abs(apogee.thrust(i) - settings.z_final)<50
             N_ApogeeWithinTarget = N_ApogeeWithinTarget +1; % save how many apogees sit in the +-50 m from target
@@ -278,10 +288,10 @@ for alg_index = 1:2
             switch  settings.mission
 
                 case 'Pyxis_Portugal_October_2022'
-                    folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\task 1 - motor model\montecarlo e tuning\"+settings.mission+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % online
+                    folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\task 1 - motor model\montecarlo e tuning\"+settings.mission+"\wind_input\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % online
 
                 case 'Pyxis_Roccaraso_September_2022'
-                    folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\task 1 - motor model\montecarlo e tuning\"+settings.mission+"\z_f_"+settings.z_final+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % online
+                    folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\task 1 - motor model\montecarlo e tuning\"+settings.mission+"\z_f_"+settings.z_final+"\wind_input\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % online
             end
         end
     end

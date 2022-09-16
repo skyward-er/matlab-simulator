@@ -117,14 +117,14 @@ end
 
 
 %% ADDING WIND (supposed to be added in NED axes);
-if settings.wind.model
-    [uw, vw, ww] = windMatlabGenerator(settings, z, t);
-elseif settings.wind.input
-    uncert = [0, 0];
-    [uw, vw, ww] = windInputGenerator(settings, z, uncert);
-end
+% if settings.wind.model
+%     [uw, vw, ww] = windMatlabGenerator(settings, z, t);
+% elseif settings.wind.input
+%     uncert = settings.wind.input_uncertainty;
+%     [uw, vw, ww] = windInputGenerator(settings, z, uncert);
+% end
 
-if not(settings.wind.input) && not(settings.wind.model)
+if not(settings.wind.model)  % && not(settings.wind.input)
     uw = settings.constWind(1); vw = settings.constWind(2); ww = settings.constWind(3);
 end
 
