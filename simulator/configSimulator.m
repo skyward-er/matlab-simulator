@@ -82,7 +82,7 @@ end
 %% LAUNCH SETUP
 % launchpad directions
 % for a single run the maximum and the minimum value of the following angles must be the same.
-settings.OMEGA = 85*pi/180;              % [rad] Minimum Elevation Angle, user input in degrees (ex. 80)
+settings.OMEGA = 83*pi/180;              % [rad] Minimum Elevation Angle, user input in degrees (ex. 80)
 settings.PHI = 0*pi/180;                 % [rad] Minimum Azimuth Angle from North Direction, user input in degrees (ex. 90)
 
 %% WIND DETAILS
