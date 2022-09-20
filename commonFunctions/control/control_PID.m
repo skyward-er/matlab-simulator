@@ -31,7 +31,8 @@ time = nas_state.time;
 z = nas_state.z;
 Vz = nas_state.vz;
 
-[z_setpoint, Vz_setpoint, csett] = set_Trajectory(time,z-settings.z0, Vz, csett);
+% [z_setpoint, Vz_setpoint, csett] = set_Trajectory(time,z-settings.z0, Vz, csett);
+[z_setpoint, Vz_setpoint, csett] = set_Trajectory(time,z, Vz, csett);
 
 %% PI ALGORITHM 
 
@@ -161,9 +162,9 @@ alpha_degree_out = (alpha_rad*180)/pi;
 
 %% LIMIT THE RATE OF THE CONTROL VARIABLE 
 
-alpha_degree_out = rate_Limiter(alpha_degree_out, csett.alpha_degree_prec, csett.rate_limiter, csett.sample_time);
-
-alpha_degree_out = smooth_Control(alpha_degree_out, csett.alpha_degree_prec, csett.filter_coeff);
+% alpha_degree_out = rate_Limiter(alpha_degree_out, csett.alpha_degree_prec, csett.rate_limiter, csett.sample_time);
+% 
+% alpha_degree_out = smooth_Control(alpha_degree_out, csett.alpha_degree_prec, csett.filter_coeff);
 csett.alpha_degree_prec = alpha_degree_out;
 
 end

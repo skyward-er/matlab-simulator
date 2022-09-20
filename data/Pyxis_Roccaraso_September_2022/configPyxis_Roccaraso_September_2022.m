@@ -20,7 +20,7 @@ settings.launchDate = [2021 9 18];
 
 %% TRAJECTORY GENERATION PARAMETERS
 settings.Vz_final = 0;
-settings.z_final  = 930;
+settings.z_final  = 950;
 settings.Vx_final = 0;
 settings.x_final  = 500;
 settings.Vy_final = 0;

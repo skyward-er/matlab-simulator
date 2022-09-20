@@ -65,9 +65,9 @@ matlab_graphics; % thanks Massimiliano Restuccia
 % values for each simulation, so it has the same atmospheric conditions
 % each time
 
-if settings.tuning
-	rng('default')
-end
+% if settings.tuning
+% 	rng('default')
+% end
 
 %% START THE SIMULATION
 % T = vector of time used by ODE, [s] also for Tf Ta

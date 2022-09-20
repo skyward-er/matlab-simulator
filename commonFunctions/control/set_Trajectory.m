@@ -12,11 +12,11 @@ function [z_setpoint, Vz_setpoint, csett] = set_Trajectory(time,z, Vz, csett)
 % Update date: 23/04/2022
 
 %%% new trajectory choice
-
-if time-csett.T_trajChoice>0
-   csett.iteration_flag = 1;
-   csett.T_trajChoice = csett.T_trajChoice + csett.deltaT_change;
-end
+% 
+% if time-csett.T_trajChoice>0
+%    csett.iteration_flag = 1;
+%    csett.T_trajChoice = csett.T_trajChoice + csett.deltaT_change;
+% end
 
 
 if csett.iteration_flag == 1
@@ -50,12 +50,12 @@ if csett.iteration_flag == 1
     % I select the reference altitude and the reference vertical velocity
     z_setpoint  =  csett.reference.Z(csett.index_min_value);
     Vz_setpoint =  csett.reference.Vz(csett.index_min_value,csett.chosen_trajectory);
-    
+
     % Just for plot
   
-% % %     csett.starting_index = best_index;
-% % %     disp('trajectory chosen:')
-% % %     disp(csett.chosen_trajectory)
+    csett.starting_index = best_index;
+    disp('trajectory chosen:')
+    disp(csett.chosen_trajectory)
     
 %% For the following iterations keep tracking the chosen trajectory
 else

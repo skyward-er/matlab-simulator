@@ -24,7 +24,7 @@ contSettings.starting_index = 0;
 %% CONTROL PARAMETERS
 
 % choose strategy:
-contSettings.algorithm = "interp"; % choices: "interp", "PID_2021", "PID_2refs", "shooting"
+contSettings.algorithm = "PID_2021"; % choices: "interp", "PID_2021", "PID_2refs", "shooting"
 
 
 % Control time sample:
@@ -43,8 +43,8 @@ contSettings.Ki_2ref = [0, 0];
 contSettings.flagPID           =    1;                                      % 1: control_PID (Fdrag);  2: control_LIN (u);  3: control_Servo (alfa_degree);
 
 % Trajectory change for PID:
-contSettings.T_trajChoice = 5;                                              % initial condition for trajectory choice for PID
-contSettings.deltaT_change = 2;                                             % Value for which the trajectory choice is re-initialized
+% contSettings.T_trajChoice = 5;                                              % initial condition for trajectory choice for PID
+% contSettings.deltaT_change = 2;                                             % Value for which the trajectory choice is re-initialized
 
 % Internal parameter of controler:
 contSettings.I                   =   0; % PID 1 reference

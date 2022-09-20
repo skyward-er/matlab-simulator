@@ -45,11 +45,6 @@ if nargin > 2
     settings.motor.expThrust = settings_mont.motor.expThrust;
     settings.motor.expTime = settings_mont.motor.expTime;
     settings.tb = settings_mont.tb;
-    settings.wind.uw = settings_mont.wind.uw;
-    settings.wind.vw = settings_mont.wind.vw;
-    settings.wind.ww = settings_mont.wind.ww;
-    settings.wind.Az = settings_mont.wind.Az;
-    settings.wind.Ez = settings_mont.wind.El;
 end
 
 if not(settings.ballisticFligth) && settings.ascentOnly
@@ -81,11 +76,11 @@ Y0 = initialCond;
 if not(settings.wind.model) && not(settings.wind.input)
 
     if settings.montecarlo
-        uw = settings.wind.uw;
-        vw = settings.wind.vw;
-        ww = settings.wind.ww;
-        Az = settings.wind.Az;
-        El = settings.wind.El;
+        uw = settings_mont.wind.uw;
+        vw = settings_mont.wind.vw;
+        ww = settings_mont.wind.ww;
+        Az = settings_mont.wind.Az;
+        El = settings_mont.wind.El;
 
         settings.constWind = [uw, vw, ww];
         saveConstWind =  [uw, vw, ww, Az, El];
@@ -93,21 +88,16 @@ if not(settings.wind.model) && not(settings.wind.input)
         [uw, vw, ww, Az, El] = windConstGenerator(settings.wind);
         settings.constWind = [uw, vw, ww];
         saveConstWind =  [uw, vw, ww, Az, El];
+        
     end
     if not(settings.montecarlo) && ww ~= 0
         warning('Pay attention using vertical wind, there might be computational errors')
     end
 
-elseif settings.wind.input
-    Mag  = settings.wind.inputGround;
-    Az = settings.wind.inputAzimut(1);
-    R = Mag*angle2dcm(Az, 0, 0, 'ZYX');
-    uw = R(1,1);
-    vw = R(1,2);
-    ww = R(1,3);
-    settings.constWind = [uw, vw, ww];
-
 end
+
+
+
 
 
 %% SENSORS INIT
@@ -149,8 +139,6 @@ c.ctr_start =      -1;                                                      % Ai
 i           =       1;                                                      % Index for while loop
 sensorData.kalman.pn_prec  =       settings.ada.p_ref;                        % settings for ADA and KALMAN
 
-windMag = [];
-windAz = [];
 ap_ref_new = 0;                                                             % air brakes closed until Mach < settings.MachControl
 ap_ref_old = 0;
 
@@ -193,7 +181,7 @@ contSettings.indice_test = 1; % serve?
 while flagStopIntegration && n_old < nmax
     tic                                                                     % Starts CHRONO
     iTimes = iTimes + 1;                                                    % Advance the steps
-
+   
     lastFlagAscent = flagAscent;                                            % Saves the value of the flagAscent to recall it later
 
     if settings.launchWindow
@@ -301,7 +289,7 @@ while flagStopIntegration && n_old < nmax
     
         if iTimes==1 && settings.Kalman
             x_prev    =  [X0; V0; Q0(2:4); Q0(1);0;0;0];
-            x_prev(3) = -settings.z0;
+            x_prev(3) =  -settings.z0;
             vels_prev =  [0;0;0];
             P_prev    =   0.01*eye(12);
         elseif iTimes ~= 1 && settings.Kalman
@@ -438,23 +426,6 @@ while flagStopIntegration && n_old < nmax
     normV = norm([sensorData.kalman.vz sensorData.kalman.vx sensorData.kalman.vy]);
     mach = normV/a;
 
-    % wind update
-    if settings.wind.input
-
-        Mag = settings.wind.inputGround*interp1(settings.wind.inputAlt, settings.wind.inputMult,-Y0(3))
-        Az = interp1(settings.wind.inputAlt, settings.wind.inputAzimut,-Y0(3));
-        
-        R = Mag*angle2dcm(Az, 0, 0, 'ZYX');
-        uw = R(1,1);
-        vw = R(1,2);
-        ww = R(1,3);
-        
-        settings.constWind = [uw, vw, ww];
-
-        windMag = [windMag Mag];
-        windAz = [windAz Az];
-    end
-
     % time update
     t0 = t0 + dt;
     t1 = t1 + dt;
@@ -579,11 +550,8 @@ if settings.dataNoise
     save('results/Sensors.mat','c');
 end
 
-saveConstWind =  [0];
-
 varargout{1} = ap_ref_vec;
 varargout{2} = qdyn;
-varargout{3} = windMag;
-varargout{4} = windAz;
+
 
 
