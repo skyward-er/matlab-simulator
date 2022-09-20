@@ -45,6 +45,11 @@ if nargin > 2
     settings.motor.expThrust = settings_mont.motor.expThrust;
     settings.motor.expTime = settings_mont.motor.expTime;
     settings.tb = settings_mont.tb;
+    settings.wind.uw = settings_mont.wind.uw;
+    settings.wind.vw = settings_mont.wind.vw;
+    settings.wind.ww = settings_mont.wind.ww;
+    settings.wind.Az = settings_mont.wind.Az;
+    settings.wind.Ez = settings_mont.wind.El;
 end
 
 if not(settings.ballisticFligth) && settings.ascentOnly
@@ -76,11 +81,11 @@ Y0 = initialCond;
 if not(settings.wind.model) && not(settings.wind.input)
 
     if settings.montecarlo
-        uw = settings_mont.wind.uw;
-        vw = settings_mont.wind.vw;
-        ww = settings_mont.wind.ww;
-        Az = settings_mont.wind.Az;
-        El = settings_mont.wind.El;
+        uw = settings.wind.uw;
+        vw = settings.wind.vw;
+        ww = settings.wind.ww;
+        Az = settings.wind.Az;
+        El = settings.wind.El;
 
         settings.constWind = [uw, vw, ww];
         saveConstWind =  [uw, vw, ww, Az, El];
@@ -88,16 +93,21 @@ if not(settings.wind.model) && not(settings.wind.input)
         [uw, vw, ww, Az, El] = windConstGenerator(settings.wind);
         settings.constWind = [uw, vw, ww];
         saveConstWind =  [uw, vw, ww, Az, El];
-        
     end
     if not(settings.montecarlo) && ww ~= 0
         warning('Pay attention using vertical wind, there might be computational errors')
     end
 
+elseif settings.wind.input
+    Mag  = settings.wind.inputGround;
+    Az = settings.wind.inputAzimut(1);
+    R = Mag*angle2dcm(Az, 0, 0, 'ZYX');
+    uw = R(1,1);
+    vw = R(1,2);
+    ww = R(1,3);
+    settings.constWind = [uw, vw, ww];
+
 end
-
-
-
 
 
 %% SENSORS INIT
@@ -116,6 +126,31 @@ XYZh   =    wrldmagm(hmax, settings.lat0, settings.lon0, dy, '2020');     % Worl
 
 magneticFieldApprox = @(zSlm) XYZ0 + (XYZh-XYZ0)./hmax.*zSlm;              % Magnetic field linear interpolation
 
+
+%% DATA TEST FLIGHT
+if settings.postProcessing
+    % load log data
+    load("testFlights\"+settings.mission+"\roccarasoLog.mat");
+    
+
+    % retrieve only useful parameters
+    NASlog.n = roccarasoLog.NAS.n;
+    NASlog.e = roccarasoLog.NAS.e;
+    NASlog.d = roccarasoLog.NAS.d;
+
+    NASlog.vn = roccarasoLog.NAS.vn;
+    NASlog.ve = roccarasoLog.NAS.ve;
+    NASlog.vd = roccarasoLog.NAS.vd;
+
+    NASlog.qx = roccarasoLog.NAS.qx;
+    NASlog.qy = roccarasoLog.NAS.qy;
+    NASlog.qz = roccarasoLog.NAS.qz;
+    NASlog.qw = roccarasoLog.NAS.qw;
+
+    % adjust length
+%     resample
+
+end
 
 %% INTEGRATION
 % setting initial condition before control phase
@@ -137,8 +172,10 @@ cpuTimes    =       zeros(nmax, 1);                                          % V
 iTimes      =       0;                                                      % Iteration
 c.ctr_start =      -1;                                                      % Air brake control parameter initial condition
 i           =       1;                                                      % Index for while loop
-sensorData.kalman.pn_prec  =       settings.ada.p_ref;                        % settings for ADA and KALMAN
+sensorData.kalman.pn_prec  =       settings.ada.p_ref;                       % settings for ADA and KALMAN
 
+windMag = [];
+windAz = [];
 ap_ref_new = 0;                                                             % air brakes closed until Mach < settings.MachControl
 ap_ref_old = 0;
 
@@ -181,7 +218,7 @@ contSettings.indice_test = 1; % serve?
 while flagStopIntegration && n_old < nmax
     tic                                                                     % Starts CHRONO
     iTimes = iTimes + 1;                                                    % Advance the steps
-   
+
     lastFlagAscent = flagAscent;                                            % Saves the value of the flagAscent to recall it later
 
     if settings.launchWindow
@@ -289,13 +326,15 @@ while flagStopIntegration && n_old < nmax
     
         if iTimes==1 && settings.Kalman
             x_prev    =  [X0; V0; Q0(2:4); Q0(1);0;0;0];
-            x_prev(3) =  -settings.z0;
+            x_prev(3) = -settings.z0;
             vels_prev =  [0;0;0];
             P_prev    =   0.01*eye(12);
-        elseif iTimes ~= 1 && settings.Kalman
+        elseif iTimes ~= 1 && settings.Kalman && not(settings.postProcessing)
             x_prev    =   x_est_tot(end,:);
             vels_prev =   vels_tot(end,:);
             P_prev    =   P_c(:,:,end);
+        elseif iTimes ~= 1 && settings.Kalman && settings.postProcessing
+            
         end
 
         %% ADA
@@ -310,6 +349,7 @@ while flagStopIntegration && n_old < nmax
         end
 
         %% Navigation system
+
         if settings.Kalman && settings.dataNoise
     
             [sensorData.kalman.x_c, vels, P_c, settings.kalman]   =  run_kalman(x_prev, vels_prev, P_prev, sp, settings.kalman, XYZ0*0.01);
@@ -318,26 +358,40 @@ while flagStopIntegration && n_old < nmax
             vels_tot(c.n_est_old:c.n_est_old + size(vels(:,1),1)-1,:)  = vels(:,:); % NAS speed output
             t_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1)    = sensorData.accelerometer.time; % NAS time output
             c.n_est_old = c.n_est_old + size(sensorData.kalman.x_c,1);
+      
         end
     
         % vertical velocity and position
-        if flagAscent || (not(flagAscent) && settings.ballisticFligth)
-            Q    =   Yf(end, 10:13);
-            vels =   quatrotate(quatconj(Q), Yf(:, 4:6));
-            sensorData.kalman.vz = - vels(end,3);   % down
-            sensorData.kalman.vx =   vels(end,2);   % north
-            sensorData.kalman.vy =   vels(end,1);   % east
-        else
-            sensorData.kalman.vz   = - Yf(end, 6); % actually not coming from NAS in this case
-            sensorData.kalman.vx = Yf(end, 5);
-            sensorData.kalman.vy = Yf(end, 4);
+        if not(settings.postProcessing)
+            if flagAscent || (not(flagAscent) && settings.ballisticFligth)
+                Q    =   Yf(end, 10:13);
+                vels =   quatrotate(quatconj(Q), Yf(:, 4:6));
+                sensorData.kalman.vz = - vels(end,3);   % down
+                sensorData.kalman.vx =   vels(end,2);   % north
+                sensorData.kalman.vy =   vels(end,1);   % east
+
+            else
+                sensorData.kalman.vz   = - Yf(end, 6); % actually not coming from NAS in this case
+                sensorData.kalman.vx = Yf(end, 5);
+                sensorData.kalman.vy = Yf(end, 4);
+            end
+        elseif settings.postProcessing
+            sensorData.kalman.vx =   flightLog.vn(i);   % north
+            sensorData.kalman.vy =   flightLog.ve(i);   % east
+            sensorData.kalman.vz = - flightLog.vd(i);   % down
+
         end
-    
         v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
     
-        sensorData.kalman.z    = -x_est_tot(end, 3);
-        sensorData.kalman.x  =  Yf(end, 2);
-        sensorData.kalman.y  =  Yf(end, 1);
+        if not(settings.postProcessing)
+            sensorData.kalman.z    = -x_est_tot(end, 3);
+            sensorData.kalman.x  =  Yf(end, 2);
+            sensorData.kalman.y  =  Yf(end, 1);
+        else
+            sensorData.kalman.x =   flightLog.n(i);   % north
+            sensorData.kalman.y =   flightLog.e(i);   % east
+            sensorData.kalman.z = - flightLog.d(i);   % down
+        end
     
         %% Control algorithm
         if flagAeroBrakes && mach < settings.MachControl && settings.Kalman && settings.control
@@ -425,6 +479,23 @@ while flagStopIntegration && n_old < nmax
     %   normV = norm(Yf(end, 4:6));
     normV = norm([sensorData.kalman.vz sensorData.kalman.vx sensorData.kalman.vy]);
     mach = normV/a;
+
+    % wind update
+    if settings.wind.input
+
+        Mag = settings.wind.inputGround*interp1(settings.wind.inputAlt, settings.wind.inputMult,-Y0(3));
+        Az = interp1(settings.wind.inputAlt, settings.wind.inputAzimut,-Y0(3));
+        
+        R = Mag*angle2dcm(Az, 0, 0, 'ZYX');
+        uw = R(1,1);
+        vw = R(1,2);
+        ww = R(1,3);
+        
+        settings.constWind = [uw, vw, ww];
+
+        windMag = [windMag Mag];
+        windAz = [windAz Az];
+    end
 
     % time update
     t0 = t0 + dt;
@@ -550,8 +621,11 @@ if settings.dataNoise
     save('results/Sensors.mat','c');
 end
 
+saveConstWind =  [0];
+
 varargout{1} = ap_ref_vec;
 varargout{2} = qdyn;
-
+varargout{3} = windMag;
+varargout{4} = windAz;
 
 
