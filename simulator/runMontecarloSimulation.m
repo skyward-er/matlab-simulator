@@ -51,7 +51,7 @@ rng default
 settings.montecarlo = true;
 
 %% how many simulations
-N_sim = 100; % set to at least 500
+N_sim = 50; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 
 %% stochastic parameters
@@ -159,7 +159,7 @@ settings.wind.input = true; % occhio che per ora non è settato esternamente con
 settings_mont_init = struct('x',[]);
 
 % start simulation
-for alg_index = 1:2
+for alg_index = 2
 
     contSettings.algorithm = algorithm_vec(alg_index);
 
@@ -306,7 +306,9 @@ for alg_index = 1:2
             saveas(save_thrust_apogee_probability,folder(i)+"\ApogeeProbabilityPlot")
             saveas(save_thrust_apogee_mean,folder(i)+"\ApogeeMeanOverNsimPlot")
             saveas(save_thrust_apogee_std,folder(i)+"\ApogeeStdOverNsimPlot")
+            if ~settings.wind.model && ~settings.wind.input
             saveas(save_apogee_3D,folder(i)+"\ApogeeWindThrust")
+            end
             saveas(save_dynamic_pressure_and_forces,folder(i)+"\dynamicPressureAndForces")
             save(folder(i)+"\saveThrust.mat","save_thrust","apogee","N_sim","settings","thrust_percentage")
 

@@ -56,6 +56,8 @@ settings.Ada               = true;  % Switch on to run the apogee detection algo
 settings.HRE               = false; % Switch on if the rocket is mounting a Hybrid Engine, which allows the possibility to shut down the engine
 settings.machControlActive = false; % Switch on the mach control in ascentControl.m
 
+% post processing
+settings.postProcessing = true;
 % compatibility check - do not change
 if settings.electronics
     settings.launchWindow = true;
