@@ -1,6 +1,17 @@
 clearvars;close all;clc
 
+filePath = fileparts(mfilename('fullpath'));
+currentPath = pwd;
+if not(strcmp(filePath, currentPath))
+    cd (filePath);
+    currentPath = filePath;
+end
+commonFunctionsPath = '../commonFunctions';
+addpath(genpath(currentPath));
 
+% Common Functions path
+addpath(genpath(commonFunctionsPath));
+addpath("..\simulator\")
 load("NAS.mat")
 configSimulator; 
 configControl;
