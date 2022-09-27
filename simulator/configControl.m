@@ -24,15 +24,15 @@ contSettings.starting_index = 0;
 %% CONTROL PARAMETERS
 
 % choose strategy:
-contSettings.algorithm = "interp"; % choices: "interp", "PID_2021", "PID_2refs", "shooting"
+contSettings.algorithm = "PID_2021"; % choices: "interp", "PID_2021", "PID_2refs", "shooting"
 
 
 % Control time sample:
 contSettings.sample_time         =  0.1;
 
 % PI controler tune parameter:
-contSettings.Kp    =   20;                    % using Fdrag nel pid --> da migliorare (magari si può ottenere variabile controllo più smooth)
-contSettings.Ki    =   5;                     % using Fdrag nel pid
+contSettings.Kp    =   12;                    % using Fdrag nel pid --> da migliorare (magari si può ottenere variabile controllo più smooth)
+contSettings.Ki    =   0.9;                     % using Fdrag nel pid
 
 % PI with 2 references tune parameters:
 contSettings.Kp_2ref = [1, 1]; % these two coefficients are nonsense if set to 1, they're just here for reference, may edit later or delete.

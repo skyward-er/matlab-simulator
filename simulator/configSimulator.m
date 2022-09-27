@@ -17,8 +17,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 % Choose the mision you want to simulate from rocketsData folder
 % settings.mission = 'Lynx_Roccaraso_September_2021';
 % settings.mission = 'Lynx_Portugal_October_2021';
-% settings.mission = 'Pyxis_Portugal_October_2022';
-settings.mission = 'Pyxis_Roccaraso_September_2022';
+settings.mission = 'Pyxis_Portugal_October_2022';
+% settings.mission = 'Pyxis_Roccaraso_September_2022';
 % settings.mission = 'NewRocket_2023';
 
 %% LOAD DATA
@@ -57,7 +57,7 @@ settings.HRE               = false; % Switch on if the rocket is mounting a Hybr
 settings.machControlActive = false; % Switch on the mach control in ascentControl.m
 
 % post processing
-settings.postProcessing = true;
+settings.postProcessing = false;
 % compatibility check - do not change
 if settings.electronics
     settings.launchWindow = true;
@@ -102,7 +102,7 @@ settings.wind.HourMax = 4;                     % [h] Maximum Hour of the day
 settings.wind.ww = 0;                          % [m/s] Vertical wind speed
 
 %%%%% Input wind
-settings.wind.input = true;
+settings.wind.input = false;
 % Wind is generated for every altitude interpolating with the coefficient defined below
 if settings.wind.input == true && settings.wind.model == true
     warning("you are trying to use 'input model' but is shadowed by 'wind model' ")

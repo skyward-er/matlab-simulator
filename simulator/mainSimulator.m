@@ -146,5 +146,5 @@ fprintf('apogee: %.1f [m] \n', max_z);
 % save data
 save("Simulation_log.mat","Tf","Yf","data_flight")
 
-% clearvars -except Yf data_flight settings 
+clearvars -except Yf data_flight settings 
  
