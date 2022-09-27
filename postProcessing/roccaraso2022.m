@@ -12,7 +12,7 @@ addpath(genpath(currentPath));
 % Common Functions path
 addpath(genpath(commonFunctionsPath));
 addpath("..\simulator\")
-load("roccaraso.mat")
+addpath("2022-09-17-pyxis-euroc\2022-09-17-pyxis-euroc\logs\SRAD_main\normalized\")
 configSimulator; 
 configControl;
 configReferences;
@@ -22,25 +22,26 @@ for ii = 1:11
     name_traj = strcat('referenceinterp',num2str(ii));
     traj(ii).num = table2array(readtable(name_traj));
 end
-
+nas = table2array(readtable('Boardcore_NASState.csv'));
+apogee = table2array(readtable('Common_ApogeeEvent.csv'));
 %% air brakes motion
-time_nas = Main_roccaraso_flight.NAS.time;
+
+nas = nas(nas(:,1)>=0,:);
+time_nas = nas(:,1);
 % time_nas = time_nas-Main_roccaraso_flight.events.time(1);
 time_10 = time_nas(1):0.1:time_nas(end);
 % nas  = interp1(nas(:,1),nas(:,1:end),time_10,'nearest');
-ap = 0;
-dt = 0.1;
-ap_save(1) = 0;
-ap_ref_save(1) =0;
-apogee = (Main_roccaraso_flight.events.time(4));
-liftoff = Main_roccaraso_flight.events.time(1);
+
 for ii = 2:length(time_10)
     [~,idx] = min(abs(time_nas(:,1)-time_10(ii)));
-    if time_nas(idx) >= liftoff+3.8 && time_nas(idx) <= apogee
-        V_mod     = norm(Main_roccaraso_flight.NAS.ned_vel(idx,:));
+    if time_nas(idx)>time_10(ii)
+    idx = idx-1;
+    end
+    if time_nas(idx) >= 3.9 && time_nas(idx) <= apogee(end)
+        V_mod     = norm(nas(idx,5:7));
         nas_state.time  =  time_nas(idx);
-        nas_state.z     = -Main_roccaraso_flight.NAS.ned_pos(idx,3);
-        nas_state.vz    = -Main_roccaraso_flight.NAS.ned_vel(idx,3);
+        nas_state.z     = -nas(idx,4);
+        nas_state.vz    = -nas(idx,7);
         [alpha_degree, vz_setpoint, z_setpoint, contSettings] =control_PID(nas_state, V_mod, contSettings,settings);
         ap_ref(ii) =alpha_degree*pi/180;
     else
@@ -52,15 +53,7 @@ figure;
 yyaxis left
 plot(time_10,ap_ref);
 yyaxis right
-plot(time_nas(:,1),Main_roccaraso_flight.NAS.ned_vel);
-
-%%
-figure
-plot(Main_roccaraso_flight.IMU.time,Main_roccaraso_flight.IMU.acc(:,1));
-hold on
-plot(Main_roccaraso_flight.NAS.time,Main_roccaraso_flight.NAS.ned_vel(:,3));
-plot(time_10,ap_ref);
-
+plot(time_nas(:,1),nas(:,7));
 
 %% airbrakes
 
@@ -80,4 +73,4 @@ legend()
 
 air_brakes.time       = time_10;
 air_brakes.servoangle = alpha_real';
-
+air_brakes.commanded  = ap_ref;
