@@ -2,33 +2,29 @@ function [ap_ref_new,contSettings,varargout] = run_simulated_airbrakes(sensorDat
 
 
 %% HELP:
-%
-% air brakes strategy chooser
-%
-% INPUT: 
-%
-% - nas_state: state of the rocket, contains velocities and position, can
-%   come from the actual NAS, or from the simulated exact values, depending
-%   if NAS actually is working or not
-% 
-% - settings, contSettings: structs that contain all informations about
-%   mission, rocket, etc, and control settings
-%
-% - ap_ref_old: old value of angle reference, needed because of how filters
-%   work
-%
-% OUTPUT:
-%
-% - ap_ref_new: new reference angle value
-%
-% - contSettings: update of contSettings state
-%
-% - varargout - only if PID_2021 strategy is used:
-%       {1} = vz_setpoint; % contains the setpoint trajectories
-%       {2} = z_setpoint;
-%       {3} = input_output_test; % contains information for cpp algorithms
+%{
+air brakes strategy chooser
 
+INPUT: 
 
+- nas_state: state of the rocket, contains velocities and position, can
+  come from the actual NAS, or from the simulated exact values, depending
+  if NAS actually is working or not
+- settings, contSettings: structs that contain all informations about
+  mission, rocket, etc, and control settings
+- ap_ref_old: old value of angle reference, needed because of how filters
+  work
+
+OUTPUT:
+
+- ap_ref_new: new reference angle value
+- contSettings: update of contSettings state
+- varargout - only if PID_2021 strategy is used:
+      {1} = vz_setpoint; % contains the setpoint trajectories
+      {2} = z_setpoint;
+      {3} = input_output_test; % contains information for cpp algorithms
+
+%}
 
 switch contSettings.algorithm % set this value in configControl.m
 
@@ -38,28 +34,21 @@ switch contSettings.algorithm % set this value in configControl.m
         % interpolation at fixed altitude of the actual velocity
         % w.r.t. the two references.
 
-        if not(contSettings.flagFilter)
+        [ap_base_filter] = control_Interp(sensorData.kalman.z-settings.z0,sensorData.kalman.vz,contSettings.reference.Z,contSettings.reference.Vz,contSettings.interpType,contSettings.N_forward,settings,contSettings); % cambiare nome alla funzione tra le altre cose
 
-            [ap_ref_new] = control_Interp(sensorData.kalman.z-settings.z0,sensorData.kalman.vz,contSettings.reference.Z,contSettings.reference.Vz,'linear',contSettings.N_forward,settings,contSettings); % cambiare nome alla funzione tra le altre cose
-
+        % filter control action
+        if contSettings.flagFirstControl == false % the first reference is given the fastest possible (unfiltered), then filter
+            ap_ref_new = ap_ref_old + (ap_base_filter - ap_ref_old)*contSettings.filter_coeff;
         else
-
-            [ap_base_filter] = control_Interp(sensorData.kalman.z-settings.z0,sensorData.kalman.vz,contSettings.reference.Z,contSettings.reference.Vz,contSettings.interpType,contSettings.N_forward,settings,contSettings); % cambiare nome alla funzione tra le altre cose
-
-            % filter control action
-            if contSettings.flagFirstControl == false % the first reference is given the fastest possible (unfiltered), then filter
-                ap_ref_new = ap_ref_old + (ap_base_filter - ap_ref_old)*contSettings.filter_coeff;
-            else
-                ap_ref_new = ap_base_filter;
-            end
-            contSettings.flagFirstControl = false;
-            if sensorData.kalman.time>contSettings.Tfilter
-                contSettings.Tfilter = contSettings.Tfilter+contSettings.deltaTfilter;
-                contSettings.filter_coeff = contSettings.filter_coeff/contSettings.filterRatio;
-            end
-
+            ap_ref_new = ap_base_filter;
+        end
+        contSettings.flagFirstControl = false;
+        if sensorData.kalman.time>contSettings.Tfilter
+            contSettings.Tfilter = contSettings.Tfilter+contSettings.deltaTfilter;
+            contSettings.filter_coeff = contSettings.filter_coeff/contSettings.filterRatio;
         end
 
+       
     case 'shooting'
         % shooting algorithm:
 

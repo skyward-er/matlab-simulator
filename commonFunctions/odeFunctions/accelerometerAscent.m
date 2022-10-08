@@ -32,14 +32,15 @@ if abs(normQ - 1) > 0.1
 end
 
 %% ADDING WIND (supposed to be added in NED axes);
-if settings.wind.model
+switch settings.windModel
+    case "atmospherical"
     [uw, vw, ww] = windMatlabGenerator(settings, z, t);
-elseif settings.wind.input
+
+    case "multiplicative"
     uncert = [0, 0];
     [uw, vw, ww] = windInputGenerator(settings, z, uncert);
-end
 
-if not(settings.wind.input) && not(settings.wind.model)
+    case "constant"
     uw = settings.constWind(1); vw = settings.constWind(2); ww = settings.constWind(3);
 end
 

@@ -117,14 +117,16 @@ end
 
 
 %% ADDING WIND (supposed to be added in NED axes);
-if settings.wind.model
+switch settings.windModel
+
+    case "atmospherical"
     [uw, vw, ww] = windMatlabGenerator(settings, z, t);
-elseif settings.wind.input
+    
+    case "multiplicative"
     uncert = settings.wind.input_uncertainty;
     [uw, vw, ww] = windInputGenerator(settings, z, uncert);
-end
 
-if not(settings.wind.model)  % && not(settings.wind.input)
+    case "constant"
     uw = settings.constWind(1); vw = settings.constWind(2); ww = settings.constWind(3);
 end
 

@@ -78,34 +78,34 @@ Y0 = initialCond;
 
 
 %% WIND GENERATION
-if not(settings.wind.model) && not(settings.wind.input)
+switch settings.windModel 
 
-    if settings.montecarlo
-        uw = settings.wind.uw;
-        vw = settings.wind.vw;
-        ww = settings.wind.ww;
-        Az = settings.wind.Az;
-        El = settings.wind.El;
+    case "constant"
 
+        if settings.montecarlo
+            uw = settings.wind.uw;
+            vw = settings.wind.vw;
+            ww = settings.wind.ww;
+            Az = settings.wind.Az;
+            El = settings.wind.El;
+    
+            settings.constWind = [uw, vw, ww];
+            saveConstWind =  [uw, vw, ww, Az, El];
+        else 
+            [uw, vw, ww, Az, El] = windConstGenerator(settings.wind);
+            settings.constWind = [uw, vw, ww];
+            saveConstWind =  [uw, vw, ww, Az, El];
+        end
+
+    case "multiplicative"
+       
+        Mag  = settings.wind.inputGround;
+        Az = settings.wind.inputAzimut(1);
+        R = Mag*angle2dcm(Az, 0, 0, 'ZYX');
+        uw = R(1,1);
+        vw = R(1,2);
+        ww = R(1,3);
         settings.constWind = [uw, vw, ww];
-        saveConstWind =  [uw, vw, ww, Az, El];
-    else
-        [uw, vw, ww, Az, El] = windConstGenerator(settings.wind);
-        settings.constWind = [uw, vw, ww];
-        saveConstWind =  [uw, vw, ww, Az, El];
-    end
-    if not(settings.montecarlo) && ww ~= 0
-        warning('Pay attention using vertical wind, there might be computational errors')
-    end
-
-elseif settings.wind.input
-    Mag  = settings.wind.inputGround;
-    Az = settings.wind.inputAzimut(1);
-    R = Mag*angle2dcm(Az, 0, 0, 'ZYX');
-    uw = R(1,1);
-    vw = R(1,2);
-    ww = R(1,3);
-    settings.constWind = [uw, vw, ww];
 
 end
 
@@ -126,40 +126,14 @@ XYZh   =    wrldmagm(hmax, settings.lat0, settings.lon0, dy, '2020');     % Worl
 
 magneticFieldApprox = @(zSlm) XYZ0 + (XYZh-XYZ0)./hmax.*zSlm;              % Magnetic field linear interpolation
 
-
-%% DATA TEST FLIGHT
-if settings.postProcessing
-    % load log data
-    load("testFlights\"+settings.mission+"\roccarasoLog.mat");
-    
-
-    % retrieve only useful parameters
-    NASlog.n = roccarasoLog.NAS.n;
-    NASlog.e = roccarasoLog.NAS.e;
-    NASlog.d = roccarasoLog.NAS.d;
-
-    NASlog.vn = roccarasoLog.NAS.vn;
-    NASlog.ve = roccarasoLog.NAS.ve;
-    NASlog.vd = roccarasoLog.NAS.vd;
-
-    NASlog.qx = roccarasoLog.NAS.qx;
-    NASlog.qy = roccarasoLog.NAS.qy;
-    NASlog.qz = roccarasoLog.NAS.qz;
-    NASlog.qw = roccarasoLog.NAS.qw;
-
-    % adjust length
-%     resample
-
-end
-
 %% INTEGRATION
 % setting initial condition before control phase
 dt          =       1/settings.frequencies.controlFrequency;                % Time step of the controller
 t0          =       0;                                                      % First time step - used in ode as initial time
 t1          =       t0 + dt;                                                % Second time step - used in ode as final time
 t_change_ref =      t0 + settings.servo.delay;
-sensorData.kalman.vz =       1;                                                      % Vertical velocity
-sensorData.kalman.z  =       1;                                                      % Altitude
+sensorData.kalman.vz = 1;                                                      % Vertical velocity
+sensorData.kalman.z  = 1;                                                      % Altitude
 nmax        =       100000;                                                 % Max iteration number - stops the integration if reached
 mach        =       0;                                                      % Mach number
 ext         =       0;                                                      % air brake extension
@@ -329,12 +303,10 @@ while flagStopIntegration && n_old < nmax
             x_prev(3) = -settings.z0;
             vels_prev =  [0;0;0];
             P_prev    =   0.01*eye(12);
-        elseif iTimes ~= 1 && settings.Kalman && not(settings.postProcessing)
+        elseif iTimes ~= 1 && settings.Kalman
             x_prev    =   x_est_tot(end,:);
             vels_prev =   vels_tot(end,:);
             P_prev    =   P_c(:,:,end);
-        elseif iTimes ~= 1 && settings.Kalman && settings.postProcessing
-            
         end
 
         %% ADA
@@ -362,7 +334,6 @@ while flagStopIntegration && n_old < nmax
         end
     
         % vertical velocity and position
-        if not(settings.postProcessing)
             if flagAscent || (not(flagAscent) && settings.ballisticFligth)
                 Q    =   Yf(end, 10:13);
                 vels =   quatrotate(quatconj(Q), Yf(:, 4:6));
@@ -375,23 +346,11 @@ while flagStopIntegration && n_old < nmax
                 sensorData.kalman.vx = Yf(end, 5);
                 sensorData.kalman.vy = Yf(end, 4);
             end
-        elseif settings.postProcessing
-            sensorData.kalman.vx =   flightLog.vn(i);   % north
-            sensorData.kalman.vy =   flightLog.ve(i);   % east
-            sensorData.kalman.vz = - flightLog.vd(i);   % down
-
-        end
         v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
     
-        if not(settings.postProcessing)
-            sensorData.kalman.z    = -x_est_tot(end, 3);
-            sensorData.kalman.x  =  Yf(end, 2);
-            sensorData.kalman.y  =  Yf(end, 1);
-        else
-            sensorData.kalman.x =   flightLog.n(i);   % north
-            sensorData.kalman.y =   flightLog.e(i);   % east
-            sensorData.kalman.z = - flightLog.d(i);   % down
-        end
+        sensorData.kalman.z    = -x_est_tot(end, 3);
+        sensorData.kalman.x  =  Yf(end, 2);
+        sensorData.kalman.y  =  Yf(end, 1);
     
         %% Control algorithm
         if flagAeroBrakes && mach < settings.MachControl && settings.Kalman && settings.control
@@ -481,7 +440,7 @@ while flagStopIntegration && n_old < nmax
     mach = normV/a;
 
     % wind update
-    if settings.wind.input
+    if settings.windModel == "multiplicative"
 
         Mag = settings.wind.inputGround*interp1(settings.wind.inputAlt, settings.wind.inputMult,-Y0(3));
         Az = interp1(settings.wind.inputAlt, settings.wind.inputAzimut,-Y0(3));
@@ -585,11 +544,6 @@ if settings.Ada
     c.xp_ada_tot   =  xp_ada_tot;
     c.xv_ada_tot   =  xv_ada_tot;
     c.t_ada_tot    =  t_ada_tot;
-end
-
-% control
-if settings.control
-    c.flagPID      =  contSettings.flagPID;
 end
 
 c.plot_ada     =  settings.Ada && false;
