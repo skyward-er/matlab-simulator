@@ -267,6 +267,8 @@ while flagStopIntegration && n_old < nmax
     % of the sensor is lower than the control action (or whatever)
     [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Yf, Tf, ext, uw, vw, ww);
     [~, ~, p, ~] = atmosisa(-Yf(:,3) + settings.z0) ;
+    sensorData.accelerometer.measures = sensorData.accelerometer.measures + (quat2rotm(Yf(1,10:13)) * [0;0;-9.81])';
+%     disp("acc_x: " + sensorData.accelerometer.measures(end,1) + ", acc_y: " + sensorData.accelerometer.measures(end,2) + ", acc_z: " + sensorData.accelerometer.measures(end,3));
 
     % simulate sensor acquisition
     if settings.dataNoise
@@ -338,6 +340,7 @@ while flagStopIntegration && n_old < nmax
         if flagAeroBrakes && mach < settings.MachControl && settings.Kalman && settings.control
             sensorData.kalman.time = Tf(end);
             ap_ref_old = ap_ref_new;
+
             [ap_ref_new,contSettings] = run_simulated_airbrakes(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
         else
             ap_ref_new = 0;
@@ -371,8 +374,6 @@ while flagStopIntegration && n_old < nmax
         sensorData.gps.longitude = longitude;
 
         % Add gravity acceleration
-        sensorData.accelerometer.measures = sensorData.accelerometer.measures + (quat2rotm(Yf(1,11:14)) * [0;0;9.81])';
-
         ap_ref_old = ap_ref_new;
         [alpha_aperture, t_est_tot, x_est_tot, xp_ada_tot, xv_ada_tot, t_ada_tot] = run_HIL_airbrakes(sensorData, flagsArray);
         ap_ref_new = alpha_aperture * settings.servo.maxAngle;  % alpha_aperture: 
@@ -389,8 +390,8 @@ while flagStopIntegration && n_old < nmax
         % Save the values to plot them
         c.vz_tot(i)    =  sensorData.kalman.vz;
         c.z_tot(i)     =  sensorData.kalman.z;
-        c.ap_ref_time(i) = sensorData.kalman.time;
-        c.ap_ref_tot(i) =  ap_ref_new;
+%         c.ap_ref_time(i) = sensorData.kalman.time;
+%         c.ap_ref_tot(i) =  ap_ref_new;
     end
 
 
@@ -452,9 +453,9 @@ while flagStopIntegration && n_old < nmax
         flagStopIntegration = flagFlight || not(lastLaunchflag);
     end
     
-    if not(settings.montecarlo)
-        disp("z: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,end));
-    end
+%     if not(settings.montecarlo)
+%         disp("z: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,end));
+%     end
 
     flagMatr(n_old:n_old+n-1, :) = repmat([flagFlight, flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2], n, 1);
 

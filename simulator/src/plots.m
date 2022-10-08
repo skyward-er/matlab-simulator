@@ -14,18 +14,18 @@ if flagEXPORT == true
 end
 
 %% Control variable: servo angle + reference values
-figures.servo_angle = figure('Name', 'Servo angle after burning phase');
-plot(c.Tf_tot, c.ap_tot);
-hold on; grid on;
-stairs(c.ap_ref_time,c.ap_ref_tot,'r');
-xlabel('Time [s]');
-ylabel('$\alpha$ [rad]');
-title('Servo angle');
-legend('simulated','reference values')
-if flagEXPORT == true
-    exportgraphics(figures.servo_angle,'report_images\src_servo_angle.pdf','ContentType','vector')
-end
-
+% figures.servo_angle = figure('Name', 'Servo angle after burning phase');
+% plot(c.Tf_tot, c.ap_tot);
+% hold on; grid on;
+% stairs(c.ap_ref_time,c.ap_ref_tot,'r');
+% xlabel('Time [s]');
+% ylabel('$\alpha$ [rad]');
+% title('Servo angle');
+% legend('simulated','reference values')
+% if flagEXPORT == true
+%     exportgraphics(figures.servo_angle,'report_images\src_servo_angle.pdf','ContentType','vector')
+% end
+% 
 
 
 

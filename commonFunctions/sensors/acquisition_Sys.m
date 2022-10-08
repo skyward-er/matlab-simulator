@@ -66,7 +66,10 @@ OUTPUT:
                  sp.gyro(ii,:)  = sp.gyro(ii,:)*2*pi/360/1000;                          
         end 
         c.accel_tot(c.na_old:c.na_old + size(sp.accel,1) - 1,:) = sp.accel(1:end,:) ;
+        c.accel_clear(c.na_old:c.na_old + size(sp.accel,1) - 1,:) = sensorData.accelerometer.measures;
         c.gyro_tot(c.na_old:c.na_old + size(sp.gyro,1) - 1,:)   = sp.gyro(1:end,:) ;
+        c.gyro_clear(c.na_old:c.na_old + size(sp.accel,1) - 1,:) = sensorData.gyro.measures;
+        c.mag_clear(c.na_old:c.na_old + size(sp.accel,1) - 1,:) = sensorData.magnetometer.measures;
         c.mag_tot(c.na_old:c.na_old + size(sp.mag,1) - 1,:)     = sp.mag(1:end,:) ;
         c.time_imu(c.na_old:c.na_old + size(sp.accel,1) - 1)   =  sp.t_acc;
         c.na_old = c.na_old + size(sp.accel,1);
