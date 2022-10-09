@@ -1,4 +1,4 @@
-function [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, dataBallisticFlight,saveConstWind,varargout] = std_run(settings, contSettings, varargin)
+function [struct_out] = std_runV2(settings, contSettings, varargin)
 %{
 
 STD_RUN_BALLISTIC - This function runs a standard ballistic (non-stochastic) simulation
@@ -78,83 +78,16 @@ Y0 = initialCond;
 
 
 %% WIND GENERATION
-switch settings.windModel 
-
-    case "constant"
-
-        if settings.montecarlo
-            uw = settings.wind.uw;
-            vw = settings.wind.vw;
-            ww = settings.wind.ww;
-            Az = settings.wind.Az;
-            El = settings.wind.El;
-    
-            settings.constWind = [uw, vw, ww];
-            saveConstWind =  [uw, vw, ww, Az, El];
-        else 
-            [uw, vw, ww, Az, El] = windConstGenerator(settings.wind);
-            settings.constWind = [uw, vw, ww];
-            saveConstWind =  [uw, vw, ww, Az, El];
-        end
-
-    case "multiplicative"
-       
-        Mag  = settings.wind.inputGround;
-        Az = settings.wind.inputAzimut(1);
-        R = Mag*angle2dcm(Az, 0, 0, 'ZYX');
-        uw = R(1,1);
-        vw = R(1,2);
-        ww = R(1,3);
-        settings.constWind = [uw, vw, ww];
-
-end
-
+std_setWind; 
 
 %% SENSORS INIT
 [s, c] = initSensors(settings.lat0, settings.lon0, settings.z0);
 
 %% MAGNETIC FIELD MODEL
-hmax   =   settings.hmax;
-
-%Use this lines if your MATLAB version is up to 2020
-dy     =    decyear(settings.launchDate);
-XYZ0   =    wrldmagm(0, settings.lat0, settings.lon0, dy, '2020');        % World magnetic map at h = 0
-XYZh   =    wrldmagm(hmax, settings.lat0, settings.lon0, dy, '2020');     % World magnetic map at h = 6000
-
-% %Use this next line if your MATLAB version is previous to 2020
-% load('magn_field.mat');
-
-magneticFieldApprox = @(zSlm) XYZ0 + (XYZh-XYZ0)./hmax.*zSlm;              % Magnetic field linear interpolation
+std_magneticField;
 
 %% INTEGRATION
-% setting initial condition before control phase
-dt          =       1/settings.frequencies.controlFrequency;                % Time step of the controller
-t0          =       0;                                                      % First time step - used in ode as initial time
-t1          =       t0 + dt;                                                % Second time step - used in ode as final time
-t_change_ref =      t0 + settings.servo.delay;
-sensorData.kalman.vz = 1;                                                      % Vertical velocity
-sensorData.kalman.z  = 1;                                                      % Altitude
-nmax        =       100000;                                                 % Max iteration number - stops the integration if reached
-mach        =       0;                                                      % Mach number
-ext         =       0;                                                      % air brake extension
-n_old       =       1;                                                      % Iteration number (first iter-> n=1)
-% Yf          =       zeros(1, length(Y0));                                % State vector for ode integration
-Yf_tot      =       zeros(nmax, length(Y0));                                % State vector for ode integration
-Tf_tot      =       zeros(nmax, 1);                                         % Time vector for ode integration
-ext_tot     =       zeros(nmax, 1);                                         % Air brake extension vector
-cpuTimes    =       zeros(nmax, 1);                                          % Vector of iterations
-iTimes      =       0;                                                      % Iteration
-c.ctr_start =      -1;                                                      % Air brake control parameter initial condition
-i           =       1;                                                      % Index for while loop
-sensorData.kalman.pn_prec  =       settings.ada.p_ref;                       % settings for ADA and KALMAN
-
-windMag = [];
-windAz = [];
-ap_ref_new = 0;                                                             % air brakes closed until Mach < settings.MachControl
-ap_ref_old = 0;
-
-ap_ref = [ ap_ref_old ap_ref_new ];
-% alpha_degree_old = 0;
+std_setInitialParams
 
 %% Flag initializations
 % global isLaunch
@@ -167,13 +100,13 @@ lastLaunchflag = true; % LEAVE THIS TO TRUE UNLESS YOU KNOW WHAT YOU ARE DOING (
 
 
 if settings.launchWindow
-    global windowCreated
-    
-    windowCreated = false;
+%     global windowCreated
+%     
+%     windowCreated = false;
     launchWindow;
-    while not(windowCreated)
-        pause(0.1);
-    end
+%     while not(windowCreated)
+%         pause(0.01);
+%     end
 
     launchFlag = false;
 else
@@ -567,7 +500,7 @@ else
 end
 
 if ~settings.montecarlo
-    plots
+    std_plots
 end
 
 save('results/Ground_truth.mat','sensorData');
@@ -577,9 +510,13 @@ end
 
 saveConstWind =  [0];
 
-varargout{1} = ap_ref_vec;
-varargout{2} = qdyn;
-varargout{3} = windMag;
-varargout{4} = windAz;
+%% output 
+struct_out.t_tot = Tf_tot;
+struct_out.Y_tot = Yf_tot;
+
+struct_out.ap_ref_vec = ap_ref_vec;
+struct_out.qdyn = qdyn;
+struct_out.windMag = windMag;
+struct_out.windAz = windAz;
 
 

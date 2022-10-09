@@ -1,39 +1,153 @@
 %{
 
-flag configuration
+flag configuration script
+
+
+possible scenarios: "free ascent", "controlled ascent" , "descent",
+"ballistic", "full flight"
+
+scenarios explanation:
+
+- "free ascent"       : only up to apogee, no control, no kalman, no ada, no
+                        nothing.
+
+- "controlled ascent" : only up to apogee, with airbrakes, with kalman,
+                        with ada, with everything.
+
+- "descent"           : to investigate how to do it, we should be able to
+                        simulate only from apogee to ground.
+
+- "ballistic"         : all flight, no parachutes, active ascent control (airbrakes or engine shutdown). So ballistic ground
+                        apogee ground.
+
+- "full flight"       : all flight, including parachutes and active control
+                        (airbrakes or engine shutdown).
 
 %}
 
-% FLAGS:
-settings.launchWindow       = false;  % Switch off this to avoid pausing the launch till you press the launch button
-settings.electronics        = false;  % Switch on when testing with Hardware in the loop HIL - NOT IMPLEMENTED YET, STILL TO BE MERGED
-settings.ascentOnly         = true;  % Switch on to simulate only the ascent phase untill the apogee
-settings.ballisticFligth    = true;  % Switch on to simulate the balistic fligth without any parachute
-settings.control            = true;  % Switch on to simulate the control
-settings.dataNoise          = true;  % Switch on to simulate the data acquisiton from sensors
-settings.Kalman             = true;  % Switch on to run the kalman algorithm - note, also to run the airbrakes control algorithm this is needed true
-settings.Ada                = true;  % Switch on to run the apogee detection algorithm
-settings.HRE                = false; % Switch on if the rocket is mounting a Hybrid Engine, which allows the possibility to shut down the engine
+
+% scenario configuration
+conf.scenario = "controlled ascent";
+conf.HIL = false;
+
+% WIP flags
 settings.machControlActive  = false; % Switch on the mach control in ascentControl.m
-
-% compatibility checks - do not change unless you really know what you are
-% doing
-if settings.electronics
-    settings.launchWindow = true;
-    settings.Kalman       = false;
-    settings.Ada          = false;
-    settings.control      = true;
+settings.HRE                = false; % Switch on if the rocket is mounting a Hybrid Engine, which allows the possibility to shut down the engine
 
 
-    % add path for Hardware In the Loop
-    addpath('../hardware_in_the_loop/');
-    addpath('../hardware_in_the_loop/serialbridge');
-    run('HILconfig.m');
-    serialbridge("Open", hil_settings.serial_port, hil_settings.baudrate); % Initialization of the serial port
-end
 
+
+
+%%%%------------------------------- don't modify unless you really know what you are doing, touch only the flags before this line -----------------------------%%%%
+if not(conf.HIL) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+    switch conf.scenario
+     
+        case "free ascent" 
+
+            settings.launchWindow       = false;  % Switch off this to avoid pausing the launch till you press the launch button
+            settings.electronics        = false;  % Switch on when testing with Hardware in the loop HIL - NOT IMPLEMENTED YET, STILL TO BE MERGED
+            settings.ascentOnly         = true;  % Switch on to simulate only the ascent phase untill the apogee
+            settings.ballisticFligth    = true;  % Switch on to simulate the balistic fligth without any parachute
+            settings.control            = false;  % Switch on to simulate the control
+            settings.dataNoise          = false;  % Switch on to simulate the data acquisiton from sensors
+            settings.Kalman             = false;  % Switch on to run the kalman algorithm - note, also to run the airbrakes control algorithm this is needed true
+            settings.Ada                = false;  % Switch on to run the apogee detection algorithm
+        
+        case "controlled ascent"
+
+            settings.launchWindow       = false;  % Switch off this to avoid pausing the launch till you press the launch button
+            settings.electronics        = false;  % Switch on when testing with Hardware in the loop HIL - NOT IMPLEMENTED YET, STILL TO BE MERGED
+            settings.ascentOnly         = true;  % Switch on to simulate only the ascent phase untill the apogee
+            settings.ballisticFligth    = true;  % Switch on to simulate the balistic fligth without any parachute
+            settings.control            = true;  % Switch on to simulate the control
+            settings.dataNoise          = true;  % Switch on to simulate the data acquisiton from sensors
+            settings.Kalman             = true;  % Switch on to run the kalman algorithm - note, also to run the airbrakes control algorithm this is needed true
+            settings.Ada                = true;  % Switch on to run the apogee detection algorithm
+
+        case "descent" % WIP    
+
+            settings.launchWindow       = false;  % Switch off this to avoid pausing the launch till you press the launch button
+            settings.electronics        = false;  % Switch on when testing with Hardware in the loop HIL - NOT IMPLEMENTED YET, STILL TO BE MERGED
+            settings.ascentOnly         = true;  % Switch on to simulate only the ascent phase untill the apogee
+            settings.ballisticFligth    = true;  % Switch on to simulate the balistic fligth without any parachute
+            settings.control            = false;  % Switch on to simulate the control
+            settings.dataNoise          = true;  % Switch on to simulate the data acquisiton from sensors
+            settings.Kalman             = true;  % Switch on to run the kalman algorithm - note, also to run the airbrakes control algorithm this is needed true
+            settings.Ada                = true;  % Switch on to run the apogee detection algorithm
+
+        case "ballistic"
+
+            settings.launchWindow       = false;  % Switch off this to avoid pausing the launch till you press the launch button
+            settings.electronics        = false;  % Switch on when testing with Hardware in the loop HIL - NOT IMPLEMENTED YET, STILL TO BE MERGED
+            settings.ascentOnly         = true;  % Switch on to simulate only the ascent phase untill the apogee
+            settings.ballisticFligth    = true;  % Switch on to simulate the balistic fligth without any parachute
+            settings.control            = false;  % Switch on to simulate the control
+            settings.dataNoise          = true;  % Switch on to simulate the data acquisiton from sensors
+            settings.Kalman             = true;  % Switch on to run the kalman algorithm - note, also to run the airbrakes control algorithm this is needed true
+            settings.Ada                = true;  % Switch on to run the apogee detection algorithm
+
+        case "full flight"
+
+            settings.launchWindow       = false;  % Switch off this to avoid pausing the launch till you press the launch button
+            settings.electronics        = false;  % Switch on when testing with Hardware in the loop HIL - NOT IMPLEMENTED YET, STILL TO BE MERGED
+            settings.ascentOnly         = true;  % Switch on to simulate only the ascent phase untill the apogee
+            settings.ballisticFligth    = true;  % Switch on to simulate the balistic fligth without any parachute
+            settings.control            = true;  % Switch on to simulate the control
+            settings.dataNoise          = true;  % Switch on to simulate the data acquisiton from sensors
+            settings.Kalman             = true;  % Switch on to run the kalman algorithm - note, also to run the airbrakes control algorithm this is needed true
+            settings.Ada                = true;  % Switch on to run the apogee detection algorithm
+
+    end
+
+elseif conf.HIL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    settings.launchWindow       = true;  % Switch off this to avoid pausing the launch till you press the launch button
+    settings.electronics        = true;  % Switch on when testing with Hardware in the loop HIL - NOT IMPLEMENTED YET, STILL TO BE MERGED
+    settings.Kalman             = false;  % Switch on to run the kalman algorithm - note, also to run the airbrakes control algorithm this is needed true
+    settings.Ada                = false;  % Switch on to run the apogee detection algorithm
+    
+    switch conf.scenario
+     
+        case "free ascent" 
+            
+            error('free ascent and Hardware In the Loop are not compatible scenarios')
+            
+        case "controlled ascent"
+
+            settings.ascentOnly         = true;  % Switch on to simulate only the ascent phase untill the apogee
+            settings.ballisticFligth    = true;  % Switch on to simulate the balistic fligth without any parachute
+            settings.control            = true;  % Switch on to simulate the control
+            settings.dataNoise          = true;  % Switch on to simulate the data acquisiton from sensors
+           
+        case "descent" % WIP    
+
+            settings.ascentOnly         = true;  % Switch on to simulate only the ascent phase untill the apogee
+            settings.ballisticFligth    = true;  % Switch on to simulate the balistic fligth without any parachute
+            settings.control            = false;  % Switch on to simulate the control
+            settings.dataNoise          = true;  % Switch on to simulate the data acquisiton from sensors
+            
+        case "ballistic"
+
+            settings.ascentOnly         = true;  % Switch on to simulate only the ascent phase untill the apogee
+            settings.ballisticFligth    = true;  % Switch on to simulate the balistic fligth without any parachute
+            settings.control            = false;  % Switch on to simulate the control
+            settings.dataNoise          = true;  % Switch on to simulate the data acquisiton from sensors
+            
+
+        case "full flight"
+
+            settings.ascentOnly         = true;  % Switch on to simulate only the ascent phase untill the apogee
+            settings.ballisticFligth    = true;  % Switch on to simulate the balistic fligth without any parachute
+            settings.control            = true;  % Switch on to simulate the control
+            settings.dataNoise          = true;  % Switch on to simulate the data acquisiton from sensors
+            
+    end
+
+end %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% ALGORITHM TUNING
 settings.tuning = true;                 % [-] True if you want to tune the algorithm
+
 
 %%% uncomment when the MSA toolkit is updated
 

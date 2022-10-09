@@ -2,7 +2,7 @@
 
 structCutter()
 
-Author: Marco Marchesi - CTR iptl
+Author: Marco Marchesi - GNC iptl
         marco.marchesi@skywarder.eu
 
 -       Release: 03/09/2022

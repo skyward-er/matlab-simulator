@@ -323,7 +323,6 @@ else %%% rocket out of the launchpad
 
 end
 
-
 % Quaternions
 OM = [ 0 -p -q -r  ;
        p  0  r -q  ;

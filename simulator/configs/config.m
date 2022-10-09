@@ -16,11 +16,13 @@ SPDX-License-Identifier: GPL-3.0-or-later
 %% 1) MISSION FILE
 configMission;
 
-%% 2) LOAD DATAPATH
+%% 2) SIMULATION SETTINGS
+configFlags;
+
+%% 3) LOAD DATAPATH
 configPath;
 
-%% 3) SIMULATION SETTINGS
-configFlags;
+
 
 %% 4) LAUNCH SETUP
 configLaunchRail;
