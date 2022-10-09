@@ -40,5 +40,8 @@ configControl;
 %% 10) CONTROL PARAMETERS
 configControlParams;
 
-%% 11) DATA EXTRACTION
+%% 11) REFERENCES
+configReferences;
+
+%% 12) DATA EXTRACTION
 configSettings;

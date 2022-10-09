@@ -46,8 +46,6 @@ localRepoPath = '../data/msa-toolkit';
 %% CONFIGs
 
 configSimulator; 
-configControl;
-configReferences;
 matlab_graphics; % thanks Massimiliano Restuccia
 
 
