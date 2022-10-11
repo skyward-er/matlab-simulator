@@ -40,9 +40,7 @@ status = checkLastCommit(msaToolkitURL, localRepoPath, pwd);
 % submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
 
 %% CONFIGs
-configSimulator;
-configControl;
-configReferences;
+config;
 matlab_graphics;
 
 
@@ -51,7 +49,7 @@ rng default
 settings.montecarlo = true;
 
 %% how many simulations
-N_sim = 50; % set to at least 500
+N_sim = 500; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 
 %% stochastic parameters
@@ -190,30 +188,12 @@ for alg_index = 2
         end
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STD_RUN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        [Yf, Tf, t_ada, t_kalman, cpuTimes, flagMatr, data_flight,windParams,ap_ref,qdyn,windMag,windAz] = std_run(settings,contSettings,settings_mont);
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STD_RUN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  
-
-        save_thrust{i}.time = Tf;
-        save_thrust{i}.control = Yf(:,17);
-        save_thrust{i}.position = Yf(:,1:3);
-        save_thrust{i}.speed = Yf(:,4:6);
-        if ~settings.wind.model && ~settings.wind.input
-        save_thrust{i}.windParams = windParams;
-        end
-        if settings.wind.input
-            save_thrust{i}.windMag = windMag;
-            save_thrust{i}.windAz = windAz;
-        end
-        save_thrust{i}.thrust_percentage = thrust_percentage(i);
-        save_thrust{i}.qdyn = qdyn;
-        save_thrust{i}.ap_ref = ap_ref;
-        save_thrust{i}.paroutFlight = data_flight;
-        if settings.HRE
-            save_thrust{i}.t_shutdown = t_shutdown;
-        end
+        [simOutput] = std_runV2(settings,contSettings,settings_mont);
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STD_RUN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        save_thrust{i} = simOutput;
     end
-
+    
+return
     %% RETRIEVE INTERESING PARAMETERS:
 
     N_sim = length(save_thrust); % recall the number, useful if you have to just plot the saved results and you don't know the N_sim you gave
@@ -266,6 +246,9 @@ for alg_index = 2
     %% PLOTS
     
     plotsMontecarlo;
+
+
+    %% SAVE FUNCTION
 
     %% SAVE
     % save plots

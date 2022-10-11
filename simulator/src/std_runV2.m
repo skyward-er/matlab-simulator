@@ -49,7 +49,7 @@ if nargin > 2
     settings.wind.vw = settings_mont.wind.vw;
     settings.wind.ww = settings_mont.wind.ww;
     settings.wind.Az = settings_mont.wind.Az;
-    settings.wind.Ez = settings_mont.wind.El;
+    settings.wind.El = settings_mont.wind.El;
 end
 
 if settings.electronics % global variables slow down a bit the comunication over thread, we don't need these for montecarlo analysis
