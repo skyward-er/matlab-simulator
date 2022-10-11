@@ -1,91 +1,90 @@
-flagEXPORT = false; % do you want to export graphics?
+function std_plots(structIn, settings)
+
 
 %% Control variable: servo control action (percentage of angle max)
-ap_tot_rescale = rescale(c.ap_tot, "InputMin", 0, "InputMax", settings.servo.maxAngle);
+ap_tot_rescale = rescale(structIn.Y(:,17), "InputMin", 0, "InputMax", settings.servo.maxAngle);
 figures.servo_control_action = figure('Name', 'Servo angle after burning phase');
-plot(c.Tf_tot, ap_tot_rescale*100);
+plot(structIn.t, ap_tot_rescale*100);
 grid on;
 xlabel('Time [s]');
 ylabel('Extension [%]');
 title('Servo control action [%]');
 
-if flagEXPORT == true
+if settings.flagExport == true
     exportgraphics(figures.servo_control_action,'report_images\src_control_action.pdf','ContentType','vector')
 end
 
 %% Control variable: servo angle + reference values
 figures.servo_angle = figure('Name', 'Servo angle after burning phase');
-plot(c.Tf_tot, c.ap_tot);
+plot(structIn.t, structIn.Y(:,17));
 hold on; grid on;
-stairs(c.ap_ref_time,c.ap_ref_tot,'r');
+stairs(structIn.ARB_time,structIn.ARB_commanded,'r');
 xlabel('Time [s]');
 ylabel('$\alpha$ [rad]');
 title('Servo angle');
 legend('simulated','reference values')
-if flagEXPORT == true
+
+if settings.flagExport == true
     exportgraphics(figures.servo_angle,'report_images\src_servo_angle.pdf','ContentType','vector')
 end
 
 
-
-
-
 %% Airbrake surface
 figures.arb_exposed_surface = figure('Name', 'Airbrake exposed surface');
-c.dS = settings.arb.surfPol * c.ap_tot;
-plot(c.Tf_tot, c.dS);
+dS = settings.arb.surfPol * structIn.Y(:,17);
+plot(structIn.t, dS);
 grid on;
 xlabel('Time [s]');
 ylabel('dS [m^2]');
 title('Airbrake exposed surface');
 
-if flagEXPORT == true
+if settings.flagExport == true
     exportgraphics(figures.arb_exposed_surface,'report_images\src_arb_exposed_surface.pdf')
 end
 
 %% Trajectory
 figures.trajectory = figure('Name', 'Trajectory');
-plot3(c.Yf_tot(:, 1), c.Yf_tot(:, 2), -c.Yf_tot(:, 3));
+plot3(structIn.Y(:, 1), structIn.Y(:, 2), -structIn.Y(:, 3));
 grid on;
 xlabel('x [m]');
 ylabel('y [m]');
 zlabel('z [m]');
 title('Trajectory');
-if flagEXPORT == true
+if settings.flagExport == true
     exportgraphics(figures.trajectory,'report_images\src_trajectory.pdf')
 end
 %% Velocities w.r.t. time
 figures.velocities = figure('Name', 'Velocities');
-plot(c.Tf_tot, c.Yf_tot(:, 4))
+plot(structIn.t, structIn.Y(:, 4))
 hold on;
-plot(c.Tf_tot, c.Yf_tot(:, 5))
-plot(c.Tf_tot, c.Yf_tot(:, 6))
+plot(structIn.t, structIn.Y(:, 5))
+plot(structIn.t, structIn.Y(:, 6))
 grid on;
 xlabel('Time [s]');
 ylabel('Speed V [m/s]');
 title('Velocities');
 legend('Vx', 'Vy', 'Vz')
 
-if flagEXPORT == true
+if settings.flagExport == true
     exportgraphics(figures.velocities,'report_images\src_velocities.pdf')
 end
 
 %% Mach w.r.t. time
 figures.Mach_number = figure('Name', 'Velocities');
-[~, a, ~, ~] = atmosisa(c.Yf_tot(:, 3));
-v_norm_vec = zeros(length(c.Yf_tot(:, 1)), 1);
+[~, a, ~, ~] = atmosisa(structIn.Y(:, 3));
+v_norm_vec = zeros(length(structIn.Y(:, 1)), 1);
 
-for i = 1:length(c.Yf_tot(:, 1))
-    v_norm_vec(i) = norm([c.Yf_tot(i, 4), c.Yf_tot(i, 5), c.Yf_tot(i, 6)]);
+for i = 1:length(structIn.Y(:, 1))
+    v_norm_vec(i) = norm([structIn.Y(i, 4), structIn.Y(i, 5), structIn.Y(i, 6)]);
 end
 
-plot(c.Tf_tot, v_norm_vec ./ a)
+plot(structIn.t, v_norm_vec ./ a)
 grid on;
 xlabel('Time t [s]');
 ylabel('Mach M(t) [-]');
 title('Velocities');
 legend('Mach')
 
-if flagEXPORT == true
+if settings.flagExport == true
     exportgraphics(figures.Mach_number,'report_images\src_src_Mach_number.pdf')
 end

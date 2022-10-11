@@ -8,7 +8,7 @@ Author: Marco Marchesi - GNC iptl
 -       Release: 03/09/2022
 %}
 
-function structOut = structCutter(structIn,t0,t1,options,freq)
+function structOut = structCutter(structIn,type,t0,t1,options,freq)
 
 %{
 HELP:
@@ -26,28 +26,48 @@ OUTPUT:
 
 %}
 
-if nargin < 4
+if nargin < 5
    
-    options = [];
+    options = [""];
     freq = [];
 
 end
 namesStructIn = fieldnames(structIn);
 
-% remove first samples
-savingValues1 = structIn.(namesStructIn{1})(structIn.(namesStructIn{1})>t0);
-len1 = length(savingValues1);
 
-% remove last samples
-savingValues2 = savingValues1(savingValues1<t1);
-len2 = len1 - length(savingValues2);
+switch type
 
-if length(structIn.(namesStructIn{1}))-len1 == 0 || len1 == 0
-    warning('OCIO! You set time window values out of the timestamp boundaries. Also check if the timestamp is in seconds or microseconds.')
+    case "timestamp"
+        % remove first samples
+        savingValues1 = structIn.(namesStructIn{1})(structIn.(namesStructIn{1})>t0);
+        len1 = length(savingValues1);
+        
+        % remove last samples
+        savingValues2 = savingValues1(savingValues1<t1);
+        len2 = len1 - length(savingValues2);
+        
+        if length(structIn.(namesStructIn{1}))-len1 == 0 || len1 == 0
+            warning('OCIO! You set time window values out of the timestamp boundaries. Also check if the timestamp is in seconds or microseconds.')
+        end
+
+    case "index"
+        
+        % remove first samples
+        len1 = length(structIn.(namesStructIn{1}))-t0;
+        
+        % remove last samples
+        len2 = length(structIn.(namesStructIn{1}))-t1;
+
 end
 
-for i = 1:size(namesStructIn)
-    structOut.(namesStructIn{i}) = structIn.(namesStructIn{i})(end-len1:end-len2);
+% adjust time, then all the others consequently
+structOut.(namesStructIn{1}) = structIn.(namesStructIn{1})(end-len1:end-len2);
+for i = 2:size(namesStructIn)
+    if length(structIn.(namesStructIn{i})) == length(structIn.(namesStructIn{1}))
+        structOut.(namesStructIn{i}) = structIn.(namesStructIn{i})(end-len1:end-len2,:);
+    else
+        structOut.(namesStructIn{i}) = structIn.(namesStructIn{i});
+    end
 end
 
 if options == "resample"
@@ -57,7 +77,7 @@ if options == "resample"
     structOutParz.(namesStructIn{1}) = t_vec;
 
     for i = 2:size(namesStructIn)
-        structOutParz.(namesStructIn{i}) = interp1(structOut.(namesStructIn{1}),structOut.(namesStructIn{i}),t_vec);
+            structOutParz.(namesStructIn{i}) = interp1(structOut.(namesStructIn{1}),structOut.(namesStructIn{i}),t_vec);
     end
     structOut = structOutParz;
 

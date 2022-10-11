@@ -1,4 +1,4 @@
-function [alpha_percentage, t_est_tot, x_est_tot, xp_ada_tot, xv_ada_tot, t_ada_tot] = run_HIL_airbrakes(sensorData, flagsArray)
+function [alpha_percentage, t_est_tot, x_est_tot, xp_ada_tot, xv_ada_tot, t_ada_tot] = run_ARB_HIL(sensorData, flagsArray)
     % alpha_degree  -> percentage opening of the airbrakes (% 0<=alpha_degree<=1)
     % t_est_tot     -> timestamps NAS
     % x_est_tot     -> vettore stato NAS

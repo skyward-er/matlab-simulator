@@ -22,8 +22,6 @@ configFlags;
 %% 3) LOAD DATAPATH
 configPath;
 
-
-
 %% 4) LAUNCH SETUP
 configLaunchRail;
 

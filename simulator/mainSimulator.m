@@ -63,16 +63,13 @@ end
 % Y = State = ( x y z | u v w | p q r | q0 q1 q2 q3 | thetax thetay thetaz | ap_ref ) also for Ya,Yf corresponding to T
 
 % simulation:
-[OUTPUTVARIABLES] = std_run(settings,contSettings);
+[simOutput] = std_runV2(settings,contSettings);
 
-
+%% PLOTS
+std_plots(simOutput,settings)
 
 %% DATA-PRINTING
-
-printOutput;
+printOutput(simOutput,settings);
 
 %% save data
 % save("Simulation_log.mat","Tf","Yf","data_flight")
-
-
- 

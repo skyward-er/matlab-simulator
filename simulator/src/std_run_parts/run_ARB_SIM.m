@@ -1,4 +1,4 @@
-function [ap_ref_new,contSettings,varargout] = run_simulated_airbrakes(sensorData,settings,contSettings,ap_ref_old)
+function [ap_ref_new,contSettings,varargout] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old)
 
 
 %% HELP:
