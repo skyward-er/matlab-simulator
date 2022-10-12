@@ -40,16 +40,15 @@ status = checkLastCommit(msaToolkitURL, localRepoPath, pwd);
 % submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
 
 %% CONFIGs
+conf.script = "simulation";
 config;
-matlab_graphics;
-
 
 %% MONTECARLO SETTINGS
 rng default
 settings.montecarlo = true;
 
 %% how many simulations
-N_sim = 500; % set to at least 500
+N_sim = 2; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 
 %% stochastic parameters
@@ -58,7 +57,7 @@ switch simulationType_thrust
 
     case "gaussian"
 
-        sigma_t = (1.20-1)/3;             % thrust_percentage standard deviation
+        sigma_t = (1.50-1)/3;             % thrust_percentage standard deviation
         mu_t = 1;                         % thrust_percentage mean value
 
         thrust_percentage = normrnd(mu_t,sigma_t,N_sim,1);       %generate normally distributed values ( [0.8 1.20] = 3sigma) % serve il toolbox
@@ -120,12 +119,6 @@ contSettings.deltaZ_change = 2;                         % change reference every
 % algorithms
 algorithm_vec = [ "interp"; "PID_2021"; "shooting" ;"NoControl"]; % interpolation, PID change every 2s, shooting, no control
 
-%% which montecarlo do you want to run?
-
-run_Thrust = true;
-run_Filter = false;
-
-
 %% do you want to save the results?
 
 flagSaveOffline = input('Do you want to save the results offline? ("yes" or "no"): ','s');
@@ -152,20 +145,25 @@ contSettings.deltaZfilter = 250; % every deltaZfilter the filter coefficient is 
 settings.wind.model = false;
 settings.wind.input = true; % occhio che per ora non è settato esternamente con le montecarlo, quindi se questo viene settato a true abbiamo solamente incertezza sulla spinta.
 
+clearvars   msaToolkitURL Itot
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%CONFIG%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 settings_mont_init = struct('x',[]);
 
 % start simulation
-for alg_index = 2
+for alg_index = 1
 
     contSettings.algorithm = algorithm_vec(alg_index);
 
     %save arrays
     save_thrust = cell(size(stoch.thrust,1),1);
     apogee.thrust = [];
-
-
+    N_ApogeeWithinTarget = zeros(N_sim,1);
+    wind_Mag = zeros(N_sim,1);
+    wind_el = zeros(N_sim,1);
+    wind_az = zeros(N_sim,1);
+    
     parfor i = 1:N_sim
         settings_mont = settings_mont_init;
 %         contSettings_mont = contSettings;
@@ -188,45 +186,41 @@ for alg_index = 2
         end
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STD_RUN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        [simOutput] = std_runV2(settings,contSettings,settings_mont);
+        [simOutput] = std_run(settings,contSettings,settings_mont);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STD_RUN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         save_thrust{i} = simOutput;
+
+        
+
     end
-    
-return
+     
+clearvars   i l j jj crossCase
+
     %% RETRIEVE INTERESING PARAMETERS:
 
-    N_sim = length(save_thrust); % recall the number, useful if you have to just plot the saved results and you don't know the N_sim you gave
-
-    wind_Mag = zeros(N_sim,1);
-    wind_el = zeros(N_sim,1);
-    wind_az = zeros(N_sim,1);
-
-    N_ApogeeWithinTarget = 0;
-
     for i = 1:N_sim
-        % apogee
-        apogee.thrust(i) = max(-save_thrust{i}.position(:,3));
-        % radius of apogee (horizontal) from the initial point
-        apogee.radius(i) = sqrt(save_thrust{i}.position(end,1)^2+save_thrust{i}.position(end,2)^2);
-        % horizontal speed at apogee
-        apogee.horizontalSpeed(i) = norm(save_thrust{i}.speed(end,1:3)); % in theory this is the body frame, but as the last point is the apogee we should have only  horizontal velocity, so all the components must be taken
-        if ~settings.wind.model && ~settings.wind.input
-        % wind magnitude
-        wind_Mag(i) = norm([save_thrust{i}.windParams(1), save_thrust{i}.windParams(2), save_thrust{i}.windParams(3)]);
-        % wind azimuth
-        wind_az(i) = save_thrust{i}.windParams(4);
-        %wind elevation
-        wind_el(i) = save_thrust{i}.windParams(5);
-        end
-        if settings.wind.input
-            
-        end
-        % within +-50 meters target apogees:
-        if abs(apogee.thrust(i) - settings.z_final)<50
-            N_ApogeeWithinTarget = N_ApogeeWithinTarget +1; % save how many apogees sit in the +-50 m from target
-        end
+            % apogee
+            apogee.thrust(i) = save_thrust{i}.apogee_coordinates(3);
+            % radius of apogee (horizontal) from the initial point
+            apogee.radius(i) = save_thrust{i}.apogee_radius;
+            % horizontal speed at apogee
+            apogee.horizontalSpeed(i) = norm(save_thrust{i}.Y(end,4:6)); % in theory this is the body frame, but as the last point is the apogee we should have only  horizontal velocity, so all the components must be taken
+            if ~settings.wind.model && ~settings.wind.input
+            % wind magnitude
+            wind_Mag(i) = save_thrust{i}.windMag;
+            % wind azimuth
+            wind_az(i) = save_thrust{i}.windAz;
+            %wind elevation
+            wind_el(i) = save_thrust{i}.windEl;
+            end
+    
+            % within +-50 meters target apogees:
+            if abs(apogee.thrust(i) - settings.z_final)<50
+                N_ApogeeWithinTarget = N_ApogeeWithinTarget +1; % save how many apogees sit in the +-50 m from target
+            end
     end
+
+    
 
     apogee.thrust_mean = mean(apogee.thrust);
     apogee.thrust_std = std(apogee.thrust);
@@ -243,6 +237,10 @@ return
 
     apogee.accuracy = N_ApogeeWithinTarget/N_sim*100; % percentage, so*100
 
+    for i = 1:N_sim
+        save_thrust{i}.mu = mean(apogee.thrust(1:i));
+        save_thrust{i}.sigma = std(apogee.thrust(1:i));
+    end
     %% PLOTS
     
     plotsMontecarlo;

@@ -42,3 +42,19 @@ i           =       1;                                                      % In
 sensorData.kalman.pn_prec = settings.ada.p_ref;                             % settings for ADA and KALMAN
 % ap_ref_vec  = zeros(nmax, 2);                                               % Matrix N x 2 to save reference angle vector
 % ap_ref_time = zeros(nmax, 1);                                               % Vector of time reference for air brakes
+
+%% ADA initial conditions
+
+if settings.flagADA
+    ada_prev  =   settings.ada.x0;
+    Pada_prev =   settings.ada.P0;
+end
+
+%% NAS initial conditions
+
+if settings.flagNAS
+    x_prev    =  [X0; V0; Q0(2:4); Q0(1);0;0;0];
+    x_prev(3) = -settings.z0;
+    vels_prev =  [0;0;0];
+    P_prev    =   0.01*eye(12);
+end

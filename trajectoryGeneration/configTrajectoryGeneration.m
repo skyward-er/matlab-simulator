@@ -17,8 +17,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 % Choose the mision you want to simulate from rocketsData folder
 % settings.mission = 'Lynx_Roccaraso_September_2021';
 % settings.mission = 'Lynx_Portugal_October_2021';
-% settings.mission = 'Pyxis_Portugal_October_2022';
- settings.mission = 'Pyxis_Roccaraso_September_2022';
+settings.mission = 'Pyxis_Portugal_October_2022';
+%  settings.mission = 'Pyxis_Roccaraso_September_2022';
 
 %% LOAD DATA
 % Retrieve MSA-Toolkit rocket data
@@ -46,12 +46,12 @@ settings.Ndx = 10;                                % [m] Number of trajectories
 settings.Vz_initialPerc = 0.05;                   % [-] Percentage of increasing the initial vertical velocity
 
 %% LAUNCHPAD
-settings.OMEGA = 85*pi/180;                       % [rad] Minimum Elevation Angle, user input in degrees (ex. 80)
-settings.PHI = 0*pi/180;                          % [rad] Minimum Azimuth Angle from North Direction, user input in degrees (ex. 90)
+settings.OMEGA = 83*pi/180;                       % [rad] Minimum Elevation Angle, user input in degrees (ex. 80)
+settings.PHI = 133*pi/180;                        % [rad] Minimum Azimuth Angle from North Direction, user input in degrees (ex. 90)
 
 %% WIND
-settings.wind.MagMin = 0.01;                      % [m/s] Minimum Magnitude
-settings.wind.MagMax = 0.01;                      % [m/s] Maximum Magnitude
+settings.wind.MagMin = 0;                         % [m/s] Minimum Magnitude
+settings.wind.MagMax = 0;                         % [m/s] Maximum Magnitude
 settings.wind.ElMin = 0*pi/180;                   % [rad] Minimum Elevation, user input in degrees (ex. 0)
 settings.wind.ElMax = 0*pi/180;                   % [rad] Maximum Elevation, user input in degrees (ex. 0) (Max == 90 Deg)
 settings.wind.AzMin = (360)*pi/180;               % [rad] Minimum Azimuth, user input in degrees (ex. 90)

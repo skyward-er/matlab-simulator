@@ -13,35 +13,49 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 
+
+
+
 %% 1) MISSION FILE
 configMission;
 
 %% 2) SIMULATION SETTINGS
+
 configFlags;
+
 
 %% 3) LOAD DATAPATH
 configPath;
 
-%% 4) LAUNCH SETUP
+%% 4) TRAJECTORY GENERATION SETUP
+if conf.script == "trajectory generation"
+    config_TrajectoryGen;
+end
+%% 5) LAUNCH SETUP
 configLaunchRail;
 
-%% 5) WIND DETAILS
+%% 6) WIND DETAILS
 configWind;
 
-%% 7) PLOTS?
+%% 8) PLOTS?
 configPlots;
 
-%% 8) MONTECARLO?
+%% 9) MONTECARLO?
 configMontecarlo;
 
-%% 9) CONTROL
+%% 10) CONTROL
 configControl;
 
-%% 10) CONTROL PARAMETERS
+%% 11) CONTROL PARAMETERS
 configControlParams;
 
-%% 11) REFERENCES
+%% 12) REFERENCES
 configReferences;
 
-%% 12) DATA EXTRACTION
+%% 13) SPECIAL CONDITIONS?
+config_SpecialConditions;
+
+%% 14) DATA EXTRACTION
 configSettings;
+
+

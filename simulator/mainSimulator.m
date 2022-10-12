@@ -45,9 +45,8 @@ localRepoPath = '../data/msa-toolkit';
 
 %% CONFIGs
 
+conf.script = "simulator"; % this defines which configuration scripts to run
 config; 
-matlab_graphics; % thanks Massimiliano Restuccia
-
 
 %% ALGORITHM TUNING
 % basically if this is true sets the randomic value of the wind to the same
@@ -56,14 +55,18 @@ matlab_graphics; % thanks Massimiliano Restuccia
 
 if settings.tuning
 	rng('default')
-end
+end 
+
+%% SET SPECIFIC PARAMETERS FOR A PRE LAUNCH SIMULATION
+
+% config_SpecialConditions;
 
 %% START THE SIMULATION
 % T = vector of time used by ODE, [s] also for Tf Ta
 % Y = State = ( x y z | u v w | p q r | q0 q1 q2 q3 | thetax thetay thetaz | ap_ref ) also for Ya,Yf corresponding to T
 
 % simulation:
-[simOutput] = std_runV2(settings,contSettings);
+[simOutput] = std_run(settings,contSettings);
 
 %% PLOTS
 std_plots(simOutput,settings)

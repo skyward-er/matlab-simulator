@@ -125,14 +125,16 @@ switch contSettings.algorithm % set this value in configControl.m
             else
                 ap_ref_new = ap_base_filter;
             end
-            contSettings.flagFirstControl = false;
+            
             if sensorData.kalman.time>contSettings.Tfilter
                 contSettings.Tfilter = contSettings.Tfilter+contSettings.deltaTfilter;
                 contSettings.filter_coeff = contSettings.filter_coeff/contSettings.filterRatio;
             end
 
         end
+
 end
 
+contSettings.flagFirstControl = false;
 
 

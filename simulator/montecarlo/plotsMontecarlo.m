@@ -34,7 +34,7 @@ ylabel('Apogee standard deviation')
 %% PLOT CONTROL
 save_plotControl = figure;
 for i = floor(linspace(1,N_sim,5))
-    plot(save_thrust{i}.time,save_thrust{i}.control)
+    plot(save_thrust{i}.t,save_thrust{i}.Y(:,17))
     hold on; grid on;
 end
 title('Control action')
@@ -99,8 +99,8 @@ end
 %% PLOT TRAJECTORY
 
 save_plotTrajectory = figure;
-for i = 1:round(N_sim/50):size(save_thrust,1)
-    plot3(save_thrust{i}.position(:,1),save_thrust{i}.position(:,2),-save_thrust{i}.position(:,3));
+for i = floor(linspace(1,size(save_thrust,1),500))
+    plot3(save_thrust{i}.Y(:,1),save_thrust{i}.Y(:,2),-save_thrust{i}.Y(:,3));
     hold on; grid on;
 end
 title('Trajectories')
@@ -113,10 +113,10 @@ legend(contSettings.algorithm);
 
 save_plotVelocity = figure;
 for i = 1:size(save_thrust,1)
-    plot(save_thrust{i}.time,save_thrust{i}.speed(:,1));
+    plot(save_thrust{i}.t,save_thrust{i}.Y(:,4));
     hold on; grid on;
-    plot(save_thrust{i}.time,save_thrust{i}.speed(:,2));
-    plot(save_thrust{i}.time,save_thrust{i}.speed(:,3));
+    plot(save_thrust{i}.t,save_thrust{i}.Y(:,5));
+    plot(save_thrust{i}.t,save_thrust{i}.Y(:,6));
 end
 title('Velocities')
 xlabel('Vx_b [m/s]')
@@ -197,7 +197,7 @@ save_dynamic_pressure_and_forces = figure;
 %%%%%%%%%%% time - dynamic pressure
 subplot(1,2,1)
 for i = floor(linspace(1,N_sim,5))
-    plot(save_thrust{i}.time,save_thrust{i}.qdyn);
+    plot(save_thrust{i}.t,save_thrust{i}.qdyn);
     grid on; hold on;
 end
 title('Dynamic Pressure')
@@ -207,10 +207,10 @@ ylabel('Dynamic Pressure [Pa]')
 %%%%%%%%%%% time - aerodynamic load
 subplot(1,2,2)
 for i = floor(linspace(1,N_sim,5))
-    dS = 3*0.009564 * save_thrust{i}.control;
+    dS = 3*0.009564 * save_thrust{i}.Y(17);
     force = save_thrust{i}.qdyn .* dS;
     force_kg = force/9.81;
-    plot(save_thrust{i}.time,force_kg);
+    plot(save_thrust{i}.t,force_kg);
     grid on; hold on;
 end
 title('Aerodynamic load')

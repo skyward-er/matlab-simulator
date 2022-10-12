@@ -37,16 +37,17 @@ addpath(genpath(commonFunctionsPath));
 %% CHECK IF MSA-TOOLKIT IS UPDATED
 msaToolkitURL = 'https://github.com/skyward-er/msa-toolkit';
 localRepoPath = '../data/msa-toolkit';
-status = checkLastCommit(msaToolkitURL, localRepoPath, pwd);
-submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
+% status = checkLastCommit(msaToolkitURL, localRepoPath, pwd);
+% submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
 
-%% LOAD DATA
-configTrajectoryGeneration;
-matlab_graphics;
+% %% LOAD DATA
+conf.script = "trajectory generation"; % this defines which configuration script to run
+config;
 
 %% AIRBRAKES RADIAL EXTENSION
 % Airbrakes extension vector
-deltaX_values = linspace(settings.hprot(1), settings.hprot(end), settings.Ndx);
+delta_alpha_values  = linspace(settings.servo.minAngle,settings.servo.maxAngle,11);
+[deltaX_values] = extension_From_Angle(delta_alpha_values, settings);
 % I exclude the limits for robustness
 % deltaX_values = deltaX_values(2:end-1);
 
@@ -141,7 +142,7 @@ end
 
 %% PLOT
 if settings.plots
-    plots
+    tg_plots
 end
 
 %% DELETE USELESS FILES

@@ -4,6 +4,7 @@ set_wind
 std_run - wind generation settings
 
 %}
+function [uw, vw, ww, Az, El, Mag] = std_setWind(settings)
 
 switch settings.windModel 
 
@@ -15,14 +16,11 @@ switch settings.windModel
             ww = settings.wind.ww;
             Az = settings.wind.Az;
             El = settings.wind.El;
-    
-            settings.constWind = [uw, vw, ww];
-            saveConstWind =  [uw, vw, ww, Az, El];
         else 
-            [uw, vw, ww, Az, El] = windConstGenerator(settings.wind);
-            settings.constWind = [uw, vw, ww];
-            saveConstWind =  [uw, vw, ww, Az, El];
+            [uw, vw, ww, Az, El] = windConstGenerator(settings.wind);       
         end
+        
+        Mag = sqrt(uw^2 + vw^2 + ww^2);
 
     case "multiplicative"
        
@@ -31,7 +29,5 @@ switch settings.windModel
         R = Mag*angle2dcm(Az, 0, 0, 'ZYX');
         uw = R(1,1);
         vw = R(1,2);
-        ww = R(1,3);
-        settings.constWind = [uw, vw, ww];
-
+        ww = R(1,3);       
 end

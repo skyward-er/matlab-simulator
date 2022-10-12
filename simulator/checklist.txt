@@ -1,0 +1,34 @@
+%{
+
+-------------PRELAUNCH CHECKLIST-----------
+
+1) check coefficients for the controller algorithm
+2) check the reference trajectories are generated for the correct target
+3) check the reference trajectories are rescaled in the correct way (10m
+steps)
+4) check the shadow modes
+5) check the sensors are correctly connected
+6) check the sensors are correctly initialized in obs
+
+
+
+------------parameters for euroc 2022----------
+
+parameter       2021        2022
+
+
+for next time: 
+set the montecarlo so that it can give back some parameters of interest,
+which are: 
++ montecarlo:
+    - TIME at which we get to MACH.CONTROL -> VERY IMPORTANT for the shadow modes
+    - TIME at which we get to apogee -> also very important for the shadow modes
+    - set that multiplicative wind can work
++ write new members in the virginia sheet
++ set the requirements in the word file of requirements
+
+
+thrust 1, time 1 -> tempo= 5.7 per mach 0.85, ( apogeo 2999)
+thrust = 1.05, time = 1.05 -> tempo = 5.7 per mach 0.97 (apogeo 3475)
+
+%}
