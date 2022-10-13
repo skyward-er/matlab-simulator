@@ -1,4 +1,4 @@
-function [struct_out] = std_runV2(settings, contSettings, varargin)
+function [struct_out] = std_run(settings, contSettings, varargin)
 %{
 
 STD_RUN_BALLISTIC - This function runs a standard ballistic (non-stochastic) simulation

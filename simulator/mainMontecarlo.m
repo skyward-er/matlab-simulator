@@ -48,7 +48,7 @@ rng default
 settings.montecarlo = true;
 
 %% how many simulations
-N_sim = 2; % set to at least 500
+N_sim = 5000; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 
 %% stochastic parameters
@@ -67,25 +67,9 @@ switch simulationType_thrust
         %%% settato al'interno di simulationData.m -> possibili errori per
         %%% le simulazioni con exp_thrust aumentato se si vuole fare
         %%% spegnimento dell'ibrido
-        impulse_uncertainty = normrnd(1,0.05/3,N_sim,1);
+        impulse_uncertainty = normrnd(1,0.1/3,N_sim,1);
         stoch.expThrust = diag(impulse_uncertainty)*((1./thrust_percentage) * settings.motor.expTime);          % burning time - same notation as thrust here
 
-        %%% check on thrust - all of them must have the same total impulse
-        for i = 1:size(stoch.thrust,1)
-            %     plot(stoch.expThrust(i,:),stoch.thrust(i,:))
-            %     hold on;
-            %     grid on;
-            %     legend
-            %%% check on total impulse: trapezoidal integration:
-            for jj = 1:length(stoch.thrust(i,:))-1
-                deltaT = stoch.expThrust(i,jj+1)-stoch.expThrust(i,jj);
-                I(jj) = (stoch.thrust(i,jj+1)+stoch.thrust(i,jj))*deltaT/2;
-            end
-            Itot(i) = sum(I);
-        end
-        if Itot - Itot(1)>0.0001
-            warning('The thrust vector does not return equal total impulse for each simulation')
-        end
         %%% wind parameters
         settings.wind.MagMin = 0;                                               % [m/s] Minimum Wind Magnitude
         settings.wind.MagMax = 10;                                               % [m/s] Maximum Wind Magnitude
@@ -109,11 +93,6 @@ switch simulationType_thrust
         stoch.expThrust = (1./thrust_percentage) * settings.motor.expTime;          % burning time - same notation as thrust here
 end
 
-
-contSettings.deltaZ_change = 2;                         % change reference every 2seconds
-
-
-
 %% save arrays
 
 % algorithms
@@ -134,16 +113,6 @@ displayIter = true; % set to false if you don't want to see the iteration number
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%CONFIG%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % other parameters you want to set for the particular simulation:
-
-contSettings.N_forward = 0;
-contSettings.filter_coeff = 0.3; % 1 = no filter
-contSettings.interpType = 'linear'; % set if the interp algorithm does a linear or sinusoidal interpolation of the references
-contSettings.filterRatio = 2;
-contSettings.Zfilter = 2000; % starting point from which the coefficient is diminished.
-contSettings.deltaZfilter = 250; % every deltaZfilter the filter coefficient is diminished by a ratio of filterRatio
-
-settings.wind.model = false;
-settings.wind.input = true; % occhio che per ora non è settato esternamente con le montecarlo, quindi se questo viene settato a true abbiamo solamente incertezza sulla spinta.
 
 clearvars   msaToolkitURL Itot
 
@@ -212,6 +181,8 @@ clearvars   i l j jj crossCase
             wind_az(i) = save_thrust{i}.windAz;
             %wind elevation
             wind_el(i) = save_thrust{i}.windEl;
+            %reached apogee time
+            apogee.times(i) = save_thrust{i}.apogee_time;
             end
     
             % within +-50 meters target apogees:
@@ -266,14 +237,7 @@ clearvars   i l j jj crossCase
     end
     if flagSaveOnline == "yes"
         if computer == "Marco" || computer == "marco"
-            switch  settings.mission
-
-                case 'Pyxis_Portugal_October_2022'
-                    folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\task 1 - motor model\montecarlo e tuning\"+settings.mission+"\wind_input\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % online
-
-                case 'Pyxis_Roccaraso_September_2022'
-                    folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\task 1 - motor model\montecarlo e tuning\"+settings.mission+"\z_f_"+settings.z_final+"\wind_input\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % online
-            end
+            folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\AIR BRAKES\MONTECARLO E TUNING\"+settings.mission+"\wind_input\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % online
         end
     end
 
@@ -287,6 +251,8 @@ clearvars   i l j jj crossCase
             saveas(save_thrust_apogee_probability,folder(i)+"\ApogeeProbabilityPlot")
             saveas(save_thrust_apogee_mean,folder(i)+"\ApogeeMeanOverNsimPlot")
             saveas(save_thrust_apogee_std,folder(i)+"\ApogeeStdOverNsimPlot")
+            saveas(save_arb_deploy_histogram,folder(i)+"\ARBdeployTimeHistogram")
+            saveas(save_apogee_histogram,folder(i)+"\ApogeeTimeHistogram")
             if ~settings.wind.model && ~settings.wind.input
             saveas(save_apogee_3D,folder(i)+"\ApogeeWindThrust")
             end

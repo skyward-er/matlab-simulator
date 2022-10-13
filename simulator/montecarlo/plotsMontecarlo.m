@@ -11,6 +11,44 @@ ylabel('Number of apogees in the same interval')
 title('Reached apogee distribution')
 legend('Range of acceptable apogees')
 
+%% AIRBRAKE DEPLOY TIME HISTOGRAM - this plot is particularly interesting for the shadowmodes
+arb_deploy_time_vec = zeros(N_sim,1);
+for i = 1: N_sim
+    arb_deploy_time_vec(i) = save_thrust{i}.ARB_allowanceTime;
+end
+arb_deploy_time_MEAN = mean(arb_deploy_time_vec);
+arb_deploy_time_MODE = mode(arb_deploy_time_vec);
+N_histCol = min(N_sim,100); % best looking if we don't go higher than 200, but if N_sim is less than 200 it gives error if we set it to 200 
+% figure
+save_arb_deploy_histogram = figure;
+histogram(arb_deploy_time_vec,N_histCol)
+hold on; grid on;
+xline(arb_deploy_time_MEAN,'r--')
+xline(arb_deploy_time_MODE,'g--')
+xlabel('Apogee value [m]')
+ylabel('Number of apogees in the same interval')
+title('Reached apogee distribution')
+legend('Airbrakes time deploy','Mean', 'Median')
+
+%% APOGEE TIME HISTOGRAM - this plot is particularly interesting for the shadowmodes
+apogee_time_vec = zeros(N_sim,1);
+for i = 1: N_sim
+    apogee_time_vec(i) = save_thrust{i}.apogee_time;
+end
+apogee_time_MEAN = mean(apogee_time_vec);
+apogee_time_MODE = mode(apogee_time_vec);
+N_histCol = min(N_sim,100); % best looking if we don't go higher than 200, but if N_sim is less than 200 it gives error if we set it to 200 
+% figure
+save_apogee_histogram = figure;
+histogram(apogee_time_vec,N_histCol)
+hold on; grid on;
+xline(apogee_time_MEAN,'r--')
+xline(apogee_time_MODE,'g--')
+xlabel('Apogee value [m]')
+ylabel('Number of apogees in the same interval')
+title('Reached apogee distribution')
+legend('Airbrakes time deploy','Mean', 'Median')
+
 %% PLOT MEAN
 save_thrust_apogee_mean = figure;
 mu = zeros(N_sim,1);

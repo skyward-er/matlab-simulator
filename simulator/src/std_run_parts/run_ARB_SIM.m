@@ -56,11 +56,8 @@ switch contSettings.algorithm % set this value in configControl.m
         init.options = optimoptions("lsqnonlin","Display","off");
         
         if not(contSettings.flagFilter)
-        [ap_ref_new] = control_Shooting([-sensorData.kalman.z-settings.z0,sensorData.kalman.vz],ap_ref_new,settings,contSettings.coeff_Cd,settings.arb,init);
-   
-
-         else
-
+            [ap_ref_new] = control_Shooting([-sensorData.kalman.z-settings.z0,sensorData.kalman.vz],ap_ref_new,settings,contSettings.coeff_Cd,settings.arb,init);
+        else
             [ap_base_filter] = control_Shooting([-sensorData.kalman.z-settings.z0,sensorData.kalman.vz],ap_ref_new,settings,contSettings.coeff_Cd,settings.arb,init);
 
             % filter control action

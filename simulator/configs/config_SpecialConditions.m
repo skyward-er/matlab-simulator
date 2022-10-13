@@ -13,7 +13,16 @@ conf.motor_Thrust_Factor = 1.; % default: = 1;
 conf.motor_Time_Factor = 1; % default: 
 
 % mach control
-conf.mach_control = settings.MachControl; % default: = settings.MachControl;
+conf.mach_control = 0.85; % default: = settings.MachControl;
+
+% steps in advance
+contSettings.N_forward = 2;
+contSettings.interpType = 'linear'; % set if the interp algorithm does a linear or sinusoidal interpolation of the references
+contSettings.filterRatio = 2;
+
+settings.wind.model = false;
+settings.wind.input = true; % occhio che per ora non è settato esternamente con le montecarlo, quindi se questo viene settato a true abbiamo solamente incertezza sulla spinta.
+
 
 
 

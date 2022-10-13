@@ -20,11 +20,7 @@ switch settings.mission
         contSettings.delta_S_available = (0.0:0.001/4:0.009564*settings.servo.maxAngle)'; 
         
         %filtering
-        contSettings.filterRatio = 2;
-        
-        contSettings.Zfilter = 2000; % starting point from which the coefficient is diminished.
-        contSettings.deltaZfilter = 250; % every deltaZfilter [m] the filter coefficient is diminished by a ratio of filterRatio
-        
+        contSettings.filterRatio = 2;      
         contSettings.Tfilter = 12; % starting time from which the coefficient is diminished.
         contSettings.deltaTfilter = 2.5; % every deltaTfilter [s] the filter coefficient is diminished by a ratio of filterRatio
     
@@ -34,6 +30,7 @@ switch settings.mission
         
         % filtering
         contSettings.filterRatio = 2;
+
         contSettings.Zfilter = 600; % starting point from which the coefficient is diminished.
         contSettings.deltaZfilter = 100; % every deltaZfilter the filter coefficient is diminished by a ratio of filterRatio
         
