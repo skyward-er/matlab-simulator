@@ -72,9 +72,11 @@ initialCond = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf; ap0;
 Y0 = initialCond;
 
 %% WIND GENERATION
-[uw, vw, ww, ~ ,~, Mag] = std_setWind(settings);
+[uw, vw, ww, Az , El, Mag] = std_setWind(settings);
 settings.constWind = [uw, vw, ww];
 settings.wind.Mag = Mag;
+settings.wind.El = El;
+settings.wind.Az = Az;
 
 %% SENSORS INIT
 [s, c] = initSensors(settings.lat0, settings.lon0, settings.z0);
@@ -218,14 +220,10 @@ while settings.flagStopIntegration && n_old < nmax                              
 
     end
 
+    % airbrakes reference update (for the ODE)
     ap_ref = [ ap_ref_old ap_ref_new ];
     ap_ref_vec(iTimes,:) = ap_ref;
     ap_ref_time(iTimes) = t1; % because it is commanded in the next step, so we save the step final time
-
-    % Save the values to plot them
-    %         c.vz_tot(i)    =  sensorData.kalman.vz;
-    %         c.z_tot(i)     =  sensorData.kalman.z;
-
 
     % vertical velocity and position
     if settings.flagAscent || (not(settings.flagAscent) && settings.ballisticFligth)
@@ -315,8 +313,6 @@ if settings.launchWindow
     fclose('all');
 end
 
-cpuTimes = cpuTimes(1:iTimes);
-
 %% ASSEMBLE TOTAL FLIGHT STATE
 Yf = Yf_tot(1:n_old, :);
 Tf = Tf_tot(1:n_old, :);
@@ -328,33 +324,7 @@ else
 end
 
 t_ada    = settings.ada.t_ada;
-
-if settings.flagNAS
-    i_apo_est= max(find(t_est_tot < max(Tf(Tf<24.8))));  % actually I don't know what is this 24.8
-end
 settings.flagMatr = settings.flagMatr(1:n_old, :);
-
-%% SAVE THE VARIABLES FOR PLOT PURPOSE
-% kalman state plot
-if settings.flagNAS
-    c.x_est_tot    =  x_est_tot;
-    c.vels_tot     =  vels_tot;
-    c.t_est_tot    =  t_est_tot;
-    c.i_apo_est    =  i_apo_est;
-end
-
-% ada state for plot
-if settings.flagADA
-    c.xp_ada_tot   =  xp_ada_tot;
-    c.xv_ada_tot   =  xv_ada_tot;
-    c.t_ada_tot    =  t_ada_tot;
-end
-
-% c.plot_ada     =  settings.flagADA && false;
-% c.plot_sensors =  settings.dataNoise && false;
-% c.plot_kalman  =  settings.flagNAS && false;
-% c.plot_control =  settings.control && true;
-
 
 %% other useful parameters:
 qdyn = zeros(size(Yf,1),1);
@@ -379,9 +349,7 @@ if not(settings.montecarlo)
     end
 end
 
-
 %% extract parameters:
-
 [~, idx_apo] = max(-Yf_tot(:,3));
 
 %% output
