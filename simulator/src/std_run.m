@@ -340,15 +340,6 @@ else
     dataBallisticFlight = [];
 end
 
-%% SAVE
-if not(settings.montecarlo)
-    mkdir('results')
-    save('results/Ground_truth.mat','sensorData');
-    if settings.dataNoise
-        save('results/Sensors.mat','c');
-    end
-end
-
 %% extract parameters:
 [~, idx_apo] = max(-Yf_tot(:,3));
 
