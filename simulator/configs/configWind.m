@@ -34,6 +34,7 @@ if conf.script == "simulator"
             settings.wind.HourMax = 4;                     % [h] Maximum Hour of the day
             settings.wind.ww = 0;                          % [m/s] Vertical wind speed
             
+            
     
         case "multiplicative"
     
@@ -71,4 +72,7 @@ elseif conf.script == "trajectory generation"
             settings.wind.ElMax = 0*pi/180;                   % [rad] Maximum Elevation, user input in degrees (ex. 0) (Max == 90 Deg)
             settings.wind.AzMin = (360)*pi/180;               % [rad] Minimum Azimuth, user input in degrees (ex. 90)
             settings.wind.AzMax = (360)*pi/180;               % [rad] Maximum Azimuth, user input in degrees (ex. 90)
+            
+            settings.wind.model = false;
+            settings.wind.input = false;
 end

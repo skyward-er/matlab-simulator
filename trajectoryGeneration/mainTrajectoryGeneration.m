@@ -81,14 +81,7 @@ Y0 = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf];
 [uw, vw, ww, ~] = windConstGenerator(settings.wind);
 settings.constWind = [uw, vw, ww];
 
-%%% running the preliminar simulation that stops when air brakes open
-[T, Y] = ode113(@ascent, [0, 60], Y0, settings.ode.optionsascTrajGen, settings);
-vels = quatrotate(quatconj(Y(end, 10:13)),Y(end, 4:6));
-
-Vz_initial = -vels(3);
 Z_initial = 0;
-% Increasing the value
-%Vz_initial = Vz_initial * (1 + settings.Vz_initialPerc);
 
 %% INTERPOLATED CA
 coeffsCA = load(strcat(dataPath, '/CAinterpCoeffs.mat'));
