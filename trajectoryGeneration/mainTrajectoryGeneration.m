@@ -19,8 +19,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 
-% clearvars -except ZTARGET_CYCLE;
-clear all; close all; clc;
+
+clearvars; close all; clc;
 
 filePath = fileparts(mfilename('fullpath'));
 currentPath = pwd;
@@ -34,6 +34,9 @@ addpath(genpath(currentPath));
 % Common Functions path
 addpath(genpath(commonFunctionsPath));
 
+% Config path
+addpath('../simulator/configs/');
+
 %% CHECK IF MSA-TOOLKIT IS UPDATED
 msaToolkitURL = 'https://github.com/skyward-er/msa-toolkit';
 localRepoPath = '../data/msa-toolkit';
@@ -46,7 +49,7 @@ config;
 
 %% AIRBRAKES RADIAL EXTENSION
 % Airbrakes extension vector
-delta_alpha_values  = linspace(settings.servo.minAngle,settings.servo.maxAngle,11);
+delta_alpha_values  = linspace(settings.servo.minAngle,settings.servo.maxAngle,2);
 [deltaX_values] = extension_From_Angle(delta_alpha_values, settings);
 % I exclude the limits for robustness
 % deltaX_values = deltaX_values(2:end-1);
@@ -55,7 +58,8 @@ delta_alpha_values  = linspace(settings.servo.minAngle,settings.servo.maxAngle,1
 % Impose the final condition I want to reach.
 
 Vz_final =  settings.Vz_final;
-z_final  =  settings.z_final;
+z_final_ABR  =  settings.z_final_ABR;
+z_final_MTR  =  settings.z_final_MTR;
 Vx_final =  settings.Vx_final;   
 x_final  =  settings.x_final;  
 Vy_final =  settings.Vy_final;  
@@ -87,24 +91,32 @@ Z_initial = 0;
 coeffsCA = load(strcat(dataPath, '/CAinterpCoeffs.mat'));
 
 %% NEEDED PARAMETERS
-settingsSim.ms = settings.ms;
+
 settingsSim.g0 = settings.g0;
 settingsSim.z0 = settings.z0;
 settingsSim.C  = settings.C;
 
 %% COMPUTE THE TRAJECTORIES BY BACK INTEGRATION
-Ntraj = length(deltaX_values);
+Ntraj_ABR = length(deltaX_values);
+N_mass = 10;                            % number of different Mass values
+
 deltaX = 0;
+m = linspace(settings.ms,settings.m0,N_mass);
 
 % Pre-allocation
-trajectories = cell(Ntraj, 1);
-trajectories_saving = cell(Ntraj, 1);
+trajectories_ARB = cell(Ntraj_ABR, N_mass);
+trajectories_saving_ARB = cell(Ntraj_ABR, N_mass);
+trajectories_MTR = cell(N_mass,1);
+trajectories_saving_MTR = cell(N_mass,1);
 
-for index = 1:Ntraj
+for j = 1:N_mass
+  settingsSim.m = m(j);
+for index = 1:Ntraj_ABR
 
 deltaX = deltaX_values(index);
 
 % Start simulink simulation
+z_final = z_final_ABR;
 generation = sim('Trajectory_generation');
 
 % Get the output of the simulation
@@ -118,11 +130,31 @@ VY_ref  = flip(generation.Vy_simul);
 cd      = flip(generation.cd);
 
 % Save the trajectories in a struct. Easier to plot
-trajectories{index}        = struct('t_ref', t_ref,  'Z_ref',  Z_ref, 'VZ_ref', VZ_ref,  'X_ref',  X_ref, 'VX_ref', VX_ref,  'Y_ref',  Y_ref, 'VY_ref', VY_ref);
-trajectories_saving{index} = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref',  X_ref, 'VX_ref', VX_ref,  'Y_ref',  Y_ref, 'VY_ref', VY_ref);
+trajectories_ARB{index,j}        = struct('t_ref', t_ref,  'Z_ref',  Z_ref, 'VZ_ref', VZ_ref,  'X_ref',  X_ref, 'VX_ref', VX_ref,  'Y_ref',  Y_ref, 'VY_ref', VY_ref);
+trajectories_saving_ARB{index,j} = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref',  X_ref, 'VX_ref', VX_ref,  'Y_ref',  Y_ref, 'VY_ref', VY_ref);
 
 end
 
+deltaX = 0;
+z_final = z_final_MTR;
+generation = sim('Trajectory_generation');
+
+% Get the output of the simulation
+t_ref   = flip(30 - generation.tout); % (30seconds - time) In this way a plot the trajectories in a clearer way
+Z_ref   = flip(generation.z_simul); 
+VZ_ref  = flip(generation.Vz_simul);
+X_ref   = flip(generation.x_simul); 
+VX_ref  = flip(generation.Vx_simul);
+Y_ref   = flip(generation.y_simul); 
+VY_ref  = flip(generation.Vy_simul);
+cd      = flip(generation.cd);
+
+% Save the trajectories in a struct. Easier to plot
+trajectories_MTR{j}        = struct('t_ref', t_ref,  'Z_ref',  Z_ref, 'VZ_ref', VZ_ref,  'X_ref',  X_ref, 'VX_ref', VX_ref,  'Y_ref',  Y_ref, 'VY_ref', VY_ref);
+trajectories_saving_MTR{j} = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref',  X_ref, 'VX_ref', VX_ref,  'Y_ref',  Y_ref, 'VY_ref', VY_ref);
+
+
+end
 %% SAVING
 
 if ~settings.save
@@ -130,7 +162,7 @@ if ~settings.save
 end
 
 if settings.save
-    save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
+   % save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
 end
 
 %% PLOT
