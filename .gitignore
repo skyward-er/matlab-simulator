@@ -1,3 +1,4 @@
-
-ControlSimualtor/.DS_Store
-*.asv
+**/.DS_Store
+**/*.asv
+**/slprj/**
+**/*.slxc

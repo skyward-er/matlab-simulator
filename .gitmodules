@@ -1,9 +1,3 @@
-[submodule "MSA Toolkit"]
+[submodule "data/msa-toolkit"]
 	path = data/msa-toolkit
 	url = ../../../afd/msa/msa-toolkit
-[submodule "data/msa-toolkit"]
-	path = data/msa-toolkit
-	url = https://git.skywarder.eu/afd/msa/msa-toolkit.git
-[submodule "data/msa-toolkit"]
-	path = data/msa-toolkit
-	url = git@git.skywarder.eu:afd/msa/msa-toolkit.git
