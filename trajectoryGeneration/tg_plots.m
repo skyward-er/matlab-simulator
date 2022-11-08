@@ -18,60 +18,71 @@ set(groot,'defaultAxesTickLabelInterpreter','latex');
 set(groot,'defaulttextinterpreter','latex');
 set(groot,'defaultLegendInterpreter','latex');
 
-% Z(t)
-figure('Name','Altitude vs Time','NumberTitle','off');
-for i = 1:Ntraj
-    plot(trajectories{i}.t_ref, trajectories{i}.Z_ref);
-    grid on; hold on;
-end
-xlabel('Time [s]'); ylabel('Altitude [m]'); title('Altitude vs Time')
+% % % % Z(t)
+% % % figure('Name','Altitude vs Time','NumberTitle','off');
+% % % for i = 1:Ntraj
+% % %     plot(trajectories{i}.t_ref, trajectories{i}.Z_ref);
+% % %     grid on; hold on;
+% % % end
+% % % xlabel('Time [s]'); ylabel('Altitude [m]'); title('Altitude vs Time')
+% % % 
+% % % % Vz(t)
+% % % figure('Name','Vertical velocity vs Time','NumberTitle','off');
+% % % for i = 1:Ntraj
+% % %     plot(trajectories{i}.t_ref, trajectories{i}.VZ_ref);
+% % %     grid on; hold on;
+% % % end
+% % % xlabel('Time [s]'); ylabel('$V_{z}$ [m/s]'); title('Vertical velocity vs Time')
+% % % 
+% % % % X(t)
+% % % figure('Name','Latitude vs Time','NumberTitle','off');
+% % % for i = 1:Ntraj
+% % %     plot(trajectories{i}.t_ref, trajectories{i}.X_ref);
+% % %     grid on; hold on;
+% % % end
+% % % xlabel('Time [s]'); ylabel('Latitude [m]'); title('Latitude vs Time')
+% % % 
+% % % % Vx(t)
+% % % figure('Name','Horizontal velocity vs Time','NumberTitle','off');
+% % % for i = 1:Ntraj
+% % %     plot(trajectories{i}.t_ref, trajectories{i}.VX_ref);
+% % %     grid on; hold on;
+% % % end
+% % % xlabel('Time [s]'); ylabel('$V_{x}$ [m/s]'); title('Horizontal velocity vs Time')
+% % % 
+% % % % Y(t)
+% % % figure('Name','Latitude vs Time','NumberTitle','off');
+% % % for i = 1:Ntraj
+% % %     plot(trajectories{i}.t_ref, trajectories{i}.Y_ref);
+% % %     grid on; hold on;
+% % % end
+% % % xlabel('Time [s]'); ylabel('Latitude [m]'); title('Latitude vs Time')
+% % % 
+% % % % Vy(t)
+% % % figure('Name','Horizontal velocity vs Time','NumberTitle','off');
+% % % for i = 1:Ntraj
+% % %     plot(trajectories{i}.t_ref, trajectories{i}.VY_ref);
+% % %     grid on; hold on;
+% % % end
+% % % xlabel('Time [s]'); ylabel('$V_{y}$ [m/s]'); title('Horizontal velocity vs Time')
 
-% Vz(t)
-figure('Name','Vertical velocity vs Time','NumberTitle','off');
-for i = 1:Ntraj
-    plot(trajectories{i}.t_ref, trajectories{i}.VZ_ref);
-    grid on; hold on;
-end
-xlabel('Time [s]'); ylabel('$V_{z}$ [m/s]'); title('Vertical velocity vs Time')
-
-% X(t)
-figure('Name','Latitude vs Time','NumberTitle','off');
-for i = 1:Ntraj
-    plot(trajectories{i}.t_ref, trajectories{i}.X_ref);
-    grid on; hold on;
-end
-xlabel('Time [s]'); ylabel('Latitude [m]'); title('Latitude vs Time')
-
-% Vx(t)
-figure('Name','Horizontal velocity vs Time','NumberTitle','off');
-for i = 1:Ntraj
-    plot(trajectories{i}.t_ref, trajectories{i}.VX_ref);
-    grid on; hold on;
-end
-xlabel('Time [s]'); ylabel('$V_{x}$ [m/s]'); title('Horizontal velocity vs Time')
-
-% Y(t)
-figure('Name','Latitude vs Time','NumberTitle','off');
-for i = 1:Ntraj
-    plot(trajectories{i}.t_ref, trajectories{i}.Y_ref);
-    grid on; hold on;
-end
-xlabel('Time [s]'); ylabel('Latitude [m]'); title('Latitude vs Time')
-
-% Vy(t)
-figure('Name','Horizontal velocity vs Time','NumberTitle','off');
-for i = 1:Ntraj
-    plot(trajectories{i}.t_ref, trajectories{i}.VY_ref);
-    grid on; hold on;
-end
-xlabel('Time [s]'); ylabel('$V_{y}$ [m/s]'); title('Horizontal velocity vs Time')
-
-% Vz(z)
+% Vz(z)_ARB
 figure('Name','Vertical velocity vs Altitude','NumberTitle','off');
-for i = 1:Ntraj
+for j = 1:N_mass
+for i = 1:Ntraj_ABR
 %     indexes = find(trajectories{i}.VZ_ref < Vz_initial);
 %     plot(trajectories{i}.Z_ref(indexes), trajectories{i}.VZ_ref(indexes));
-plot(trajectories{i}.Z_ref, trajectories{i}.VZ_ref);
+plot(trajectories_ARB{i,j}.Z_ref, trajectories_ARB{i,j}.VZ_ref);
     grid on; hold on;
 end
-xlabel('Altitude [m]'); ylabel('$V_{z}$ [m/s]'); title('Vertical velocity vs Altitude')
+end
+xlabel('Altitude [m]'); ylabel('$V_{z}$ [m/s]'); title('Vertical velocity vs Altitude for ARB')
+
+% Vz(z)_MTR
+figure('Name','Vertical velocity vs Altitude','NumberTitle','off');
+for j = 1:N_mass
+plot(trajectories_MTR{j}.Z_ref, trajectories_MTR{j}.VZ_ref);
+    grid on; hold on;
+end
+
+xlabel('Altitude [m]'); ylabel('$V_{z}$ [m/s]'); title('Vertical velocity vs Altitude for MTR')

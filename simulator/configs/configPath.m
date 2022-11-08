@@ -15,7 +15,7 @@ addpath(genpath(commonFunctionsPath))
 % Retrieve Control rocket data
 ConDataPath = strcat('../data/', settings.mission);
 addpath(ConDataPath);
-run(strcat('config', settings.mission));
+ run(strcat('config', settings.mission));
 
 % Control common functions
 commonFunctionsPath = '../commonFunctions';

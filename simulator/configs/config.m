@@ -49,13 +49,16 @@ configControl;
 %% 11) CONTROL PARAMETERS
 configControlParams;
 
-%% 12) REFERENCES
-configReferences;
+if conf.script ~= "trajectory generation"
+    %% 12) REFERENCES
+    configReferences;
+    %% 13) SPECIAL CONDITIONS?
+    config_SpecialConditions;
 
-%% 13) SPECIAL CONDITIONS?
-config_SpecialConditions;
+    %% 14) DATA EXTRACTION
+    configSettings;
+end
 
-%% 14) DATA EXTRACTION
-configSettings;
+
 
 

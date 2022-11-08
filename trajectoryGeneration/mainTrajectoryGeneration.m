@@ -101,7 +101,7 @@ Ntraj_ABR = length(deltaX_values);
 N_mass = 10;                            % number of different Mass values
 
 deltaX = 0;
-m = linspace(settings.ms,settings.m0,N_mass);
+mass = linspace(settings.ms,settings.m0,N_mass);
 
 % Pre-allocation
 trajectories_ARB = cell(Ntraj_ABR, N_mass);
@@ -110,7 +110,7 @@ trajectories_MTR = cell(N_mass,1);
 trajectories_saving_MTR = cell(N_mass,1);
 
 for j = 1:N_mass
-  settingsSim.m = m(j);
+  m = mass(j);
 for index = 1:Ntraj_ABR
 
 deltaX = deltaX_values(index);
