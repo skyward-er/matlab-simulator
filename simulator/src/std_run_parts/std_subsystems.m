@@ -60,11 +60,22 @@ sensorData.kalman.x  =  Yf(end, 2);
 sensorData.kalman.y  =  Yf(end, 1);
 
 %% Control algorithm
+
+if str2double(settings.mission(end)) > 2 % only for mission after october 2022
+
+    trajectoryChoice_mass;
+
+end
+
 if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings.control
+
     if contSettings.flagFirstControl
+
         t_airbrakes = t0;
         idx_airbrakes = n_old+1;
+
     end
+
     sensorData.kalman.time = Tf(end);
     ap_ref_old = ap_ref_new;
     [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.

@@ -35,7 +35,7 @@ end
 
 % sets how many points in advance it has to check
 % V_ref = [V_ref ; zeros(N_forward,size(V_ref,2))];
-V_extrema = V_ref(index_z,[1,end]); %select the reference point on the trajectories to use for fuzzy logic
+V_extrema = V_ref(index_z,[1,end]); 
 
 
 if Vz<V_extrema(1) % use the vertical component of vector V, check if it is the first or second

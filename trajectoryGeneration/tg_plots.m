@@ -69,10 +69,10 @@ set(groot,'defaultLegendInterpreter','latex');
 % Vz(z)_ARB
 figure('Name','Vertical velocity vs Altitude','NumberTitle','off');
 for j = 1:N_mass
-for i = 1:Ntraj_ABR
+for i = 1:Ntraj_ARB
 %     indexes = find(trajectories{i}.VZ_ref < Vz_initial);
 %     plot(trajectories{i}.Z_ref(indexes), trajectories{i}.VZ_ref(indexes));
-plot(trajectories_ARB{i,j}.Z_ref, trajectories_ARB{i,j}.VZ_ref);
+plot(trajectories{i,j}.Z_ref, trajectories{i,j}.VZ_ref);
     grid on; hold on;
 end
 end

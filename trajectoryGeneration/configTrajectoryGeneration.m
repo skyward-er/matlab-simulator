@@ -17,8 +17,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
 % Choose the mision you want to simulate from rocketsData folder
 % settings.mission = 'Lynx_Roccaraso_September_2021';
 % settings.mission = 'Lynx_Portugal_October_2021';
-settings.mission = 'Pyxis_Portugal_October_2022';
+%settings.mission = 'Pyxis_Portugal_October_2022';
 %  settings.mission = 'Pyxis_Roccaraso_September_2022';
+settings.mission = 'Gemini_Portugal_October_2023';
 
 %% LOAD DATA
 % Retrieve MSA-Toolkit rocket data
