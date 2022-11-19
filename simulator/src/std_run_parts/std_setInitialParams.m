@@ -5,13 +5,22 @@ integration initialization script- setting initial condition before control phas
 %}
 
 %% integration time
-dt          =       1/settings.frequencies.controlFrequency;                % Time step of the controller
+dt          =       1/10;%settings.frequencies.controlFrequency;                % Time step of the controller
 t0          =       0;                                                      % First time step - used in ode as initial time
 t1          =       t0 + dt;                                                % Second time step - used in ode as final time
 
 %% kalman initialization
 sensorData.kalman.vz = 1;                                                   % Vertical velocity
 sensorData.kalman.z  = 1;                                                   % Altitude
+
+%% Initialization of sensor measurement time
+sensorData.accelerometer.t0 = 0;
+sensorData.gyro.t0 = 0;
+sensorData.magnetometer.t0 = 0;
+sensorData.gps.t0 = 0;
+sensorData.barometer.t0 = 0;
+sensorData.pitot.t0 = 0;
+% sensorData.chamberPressure.t0 = 0;
 
 %% while cycle max iterations
 nmax        =       settings.nmax;                                                 % Max iteration number - stops the integration if reached
