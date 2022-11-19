@@ -5,7 +5,7 @@ integration initialization script- setting initial condition before control phas
 %}
 
 %% integration time
-dt          =       1/10;%settings.frequencies.controlFrequency;                % Time step of the controller
+dt          =       1/settings.frequencies.controlFrequency;                % Time step of the controller
 t0          =       0;                                                      % First time step - used in ode as initial time
 t1          =       t0 + dt;                                                % Second time step - used in ode as final time
 

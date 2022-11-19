@@ -1,4 +1,4 @@
-function [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings, Y, T, ext, uw, vw, ww)
+function [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings,sensorData, Y, T, ext, uw, vw, ww)
 
 %{
         AGGIUNGERE sensorData TRA GLI INPUT ANCHE NEL MAIN
@@ -298,7 +298,7 @@ elseif freq.gpsFrequency == freq.controlFrequency
         sensorData.gps.time = T(end);
     end
 
-else %% freq brutte
+else 
     if settings.ballisticFligth || (not(settings.ballisticFligth) && flagAscent)
         for i = 1:length(T)
 
@@ -312,15 +312,15 @@ else %% freq brutte
                 m = (Y1 - Y0)./(T1 - T0);
                 q = Y1 - m*T1;
                 Yinterp = m*iTimegps + q;
-                sensorData.gps.positionMeasures(i, :) = Yinterp(1:3);
-                sensorData.gps.velocityMeasures(i, :) = quatrotate(quatconj(Yinterp(7:10)), Yinterp(4:6));
+                sensorData.gps.positionMeasures(i, :) = -Yinterp(1:3);
+                sensorData.gps.velocityMeasures(i, :) = -quatrotate(quatconj(Yinterp(7:10)), Yinterp(4:6));
                 sensorData.gps.t0 = iTimegps;
             elseif T(i) - sensorData.gps.t0 == 1/freq.gpsFrequency
                 iTimegps = sensorData.gps.t0 + 1/freq.gpsFrequency;
                 Q = Y(i, 10:13);
                 V = Y(i, 4:6);
-                sensorData.gps.positionMeasures(i, :) = Y(iTimegps == T, 1:3);
-                sensorData.gps.velocityMeasures(i, :) = quatrotate(quatconj(Q), V);
+                sensorData.gps.positionMeasures(i, :) = -Y(iTimegps == T, 1:3);
+                sensorData.gps.velocityMeasures(i, :) = -quatrotate(quatconj(Q), V);
                 sensorData.gps.t0 = iTimegps;
             end
         end
@@ -339,15 +339,15 @@ else %% freq brutte
                 m = (Y1 - Y0)./(T1 - T0);
                 q = Y1 - m*T1;
                 Yinterp = m*iTimegps + q;
-                sensorData.gps.positionMeasures(i, :) = Yinterp(1:3);
-                sensorData.gps.velocityMeasures(i, :) = quatrotate(quatconj(Yinterp(7:10)), Yinterp(4:6));
+                sensorData.gps.positionMeasures(i, :) = -Yinterp(1:3);
+                sensorData.gps.velocityMeasures(i, :) = -quatrotate(quatconj(Yinterp(7:10)), Yinterp(4:6));
                 sensorData.gps.t0 = iTimegps;
             elseif T(i) - sensorData.gps.t0 == 1/freq.gpsFrequency
                 iTimegps = sensorData.gps.t0 + 1/freq.gpsFrequency;
                 Q = Y(i, 10:13);
                 V = Y(i, 4:6);
-                sensorData.gps.positionMeasures(i, :) = Y(iTimegps == T, 1:3);
-                sensorData.gps.velocityMeasures(i, :) = quatrotate(quatconj(Q), V);
+                sensorData.gps.positionMeasures(i, :) = -Y(iTimegps == T, 1:3);
+                sensorData.gps.velocityMeasures(i, :) = -quatrotate(quatconj(Q), V);
                 sensorData.gps.t0 = iTimegps;
             end
         end
@@ -356,8 +356,6 @@ else %% freq brutte
     end
 end
 
-sensorData.gps.positionMeasures(:, 3) = -sensorData.gps.positionMeasures(:, 3);
-sensorData.gps.velocityMeasures(:, 3) = -sensorData.gps.velocityMeasures(:, 3);
 
 
 
@@ -389,9 +387,31 @@ if freq.barometerFrequency > freq.controlFrequency
         end
     end
 
-else
+elseif  freq.barometerFrequency == freq.controlFrequency
     sensorData.barometer.time = T(end);
     z = -Y(end, 3);
+else
+     for i = 1:length(T)
+        if T(i) - sensorData.barometer.t0 > 1/freq.barometerFrequency
+            iTimeBarometer = sensorData.barometer.t0 + 1/freq.barometerFrequency;
+            Y1 = Y(i, 3);
+            Y0 = Y(i-1,3);
+            T1 = T(i);
+            T0 = T(i-1);
+            % linear interpolation between the 2 states
+            m = (Y1 - Y0)./(T1 - T0);
+            q = Y1 - m*T1;
+            z = m*iTimeBarometer + q;
+            sensorData.barometer.t0 = iTimeBarometer;
+
+        elseif  T(i) - sensorData.barometer.t0 == 1/freq.barometerFrequency
+            iTimeBarometer = sensorData.barometer.t0 + 1/freq.barometerFrequency;
+            z = -Y(i, 3);
+            sensorData.barometer.t0 = iTimeBarometer;
+        end
+
+    end
+
 end
 
 [Temp, ~, P, ~] = atmosisa(z+settings.z0);
@@ -433,11 +453,42 @@ if isfield(freq, 'pitotFrequency')
             end
         end
 
-    else
+    elseif freq.pitotFrequency == freq.controlFrequency
         sensorData.pitot.time = T(end);
         vx = Y(end, 4);
         z_pit  = -Y(end, 3);
+
+    else 
+         for i = 1:length(T)
+        if T(i) - sensorData.pitot.t0 > 1/freq.pitotFrequency
+            iTimePitot = sensorData.pitot.t0 + 1/freq.pitotFrequency;
+            T1 = T(i);
+                T0 = T(i-1);
+                % linear interpolation between x-body ned
+                Y1 = Y(i, 4);
+                Y0 = Y(i-1, 4);
+                m = (Y1 - Y0)./(T1 - T0);
+                q = Y1 - m*T1;
+                vx = m*iTimePitot + q;
+                % linear interpolation between altitude
+                Y1 = Y(i, 3);
+                Y0 = Y(i-1, 3);
+                m = (Y1 - Y0)./(T1 - T0);
+                q = Y1 - m*T1;
+                z_pit = -(m*iTimePitot + q);
+            sensorData.pitot.t0 = iTimePitot;
+
+        elseif  T(i) - sensorData.pitot.t0 == 1/freq.pitotFrequency
+            iTimePitot = sensorData.pitot.t0 + 1/freq.pitotFrequency;
+            z_pit = -Y(i, 3);
+            sensorData.pitot.t0 = iTimePitot;
+        end
+
     end
+
+    end
+
+    if exist('z_pit','var')
     [Temp, ~, P, rho] = atmosisa(z_pit + settings.z0);
 
     Q = [Y(end, 11:13),Y(end, 10)];
@@ -455,4 +506,5 @@ if isfield(freq, 'pitotFrequency')
     sensorData.pitot.temperature = Temp;
     sensorData.pitot.measures = (0.5*rho'.*v.*v.*sign(v))'; % differential pressure in Pascals
     %     (0.5*rho'.*v.*v.*sign(v))'
+    end
 end

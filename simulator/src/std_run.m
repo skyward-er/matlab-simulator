@@ -201,7 +201,7 @@ while settings.flagStopIntegration && n_old < nmax                              
 
     % fix on signal frequencies: this interpolates the values if the speed
     % of the sensor is lower than the control action (or whatever)
-    [sensorData] = manageSignalFrequencies(magneticFieldApprox, settings.flagAscent, settings, Yf, Tf, ext, uw, vw, ww);
+    [sensorData] = manageSignalFrequencies(magneticFieldApprox, settings.flagAscent, settings,sensorData, Yf, Tf, ext, uw, vw, ww);
     [~, ~, p, ~] = atmosisa(-Yf(:,3) + settings.z0) ;
 
     % simulate sensor acquisition
