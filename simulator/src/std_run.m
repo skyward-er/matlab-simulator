@@ -206,7 +206,7 @@ while settings.flagStopIntegration && n_old < nmax                              
 
     % simulate sensor acquisition
     if settings.dataNoise
-        [sp, c] = acquisition_Sys(sensorData, s, c);
+        [sp, c] = acquisition_Sys(sensorData, s, c, settings);
     end
 
     % SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU

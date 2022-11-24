@@ -14,14 +14,16 @@ sensorData.kalman.vz = 1;                                                   % Ve
 sensorData.kalman.z  = 1;                                                   % Altitude
 
 %% Initialization of sensor measurement time
-sensorData.accelerometer.t0 = 0;
-sensorData.gyro.t0 = 0;
-sensorData.magnetometer.t0 = 0;
-sensorData.gps.t0 = 0;
-sensorData.barometer.t0 = 0;
-sensorData.pitot.t0 = 0;
-% sensorData.chamberPressure.t0 = 0;
+sensorData.accelerometer.t0 = -1/settings.frequencies.accelerometerFrequency;
+sensorData.gyro.t0 = -1/settings.frequencies.gyroFrequency;
+sensorData.magnetometer.t0 = -1/settings.frequencies.magnetometerFrequency;
+sensorData.gps.t0 = -1/settings.frequencies.gpsFrequency;
+sensorData.barometer.t0 = -1/settings.frequencies.barometerFrequency;
+sensorData.pitot.t0 = -1/settings.frequencies.pitotFrequency;
+% sensorData.chamberPressure.t0 = 
 
+sensorData.barometer.time = [];
+sensorData.barometer.z = [];
 %% while cycle max iterations
 nmax        =       settings.nmax;                                                 % Max iteration number - stops the integration if reached
 

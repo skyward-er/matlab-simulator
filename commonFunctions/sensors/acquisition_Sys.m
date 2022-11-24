@@ -1,4 +1,4 @@
-function [sp, c] = acquisition_Sys(sensorData, s, c)
+function [sp, c] = acquisition_Sys(sensorData, s, c,settings)
 %{
 Routine to simulate the data acquisition from the sensors, that use the
 class sensors in: "skyward-matlab-control-simulator\sensors"
@@ -8,7 +8,9 @@ INPUT:
 
     - s:          STRUCT WITH ALL THE SENSOR OBJECTS 
 
-    - c:          STRUCT WITH THE ASSEMBLED TOTAL MEASUREMENT VECTORS       
+    - c:          STRUCT WITH THE ASSEMBLED TOTAL MEASUREMENT VECTORS  
+
+    - settings:   STRUCT THAT CONTAIN THE SENSORS' FREQUENCIES
 
 OUTPUT:
     - sp          PROCESSED MEASUREMENTS
@@ -25,7 +27,7 @@ OUTPUT:
 if isfield(sensorData.barometer,'time')
     sp.pn      = zeros(1,length(sensorData.barometer.time));
     sp.h_baro  = zeros(1,length(sensorData.barometer.time));
-    sp.t_baro  = sensorData.barometer.time;
+    sp.t_baro  = sensorData.barometer.time';
 
     for ii=1:length(sensorData.barometer.time)
         sp.pn(ii)        =      s.MS580301BA01.sens(sensorData.barometer.measures(ii)/100,...
@@ -35,7 +37,7 @@ if isfield(sensorData.barometer,'time')
     end
     c.pn_tot(c.np_old:c.np_old + size(sp.pn,2) - 1,1)    = sp.pn(1:end);
     c.hb_tot(c.np_old:c.np_old + size(sp.pn,2) - 1,1)    = sp.h_baro(1:end);
-    c.time_baro(c.np_old:c.np_old + size(sp.pn,2) - 1)    =  sp.t_baro;
+    c.time_baro(c.np_old:c.np_old + size(sp.pn,2) - 1)    =  sp.t_baro(end);
     c.np_old = c.np_old + size(sp.pn,2);
 end
 %% IMU Acquisition loop

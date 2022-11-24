@@ -315,6 +315,7 @@ else
                 sensorData.gps.positionMeasures(i, :) = -Yinterp(1:3);
                 sensorData.gps.velocityMeasures(i, :) = -quatrotate(quatconj(Yinterp(7:10)), Yinterp(4:6));
                 sensorData.gps.t0 = iTimegps;
+                sensorData.gps.time = iTimegps;
             elseif T(i) - sensorData.gps.t0 == 1/freq.gpsFrequency
                 iTimegps = sensorData.gps.t0 + 1/freq.gpsFrequency;
                 Q = Y(i, 10:13);
@@ -322,6 +323,7 @@ else
                 sensorData.gps.positionMeasures(i, :) = -Y(iTimegps == T, 1:3);
                 sensorData.gps.velocityMeasures(i, :) = -quatrotate(quatconj(Q), V);
                 sensorData.gps.t0 = iTimegps;
+                sensorData.gps.time = iTimegps;
             end
         end
 
@@ -402,16 +404,25 @@ else
             m = (Y1 - Y0)./(T1 - T0);
             q = Y1 - m*T1;
             z = m*iTimeBarometer + q;
+            sensorData.barometer.z = [sensorData.barometer.z; z];
             sensorData.barometer.t0 = iTimeBarometer;
-
+             sensorData.barometer.time = [sensorData.barometer.time; iTimeBarometer];
         elseif  T(i) - sensorData.barometer.t0 == 1/freq.barometerFrequency
             iTimeBarometer = sensorData.barometer.t0 + 1/freq.barometerFrequency;
             z = -Y(i, 3);
             sensorData.barometer.t0 = iTimeBarometer;
+            sensorData.barometer.time = [sensorData.barometer.time; iTimeBarometer];
+            sensorData.barometer.z = [sensorData.barometer.z; z];
         end
 
     end
 
+end
+
+if length(sensorData.barometer.time)>=2
+    sensorData.barometer.time = sensorData.barometer.time(end-1:end);
+    sensorData.barometer.z = sensorData.barometer.z(end-1:end);
+    z = sensorData.barometer.z ;
 end
 
 [Temp, ~, P, ~] = atmosisa(z+settings.z0);
@@ -482,6 +493,7 @@ if isfield(freq, 'pitotFrequency')
             iTimePitot = sensorData.pitot.t0 + 1/freq.pitotFrequency;
             z_pit = -Y(i, 3);
             sensorData.pitot.t0 = iTimePitot;
+             vx = Y(end, 4);
         end
 
     end
