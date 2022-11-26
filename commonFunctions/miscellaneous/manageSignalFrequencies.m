@@ -396,8 +396,8 @@ else
      for i = 1:length(T)
         if T(i) - sensorData.barometer.t0 > 1/freq.barometerFrequency
             iTimeBarometer = sensorData.barometer.t0 + 1/freq.barometerFrequency;
-            Y1 = Y(i, 3);
-            Y0 = Y(i-1,3);
+            Y1 = -Y(i, 3);
+            Y0 = -Y(i-1,3);
             T1 = T(i);
             T0 = T(i-1);
             % linear interpolation between the 2 states

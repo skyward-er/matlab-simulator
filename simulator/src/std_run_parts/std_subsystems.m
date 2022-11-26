@@ -20,10 +20,6 @@ end
 %% ADA
 if settings.flagADA && settings.dataNoise && length(sensorData.barometer.time) > 1
 
-    if length(sp.pn) > 2
-        sp.pn = sp.pn(end-1:end);
-    end
-
     [xp_ada, xv_ada, P_ada, settings.ada]   =  run_ADA(ada_prev, Pada_prev, sp.pn, sensorData.barometer.time, settings.ada);
 
     xp_ada_tot(c.n_ada_old:c.n_ada_old + size(xp_ada(:,1),1) -1,:)  = xp_ada(1:end,:);
@@ -35,6 +31,9 @@ end
 %% Navigation system
 
 if settings.flagNAS && settings.dataNoise 
+
+%     sp.pn = sp.pn(end);
+%     sp.t_baro = sp.t_baro(end);
 
     [sensorData.kalman.x_c, vels, P_c, settings.kalman]   =  run_kalman(x_prev, vels_prev, P_prev, sp, settings.kalman, XYZ0*0.01);
     sensorData.kalman.time(iTimes) = Tf(end);
