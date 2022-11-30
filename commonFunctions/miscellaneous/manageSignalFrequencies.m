@@ -369,6 +369,7 @@ if freq.barometerFrequency > freq.controlFrequency
         error('the sensor frequency must be a multiple of the control frequency');
     end
     sensorData.barometer.time = linspace(T(1), T(end) - 1/freq.barometerFrequency, N);
+    sensorData.barometer.time =  sensorData.barometer.time';
     for i = 1:N
         iTimeBarometer = sensorData.barometer.time(i);
         if all(iTimeBarometer ~= T)
@@ -387,11 +388,13 @@ if freq.barometerFrequency > freq.controlFrequency
         else
             z(i) = -Y(iTimeBarometer == T, 3);
         end
+        sensorData.barometer.z = [sensorData.barometer.z; z(i)];
     end
-
-elseif  freq.barometerFrequency == freq.controlFrequency
-    sensorData.barometer.time = T(end);
+     elseif  freq.barometerFrequency == freq.controlFrequency
+    iTimeBarometer = T(end);
+     sensorData.barometer.time = [sensorData.barometer.time; iTimeBarometer];
     z = -Y(end, 3);
+      sensorData.barometer.z = [sensorData.barometer.z; z];
 else
      for i = 1:length(T)
         if T(i) - sensorData.barometer.t0 > 1/freq.barometerFrequency
