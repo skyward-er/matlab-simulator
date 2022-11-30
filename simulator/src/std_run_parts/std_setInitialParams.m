@@ -14,12 +14,26 @@ sensorData.kalman.vz = 1;                                                   % Ve
 sensorData.kalman.z  = 1;                                                   % Altitude
 
 %% Initialization of sensor measurement time
-sensorData.accelerometer.t0 = -1/settings.frequencies.accelerometerFrequency;
-sensorData.gyro.t0 = -1/settings.frequencies.gyroFrequency;
-sensorData.magnetometer.t0 = -1/settings.frequencies.magnetometerFrequency;
-sensorData.gps.t0 = -1/settings.frequencies.gpsFrequency;
-sensorData.barometer.t0 = -1/settings.frequencies.barometerFrequency;
-sensorData.pitot.t0 = -1/settings.frequencies.pitotFrequency;
+control_freq = settings.frequencies.controlFrequency;
+
+sensorData.accelerometer.t0 = initSensorT0...
+    (control_freq ,settings.frequencies.accelerometerFrequency);
+
+sensorData.gyro.t0 = initSensorT0...
+    (control_freq,settings.frequencies.gyroFrequency);
+
+sensorData.magnetometer.t0 = initSensorT0...
+    (control_freq,settings.frequencies.magnetometerFrequency);
+
+sensorData.gps.t0 = initSensorT0...
+    (control_freq,settings.frequencies.gpsFrequency);
+
+sensorData.barometer.t0 = initSensorT0...
+    (control_freq,settings.frequencies.barometerFrequency);
+
+sensorData.pitot.t0 = initSensorT0...
+    (control_freq,settings.frequencies.pitotFrequency);
+
 % sensorData.chamberPressure.t0 = 
 
 sensorData.barometer.time = [];

@@ -47,9 +47,10 @@ freq = settings.frequencies;
 %% accelerometer
 
 if freq.accelerometerFrequency > freq.controlFrequency
-    N = freq.accelerometerFrequency/freq.controlFrequency;
-    sensorData.accelerometer.time = linspace(T(1), T(end), N);
-
+    dt = 1/freq.accelerometerFrequency;
+    sensorData.accelerometer.time = sensorData.accelerometer.t0:dt:T(end);
+    sensorData.accelerometer.t0 = sensorData.accelerometer.time(end);
+     N = length(sensorData.accelerometer.time);
     for i = 1:N
         iTimeAcc = sensorData.accelerometer.time(i);
         if all(iTimeAcc ~= T)
@@ -77,7 +78,7 @@ elseif freq.accelerometerFrequency == freq.controlFrequency
     sensorData.accelerometer.measures(1, :) = accelerometerAscent...
         (T(end), Y(end, :), settings, ext); % checkare il tLaunch
     sensorData.accelerometer.time = T(end);
-
+    sensorData.accelerometer.t0 = T(end);
 else
 
     for i = 1:length(T)
@@ -108,12 +109,10 @@ end
 
 %% gyro
 if freq.gyroFrequency > freq.controlFrequency
-    N = freq.gyroFrequency/freq.controlFrequency;
-    if N ~= round(N)
-        error('the sensor frequency must be a multiple of the control frequency');
-    end
-    sensorData.gyro.time = linspace(T(1), T(end), N);
-
+    dt = 1/freq.gyroFrequency;
+    sensorData.gyro.time = sensorData.gyro.t0:dt:T(end);
+    sensorData.gyro.t0 = sensorData.gyro.time(end);
+    N = length(sensorData.gyro.time);
     for i = 1:N
         iTimeGyro = sensorData.gyro.time(i);
         if all(iTimeGyro ~= T)
@@ -136,6 +135,7 @@ if freq.gyroFrequency > freq.controlFrequency
 elseif freq.gyroFrequency == freq.controlFrequency
     sensorData.gyro.measures(1, :) = Y(end, 7:9);
     sensorData.gyro.time = T(end);
+    sensorData.gyro.t0 = T(end);
 else
     for i = 1:length(T)
         if T(i) - sensorData.gyro.t0 > 1/freq.gyroFrequency
@@ -160,11 +160,10 @@ end
 
 %% magnetometer
 if freq.magnetometerFrequency > freq.controlFrequency
-    N = freq.magnetometerFrequency/freq.controlFrequency;
-    if N ~= round(N)
-        error('the sensor frequency must be a multiple of the control frequency');
-    end
-    sensorData.magnetometer.time = linspace(T(1), T(end) - 1/freq.magnetometerFrequency, N);
+     dt = 1/freq.magnetometerFrequency;
+    sensorData.magnetometer.time = sensorData.magnetometer.t0:dt:T(end);
+    sensorData.magnetometer.t0 = sensorData.magnetometer.time(end);
+    N = length(sensorData.magnetometer.time);
     Q = zeros(N, 4);
     z = zeros(1, N);
 
@@ -230,11 +229,10 @@ end
 
 %% gps
 if freq.gpsFrequency > freq.controlFrequency
-    N = freq.gpsFrequency/freq.controlFrequency;
-    if N ~= round(N)
-        error('the sensor frequency must be a multiple of the control frequency');
-    end
-    sensorData.gps.time = linspace(T(1), T(end) - 1/freq.gpsFrequency, N);
+   dt = 1/freq.gpsFrequency;
+    sensorData.gps.time = sensorData.gps.t0:dt:T(end);
+    sensorData.gps.t0 = sensorData.gps.time(end);
+    N = length(sensorData.gps.time);
     if settings.ballisticFligth || (not(settings.ballisticFligth) && flagAscent)
         for i = 1:N
             iTimegps = sensorData.gps.time(i);
@@ -297,7 +295,7 @@ elseif freq.gpsFrequency == freq.controlFrequency
         sensorData.gps.velocityMeasures(1, :) = Y(end, 4:6);
         sensorData.gps.time = T(end);
     end
-
+    sensorData.gps.t0 = T(end);
 else 
     if settings.ballisticFligth || (not(settings.ballisticFligth) && flagAscent)
         for i = 1:length(T)
@@ -363,12 +361,10 @@ end
 
 %% barometer
 if freq.barometerFrequency > freq.controlFrequency
-    N = freq.barometerFrequency/freq.controlFrequency;
-    z = zeros(N, 1);
-    if N ~= round(N)
-        error('the sensor frequency must be a multiple of the control frequency');
-    end
-    sensorData.barometer.time = linspace(T(1), T(end) - 1/freq.barometerFrequency, N);
+    dt = 1/freq.barometerFrequency;
+    sensorData.barometer.time = sensorData.barometer.t0:dt:T(end);
+    sensorData.barometer.t0 = sensorData.barometer.time(end);
+    N = length(sensorData.barometer.time);
     sensorData.barometer.time =  sensorData.barometer.time';
     for i = 1:N
         iTimeBarometer = sensorData.barometer.time(i);
@@ -395,6 +391,7 @@ if freq.barometerFrequency > freq.controlFrequency
      sensorData.barometer.time = [sensorData.barometer.time; iTimeBarometer];
     z = -Y(end, 3);
       sensorData.barometer.z = [sensorData.barometer.z; z];
+      sensorData.barometer.t0 = T(end);
 else
      for i = 1:length(T)
         if T(i) - sensorData.barometer.t0 > 1/freq.barometerFrequency
@@ -434,13 +431,13 @@ sensorData.barometer.temperature = Temp;
 %% pitot
 if isfield(freq, 'pitotFrequency')
     if freq.pitotFrequency > freq.controlFrequency
-        N = freq.pitotFrequency/freq.controlFrequency;
-        vx = zeros(N, 1);
+ 
+        dt = 1/freq.pitotFrequency;
+    sensorData.pitot.time = sensorData.pitot.t0:dt:T(end);
+    sensorData.pitot.t0 = sensorData.pitot.time(end);
+    N = length(sensorData.pitot.time);
+           vx = zeros(N, 1);
         z_pit = zeros(N, 1);
-        if N ~= round(N)
-            error('the sensor frequency must be a multiple of the control frequency');
-        end
-        sensorData.pitot.time = linspace(T(1), T(end) - 1/freq.pitotFrequency, N);
         for i = 1:N
             iTimePitot = sensorData.pitot.time(i);
             if all(iTimePitot ~= T)
@@ -469,6 +466,7 @@ if isfield(freq, 'pitotFrequency')
 
     elseif freq.pitotFrequency == freq.controlFrequency
         sensorData.pitot.time = T(end);
+        sensorData.pitot.t0 = T(end);
         vx = Y(end, 4);
         z_pit  = -Y(end, 3);
 
