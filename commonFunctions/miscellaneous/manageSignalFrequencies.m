@@ -49,7 +49,7 @@ freq = settings.frequencies;
 if freq.accelerometerFrequency > freq.controlFrequency
     dt = 1/freq.accelerometerFrequency;
     sensorData.accelerometer.time = sensorData.accelerometer.t0:dt:T(end);
-    sensorData.accelerometer.t0 = sensorData.accelerometer.time(end);
+    sensorData.accelerometer.t0 = sensorData.accelerometer.time(end)+dt;
      N = length(sensorData.accelerometer.time);
     for i = 1:N
         iTimeAcc = sensorData.accelerometer.time(i);
@@ -111,7 +111,7 @@ end
 if freq.gyroFrequency > freq.controlFrequency
     dt = 1/freq.gyroFrequency;
     sensorData.gyro.time = sensorData.gyro.t0:dt:T(end);
-    sensorData.gyro.t0 = sensorData.gyro.time(end);
+    sensorData.gyro.t0 = sensorData.gyro.time(end)+dt;
     N = length(sensorData.gyro.time);
     for i = 1:N
         iTimeGyro = sensorData.gyro.time(i);
@@ -162,7 +162,7 @@ end
 if freq.magnetometerFrequency > freq.controlFrequency
      dt = 1/freq.magnetometerFrequency;
     sensorData.magnetometer.time = sensorData.magnetometer.t0:dt:T(end);
-    sensorData.magnetometer.t0 = sensorData.magnetometer.time(end);
+    sensorData.magnetometer.t0 = sensorData.magnetometer.time(end)+dt;
     N = length(sensorData.magnetometer.time);
     Q = zeros(N, 4);
     z = zeros(1, N);
@@ -231,7 +231,7 @@ end
 if freq.gpsFrequency > freq.controlFrequency
    dt = 1/freq.gpsFrequency;
     sensorData.gps.time = sensorData.gps.t0:dt:T(end);
-    sensorData.gps.t0 = sensorData.gps.time(end);
+    sensorData.gps.t0 = sensorData.gps.time(end)+dt;
     N = length(sensorData.gps.time);
     if settings.ballisticFligth || (not(settings.ballisticFligth) && flagAscent)
         for i = 1:N
@@ -363,7 +363,7 @@ end
 if freq.barometerFrequency > freq.controlFrequency
     dt = 1/freq.barometerFrequency;
     sensorData.barometer.time = sensorData.barometer.t0:dt:T(end);
-    sensorData.barometer.t0 = sensorData.barometer.time(end);
+    sensorData.barometer.t0 = sensorData.barometer.time(end)+dt;
     N = length(sensorData.barometer.time);
     sensorData.barometer.time =  sensorData.barometer.time';
     for i = 1:N
@@ -434,7 +434,7 @@ if isfield(freq, 'pitotFrequency')
  
         dt = 1/freq.pitotFrequency;
     sensorData.pitot.time = sensorData.pitot.t0:dt:T(end);
-    sensorData.pitot.t0 = sensorData.pitot.time(end);
+    sensorData.pitot.t0 = sensorData.pitot.time(end)+dt;
     N = length(sensorData.pitot.time);
            vx = zeros(N, 1);
         z_pit = zeros(N, 1);
