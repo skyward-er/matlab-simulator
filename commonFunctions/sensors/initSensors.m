@@ -24,6 +24,14 @@ s.MS580301BA01.resolution           =   0.012;                  % 0.012, 0.018, 
 s.MS580301BA01.noiseVariance        =   1;                      % guess in mbar
 s.MS580301BA01.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
 
+% initial chamber pressure sensor NAT825281
+s.NAT825281 = Sensor(); % presure in mbar, temp should be in C°
+s.NAT825281.maxMeasurementRange  =   40000;                   % 1100, 1300 in mbar
+s.NAT825281.minMeasurementRange  =   0;                    % 300, 10 in mbar
+s.NAT825281.noiseVariance        =   600;                      %  mbar
+s.NAT825281.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
+% check 2d offset for chamber pressure sensor
+
 % initial accelerometer sensor from LSM9DS1
 s.ACCEL_LSM9DS1 = Sensor3D(); % acceleration in mg
 s.ACCEL_LSM9DS1.maxMeasurementRange =   16000;                  % 2000, 4000, 8000, 16000 in mg
