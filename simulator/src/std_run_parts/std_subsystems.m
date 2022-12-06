@@ -76,13 +76,20 @@ if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings
     if contSettings.flagFirstControl
 
         t_airbrakes = t0;
+        t_last_arb_control = t0;
         idx_airbrakes = n_old+1;
 
     end
 
+    if Tf(end)-t_last_arb_control >= 1/settings.frequencies.arbFrequency - 1e-5 ||...
+            t_last_arb_control == t_airbrakes
+
+        t_last_arb_control = Tf(end);
+        ap_ref_old = ap_ref_new;
+        [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
+
+    end
     sensorData.kalman.time = Tf(end);
-    ap_ref_old = ap_ref_new;
-    [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
 else
     ap_ref_new = 0;
 end
