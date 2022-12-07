@@ -74,7 +74,7 @@ contSettings.interpType = 'sinusoidal'; % choose between: 'linear' , 'sinusoidal
 
 contSettings.Engine_model_A = [1.69656148956851	    -0.737446848106867	  0;...
                                       1                 	0          	  0;...
-                               6.20666082879976e-05	-0.000940256647528836 1];
+                               4.24950760584965e-05	-0.000643764479055182	1];
 
 contSettings.Engine_model_B = [1;0;0];
 

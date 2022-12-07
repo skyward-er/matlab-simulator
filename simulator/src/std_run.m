@@ -76,6 +76,9 @@ if  (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'c
     xe = [0,0,settings.m0]';     % initial state estimate
     u = 1;                      % initial valve position ( 1 = open, 0 = closed )
     settings.shutdown = 0;
+    P_mat = zeros(3);          % initial value for P
+    V1=diag([1,1,1]);           % model noise covariance matrix
+    V2=0.1;
 end 
 
 %% WIND GENERATION
@@ -118,7 +121,7 @@ end
 % Salvo input/output per testare algoritmo cpp
 contSettings.indice_test = 1; % serve?
 
-while settings.flagStopIntegration && n_old < nmax                                                                     % Starts CHRONO
+while settings.flagStopIntegration && n_old < nmax                                                                   % Starts CHRONO
     iTimes = iTimes + 1;                                                    % Advance the steps
 
     lastFlagAscent = settings.flagAscent;                                            % Saves the value of the flagAscent to recall it later
@@ -372,7 +375,7 @@ struct_out.recall = dataBallisticFlight;
 struct_out.cp = c.cp_tot; 
 
 if strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')
-    struct_out.t_shutdown = t_shutdown;
+% % % % % % % %     struct_out.t_shutdown = t_shutdown;
     struct_out.predicted_apogee = predicted_apogee;
     struct_out.estimated_mass = estimated_mass;
     struct_out.estimated_pressure = estimated_pressure;

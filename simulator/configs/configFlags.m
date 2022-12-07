@@ -35,7 +35,7 @@ settings.machControlActive  = false; % Switch on the mach control in ascentContr
 settings.HRE                = false; % Switch on if the rocket is mounting a Hybrid Engine, which allows the possibility to shut down the engine
 
 % std_run integration flags
-settings.nmax = 10000;
+settings.nmax = 20000;
 settings.flagStopIntegration     =   true;                                           % while this is true the integration runs
 settings.flagAscent              =   false;                                          % while this is false...
 settings.flagMatr                =   false(settings.nmax, 6);                                 % while this value are false...
