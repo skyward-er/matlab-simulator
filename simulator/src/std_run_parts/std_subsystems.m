@@ -63,7 +63,43 @@ sensorData.kalman.z  = -x_est_tot(end, 3);
 sensorData.kalman.x  =  Yf(end, 2);
 sensorData.kalman.y  =  Yf(end, 1);
 
-%% Control algorithm
+%% Engine Control algorithm
+    
+% TODO: 
+% inizializzare xe ye e K A B C D
+% test con gain variabile
+if Tf(end) < settings.tb &&...
+   (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
+
+    % mass estimation
+
+    xe = contSettings.Engine_model_A * xe + contSettings.Engine_model_B * u; % propagation
+    estimated_pressure(iTimes) = contSettings.Engine_model_C * xe; 
+    e =  c.cp_tot(end) - estimated_pressure(iTimes);
+
+    xe = xe + contSettings.Engine_model_Kgain * e; % correction
+    estimated_mass(iTimes) = xe(3); 
+
+    m = estimated_mass(iTimes);
+    % magic formula seguire traiettorie è meglio?
+    
+    cd = getDrag(norm(vels), sensorData.kalman.z, 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
+    [~,~,~,rho] = atmosisa(sensorData.kalman.z);
+
+    predicted_apogee(iTimes) = sensorData.kalman.z + 1/( rho * cd * settings.S / m)...
+        * log(1 + (sensorData.kalman.vz^2 * (0.5 * rho * cd * settings.S) / m) / 9.81 );
+
+    if predicted_apogee(iTimes) >= settings.z_final
+            u = 0;
+            if ~settings.shutdown 
+            t_shutdown = Tf(end);
+            settings.shutdown = 1;
+            % modificare la ascent
+            end
+    end
+
+end
+%% ARB Control algorithm
 
 if str2double(settings.mission(end)) > 2 % only for mission after october 2022
 
@@ -71,8 +107,8 @@ if str2double(settings.mission(end)) > 2 % only for mission after october 2022
 
 end
 
-if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings.control
-
+if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings.control...
+        && ~(strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine') ) 
     if contSettings.flagFirstControl
 
         t_airbrakes = t0;

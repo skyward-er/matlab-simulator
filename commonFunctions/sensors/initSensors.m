@@ -28,8 +28,9 @@ s.MS580301BA01.error2dOffset        =   ep_data;                % [p in mbar, T 
 s.NAT825281 = Sensor(); % presure in mbar, temp should be in C°
 s.NAT825281.maxMeasurementRange  =   40000;                   % 1100, 1300 in mbar
 s.NAT825281.minMeasurementRange  =   0;                    % 300, 10 in mbar
-s.NAT825281.noiseVariance        =   600;                      %  mbar
-s.NAT825281.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
+s.NAT825281.noiseVariance        =   60000;                      %  mbar
+% s.NAT825281.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
+s.NAT825281.resolution           =   1;     % random value stolen from baro
 % check 2d offset for chamber pressure sensor
 
 % initial accelerometer sensor from LSM9DS1
@@ -104,15 +105,17 @@ s.SSCDRRN015PDAD5.noiseVariance        =   75;                     % guess in mb
 s.SSCDRRN015PDAD5.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
 % check 2d offset for pitot
 
-sensorTot.npit_old    =   1;
+sensorTot.npit_old      =   1;
 sensorTot.np_old        =   1;
 sensorTot.na_old        =   1;
 sensorTot.ngps_old      =   1;
 sensorTot.n_est_old     =   1;
 sensorTot.n_ada_old     =   1;
+sensorTot.ncp_old       =   1;
 
 % from here are commented in the HIL of Angelo and Emilio, check why:
 sensorTot.pn_tot      =   0;
+sensorTot.cp_tot      =   0;
 sensorTot.hb_tot      =   0;
 sensorTot.accel_tot   =   [0, 0, 0];
 sensorTot.gyro_tot    =   [0, 0, 0];

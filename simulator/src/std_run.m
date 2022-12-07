@@ -70,6 +70,13 @@ ap0 = 0;                                                                    % Co
 
 initialCond = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf; ap0;];
 Y0 = initialCond;
+%% engine control initialization
+
+if  (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
+    xe = [0,0,settings.m0]';     % initial state estimate
+    u = 1;                      % initial valve position ( 1 = open, 0 = closed )
+    settings.shutdown = 0;
+end 
 
 %% WIND GENERATION
 [uw, vw, ww, Az , El, Mag] = std_setWind(settings);
@@ -304,7 +311,7 @@ while settings.flagStopIntegration && n_old < nmax                              
     %% display step state
 
     if not(settings.montecarlo)
-        disp("z: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,end));
+         disp("z: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,end));
     end
 
 end
@@ -346,13 +353,6 @@ end
 %% output
 struct_out.t = Tf_tot;
 struct_out.Y = Yf_tot;
-struct_out.ARB_allowanceTime = t_airbrakes;
-struct_out.ARB_allowanceIdx = idx_airbrakes;
-struct_out.ARB_cmdTime = ap_ref_time; % for plots, in order to plot the stairs of the commanded value
-struct_out.ARB_cmd = ap_ref_vec(:,2); % cmd  = commanded
-struct_out.ARB_cmd = ap_ref_vec(:,2); % cmd  = commanded
-struct_out.ARB_openingPosition = [Yf_tot(idx_airbrakes,1),Yf_tot(idx_airbrakes,2),-Yf_tot(idx_airbrakes,3)];
-struct_out.ARB_openingVelocities = [Yf_tot(idx_airbrakes,4),Yf_tot(idx_airbrakes,5),-Yf_tot(idx_airbrakes,6)];
 struct_out.qdyn = qdyn;
 struct_out.windMag = settings.wind.Mag;
 struct_out.windAz = settings.wind.Az;
@@ -369,7 +369,24 @@ struct_out.apogee_speed = [Yf_tot(idx_apo,4),Yf_tot(idx_apo,5),-Yf_tot(idx_apo,6
 struct_out.apogee_radius = sqrt(struct_out.apogee_coordinates(1)^2+struct_out.apogee_coordinates(2)^2);
 struct_out.recall = dataBallisticFlight;
 % struct_out.NAS = x_est_tot;
+struct_out.cp = c.cp_tot; 
 
+if strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')
+    struct_out.t_shutdown = t_shutdown;
+    struct_out.predicted_apogee = predicted_apogee;
+    struct_out.estimated_mass = estimated_mass;
+    struct_out.estimated_pressure = estimated_pressure;
+end
+
+if exist('t_airbrakes','var')
+    struct_out.ARB_allowanceTime = t_airbrakes;
+    struct_out.ARB_allowanceIdx = idx_airbrakes;
+    struct_out.ARB_cmdTime = ap_ref_time; % for plots, in order to plot the stairs of the commanded value
+    struct_out.ARB_cmd = ap_ref_vec(:,2); % cmd  = commanded
+    struct_out.ARB_cmd = ap_ref_vec(:,2); % cmd  = commanded
+    struct_out.ARB_openingPosition = [Yf_tot(idx_airbrakes,1),Yf_tot(idx_airbrakes,2),-Yf_tot(idx_airbrakes,3)];
+    struct_out.ARB_openingVelocities = [Yf_tot(idx_airbrakes,4),Yf_tot(idx_airbrakes,5),-Yf_tot(idx_airbrakes,6)];
+end
 
 [~,structCutterTimeIndex] = max(struct_out.t);
 struct_out = structCutter(struct_out, "index", 1, structCutterTimeIndex);

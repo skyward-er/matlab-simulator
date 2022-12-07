@@ -34,7 +34,9 @@ sensorData.barometer.t0 = initSensorT0...
 sensorData.pitot.t0 = initSensorT0...
     (control_freq,settings.frequencies.pitotFrequency);
 
-% sensorData.chamberPressure.t0 = 
+sensorData.chamberPressure.t0 = initSensorT0...
+    (control_freq,settings.frequencies.chamberPressureFrequency);
+
 
 sensorData.barometer.time = [];
 sensorData.barometer.z = [];

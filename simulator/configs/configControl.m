@@ -17,7 +17,7 @@ contSettings.coeff_Cd = data.coeffs;
 %% CONTROL PARAMETERS
 
 % choose strategy:
-contSettings.algorithm = "interp"; % choices: "interp", "PID_2021", "PID_2refs", "shooting"
+contSettings.algorithm = 'complete'; % choices: 'interp', "PID_2021", "PID_2refs", "shooting", 'engine', 'complete'
 
 % Control time sample:
 contSettings.sample_time = 1/settings.frequencies.controlFrequency;
@@ -68,6 +68,19 @@ end
 % For interpolation reference algorithm only:
 contSettings.N_forward = 2; % how many steps in advance have to check on speed to interpolate
 contSettings.interpType = 'sinusoidal'; % choose between: 'linear' , 'sinusoidal'
+
+%% ENGINE CONTROL
+% these need to be updated after every static fire test
+
+contSettings.Engine_model_A = [1.69656148956851	    -0.737446848106867	  0;...
+                                      1                 	0          	  0;...
+                               6.20666082879976e-05	-0.000940256647528836 1];
+
+contSettings.Engine_model_B = [1;0;0];
+
+contSettings.Engine_model_C = [-0.0612529358758888	0.927930198323715	0];
+
+contSettings.Engine_model_Kgain = [0.237322102194205;0.242208876758461;-0.000686466033197479];
 
 
 %% MAGNETIC MAP

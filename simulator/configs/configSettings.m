@@ -15,16 +15,16 @@ fieldsToRemove_settings = {'x_final','y_final', ...
                   'pMod','cMod', ...
                   'limLat','limLon',...
                   };
-
-switch contSettings.algorithm
-    case "interp"
-        fieldsToRemove_contSettings = {'data_trajectories'};
-    case "PID_2021"
-
-end
-
 rmfield(settings, fieldsToRemove_settings);
-rmfield(contSettings, fieldsToRemove_contSettings);
+% % % switch contSettings.algorithm
+% % %     case 'interp'
+% % %         fieldsToRemove_contSettings = {'data_trajectories'};
+% % %     case "PID_2021"
+% % % 
+% % % end
+% % % 
+
+% % % rmfield(contSettings, fieldsToRemove_contSettings);
 
 %% clear useless variables
 clear GeometryE GeometryF...

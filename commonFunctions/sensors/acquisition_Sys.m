@@ -116,7 +116,19 @@ if isfield(sensorData.pitot,'time')
         sp.dp(ii) = sensorData.pitot.measures(ii);
     end
     c.dp_tot(c.npit_old:c.npit_old + size(sp.dp,2) - 1,1)    = sp.dp(1:end);
-    c.time_baro(c.npit_old:c.npit_old + size(sp.dp,2) - 1)    =  sp.t_pit;
+    c.time_pit(c.npit_old:c.npit_old + size(sp.dp,2) - 1)    =  sp.t_pit;
     c.npit_old = c.npit_old + size(sp.dp,2);
 end
+
+%% Chamber Pressure acquisition loop
+
+    sp.cp      = zeros(1,length(sensorData.chamberPressure.time));
+    sp.t_cp    = sensorData.chamberPressure.time;
+
+    for ii=1:length(sensorData.chamberPressure.time)
+        sp.cp(ii) = s.NAT825281.sens(sensorData.chamberPressure.measures(ii)*1000,50); % 50 temperature in °C (random)
+    end
+     c.cp_tot(c.ncp_old:c.ncp_old + size(sp.cp,2) - 1,1)    = sp.cp(1:end);
+     c.time_cp(c.ncp_old:c.ncp_old + size(sp.cp,2) - 1)    =  sp.t_cp;
+     c.ncp_old = c.ncp_old + size(sp.cp,2);
 end

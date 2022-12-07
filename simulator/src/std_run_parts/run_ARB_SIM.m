@@ -26,9 +26,9 @@ OUTPUT:
 
 %}
 
-switch contSettings.algorithm % set this value in configControl.m
+switch true % set this value in configControl.m
 
-    case 'interp'
+    case strcmp(contSettings.algorithm,'interp') || strcmp(contSettings.algorithm,'complete')
         % interpolation algorithm: takes two references (max and
         % min extension) and decides how much to open with an
         % interpolation at fixed altitude of the actual velocity
@@ -49,7 +49,7 @@ switch contSettings.algorithm % set this value in configControl.m
         end
 
        
-    case 'shooting'
+    case strcmp (contSettings.algorithm,'shooting')
         % shooting algorithm:
 
         [ap_ref_new] = control_Interp(sensorData.kalman.z-settings.z0,sensorData.kalman.vz,contSettings.reference.Z,contSettings.reference.Vz,'linear',contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
@@ -74,7 +74,7 @@ switch contSettings.algorithm % set this value in configControl.m
 
         end
 
-    case 'PID_2021'
+    case strcmp (contSettings.algorithm,'PID_2021')
         % PID algorithm: at first checks speed and altitude to find
         % which of the tabulated references is the closest, then
         % tries to follow it with a PI controller.
@@ -100,7 +100,7 @@ switch contSettings.algorithm % set this value in configControl.m
         varargout{2} = z_setpoint;
         varargout{3} = input_output_test;
 
-    case 'PID_2refs'
+    case strcmp (contSettings.algorithm,'PID_2refs')
         % PID 2 references algorithm: this is a generalization of the
         % 'interp' algorithm formally defined as a controller (PI)
         % with two reference states and one output fed back.

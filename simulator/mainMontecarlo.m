@@ -34,10 +34,10 @@ addpath(genpath(currentPath));
 addpath(genpath(commonFunctionsPath));
 
 %% CHECK IF MSA-TOOLKIT IS UPDATED
-msaToolkitURL = 'https://github.com/skyward-er/msa-toolkit';
-localRepoPath = '../data/msa-toolkit';
-status = checkLastCommit(msaToolkitURL, localRepoPath, pwd);
-% submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
+% msaToolkitURL = 'https://github.com/skyward-er/msa-toolkit';
+% localRepoPath = '../data/msa-toolkit';
+% status = checkLastCommit(msaToolkitURL, localRepoPath, pwd);
+% % submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
 
 %% CONFIGs
 conf.script = "simulation";
@@ -96,7 +96,7 @@ end
 %% save arrays
 
 % algorithms
-algorithm_vec = [ "interp"; "PID_2021"; "shooting" ;"NoControl"]; % interpolation, PID change every 2s, shooting, no control
+algorithm_vec = {'interp';'NoControl';'engine';'complete'; 'PID_2021'; 'shooting '}; % interpolation, no control, engine shutdown, engine+arb, PID change every 2s, shooting
 
 %% do you want to save the results?
 
@@ -121,9 +121,9 @@ clearvars   msaToolkitURL Itot
 settings_mont_init = struct('x',[]);
 
 % start simulation
-for alg_index = 1
+for alg_index = 4
 
-    contSettings.algorithm = algorithm_vec(alg_index);
+    contSettings.algorithm = algorithm_vec{alg_index};
 
     %save arrays
     save_thrust = cell(size(stoch.thrust,1),1);

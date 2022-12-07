@@ -521,3 +521,39 @@ if isfield(freq, 'pitotFrequency')
     %     (0.5*rho'.*v.*v.*sign(v))'
     end
 end
+
+%% chamber pressure sensor
+ if freq.chamberPressureFrequency > freq.controlFrequency
+     dt = 1/freq.chamberPressureFrequency;
+    sensorData.chamberPressure.time = sensorData.chamberPressure.t0:dt:T(end);
+    sensorData.chamberPressure.t0 = sensorData.chamberPressure.time(end);
+    N = length(sensorData.chamberPressure.time);
+
+    for i = 1:N
+        iTimechamberPressure = sensorData.chamberPressure.time(i);
+        Thrust(i) = interp1(settings.motor.expTime, settings.motor.expThrust,iTimechamberPressure );
+    end
+    
+    sensorData.chamberPressure.measures = Thrust/settings.motor.K;
+
+elseif freq.chamberPressureFrequency == freq.controlFrequency
+    sensorData.chamberPressure.time = T(end);
+     Thrust = interp1(settings.motor.expTime, settings.motor.expThrust,T(end));
+    sensorData.chamberPressure.measures = Thrust/settings.motor.K;
+  
+else
+    for i = 1:length(T)
+        if T(i) - sensorData.chamberPressure.t0 > 1/freq.chamberPressureFrequency
+            iTimechamberPressure = sensorData.chamberPressure.t0 + 1/freq.chamberPressureFrequency;
+            Thrust(i) = interp1(settings.motor.expTime, settings.motor.expThrust,iTimechamberPressure );
+            sensorData.chamberPressure.measures(i) = Thrust(i)/settings.motor.K;
+            sensorData.chamberPressure.t0 = iTimechamberPressure ;
+        elseif  T(i) - sensorData.chamberPressure.t0 == 1/freq.chamberPressureFrequency
+            iTimechamberPressure = sensorData.chamberPressure.t0 + 1/freq.chamberPressureFrequency;
+            sensorData.chamberPressure.measures(i) = Thrust(i)/settings.motor.K;
+            sensorData.chamberPressure.t0 = iTimechamberPressure;
+        end
+
+    end
+end
+
