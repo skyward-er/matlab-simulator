@@ -25,6 +25,8 @@ if conf.script == "simulator"
     
         case "atmospheric"
            
+            settings.wind.input = false;
+            settings.wind.model = true;
             % matlab hswm model, wind model on altitude based on historical data
             
             % input Day and Hour as arrays to run stochastic simulations
@@ -39,7 +41,8 @@ if conf.script == "simulator"
         case "multiplicative"
     
             % Wind is generated for every altitude interpolating with the coefficient defined below
-            
+            settings.wind.input = true;
+            settings.wind.model = false;
             settings.wind.inputGround  = 9;                                         % [m/s] Wind magnitude at the ground
             settings.wind.inputAlt     = 4000/1100*[0 50 100 200 350 500 700 900 1100];       % [m] Altitude vector
             settings.wind.inputMult    = 2*[1 2 3 3.5 4 4.5 5 5.5 6];                 % [-] Percentage of increasing magnitude at each altitude
@@ -54,6 +57,9 @@ if conf.script == "simulator"
     
             % Wind is generated randomly from the minimum to the maximum parameters which defines the wind.
             % Setting the same values for min and max will fix the parameters of the wind.
+            settings.wind.input = false;
+            settings.wind.model = false;
+
             settings.wind.MagMin    =   0;                        % [m/s] Minimum Magnitude
             settings.wind.MagMax    =   0;                        % [m/s] Maximum Magnitude
             settings.wind.ElMin     =   0*pi/180;                 % [rad] Minimum Elevation, user input in degrees (ex. 0)

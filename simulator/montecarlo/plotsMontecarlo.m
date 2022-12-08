@@ -2,8 +2,8 @@
 N_histCol = min(N_sim,100); % best looking if we don't go higher than 200, but if N_sim is less than 200 it gives error if we set it to 200
 save_plot_histogram = figure;
 hold on; grid on;
-xline(settings.z_final-50, 'r--', 'LineWidth', 1)
-xline(settings.z_final+50, 'r--', 'LineWidth', 1)
+xline(settings.z_final-10, 'r--', 'LineWidth', 1)
+xline(settings.z_final+10, 'r--', 'LineWidth', 1)
 histogram(apogee.thrust,N_histCol)
 xlim([settings.z_final-150 , settings.z_final+150])
 xlabel('Apogee value [m]')
@@ -12,24 +12,25 @@ title('Reached apogee distribution')
 legend('Range of acceptable apogees')
 
 %% AIRBRAKE DEPLOY TIME HISTOGRAM - this plot is particularly interesting for the shadowmodes
-arb_deploy_time_vec = zeros(N_sim,1);
-for i = 1: N_sim
-    arb_deploy_time_vec(i) = save_thrust{i}.ARB_allowanceTime;
+if ~(strcmp(contSettings.algorithm,'engine')||strcmp(contSettings.algorithm,'NoControl'))
+    arb_deploy_time_vec = zeros(N_sim,1);
+    for i = 1: N_sim
+        arb_deploy_time_vec(i) = save_thrust{i}.ARB_allowanceTime;
+    end
+    arb_deploy_time_MEAN = mean(arb_deploy_time_vec);
+    arb_deploy_time_MODE = mode(arb_deploy_time_vec);
+    N_histCol = min(N_sim,100); % best looking if we don't go higher than 200, but if N_sim is less than 200 it gives error if we set it to 200
+    % figure
+    save_arb_deploy_histogram = figure;
+    histogram(arb_deploy_time_vec,N_histCol)
+    hold on; grid on;
+    xline(arb_deploy_time_MEAN,'r--')
+    xline(arb_deploy_time_MODE,'g--')
+    xlabel('Airbrakes deployment time [s]')
+    ylabel('Number of occurrences in the same interval')
+    title("Airbrakes deployment time's distribution")
+    legend('Airbrakes time deploy','Mean', 'Median')
 end
-arb_deploy_time_MEAN = mean(arb_deploy_time_vec);
-arb_deploy_time_MODE = mode(arb_deploy_time_vec);
-N_histCol = min(N_sim,100); % best looking if we don't go higher than 200, but if N_sim is less than 200 it gives error if we set it to 200 
-% figure
-save_arb_deploy_histogram = figure;
-histogram(arb_deploy_time_vec,N_histCol)
-hold on; grid on;
-xline(arb_deploy_time_MEAN,'r--')
-xline(arb_deploy_time_MODE,'g--')
-xlabel('Apogee value [m]')
-ylabel('Number of apogees in the same interval')
-title('Reached apogee distribution')
-legend('Airbrakes time deploy','Mean', 'Median')
-
 %% APOGEE TIME HISTOGRAM - this plot is particularly interesting for the shadowmodes
 apogee_time_vec = zeros(N_sim,1);
 for i = 1: N_sim
@@ -60,14 +61,14 @@ end
 hold on; grid on;
 plot(1:N_sim,mu)
 xlabel('Number of iterations')
-ylabel('Apogee mean value')
+ylabel("Apogee's mean value")
 
 %% PLOT STANDARD DEVIATION
 save_thrust_apogee_std = figure;
 hold on; grid on;
 plot(1:N_sim,sigma)
 xlabel('Number of iterations')
-ylabel('Apogee standard deviation')
+ylabel("Apogee's standard deviation")
 
 %% PLOT CONTROL
 save_plotControl = figure;
@@ -86,21 +87,31 @@ for i = 1:N_sim
     plot(thrust_percentage(i),apogee.thrust(i),'k.')
     hold on; grid on;
 end
-yline(settings.z_final-50,'r--')
-yline(settings.z_final+50,'r--')
+yline(settings.z_final-10,'r--')
+yline(settings.z_final+10,'r--')
 title('Apogee w.r.t. thrust')
 xlabel('Thrust percentage w.r.t. nominal')
 ylabel('Apogee [m]')
 xlim([min(thrust_percentage)-0.01,max(thrust_percentage)+0.01])
 ylim([settings.z_final-200,settings.z_final+200])
-text(1.1,settings.z_final + 100,"target apogee: "+num2str(settings.z_final))
+text(1.1,settings.z_final + 50,"target apogee: "+num2str(settings.z_final))
 legend(contSettings.algorithm);
 
 
 
 %% PLOT SHUTDOWN TIME 2D
-if settings.HRE
-    save_tShutdown = figure;
+ 
+%%% t_shutdown histogram
+    N_histCol = min(N_sim,100); 
+
+    save_t_shutdown_histogram = figure;
+    histogram(t_shutdown.value,N_histCol)
+    xlabel('Shutdown time [s]')
+    ylabel('Number of shutdowns in the same time interval')
+    title('Engine shutdown time distribution')
+
+ %%% t_shutdown wrt wind
+    save_tShutdown_wind = figure;
     subplot(1,3,1)
     for i = 1:N_sim
         plot(wind_el(i),save_thrust{i}.t_shutdown,'.')
@@ -108,7 +119,7 @@ if settings.HRE
     end
     title('shutdown time w.r.t. wind elevation')
     xlabel('Wind elevation angle')
-    ylabel('Apogee [m]')
+    ylabel('Engine shut-down time [s]')
     legend(contSettings.algorithm);
     %%%
     subplot(1,3,2)
@@ -118,7 +129,7 @@ if settings.HRE
     end
     title('shutdown time w.r.t. wind azimuth')
     xlabel('Wind azimuth angle')
-    ylabel('Apogee [m]')
+    ylabel('Engine shut-down time [s]')
     xlim([min(wind_az)-0.01,max(wind_az)+0.01])
     text(1.1,settings.z_final + 100,"target apogee: "+num2str(settings.z_final))
     legend(contSettings.algorithm);
@@ -131,9 +142,9 @@ if settings.HRE
     end
     title('shutdown time w.r.t. thrust')
     xlabel('Thrust percentage w.r.t. nominal')
-    ylabel('Apogee [m]')
+    ylabel('Engine shut-down time [s]')
     legend(contSettings.algorithm);
-end
+
 %% PLOT TRAJECTORY
 
 save_plotTrajectory = figure;
@@ -162,6 +173,18 @@ ylabel('Vy_b [m/s]')
 zlabel('Vz_b [m/s]')
 legend(contSettings.algorithm);
 
+%% Predicted apogee
+if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
+    save_predicted_apogee = figure;
+    hold on;
+    grid on
+    for i = 1:size(save_thrust,1)
+        plot([1:length(save_thrust{i}.predicted_apogee)]/settings.frequencies.controlFrequency,save_thrust{i}.predicted_apogee);
+    end
+    title('Predicted apogee')
+    xlabel('time [s]')
+    ylabel('Predicted Apogee [m]')
+end
 %% PLOT APOGEE 3D
 if ~settings.wind.model && ~settings.wind.input
 save_apogee_3D = figure;
@@ -254,5 +277,3 @@ end
 title('Aerodynamic load')
 xlabel('Time [s]')
 ylabel('Total aerodynamic load on airbrakes [kg]')
-
-

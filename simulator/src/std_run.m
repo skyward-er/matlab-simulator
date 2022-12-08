@@ -372,13 +372,12 @@ struct_out.apogee_radius = sqrt(struct_out.apogee_coordinates(1)^2+struct_out.ap
 struct_out.recall = dataBallisticFlight;
 % struct_out.NAS = x_est_tot;
 struct_out.cp = c.cp_tot; 
+struct_out.t_shutdown = t_shutdown;
 
 if strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')
-% % % % % % % %     struct_out.t_shutdown = t_shutdown;
     struct_out.predicted_apogee = predicted_apogee;
     struct_out.estimated_mass = estimated_mass;
     struct_out.estimated_pressure = estimated_pressure;
-    struct_out.cd = CD;
 end
 
 if exist('t_airbrakes','var')

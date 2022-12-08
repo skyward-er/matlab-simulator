@@ -21,7 +21,7 @@ contSettings.interpType = 'linear'; % set if the interp algorithm does a linear 
 contSettings.filterRatio = 2;
 
 settings.wind.model = false;
-settings.wind.input = true; % occhio che per ora non è settato esternamente con le montecarlo, quindi se questo viene settato a true abbiamo solamente incertezza sulla spinta.
+settings.wind.input = false;
 
 
 

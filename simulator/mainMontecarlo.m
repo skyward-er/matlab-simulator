@@ -48,7 +48,7 @@ rng default
 settings.montecarlo = true;
 
 %% how many simulations
-N_sim = 5000; % set to at least 500
+N_sim = 1000; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 
 %% stochastic parameters
@@ -128,21 +128,22 @@ for alg_index = 4
     %save arrays
     save_thrust = cell(size(stoch.thrust,1),1);
     apogee.thrust = [];
-    N_ApogeeWithinTarget = zeros(N_sim,1);
+    N_ApogeeWithinTarget = 0;
     wind_Mag = zeros(N_sim,1);
     wind_el = zeros(N_sim,1);
     wind_az = zeros(N_sim,1);
-    
+    t_shutdown.value = zeros(N_sim,1);
+
     parfor i = 1:N_sim
         settings_mont = settings_mont_init;
-%         contSettings_mont = contSettings;
-%         reference_mont = reference;
+        %         contSettings_mont = contSettings;
+        %         reference_mont = reference;
 
         settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
         settings_mont.motor.expTime = stoch.expThrust(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
         settings_mont.tb = stoch.expThrust(i,end);                              % initialize the burning time of the current simulation (parfor purposes)
 
-       
+
         % set the wind parameters
         settings_mont.wind.uw = stoch.wind.uw(i);
         settings_mont.wind.vw = stoch.wind.vw(i);
@@ -153,28 +154,35 @@ for alg_index = 4
         if displayIter == true
             fprintf("simulation = " + num2str(i) + " of " + num2str(N_sim) + ", algorithm: " + contSettings.algorithm +"\n");
         end
-        
+
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STD_RUN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         [simOutput] = std_run(settings,contSettings,settings_mont);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STD_RUN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         save_thrust{i} = simOutput;
 
-        
+
 
     end
-     
-clearvars   i l j jj crossCase
+
+    clearvars   i l j jj crossCase
 
     %% RETRIEVE INTERESING PARAMETERS:
 
     for i = 1:N_sim
-            % apogee
-            apogee.thrust(i) = save_thrust{i}.apogee_coordinates(3);
-            % radius of apogee (horizontal) from the initial point
-            apogee.radius(i) = save_thrust{i}.apogee_radius;
-            % horizontal speed at apogee
-            apogee.horizontalSpeed(i) = norm(save_thrust{i}.Y(end,4:6)); % in theory this is the body frame, but as the last point is the apogee we should have only  horizontal velocity, so all the components must be taken
-            if ~settings.wind.model && ~settings.wind.input
+
+        % apogee
+        apogee.thrust(i) = save_thrust{i}.apogee_coordinates(3);
+
+        % radius of apogee (horizontal) from the initial point
+        apogee.radius(i) = save_thrust{i}.apogee_radius;
+
+        % horizontal speed at apogee
+        apogee.horizontalSpeed(i) = norm(save_thrust{i}.Y(end,4:6)); % in theory this is the body frame, but as the last point is the apogee we should have only  horizontal velocity, so all the components must be taken
+
+        % time of engine shutdown
+        t_shutdown.value(i) = save_thrust{i}.t_shutdown;
+
+        if ~settings.wind.model && ~settings.wind.input
             % wind magnitude
             wind_Mag(i) = save_thrust{i}.windMag;
             % wind azimuth
@@ -183,18 +191,20 @@ clearvars   i l j jj crossCase
             wind_el(i) = save_thrust{i}.windEl;
             %reached apogee time
             apogee.times(i) = save_thrust{i}.apogee_time;
-            end
-    
-            % within +-50 meters target apogees:
-            if abs(apogee.thrust(i) - settings.z_final)<50
-                N_ApogeeWithinTarget = N_ApogeeWithinTarget +1; % save how many apogees sit in the +-50 m from target
-            end
+        end
+
+        % within +-10 meters target apogees:
+        if abs(apogee.thrust(i) - settings.z_final)<10
+            N_ApogeeWithinTarget = N_ApogeeWithinTarget +1; % save how many apogees sit in the +-50 m from target
+        end
     end
 
-    
 
     apogee.thrust_mean = mean(apogee.thrust);
     apogee.thrust_std = std(apogee.thrust);
+
+    t_shutdown.mean = mean(t_shutdown.value);
+    t_shutdown.std = std(t_shutdown.value);
 
     apogee.radius_mean = mean(apogee.radius);
     apogee.radius_std = std(apogee.radius);
@@ -212,12 +222,10 @@ clearvars   i l j jj crossCase
         save_thrust{i}.mu = mean(apogee.thrust(1:i));
         save_thrust{i}.sigma = std(apogee.thrust(1:i));
     end
+
     %% PLOTS
-    
+
     plotsMontecarlo;
-
-
-    %% SAVE FUNCTION
 
     %% SAVE
     % save plots
@@ -228,6 +236,9 @@ clearvars   i l j jj crossCase
         switch  settings.mission
 
             case 'Pyxis_Portugal_October_2022'
+                folder = [folder ; "MontecarloResults\"+settings.mission+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % offline
+
+            case 'Gemini_Portugal_October_2023'
                 folder = [folder ; "MontecarloResults\"+settings.mission+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % offline
 
             case 'Pyxis_Roccaraso_September_2022'
@@ -251,16 +262,23 @@ clearvars   i l j jj crossCase
             saveas(save_thrust_apogee_probability,folder(i)+"\ApogeeProbabilityPlot")
             saveas(save_thrust_apogee_mean,folder(i)+"\ApogeeMeanOverNsimPlot")
             saveas(save_thrust_apogee_std,folder(i)+"\ApogeeStdOverNsimPlot")
-            saveas(save_arb_deploy_histogram,folder(i)+"\ARBdeployTimeHistogram")
+            saveas(save_t_shutdown_histogram,folder(i)+"\t_shutdownPlot")
+
+            if exist('save_arb_deploy_histogram','var')
+                saveas(save_arb_deploy_histogram,folder(i)+"\ARBdeployTimeHistogram")
+            end
+            if exist(' save_predicted_apogee','var')
+                saveas( save_predicted_apogee,folder(i)+"\PredictedApogee")
+            end
             saveas(save_apogee_histogram,folder(i)+"\ApogeeTimeHistogram")
             if ~settings.wind.model && ~settings.wind.input
-            saveas(save_apogee_3D,folder(i)+"\ApogeeWindThrust")
+                saveas(save_apogee_3D,folder(i)+"\ApogeeWindThrust")
             end
             saveas(save_dynamic_pressure_and_forces,folder(i)+"\dynamicPressureAndForces")
-            save(folder(i)+"\saveThrust.mat","save_thrust","apogee","N_sim","settings","thrust_percentage")
+            save(folder(i)+"\saveThrust.mat","apogee","N_sim","settings","thrust_percentage") % add "save_thrust", > 2GB for 1000 sim
 
-            exportgraphics(save_plot_histogram,'report_images\mc_Histogram.pdf','ContentType','vector')
-            exportgraphics(save_plotApogee,'report_images\mc_Apogees.pdf','ContentType','vector')
+            %             exportgraphics(save_plot_histogram,'report_images\mc_Histogram.pdf','ContentType','vector')
+            %             exportgraphics(save_plotApogee,'report_images\mc_Apogees.pdf','ContentType','vector')
 
 
             % Save results.txt
@@ -269,19 +287,20 @@ clearvars   i l j jj crossCase
             fprintf(fid,'Number of simulations: %d \n \n',N_sim); % Cambia n_sim
             fprintf(fid,'Parameters: \n');
             fprintf(fid,'Target apogee: %d \n',settings.z_final);
-            fprintf(fid,'Thrust: +-20%% at 3*sigma, total impulse constant \n');
-            fprintf(fid,'Control frequency: %d Hz \n',settings.frequencies.controlFrequency);
+            fprintf(fid,'Thrust: +-50%% at 3*sigma, total impulse constant \n');
+            fprintf(fid,'Engine shut-down control frequency: %d Hz \n',settings.frequencies.controlFrequency);
+            fprintf(fid,'Airbrakes control frequency: %d Hz \n',settings.frequencies.arbFrequency );
             fprintf(fid,'Initial Mach number at which the control algorithm starts: %.3f \n',settings.MachControl);
-            switch alg_index
-                case 2
-                    fprintf(fid,'P = %d \n',contSettings.Kp );
-                    fprintf(fid,'I = %d \n',contSettings.Ki );
-                    fprintf(fid,'Never change reference trajectory \n\n' );
-                case 3
-                    fprintf(fid,'P = %d \n',contSettings.Kp );
-                    fprintf(fid,'I = %d \n',contSettings.Ki );
-                    fprintf(fid,'Change reference trajectory every %d seconds \n\n',contSettings.deltaZ_change );
-            end
+            % %             switch alg_index
+            % %                 case 2
+            % %                     fprintf(fid,'P = %d \n',contSettings.Kp );
+            % %                     fprintf(fid,'I = %d \n',contSettings.Ki );
+            % %                     fprintf(fid,'Never change reference trajectory \n\n' );
+            % %                 case 3
+            % %                     fprintf(fid,'P = %d \n',contSettings.Kp );
+            % %                     fprintf(fid,'I = %d \n',contSettings.Ki );
+            % %                     fprintf(fid,'Change reference trajectory every %d seconds \n\n',contSettings.deltaZ_change );
+            % %             end
             fprintf(fid,'Wind model parameters: \n'); % inserisci tutti i parametri del vento
             fprintf(fid,'Wind Magnitude: 0-%d m/s\n',settings.wind.MagMax);
             fprintf(fid,'Wind minimum azimuth: %d [°] \n',rad2deg(settings.wind.AzMin));
@@ -294,12 +313,14 @@ clearvars   i l j jj crossCase
             fprintf(fid,'Min apogee: %.2f \n',min(apogee.thrust));
             fprintf(fid,'Mean apogee: %.2f \n',apogee.thrust_mean);
             fprintf(fid,'Apogee standard deviation 3sigma: %.4f \n',3*apogee.thrust_std);
-            fprintf(fid,'Apogees within +-50m from target (gaussian): %.2f %% \n',apogee.accuracy_gaussian);
-            fprintf(fid,'Apogees within +-50m from target (ratio): %.2f %% \n\n',apogee.accuracy);
+            fprintf(fid,'Apogees within +-10m from target (gaussian): %.2f %% \n',apogee.accuracy_gaussian);
+            fprintf(fid,'Apogees within +-10m from target (ratio): %.2f %% \n\n',apogee.accuracy);
             fprintf(fid,'Apogees horizontal distance from origin mean : %.2f [m] \n',apogee.radius_mean);
             fprintf(fid,'Apogees horizontal distance from origin std : %.2f [m] \n\n',apogee.radius_std);
             fprintf(fid,'Apogees horizontal speed mean : %.2f [m/s] \n',apogee.horizontalSpeed_mean);
-            fprintf(fid,'Apogees horizontal speed std : %.2f [m/s] \n\n\n',apogee.horizontalSpeed_std);
+            fprintf(fid,'Apogees horizontal speed std : %.2f [m/s] \n\n',apogee.horizontalSpeed_std);
+            fprintf(fid,'Mean shutdown time : %.3f [m/s] \n',t_shutdown.mean);
+            fprintf(fid,'Standard deviation of shutdown time : %.3f [m/s] \n\n\n',t_shutdown.std);
             %%%%%%%%%%%%%%%
             fprintf(fid,'Other parameters specific of the simulation: \n\n');
             fprintf(fid,'Filter coefficient: %.3f \n', contSettings.filter_coeff);
