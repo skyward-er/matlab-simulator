@@ -75,7 +75,6 @@ Y0 = initialCond;
 if  (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
     xe = [0,0,settings.m0]';     % initial state estimate
     u = 1;                      % initial valve position ( 1 = open, 0 = closed )
-    settings.shutdown = 0;
     P_mat = zeros(3);          % initial value for P
     V1=diag([1,1,1]);           % model noise covariance matrix
     V2=0.1;
@@ -379,6 +378,7 @@ if strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'com
     struct_out.predicted_apogee = predicted_apogee;
     struct_out.estimated_mass = estimated_mass;
     struct_out.estimated_pressure = estimated_pressure;
+    struct_out.cd = CD;
 end
 
 if exist('t_airbrakes','var')

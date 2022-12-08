@@ -75,17 +75,15 @@ if Tf(end) < settings.tb &&...
 A = contSettings.Engine_model_A;
 B = contSettings.Engine_model_B;
 C = contSettings.Engine_model_C;
-% % % % %     xe = contSettings.Engine_model_A * xe + contSettings.Engine_model_B * u; % propagation
-% % % % %     estimated_pressure(iTimes) = contSettings.Engine_model_C * xe; 
-% % % % %     e =  (c.cp_tot(end)-1950) - estimated_pressure(iTimes)*1000;
-% % % % %     e = e/1000; % from mbar to bar
-% % % % %     xe = xe + contSettings.Engine_model_Kgain * e; % correction
-% % % % % 
-% % % % %     estimated_mass(iTimes) = xe(3);
-% % % % %     m = estimated_mass(iTimes);
-% % % % % % 
-% % % % %     mass_from_measuredP(iTimes+1) = mass_from_measuredP(iTimes-1) - ...
-% % % % %         63.3/1820*0.02*c.cp(end)/1000; 
+% % % %     xe = contSettings.Engine_model_A * xe + contSettings.Engine_model_B * u; % propagation
+% % % %     estimated_pressure(iTimes) = contSettings.Engine_model_C * xe; 
+% % % %     e =  (c.cp_tot(end)-1950) - estimated_pressure(iTimes)*1000;
+% % % %     e = e/1000; % from mbar to bar
+% % % %     xe = xe + contSettings.Engine_model_Kgain * e; % correction
+% % % % 
+% % % %     estimated_mass(iTimes) = xe(3);
+% % % %     m = estimated_mass(iTimes);
+
 
 %%%%%%% online kalman
     estimated_pressure(iTimes) = contSettings.Engine_model_C * xe; 
@@ -99,14 +97,13 @@ C = contSettings.Engine_model_C;
       m = estimated_mass(iTimes);
 
     % magic formula seguire traiettorie è meglio?
-    
-    cd = getDrag(norm(vels), sensorData.kalman.z, 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
+    CD(iTimes) = getDrag(norm(vels(end,:)), sensorData.kalman.z, 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
     [~,~,~,rho] = atmosisa(sensorData.kalman.z);
 
-    predicted_apogee(iTimes) = sensorData.kalman.z + 1/(2*( 0.5*rho * cd * settings.S / m))...
-        * log(1 + (sensorData.kalman.vz^2 * (0.5 * rho * cd * settings.S) / m) / 9.81 );
-
-    if predicted_apogee(iTimes) >= settings.z_final
+    predicted_apogee(iTimes) = sensorData.kalman.z + 1/(2*( 0.5*rho * CD(iTimes) * settings.S / m))...
+        * log(1 + (sensorData.kalman.vz^2 * (0.5 * rho * CD(iTimes) * settings.S) / m) / 9.81 );
+    
+    if predicted_apogee(iTimes) >= settings.z_final+200
             u = 0;
             if ~settings.shutdown 
             t_shutdown = Tf(end);
@@ -115,6 +112,11 @@ C = contSettings.Engine_model_C;
             end
     end
 
+end
+
+if ~settings.shutdown && Tf(end) >= settings.tb
+    settings.shutdown = 1;
+    t_shutdown = settings.tb;
 end
 %% ARB Control algorithm
 
@@ -142,7 +144,9 @@ if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings
         [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
 
     end
-    sensorData.kalman.time = Tf(end);
+   
 else
     ap_ref_new = 0;
 end
+
+ sensorData.kalman.time = Tf(end); %% CAPIRE A COSA SERVE

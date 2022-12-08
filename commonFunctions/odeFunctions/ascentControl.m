@@ -156,7 +156,7 @@ M_value = M;
 %% TIME-DEPENDENT VARIABLES
 dI = 1/tb*([Ixxf Iyyf Izzf]' - [Ixxe Iyye Izze]');
 
-if t<tb && ~settings.shutdown
+if t<tb  && ~settings.shutdown
     m = settings.ms + interp1(settings.motor.expTime, settings.motor.expM, t);
     Ixxdot = -dI(1);
     Iyydot = -dI(2);
