@@ -46,7 +46,7 @@ config;
 %% MONTECARLO SETTINGS
 rng default
 settings.montecarlo = true;
-
+matlab_graphics;
 %% how many simulations
 N_sim = 1000; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
@@ -121,7 +121,7 @@ clearvars   msaToolkitURL Itot
 settings_mont_init = struct('x',[]);
 
 % start simulation
-for alg_index = 4
+for alg_index = 3
 
     contSettings.algorithm = algorithm_vec{alg_index};
 
@@ -197,6 +197,7 @@ for alg_index = 4
         if abs(apogee.thrust(i) - settings.z_final)<10
             N_ApogeeWithinTarget = N_ApogeeWithinTarget +1; % save how many apogees sit in the +-50 m from target
         end
+     
     end
 
 
@@ -275,12 +276,16 @@ for alg_index = 4
                 saveas(save_apogee_3D,folder(i)+"\ApogeeWindThrust")
             end
             saveas(save_dynamic_pressure_and_forces,folder(i)+"\dynamicPressureAndForces")
-            save(folder(i)+"\saveThrust.mat","apogee","N_sim","settings","thrust_percentage") % add "save_thrust", > 2GB for 1000 sim
+           
+            for j = 1:N_sim
+                save_thrust{j} = rmfield(save_thrust{j},'Y'); % remove ode data to save space
+            end
+            save(folder(i)+"\saveThrust.mat","save_thrust","apogee","N_sim","settings","thrust_percentage") % add "save_thrust", > 2GB for 1000 sim
 
-            %             exportgraphics(save_plot_histogram,'report_images\mc_Histogram.pdf','ContentType','vector')
-            %             exportgraphics(save_plotApogee,'report_images\mc_Apogees.pdf','ContentType','vector')
-
-
+                        exportgraphics(save_plot_histogram,'report_images\mc_Histogram.pdf','ContentType','vector')
+                        exportgraphics(save_plotApogee,'report_images\mc_Apogees.pdf','ContentType','vector')
+                         exportgraphics(save_apogee_3D,'report_images/apogee_wind.pdf','ContentType','vector')
+                         
             % Save results.txt
             fid = fopen( folder(i)+"\"+contSettings.algorithm+"Results"+saveDate+".txt", 'wt' );  % CAMBIA IL NOME
             fprintf(fid,'Algorithm: %s \n',contSettings.algorithm );
@@ -336,3 +341,6 @@ for alg_index = 4
         end
     end
 end
+
+load('gong.mat')
+sound(y)

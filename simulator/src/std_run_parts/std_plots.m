@@ -101,3 +101,22 @@ legend('Mach','Airbrakes deployment','Apogee')
 if settings.flagExport == true
     exportgraphics(figures.Mach_number,'report_images\src_src_Mach_number.pdf')
 end
+
+%% Predicted vs real apogee
+prediction = figure('Name', 'Predicted apogee','ToolBar','auto');
+hold on;
+grid on;
+
+plot(structIn.t, -structIn.Y(:, 3));
+plot(0:1/settings.frequencies.controlFrequency:settings.tb-0.02, structIn.predicted_apogee);
+xline(structIn.t_shutdown,'r--')
+
+xlabel('Time t [s]');
+ylabel('Altitude [m]');
+title('Predicted vs Real apogee');
+legend('Predicted apogee','Real altitude','shutdown time')
+
+settings.flagExport = true;
+if settings.flagExport == true
+    exportgraphics(prediction,'predicted_apogee.pdf')
+end

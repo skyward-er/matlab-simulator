@@ -156,6 +156,7 @@ trajectories_saving_MTR{j} = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref', 
 
 end
 %% SAVING
+settings.save = false;
 
 if ~settings.save
     warning('save is set to false')

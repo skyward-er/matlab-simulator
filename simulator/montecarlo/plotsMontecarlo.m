@@ -82,22 +82,20 @@ ylabel('Servo angle [\alpha]')
 legend(contSettings.algorithm);
 
 %% PLOT APOGEE 2D
-save_plotApogee = figure;
+save_plotApogee = figure('units','pixels','position',[0 0 800 600]);
+ hold on; grid on;
 for i = 1:N_sim
-    plot(thrust_percentage(i),apogee.thrust(i),'k.')
-    hold on; grid on;
+    plot(thrust_percentage(i),apogee.thrust(i),'.','color',[0, 0.447, 0.741])
+   
 end
 yline(settings.z_final-10,'r--')
 yline(settings.z_final+10,'r--')
 title('Apogee w.r.t. thrust')
 xlabel('Thrust percentage w.r.t. nominal')
 ylabel('Apogee [m]')
-xlim([min(thrust_percentage)-0.01,max(thrust_percentage)+0.01])
-ylim([settings.z_final-200,settings.z_final+200])
-text(1.1,settings.z_final + 50,"target apogee: "+num2str(settings.z_final))
+
+text(1.1,max(apogee.thrust) + 50,"target apogee: "+num2str(settings.z_final))
 legend(contSettings.algorithm);
-
-
 
 %% PLOT SHUTDOWN TIME 2D
  
@@ -145,6 +143,8 @@ legend(contSettings.algorithm);
     ylabel('Engine shut-down time [s]')
     legend(contSettings.algorithm);
 
+   
+
 %% PLOT TRAJECTORY
 
 save_plotTrajectory = figure;
@@ -187,7 +187,13 @@ if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'co
 end
 %% PLOT APOGEE 3D
 if ~settings.wind.model && ~settings.wind.input
-save_apogee_3D = figure;
+    for i = 1:1000
+        wind_Mag(i) = save_thrust{i}.windMag;
+         wind_az(i) = save_thrust{i}.windAz;
+          wind_el(i) = save_thrust{i}.windEl;
+          
+    end
+save_apogee_3D = figure('units','normalized','outerposition',[0 0 1 1]);
 %%%%%%%%%% wind magnitude - thrust - apogee
 subplot(2,2,1)
 hold on; grid on;
@@ -195,7 +201,7 @@ plot3(wind_Mag,thrust_percentage*100,apogee.thrust','.')
 xlabel('Wind magnitude [m/s]')
 ylabel('Thrust percentage')
 zlabel('Apogee')
-zlim([settings.z_final-200,settings.z_final+200])
+% zlim([settings.z_final-200,settings.z_final+200])
 view(30,20)
 text(min(wind_Mag),110,max(apogee.thrust) + 70,"target apogee: "+num2str(settings.z_final))
 legend(contSettings.algorithm);
@@ -206,7 +212,7 @@ plot3(rad2deg(wind_az),thrust_percentage*100,apogee.thrust','.')
 xlabel('Wind azimuth [°]')
 ylabel('Thrust percentage')
 zlabel('Apogee')
-zlim([settings.z_final-200,settings.z_final+200])
+% zlim([settings.z_final-200,settings.z_final+200])
 view(30,20)
 legend(contSettings.algorithm);
 %%%%%%%%%%%% wind elevation - thrust - apogee
@@ -216,7 +222,7 @@ plot3(rad2deg(wind_el),thrust_percentage*100,apogee.thrust','.')
 xlabel('Wind elevation [°]')
 ylabel('Thrust percentage [%]')
 zlabel('Apogee')
-zlim([settings.z_final-200,settings.z_final+200])
+% zlim([settings.z_final-200,settings.z_final+200])
 view(30,20)
 legend(contSettings.algorithm);
 %%%%%
@@ -226,10 +232,12 @@ plot3(wind_el,wind_az,apogee.thrust','.')
 xlabel('Wind elevation [°]')
 ylabel('Wind azimuth [°]')
 zlabel('Apogee')
-zlim([settings.z_final-200,settings.z_final+200])
+% zlim([settings.z_final-200,settings.z_final+200])
 view(30,20)
 legend(contSettings.algorithm);
 end
+
+ 
 
 %% PLOT PROBABILITY FUNCTION
 if N_sim>1

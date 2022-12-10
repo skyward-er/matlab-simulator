@@ -14,9 +14,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 
-set(groot,'defaultAxesTickLabelInterpreter','latex');
-set(groot,'defaulttextinterpreter','latex');
-set(groot,'defaultLegendInterpreter','latex');
 
 % % % % Z(t)
 % % % figure('Name','Altitude vs Time','NumberTitle','off');
@@ -67,7 +64,7 @@ set(groot,'defaultLegendInterpreter','latex');
 % % % xlabel('Time [s]'); ylabel('$V_{y}$ [m/s]'); title('Horizontal velocity vs Time')
 
 % Vz(z)_ARB
-figure('Name','Vertical velocity vs Altitude','NumberTitle','off');
+ref = figure('Name','Vertical velocity vs Altitude','NumberTitle','off');
 for j = 1:N_mass
 for i = 1:Ntraj_ARB
 %     indexes = find(trajectories{i}.VZ_ref < Vz_initial);
@@ -76,7 +73,9 @@ plot(trajectories{i,j}.Z_ref, trajectories{i,j}.VZ_ref);
     grid on; hold on;
 end
 end
-xlabel('Altitude [m]'); ylabel('$V_{z}$ [m/s]'); title('Vertical velocity vs Altitude for ARB')
+xlabel('Altitude [m]'); ylabel('V_{z} [m/s]'); title('Vertical velocity vs Altitude for ARB')
+
+  exportgraphics(ref,'references.pdf','ContentType','vector')
 
 % Vz(z)_MTR
 figure('Name','Vertical velocity vs Altitude','NumberTitle','off');
