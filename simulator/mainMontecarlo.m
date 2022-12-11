@@ -57,7 +57,7 @@ switch simulationType_thrust
 
     case "gaussian"
 
-        sigma_t = (1.50-1)/3;             % thrust_percentage standard deviation
+        sigma_t = (1.20-1)/3;             % thrust_percentage standard deviation
         mu_t = 1;                         % thrust_percentage mean value
 
         thrust_percentage = normrnd(mu_t,sigma_t,N_sim,1);       %generate normally distributed values ( [0.8 1.20] = 3sigma) % serve il toolbox
@@ -284,7 +284,7 @@ for alg_index = 3
 
                         exportgraphics(save_plot_histogram,'report_images\mc_Histogram.pdf','ContentType','vector')
                         exportgraphics(save_plotApogee,'report_images\mc_Apogees.pdf','ContentType','vector')
-                         exportgraphics(save_apogee_3D,'report_images/apogee_wind.pdf','ContentType','vector')
+                         exportgraphics(save_apogee_3D,'report_images\apogee_wind.pdf','ContentType','vector')
                          
             % Save results.txt
             fid = fopen( folder(i)+"\"+contSettings.algorithm+"Results"+saveDate+".txt", 'wt' );  % CAMBIA IL NOME
@@ -341,6 +341,3 @@ for alg_index = 3
         end
     end
 end
-
-load('gong.mat')
-sound(y)

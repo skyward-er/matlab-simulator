@@ -67,7 +67,7 @@ end
 
 % For interpolation reference algorithm only:
 contSettings.N_forward = 2; % how many steps in advance have to check on speed to interpolate
-contSettings.interpType = 'sinusoidal'; % choose between: 'linear' , 'sinusoidal'
+contSettings.interpType = 'linear'; % choose between: 'linear' , 'sinusoidal'
 
 %% ENGINE CONTROL
 % these need to be updated after every static fire test

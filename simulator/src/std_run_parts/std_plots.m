@@ -58,7 +58,7 @@ xlabel('x [m]');
 ylabel('y [m]');
 zlabel('z [m]');
 title('Trajectory');
-axis([-300 300 -300 300 0 4000])
+
 legend('Trajectory','Airbrake deployment','Apogee')
 if settings.flagExport == true
     exportgraphics(figures.trajectory,'report_images\src_trajectory.pdf')
@@ -114,7 +114,7 @@ xline(structIn.t_shutdown,'r--')
 xlabel('Time t [s]');
 ylabel('Altitude [m]');
 title('Predicted vs Real apogee');
-legend('Predicted apogee','Real altitude','shutdown time')
+legend('Real altitude','Predicted apogee','shutdown time')
 
 settings.flagExport = true;
 if settings.flagExport == true

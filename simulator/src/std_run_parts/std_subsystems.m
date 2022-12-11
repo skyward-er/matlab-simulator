@@ -62,12 +62,11 @@ v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
 sensorData.kalman.z  = -x_est_tot(end, 3);
 sensorData.kalman.x  =  Yf(end, 2);
 sensorData.kalman.y  =  Yf(end, 1);
+% sensorData.kalman.time = Tf(end); %% CAPIRE A COSA SERVE
 
 %% Engine Control algorithm
     
-% TODO: 
-% inizializzare xe ye e K A B C D
-% test con gain variabile
+
 if Tf(end) < settings.tb &&...
    (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
 
@@ -100,10 +99,10 @@ C = contSettings.Engine_model_C;
     CD(iTimes) = getDrag(norm(vels(end,:)), sensorData.kalman.z, 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
     [~,~,~,rho] = atmosisa(sensorData.kalman.z);
 
-    predicted_apogee(iTimes) = sensorData.kalman.z + 1/(2*( 0.5*rho * CD(iTimes) * settings.S / m))...
+    predicted_apogee(iTimes) = sensorData.kalman.z-settings.z0 + 1/(2*( 0.5*rho * CD(iTimes) * settings.S / m))...
         * log(1 + (sensorData.kalman.vz^2 * (0.5 * rho * CD(iTimes) * settings.S) / m) / 9.81 );
     
-    if predicted_apogee(iTimes) >= settings.z_final+200
+    if predicted_apogee(iTimes) >= settings.z_final+100
             u = 0;
             if ~settings.shutdown 
             t_shutdown = Tf(end);
@@ -135,7 +134,6 @@ if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings
         idx_airbrakes = n_old+1;
 
     end
-
     if Tf(end)-t_last_arb_control >= 1/settings.frequencies.arbFrequency - 1e-5 ||...
             t_last_arb_control == t_airbrakes
 
@@ -149,4 +147,4 @@ else
     ap_ref_new = 0;
 end
 
- sensorData.kalman.time = Tf(end); %% CAPIRE A COSA SERVE
+ 

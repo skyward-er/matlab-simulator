@@ -43,7 +43,7 @@ switch true % set this value in configControl.m
             ap_ref_new = ap_base_filter;
         end
         contSettings.flagFirstControl = false;
-        if sensorData.kalman.time>contSettings.Tfilter
+        if sensorData.kalman.time(end)>contSettings.Tfilter
             contSettings.Tfilter = contSettings.Tfilter+contSettings.deltaTfilter;
             contSettings.filter_coeff = contSettings.filter_coeff/contSettings.filterRatio;
         end
@@ -67,7 +67,7 @@ switch true % set this value in configControl.m
                 ap_ref_new = ap_base_filter;
             end
             contSettings.flagFirstControl = false;
-            if sensorData.kalman.time>contSettings.Tfilter
+            if sensorData.kalman.time(end)>contSettings.Tfilter
                 contSettings.Tfilter = contSettings.Tfilter+contSettings.deltaTfilter;
                 contSettings.filter_coeff = contSettings.filter_coeff/contSettings.filterRatio;
             end
@@ -123,7 +123,7 @@ switch true % set this value in configControl.m
                 ap_ref_new = ap_base_filter;
             end
             
-            if sensorData.kalman.time>contSettings.Tfilter
+            if sensorData.kalman.time(end)>contSettings.Tfilter
                 contSettings.Tfilter = contSettings.Tfilter+contSettings.deltaTfilter;
                 contSettings.filter_coeff = contSettings.filter_coeff/contSettings.filterRatio;
             end
