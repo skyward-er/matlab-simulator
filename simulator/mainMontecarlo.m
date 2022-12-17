@@ -96,7 +96,7 @@ end
 %% save arrays
 
 % algorithms
-algorithm_vec = {'interp';'NoControl';'engine';'complete'; 'PID_2021'; 'shooting '}; % interpolation, no control, engine shutdown, engine+arb, PID change every 2s, shooting
+algorithm_vec = {'interp';'NoControl';'engine';'complete'; 'PID_2021'; 'shooting'}; % interpolation, no control, engine shutdown, engine+arb, PID change every 2s, shooting
 
 %% do you want to save the results?
 
@@ -129,6 +129,7 @@ for alg_index = 3
     save_thrust = cell(size(stoch.thrust,1),1);
     apogee.thrust = [];
     N_ApogeeWithinTarget = 0;
+    N_ApogeeWithinTarget_50 = 0;
     wind_Mag = zeros(N_sim,1);
     wind_el = zeros(N_sim,1);
     wind_az = zeros(N_sim,1);
@@ -194,10 +195,15 @@ for alg_index = 3
         end
 
         % within +-10 meters target apogees:
-        if abs(apogee.thrust(i) - settings.z_final)<10
+        if abs(apogee.thrust(i) - settings.z_final)<=10
             N_ApogeeWithinTarget = N_ApogeeWithinTarget +1; % save how many apogees sit in the +-50 m from target
         end
-     
+          % within +-50 meters target apogees:
+          
+        if abs(apogee.thrust(i) - settings.z_final)<=50
+            N_ApogeeWithinTarget_50 = N_ApogeeWithinTarget_50 +1; % save how many apogees sit in the +-50 m from target
+        end
+          
     end
 
 
@@ -218,6 +224,7 @@ for alg_index = 3
     apogee.horizontalSpeed_min = min(apogee.horizontalSpeed);
 
     apogee.accuracy = N_ApogeeWithinTarget/N_sim*100; % percentage, so*100
+    apogee.accuracy_50 = N_ApogeeWithinTarget_50/N_sim*100; % percentage, so*100
 
     for i = 1:N_sim
         save_thrust{i}.mu = mean(apogee.thrust(1:i));
@@ -227,6 +234,8 @@ for alg_index = 3
     %% PLOTS
 
     plotsMontecarlo;
+    
+    
 
     %% SAVE
     % save plots
@@ -320,6 +329,8 @@ for alg_index = 3
             fprintf(fid,'Apogee standard deviation 3sigma: %.4f \n',3*apogee.thrust_std);
             fprintf(fid,'Apogees within +-10m from target (gaussian): %.2f %% \n',apogee.accuracy_gaussian);
             fprintf(fid,'Apogees within +-10m from target (ratio): %.2f %% \n\n',apogee.accuracy);
+            fprintf(fid,'Apogees within +-50m from target (gaussian): %.2f %% \n',apogee.accuracy_gaussian_50);
+            fprintf(fid,'Apogees within +-50m from target (ratio): %.2f %% \n\n',apogee.accuracy_50);
             fprintf(fid,'Apogees horizontal distance from origin mean : %.2f [m] \n',apogee.radius_mean);
             fprintf(fid,'Apogees horizontal distance from origin std : %.2f [m] \n\n',apogee.radius_std);
             fprintf(fid,'Apogees horizontal speed mean : %.2f [m/s] \n',apogee.horizontalSpeed_mean);

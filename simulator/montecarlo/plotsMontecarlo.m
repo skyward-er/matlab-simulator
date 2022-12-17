@@ -93,10 +93,10 @@ yline(settings.z_final+10,'r--')
 title('Apogee w.r.t. thrust')
 xlabel('Thrust percentage w.r.t. nominal')
 ylabel('Apogee [m]')
-
-text(1.1,max(apogee.thrust) + 50,"target apogee: "+num2str(settings.z_final))
+xlim([0.85 1.15])
+ylim([2900 3100])
+text(1, 3080,"target apogee: "+num2str(settings.z_final))
 legend(contSettings.algorithm);
-
 %% PLOT SHUTDOWN TIME 2D
  
 %%% t_shutdown histogram
@@ -240,14 +240,19 @@ end
  
 
 %% PLOT PROBABILITY FUNCTION
+
+ % gaussian 50m
+    p = normcdf([settings.z_final-50, settings.z_final+50],apogee.thrust_mean,apogee.thrust_std);
+    apogee.accuracy_gaussian_50 =( p(2) - p(1) )*100;
+    
 if N_sim>1
     save_thrust_apogee_probability = figure;
     pd = fitdist(apogee.thrust','Normal');    % create normal distribution object to compute mu and sigma
-    % probability to reach an apogee between 2950 and 3050
-    p = normcdf([settings.z_final-50, settings.z_final+50],apogee.thrust_mean,apogee.thrust_std);
+    % probability to reach an apogee between 2990 and 3010
+    p = normcdf([settings.z_final-10, settings.z_final+10],apogee.thrust_mean,apogee.thrust_std);
     apogee.accuracy_gaussian =( p(2) - p(1) )*100;
     x_values = linspace(settings.z_final-500,settings.z_final+500,1000);   % possible apogees
-
+   
     y = pdf(pd,x_values);                  % array of values of the probability density function
     hold on; grid on;
     xlabel('Reached apogee','Interpreter','latex','FontSize',15,'FontWeight','bold')

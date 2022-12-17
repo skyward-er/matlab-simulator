@@ -102,7 +102,7 @@ C = contSettings.Engine_model_C;
     predicted_apogee(iTimes) = sensorData.kalman.z-settings.z0 + 1/(2*( 0.5*rho * CD(iTimes) * settings.S / m))...
         * log(1 + (sensorData.kalman.vz^2 * (0.5 * rho * CD(iTimes) * settings.S) / m) / 9.81 );
     
-    if predicted_apogee(iTimes) >= settings.z_final+100
+    if predicted_apogee(iTimes) >= settings.z_final + 100
             u = 0;
             if ~settings.shutdown 
             t_shutdown = Tf(end);
