@@ -67,7 +67,14 @@ V0 = [0; 0; 0];                                                             % Ve
 W0 = [0; 0; 0];                                                             % Angular speed initial condition
 ap0 = 0;                                                                    % Control servo angle initial condition
 
-
+%%% TEMPORANEO
+    settings.Ixxf = settings.Ixx(1);
+    settings.Iyyf = settings.Iyy(1);
+    settings.Izzf = settings.Izz(1);
+    settings.Ixxe = settings.Ixx(end);
+    settings.Iyye = settings.Iyy(end);
+    settings.Izze = settings.Izz(end);
+    %%%
 initialCond = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf; ap0;];
 Y0 = initialCond;
 %% engine control initialization
@@ -174,10 +181,10 @@ while settings.flagStopIntegration && n_old < nmax                              
     if flagFlight
 
         if settings.ballisticFligth
-            [Tf, Yf] = ode113(@ascentControl, [t0, t1], Y0, [], settings, ap_ref, t_change_ref, tLaunch);
+            [Tf, Yf] = ode113(@ascentControl_wip, [t0, t1], Y0, [], settings, ap_ref, t_change_ref, tLaunch);
         else
             if settings.flagAscent
-                [Tf, Yf] = ode113(@ascentControl, [t0, t1], Y0, [], settings,  ap_ref, t_change_ref, tLaunch);
+                [Tf, Yf] = ode113(@ascentControl_wip, [t0, t1], Y0, [], settings,  ap_ref, t_change_ref, tLaunch);
 
             else
                 if flagPara1

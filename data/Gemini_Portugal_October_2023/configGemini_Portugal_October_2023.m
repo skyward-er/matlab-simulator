@@ -51,7 +51,7 @@ settings.arb.extPol(1) = -0.009216;                                         % co
 settings.arb.extPol(2) = 0.02492;                                           % coefficient for extension - alpha^3
 settings.arb.extPol(3) = -0.01627;                                          % coefficient for extension - alpha^2
 settings.arb.extPol(4) = 0.03191;                                           % coefficient for extension - alpha
-settings.arb.maxExt = settings.Controls(end);
+settings.arb.maxExt = settings.hprot(end);
 
 % servo angle to exposed surface of the airbrakes (PYXIS)
 settings.arb.surfPol = 0.009564;                                            % coefficient for surface - alpha
@@ -70,7 +70,7 @@ settings.arb.R = 66e-3;                                                     % tr
 x = @(alpha) settings.arb.extPol(1)*alpha.^4 + ...
     settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + ...
     settings.arb.extPol(4).*alpha;
-fun = @(alpha) x(alpha) - settings.Controls(end);
+fun = @(alpha) x(alpha) - settings.hprot(end);
 settings.servo.maxAngle = fzero(fun, deg2rad(50));
 settings.servo.maxAngle = fix(settings.servo.maxAngle*1e9)/1e9; % to avoid computational error propagation (truncates the angle to the ninth decimal)
 

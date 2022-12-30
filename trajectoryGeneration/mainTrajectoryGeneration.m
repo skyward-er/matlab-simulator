@@ -79,7 +79,7 @@ V0 = [0 0 0]';
 W0 = [0 0 0]';
 
 %%% composing initial conditions for ode
-Y0 = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf];
+Y0 = [X0; V0; W0; Q0; settings.Ixx(end); settings.Iyy(end); settings.Izz(end)];
 
 %%% wind initialization
 [uw, vw, ww, ~] = windConstGenerator(settings.wind);
@@ -156,7 +156,7 @@ trajectories_saving_MTR{j} = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref', 
 
 end
 %% SAVING
-settings.save = false;
+% settings.save = false;
 
 if ~settings.save
     warning('save is set to false')

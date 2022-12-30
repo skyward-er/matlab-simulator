@@ -48,7 +48,7 @@ rng default
 settings.montecarlo = true;
 matlab_graphics;
 %% how many simulations
-N_sim = 1000; % set to at least 500
+N_sim = 400; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 
 %% stochastic parameters
@@ -121,7 +121,7 @@ clearvars   msaToolkitURL Itot
 settings_mont_init = struct('x',[]);
 
 % start simulation
-for alg_index = 3
+for alg_index = 4
 
     contSettings.algorithm = algorithm_vec{alg_index};
 
