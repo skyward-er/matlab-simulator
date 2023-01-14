@@ -106,6 +106,9 @@ C = contSettings.Engine_model_C;
             u = 0;
             if ~settings.shutdown 
             t_shutdown = Tf(end);
+            settings.timeEngineCut = t_shutdown;
+            settings.IengineCut = Yf(end,14:16);
+            settings.expMengineCut = m - settings.ms;
             settings.shutdown = 1;
             % modificare la ascent
             end

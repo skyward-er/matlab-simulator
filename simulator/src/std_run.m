@@ -181,10 +181,10 @@ while settings.flagStopIntegration && n_old < nmax                              
     if flagFlight
 
         if settings.ballisticFligth
-            [Tf, Yf] = ode113(@ascentControl_wip, [t0, t1], Y0, [], settings, ap_ref, t_change_ref, tLaunch);
+            [Tf, Yf] = ode113(@ascentControl, [t0, t1], Y0, [], settings, ap_ref, t_change_ref, tLaunch);
         else
             if settings.flagAscent
-                [Tf, Yf] = ode113(@ascentControl_wip, [t0, t1], Y0, [], settings,  ap_ref, t_change_ref, tLaunch);
+                [Tf, Yf] = ode113(@ascentControl, [t0, t1], Y0, [], settings,  ap_ref, t_change_ref, tLaunch);
 
             else
                 if flagPara1

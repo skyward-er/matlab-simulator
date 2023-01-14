@@ -17,7 +17,7 @@ contSettings.coeff_Cd = data.coeffs;
 %% CONTROL PARAMETERS
 
 % choose strategy:
-contSettings.algorithm = 'engine'; % choices: 'interp', "PID_2021", "PID_2refs", "shooting", 'engine', 'complete', 'NoControl'
+contSettings.algorithm = 'complete'; % choices: 'interp', "PID_2021", "PID_2refs", "shooting", 'engine', 'complete', 'NoControl'
 
 % Control time sample:
 contSettings.sample_time = 1/settings.frequencies.controlFrequency;

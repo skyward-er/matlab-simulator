@@ -1,7 +1,7 @@
 function std_plots(structIn, settings)
-% 
-% 
-% %% Control variable: servo control action (percentage of angle max)
+
+
+%% Control variable: servo control action (percentage of angle max)
 % ap_tot_rescale = rescale(structIn.Y(:,17), "InputMin", 0, "InputMax", settings.servo.maxAngle);
 % figures.servo_control_action = figure('Name', 'Servo angle after burning phase','ToolBar','auto');
 % plot(structIn.t, ap_tot_rescale*100);
@@ -15,8 +15,8 @@ function std_plots(structIn, settings)
 % if settings.flagExport == true
 %     exportgraphics(figures.servo_control_action,'report_images\src_control_action.pdf','ContentType','vector')
 % end
-% 
-% %% Control variable: servo angle + reference values
+
+%% Control variable: servo angle + reference values
 % figures.servo_angle = figure('Name', 'Servo angle after burning phase','ToolBar','auto');
 % plot(structIn.t, structIn.Y(:,17));
 % hold on; grid on;
@@ -47,8 +47,8 @@ function std_plots(structIn, settings)
 % if settings.flagExport == true
 %     exportgraphics(figures.arb_exposed_surface,'report_images\src_arb_exposed_surface.pdf')
 % end
-% 
-% %% Trajectory
+
+%% Trajectory
 % figures.trajectory = figure('Name', 'Trajectory','ToolBar','auto');
 % plot3(structIn.Y(:, 1), structIn.Y(:, 2), -structIn.Y(:, 3));
 % hold on; grid on;
@@ -63,7 +63,7 @@ function std_plots(structIn, settings)
 % if settings.flagExport == true
 %     exportgraphics(figures.trajectory,'report_images\src_trajectory.pdf')
 % end
-% 
+
 % %% Velocities w.r.t. time
 % figures.velocities = figure('Name', 'Velocities','ToolBar','auto');
 % plot(structIn.t, structIn.Y(:, 4))
@@ -101,7 +101,7 @@ function std_plots(structIn, settings)
 % if settings.flagExport == true
 %     exportgraphics(figures.Mach_number,'report_images\src_src_Mach_number.pdf')
 % end
-
+% 
 %% Predicted vs real apogee
 prediction = figure('Name', 'Predicted apogee','ToolBar','auto');
 hold on;
