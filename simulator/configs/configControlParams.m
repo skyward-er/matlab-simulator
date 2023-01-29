@@ -50,7 +50,7 @@ switch settings.mission
         contSettings.Zfilter = 600; % starting point from which the coefficient is diminished.
         contSettings.deltaZfilter = 100; % every deltaZfilter the filter coefficient is diminished by a ratio of filterRatio
         
-        contSettings.Tfilter = 8; % starting time from which the coefficient is diminished.
+        contSettings.Tfilter = 15; % starting time from which the coefficient is diminished.
         contSettings.deltaTfilter = 2; % every deltaTfilter [s] the filter coefficient is diminished by a ratio of filterRatio
 
 end
