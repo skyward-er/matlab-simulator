@@ -75,6 +75,7 @@ fun = @(alpha) x(alpha) - settings.hprot(end);
 settings.servo.maxAngle = fzero(fun, deg2rad(50));
 settings.servo.maxAngle = fix(settings.servo.maxAngle*1e9)/1e9; % to avoid computational error propagation (truncates the angle to the ninth decimal)
 
+
 %% KALMAN TUNING PARAMETERS
 settings.kalman.dt_k          =   0.01;                                    % [s]        kalman time step
 settings.kalman.sigma_baro    =   5;                                       % [m/2]   estimated barometer variance    

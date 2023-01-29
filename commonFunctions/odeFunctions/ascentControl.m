@@ -218,22 +218,65 @@ beta_value = beta;
 %% CHOSING THE EMPTY CONDITION VALUE
 % interpolation of the coefficients with the value in the nearest condition of the Coeffs matrix
 
-if t >= settings.tControl && M <= settings.MachControl
-    c = settings.control;
-else
-    c = 1;
-end
+%{
+    c = 1: estensione = 0%
+    c = 2: estensione = 50%
+    c = 3: estensione = 100%
+    
+    --> interpCoeffsHRE con c1=2
+        if ext < 50% --> interpCoeffsHRE con c2=1
+        else --> interpCoeffsHRE con c2=3;
+    
+    --> linear interpolation of coeffsValue
+        coeffsValue = coeffsValue1 + ( (coeffsValue2 - coeffsValue1).*(ext-c1)./(c2-c1) )
+%}
+
+
+
+% if t >= settings.tControl && M <= settings.MachControl
+%     c = settings.control;
+% else
+%     c = 1;
+% end
 
 %% INTERPOLATE AERODYNAMIC COEFFICIENTS:
 if settings.HREmot
-    [coeffsValues, angle0] = interpCoeffsHRE(t, alpha, M, beta, absoluteAltitude,...
-        c, settings);
+    c1 = 2;
+    ext1 = settings.arb.maxExt/2;
+    [coeffsValues1, angle1] = interpCoeffsHRE(t, alpha, M, beta, absoluteAltitude,...
+        c1, settings);
+    ext = extension_From_Angle(ap, settings);
+
+    if ext == ext1
+        coeffsValues = coeffsValues1;
+        angle0 = angle1;
+    elseif ext > ext1
+        c2 = 3;
+        ext2 = settings.arb.maxExt;
+        [coeffsValues2, angle2] = interpCoeffsHRE(t, alpha, M, beta, absoluteAltitude,...
+        c2, settings);
+
+         coeffsValues = coeffsValues1 + ( (coeffsValues2 - coeffsValues1).*(ext-ext1)./(ext2-ext1) );
+         angle0 = angle1 + ( (angle2 - angle1).*(ext-ext1)./(ext2-ext1) );
+    else
+        c2 = 1;
+        ext2 = 0;
+        [coeffsValues2, angle2] = interpCoeffsHRE(t, alpha, M, beta, absoluteAltitude,...
+        c2, settings);
+
+        coeffsValues = coeffsValues1 + ( (coeffsValues2 - coeffsValues1).*(ext-ext1)./(ext2-ext1) );
+        angle0 = angle1 + ( (angle2 - angle1).*(ext-ext1)./(ext2-ext1) );
+    end
+   
+
 else
     [coeffsValues, angle0] = interpCoeffs(t, alpha, M, beta, absoluteAltitude,...
         c, settings);
 end
 % Retrieve Coefficients
-
+[coeffsValues0, angle2] = interpCoeffsHRE(t, alpha, M, beta, absoluteAltitude,...
+        1, settings);
+coeffsValues0-coeffsValues;
 
 CA = coeffsValues(1); CYB = coeffsValues(2); CY0 = coeffsValues(3);
 CNA = coeffsValues(4); CN0 = coeffsValues(5); Cl = coeffsValues(6);
@@ -339,7 +382,7 @@ else
     Myz = [0, Cm, Cn]; 
 
     % flagSpeedSaturation = false;
-    if (M_value < settings.MachControl && t>tb) %|| ~settings.machControlActive
+    if (M_value < settings.MachControl && settings.shutdown) %|| ~settings.machControlActive
         % set velocity of servo (air brakes)
         if length(ap_ref_vec)==2 % for the recallOdeFunction
             if t < t_change_ref
