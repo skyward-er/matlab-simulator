@@ -1,4 +1,4 @@
-function [dY, parout] = ascentControl_wip(t, Y, settings, ap_ref_vec,t_change_ref, tLaunch,varargin)
+function [dY, parout] = ascentControl(t, Y, settings, ap_ref_vec,t_change_ref, tLaunch,varargin)
 %{
 ascent - ode function of the 6DOF Rigid Rocket Model
 
@@ -291,6 +291,7 @@ if -z < settings.lrampa*sin(OMEGA)      % No torque on the launchpad
     dp = 0;
     dq = 0;
     dr = 0;
+    dap = 0;
 
     alpha_value = NaN;
     beta_value = NaN;
@@ -304,6 +305,7 @@ if -z < settings.lrampa*sin(OMEGA)      % No torque on the launchpad
     end
     Fyz = [0, nan, nan]; 
     Myz = [0, nan, nan]; 
+
 else
 %% FORCES
     % first computed in the body-frame reference system
@@ -383,7 +385,7 @@ dY(10:13) = dQQ;
 dY(14) = Ixxdot;
 dY(15) = Iyydot;
 dY(16) = Izzdot;
-dap = 0;
+% dap = 0;
 dY(17) = dap;
 
 dY = dY';

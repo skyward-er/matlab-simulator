@@ -140,7 +140,7 @@ while settings.flagStopIntegration && n_old < nmax                              
         tLaunch = 0;
     end
 
-    if launchFlag && (t0 - tLaunch) <= settings.tb
+    if launchFlag && ~settings.shutdown
         flagBurning = true;                                                 % Powered ascent
     else
         flagBurning = false;                                                % Motor ends thrust

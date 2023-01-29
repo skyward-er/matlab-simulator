@@ -17,7 +17,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 %}
 
 settings.launchDate = [2023 10 13];
-
+%% ESTIMATED K COEFF
+settings.motor.K = 63.33;
 %% TRAJECTORY GENERATION PARAMETERS
 settings.Vz_final = 0;
 settings.z_final  = 3000;
