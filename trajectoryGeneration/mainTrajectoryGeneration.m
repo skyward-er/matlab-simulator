@@ -60,9 +60,9 @@ delta_alpha_values  = linspace(settings.servo.minAngle,settings.servo.maxAngle,2
 Vz_final =  settings.Vz_final;
 z_final  =  settings.z_final;
 z_final_MTR  =  settings.z_final_MTR;
-Vx_final =  settings.Vx_final;   
+Vx_final = 0;% settings.Vx_final;   
 x_final  =  settings.x_final;  
-Vy_final =  settings.Vy_final;  
+Vy_final = 0; %  settings.Vy_final;  
 y_final  =  settings.y_final;  
 
 %% INITIAL VELOCITY

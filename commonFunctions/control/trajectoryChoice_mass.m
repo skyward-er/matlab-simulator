@@ -67,8 +67,8 @@ if contSettings.traj_choice == 1 && settings.shutdown
                 (m - mass_vect(index-1) ) / ( mass_vect(index)...
                 - mass_vect(index-1) );
 
-            reference.Vz{2,1}(i) = Vz1_100(i)+ ( Vz2_100(i) - Vz1_100(i) ) *...
-                (m - mass_vect(index+1) ) / ( mass_vect(index)...
+            reference.Vz{2,1}(i) = Vz1_100(i) + ( Vz2_100(i) - Vz1_100(i) ) *...
+                (m - mass_vect(index-1) ) / ( mass_vect(index)...
                 - mass_vect(index-1) );
         end
 
@@ -77,4 +77,13 @@ if contSettings.traj_choice == 1 && settings.shutdown
     contSettings.reference.Vz_temp(:,1) = reference.Vz{1,end};
     contSettings.reference.Vz_temp(:,2) = reference.Vz{2,end};
     contSettings.reference.Vz = contSettings.reference.Vz_temp;
+    
+    figure()
+    hold on
+    plot(reference.Vz{1,end},'b')
+    plot(reference.Vz{2,end},'b')
+    plot( Vz1_0,'k')
+    plot( Vz2_0,'k')
+    plot( Vz1_100,'r')
+    plot( Vz2_100,'r')
 end

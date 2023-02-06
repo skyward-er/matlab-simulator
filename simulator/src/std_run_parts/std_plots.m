@@ -116,7 +116,6 @@ ylabel('Altitude AGL [m]');
 title('Predicted vs Real apogee');
 legend('Real altitude','Predicted apogee','shutdown time')
 
-settings.flagExport = true;
 if settings.flagExport == true
     exportgraphics(prediction,'predicted_apogee.pdf')
 end

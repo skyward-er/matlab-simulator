@@ -85,6 +85,8 @@ if  (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'c
     P_mat = zeros(3);          % initial value for P
     V1=diag([1,1,1]);           % model noise covariance matrix
     V2=0.1;
+%     V1=1e-2*diag([1,1,1]);      % model noise covariance matrix    
+%     V2=0.36; 
 end 
 
 %% WIND GENERATION
