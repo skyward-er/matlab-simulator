@@ -78,12 +78,4 @@ if contSettings.traj_choice == 1 && settings.shutdown
     contSettings.reference.Vz_temp(:,2) = reference.Vz{2,end};
     contSettings.reference.Vz = contSettings.reference.Vz_temp;
     
-    figure()
-    hold on
-    plot(reference.Vz{1,end},'b')
-    plot(reference.Vz{2,end},'b')
-    plot( Vz1_0,'k')
-    plot( Vz2_0,'k')
-    plot( Vz1_100,'r')
-    plot( Vz2_100,'r')
 end

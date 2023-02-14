@@ -50,6 +50,7 @@ if nargin > 2
     settings.wind.ww = settings_mont.wind.ww;
     settings.wind.Az = settings_mont.wind.Az;
     settings.wind.El = settings_mont.wind.El;
+    settings.State.xcgTime = settings_mont.State.xcgTime;
 end
 
 if settings.electronics % global variables slow down a bit the comunication over thread, we don't need these for montecarlo analysis
@@ -160,7 +161,7 @@ while settings.flagStopIntegration && n_old < nmax                              
         flagFlight = true;
     end
 
-    if sensorData.kalman.vz(end) >= 0 && launchFlag
+    if sensorData.kalman.vz(end) >= -1e-3 && launchFlag
         settings.flagAscent = true;                                                  % Ascent
     else
         settings.flagAscent = false;                                                 % Descent
@@ -382,6 +383,7 @@ struct_out.recall = dataBallisticFlight;
 % struct_out.NAS = x_est_tot;
 struct_out.cp = c.cp_tot; 
 struct_out.t_shutdown = t_shutdown;
+struct_out.quat = Yf(:,10:13);
 
 if strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')
     struct_out.predicted_apogee = predicted_apogee;

@@ -48,7 +48,7 @@ rng default
 settings.montecarlo = true;
 matlab_graphics;
 %% how many simulations
-N_sim = 400; % set to at least 500
+N_sim = 1000; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 
 %% stochastic parameters
@@ -67,9 +67,13 @@ switch simulationType_thrust
         %%% settato al'interno di simulationData.m -> possibili errori per
         %%% le simulazioni con exp_thrust aumentato se si vuole fare
         %%% spegnimento dell'ibrido
-        impulse_uncertainty = normrnd(1,0.1/3,N_sim,1);
+        impulse_uncertainty = normrnd(1,0.02/3,N_sim,1);
         stoch.expThrust = diag(impulse_uncertainty)*((1./thrust_percentage) * settings.motor.expTime);          % burning time - same notation as thrust here
-
+           %%%
+        for i =1:N_sim
+            stoch.State.xcgTime(:,i) =  settings.State.xcgTime/settings.tb .* stoch.expThrust(i,end);  % Xcg time
+        end
+        
         %%% wind parameters
         settings.wind.MagMin = 0;                                               % [m/s] Minimum Wind Magnitude
         settings.wind.MagMax = 10;                                               % [m/s] Maximum Wind Magnitude
@@ -121,7 +125,7 @@ clearvars   msaToolkitURL Itot
 settings_mont_init = struct('x',[]);
 
 % start simulation
-for alg_index = 4
+for alg_index = 3
 
     contSettings.algorithm = algorithm_vec{alg_index};
 
@@ -143,7 +147,7 @@ for alg_index = 4
         settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
         settings_mont.motor.expTime = stoch.expThrust(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
         settings_mont.tb = stoch.expThrust(i,end);                              % initialize the burning time of the current simulation (parfor purposes)
-
+        settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                      % initialize the baricenter position time vector
 
         % set the wind parameters
         settings_mont.wind.uw = stoch.wind.uw(i);
@@ -160,8 +164,6 @@ for alg_index = 4
         [simOutput] = std_run(settings,contSettings,settings_mont);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STD_RUN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         save_thrust{i} = simOutput;
-
-
 
     end
 

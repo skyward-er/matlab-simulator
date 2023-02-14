@@ -187,7 +187,7 @@ if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'co
 end
 %% PLOT APOGEE 3D
 if ~settings.wind.model && ~settings.wind.input
-    for i = 1:1000
+    for i = 1:N_sim
         wind_Mag(i) = save_thrust{i}.windMag;
          wind_az(i) = save_thrust{i}.windAz;
           wind_el(i) = save_thrust{i}.windEl;
