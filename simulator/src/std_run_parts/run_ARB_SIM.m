@@ -42,12 +42,25 @@ switch true % set this value in configControl.m
         else
             ap_ref_new = ap_base_filter;
         end
-        contSettings.flagFirstControl = false;
-        if sensorData.kalman.time(end)>contSettings.Tfilter
-            contSettings.Tfilter = contSettings.Tfilter+contSettings.deltaTfilter;
-            contSettings.filter_coeff = contSettings.filter_coeff/contSettings.filterRatio;
+
+        test = (wrapToPi(settings.PHI-settings.wind.inputAzimut(1)));
+        if (test <= -pi/6 || (test >= pi/4 && test<= pi*3/5)) && settings.wind.inputGround >=6
+            ap_ref_new = min(abs(ap_ref_new/(1.6)*1/cos(test)),ap_ref_new/(1.6));
         end
 
+        contSettings.flagFirstControl = false;
+%         if sensorData.kalman.time(end)>contSettings.Tfilter
+%             contSettings.Tfilter = contSettings.Tfilter+contSettings.deltaTfilter;
+%             contSettings.filter_coeff = contSettings.filter_coeff/contSettings.filterRatio;
+%         end
+        if sensorData.kalman.z(end)>contSettings.Zfilter
+            contSettings.Zfilter = contSettings.Zfilter+ contSettings.deltaZfilter;
+            contSettings.filter_coeff = contSettings.filter_coeff/contSettings.filterRatio;
+        end
+        
+        if sensorData.kalman.z-settings.z0 > 2997
+            ap_ref_new = settings.servo.maxAngle;
+        end
        
     case strcmp (contSettings.algorithm,'shooting')
         % shooting algorithm:

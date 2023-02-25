@@ -56,6 +56,7 @@ else
     sensorData.kalman.vz = - Yf(end, 6); % actually not coming from NAS in this case
     sensorData.kalman.vx = Yf(end, 5);
     sensorData.kalman.vy = Yf(end, 4);
+   
 end
 v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
 
@@ -74,26 +75,26 @@ if Tf(end) < settings.tb &&...
 A = contSettings.Engine_model_A;
 B = contSettings.Engine_model_B;
 C = contSettings.Engine_model_C;
-% % % %     xe = contSettings.Engine_model_A * xe + contSettings.Engine_model_B * u; % propagation
-% % % %     estimated_pressure(iTimes) = contSettings.Engine_model_C * xe; 
-% % % %     e =  (c.cp_tot(end)-1950) - estimated_pressure(iTimes)*1000;
-% % % %     e = e/1000; % from mbar to bar
-% % % %     xe = xe + contSettings.Engine_model_Kgain * e; % correction
-% % % % 
-% % % %     estimated_mass(iTimes) = xe(3);
-% % % %     m = estimated_mass(iTimes);
+    xe = contSettings.Engine_model_A * xe + contSettings.Engine_model_B * u; % propagation
+    estimated_pressure(iTimes) = contSettings.Engine_model_C * xe; 
+    e =  (c.cp_tot(end)-1950) - estimated_pressure(iTimes)*1000;
+    e = e/1000; % from mbar to bar
+    xe = xe + contSettings.Engine_model_Kgain * e; % correction
+
+    estimated_mass(iTimes) = xe(3);
+    m = estimated_mass(iTimes);
 
 
 %%%%%%% online kalman
-    estimated_pressure(iTimes) = contSettings.Engine_model_C * xe; 
-    e =  (c.cp_tot(end)-1950) - estimated_pressure(iTimes)*1000;
-    e = e/1000;
-    K=(A*P_mat*C')/(C*P_mat*C'+V2);
-    P_mat=(A*P_mat*A'+V1)-K*(A*P_mat*C')';
-    xe=A*xe + K*e+B*u;
-    
-      estimated_mass(iTimes) = xe(3);
-      m = estimated_mass(iTimes);
+% % %     estimated_pressure(iTimes) = contSettings.Engine_model_C * xe; 
+% % %     e =  (c.cp_tot(end)-1950) - estimated_pressure(iTimes)*1000;
+% % %     e = e/1000;
+% % %     K=(A*P_mat*C')/(C*P_mat*C'+V2);
+% % %     P_mat=(A*P_mat*A'+V1)-K*(A*P_mat*C')';
+% % %     xe=A*xe + K*e+B*u;
+% % %     
+% % %       estimated_mass(iTimes) = xe(3);
+% % %       m = estimated_mass(iTimes);
 
     % magic formula seguire traiettorie è meglio?
     CD(iTimes) = getDrag(norm(vels(end,:)), sensorData.kalman.z, 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
@@ -101,7 +102,7 @@ C = contSettings.Engine_model_C;
 
     predicted_apogee(iTimes) = sensorData.kalman.z-settings.z0 + 1/(2*( 0.5*rho * CD(iTimes) * settings.S / m))...
         * log(1 + (sensorData.kalman.vz^2 * (0.5 * rho * CD(iTimes) * settings.S) / m) / 9.81 );
-    if predicted_apogee(iTimes) >= settings.z_final  + 100
+    if predicted_apogee(iTimes) >= settings.z_final  + 100 %+ min(40,abs(80*cos(settings.PHI-settings.wind.inputAzimut(1))))% settings.wind.inputGround
             u = 0;
             if ~settings.shutdown 
             t_shutdown = Tf(end);
