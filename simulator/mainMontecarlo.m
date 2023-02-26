@@ -40,7 +40,7 @@ addpath(genpath(commonFunctionsPath));
 % % submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
 
 %% CONFIGs
-conf.script = "simulation";
+conf.script = "simulator";
 config;
 
 %% MONTECARLO SETTINGS
@@ -48,7 +48,7 @@ rng default
 settings.montecarlo = true;
 matlab_graphics;
 %% how many simulations
-N_sim = 1000; % set to at least 500
+N_sim = 4; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 
 %% stochastic parameters
@@ -69,11 +69,11 @@ switch simulationType_thrust
         %%% spegnimento dell'ibrido
         impulse_uncertainty = normrnd(1,0.02/3,N_sim,1);
         stoch.expThrust = diag(impulse_uncertainty)*((1./thrust_percentage) * settings.motor.expTime);          % burning time - same notation as thrust here
-           %%%
+        %%%
         for i =1:N_sim
             stoch.State.xcgTime(:,i) =  settings.State.xcgTime/settings.tb .* stoch.expThrust(i,end);  % Xcg time
         end
-        
+
         %%% wind parameters
         settings.wind.MagMin = 0;                                               % [m/s] Minimum Wind Magnitude
         settings.wind.MagMax = 10;                                               % [m/s] Maximum Wind Magnitude
@@ -82,7 +82,12 @@ switch simulationType_thrust
         settings.wind.AzMin  = - deg2rad(180);
         settings.wind.AzMax  = + deg2rad(180);
 
-        [stoch.wind.uw, stoch.wind.vw, stoch.wind.ww, stoch.wind.Az, stoch.wind.El ] = windConstGeneratorMontecarlo(settings.wind,N_sim,simulationType_thrust);
+        switch settings.windModel
+            case "constant"
+                [stoch.wind.uw, stoch.wind.vw, stoch.wind.ww, stoch.wind.Az, stoch.wind.El ] = windConstGeneratorMontecarlo(settings.wind,N_sim,simulationType_thrust);
+            case "multiplicative"
+                [stoch.wind.Mag,stoch.wind.Az] = windMultGeneratorMontecarlo(settings.wind,N_sim);
+        end
 
     case "extreme"
 
@@ -125,7 +130,7 @@ clearvars   msaToolkitURL Itot
 settings_mont_init = struct('x',[]);
 
 % start simulation
-for alg_index = 3
+for alg_index = 4
 
     contSettings.algorithm = algorithm_vec{alg_index};
 
@@ -150,12 +155,18 @@ for alg_index = 3
         settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                      % initialize the baricenter position time vector
 
         % set the wind parameters
-        settings_mont.wind.uw = stoch.wind.uw(i);
-        settings_mont.wind.vw = stoch.wind.vw(i);
-        settings_mont.wind.ww = stoch.wind.ww(i);
-        settings_mont.wind.Az = stoch.wind.Az(i);
-        settings_mont.wind.El = stoch.wind.El(i);
-
+        switch settings.windModel
+            case "constant"
+                settings_mont.wind.uw = stoch.wind.uw(i);
+                settings_mont.wind.vw = stoch.wind.vw(i);
+                settings_mont.wind.ww = stoch.wind.ww(i);
+                settings_mont.wind.Az = stoch.wind.Az(i);
+                settings_mont.wind.El = stoch.wind.El(i);
+            case "multiplicative"
+                settings_mont.wind.Mag = stoch.wind.Mag(i);
+                settings_mont.wind.Az = stoch.wind.Az(i,:);
+        end
+        
         if displayIter == true
             fprintf("simulation = " + num2str(i) + " of " + num2str(N_sim) + ", algorithm: " + contSettings.algorithm +"\n");
         end
@@ -317,12 +328,19 @@ for alg_index = 3
             % %                     fprintf(fid,'I = %d \n',contSettings.Ki );
             % %                     fprintf(fid,'Change reference trajectory every %d seconds \n\n',contSettings.deltaZ_change );
             % %             end
-            fprintf(fid,'Wind model parameters: \n'); % inserisci tutti i parametri del vento
-            fprintf(fid,'Wind Magnitude: 0-%d m/s\n',settings.wind.MagMax);
-            fprintf(fid,'Wind minimum azimuth: %d [°] \n',rad2deg(settings.wind.AzMin));
-            fprintf(fid,'Wind maximum azimuth: %d [°] \n',rad2deg(settings.wind.AzMax));
-            fprintf(fid,'Wind minimum elevation: %d [°] \n', rad2deg(settings.wind.ElMin));
-            fprintf(fid,'Wind maximum elevation: %d [°] \n\n\n',rad2deg(settings.wind.ElMax));
+            fprintf(fid,'Wind model: %s \n',settings.windModel);
+            if settings.windModel == "constant"
+                fprintf(fid,'Wind model parameters: \n'); % inserisci tutti i parametri del vento
+                fprintf(fid,'Wind Magnitude: 0-%d m/s\n',settings.wind.MagMax);
+                fprintf(fid,'Wind minimum azimuth: %d [°] \n',rad2deg(settings.wind.AzMin));
+                fprintf(fid,'Wind maximum azimuth: %d [°] \n',rad2deg(settings.wind.AzMax));
+                fprintf(fid,'Wind minimum elevation: %d [°] \n', rad2deg(settings.wind.ElMin));
+                fprintf(fid,'Wind maximum elevation: %d [°] \n\n\n',rad2deg(settings.wind.ElMax));
+            else
+                fprintf(fid,'Wind model parameters: \n'); % inserisci tutti i parametri del vento
+                fprintf(fid,'Ground wind Magnitude: 0-%d m/s\n',settings.wind.MagMax);
+            end
+            
             %%%%%%%%%%%%%%%
             fprintf(fid,'Results: \n');
             fprintf(fid,'Max apogee: %.2f \n',max(apogee.thrust));
@@ -342,13 +360,15 @@ for alg_index = 3
             %%%%%%%%%%%%%%%
             fprintf(fid,'Other parameters specific of the simulation: \n\n');
             fprintf(fid,'Filter coefficient: %.3f \n', contSettings.filter_coeff);
-            if contSettings.algorithm == "interp"
+            if contSettings.algorithm == "interp" || contSettings.algorithm == "complete" 
                 fprintf(fid,'N_forward: %d \n', contSettings.N_forward);
                 fprintf(fid,'Delta Z (reference): %d \n',contSettings.reference.deltaZ);
                 fprintf(fid,'Filter diminished every: %d \n', contSettings.deltaTfilter);
                 fprintf(fid,'Filter diminished by ratio: %d \n', contSettings.filterRatio);
                 fprintf(fid,'Filter diminishing starts at: %d m \n', contSettings.Tfilter);
                 fprintf(fid,'Interpolation type: %s \n', contSettings.interpType);
+
+                fprintf(fid,'Correction with ground wind: no \n');
             end
             fclose(fid);
         end

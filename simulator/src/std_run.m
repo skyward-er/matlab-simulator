@@ -45,11 +45,18 @@ if nargin > 2
     settings.motor.expThrust = settings_mont.motor.expThrust;
     settings.motor.expTime = settings_mont.motor.expTime;
     settings.tb = settings_mont.tb;
-    settings.wind.uw = settings_mont.wind.uw;
-    settings.wind.vw = settings_mont.wind.vw;
-    settings.wind.ww = settings_mont.wind.ww;
-    settings.wind.Az = settings_mont.wind.Az;
-    settings.wind.El = settings_mont.wind.El;
+    switch settings.windModel
+        case "constant"
+            settings.wind.uw = settings_mont.wind.uw;
+            settings.wind.vw = settings_mont.wind.vw;
+            settings.wind.ww = settings_mont.wind.ww;
+            settings.wind.Az = settings_mont.wind.Az;
+            settings.wind.El = settings_mont.wind.El;
+        case "multiplicative"
+            settings.wind.inputGround = settings_mont.wind.Mag;
+            settings.wind.inputAzimut = settings_mont.wind.Az;
+    end
+   
     settings.State.xcgTime = settings_mont.State.xcgTime;
 end
 

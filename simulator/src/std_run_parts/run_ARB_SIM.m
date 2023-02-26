@@ -43,10 +43,10 @@ switch true % set this value in configControl.m
             ap_ref_new = ap_base_filter;
         end
 
-        test = (wrapToPi(settings.PHI-settings.wind.inputAzimut(1)));
-        if (test <= -pi/6 || (test >= pi/4 && test<= pi*3/5)) && settings.wind.inputGround >=6
-            ap_ref_new = min(abs(ap_ref_new/(1.6)*1/cos(test)),ap_ref_new/(1.6));
-        end
+% % % % %         test = (wrapToPi(settings.PHI-settings.wind.inputAzimut(1)));
+% % % % %         if (test <= -pi/6 || (test >= pi/4 && test<= pi*3/5)) && settings.wind.inputGround >=6
+% % % % %             ap_ref_new = min(abs(ap_ref_new/(1.6)*1/cos(test)),ap_ref_new/(1.6));
+% % % % %         end
 
         contSettings.flagFirstControl = false;
 %         if sensorData.kalman.time(end)>contSettings.Tfilter

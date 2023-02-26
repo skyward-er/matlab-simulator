@@ -47,15 +47,15 @@ settings.servo.maxSpeed = deg2rad(300);                     %[rad/s]        % ma
 settings.servo.minAngle = 0;                                                % min servo angle
 settings.servo.maxTorque = 51*9.81/100;                                     % max torque guaranteed (given as 51 kg-cm)
 
-% Servo angle to extension of the air brakes (PYXIS)
-settings.arb.extPol(1) = -0.009216;                                         % coefficient for extension - alpha^4
-settings.arb.extPol(2) = 0.02492;                                           % coefficient for extension - alpha^3
-settings.arb.extPol(3) = -0.01627;                                          % coefficient for extension - alpha^2
-settings.arb.extPol(4) = 0.03191;                                           % coefficient for extension - alpha
+% Servo angle to extension of the air brakes (GEMINI)
+settings.arb.extPol(1) = -0.009083;                                         % coefficient for extension - alpha^4
+settings.arb.extPol(2) = 0.02473;                                           % coefficient for extension - alpha^3
+settings.arb.extPol(3) = -0.01677;                                          % coefficient for extension - alpha^2
+settings.arb.extPol(4) = 0.03129;                                           % coefficient for extension - alpha
 settings.arb.maxExt = settings.hprot(end);
 
-% servo angle to exposed surface of the airbrakes (PYXIS)
-settings.arb.surfPol = 0.009564;                                            % coefficient for surface - alpha
+% servo angle to exposed surface of the airbrakes (GEMINI)
+settings.arb.surfPol = 0.00932857142857;                                            % coefficient for surface - alpha
 
 % servo angle to guide angle (PYXIS)
 settings.arb.guidePol(1) = -9.4265;                                         % coefficient for guide - sin(alpha...)

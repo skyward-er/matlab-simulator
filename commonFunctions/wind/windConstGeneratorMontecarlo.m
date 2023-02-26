@@ -40,13 +40,13 @@ switch simulationType_thrust
         end
 
     case "extreme"
-        
+
         thrust_percentage = varargin{1};
-%         Az_vec = deg2rad([-180 -135 -90 -45 0 45 90 135]);
-%         El_vec = deg2rad([-60 0 60]);
+        %         Az_vec = deg2rad([-180 -135 -90 -45 0 45 90 135]);
+        %         El_vec = deg2rad([-60 0 60]);
         Az_vec = deg2rad([-180 -90 0 90]);
         El_vec = deg2rad([-60 60]);
-        
+
         [A,B,C] = meshgrid(Az_vec,El_vec,thrust_percentage);
         Az = [];
         El = [];
@@ -60,7 +60,7 @@ switch simulationType_thrust
                 end
             end
         end
-        
+
         n_sim = length(Az);
         Mag= ones(n_sim,1)*10; %[m/s]
         uw = zeros(n_sim,1);
