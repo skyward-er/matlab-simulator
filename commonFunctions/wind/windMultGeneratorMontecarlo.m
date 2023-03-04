@@ -10,6 +10,6 @@ Mag = normrnd(mu_Mag,sigma_Mag,n_sim,1);
 
 %Azimuth matrix
 
-Az = 360*pi/180*rand(n_sim,1);
+Az = 360*pi/180*rand(n_sim,9);
 
 

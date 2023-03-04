@@ -110,6 +110,7 @@ C = contSettings.Engine_model_C;
             settings.IengineCut = Yf(end,14:16);
             settings.expMengineCut = m - settings.ms;
             settings.shutdown = 1;
+            settings = settingsEngineCut(settings);
             end
     end
 end
@@ -117,6 +118,8 @@ end
 if ~settings.shutdown && Tf(end) >= settings.tb
     settings.shutdown = 1;
     t_shutdown = settings.tb;
+    settings.timeEngineCut = t_shutdown;
+    settings = settingsEngineCut(settings);
 end
 %% ARB Control algorithm
 
@@ -127,7 +130,8 @@ if str2double(settings.mission(end)) > 2 % only for mission after october 2022
 end
 
 if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings.control...
-        && ~(strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine') ) 
+        && ~(strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine') ) ...
+    && Tf(end) > settings.timeEngineCut + 0.5
     if contSettings.flagFirstControl
 
         t_airbrakes = t0;

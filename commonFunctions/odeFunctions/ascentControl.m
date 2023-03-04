@@ -202,6 +202,7 @@ else     % for t >= tb the fligth condition is the empty one(no interpolation ne
     T = 0;
 end
 
+T
 %% AERODYNAMICS ANGLES
 if not(ur < 1e-9 || V_norm < 1e-9)
     alpha = atan(wr/ur);
