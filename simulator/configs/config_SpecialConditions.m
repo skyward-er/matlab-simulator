@@ -20,8 +20,8 @@ contSettings.N_forward = 2;
 contSettings.interpType = 'linear'; % set if the interp algorithm does a linear or sinusoidal interpolation of the references
 contSettings.filterRatio = 2;
 
-% settings.wind.model = false;
-% settings.wind.input = false;
+settings.wind.model = false;
+settings.wind.input = false;
 
 
 

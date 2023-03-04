@@ -45,9 +45,9 @@ if conf.script == "simulator"
             settings.wind.model = false;
             settings.wind.inputGround  = 9;                                         % [m/s] Wind magnitude at the ground
             settings.wind.inputAlt     = 4000/1100*[0 50 100 200 350 500 700 900 1100];       % [m] Altitude vector
-            settings.wind.inputMult    = [1 2 3 3.5 4 4.5 5 5.5 6];                 % [-] Percentage of increasing magnitude at each altitude
-            settings.wind.inputAzimut  = 360*pi/180*rand(1,9);                       % [deg] Wind azimut angle at each altitude (toward wind incoming direction)
-            settings.wind.input_uncertainty = [0, 0];
+            settings.wind.inputMult    = [0 1 2 3 4 4.5 5 5.5 6]*50;                 % [-] Percentage of increasing magnitude at each altitude
+            settings.wind.inputAzimut  = 140*pi/180*ones(1,9);                       % [deg] Wind azimut angle at each altitude (toward wind incoming direction)
+            settings.wind.input_uncertainty = [0,0];
             % settings.wind.input_uncertainty = [a,b];      wind uncertanties:
             % - a, wind magnitude percentage uncertanty: magn = magn *(1 +- a)
             % - b, wind direction band uncertanty: dir = dir 1 +- b

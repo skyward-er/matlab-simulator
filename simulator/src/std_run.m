@@ -280,13 +280,7 @@ while settings.flagStopIntegration && n_old < nmax                              
     % wind update
     if settings.windModel == "multiplicative"
 
-        Mag = settings.wind.inputGround*interp1(settings.wind.inputAlt, settings.wind.inputMult,-Y0(3));
-        Az = interp1(settings.wind.inputAlt, settings.wind.inputAzimut,-Y0(3));
-
-        R = Mag*angle2dcm(Az, 0, 0, 'ZYX');
-        uw = R(1,1);
-        vw = R(1,2);
-        ww = R(1,3);
+        [uw, vw, ww,Mag,Az] = windInputGenerator(settings, -Y0(3), settings.wind.input_uncertainty);
 
         settings.constWind = [uw, vw, ww];
 

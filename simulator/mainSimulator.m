@@ -53,13 +53,13 @@ config;
 % values for each simulation, so it has the same atmospheric conditions
 % each time
 
-if settings.tuning
-%  	rng('default')
-end 
+% if settings.tuning
+  	rng('default')
+% end 
 
 %% SET SPECIFIC PARAMETERS FOR A PRE LAUNCH SIMULATION
 
-% config_SpecialConditions;
+%  config_SpecialConditions;
 
 %% START THE SIMULATION
 % T = vector of time used by ODE, [s] also for Tf Ta

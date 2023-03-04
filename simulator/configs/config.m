@@ -53,7 +53,7 @@ if conf.script ~= "trajectory generation"
     %% 12) REFERENCES
     configReferences;
     %% 13) SPECIAL CONDITIONS?
-    config_SpecialConditions;
+%     config_SpecialConditions;
 
     %% 14) DATA EXTRACTION
     configSettings;
