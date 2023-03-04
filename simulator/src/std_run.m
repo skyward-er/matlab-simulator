@@ -324,7 +324,7 @@ while settings.flagStopIntegration && n_old < nmax                              
     %% display step state
 
     if not(settings.montecarlo)
-%          disp("z: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,end));
+         disp("z: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,end));
     end
 
 end

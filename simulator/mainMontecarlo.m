@@ -48,7 +48,7 @@ rng default
 settings.montecarlo = true;
 matlab_graphics;
 %% how many simulations
-N_sim = 4; % set to at least 500
+N_sim = 8; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 
 %% stochastic parameters
@@ -144,7 +144,7 @@ for alg_index = 4
     wind_az = zeros(N_sim,1);
     t_shutdown.value = zeros(N_sim,1);
 
-    parfor i = 1:n_sim
+    parfor i = 1:N_sim
         settings_mont = settings_mont_init;
         %         contSettings_mont = contSettings;
         %         reference_mont = reference;
@@ -248,8 +248,6 @@ for alg_index = 4
 
     plotsMontecarlo;
     
-    
-
     %% SAVE
     % save plots
     saveDate = string(datestr(date,29));
