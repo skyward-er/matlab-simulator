@@ -2,7 +2,7 @@
     This function chooses the reference trajectories to follow based on
     the estimated mass after engine shut-down.
     After finding the reference which correspond to the rocket mass closer 
-    to the estimated one, performs a liner interpolation to find the
+    to the estimated one, performs a linear interpolation to find the
     optimal trajectory to follow
 
     

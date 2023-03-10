@@ -30,10 +30,10 @@ end
 
 %% Navigation system
 
-if settings.flagNAS && settings.dataNoise 
+if settings.flagNAS && settings.dataNoise
 
-%     sp.pn = sp.pn(end);
-%     sp.t_baro = sp.t_baro(end);
+    %     sp.pn = sp.pn(end);
+    %     sp.t_baro = sp.t_baro(end);
 
     [sensorData.kalman.x_c, vels, P_c, settings.kalman]   =  run_kalman(x_prev, vels_prev, P_prev, sp, settings.kalman, XYZ0*0.01);
     sensorData.kalman.time(iTimes) = Tf(end);
@@ -42,27 +42,36 @@ if settings.flagNAS && settings.dataNoise
     t_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1)    = sensorData.accelerometer.time; % NAS time output
     c.n_est_old = c.n_est_old + size(sensorData.kalman.x_c,1);
 
+    sensorData.kalman.z  = -x_est_tot(end, 3);
+    sensorData.kalman.x  =  x_est_tot(end, 2);
+    sensorData.kalman.y  =  x_est_tot(end, 1);
+    sensorData.kalman.vx =  x_est_tot(end, 4);   % north
+    sensorData.kalman.vy =  x_est_tot(end, 5);   % east
+    sensorData.kalman.vz = -x_est_tot(end, 6);   % down
+    est = sensorData.kalman.vz;
 end
 
 % vertical velocity and position
-if settings.flagAscent || (not(settings.flagAscent) && settings.ballisticFligth)
-    Q    =   Yf(end, 10:13);
-    vels =   quatrotate(quatconj(Q), Yf(:, 4:6));
-    sensorData.kalman.vz = - vels(end,3);   % down
-    sensorData.kalman.vx =   vels(end,2);   % north
-    sensorData.kalman.vy =   vels(end,1);   % east
-
-else
-    sensorData.kalman.vz = - Yf(end, 6); % actually not coming from NAS in this case
-    sensorData.kalman.vx = Yf(end, 5);
-    sensorData.kalman.vy = Yf(end, 4);
-   
-end
+% % % % % % if settings.flagAscent || (not(settings.flagAscent) && settings.ballisticFligth)
+% % % % % %     Q    =   Yf(end, 10:13);
+% % % % % %     vels =   quatrotate(quatconj(Q), Yf(:, 4:6));
+% % % % % %     sensorData.kalman.vz = - vels(end,3);   % down
+% % % % % %     sensorData.kalman.vx =   vels(end,2);   % north
+% % % % % %     sensorData.kalman.vy =   vels(end,1);   % east
+% % % % % %     real = sensorData.kalman.vz;
+% % % % % %     est_meno_real = est-real;
+% % % % % %     z = -Yf(end, 3);
+% % % % % % else
+% % % % % %     sensorData.kalman.vz = - Yf(end, 6); % actually not coming from NAS in this case
+% % % % % %     sensorData.kalman.vx = Yf(end, 5);
+% % % % % %     sensorData.kalman.vy = Yf(end, 4);  
+% % % % % % end
 v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
 
-sensorData.kalman.z  = -x_est_tot(end, 3);
-sensorData.kalman.x  =  Yf(end, 2);
-sensorData.kalman.y  =  Yf(end, 1);
+% % % % % % 
+% % % % % % sensorData.kalman.z  = -x_est_tot(end, 3);
+% % % % % % sensorData.kalman.x  =  Yf(end, 2);
+% % % % % % sensorData.kalman.y  =  Yf(end, 1);
 % sensorData.kalman.time = Tf(end); %% CAPIRE A COSA SERVE
 
 %% Engine Control algorithm
@@ -123,15 +132,16 @@ if ~settings.shutdown && Tf(end) >= settings.tb
 end
 %% ARB Control algorithm
 
-if str2double(settings.mission(end)) > 2 % only for mission after october 2022
 
-    trajectoryChoice_mass;
-
-end
 
 if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings.control...
         && ~(strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine') ) ...
     && Tf(end) > settings.timeEngineCut + 0.5
+
+    if str2double(settings.mission(end)) > 2 % only for mission after october 2022
+    trajectoryChoice_mass;
+    end
+    
     if contSettings.flagFirstControl
 
         t_airbrakes = t0;

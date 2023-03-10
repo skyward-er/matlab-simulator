@@ -48,7 +48,7 @@ rng default
 settings.montecarlo = true;
 matlab_graphics;
 %% how many simulations
-N_sim = 8; % set to at least 500
+N_sim = 400; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 
 %% stochastic parameters

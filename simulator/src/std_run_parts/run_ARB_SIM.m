@@ -35,7 +35,7 @@ switch true % set this value in configControl.m
         % w.r.t. the two references.
 
         [ap_base_filter] = control_Interp(sensorData.kalman.z-settings.z0,sensorData.kalman.vz,contSettings.reference.Z,contSettings.reference.Vz,contSettings.interpType,contSettings.N_forward,settings,contSettings); % cambiare nome alla funzione tra le altre cose
-
+        
         % filter control action
         if contSettings.flagFirstControl == false % the first reference is given the fastest possible (unfiltered), then filter
             ap_ref_new = ap_ref_old + (ap_base_filter - ap_ref_old)*contSettings.filter_coeff;
@@ -47,7 +47,7 @@ switch true % set this value in configControl.m
 % % % % %         if (test <= -pi/6 || (test >= pi/4 && test<= pi*3/5)) && settings.wind.inputGround >=6
 % % % % %             ap_ref_new = min(abs(ap_ref_new/(1.6)*1/cos(test)),ap_ref_new/(1.6));
 % % % % %         end
-
+                    
         contSettings.flagFirstControl = false;
 %         if sensorData.kalman.time(end)>contSettings.Tfilter
 %             contSettings.Tfilter = contSettings.Tfilter+contSettings.deltaTfilter;
