@@ -70,13 +70,13 @@ if freq.accelerometerFrequency > freq.controlFrequency
 
         end
         sensorData.accelerometer.measures(i, :) = accelerometerAscent...
-            (iTimeAcc, Yinterp, settings, ext);
+            (iTimeAcc, Yinterp, settings);
     end
 
 elseif freq.accelerometerFrequency == freq.controlFrequency
 
     sensorData.accelerometer.measures(1, :) = accelerometerAscent...
-        (T(end), Y(end, :), settings, ext); % checkare il tLaunch
+        (T(end), Y(end, :), settings); % checkare il tLaunch
     sensorData.accelerometer.time = T(end);
     sensorData.accelerometer.t0 = T(end);
 else
@@ -94,13 +94,13 @@ else
             Yinterp = m*iTimeAcc + q;
             sensorData.accelerometer.t0 = iTimeAcc;
             sensorData.accelerometer.measures = accelerometerAscent...
-                (iTimeAcc, Yinterp, settings, ext);
+                (iTimeAcc, Yinterp, settings);
         elseif T(i) - sensorData.accelerometer.t0 == 1/freq.accelerometerFrequency
             iTimeAcc = sensorData.accelerometer.t0 + 1/freq.accelerometerFrequency;
             Yinterp = Y(i, :);
             sensorData.accelerometer.t0 = iTimeAcc;
             sensorData.accelerometer.measures = accelerometerAscent...
-                (iTimeAcc, Yinterp, settings, ext);
+                (iTimeAcc, Yinterp, settings);
         end
 
 

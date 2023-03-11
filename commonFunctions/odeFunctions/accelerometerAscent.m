@@ -1,4 +1,4 @@
-function acc = accelerometerAscent(t, Y, settings, ext)
+function acc = accelerometerAscent(t, Y, settings)
 %{ 
 
 Author: Adriano Filippo Inno
@@ -25,6 +25,9 @@ q3 = Y(13);
 Ixx = Y(14);
 Iyy = Y(15);
 Izz = Y(16);
+ap =  Y(17);
+
+% saturation on servo angle
 
 %% CONSTANTS
 S = settings.S;                         % [m^2]   cross surface
@@ -85,11 +88,7 @@ end
 
 %% QUATERION ATTITUDE
 Q = [q0 q1 q2 q3];
-normQ = norm(Q);
-
-if abs(normQ - 1) > 0.1
-    Q = Q/normQ;
-end
+Q = Q/norm(Q);
 
 %% ADDING WIND (supposed to be added in NED axes);
 if settings.wind.model
@@ -196,19 +195,37 @@ end
 alpha_value = alpha;
 beta_value = beta;
 
-%% CHOSING THE EMPTY CONDITION VALUE
-% interpolation of the coefficients with the value in the nearest condition of the Coeffs matrix
-
-if t >= settings.tControl && M <= settings.MachControl
-    c = settings.control;
-else
-    c = 1;
-end
 
 %% INTERPOLATE AERODYNAMIC COEFFICIENTS:
 if settings.HREmot
-    [coeffsValues, angle0] = interpCoeffsHRE(t, alpha, M, beta, h,...
-        c, settings);
+    c1 = 2;
+    ext1 = settings.arb.maxExt/2;
+    [coeffsValues1, angle1] = interpCoeffsHRE(t, alpha, M, beta, h,...
+        c1, settings);
+    ext = extension_From_Angle(ap, settings);
+
+    if ext == ext1
+        coeffsValues = coeffsValues1;
+        angle0 = angle1;
+    elseif ext > ext1
+        c2 = 3;
+        ext2 = settings.arb.maxExt;
+        [coeffsValues2, angle2] = interpCoeffsHRE(t, alpha, M, beta, h,...
+        c2, settings);
+
+         coeffsValues = coeffsValues1 + ( (coeffsValues2 - coeffsValues1).*(ext-ext1)./(ext2-ext1) );
+         angle0 = angle1 + ( (angle2 - angle1).*(ext-ext1)./(ext2-ext1) );
+    else
+        c2 = 1;
+        ext2 = 0;
+        [coeffsValues2, angle2] = interpCoeffsHRE(t, alpha, M, beta, h,...
+        c2, settings);
+
+        coeffsValues = coeffsValues1 + ( (coeffsValues2 - coeffsValues1).*(ext-ext1)./(ext2-ext1) );
+        angle0 = angle1 + ( (angle2 - angle1).*(ext-ext1)./(ext2-ext1) );
+    end
+   
+
 else
     [coeffsValues, angle0] = interpCoeffs(t, alpha, M, beta, h,...
         c, settings);
@@ -257,6 +274,7 @@ end
 %     XCPlat = -5;
 % end
 
+%%
 if -z < settings.lrampa*sin(OMEGA)      % No torque on the Launch
     
     Fg = m*g*sin(OMEGA);                % [N] force due to the gravity

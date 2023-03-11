@@ -274,9 +274,6 @@ else
         c, settings);
 end
 % Retrieve Coefficients
-[coeffsValues0, angle2] = interpCoeffsHRE(t, alpha, M, beta, absoluteAltitude,...
-        1, settings);
-coeffsValues0-coeffsValues;
 
 CA = coeffsValues(1); CYB = coeffsValues(2); CY0 = coeffsValues(3);
 CNA = coeffsValues(4); CN0 = coeffsValues(5); Cl = coeffsValues(6);

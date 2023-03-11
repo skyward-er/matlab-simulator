@@ -301,11 +301,11 @@ for alg_index = 4
                 save_thrust{j} = rmfield(save_thrust{j},'Y'); % remove ode data to save space
             end
             save(folder(i)+"\saveThrust.mat","save_thrust","apogee","N_sim","settings","thrust_percentage") % add "save_thrust", > 2GB for 1000 sim
-
-                        exportgraphics(save_plot_histogram,'report_images\mc_Histogram.pdf','ContentType','vector')
-                        exportgraphics(save_plotApogee,'report_images\mc_Apogees.pdf','ContentType','vector')
-                         exportgraphics(save_apogee_3D,'report_images\apogee_wind.pdf','ContentType','vector')
-                         
+% 
+%                         exportgraphics(save_plot_histogram,'report_images\mc_Histogram.pdf','ContentType','vector')
+%                         exportgraphics(save_plotApogee,'report_images\mc_Apogees.pdf','ContentType','vector')
+%                          exportgraphics(save_apogee_3D,'report_images\apogee_wind.pdf','ContentType','vector')
+%                          
             % Save results.txt
             fid = fopen( folder(i)+"\"+contSettings.algorithm+"Results"+saveDate+".txt", 'wt' );  % CAMBIA IL NOME
             fprintf(fid,'Algorithm: %s \n',contSettings.algorithm );
