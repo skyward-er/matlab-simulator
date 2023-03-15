@@ -361,12 +361,12 @@ for alg_index = 4
             if contSettings.algorithm == "interp" || contSettings.algorithm == "complete" 
                 fprintf(fid,'N_forward: %d \n', contSettings.N_forward);
                 fprintf(fid,'Delta Z (reference): %d \n',contSettings.reference.deltaZ);
-                fprintf(fid,'Filter diminished every: %d \n', contSettings.deltaTfilter);
+                fprintf(fid,'Filter diminished every: %d m\n', contSettings.deltaZfilter);
                 fprintf(fid,'Filter diminished by ratio: %d \n', contSettings.filterRatio);
-                fprintf(fid,'Filter diminishing starts at: %d m \n', contSettings.Tfilter);
+                fprintf(fid,'Filter diminishing starts at: %d m \n', contSettings.Zfilter);
                 fprintf(fid,'Interpolation type: %s \n', contSettings.interpType);
 
-                fprintf(fid,'Correction with ground wind: no \n');
+                fprintf(fid,'Correction with pitch angle: yes \n');
             end
             fclose(fid);
         end

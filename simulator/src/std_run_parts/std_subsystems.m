@@ -120,6 +120,8 @@ C = contSettings.Engine_model_C;
             settings.expMengineCut = m - settings.ms;
             settings.shutdown = 1;
             settings = settingsEngineCut(settings);
+            settings.quatCut = [x_est_tot(end, 8:10) x_est_tot(end, 7)];
+            [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
             end
     end
 end
@@ -129,6 +131,8 @@ if ~settings.shutdown && Tf(end) >= settings.tb
     t_shutdown = settings.tb;
     settings.timeEngineCut = t_shutdown;
     settings = settingsEngineCut(settings);
+     settings.quatCut = [x_est_tot(end, 8:10) x_est_tot(end, 7)];
+    [~,settings.pitchCut,~]  = quat2angle(settings.quatCut,'ZYX');
 end
 %% ARB Control algorithm
 

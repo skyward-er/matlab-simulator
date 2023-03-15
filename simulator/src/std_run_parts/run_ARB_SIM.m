@@ -42,12 +42,16 @@ switch true % set this value in configControl.m
         else
             ap_ref_new = ap_base_filter;
         end
+        
+        switch true
+            case  rad2deg(settings.pitchCut)<=70
+                  ap_ref_new = ap_ref_new/1.2;
+            case  rad2deg(settings.pitchCut)>70 &&  rad2deg(settings.pitchCut)<=78
+                coeff = interp1([70 78],[1.15 1], rad2deg(settings.pitchCut));
+                ap_ref_new = ap_ref_new/coeff;
+     
+        end
 
-% % % % %         test = (wrapToPi(settings.PHI-settings.wind.inputAzimut(1)));
-% % % % %         if (test <= -pi/6 || (test >= pi/4 && test<= pi*3/5)) && settings.wind.inputGround >=6
-% % % % %             ap_ref_new = min(abs(ap_ref_new/(1.6)*1/cos(test)),ap_ref_new/(1.6));
-% % % % %         end
-                    
         contSettings.flagFirstControl = false;
 %         if sensorData.kalman.time(end)>contSettings.Tfilter
 %             contSettings.Tfilter = contSettings.Tfilter+contSettings.deltaTfilter;
