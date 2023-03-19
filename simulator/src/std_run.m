@@ -85,17 +85,6 @@ ap0 = 0;                                                                    % Co
     %%%
 initialCond = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf; ap0;];
 Y0 = initialCond;
-%% engine control initialization
-
-if  (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
-    xe = [0,0,settings.m0]';     % initial state estimate
-    u = 1;                      % initial valve position ( 1 = open, 0 = closed )
-    P_mat = zeros(3);          % initial value for P
-    V1=diag([1,1,1]);           % model noise covariance matrix
-    V2=0.1;
-%     V1=1e-2*diag([1,1,1]);      % model noise covariance matrix    
-%     V2=0.36; 
-end 
 
 %% WIND GENERATION
 [uw, vw, ww, Az , El, Mag] = std_setWind(settings);
@@ -383,7 +372,7 @@ struct_out.apogee_radius = sqrt(struct_out.apogee_coordinates(1)^2+struct_out.ap
 struct_out.recall = dataBallisticFlight;
 % struct_out.NAS = x_est_tot;
 struct_out.cp = c.cp_tot; 
-struct_out.t_shutdown = t_shutdown;
+struct_out.t_shutdown = settings.timeEngineCut;
 struct_out.quat = Yf(:,10:13);
 
 if strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')

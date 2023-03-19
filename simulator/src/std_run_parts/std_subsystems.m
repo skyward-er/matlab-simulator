@@ -79,69 +79,20 @@ v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
 
 if Tf(end) < settings.tb &&...
    (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
-
-    % mass estimation
-A = contSettings.Engine_model_A;
-B = contSettings.Engine_model_B;
-C = contSettings.Engine_model_C;
-    xe = contSettings.Engine_model_A * xe + contSettings.Engine_model_B * u; % propagation
-    estimated_pressure(iTimes) = contSettings.Engine_model_C * xe; 
-    e =  (c.cp_tot(end)-1950) - estimated_pressure(iTimes)*1000;
-    e = e/1000; % from mbar to bar
-    xe = xe + contSettings.Engine_model_Kgain * e; % correction
-
-    estimated_mass(iTimes) = xe(3);
-    m = estimated_mass(iTimes);
-
-
-%%%%%%% online kalman
-% % %     estimated_pressure(iTimes) = contSettings.Engine_model_C * xe; 
-% % %     e =  (c.cp_tot(end)-1950) - estimated_pressure(iTimes)*1000;
-% % %     e = e/1000;
-% % %     K=(A*P_mat*C')/(C*P_mat*C'+V2);
-% % %     P_mat=(A*P_mat*A'+V1)-K*(A*P_mat*C')';
-% % %     xe=A*xe + K*e+B*u;
-% % %     
-% % %       estimated_mass(iTimes) = xe(3);
-% % %       m = estimated_mass(iTimes);
-
-    % magic formula seguire traiettorie è meglio?
-    CD(iTimes) = getDrag(norm(vels(end,:)), sensorData.kalman.z, 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
-    [~,~,~,rho] = atmosisa(sensorData.kalman.z);
-
-    predicted_apogee(iTimes) = sensorData.kalman.z-settings.z0 + 1/(2*( 0.5*rho * CD(iTimes) * settings.S / m))...
-        * log(1 + (sensorData.kalman.vz^2 * (0.5 * rho * CD(iTimes) * settings.S) / m) / 9.81 );
-    if predicted_apogee(iTimes) >= settings.z_final  + 100 %+ min(40,abs(80*cos(settings.PHI-settings.wind.inputAzimut(1))))% settings.wind.inputGround
-            u = 0;
-            if ~settings.shutdown 
-            t_shutdown = Tf(end);
-            settings.timeEngineCut = t_shutdown;
-            settings.IengineCut = Yf(end,14:16);
-            settings.expMengineCut = m - settings.ms;
-            settings.shutdown = 1;
-            settings = settingsEngineCut(settings);
-            settings.quatCut = [x_est_tot(end, 8:10) x_est_tot(end, 7)];
-            [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
-            end
-    end
-end
-
-if ~settings.shutdown && Tf(end) >= settings.tb
-    settings.shutdown = 1;
-    t_shutdown = settings.tb;
-    settings.timeEngineCut = t_shutdown;
-    settings = settingsEngineCut(settings);
-     settings.quatCut = [x_est_tot(end, 8:10) x_est_tot(end, 7)];
-    [~,settings.pitchCut,~]  = quat2angle(settings.quatCut,'ZYX');
+       [t_shutdown,settings,contSettings,predicted_apogee,estimated_mass,estimated_pressure] =...
+           run_MTR_SIM (contSettings,sensorData,settings,iTimes,c,Tf,Yf,x_est_tot);
+       m = estimated_mass(end);
+% plot brutti per ora perchè
+% predicted_apogee,estimated_mass,estimated_pressure dovrebbero essere dati
+% in input a run_MTR_SIM
 end
 %% ARB Control algorithm
-
 
 
 if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings.control...
         && ~(strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine') ) ...
     && Tf(end) > settings.timeEngineCut + 0.5
-
+    Tf(end)
     if str2double(settings.mission(end)) > 2 % only for mission after october 2022
     trajectoryChoice_mass;
     end

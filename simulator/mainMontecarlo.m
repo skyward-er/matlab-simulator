@@ -130,7 +130,7 @@ clearvars   msaToolkitURL Itot
 settings_mont_init = struct('x',[]);
 
 % start simulation
-for alg_index = 4
+for alg_index = 3
 
     contSettings.algorithm = algorithm_vec{alg_index};
 
@@ -358,6 +358,7 @@ for alg_index = 4
             %%%%%%%%%%%%%%%
             fprintf(fid,'Other parameters specific of the simulation: \n\n');
             fprintf(fid,'Filter coefficient: %.3f \n', contSettings.filter_coeff);
+              fprintf(fid,'Target for shutdown: %d \n',settings.z_final_MTR );
             if contSettings.algorithm == "interp" || contSettings.algorithm == "complete" 
                 fprintf(fid,'N_forward: %d \n', contSettings.N_forward);
                 fprintf(fid,'Delta Z (reference): %d \n',contSettings.reference.deltaZ);
