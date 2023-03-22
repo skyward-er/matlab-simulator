@@ -92,11 +92,11 @@ end
 if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings.control...
         && ~(strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine') ) ...
     && Tf(end) > settings.timeEngineCut + 0.5
-    Tf(end)
+
     if str2double(settings.mission(end)) > 2 % only for mission after october 2022
     trajectoryChoice_mass;
     end
-    
+
     if contSettings.flagFirstControl
 
         t_airbrakes = t0;

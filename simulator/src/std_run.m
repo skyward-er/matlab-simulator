@@ -269,12 +269,12 @@ while settings.flagStopIntegration && n_old < nmax                              
     % wind update
     if settings.windModel == "multiplicative"
 
-        [uw, vw, ww,Mag,Az] = windInputGenerator(settings, -Y0(3), settings.wind.input_uncertainty);
+        [uw, vw, ww] = windInputGenerator(settings, -Y0(3), settings.wind.input_uncertainty);
 
         settings.constWind = [uw, vw, ww];
 
-        windMag = [windMag Mag];
-        windAz = [windAz Az];
+        windMag = [windMag sqrt(uw^2+vw^2+ww^2)];
+        windAz = [windAz atan2(sqrt(uw^2+vw^2+ww^2)/vw,sqrt(uw^2+vw^2+ww^2)/uw)];
     end
 
     % time update
