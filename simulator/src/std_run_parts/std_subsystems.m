@@ -109,6 +109,8 @@ if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings
 
         t_last_arb_control = Tf(end);
         ap_ref_old = ap_ref_new;
+        settings.quat = [x_est_tot(end, 8:10) x_est_tot(end, 7)];
+        [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
         [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
 
     end

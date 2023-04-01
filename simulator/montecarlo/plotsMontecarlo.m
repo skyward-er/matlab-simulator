@@ -10,7 +10,7 @@ xlabel('Apogee value [m]')
 ylabel('Number of apogees in the same interval')
 title('Reached apogee distribution')
 legend('Range of acceptable apogees')
-
+ exportgraphics(save_plot_histogram,'new_cont_const.pdf','ContentType','vector')
 %% AIRBRAKE DEPLOY TIME HISTOGRAM - this plot is particularly interesting for the shadowmodes
 if ~(strcmp(contSettings.algorithm,'engine')||strcmp(contSettings.algorithm,'NoControl'))
     arb_deploy_time_vec = zeros(N_sim,1);

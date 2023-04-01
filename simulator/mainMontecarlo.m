@@ -48,7 +48,7 @@ rng default
 settings.montecarlo = true;
 matlab_graphics;
 %% how many simulations
-N_sim = 4; % set to at least 500
+N_sim = 1000; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 
 %% stochastic parameters
@@ -130,7 +130,7 @@ clearvars   msaToolkitURL Itot
 settings_mont_init = struct('x',[]);
 
 % start simulation
-for alg_index = 3
+for alg_index = 4
 
     contSettings.algorithm = algorithm_vec{alg_index};
 
@@ -315,7 +315,7 @@ for alg_index = 3
             fprintf(fid,'Thrust: +-50%% at 3*sigma, total impulse constant \n');
             fprintf(fid,'Engine shut-down control frequency: %d Hz \n',settings.frequencies.controlFrequency);
             fprintf(fid,'Airbrakes control frequency: %d Hz \n',settings.frequencies.arbFrequency );
-            fprintf(fid,'Initial Mach number at which the control algorithm starts: %.3f \n',settings.MachControl);
+            fprintf(fid,'Initial Mach number at which the control algorithm starts: %.3f \n\n',settings.MachControl);
             % %             switch alg_index
             % %                 case 2
             % %                     fprintf(fid,'P = %d \n',contSettings.Kp );
@@ -336,7 +336,7 @@ for alg_index = 3
                 fprintf(fid,'Wind maximum elevation: %d [°] \n\n\n',rad2deg(settings.wind.ElMax));
             else
                 fprintf(fid,'Wind model parameters: \n'); % inserisci tutti i parametri del vento
-                fprintf(fid,'Ground wind Magnitude: 0-%d m/s\n',settings.wind.MagMax);
+                fprintf(fid,'Ground wind Magnitude: 0-%d m/s\n\n',settings.wind.MagMax);
             end
             
             %%%%%%%%%%%%%%%
@@ -367,7 +367,7 @@ for alg_index = 3
                 fprintf(fid,'Filter diminishing starts at: %d m \n', contSettings.Zfilter);
                 fprintf(fid,'Interpolation type: %s \n', contSettings.interpType);
 
-                fprintf(fid,'Correction with pitch angle: yes \n');
+                fprintf(fid,'Correction with current pitch angle: yes \n');
             end
             fclose(fid);
         end

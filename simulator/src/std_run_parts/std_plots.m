@@ -119,3 +119,21 @@ legend('Real altitude','Predicted apogee','shutdown time')
 if settings.flagExport == true
     exportgraphics(prediction,'predicted_apogee.pdf')
 end
+
+%% reference
+
+figure()
+yyaxis left
+hold on
+contSettings = structIn.contSettings;
+v_ned = quatrotate(quatconj(structIn.Y(:, 10:13)), structIn.Y(:, 4:6));
+
+plot(contSettings.reference.Z, contSettings.reference.Vz(:,1),'r','DisplayName','ref min')
+plot(contSettings.reference.Z, contSettings.reference.Vz(:,2),'k','DisplayName','ref max')
+plot( -structIn.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
+plot( -structIn.NAS(:,3)-settings.z0,  -structIn.NAS(:,6),'m--','DisplayName','Kalman')
+
+yyaxis right
+plot( -structIn.Y(:, 3), structIn.Y(:, 17),'g','DisplayName','arb')
+
+legend

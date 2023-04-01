@@ -77,7 +77,7 @@ settings.servo.maxAngle = fix(settings.servo.maxAngle*1e9)/1e9; % to avoid compu
 
 %% KALMAN TUNING PARAMETERS
 settings.kalman.dt_k          =   0.01;                                    % [s]        kalman time step
-settings.kalman.sigma_baro    =   5;                                       % [m/2]   estimated barometer variance    
+settings.kalman.sigma_baro    =   50;                                       % [m/2]   estimated barometer variance    
 settings.kalman.sigma_mag     =   1;                                       % [mgauss^2] estimated magnetometer variance    
 settings.kalman.sigma_GPS     =   5;                                       % [mg^2]     estimated GPS variance
 settings.kalman.sigma_w       =   1;                                       % [rad^2/s^2]   estimated gyroscope variance;
