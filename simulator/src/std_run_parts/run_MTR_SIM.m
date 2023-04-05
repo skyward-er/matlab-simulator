@@ -47,25 +47,38 @@ predicted_apogee(iTimes) = sensorData.kalman.z-settings.z0 + 1/(2*( 0.5*rho * CD
     * log(1 + (sensorData.kalman.vz^2 * (0.5 * rho * CD(iTimes) * settings.S) / m) / 9.81 );
 
 if predicted_apogee(iTimes) >= settings.z_final_MTR
-    contSettings.u = 0;
+    
     if ~settings.shutdown
-        t_shutdown = Tf(end);
-        settings.timeEngineCut = t_shutdown;
-        settings.IengineCut = Yf(end,14:16);
-        settings.expMengineCut = m - settings.ms;
-        settings.shutdown = 1;
-        settings = settingsEngineCut(settings);
-        settings.quatCut = [x_est_tot(end, 8:10) x_est_tot(end, 7)];
-        [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
+        settings.expShutdown = 1;
+        if contSettings.fault 
+            if contSettings.u
+                settings.shutdown = 0;
+                settings.expTimeEngineCut = Tf(end);
+            end
+        else 
+            t_shutdown = Tf(end);
+            settings.timeEngineCut = t_shutdown;
+            settings.expTimeEngineCut = t_shutdown;
+            settings.IengineCut = Yf(end,14:16);
+            settings.expMengineCut = m - settings.ms;
+            settings.shutdown = 1;
+            settings = settingsEngineCut(settings);
+            settings.quatCut = [x_est_tot(end, 8:10) x_est_tot(end, 7)];
+            [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
+        end
+        contSettings.u = 0;
     else
         t_shutdown = inf;
     end
 end
 
-if ~settings.shutdown && Tf(end) >= settings.tb
+if ~settings.shutdown && Tf(end) >= settings.tb 
     settings.shutdown = 1;
     t_shutdown = settings.tb;
+    if contSettings.fault
     settings.timeEngineCut = t_shutdown;
+    settings.expTimeEngineCut = t_shutdown;
+    end
     settings = settingsEngineCut(settings);
     settings.quatCut = [x_est_tot(end, 8:10) x_est_tot(end, 7)];
     [~,settings.pitchCut,~]  = quat2angle(settings.quatCut,'ZYX');

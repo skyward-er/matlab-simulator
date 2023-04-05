@@ -1,4 +1,4 @@
-function std_plots(structIn, settings)
+function std_plots(structIn, settings,contSettings)
 
 
 %% Control variable: servo control action (percentage of angle max)
@@ -103,21 +103,24 @@ if settings.flagExport == true
 end
 
 % Predicted vs real apogee
-prediction = figure('Name', 'Predicted apogee','ToolBar','auto');
-hold on;
-grid on;
+if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
+    prediction = figure('Name', 'Predicted apogee','ToolBar','auto');
+    hold on;
+    grid on;
 
-plot(structIn.t, -structIn.Y(:, 3));
-plot(0:1/settings.frequencies.controlFrequency:settings.tb-0.02, structIn.predicted_apogee);
-xline(structIn.t_shutdown,'r--')
+    plot(structIn.t, -structIn.Y(:, 3));
+    plot(0:1/settings.frequencies.controlFrequency:settings.tb-0.02, structIn.predicted_apogee);
+    xline(structIn.t_shutdown,'r--')
 
-xlabel('Time t [s]');
-ylabel('Altitude AGL [m]');
-title('Predicted vs Real apogee');
-legend('Real altitude','Predicted apogee','shutdown time')
+    xlabel('Time t [s]');
+    ylabel('Altitude AGL [m]');
+    title('Predicted vs Real apogee');
+    legend('Real altitude','Predicted apogee','shutdown time')
 
-if settings.flagExport == true
-    exportgraphics(prediction,'predicted_apogee.pdf')
+    if settings.flagExport == true
+        exportgraphics(prediction,'predicted_apogee.pdf')
+    end
+
 end
 
 %% reference

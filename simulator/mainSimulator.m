@@ -69,7 +69,7 @@ config;
 [simOutput] = std_run(settings,contSettings);
 
 %% PLOTS
-std_plots(simOutput,settings)
+std_plots(simOutput,settings,contSettings)
 
 %% DATA-PRINTING
 printOutput(simOutput,settings);

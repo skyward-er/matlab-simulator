@@ -70,6 +70,7 @@ sensorData.kalman.pn_prec = settings.ada.p_ref;                             % se
 % ap_ref_vec  = zeros(nmax, 2);                                               % Matrix N x 2 to save reference angle vector
 % ap_ref_time = zeros(nmax, 1);                                               % Vector of time reference for air brakes
 settings.shutdown = 0;                                                      % engine on
+settings.expShutdown = 0;                                                   % engine expected to be on
 %% ADA initial conditions
 
 if settings.flagADA

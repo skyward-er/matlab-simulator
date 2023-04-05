@@ -10,7 +10,7 @@
 
 %}
 
-if contSettings.traj_choice == 1 && settings.shutdown
+if contSettings.traj_choice == 1 && settings.expShutdown
 
     if ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
         m = settings.ms;

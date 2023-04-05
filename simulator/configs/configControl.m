@@ -105,6 +105,7 @@ if  (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'c
     contSettings.P_mat = zeros(3);          % initial value for P
     contSettings.R=1e-2*diag([1,1,1]);      % model noise covariance matrix    
     contSettings.Q=0.36; 
+    contSettings.fault = false;
 end 
 
 

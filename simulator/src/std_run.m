@@ -145,7 +145,7 @@ while settings.flagStopIntegration && n_old < nmax                              
         flagBurning = false;                                                % Motor ends thrust
     end
 
-    if settings.flagAscent && not(flagBurning) && mach <= settings.MachControl
+    if settings.flagAscent && settings.expShutdown && mach <= settings.MachControl
         flagAeroBrakes = true;                                              % Allows airbrakes to open
     else
         flagAeroBrakes = false;

@@ -85,13 +85,17 @@ if Tf(end) < settings.tb &&...
 % plot brutti per ora perchè
 % predicted_apogee,estimated_mass,estimated_pressure dovrebbero essere dati
 % in input a run_MTR_SIM
+elseif ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')) && ...
+        Tf(end) > settings.tb
+    settings.shutdown = 1;
+    settings.expShutdown = 1;
+    settings.timeEngineCut = settings.tb;
+    settings.expTimeEngineCut = settings.tb;
 end
 %% ARB Control algorithm
-
-
 if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings.control...
         && ~(strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine') ) ...
-    && Tf(end) > settings.timeEngineCut + 0.5
+    && Tf(end) > settings.expTimeEngineCut + 0.2
 
     if str2double(settings.mission(end)) > 2 % only for mission after october 2022
     trajectoryChoice_mass;

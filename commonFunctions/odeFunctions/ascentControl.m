@@ -379,7 +379,7 @@ else
     Myz = [0, Cm, Cn]; 
 
     % flagSpeedSaturation = false;
-    if (M_value < settings.MachControl && settings.shutdown) %|| ~settings.machControlActive
+    if (M_value < settings.MachControl && settings.expShutdown) %|| ~settings.machControlActive
         % set velocity of servo (air brakes)
         if length(ap_ref_vec)==2 % for the recallOdeFunction
             if t < t_change_ref

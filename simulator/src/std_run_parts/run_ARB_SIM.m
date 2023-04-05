@@ -65,14 +65,14 @@ switch true % set this value in configControl.m
 %             contSettings.filter_coeff = contSettings.filter_coeff/contSettings.filterRatio;
 %         end
 
-        if sensorData.kalman.z(end)>contSettings.Zfilter
-            contSettings.Zfilter = contSettings.Zfilter+ contSettings.deltaZfilter;
-            contSettings.filter_coeff = contSettings.filter_coeff/contSettings.filterRatio;
-        end
+%         if sensorData.kalman.z(end)>contSettings.Zfilter
+%             contSettings.Zfilter = contSettings.Zfilter+ contSettings.deltaZfilter;
+%             contSettings.filter_coeff = contSettings.filter_coeff/contSettings.filterRatio;
+%         end
         
-%          h = sensorData.kalman.z-settings.z0;
+         h = sensorData.kalman.z-settings.z0;
 % 
-%          contSettings.filter_coeff = 0.9 - (h - 1000) * ((0.9)/2000);  %linear
+         contSettings.filter_coeff = 0.9 - (h - 1000) * ((0.9)/2000);  %linear
 %          contSettings.filter_coeff = 1* (0.1/1)^((h - 1000) / 2000); % exponential
 %          contSettings.filter_coeff = -1/(3300^2) * (h)^2 + 0.9; % parabolic (bad)
 
