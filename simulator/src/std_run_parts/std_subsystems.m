@@ -18,14 +18,17 @@ if iTimes>3
 end
 
 %% ADA
-if settings.flagADA && settings.dataNoise && length(sensorData.barometer.time) > 1
 
+if settings.flagADA && settings.dataNoise && length(sensorData.barometer.time) > 1 ...
+        && sensorData.barometer.time(1) == settings.baro_old
     [xp_ada, xv_ada, P_ada, settings.ada]   =  run_ADA(ada_prev, Pada_prev, sp.pn, sensorData.barometer.time, settings.ada);
 
     xp_ada_tot(c.n_ada_old:c.n_ada_old + size(xp_ada(:,1),1) -1,:)  = xp_ada(1:end,:);
     xv_ada_tot(c.n_ada_old:c.n_ada_old + size(xv_ada(:,1),1)-1,:)  = xv_ada(1:end,:);
     t_ada_tot(c.n_ada_old:c.n_ada_old + size(xp_ada(:,1),1)-1)     = sensorData.barometer.time;
     c.n_ada_old = c.n_ada_old + size(xp_ada,1);
+
+    settings.baro_old = sensorData.barometer.time(end);
 end
 
 %% Navigation system

@@ -1,6 +1,5 @@
 function std_plots(structIn, settings,contSettings)
 
-
 %% Control variable: servo control action (percentage of angle max)
 ap_tot_rescale = rescale(structIn.Y(:,17), "InputMin", 0, "InputMax", settings.servo.maxAngle);
 figures.servo_control_action = figure('Name', 'Servo angle after burning phase','ToolBar','auto');
@@ -124,7 +123,6 @@ if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'co
 end
 
 %% reference
-
 figure()
 yyaxis left
 hold on
@@ -134,9 +132,21 @@ v_ned = quatrotate(quatconj(structIn.Y(:, 10:13)), structIn.Y(:, 4:6));
 plot(contSettings.reference.Z, contSettings.reference.Vz(:,1),'r','DisplayName','ref min')
 plot(contSettings.reference.Z, contSettings.reference.Vz(:,2),'k','DisplayName','ref max')
 plot( -structIn.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
-plot( -structIn.NAS(:,3)-settings.z0,  -structIn.NAS(:,6),'m--','DisplayName','Kalman')
-
+plot( -structIn.NAS(:,3)-settings.z0,  -structIn.NAS(:,6),'m--','DisplayName','NAS')
+% plot( structIn.ADA(:,4),  structIn.ADA(:,5),'b','DisplayName','ADA z')
 yyaxis right
 plot( -structIn.Y(:, 3), structIn.Y(:, 17),'g','DisplayName','arb')
 
 legend
+
+
+%% ada
+figure
+hold on
+plot( structIn.t_ada_tot,  structIn.ADA(:,4),'DisplayName','ADA_z')
+plot( structIn.t_ada_tot,  structIn.ADA(:,5),'DisplayName','ADA_vz')
+legend;
+
+
+figure()
+plot(structIn.ADA(:,4))

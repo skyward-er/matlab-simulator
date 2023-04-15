@@ -111,3 +111,6 @@ end
 
 %% MAGNETIC MAP
 settings.hmax = 6000;                                                       % [m] Max altitude at which the world magnetic map must be computed
+
+%% TEST DA SPOSTARE PER FORZA 
+ 

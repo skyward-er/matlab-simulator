@@ -364,6 +364,7 @@ struct_out.windVel(2) = vw;
 struct_out.windVel(3) = ww;
 struct_out.t_ada = t_ada;
 struct_out.t_nas = t_kalman;
+struct_out.t_ada_tot = t_ada_tot;
 struct_out.apogee_time = Tf_tot(idx_apo);
 struct_out.apogee_idx = idx_apo;
 struct_out.apogee_coordinates = [Yf_tot(idx_apo,1),Yf_tot(idx_apo,2),-Yf_tot(idx_apo,3)];
@@ -371,11 +372,11 @@ struct_out.apogee_speed = [Yf_tot(idx_apo,4),Yf_tot(idx_apo,5),-Yf_tot(idx_apo,6
 struct_out.apogee_radius = sqrt(struct_out.apogee_coordinates(1)^2+struct_out.apogee_coordinates(2)^2);
 struct_out.recall = dataBallisticFlight;
 struct_out.NAS = x_est_tot;
+struct_out.ADA = [xp_ada_tot xv_ada_tot];
 struct_out.cp = c.cp_tot; 
 struct_out.t_shutdown = settings.timeEngineCut;
 struct_out.quat = Yf(:,10:13);
 struct_out.contSettings = contSettings;
-
 
 if strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')
     struct_out.predicted_apogee = predicted_apogee;

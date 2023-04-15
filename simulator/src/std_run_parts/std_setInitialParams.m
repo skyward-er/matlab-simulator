@@ -40,6 +40,7 @@ sensorData.chamberPressure.t0 = initSensorT0...
 
 sensorData.barometer.time = [];
 sensorData.barometer.z = [];
+settings.baro_old = 0;
 %% while cycle max iterations
 nmax        =       settings.nmax;                                                 % Max iteration number - stops the integration if reached
 

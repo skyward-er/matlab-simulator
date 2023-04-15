@@ -117,7 +117,7 @@ settings.ada.P0          =   [  0.1    0      0;                            % In
                                 0      0.1     0;                            % state covariance matrix 
                                 0      0      0.1;];
 [settings.ada.temp_ref, ~,...
- settings.ada.p_ref, ~]  =   atmosisa(0);                                  % Reference temperature in kelvin and pressure in Pa 
+ settings.ada.p_ref, ~]  =   atmosisa(settings.z0);                                  % Reference temperature in kelvin and pressure in Pa 
 
 settings.ada.v0          =   -10;                                         % Vertical velocity initial condition
 settings.ada.a0          =   -100;                                         % Acceleration velocity initial condition

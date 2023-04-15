@@ -75,7 +75,6 @@ switch true % set this value in configControl.m
          contSettings.filter_coeff = 0.9 - (h - 1000) * ((0.9)/2000);  %linear
 %          contSettings.filter_coeff = 1* (0.1/1)^((h - 1000) / 2000); % exponential
 %          contSettings.filter_coeff = -1/(3300^2) * (h)^2 + 0.9; % parabolic (bad)
-
 %            contSettings.filter_coeff = 6.30187797115758e-14*h^4 -6.11171732035364e-10*h^3 + ...
 %                2.35468794275658e-06*h^2 + -0.00444100005800747*h...  % v_ref
 %                + 3.52867224599647 ; 
