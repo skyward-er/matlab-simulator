@@ -147,6 +147,10 @@ plot( structIn.t_ada_tot,  structIn.ADA(:,4),'DisplayName','ADA_z')
 plot( structIn.t_ada_tot,  structIn.ADA(:,5),'DisplayName','ADA_vz')
 legend;
 
+figure
+hold on
+plot( structIn.t_ada_tot,  structIn.ADA(:,2),'DisplayName','ADA dp')
 
-figure()
-plot(structIn.ADA(:,4))
+% 
+% figure()
+% plot(structIn.ADA(:,4))

@@ -62,7 +62,8 @@ switch simulationType_thrust
 
         thrust_percentage = normrnd(mu_t,sigma_t,N_sim,1);       %generate normally distributed values ( [0.8 1.20] = 3sigma) % serve il toolbox
         stoch.thrust = thrust_percentage*settings.motor.expThrust;                  % thrust - the notation used creates a matrix where each row is the expThrust multiplied by one coefficient in the thrust percentage array
-
+        
+        
         %%% in questo modo però il burning time rimane fissato perchè è
         %%% settato al'interno di simulationData.m -> possibili errori per
         %%% le simulazioni con exp_thrust aumentato se si vuole fare
@@ -73,6 +74,12 @@ switch simulationType_thrust
         for i =1:N_sim
             stoch.State.xcgTime(:,i) =  settings.State.xcgTime/settings.tb .* stoch.expThrust(i,end);  % Xcg time
         end
+        
+        %%% Aero coefficients uncertainty
+
+        sigma_aer = (0.4)/3;             % aero coeffs error standard deviation
+        mu_aer = 0;                      % aero coeffs error mean value
+        aer_percentage = normrnd(mu_aer,sigma_aer,N_sim,1);       
 
         %%% wind parameters
         settings.wind.MagMin = 0;                                               % [m/s] Minimum Wind Magnitude
@@ -152,7 +159,13 @@ for alg_index = 4
         settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
         settings_mont.motor.expTime = stoch.expThrust(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
         settings_mont.tb = stoch.expThrust(i,end);                              % initialize the burning time of the current simulation (parfor purposes)
-        settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                      % initialize the baricenter position time vector
+        settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
+        settings_mont.Coeffs = settings.Coeffs;
+
+        for j = 1:size(settings.Coeffs,3)                                                          % Define coeffs matrix for the i-th simulation
+            err = aer_percentage(i) * j/size(settings.Coeffs,3) + 1;
+            settings_mont.Coeffs(:,:,j,:,:,:,:) = settings.Coeffs(:,:,j,:,:,:,:)*err;
+        end
 
         % set the wind parameters
         switch settings.windModel

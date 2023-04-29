@@ -45,6 +45,7 @@ if nargin > 2
     settings.motor.expThrust = settings_mont.motor.expThrust;
     settings.motor.expTime = settings_mont.motor.expTime;
     settings.tb = settings_mont.tb;
+    settings.Coeffs = settings_mont.Coeffs;
     switch settings.windModel
         case "constant"
             settings.wind.uw = settings_mont.wind.uw;
