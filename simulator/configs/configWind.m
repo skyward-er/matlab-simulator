@@ -13,7 +13,7 @@ NOTE: wind azimuth angle indications (wind directed towards):
 
 
 % select which model you want to use:
-settings.windModel = "constant"; % choose between: "constant" "multiplicative" "atmospheric"
+settings.windModel = "multiplicative"; % choose between: "constant" "multiplicative" "atmospheric"
 
 
 

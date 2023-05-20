@@ -101,26 +101,26 @@ if settings.flagExport == true
     exportgraphics(figures.Mach_number,'report_images\src_src_Mach_number.pdf')
 end
 
-% Predicted vs real apogee
-if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
-    prediction = figure('Name', 'Predicted apogee','ToolBar','auto');
-    hold on;
-    grid on;
-
-    plot(structIn.t, -structIn.Y(:, 3));
-    plot(0:1/settings.frequencies.controlFrequency:settings.tb-0.02, structIn.predicted_apogee);
-    xline(structIn.t_shutdown,'r--')
-
-    xlabel('Time t [s]');
-    ylabel('Altitude AGL [m]');
-    title('Predicted vs Real apogee');
-    legend('Real altitude','Predicted apogee','shutdown time')
-
-    if settings.flagExport == true
-        exportgraphics(prediction,'predicted_apogee.pdf')
-    end
-
-end
+%% Predicted vs real apogee
+% % % % if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
+% % % %     prediction = figure('Name', 'Predicted apogee','ToolBar','auto');
+% % % %     hold on;
+% % % %     grid on;
+% % % % 
+% % % %     plot(structIn.t, -structIn.Y(:, 3));
+% % % %     plot(0:1/settings.frequencies.controlFrequency:settings.tb-0.02, structIn.predicted_apogee);
+% % % %     xline(structIn.t_shutdown,'r--')
+% % % % 
+% % % %     xlabel('Time t [s]');
+% % % %     ylabel('Altitude AGL [m]');
+% % % %     title('Predicted vs Real apogee');
+% % % %     legend('Real altitude','Predicted apogee','shutdown time')
+% % % % 
+% % % %     if settings.flagExport == true
+% % % %         exportgraphics(prediction,'predicted_apogee.pdf')
+% % % %     end
+% % % % 
+% % % % end
 
 %% reference
 figure()
@@ -151,6 +151,3 @@ figure
 hold on
 plot( structIn.t_ada_tot,  structIn.ADA(:,2),'DisplayName','ADA dp')
 
-% 
-% figure()
-% plot(structIn.ADA(:,4))

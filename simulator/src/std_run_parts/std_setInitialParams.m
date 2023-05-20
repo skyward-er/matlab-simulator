@@ -41,6 +41,8 @@ sensorData.chamberPressure.t0 = initSensorT0...
 sensorData.barometer.time = [];
 sensorData.barometer.z = [];
 settings.baro_old = 0;
+
+sensorData.pitot.time = [];
 %% while cycle max iterations
 nmax        =       settings.nmax;                                                 % Max iteration number - stops the integration if reached
 
@@ -85,5 +87,5 @@ if settings.flagNAS
     x_prev    =  [X0; V0; Q0(2:4); Q0(1);0;0;0];
     x_prev(3) = -settings.z0;
     vels_prev =  [0;0;0];
-    P_prev    =   0.01*eye(12);
+    P_prev    =   0.01*eye(13);
 end

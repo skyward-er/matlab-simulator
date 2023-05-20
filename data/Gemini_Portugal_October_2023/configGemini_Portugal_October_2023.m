@@ -82,6 +82,7 @@ settings.kalman.sigma_mag     =   1;                                       % [mg
 settings.kalman.sigma_GPS     =   5;                                       % [mg^2]     estimated GPS variance
 settings.kalman.sigma_w       =   1;                                       % [rad^2/s^2]   estimated gyroscope variance;
 settings.kalman.sigma_beta    =   1e-4;                                    % [rad/s^2]   estimated gyroscope bias variance;
+settings.kalman.sigma_pitot   =  10;    %DA CAMBIARE
 
 settings.kalman.v_thr         =   2.5;                                     % Velocity threshold for the detected apogee
 settings.kalman.count_thr     =   5;                                       % If the apogee is detected count_thr time, the algorithm will return the apogee event

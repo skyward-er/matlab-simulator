@@ -57,7 +57,7 @@ switch simulationType_thrust
 
     case "gaussian"
 
-        sigma_t = (1.20-1)/3;             % thrust_percentage standard deviation
+        sigma_t = (1.10-1)/3;             % thrust_percentage standard deviation
         mu_t = 1;                         % thrust_percentage mean value
 
         thrust_percentage = normrnd(mu_t,sigma_t,N_sim,1);       %generate normally distributed values ( [0.8 1.20] = 3sigma) % serve il toolbox
@@ -77,7 +77,7 @@ switch simulationType_thrust
         
         %%% Aero coefficients uncertainty
 
-        sigma_aer = (0.4)/3;             % aero coeffs error standard deviation
+        sigma_aer = (0.1)/3;             % aero coeffs error standard deviation
         mu_aer = 0;                      % aero coeffs error mean value
         aer_percentage = normrnd(mu_aer,sigma_aer,N_sim,1);       
 
@@ -99,7 +99,7 @@ switch simulationType_thrust
     case "extreme"
 
 
-        thrust_percentage = [0.8;1.2]; % this is overwritten in the next step, but it sets the values to retrieve in the parameter generation
+        thrust_percentage = [0.9;1.1]; % this is overwritten in the next step, but it sets the values to retrieve in the parameter generation
 
         %%% wind parameters
         [stoch.wind.uw, stoch.wind.vw, stoch.wind.ww, stoch.wind.Az, stoch.wind.El ,thrust_percentage, N_sim] = windConstGeneratorMontecarlo(settings.wind,N_sim,simulationType_thrust,thrust_percentage);
@@ -158,14 +158,12 @@ for alg_index = 4
 
         settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
         settings_mont.motor.expTime = stoch.expThrust(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
-        settings_mont.tb = stoch.expThrust(i,end);                              % initialize the burning time of the current simulation (parfor purposes)
+        settings_mont.tb = max( stoch.expThrust(i,stoch.expThrust(i,:)<=settings.tb) );                              % initialize the burning time of the current simulation (parfor purposes)
         settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
-        settings_mont.Coeffs = settings.Coeffs;
 
-        for j = 1:size(settings.Coeffs,3)                                                          % Define coeffs matrix for the i-th simulation
-            err = aer_percentage(i) * j/size(settings.Coeffs,3) + 1;
-            settings_mont.Coeffs(:,:,j,:,:,:,:) = settings.Coeffs(:,:,j,:,:,:,:)*err;
-        end
+        % Define coeffs matrix for the i-th simulation
+        settings_mont.Coeffs = settings.Coeffs* (1+aer_percentage(i));
+
 
         % set the wind parameters
         switch settings.windModel
@@ -173,7 +171,7 @@ for alg_index = 4
                 settings_mont.wind.uw = stoch.wind.uw(i);
                 settings_mont.wind.vw = stoch.wind.vw(i);
                 settings_mont.wind.ww = stoch.wind.ww(i);
-                settings_mont.wind.Az = stoch.wind.Az(i);
+                settings_mont.wind.Az = stoch.wind.Az(i);yes
                 settings_mont.wind.El = stoch.wind.El(i);
             case "multiplicative"
                 settings_mont.wind.Mag = stoch.wind.Mag(i);

@@ -80,11 +80,25 @@ v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
 %% Engine Control algorithm
     
 
-if Tf(end) < settings.tb &&...
+if Tf(end) <= settings.tb+0.5 &&...
    (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
+
+    if ~settings.shutdown && Tf(end) <= settings.tb
        [t_shutdown,settings,contSettings,predicted_apogee,estimated_mass,estimated_pressure] =...
            run_MTR_SIM (contSettings,sensorData,settings,iTimes,c,Tf,Yf,x_est_tot);
        m = estimated_mass(end);
+    else
+          t_shutdown = settings.tb;
+          settings.expShutdown = 1;
+            settings.timeEngineCut = t_shutdown;
+            settings.expTimeEngineCut = t_shutdown;
+            settings.IengineCut = Yf(end,14:16);
+            settings.expMengineCut = m - settings.ms;
+            settings.shutdown = 1;
+            settings = settingsEngineCut(settings);
+            settings.quatCut = [x_est_tot(end, 8:10) x_est_tot(end, 7)];
+            [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
+    end
 % plot brutti per ora perchè
 % predicted_apogee,estimated_mass,estimated_pressure dovrebbero essere dati
 % in input a run_MTR_SIM
@@ -98,10 +112,15 @@ end
 %% ARB Control algorithm
 if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings.control...
         && ~(strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine') ) ...
-    && Tf(end) > settings.expTimeEngineCut + 0.2
+        && Tf(end) > settings.expTimeEngineCut + 0.2
 
     if str2double(settings.mission(end)) > 2 % only for mission after october 2022
-    trajectoryChoice_mass;
+        %% TEST WITH MASS ESTIMATION THAT DOESN'T WORK
+        % mass = mass_dry
+%         m = settings.ms;
+%         m = settings.ms + (settings.m0-settings.ms)/2; 
+        %%
+        trajectoryChoice_mass;
     end
 
     if contSettings.flagFirstControl

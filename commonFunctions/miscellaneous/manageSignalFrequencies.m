@@ -494,6 +494,7 @@ if isfield(freq, 'pitotFrequency')
             iTimePitot = sensorData.pitot.t0 + 1/freq.pitotFrequency;
             z_pit = -Y(i, 3);
             sensorData.pitot.t0 = iTimePitot;
+            sensorData.pitot.time = iTimePitot;
              vx = Y(end, 4);
         end
 
@@ -502,7 +503,7 @@ if isfield(freq, 'pitotFrequency')
     end
 
     if exist('z_pit','var')
-    [Temp, ~, P, rho] = atmosisa(z_pit + settings.z0);
+    [Temp, a, P, rho] = atmosisa(z_pit + settings.z0);
 
     Q = [Y(end, 11:13),Y(end, 10)];
 

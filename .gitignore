@@ -3,4 +3,5 @@
 **/slprj/**
 **/*.slxc
 MontecarloResults/
-**/.pdf
+**/*.pdf
+**/*.mat

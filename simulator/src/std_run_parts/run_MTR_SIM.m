@@ -43,6 +43,11 @@ m = estimated_mass(iTimes);
 CD(iTimes) = getDrag(norm([sensorData.kalman.vx,sensorData.kalman.vy,sensorData.kalman.vz]), sensorData.kalman.z, 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
 [~,~,~,rho] = atmosisa(sensorData.kalman.z);
 
+%% TEST WITH MASS ESTIMATION THAT DOESN'T WORK
+% mass = mass_dry
+% m = settings.ms;
+% m = settings.ms + (settings.m0-settings.ms)/2; 
+%%
 predicted_apogee(iTimes) = sensorData.kalman.z-settings.z0 + 1/(2*( 0.5*rho * CD(iTimes) * settings.S / m))...
     * log(1 + (sensorData.kalman.vz^2 * (0.5 * rho * CD(iTimes) * settings.S) / m) / 9.81 );
 
