@@ -105,7 +105,7 @@ xq          =   zeros(length(tv),7);         % Pre-allocation of quaternions and
 x_c         =   zeros(length(tv),13);
 v           =   zeros(length(tv),3);
 
-P_c         =   zeros(13,13,length(tv));
+P_c         =   zeros(12,12,length(tv));
 P_lin       =   zeros(6,6,length(tv));       %Pre-allocation of the covariance matrix
 P_q         =   zeros(6,6,length(tv));
 
@@ -121,13 +121,11 @@ P_c(:,:,1)  =   P_prev;
 index_GPS=1;
 index_bar=1;
 index_mag=1;
-index_pitot=1;
 
 % Time vectors agumentation
 t_gpstemp  = [sp.t_gps  tv(end) + dt_k];
 t_barotemp = [sp.t_baro tv(end) + dt_k];
-t_magtemp  = [sp.t_mag  tv(end) + dt_k];
-t_pitot =  [sp.t_pit tv(end) + dt_k];
+t_magtemp  = [sp.t_mag   tv(end) + dt_k];
 
 [sp.gps(:,1),sp.gps(:,2),sp.gps(:,3)]  = geodetic2ned(sp.gps(:,1), sp.gps(:,2), sp.gps(:,3), kalman.lat0, kalman.lon0, kalman.z0, kalman.spheroid, 'degrees');
 for i=2:length(tv)
@@ -158,15 +156,10 @@ for i=2:length(tv)
        index_mag    =  index_mag + 1;  
     end
     
-    if tv(i) >= t_pitot(index_pitot)              %Comparison to see the there's a new measurement
-       [~,P_c(13,13,i),x_lin(i,4:6)]     = correctionPitot(x_lin(i,:),P_prev(:,:),sp.dp(index_pitot),sp.pn(index_pitot),kalman.sigma_pitot,xq(i,:));
-        index_pitot   =  index_pitot + 1;     
-    end
-
     x_c(i,:) = [x_lin(i,:),xq(i,:)];
     P_c(1:6,1:6,i)   = P_lin(:,:,i);
     P_c(7:12,7:12,i) = P_q(:,:,i);
-
+    
     if kalman.flag_apo  == false
             if -x_c(i,6) < kalman.v_thr && -x_c(i,3) > 100
                 kalman.counter = kalman.counter + 1;
