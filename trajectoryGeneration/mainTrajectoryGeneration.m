@@ -156,7 +156,7 @@ trajectories_saving_MTR{j} = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref', 
 end
 %% SAVING
 %  settings.save = false;
-
+load test
 if ~settings.save
     warning('save is set to false')
 end
@@ -164,6 +164,8 @@ end
 if settings.save
     save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
 end
+
+% save traj-25perc.mat trajectories_saving
 
 %% PLOT
 if settings.plots
@@ -175,4 +177,28 @@ warning off
 delete('Trajectory_generation.slxc')
 rmdir('slprj', 's')
 warning on
+
+%%
+datcom_0_closed = trajectories_saving{1,end};
+datcom_0_open = trajectories_saving{2,end};
+save plot0 datcom_0_closed datcom_0_open
+
+%% 
+clearvars; close all; clc;
+
+load plot0
+load plot25
+
+figure()
+hold on;
+grid on;
+plot(datcom_0_open.Z_ref,datcom_0_open.VZ_ref,'k','DisplayName','datcom')
+plot(datcom_0_closed.Z_ref,datcom_0_closed.VZ_ref,'k')
+
+plot(datcom_25_open.Z_ref,datcom_25_open.VZ_ref,'r','DisplayName','datcom-25')
+plot(datcom_25_closed.Z_ref,datcom_25_closed.VZ_ref,'r')
+
+legend
+
+
 

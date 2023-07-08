@@ -85,7 +85,7 @@ switch true % set this value in configControl.m
 %            end
             
 
-        if sensorData.kalman.z-settings.z0 > 2995
+        if sensorData.kalman.z-settings.z0 > 2990
             ap_ref_new = settings.servo.maxAngle;
         end
        

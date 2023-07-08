@@ -22,7 +22,6 @@ if contSettings.traj_choice == 1 && settings.expShutdown
     %from here m needs to be replaced with the estimated mass
     %after shutdown
     [~,index] = min( abs(m-mass_vect) );
-    contSettings.traj_choice = 0;
     contSettings.reference.Vz_temp = zeros( length( contSettings.reference.Vz{1,1} ),2);
 
     if m <= mass_vect(1)

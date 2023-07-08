@@ -66,11 +66,7 @@ config;
 % Y = State = ( x y z | u v w | p q r | q0 q1 q2 q3 | thetax thetay thetaz | ap_ref ) also for Ya,Yf corresponding to T
 
 % simulation:
-%% TEST
-% load spinta.mat
-% temp = Thrust.timestamp(Thrust.value>=25) - Thrust.timestamp(find(Thrust.value>=25,1)); 
-% settings.motor.expThrust = Thrust.value(Thrust.value>=25);
-% settings.motor.expThrust = interp1(temp,settings.motor.expThrust,settings.motor.expTime);
+
 %%
 [simOutput] = std_run(settings,contSettings);
 

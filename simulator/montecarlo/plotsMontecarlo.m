@@ -15,7 +15,9 @@ legend('Range of acceptable apogees')
 if ~(strcmp(contSettings.algorithm,'engine')||strcmp(contSettings.algorithm,'NoControl'))
     arb_deploy_time_vec = zeros(N_sim,1);
     for i = 1: N_sim
+        if isfield(save_thrust{i},'ARB_allowanceTime')
         arb_deploy_time_vec(i) = save_thrust{i}.ARB_allowanceTime;
+        end
     end
     arb_deploy_time_MEAN = mean(arb_deploy_time_vec);
     arb_deploy_time_MODE = mode(arb_deploy_time_vec);

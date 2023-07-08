@@ -24,13 +24,14 @@ function settings = settingsEngineCut(settings)
 %}
     
     
-    if (settings.timeEngineCut) > 0 && ( settings.timeEngineCut <= (settings.tb - settings.tCO) )
+
+    if (settings.timeEngineCut) > 0 && ( settings.timeEngineCut + 0.3  <= (settings.tb - settings.tCO) )
         
-        tEC = settings.timeEngineCut;           % controlled shutoff moment 
+        tEC = settings.timeEngineCut + 0.3;           % controlled shutoff moment, 0.3 is the delay
         tCO = settings.tCO;                     % cutoff transient duration
 
         for i = 1: length(settings.motor.expTime)
-            if settings.motor.expTime(i) >= settings.timeEngineCut
+            if settings.motor.expTime(i) >= settings.timeEngineCut + 0.3
                 
                 settings.motor.expThrust(i) = settings.motor.expThrust(i) * (1 - (settings.motor.expTime(i) - tEC)/tCO ); 
 
@@ -41,7 +42,7 @@ function settings = settingsEngineCut(settings)
             end
         end
         
-        settings.timeEngineCut = settings.timeEngineCut + settings.tCO;
+        settings.timeEngineCut = settings.timeEngineCut + settings.tCO + 0.3;
 
         settings.expMengineCut = interpLinear(settings.motor.expTime, settings.motor.expM, settings.timeEngineCut);
         settings.IengineCut(1) = interpLinear(settings.motor.expTime,  settings.I(1,:), settings.timeEngineCut);

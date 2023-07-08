@@ -171,7 +171,7 @@ for alg_index = 4
                 settings_mont.wind.uw = stoch.wind.uw(i);
                 settings_mont.wind.vw = stoch.wind.vw(i);
                 settings_mont.wind.ww = stoch.wind.ww(i);
-                settings_mont.wind.Az = stoch.wind.Az(i);yes
+                settings_mont.wind.Az = stoch.wind.Az(i);
                 settings_mont.wind.El = stoch.wind.El(i);
             case "multiplicative"
                 settings_mont.wind.Mag = stoch.wind.Mag(i);
@@ -378,7 +378,8 @@ for alg_index = 4
                 fprintf(fid,'Filter diminishing starts at: %d m \n', contSettings.Zfilter);
                 fprintf(fid,'Interpolation type: %s \n', contSettings.interpType);
 
-                fprintf(fid,'Correction with current pitch angle: yes \n');
+                fprintf(fid,'Correction with current pitch angle: yes \n\n');
+                fprintf(fid,'CA: -25perc simulation, -25perc reference \n');
             end
             fclose(fid);
         end
