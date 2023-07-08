@@ -3,17 +3,9 @@ function [t_shutdown,settings,contSettings,predicted_apogee,estimated_mass,estim
 
 % mass estimation
 
-u = contSettings.u;
-
-if u == 1
     A = contSettings.Engine_model_A1;
     B = contSettings.Engine_model_B1;
     C = contSettings.Engine_model_C1;
-else
-    A = contSettings.Engine_model_A2;
-    B = contSettings.Engine_model_B2;
-    C = contSettings.Engine_model_C2;
-end
 
 % %  estimated_pressure(iTimes) = C * contSettings.xe;
 % %     e =  (c.cp_tot(end)-1950) - estimated_pressure(iTimes)*1000;
@@ -26,6 +18,13 @@ end
 % %       m = estimated_mass(iTimes);
 
 % prediction
+
+if Tf(end) >= settings.timeEngineCut
+    u = 0;
+else
+    u = 1;
+end
+
 contSettings.xe=A*contSettings.xe + B*u;
 contSettings.P_mat = A*contSettings.P_mat*A' + contSettings.R;
 % correction
@@ -61,14 +60,16 @@ if predicted_apogee(iTimes) >= settings.z_final_MTR
             end
         else 
             t_shutdown = Tf(end);
-            settings.timeEngineCut = t_shutdown;
+            settings.timeEngineCut = t_shutdown + 0.3;
             settings.expTimeEngineCut = t_shutdown;
             settings.IengineCut = Yf(end,14:16);
             settings.expMengineCut = m - settings.ms;
-            settings.shutdown = 1;
-            settings = settingsEngineCut(settings);
-            settings.quatCut = [x_est_tot(end, 8:10) x_est_tot(end, 7)];
-            [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
+            if Tf(end) > settings.timeEngineCut
+                settings.shutdown = 1;
+                settings = settingsEngineCut(settings);
+                settings.quatCut = [x_est_tot(end, 8:10) x_est_tot(end, 7)];
+                [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
+            end
         end
         contSettings.u = 0;
     else

@@ -73,28 +73,13 @@ contSettings.interpType = 'linear'; % choose between: 'linear' , 'sinusoidal'
 % these need to be updated after every static fire test
 settings.motor.K = 92.0088;
 
-contSettings.Engine_model_A1 = [1.61219080133832   	-0.676803310916212	    0; ...
-                                         1          	      0	            0; ...
-                               6.12026335234201e-05	-0.00142032800390254	1];
+contSettings.Engine_model_A1 = [1.435871191228868,-0.469001276508780,0;1,0,0;-0.002045309260755,0.001867496708935,1];
 
-contSettings.Engine_model_A2 = [0.765770735527345	-0.000382188836112505	0;...
-                                0.000488281250000000	    0	            0;...
-                                -0.000291704370946230	-0.0290586162284225	1];
 
-contSettings.Engine_model_A1i = [       0                      1            0;...
-                                 -1.477534143038197     2.382066954069472   0;...
-                                 -0.002098583120079     0.003322113768512   1];
+contSettings.Engine_model_B1 = [4;0;0];
 
-contSettings.Engine_model_A2i = [               0          2.048000000000001e+03    0;...
-                                    -2.616507614852544e+03 4.103464879592512e+06    0;...
-                                    -76.032090638745300    1.192416085534406e+05    1];
+contSettings.Engine_model_C1 = [1.780138883879285,-1.625379384370081,0];
 
-contSettings.Engine_model_B1 = [1;0;0];
-
-contSettings.Engine_model_B2 = [16;0;0];
-
-contSettings.Engine_model_C1 = [-0.061507792486304   1.427409820413903     0];
-contSettings.Engine_model_C2 = [0.293158821485070    29.203503738658544    0];
 % contSettings.Engine_model_Kgain = [0.237322102194205;0.242208876758461;-0.000686466033197479];
 
 %% engine control initialization

@@ -86,13 +86,13 @@ if Tf(end) <= settings.tb+0.5 &&...
 if isnan(c.cp_tot(end))
     c.cp_tot(end) = 0;
 end
-    if ~settings.expShutdown 
+    if ~settings.shutdown 
        [t_shutdown,settings,contSettings,predicted_apogee,estimated_mass,estimated_pressure] =...
            run_MTR_SIM (contSettings,sensorData,settings,iTimes,c,Tf,Yf,x_est_tot);
        m = estimated_mass(end);
     end
 
-    if ~settings.expShutdown && Tf(end) >= settings.tb
+    if ~settings.shutdown && Tf(end) >= settings.tb
           t_shutdown = settings.tb;
           settings.expShutdown = 1;
             settings.timeEngineCut = t_shutdown;
