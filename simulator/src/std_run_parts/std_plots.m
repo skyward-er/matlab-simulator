@@ -1,5 +1,4 @@
-function std_plots(structIn, settings)
-
+function std_plots(structIn, settings,contSettings)
 
 %% Control variable: servo control action (percentage of angle max)
 ap_tot_rescale = rescale(structIn.Y(:,17), "InputMin", 0, "InputMax", settings.servo.maxAngle);
@@ -33,7 +32,7 @@ if settings.flagExport == true
 end
 
 
-%% Airbrake surface
+% Airbrake surface
 figures.arb_exposed_surface = figure('Name', 'Airbrake exposed surface','ToolBar','auto');
 dS = settings.arb.surfPol * structIn.Y(:,17);
 plot(structIn.t, dS);
@@ -48,7 +47,7 @@ if settings.flagExport == true
     exportgraphics(figures.arb_exposed_surface,'report_images\src_arb_exposed_surface.pdf')
 end
 
-%% Trajectory
+% Trajectory
 figures.trajectory = figure('Name', 'Trajectory','ToolBar','auto');
 plot3(structIn.Y(:, 1), structIn.Y(:, 2), -structIn.Y(:, 3));
 hold on; grid on;
@@ -58,7 +57,7 @@ xlabel('x [m]');
 ylabel('y [m]');
 zlabel('z [m]');
 title('Trajectory');
-axis([-300 300 -300 300 0 4000])
+
 legend('Trajectory','Airbrake deployment','Apogee')
 if settings.flagExport == true
     exportgraphics(figures.trajectory,'report_images\src_trajectory.pdf')
@@ -103,20 +102,52 @@ if settings.flagExport == true
 end
 
 %% Predicted vs real apogee
-prediction = figure('Name', 'Predicted apogee','ToolBar','auto');
-hold on;
-grid on;
+% % % % if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
+% % % %     prediction = figure('Name', 'Predicted apogee','ToolBar','auto');
+% % % %     hold on;
+% % % %     grid on;
+% % % % 
+% % % %     plot(structIn.t, -structIn.Y(:, 3));
+% % % %     plot(0:1/settings.frequencies.controlFrequency:settings.tb-0.02, structIn.predicted_apogee);
+% % % %     xline(structIn.t_shutdown,'r--')
+% % % % 
+% % % %     xlabel('Time t [s]');
+% % % %     ylabel('Altitude AGL [m]');
+% % % %     title('Predicted vs Real apogee');
+% % % %     legend('Real altitude','Predicted apogee','shutdown time')
+% % % % 
+% % % %     if settings.flagExport == true
+% % % %         exportgraphics(prediction,'predicted_apogee.pdf')
+% % % %     end
+% % % % 
+% % % % end
 
-plot(structIn.t, -structIn.Y(:, 3));
-plot(0:1/settings.frequencies.controlFrequency:settings.tb-0.02, structIn.predicted_apogee);
-xline(structIn.t_shutdown,'r--')
+%% reference
+figure()
+yyaxis left
+hold on
+contSettings = structIn.contSettings;
+v_ned = quatrotate(quatconj(structIn.Y(:, 10:13)), structIn.Y(:, 4:6));
 
-xlabel('Time t [s]');
-ylabel('Altitude [m]');
-title('Predicted vs Real apogee');
-legend('Predicted apogee','Real altitude','shutdown time')
+plot(contSettings.reference.Z, contSettings.reference.Vz(:,1),'r','DisplayName','ref min')
+plot(contSettings.reference.Z, contSettings.reference.Vz(:,2),'k','DisplayName','ref max')
+plot( -structIn.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
+plot( -structIn.NAS(:,3)-settings.z0,  -structIn.NAS(:,6),'m--','DisplayName','NAS')
+% plot( structIn.ADA(:,4),  structIn.ADA(:,5),'b','DisplayName','ADA z')
+yyaxis right
+plot( -structIn.Y(:, 3), structIn.Y(:, 17),'g','DisplayName','arb')
 
-settings.flagExport = true;
-if settings.flagExport == true
-    exportgraphics(prediction,'predicted_apogee.pdf')
-end
+legend
+
+
+%% ada
+figure
+hold on
+plot( structIn.t_ada_tot,  structIn.ADA(:,4),'DisplayName','ADA_z')
+plot( structIn.t_ada_tot,  structIn.ADA(:,5),'DisplayName','ADA_vz')
+legend;
+
+figure
+hold on
+plot( structIn.t_ada_tot,  structIn.ADA(:,2),'DisplayName','ADA dp')
+

@@ -22,7 +22,7 @@ settings.launchDate = [2023 10 13];
 settings.Vz_final = 0;
 settings.z_final  = 3000;
 settings.z_final_MTR  = 3100;
-settings.Vx_final = 80;
+settings.Vx_final = 0;
 settings.x_final  = 600;
 settings.Vy_final = 0;
 settings.y_final  = 0;
@@ -46,15 +46,15 @@ settings.servo.maxSpeed = deg2rad(300);                     %[rad/s]        % ma
 settings.servo.minAngle = 0;                                                % min servo angle
 settings.servo.maxTorque = 51*9.81/100;                                     % max torque guaranteed (given as 51 kg-cm)
 
-% Servo angle to extension of the air brakes (PYXIS)
-settings.arb.extPol(1) = -0.009216;                                         % coefficient for extension - alpha^4
-settings.arb.extPol(2) = 0.02492;                                           % coefficient for extension - alpha^3
-settings.arb.extPol(3) = -0.01627;                                          % coefficient for extension - alpha^2
-settings.arb.extPol(4) = 0.03191;                                           % coefficient for extension - alpha
-settings.arb.maxExt = settings.Controls(end);
+% Servo angle to extension of the air brakes (GEMINI)
+settings.arb.extPol(1) = -0.009083;                                         % coefficient for extension - alpha^4
+settings.arb.extPol(2) = 0.02473;                                           % coefficient for extension - alpha^3
+settings.arb.extPol(3) = -0.01677;                                          % coefficient for extension - alpha^2
+settings.arb.extPol(4) = 0.03129;                                           % coefficient for extension - alpha
+settings.arb.maxExt = settings.hprot(end);
 
-% servo angle to exposed surface of the airbrakes (PYXIS)
-settings.arb.surfPol = 0.009564;                                            % coefficient for surface - alpha
+% servo angle to exposed surface of the airbrakes (GEMINI)
+settings.arb.surfPol = 0.00932857142857;                                            % coefficient for surface - alpha
 
 % servo angle to guide angle (PYXIS)
 settings.arb.guidePol(1) = -9.4265;                                         % coefficient for guide - sin(alpha...)
@@ -70,17 +70,19 @@ settings.arb.R = 66e-3;                                                     % tr
 x = @(alpha) settings.arb.extPol(1)*alpha.^4 + ...
     settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + ...
     settings.arb.extPol(4).*alpha;
-fun = @(alpha) x(alpha) - settings.Controls(end);
+fun = @(alpha) x(alpha) - settings.hprot(end);
 settings.servo.maxAngle = fzero(fun, deg2rad(50));
 settings.servo.maxAngle = fix(settings.servo.maxAngle*1e9)/1e9; % to avoid computational error propagation (truncates the angle to the ninth decimal)
 
+
 %% KALMAN TUNING PARAMETERS
 settings.kalman.dt_k          =   0.01;                                    % [s]        kalman time step
-settings.kalman.sigma_baro    =   5;                                       % [m/2]   estimated barometer variance    
+settings.kalman.sigma_baro    =   50;                                      % [m/2]   estimated barometer variance    
 settings.kalman.sigma_mag     =   1;                                       % [mgauss^2] estimated magnetometer variance    
 settings.kalman.sigma_GPS     =   5;                                       % [mg^2]     estimated GPS variance
 settings.kalman.sigma_w       =   1;                                       % [rad^2/s^2]   estimated gyroscope variance;
 settings.kalman.sigma_beta    =   1e-4;                                    % [rad/s^2]   estimated gyroscope bias variance;
+% settings.kalman.sigma_pitot   =  10;    %DA CAMBIARE
 
 settings.kalman.v_thr         =   2.5;                                     % Velocity threshold for the detected apogee
 settings.kalman.count_thr     =   5;                                       % If the apogee is detected count_thr time, the algorithm will return the apogee event
@@ -116,7 +118,7 @@ settings.ada.P0          =   [  0.1    0      0;                            % In
                                 0      0.1     0;                            % state covariance matrix 
                                 0      0      0.1;];
 [settings.ada.temp_ref, ~,...
- settings.ada.p_ref, ~]  =   atmosisa(0);                                  % Reference temperature in kelvin and pressure in Pa 
+ settings.ada.p_ref, ~]  =   atmosisa(settings.z0);                                  % Reference temperature in kelvin and pressure in Pa 
 
 settings.ada.v0          =   -10;                                         % Vertical velocity initial condition
 settings.ada.a0          =   -100;                                         % Acceleration velocity initial condition

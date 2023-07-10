@@ -45,11 +45,20 @@ if nargin > 2
     settings.motor.expThrust = settings_mont.motor.expThrust;
     settings.motor.expTime = settings_mont.motor.expTime;
     settings.tb = settings_mont.tb;
-    settings.wind.uw = settings_mont.wind.uw;
-    settings.wind.vw = settings_mont.wind.vw;
-    settings.wind.ww = settings_mont.wind.ww;
-    settings.wind.Az = settings_mont.wind.Az;
-    settings.wind.El = settings_mont.wind.El;
+    settings.Coeffs = settings_mont.Coeffs;
+    switch settings.windModel
+        case "constant"
+            settings.wind.uw = settings_mont.wind.uw;
+            settings.wind.vw = settings_mont.wind.vw;
+            settings.wind.ww = settings_mont.wind.ww;
+            settings.wind.Az = settings_mont.wind.Az;
+            settings.wind.El = settings_mont.wind.El;
+        case "multiplicative"
+            settings.wind.inputGround = settings_mont.wind.Mag;
+            settings.wind.inputAzimut = settings_mont.wind.Az;
+    end
+   
+    settings.State.xcgTime = settings_mont.State.xcgTime;
 end
 
 if settings.electronics % global variables slow down a bit the comunication over thread, we don't need these for montecarlo analysis
@@ -67,18 +76,16 @@ V0 = [0; 0; 0];                                                             % Ve
 W0 = [0; 0; 0];                                                             % Angular speed initial condition
 ap0 = 0;                                                                    % Control servo angle initial condition
 
-
+%%% TEMPORANEO
+    settings.Ixxf = settings.Ixx(1);
+    settings.Iyyf = settings.Iyy(1);
+    settings.Izzf = settings.Izz(1);
+    settings.Ixxe = settings.Ixx(end);
+    settings.Iyye = settings.Iyy(end);
+    settings.Izze = settings.Izz(end);
+    %%%
 initialCond = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf; ap0;];
 Y0 = initialCond;
-%% engine control initialization
-
-if  (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
-    xe = [0,0,settings.m0]';     % initial state estimate
-    u = 1;                      % initial valve position ( 1 = open, 0 = closed )
-    P_mat = zeros(3);          % initial value for P
-    V1=diag([1,1,1]);           % model noise covariance matrix
-    V2=0.1;
-end 
 
 %% WIND GENERATION
 [uw, vw, ww, Az , El, Mag] = std_setWind(settings);
@@ -133,13 +140,13 @@ while settings.flagStopIntegration && n_old < nmax                              
         tLaunch = 0;
     end
 
-    if launchFlag && (t0 - tLaunch) <= settings.tb
+    if launchFlag && ~settings.shutdown
         flagBurning = true;                                                 % Powered ascent
     else
         flagBurning = false;                                                % Motor ends thrust
     end
 
-    if settings.flagAscent && not(flagBurning) && mach <= settings.MachControl
+    if settings.flagAscent && settings.expShutdown && mach <= settings.MachControl
         flagAeroBrakes = true;                                              % Allows airbrakes to open
     else
         flagAeroBrakes = false;
@@ -151,7 +158,7 @@ while settings.flagStopIntegration && n_old < nmax                              
         flagFlight = true;
     end
 
-    if sensorData.kalman.vz(end) >= 0 && launchFlag
+    if sensorData.kalman.vz(end) >= -1e-3 && launchFlag
         settings.flagAscent = true;                                                  % Ascent
     else
         settings.flagAscent = false;                                                 % Descent
@@ -263,18 +270,12 @@ while settings.flagStopIntegration && n_old < nmax                              
     % wind update
     if settings.windModel == "multiplicative"
 
-        Mag = settings.wind.inputGround*interp1(settings.wind.inputAlt, settings.wind.inputMult,-Y0(3));
-        Az = interp1(settings.wind.inputAlt, settings.wind.inputAzimut,-Y0(3));
-
-        R = Mag*angle2dcm(Az, 0, 0, 'ZYX');
-        uw = R(1,1);
-        vw = R(1,2);
-        ww = R(1,3);
+        [uw, vw, ww] = windInputGenerator(settings, -Y0(3), settings.wind.input_uncertainty);
 
         settings.constWind = [uw, vw, ww];
 
-        windMag = [windMag Mag];
-        windAz = [windAz Az];
+        windMag = [windMag sqrt(uw^2+vw^2+ww^2)];
+        windAz = [windAz atan2(sqrt(uw^2+vw^2+ww^2)/vw,sqrt(uw^2+vw^2+ww^2)/uw)];
     end
 
     % time update
@@ -364,15 +365,19 @@ struct_out.windVel(2) = vw;
 struct_out.windVel(3) = ww;
 struct_out.t_ada = t_ada;
 struct_out.t_nas = t_kalman;
+struct_out.t_ada_tot = t_ada_tot;
 struct_out.apogee_time = Tf_tot(idx_apo);
 struct_out.apogee_idx = idx_apo;
 struct_out.apogee_coordinates = [Yf_tot(idx_apo,1),Yf_tot(idx_apo,2),-Yf_tot(idx_apo,3)];
 struct_out.apogee_speed = [Yf_tot(idx_apo,4),Yf_tot(idx_apo,5),-Yf_tot(idx_apo,6)];
 struct_out.apogee_radius = sqrt(struct_out.apogee_coordinates(1)^2+struct_out.apogee_coordinates(2)^2);
 struct_out.recall = dataBallisticFlight;
-% struct_out.NAS = x_est_tot;
+struct_out.NAS = x_est_tot;
+struct_out.ADA = [xp_ada_tot xv_ada_tot];
 struct_out.cp = c.cp_tot; 
-struct_out.t_shutdown = t_shutdown;
+struct_out.t_shutdown = settings.timeEngineCut;
+struct_out.quat = Yf(:,10:13);
+struct_out.contSettings = contSettings;
 
 if strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')
     struct_out.predicted_apogee = predicted_apogee;

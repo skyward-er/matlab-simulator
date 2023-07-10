@@ -2,7 +2,7 @@
     This function chooses the reference trajectories to follow based on
     the estimated mass after engine shut-down.
     After finding the reference which correspond to the rocket mass closer 
-    to the estimated one, performs a liner interpolation to find the
+    to the estimated one, performs a linear interpolation to find the
     optimal trajectory to follow
 
     
@@ -10,7 +10,7 @@
 
 %}
 
-if contSettings.traj_choice == 1 && settings.shutdown
+if contSettings.traj_choice == 1 && settings.expShutdown
 
     if ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
         m = settings.ms;
@@ -22,7 +22,6 @@ if contSettings.traj_choice == 1 && settings.shutdown
     %from here m needs to be replaced with the estimated mass
     %after shutdown
     [~,index] = min( abs(m-mass_vect) );
-    contSettings.traj_choice = 0;
     contSettings.reference.Vz_temp = zeros( length( contSettings.reference.Vz{1,1} ),2);
 
     if m <= mass_vect(1)
@@ -67,8 +66,8 @@ if contSettings.traj_choice == 1 && settings.shutdown
                 (m - mass_vect(index-1) ) / ( mass_vect(index)...
                 - mass_vect(index-1) );
 
-            reference.Vz{2,1}(i) = Vz1_100(i)+ ( Vz2_100(i) - Vz1_100(i) ) *...
-                (m - mass_vect(index+1) ) / ( mass_vect(index)...
+            reference.Vz{2,1}(i) = Vz1_100(i) + ( Vz2_100(i) - Vz1_100(i) ) *...
+                (m - mass_vect(index-1) ) / ( mass_vect(index)...
                 - mass_vect(index-1) );
         end
 
@@ -77,4 +76,5 @@ if contSettings.traj_choice == 1 && settings.shutdown
     contSettings.reference.Vz_temp(:,1) = reference.Vz{1,end};
     contSettings.reference.Vz_temp(:,2) = reference.Vz{2,end};
     contSettings.reference.Vz = contSettings.reference.Vz_temp;
+    
 end

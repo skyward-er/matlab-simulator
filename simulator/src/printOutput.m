@@ -64,7 +64,7 @@ if not(settings.electronics)
 
 %% Apogee detection time
     fprintf('ADA apogee detection time: %g [sec] \n', t_ada)
-    fprintf('Kalman apogee detection time: %g [sec] \n', t_nas)
+    fprintf('Kalman apogee detection time: %g [sec] \n', t_nas(end))
     fprintf('Simulated apogee time : %g [sec] \n\n', T_apo)
 end
 

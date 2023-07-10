@@ -40,7 +40,7 @@ addpath(genpath(commonFunctionsPath));
 % % submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
 
 %% CONFIGs
-conf.script = "simulation";
+conf.script = "simulator";
 config;
 
 %% MONTECARLO SETTINGS
@@ -57,18 +57,29 @@ switch simulationType_thrust
 
     case "gaussian"
 
-        sigma_t = (1.50-1)/3;             % thrust_percentage standard deviation
+        sigma_t = (1.10-1)/3;             % thrust_percentage standard deviation
         mu_t = 1;                         % thrust_percentage mean value
 
         thrust_percentage = normrnd(mu_t,sigma_t,N_sim,1);       %generate normally distributed values ( [0.8 1.20] = 3sigma) % serve il toolbox
         stoch.thrust = thrust_percentage*settings.motor.expThrust;                  % thrust - the notation used creates a matrix where each row is the expThrust multiplied by one coefficient in the thrust percentage array
-
+        
+        
         %%% in questo modo però il burning time rimane fissato perchè è
         %%% settato al'interno di simulationData.m -> possibili errori per
         %%% le simulazioni con exp_thrust aumentato se si vuole fare
         %%% spegnimento dell'ibrido
-        impulse_uncertainty = normrnd(1,0.1/3,N_sim,1);
+        impulse_uncertainty = normrnd(1,0.02/3,N_sim,1);
         stoch.expThrust = diag(impulse_uncertainty)*((1./thrust_percentage) * settings.motor.expTime);          % burning time - same notation as thrust here
+        %%%
+        for i =1:N_sim
+            stoch.State.xcgTime(:,i) =  settings.State.xcgTime/settings.tb .* stoch.expThrust(i,end);  % Xcg time
+        end
+        
+        %%% Aero coefficients uncertainty
+
+        sigma_aer = (0.1)/3;             % aero coeffs error standard deviation
+        mu_aer = 0;                      % aero coeffs error mean value
+        aer_percentage = normrnd(mu_aer,sigma_aer,N_sim,1);       
 
         %%% wind parameters
         settings.wind.MagMin = 0;                                               % [m/s] Minimum Wind Magnitude
@@ -78,12 +89,17 @@ switch simulationType_thrust
         settings.wind.AzMin  = - deg2rad(180);
         settings.wind.AzMax  = + deg2rad(180);
 
-        [stoch.wind.uw, stoch.wind.vw, stoch.wind.ww, stoch.wind.Az, stoch.wind.El ] = windConstGeneratorMontecarlo(settings.wind,N_sim,simulationType_thrust);
+        switch settings.windModel
+            case "constant"
+                [stoch.wind.uw, stoch.wind.vw, stoch.wind.ww, stoch.wind.Az, stoch.wind.El ] = windConstGeneratorMontecarlo(settings.wind,N_sim,simulationType_thrust);
+            case "multiplicative"
+                [stoch.wind.Mag,stoch.wind.Az] = windMultGeneratorMontecarlo(settings.wind,N_sim);
+        end
 
     case "extreme"
 
 
-        thrust_percentage = [0.8;1.2]; % this is overwritten in the next step, but it sets the values to retrieve in the parameter generation
+        thrust_percentage = [0.9;1.1]; % this is overwritten in the next step, but it sets the values to retrieve in the parameter generation
 
         %%% wind parameters
         [stoch.wind.uw, stoch.wind.vw, stoch.wind.ww, stoch.wind.Az, stoch.wind.El ,thrust_percentage, N_sim] = windConstGeneratorMontecarlo(settings.wind,N_sim,simulationType_thrust,thrust_percentage);
@@ -96,7 +112,7 @@ end
 %% save arrays
 
 % algorithms
-algorithm_vec = {'interp';'NoControl';'engine';'complete'; 'PID_2021'; 'shooting '}; % interpolation, no control, engine shutdown, engine+arb, PID change every 2s, shooting
+algorithm_vec = {'interp';'NoControl';'engine';'complete'; 'PID_2021'; 'shooting'}; % interpolation, no control, engine shutdown, engine+arb, PID change every 2s, shooting
 
 %% do you want to save the results?
 
@@ -121,7 +137,7 @@ clearvars   msaToolkitURL Itot
 settings_mont_init = struct('x',[]);
 
 % start simulation
-for alg_index = 3
+for alg_index = 4
 
     contSettings.algorithm = algorithm_vec{alg_index};
 
@@ -129,6 +145,7 @@ for alg_index = 3
     save_thrust = cell(size(stoch.thrust,1),1);
     apogee.thrust = [];
     N_ApogeeWithinTarget = 0;
+    N_ApogeeWithinTarget_50 = 0;
     wind_Mag = zeros(N_sim,1);
     wind_el = zeros(N_sim,1);
     wind_az = zeros(N_sim,1);
@@ -141,16 +158,26 @@ for alg_index = 3
 
         settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
         settings_mont.motor.expTime = stoch.expThrust(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
-        settings_mont.tb = stoch.expThrust(i,end);                              % initialize the burning time of the current simulation (parfor purposes)
+        settings_mont.tb = max( stoch.expThrust(i,stoch.expThrust(i,:)<=settings.tb) );                              % initialize the burning time of the current simulation (parfor purposes)
+        settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
+
+        % Define coeffs matrix for the i-th simulation
+        settings_mont.Coeffs = settings.Coeffs* (1+aer_percentage(i));
 
 
         % set the wind parameters
-        settings_mont.wind.uw = stoch.wind.uw(i);
-        settings_mont.wind.vw = stoch.wind.vw(i);
-        settings_mont.wind.ww = stoch.wind.ww(i);
-        settings_mont.wind.Az = stoch.wind.Az(i);
-        settings_mont.wind.El = stoch.wind.El(i);
-
+        switch settings.windModel
+            case "constant"
+                settings_mont.wind.uw = stoch.wind.uw(i);
+                settings_mont.wind.vw = stoch.wind.vw(i);
+                settings_mont.wind.ww = stoch.wind.ww(i);
+                settings_mont.wind.Az = stoch.wind.Az(i);
+                settings_mont.wind.El = stoch.wind.El(i);
+            case "multiplicative"
+                settings_mont.wind.Mag = stoch.wind.Mag(i);
+                settings_mont.wind.Az = stoch.wind.Az(i,:);
+        end
+        
         if displayIter == true
             fprintf("simulation = " + num2str(i) + " of " + num2str(N_sim) + ", algorithm: " + contSettings.algorithm +"\n");
         end
@@ -159,8 +186,6 @@ for alg_index = 3
         [simOutput] = std_run(settings,contSettings,settings_mont);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STD_RUN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         save_thrust{i} = simOutput;
-
-
 
     end
 
@@ -194,10 +219,15 @@ for alg_index = 3
         end
 
         % within +-10 meters target apogees:
-        if abs(apogee.thrust(i) - settings.z_final)<10
+        if abs(apogee.thrust(i) - settings.z_final)<=10
             N_ApogeeWithinTarget = N_ApogeeWithinTarget +1; % save how many apogees sit in the +-50 m from target
         end
-     
+          % within +-50 meters target apogees:
+          
+        if abs(apogee.thrust(i) - settings.z_final)<=50
+            N_ApogeeWithinTarget_50 = N_ApogeeWithinTarget_50 +1; % save how many apogees sit in the +-50 m from target
+        end
+          
     end
 
 
@@ -218,6 +248,7 @@ for alg_index = 3
     apogee.horizontalSpeed_min = min(apogee.horizontalSpeed);
 
     apogee.accuracy = N_ApogeeWithinTarget/N_sim*100; % percentage, so*100
+    apogee.accuracy_50 = N_ApogeeWithinTarget_50/N_sim*100; % percentage, so*100
 
     for i = 1:N_sim
         save_thrust{i}.mu = mean(apogee.thrust(1:i));
@@ -227,7 +258,7 @@ for alg_index = 3
     %% PLOTS
 
     plotsMontecarlo;
-
+    
     %% SAVE
     % save plots
     saveDate = string(datestr(date,29));
@@ -281,11 +312,11 @@ for alg_index = 3
                 save_thrust{j} = rmfield(save_thrust{j},'Y'); % remove ode data to save space
             end
             save(folder(i)+"\saveThrust.mat","save_thrust","apogee","N_sim","settings","thrust_percentage") % add "save_thrust", > 2GB for 1000 sim
-
-                        exportgraphics(save_plot_histogram,'report_images\mc_Histogram.pdf','ContentType','vector')
-                        exportgraphics(save_plotApogee,'report_images\mc_Apogees.pdf','ContentType','vector')
-                         exportgraphics(save_apogee_3D,'report_images/apogee_wind.pdf','ContentType','vector')
-                         
+% 
+%                         exportgraphics(save_plot_histogram,'report_images\mc_Histogram.pdf','ContentType','vector')
+%                         exportgraphics(save_plotApogee,'report_images\mc_Apogees.pdf','ContentType','vector')
+%                          exportgraphics(save_apogee_3D,'report_images\apogee_wind.pdf','ContentType','vector')
+%                          
             % Save results.txt
             fid = fopen( folder(i)+"\"+contSettings.algorithm+"Results"+saveDate+".txt", 'wt' );  % CAMBIA IL NOME
             fprintf(fid,'Algorithm: %s \n',contSettings.algorithm );
@@ -295,7 +326,7 @@ for alg_index = 3
             fprintf(fid,'Thrust: +-50%% at 3*sigma, total impulse constant \n');
             fprintf(fid,'Engine shut-down control frequency: %d Hz \n',settings.frequencies.controlFrequency);
             fprintf(fid,'Airbrakes control frequency: %d Hz \n',settings.frequencies.arbFrequency );
-            fprintf(fid,'Initial Mach number at which the control algorithm starts: %.3f \n',settings.MachControl);
+            fprintf(fid,'Initial Mach number at which the control algorithm starts: %.3f \n\n',settings.MachControl);
             % %             switch alg_index
             % %                 case 2
             % %                     fprintf(fid,'P = %d \n',contSettings.Kp );
@@ -306,12 +337,19 @@ for alg_index = 3
             % %                     fprintf(fid,'I = %d \n',contSettings.Ki );
             % %                     fprintf(fid,'Change reference trajectory every %d seconds \n\n',contSettings.deltaZ_change );
             % %             end
-            fprintf(fid,'Wind model parameters: \n'); % inserisci tutti i parametri del vento
-            fprintf(fid,'Wind Magnitude: 0-%d m/s\n',settings.wind.MagMax);
-            fprintf(fid,'Wind minimum azimuth: %d [°] \n',rad2deg(settings.wind.AzMin));
-            fprintf(fid,'Wind maximum azimuth: %d [°] \n',rad2deg(settings.wind.AzMax));
-            fprintf(fid,'Wind minimum elevation: %d [°] \n', rad2deg(settings.wind.ElMin));
-            fprintf(fid,'Wind maximum elevation: %d [°] \n\n\n',rad2deg(settings.wind.ElMax));
+            fprintf(fid,'Wind model: %s \n',settings.windModel);
+            if settings.windModel == "constant"
+                fprintf(fid,'Wind model parameters: \n'); % inserisci tutti i parametri del vento
+                fprintf(fid,'Wind Magnitude: 0-%d m/s\n',settings.wind.MagMax);
+                fprintf(fid,'Wind minimum azimuth: %d [°] \n',rad2deg(settings.wind.AzMin));
+                fprintf(fid,'Wind maximum azimuth: %d [°] \n',rad2deg(settings.wind.AzMax));
+                fprintf(fid,'Wind minimum elevation: %d [°] \n', rad2deg(settings.wind.ElMin));
+                fprintf(fid,'Wind maximum elevation: %d [°] \n\n\n',rad2deg(settings.wind.ElMax));
+            else
+                fprintf(fid,'Wind model parameters: \n'); % inserisci tutti i parametri del vento
+                fprintf(fid,'Ground wind Magnitude: 0-%d m/s\n\n',settings.wind.MagMax);
+            end
+            
             %%%%%%%%%%%%%%%
             fprintf(fid,'Results: \n');
             fprintf(fid,'Max apogee: %.2f \n',max(apogee.thrust));
@@ -320,6 +358,8 @@ for alg_index = 3
             fprintf(fid,'Apogee standard deviation 3sigma: %.4f \n',3*apogee.thrust_std);
             fprintf(fid,'Apogees within +-10m from target (gaussian): %.2f %% \n',apogee.accuracy_gaussian);
             fprintf(fid,'Apogees within +-10m from target (ratio): %.2f %% \n\n',apogee.accuracy);
+            fprintf(fid,'Apogees within +-50m from target (gaussian): %.2f %% \n',apogee.accuracy_gaussian_50);
+            fprintf(fid,'Apogees within +-50m from target (ratio): %.2f %% \n\n',apogee.accuracy_50);
             fprintf(fid,'Apogees horizontal distance from origin mean : %.2f [m] \n',apogee.radius_mean);
             fprintf(fid,'Apogees horizontal distance from origin std : %.2f [m] \n\n',apogee.radius_std);
             fprintf(fid,'Apogees horizontal speed mean : %.2f [m/s] \n',apogee.horizontalSpeed_mean);
@@ -329,18 +369,19 @@ for alg_index = 3
             %%%%%%%%%%%%%%%
             fprintf(fid,'Other parameters specific of the simulation: \n\n');
             fprintf(fid,'Filter coefficient: %.3f \n', contSettings.filter_coeff);
-            if contSettings.algorithm == "interp"
+              fprintf(fid,'Target for shutdown: %d \n',settings.z_final_MTR );
+            if contSettings.algorithm == "interp" || contSettings.algorithm == "complete" 
                 fprintf(fid,'N_forward: %d \n', contSettings.N_forward);
                 fprintf(fid,'Delta Z (reference): %d \n',contSettings.reference.deltaZ);
-                fprintf(fid,'Filter diminished every: %d \n', contSettings.deltaTfilter);
+                fprintf(fid,'Filter diminished every: %d m\n', contSettings.deltaZfilter);
                 fprintf(fid,'Filter diminished by ratio: %d \n', contSettings.filterRatio);
-                fprintf(fid,'Filter diminishing starts at: %d m \n', contSettings.Tfilter);
+                fprintf(fid,'Filter diminishing starts at: %d m \n', contSettings.Zfilter);
                 fprintf(fid,'Interpolation type: %s \n', contSettings.interpType);
+
+                fprintf(fid,'Correction with current pitch angle: yes \n\n');
+                fprintf(fid,'CA: -25perc simulation, -25perc reference \n');
             end
             fclose(fid);
         end
     end
 end
-
-load('gong.mat')
-sound(y)

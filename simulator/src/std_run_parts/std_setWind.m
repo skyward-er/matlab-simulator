@@ -29,5 +29,6 @@ switch settings.windModel
         R = Mag*angle2dcm(Az, 0, 0, 'ZYX');
         uw = R(1,1);
         vw = R(1,2);
-        ww = R(1,3);       
+        ww = R(1,3); 
+        El = acos(ww/Mag);
 end

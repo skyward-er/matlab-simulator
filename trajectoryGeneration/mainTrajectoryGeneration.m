@@ -60,9 +60,9 @@ delta_alpha_values  = linspace(settings.servo.minAngle,settings.servo.maxAngle,2
 Vz_final =  settings.Vz_final;
 z_final  =  settings.z_final;
 z_final_MTR  =  settings.z_final_MTR;
-Vx_final =  settings.Vx_final;   
+Vx_final = 0;% settings.Vx_final;   
 x_final  =  settings.x_final;  
-Vy_final =  settings.Vy_final;  
+Vy_final = 0; %  settings.Vy_final;  
 y_final  =  settings.y_final;  
 
 %% INITIAL VELOCITY
@@ -77,9 +77,6 @@ Q0 = angleToQuat(settings.PHI, settings.OMEGA, 0*pi/180)';
 X0 = [0 0 0]';
 V0 = [0 0 0]';
 W0 = [0 0 0]';
-
-%%% composing initial conditions for ode
-Y0 = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf];
 
 %%% wind initialization
 [uw, vw, ww, ~] = windConstGenerator(settings.wind);
@@ -112,7 +109,9 @@ trajectories_saving_MTR = cell(N_mass,1);
 for j = 1:N_mass
   m = mass(j);
 for index = 1:Ntraj_ARB
-
+%%% composing initial conditions for ode
+I_index = 1+floor(length(settings.Ixx)/(N_mass-1))*(j-1)
+Y0 = [X0; V0; W0; Q0; settings.Ixx(I_index); settings.Iyy(I_index); settings.Izz(I_index)];
 deltaX = deltaX_values(index);
 
 % Start simulink simulation
@@ -156,8 +155,8 @@ trajectories_saving_MTR{j} = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref', 
 
 end
 %% SAVING
-settings.save = false;
-
+%  settings.save = false;
+load test
 if ~settings.save
     warning('save is set to false')
 end
@@ -165,6 +164,8 @@ end
 if settings.save
     save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
 end
+
+% save traj-25perc.mat trajectories_saving
 
 %% PLOT
 if settings.plots
@@ -176,4 +177,28 @@ warning off
 delete('Trajectory_generation.slxc')
 rmdir('slprj', 's')
 warning on
+
+%%
+datcom_0_closed = trajectories_saving{1,end};
+datcom_0_open = trajectories_saving{2,end};
+save plot0 datcom_0_closed datcom_0_open
+
+%% 
+clearvars; close all; clc;
+
+load plot0
+load plot25
+
+figure()
+hold on;
+grid on;
+plot(datcom_0_open.Z_ref,datcom_0_open.VZ_ref,'k','DisplayName','datcom')
+plot(datcom_0_closed.Z_ref,datcom_0_closed.VZ_ref,'k')
+
+plot(datcom_25_open.Z_ref,datcom_25_open.VZ_ref,'r','DisplayName','datcom-25')
+plot(datcom_25_closed.Z_ref,datcom_25_closed.VZ_ref,'r')
+
+legend
+
+
 

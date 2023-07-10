@@ -75,8 +75,6 @@ end
 end
 xlabel('Altitude [m]'); ylabel('V_{z} [m/s]'); title('Vertical velocity vs Altitude for ARB')
 
-  exportgraphics(ref,'references.pdf','ContentType','vector')
-
 % Vz(z)_MTR
 figure('Name','Vertical velocity vs Altitude','NumberTitle','off');
 for j = 1:N_mass

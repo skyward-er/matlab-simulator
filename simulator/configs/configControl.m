@@ -67,21 +67,35 @@ end
 
 % For interpolation reference algorithm only:
 contSettings.N_forward = 2; % how many steps in advance have to check on speed to interpolate
-contSettings.interpType = 'sinusoidal'; % choose between: 'linear' , 'sinusoidal'
+contSettings.interpType = 'linear'; % choose between: 'linear' , 'sinusoidal'
 
 %% ENGINE CONTROL
 % these need to be updated after every static fire test
+settings.motor.K = 92.0088;
 
-contSettings.Engine_model_A = [1.69656148956851	    -0.737446848106867	  0;...
-                                      1                 	0          	  0;...
-                               4.24950760584965e-05	-0.000643764479055182	1];
+contSettings.Engine_model_A1 = [1.435871191228868,-0.469001276508780,0;1,0,0;-0.002045309260755,0.001867496708935,1];
 
-contSettings.Engine_model_B = [1;0;0];
 
-contSettings.Engine_model_C = [-0.0612529358758888	0.927930198323715	0];
+contSettings.Engine_model_B1 = [4;0;0];
 
-contSettings.Engine_model_Kgain = [0.237322102194205;0.242208876758461;-0.000686466033197479];
+contSettings.Engine_model_C1 = [1.780138883879285,-1.625379384370081,0];
+
+% contSettings.Engine_model_Kgain = [0.237322102194205;0.242208876758461;-0.000686466033197479];
+
+%% engine control initialization
+
+if  (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
+    contSettings.xe = [0,0,settings.m0]';     % initial state estimate
+    contSettings.u = 1;                      % initial valve position ( 1 = open, 0 = closed )
+    contSettings.P_mat = zeros(3);          % initial value for P
+    contSettings.R=1e-2*diag([1,1,1]);      % model noise covariance matrix    
+    contSettings.Q=0.36; 
+    contSettings.fault = false;
+end 
 
 
 %% MAGNETIC MAP
 settings.hmax = 6000;                                                       % [m] Max altitude at which the world magnetic map must be computed
+
+%% TEST DA SPOSTARE PER FORZA 
+ 

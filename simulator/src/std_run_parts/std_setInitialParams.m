@@ -40,6 +40,7 @@ sensorData.chamberPressure.t0 = initSensorT0...
 
 sensorData.barometer.time = [];
 sensorData.barometer.z = [];
+settings.baro_old = 0;
 %% while cycle max iterations
 nmax        =       settings.nmax;                                                 % Max iteration number - stops the integration if reached
 
@@ -70,6 +71,7 @@ sensorData.kalman.pn_prec = settings.ada.p_ref;                             % se
 % ap_ref_vec  = zeros(nmax, 2);                                               % Matrix N x 2 to save reference angle vector
 % ap_ref_time = zeros(nmax, 1);                                               % Vector of time reference for air brakes
 settings.shutdown = 0;                                                      % engine on
+settings.expShutdown = 0;                                                   % engine expected to be on
 %% ADA initial conditions
 
 if settings.flagADA

@@ -10,12 +10,14 @@ xlabel('Apogee value [m]')
 ylabel('Number of apogees in the same interval')
 title('Reached apogee distribution')
 legend('Range of acceptable apogees')
-
+ exportgraphics(save_plot_histogram,'new_cont_const.pdf','ContentType','vector')
 %% AIRBRAKE DEPLOY TIME HISTOGRAM - this plot is particularly interesting for the shadowmodes
 if ~(strcmp(contSettings.algorithm,'engine')||strcmp(contSettings.algorithm,'NoControl'))
     arb_deploy_time_vec = zeros(N_sim,1);
     for i = 1: N_sim
+        if isfield(save_thrust{i},'ARB_allowanceTime')
         arb_deploy_time_vec(i) = save_thrust{i}.ARB_allowanceTime;
+        end
     end
     arb_deploy_time_MEAN = mean(arb_deploy_time_vec);
     arb_deploy_time_MODE = mode(arb_deploy_time_vec);
@@ -93,10 +95,10 @@ yline(settings.z_final+10,'r--')
 title('Apogee w.r.t. thrust')
 xlabel('Thrust percentage w.r.t. nominal')
 ylabel('Apogee [m]')
-
-text(1.1,max(apogee.thrust) + 50,"target apogee: "+num2str(settings.z_final))
+xlim([0.85 1.15])
+ylim([2900 3100])
+text(1, 3080,"target apogee: "+num2str(settings.z_final))
 legend(contSettings.algorithm);
-
 %% PLOT SHUTDOWN TIME 2D
  
 %%% t_shutdown histogram
@@ -187,7 +189,7 @@ if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'co
 end
 %% PLOT APOGEE 3D
 if ~settings.wind.model && ~settings.wind.input
-    for i = 1:1000
+    for i = 1:N_sim
         wind_Mag(i) = save_thrust{i}.windMag;
          wind_az(i) = save_thrust{i}.windAz;
           wind_el(i) = save_thrust{i}.windEl;
@@ -240,14 +242,19 @@ end
  
 
 %% PLOT PROBABILITY FUNCTION
+
+ % gaussian 50m
+    p = normcdf([settings.z_final-50, settings.z_final+50],apogee.thrust_mean,apogee.thrust_std);
+    apogee.accuracy_gaussian_50 =( p(2) - p(1) )*100;
+    
 if N_sim>1
     save_thrust_apogee_probability = figure;
     pd = fitdist(apogee.thrust','Normal');    % create normal distribution object to compute mu and sigma
-    % probability to reach an apogee between 2950 and 3050
-    p = normcdf([settings.z_final-50, settings.z_final+50],apogee.thrust_mean,apogee.thrust_std);
+    % probability to reach an apogee between 2990 and 3010
+    p = normcdf([settings.z_final-10, settings.z_final+10],apogee.thrust_mean,apogee.thrust_std);
     apogee.accuracy_gaussian =( p(2) - p(1) )*100;
     x_values = linspace(settings.z_final-500,settings.z_final+500,1000);   % possible apogees
-
+   
     y = pdf(pd,x_values);                  % array of values of the probability density function
     hold on; grid on;
     xlabel('Reached apogee','Interpreter','latex','FontSize',15,'FontWeight','bold')
