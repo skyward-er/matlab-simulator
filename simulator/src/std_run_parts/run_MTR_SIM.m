@@ -39,7 +39,7 @@ contSettings.xe=contSettings.xe + K* ((c.cp_tot(end)-1950)/1000 - estimated_pres
 estimated_mass(iTimes) = contSettings.xe(3);
 m = estimated_mass(iTimes);
 % magic formula seguire traiettorie è meglio?
-CD(iTimes) = 0.75*getDrag(norm([sensorData.kalman.vx,sensorData.kalman.vy,sensorData.kalman.vz]), sensorData.kalman.z, 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
+CD(iTimes) = settings.CD_correction*getDrag(norm([sensorData.kalman.vx,sensorData.kalman.vy,sensorData.kalman.vz]), sensorData.kalman.z, 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
 [~,~,~,rho] = atmosisa(sensorData.kalman.z);
 
 %% TEST WITH MASS ESTIMATION THAT DOESN'T WORK

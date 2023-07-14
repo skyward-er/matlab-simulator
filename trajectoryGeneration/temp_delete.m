@@ -17,9 +17,9 @@ trajectories_saving = cell(2,10);
 for i = 1:2
     for j = 1:10
         if i ==1
-            trajectories_saving{i,j} = traj0{i,j};
+            trajectories_saving{i,j} = traj0{i,j}; % closed airbrakes
         else
-            trajectories_saving{i,j} = traj25{i,j};
+            trajectories_saving{i,j} = traj25{i,j}; % open air brakes
         end
     end
 end

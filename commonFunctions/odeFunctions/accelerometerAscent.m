@@ -233,7 +233,7 @@ end
 % Retrieve Coefficients
 
 
-CA = coeffsValues(1); CYB = coeffsValues(2); CY0 = coeffsValues(3);
+CA = coeffsValues(1)*settings.CD_correction; CYB = coeffsValues(2); CY0 = coeffsValues(3);
 CNA = coeffsValues(4); CN0 = coeffsValues(5); Cl = coeffsValues(6);
 Clp = coeffsValues(7); Cma = coeffsValues(8); Cm0 = coeffsValues(9);
 Cmad = coeffsValues(10); Cmq = coeffsValues(11); Cnb = coeffsValues(12);
