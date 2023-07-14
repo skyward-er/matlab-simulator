@@ -379,7 +379,8 @@ for alg_index = 4
                 fprintf(fid,'Interpolation type: %s \n', contSettings.interpType);
 
                 fprintf(fid,'Correction with current pitch angle: yes \n\n');
-                fprintf(fid,'CA: %.1f simulation, %.1f reference \n',settings.CD_correction, settings.CD_correction_ref);
+%                 fprintf(fid,'CA: %.1f simulation, %.1f reference \n',settings.CD_correction, settings.CD_correction_ref);
+                fprintf(fid,'CA: 0.75 simulation, 1 open reference, 0.75 closed reference \n');
             end
             fclose(fid);
         end

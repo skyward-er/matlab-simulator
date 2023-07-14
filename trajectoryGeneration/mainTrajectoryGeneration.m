@@ -157,7 +157,7 @@ trajectories_saving_MTR{j} = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref', 
 end
 %% SAVING
 %  settings.save = false;
-% load test
+load test
 if ~settings.save
     warning('save is set to false')
 end
@@ -166,8 +166,11 @@ if settings.save
     save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
 end
 
-save traj0perc.mat trajectories_saving
-
+if settings.CD_correction_ref == 1
+    save traj0perc.mat trajectories_saving
+elseif settings.CD_correction_ref == 0.75
+    save traj-25perc.mat trajectories_saving
+end
 %% PLOT
 if settings.plots
     tg_plots
@@ -199,10 +202,10 @@ figure('Position',[100,100,600,600])
 hold on;
 grid on;
 plot(datcom_0_open.Z_ref,datcom_0_open.VZ_ref,'k','DisplayName','datcom')
-plot(datcom_0_closed.Z_ref,datcom_0_closed.VZ_ref,'k')
+plot(datcom_0_closed.Z_ref,datcom_0_closed.VZ_ref,'k',"HandleVisibility","off")
 
-plot(datcom_25_open.Z_ref,datcom_25_open.VZ_ref,'r','DisplayName','datcom-25')
-plot(datcom_25_closed.Z_ref,datcom_25_closed.VZ_ref,'r')
+plot(datcom_25_open.Z_ref,datcom_25_open.VZ_ref,'b','DisplayName','datcom-25')
+plot(datcom_25_closed.Z_ref,datcom_25_closed.VZ_ref,'b',"HandleVisibility","off")
 
 legend
 
