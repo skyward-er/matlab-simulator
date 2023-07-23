@@ -29,7 +29,7 @@ if isfield(sensorData.barometer,'time')
     sp.h_baro  = zeros(1,length(sensorData.barometer.time));
     sp.t_baro  = sensorData.barometer.time';
 
-    for ii=1:length(sensorData.barometer.time)
+    for ii=1:length(sensorData.barometer.time) % mettere modulare rispetto alla missione
         sp.pn(ii)        =      s.MS580301BA01.sens(sensorData.barometer.measures(ii)/100,...
             sensorData.barometer.temperature(ii) - 273.15);
         sp.pn(ii)        =      sp.pn(ii)*100;
@@ -40,6 +40,7 @@ if isfield(sensorData.barometer,'time')
     c.time_baro(c.np_old:c.np_old + size(sp.pn,2) - 1)    =  sp.t_baro(end);
     c.np_old = c.np_old + size(sp.pn,2);
 end
+
 %% IMU Acquisition loop
 if isfield(sensorData.accelerometer,'time')
     sp.accel   = zeros(length(sensorData.accelerometer.time),3);

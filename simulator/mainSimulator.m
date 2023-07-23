@@ -53,9 +53,9 @@ config;
 % values for each simulation, so it has the same atmospheric conditions
 % each time
 
-% if settings.tuning
+if settings.tuning
   	rng('default')
-% end 
+end 
 
 %% SET SPECIFIC PARAMETERS FOR A PRE LAUNCH SIMULATION
 

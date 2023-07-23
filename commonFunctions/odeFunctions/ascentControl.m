@@ -388,7 +388,8 @@ else
                 ap_ref = ap_ref_vec(2);
             end
         else 
-            ap_ref = ap_ref_vec; % don't delete this unless you change how the recall ode works.
+            [~,ind_arb] = min(settings.parout.partial_time-t);
+            ap_ref = ap_ref_vec(ind_arb); % don't delete this unless you change how the recall ode works.
         end
         
         dap = (ap_ref-ap)/settings.servo.tau;
@@ -456,7 +457,8 @@ if nargout == 2
     
     parout.accelerations.body_acc = [du, dv, dw];
     parout.accelerations.ang_acc = [dp, dq, dr];
-    
+    F_acc = [-X+T, Y, -Z]';
+    parout.accelerometer.body_acc = F_acc/m;
     parout.coeff.CA = CA;
     parout.coeff.CYB = CYB;
     parout.coeff.CNA = CNA;

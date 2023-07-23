@@ -67,13 +67,24 @@ if settings.electronics % global variables slow down a bit the comunication over
 end
 
 %% ode states initialization ( initial conditions )
-% Attitude
-Q0 = angle2quat(settings.PHI, settings.OMEGA, 0*pi/180, 'ZYX')';            % Attitude initial condition
+            % Attitude initial condition
 
-% State
-X0 = [0; 0; 0];                                                             % Position initial condition
-V0 = [0; 0; 0];                                                             % Velocity initial condition
-W0 = [0; 0; 0];                                                             % Angular speed initial condition
+
+if settings.scenario ~= "descent"
+    % Attitude
+    Q0 = angle2quat(settings.PHI, settings.OMEGA, 0*pi/180, 'ZYX')';
+    % State
+    X0 = [0; 0; 0];                                                             % Position initial condition
+    V0 = [0; 0; 0];                                                             % Velocity initial condition
+    W0 = [0; 0; 0];                                                             % Angular speed initial condition
+else
+    % Attitude
+    Q0 = angle2quat(settings.PHI, 0, 0, 'ZYX')';
+    % State   
+    X0 = [0; 0; -settings.z_final];                                      % Position initial condition
+    V0 = [settings.Vx_final; settings.Vy_final; settings.Vz_final];                                                             % Velocity initial condition
+    W0 = [0; 0; 0];                                                             % Angular speed initial condition
+end
 ap0 = 0;                                                                    % Control servo angle initial condition
 
 %%% TEMPORANEO
@@ -127,10 +138,10 @@ end
 % Salvo input/output per testare algoritmo cpp
 contSettings.indice_test = 1; % serve?
 
-while settings.flagStopIntegration && n_old < nmax                                                                   % Starts CHRONO
+while settings.flagStopIntegration && n_old < nmax                          % Starts CHRONO
     iTimes = iTimes + 1;                                                    % Advance the steps
 
-    lastFlagAscent = settings.flagAscent;                                            % Saves the value of the flagAscent to recall it later
+    lastFlagAscent = settings.flagAscent;                                   % Saves the last value of the flagAscent to recall it later
 
     if settings.launchWindow
         if not(settings.lastLaunchFlag) && launchFlag
@@ -158,14 +169,14 @@ while settings.flagStopIntegration && n_old < nmax                              
         flagFlight = true;
     end
 
-    if sensorData.kalman.vz(end) >= -1e-3 && launchFlag
-        settings.flagAscent = true;                                                  % Ascent
+    if sensorData.kalman.vz(end) >= -1e-3 && launchFlag && not(settings.scenario == "descent")
+        settings.flagAscent = true;                                         % Ascent
     else
-        settings.flagAscent = false;                                                 % Descent
+        settings.flagAscent = false;                                        % Descent
     end
 
     if not(settings.flagAscent) && launchFlag
-        if sensorData.kalman.z >= settings.para(1).z_cut
+        if sensorData.kalman.z >= settings.para(1).z_cut + settings.z0
             flagPara1 = true;
             flagPara2 = false;                                              % parafoil drogue
         else
@@ -182,10 +193,13 @@ while settings.flagStopIntegration && n_old < nmax                              
 
         if settings.ballisticFligth
             [Tf, Yf] = ode113(@ascentControl, [t0, t1], Y0, [], settings, ap_ref, t_change_ref, tLaunch);
+            parout = recallOdeFcn2(@ascentControl, Tf, Yf, settings, Yf(:,17), settings.servo.delay,tLaunch,'apVec');
+            para = NaN;
         else
             if settings.flagAscent
                 [Tf, Yf] = ode113(@ascentControl, [t0, t1], Y0, [], settings,  ap_ref, t_change_ref, tLaunch);
-
+                parout = recallOdeFcn2(@ascentControl, Tf, Yf, settings, Yf(:,17), settings.servo.delay,tLaunch,'apVec');
+                para = NaN;
             else
                 if flagPara1
                     para = 1;
@@ -196,15 +210,24 @@ while settings.flagStopIntegration && n_old < nmax                              
 
                 Y0 = Y0(1:6);
                 [Tf, Yd] = ode45(@descentParachute, [t0, t1], Y0, [], settings, uw, vw, ww, para); % ..., para, uncert);
+                parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para);
                 [nd, ~] = size(Yd);
-                Yf = [Yd, zeros(nd, 7), settings.Ixxe*ones(nd, 1), ...
+                Yf = [Yd, zeros(nd, 6), ones(nd,1), settings.Ixxe*ones(nd, 1), ...
                     settings.Iyye*ones(nd, 1), settings.Iyye*ones(nd, 1),zeros(nd,1)];
+                
             end
         end
     else
-        Tf = [t0, t1];
-        Yf = [initialCond'; initialCond'];
+        Tf = [t0, t1]';
+        Yf = [initialCond'; initialCond']; % check how to fix this
+  
     end
+    
+    % recall some useful parameters
+    settings.parout.partial_time = Tf;
+    settings.parout.wind_NED = parout.wind.NED_wind';
+    settings.parout.wind_body = parout.wind.body_wind';
+    settings.parout.acc = parout.accelerometer.body_acc';
 
     ext = extension_From_Angle(Yf(end,17),settings); % bug fix, check why this happens because sometimes happens that the integration returns a value slightly larger than the max value of extension for airbrakes and this mess things up
     if ext > settings.arb.maxExt
@@ -217,7 +240,7 @@ while settings.flagStopIntegration && n_old < nmax                              
 
     % fix on signal frequencies: this interpolates the values if the speed
     % of the sensor is lower than the control action (or whatever)
-    [sensorData] = manageSignalFrequencies(magneticFieldApprox, settings.flagAscent, settings,sensorData, Yf, Tf, ext, uw, vw, ww);
+    [sensorData] = manageSignalFrequencies(magneticFieldApprox, settings.flagAscent, settings,sensorData, Yf, Tf, ext, uw, vw, ww, para);
     [~, ~, p, ~] = atmosisa(-Yf(:,3) + settings.z0) ;
 
     % simulate sensor acquisition
@@ -245,18 +268,18 @@ while settings.flagStopIntegration && n_old < nmax                              
     if settings.flagAscent || (not(settings.flagAscent) && settings.ballisticFligth)
         Q    =   Yf(end, 10:13);
         vels =   quatrotate(quatconj(Q), Yf(:, 4:6));
-        sensorData.kalman.vz   = - vels(end,3);   % down
-        sensorData.kalman.vx=   vels(end,2);   % north
-        sensorData.kalman.vy =   vels(end,1);   % east
+        sensorData.kalman.vz = - vels(end,3);   % down
+        sensorData.kalman.vx =  vels(end,2);   % north
+        sensorData.kalman.vy =  vels(end,1);   % east
     else
-        sensorData.kalman.vz   = - Yf(end, 6); % still not NAS state here
+        sensorData.kalman.vz = - Yf(end, 6); % still not NAS state here
         sensorData.kalman.vx = Yf(end, 5);
         sensorData.kalman.vy = Yf(end, 4);
     end
 
 
-    if lastFlagAscent && not(settings.flagAscent)
-        Y0 = [Yf(end, 1:3), vels(end,:), Yf(end, 7:end)];
+    if lastFlagAscent && not(settings.flagAscent) && not(settings.scenario == "ballistic")
+        Y0 = [Yf(end, 1:3), vels(end,:), Yf(end, 7:end)]; % non sono sicuro del senso di questa riga
     else
         Y0 = Yf(end, :);
     end
@@ -314,7 +337,7 @@ while settings.flagStopIntegration && n_old < nmax                              
     %% display step state
 
     if not(settings.montecarlo)
-         disp("z: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,end));
+        disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,end));
     end
 
 end
@@ -344,10 +367,11 @@ for k = 1:size(Yf,1)
 end
 %% RETRIVE PARAMETERS FROM THE ODE (RECALL ODE)
 
-if ~settings.electronics && ~settings.montecarlo
-    dataBallisticFlight = recallOdeFcn2(@ascentControl, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, c.ap_tot, settings.servo.delay,tLaunch,'apVec');
+if ~settings.electronics && ~settings.montecarlo && not(settings.scenario == "descent")
+    settings.wind.output_time = Tf;
+    dataAscent = recallOdeFcn2(@ascentControl, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, c.ap_tot, settings.servo.delay,tLaunch,'apVec');
 else
-    dataBallisticFlight = [];
+    dataAscent = [];
 end
 
 %% extract parameters:
@@ -371,7 +395,7 @@ struct_out.apogee_idx = idx_apo;
 struct_out.apogee_coordinates = [Yf_tot(idx_apo,1),Yf_tot(idx_apo,2),-Yf_tot(idx_apo,3)];
 struct_out.apogee_speed = [Yf_tot(idx_apo,4),Yf_tot(idx_apo,5),-Yf_tot(idx_apo,6)];
 struct_out.apogee_radius = sqrt(struct_out.apogee_coordinates(1)^2+struct_out.apogee_coordinates(2)^2);
-struct_out.recall = dataBallisticFlight;
+struct_out.recall = dataAscent;
 struct_out.NAS = x_est_tot;
 struct_out.ADA = [xp_ada_tot xv_ada_tot];
 struct_out.cp = c.cp_tot; 

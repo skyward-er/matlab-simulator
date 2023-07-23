@@ -17,6 +17,11 @@ if iTimes>3
     end
 end
 
+%% Sensor Fault Detection
+
+
+
+
 %% ADA
 
 if settings.flagADA && settings.dataNoise && length(sensorData.barometer.time) > 1 ...
