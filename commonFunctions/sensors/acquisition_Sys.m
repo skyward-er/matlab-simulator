@@ -122,7 +122,7 @@ if isfield(sensorData.pitot,'time')
 end
 
 %% Chamber Pressure acquisition loop
-
+if contains(settings.mission,'_2023')
     sp.cp      = zeros(1,length(sensorData.chamberPressure.time));
     sp.t_cp    = sensorData.chamberPressure.time;
 
@@ -132,4 +132,5 @@ end
      c.cp_tot(c.ncp_old:c.ncp_old + size(sp.cp,2) - 1,1)    = sp.cp(1:end);
      c.time_cp(c.ncp_old:c.ncp_old + size(sp.cp,2) - 1)    =  sp.t_cp;
      c.ncp_old = c.ncp_old + size(sp.cp,2);
+end
 end

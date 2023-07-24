@@ -40,9 +40,10 @@ sensorData.barometer.t0 = initSensorT0...
 sensorData.pitot.t0 = initSensorT0...
     (control_freq,settings.frequencies.pitotFrequency);
 
+if contains(settings.mission,'_2023')
 sensorData.chamberPressure.t0 = initSensorT0...
     (control_freq,settings.frequencies.chamberPressureFrequency);
-
+end
 
 sensorData.barometer.time = [];
 sensorData.barometer.z = [];

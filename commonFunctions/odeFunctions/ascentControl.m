@@ -271,7 +271,7 @@ if settings.HREmot
 
 else
     [coeffsValues, angle0] = interpCoeffs(t, alpha, M, beta, absoluteAltitude,...
-        c, settings);
+        round((ap/settings.servo.maxAngle)*2+1), settings);
 end
 % Retrieve Coefficients
 
@@ -476,10 +476,11 @@ if nargout == 2
     parout.coeff.XCPlon = XCPlon;
     parout.coeff.XCPlat = XCPlat;
         
+    if settings.HREmot
     sgn = sign(dot(cross(Myz, Fyz), [1 0 0])); 
     XCPtot = (sgn * norm(Myz)/norm(Fyz));
     err = 100*abs((acosd(dot(Fyz/norm(Fyz), Myz/norm(Myz))) - 90)/90);
     XCPtot = XCPtot - polyval(settings.regPoli, err); 
     parout.coeff.XCPtot = XCPtot; 
-
+    end
 end

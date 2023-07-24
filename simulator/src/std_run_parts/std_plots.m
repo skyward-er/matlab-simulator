@@ -159,8 +159,9 @@ plot( structIn.t_ada_tot,  structIn.ADA(:,5),'DisplayName','$ADA_{vz}$')
 plot( structIn.t,  -structIn.Y(:,3),'DisplayName','True z')
 plot( structIn.t,  -structIn.Y(:,6),'DisplayName','True Vz')
 legend;
+title('ADA vs trajectory')
 
-figure
+figure('Position',[100,100,600,400])
 hold on
 plot( structIn.t_ada_tot,  structIn.ADA(:,2),'DisplayName','ADA dp')
-
+title('ADA pressure derivative')

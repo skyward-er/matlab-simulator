@@ -87,14 +87,18 @@ else
 end
 ap0 = 0;                                                                    % Control servo angle initial condition
 
-%%% TEMPORANEO
+%%% TEMPORANEO i dati non sono standardizzati a causa del motore ibrido
+%%% rispetto agli anni precedenti
+if contains(settings.mission,'_2023')
     settings.Ixxf = settings.Ixx(1);
     settings.Iyyf = settings.Iyy(1);
     settings.Izzf = settings.Izz(1);
     settings.Ixxe = settings.Ixx(end);
     settings.Iyye = settings.Iyy(end);
     settings.Izze = settings.Izz(end);
-    %%%
+end
+%%%
+
 initialCond = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf; ap0;];
 Y0 = initialCond;
 
@@ -163,7 +167,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         flagAeroBrakes = false;
     end
 
-    if sensorData.kalman.z < 0 || not(launchFlag)
+    if sensorData.kalman.z < settings.z0-1 || not(launchFlag)
         flagFlight = false;
     else
         flagFlight = true;
@@ -398,16 +402,19 @@ struct_out.apogee_radius = sqrt(struct_out.apogee_coordinates(1)^2+struct_out.ap
 struct_out.recall = dataAscent;
 struct_out.NAS = x_est_tot;
 struct_out.ADA = [xp_ada_tot xv_ada_tot];
-struct_out.cp = c.cp_tot; 
-struct_out.t_shutdown = settings.timeEngineCut;
+struct_out.cp = c.cp_tot;
+if settings.HREmot
+    struct_out.t_shutdown = settings.timeEngineCut;
+    if strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')
+        struct_out.predicted_apogee = predicted_apogee;
+        struct_out.estimated_mass = estimated_mass;
+        struct_out.estimated_pressure = estimated_pressure;
+    end
+end
 struct_out.quat = Yf(:,10:13);
 struct_out.contSettings = contSettings;
 
-if strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')
-    struct_out.predicted_apogee = predicted_apogee;
-    struct_out.estimated_mass = estimated_mass;
-    struct_out.estimated_pressure = estimated_pressure;
-end
+
 
 if exist('t_airbrakes','var')
     struct_out.ARB_allowanceTime = t_airbrakes;
