@@ -360,74 +360,76 @@ end
 
 
 %% barometer
-if freq.barometerFrequency > freq.controlFrequency
-    dt = 1/freq.barometerFrequency;
-    sensorData.barometer.time = sensorData.barometer.t0:dt:T(end);
-    sensorData.barometer.t0 = sensorData.barometer.time(end);
-    N = length(sensorData.barometer.time);
-    sensorData.barometer.time =  sensorData.barometer.time';
-    for i = 1:N
-        iTimeBarometer = sensorData.barometer.time(i);
-        if all(iTimeBarometer ~= T)
-            [index0] = find(iTimeBarometer < T);
-            index1 = index0(1);
-            index0 = index1 - 1;
-            Y1 = -Y(index1, 3);
-            Y0 = -Y(index0, 3);
-            T1 = T(index1);
-            T0 = T(index0);
-            % linear interpolation between the 2 states
-            m = (Y1 - Y0)./(T1 - T0);
-            q = Y1 - m*T1;
-            z(i) = m*iTimeBarometer + q;
-
-        else
-            z(i) = -Y(iTimeBarometer == T, 3);
+for i_baro = 1:length(sensorData.barometer_sens)
+    if freq.barometerFrequency > freq.controlFrequency
+        dt = 1/freq.barometerFrequency;
+        sensorData.barometer_sens{i_baro}.time = sensorData.barometer_sens{i_baro}.t0:dt:T(end);
+        sensorData.barometer_sens{i_baro}.t0 = sensorData.barometer_sens{i_baro}.time(end);
+        N = length(sensorData.barometer_sens{i_baro}.time);
+        sensorData.barometer_sens{i_baro}.time =  sensorData.barometer_sens{i_baro}.time';
+        for i = 1:N
+            iTimeBarometer = sensorData.barometer_sens{i_baro}.time(i);
+            if all(iTimeBarometer ~= T)
+                [index0] = find(iTimeBarometer < T);
+                index1 = index0(1);
+                index0 = index1 - 1;
+                Y1 = -Y(index1, 3);
+                Y0 = -Y(index0, 3);
+                T1 = T(index1);
+                T0 = T(index0);
+                % linear interpolation between the 2 states
+                m = (Y1 - Y0)./(T1 - T0);
+                q = Y1 - m*T1;
+                z(i) = m*iTimeBarometer + q;
+    
+            else
+                z(i) = -Y(iTimeBarometer == T, 3);
+            end
+            sensorData.barometer_sens{i_baro}.z = [sensorData.barometer_sens{i_baro}.z; z(i)];
         end
-        sensorData.barometer.z = [sensorData.barometer.z; z(i)];
-    end
-     elseif  freq.barometerFrequency == freq.controlFrequency
-    iTimeBarometer = T(end);
-     sensorData.barometer.time = [sensorData.barometer.time; iTimeBarometer];
-    z = -Y(end, 3);
-      sensorData.barometer.z = [sensorData.barometer.z; z];
-      sensorData.barometer.t0 = T(end);
-else
-     for i = 1:length(T)
-        if T(i) - sensorData.barometer.t0 > 1/freq.barometerFrequency
-            iTimeBarometer = sensorData.barometer.t0 + 1/freq.barometerFrequency;
-            Y1 = -Y(i, 3);
-            Y0 = -Y(i-1,3);
-            T1 = T(i);
-            T0 = T(i-1);
-            % linear interpolation between the 2 states
-            m = (Y1 - Y0)./(T1 - T0);
-            q = Y1 - m*T1;
-            z = m*iTimeBarometer + q;
-            sensorData.barometer.z = [sensorData.barometer.z; z];
-            sensorData.barometer.t0 = iTimeBarometer;
-             sensorData.barometer.time = [sensorData.barometer.time; iTimeBarometer];
-        elseif  T(i) - sensorData.barometer.t0 == 1/freq.barometerFrequency
-            iTimeBarometer = sensorData.barometer.t0 + 1/freq.barometerFrequency;
-            z = -Y(i, 3);
-            sensorData.barometer.t0 = iTimeBarometer;
-            sensorData.barometer.time = [sensorData.barometer.time; iTimeBarometer];
-            sensorData.barometer.z = [sensorData.barometer.z; z];
+         elseif  freq.barometerFrequency == freq.controlFrequency
+        iTimeBarometer = T(end);
+         sensorData.barometer_sens{i_baro}.time = [sensorData.barometer_sens{i_baro}.time; iTimeBarometer];
+        z = -Y(end, 3);
+          sensorData.barometer_sens{i_baro}.z = [sensorData.barometer_sens{i_baro}.z; z];
+          sensorData.barometer_sens{i_baro}.t0 = T(end);
+    else
+         for i = 1:length(T)
+            if T(i) - sensorData.barometer_sens{i_baro}.t0 > 1/freq.barometerFrequency
+                iTimeBarometer = sensorData.barometer_sens{i_baro}.t0 + 1/freq.barometerFrequency;
+                Y1 = -Y(i, 3);
+                Y0 = -Y(i-1,3);
+                T1 = T(i);
+                T0 = T(i-1);
+                % linear interpolation between the 2 states
+                m = (Y1 - Y0)./(T1 - T0);
+                q = Y1 - m*T1;
+                z = m*iTimeBarometer + q;
+                sensorData.barometer_sens{i_baro}.z = [sensorData.barometer_sens{i_baro}.z; z];
+                sensorData.barometer_sens{i_baro}.t0 = iTimeBarometer;
+                 sensorData.barometer_sens{i_baro}.time = [sensorData.barometer_sens{i_baro}.time; iTimeBarometer];
+            elseif  T(i) - sensorData.barometer_sens{i_baro}.t0 == 1/freq.barometerFrequency
+                iTimeBarometer = sensorData.barometer_sens{i_baro}.t0 + 1/freq.barometerFrequency;
+                z = -Y(i, 3);
+                sensorData.barometer_sens{i_baro}.t0 = iTimeBarometer;
+                sensorData.barometer_sens{i_baro}.time = [sensorData.barometer_sens{i_baro}.time; iTimeBarometer];
+                sensorData.barometer_sens{i_baro}.z = [sensorData.barometer_sens{i_baro}.z; z];
+            end
+    
         end
-
+    
     end
-
+    
+    if length(sensorData.barometer_sens{i_baro}.time)>=2
+        sensorData.barometer_sens{i_baro}.time = sensorData.barometer_sens{i_baro}.time(end-1:end);
+        sensorData.barometer_sens{i_baro}.z = sensorData.barometer_sens{i_baro}.z(end-1:end);
+        z = sensorData.barometer_sens{i_baro}.z ;
+    end
+    
+    [Temp, ~, P, ~] = atmosisa(z+settings.z0);
+    sensorData.barometer_sens{i_baro}.measures = P;
+    sensorData.barometer_sens{i_baro}.temperature = Temp;
 end
-
-if length(sensorData.barometer.time)>=2
-    sensorData.barometer.time = sensorData.barometer.time(end-1:end);
-    sensorData.barometer.z = sensorData.barometer.z(end-1:end);
-    z = sensorData.barometer.z ;
-end
-
-[Temp, ~, P, ~] = atmosisa(z+settings.z0);
-sensorData.barometer.measures = P;
-sensorData.barometer.temperature = Temp;
 %% pitot
 if isfield(freq, 'pitotFrequency')
     if freq.pitotFrequency > freq.controlFrequency

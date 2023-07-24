@@ -28,7 +28,12 @@ sensorData.magnetometer.t0 = initSensorT0...
 sensorData.gps.t0 = initSensorT0...
     (control_freq,settings.frequencies.gpsFrequency);
 
-sensorData.barometer.t0 = initSensorT0...
+% triplicate sensors for sensor fault detection testing
+sensorData.barometer_sens{1}.t0 = initSensorT0...
+    (control_freq,settings.frequencies.barometerFrequency);
+sensorData.barometer_sens{2}.t0 = initSensorT0...
+    (control_freq,settings.frequencies.barometerFrequency);
+sensorData.barometer_sens{3}.t0 = initSensorT0...
     (control_freq,settings.frequencies.barometerFrequency);
 
 sensorData.pitot.t0 = initSensorT0...
@@ -38,9 +43,23 @@ sensorData.chamberPressure.t0 = initSensorT0...
     (control_freq,settings.frequencies.chamberPressureFrequency);
 
 
+sensorData.barometer_sens{1}.time = [];
+sensorData.barometer_sens{1}.z = [];
+sensorData.barometer_sens{2}.time = [];
+sensorData.barometer_sens{2}.z = [];
+sensorData.barometer_sens{3}.time = [];
+sensorData.barometer_sens{3}.z = [];
+
+sensorData.barometer.t0 = sensorData.barometer_sens{1}.t0;
 sensorData.barometer.time = [];
 sensorData.barometer.z = [];
+
+
+
 settings.baro_old = 0;
+
+
+
 %% while cycle max iterations
 nmax        =       settings.nmax;                                                 % Max iteration number - stops the integration if reached
 

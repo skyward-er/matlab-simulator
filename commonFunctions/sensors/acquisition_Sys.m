@@ -24,22 +24,42 @@ OUTPUT:
 % Revision date: 18/03/2021
 
 %% Baro Acquisition loop
-if isfield(sensorData.barometer,'time')
-    sp.pn      = zeros(1,length(sensorData.barometer.time));
-    sp.h_baro  = zeros(1,length(sensorData.barometer.time));
-    sp.t_baro  = sensorData.barometer.time';
+for i_baro = 1:2
+if isfield(sensorData.barometer_sens{i_baro},'time')
+    sp.pn_sens{i_baro}      = zeros(1,length(sensorData.barometer_sens{i_baro}.time));
+    sp.h_baro_sens{i_baro}  = zeros(1,length(sensorData.barometer_sens{i_baro}.time));
+    sp.t_baro_sens{i_baro}  = sensorData.barometer_sens{i_baro}.time';
 
-    for ii=1:length(sensorData.barometer.time)
-        sp.pn(ii)        =      s.MS580301BA01.sens(sensorData.barometer.measures(ii)/100,...
-            sensorData.barometer.temperature(ii) - 273.15);
-        sp.pn(ii)        =      sp.pn(ii)*100;
-        sp.h_baro(ii)    =     -atmospalt(sp.pn(ii),'None');
+    for ii=1:length(sensorData.barometer_sens{i_baro}.time)
+        sp.pn_sens{i_baro}(ii)        =      s.MS580301BA01.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,...
+            sensorData.barometer_sens{i_baro}.temperature(ii) - 273.15);
+        sp.pn_sens{i_baro}(ii)        =      sp.pn_sens{i_baro}(ii)*100;
+        sp.h_baro_sens{i_baro}(ii)    =     -atmospalt(sp.pn_sens{i_baro}(ii),'None');
     end
-    c.pn_tot(c.np_old:c.np_old + size(sp.pn,2) - 1,1)    = sp.pn(1:end);
-    c.hb_tot(c.np_old:c.np_old + size(sp.pn,2) - 1,1)    = sp.h_baro(1:end);
-    c.time_baro(c.np_old:c.np_old + size(sp.pn,2) - 1)    =  sp.t_baro(end);
-    c.np_old = c.np_old + size(sp.pn,2);
+    c.pn_tot{i_baro}(c.np_old{i_baro}:c.np_old{i_baro} + size(sp.pn_sens{i_baro} ,2) - 1,1)    = sp.pn_sens{i_baro}(1:end);
+    c.hb_tot{i_baro}(c.np_old{i_baro}:c.np_old{i_baro} + size(sp.pn_sens{i_baro},2) - 1,1)    = sp.h_baro_sens{i_baro}(1:end);
+    c.time_baro{i_baro}(c.np_old{i_baro}:c.np_old{i_baro} + size(sp.pn_sens{i_baro},2) - 1)    =  sp.t_baro_sens{i_baro}(end);
+    c.np_old{i_baro} = c.np_old{i_baro} + size(sp.pn_sens{i_baro},2);
 end
+if isfield(sensorData.barometer_sens{3},'time')
+    sp.pn_sens{3}      = zeros(1,length(sensorData.barometer_sens{3}.time));
+    sp.h_baro_sens{3}  = zeros(1,length(sensorData.barometer_sens{3}.time));
+    sp.t_baro_sens{3}  = sensorData.barometer_sens{3}.time';
+
+    for ii=1:length(sensorData.barometer_sens{3}.time)
+        sp.pn_sens{3}(ii)        =      s.HSCMRNN015PAAA5.sens(sensorData.barometer_sens{3}.measures(ii)/100,...
+            sensorData.barometer_sens{3}.temperature(ii) - 273.15);
+        sp.pn_sens{3}(ii)        =      sp.pn_sens{3}(ii)*100;
+        sp.h_baro_sens{3}(ii)    =     -atmospalt(sp.pn_sens{3}(ii),'None');
+    end
+    c.pn_tot{3}(c.np_old{3}:c.np_old{3} + size(sp.pn_sens{3} ,2) - 1,1)    = sp.pn_sens{3}(1:end);
+    c.hb_tot{3}(c.np_old{3}:c.np_old{3} + size(sp.pn_sens{3},2) - 1,1)    = sp.h_baro_sens{3}(1:end);
+    c.time_baro{3}(c.np_old{3}:c.np_old{3} + size(sp.pn_sens{3},2) - 1)    =  sp.t_baro_sens{3}(end);
+    c.np_old{3} = c.np_old{3} + size(sp.pn_sens{3},2);
+end
+
+
+
 %% IMU Acquisition loop
 if isfield(sensorData.accelerometer,'time')
     sp.accel   = zeros(length(sensorData.accelerometer.time),3);
