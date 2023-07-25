@@ -413,7 +413,7 @@ if settings.HREmot
 end
 struct_out.quat = Yf(:,10:13);
 struct_out.contSettings = contSettings;
-
+struct_out.sp = sp;
 
 
 if exist('t_airbrakes','var')
