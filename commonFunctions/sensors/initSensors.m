@@ -31,7 +31,7 @@ s.HSCMRNN015PAAA5.maxMeasurementRange = 1034.21; % mbar ( 15psi)
 s.HSCMRNN015PAAA5.minMeasurementRange = 0;
 s.HSCMRNN015PAAA5.bit = 12; 
 s.HSCMRNN015PAAA5.resolution = (s.HSCMRNN015PAAA5.maxMeasurementRange -s.HSCMRNN015PAAA5.minMeasurementRange)/(2^s.HSCMRNN015PAAA5.bit);
-s.HSCMRNN015PAAA5.noiseVariance = 1;  % 1 percent
+s.HSCMRNN015PAAA5.noiseVariance = 1; 
 s.HSCMRNN015PAAA5.error2dOffset = ep_data; % I will leave this like this because I don't know how this works
 
 % initial chamber pressure sensor NAT825281

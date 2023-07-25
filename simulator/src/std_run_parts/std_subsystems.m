@@ -18,10 +18,19 @@ if iTimes>3
 end
 
 %% Sensor fault detection
-% algoritmo della sensor fault detection ( per come lo immagino
-% l'implementazione della fault va qua intorno)
 
-[sensorData,sp] = run_SensorFaultDetection_SVM(sensorData,sp,settings,contSettings);
+% simulation of the faults
+
+% sp.pn_sens{1} = 1;
+
+% sensor fault detection algorithm
+Nsensors = [1,2,3];
+goodSensors = Nsensors(not(settings.faulty_sensors));
+for i = goodSensors
+    chunk{i}(1,1:end-length(sp.pn_sens{i})) = chunk{i}(1+length(sp.pn_sens{i}):end);
+    chunk{i}(1,end-length(sp.pn_sens{i})+1:end) = sp.pn_sens{i};
+end
+[sensorData,sp,chunk,settings.faulty_sensors] = run_SensorFaultDetection_SVM(sensorData,sp,chunk,settings,t0);
 
 %% ADA
 

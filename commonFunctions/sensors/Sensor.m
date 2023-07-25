@@ -123,7 +123,8 @@ classdef Sensor < handle
             %  outputArg: sensor data with white noise
             
             if (~isempty(obj.noiseVariance))
-                inputArg=inputArg+ones(size(inputArg)).*sqrt(obj.noiseVariance).*randn(1,1);
+%                 inputArg=inputArg+ones(size(inputArg)).*sqrt(obj.noiseVariance).*randn(1,1);,
+                inputArg=inputArg+sqrt(obj.noiseVariance).*randn(size(inputArg));
             end
             outputArg = inputArg;
         end

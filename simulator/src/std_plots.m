@@ -63,7 +63,7 @@ xlabel('x [m]');
 ylabel('y [m]');
 zlabel('z [m]');
 title('Trajectory');
-
+axis equal
 legend('Trajectory','Airbrake deployment','Apogee')
 if settings.flagExport == true
     exportgraphics(figures.trajectory,'report_images\src_trajectory.pdf')

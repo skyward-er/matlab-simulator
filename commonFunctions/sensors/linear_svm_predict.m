@@ -1,4 +1,17 @@
 function [classification] = linear_svm_predict(Mdl, x)
+
+%{
+HELP:
+classification function for sensor fault detection
+
+INPUT: 
+- Mdl =  model of the support vector machine
+- x = features
+
+OUTPUT: 
+- classification = true or false, if true then it's faulty
+
+%}
     scale = Mdl.Scale;
     beta = Mdl.Beta;
     bias = Mdl.Bias;
@@ -12,8 +25,8 @@ function [classification] = linear_svm_predict(Mdl, x)
     score = -(((x/scale))*beta + bias);
     %labeling based on the sign of the score 
     if(score < 0 || isnan(score))
-        classification = 1;
+        classification = true;
     else
-        classification = 0;
+        classification = false;
     end
 end

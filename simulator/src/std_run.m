@@ -246,13 +246,13 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     % of the sensor is lower than the control action (or whatever)
     [sensorData] = manageSignalFrequencies(magneticFieldApprox, settings.flagAscent, settings,sensorData, Yf, Tf, ext, uw, vw, ww, para);
     [~, ~, p, ~] = atmosisa(-Yf(:,3) + settings.z0) ;
-
     % simulate sensor acquisition
     if settings.dataNoise
         [sp, c] = acquisition_Sys(sensorData, s, c, settings);
     end
 
     % SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU
+    
     if not(settings.electronics)
 
         std_subsystems;
@@ -318,7 +318,12 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     c.p_tot(n_old:n_old+n-1, 1)  =  p(1:end, 1);
     c.ap_tot(n_old:n_old+n-1) = Yf(1:end,17);
     c.v_ned_tot(n_old:n_old+n-1,:) = v_ned;
-
+    barometer_measure{1} = [barometer_measure{1}, sp.pn_sens{1}(end)];
+    barometer_measure{2} = [barometer_measure{2}, sp.pn_sens{2}(end)];
+    barometer_measure{3} = [barometer_measure{3}, sp.pn_sens{3}(end)];
+    barometer_time = [barometer_time t1];
+    sfd_mean_p = [sfd_mean_p sp.pn(end)];
+    faults = [faults; settings.faulty_sensors];
     n_old = n_old + n -1;
 
     %% flags
@@ -413,9 +418,10 @@ if settings.HREmot
 end
 struct_out.quat = Yf(:,10:13);
 struct_out.contSettings = contSettings;
-struct_out.sp = sp;
-
-
+struct_out.barometer_measures = barometer_measure;
+struct_out.barometer_times = barometer_time;
+struct_out.sfd_mean_p = sfd_mean_p;
+struct_out.faults = faults;
 if exist('t_airbrakes','var')
     struct_out.ARB_allowanceTime = t_airbrakes;
     struct_out.ARB_allowanceIdx = idx_airbrakes;
