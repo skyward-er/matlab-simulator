@@ -86,23 +86,10 @@ else
     Izze = settings.Izze;        % [kg*m^2] Inertia to z-axis
 end
 
-%% QUATERION ATTITUDE
-Q = [q0 q1 q2 q3];
-Q = Q/norm(Q);
 
 %% ADDING WIND (supposed to be added in NED axes);
-if settings.wind.model
-
-    [uw, vw, ww] = windMatlabGenerator(settings, z, t);
-
-elseif settings.wind.input
-    [uw, vw, ww] = windInputGenerator(settings, z, uncert);
-% elseif  settings.wind.variable
-%     [uw, vw, ww] = windVariableGenerator(t, z, settings.wind);
-end
-
-dcm = quatToDcm(Q);
-wind = dcm*[uw; vw; ww];
+[~,ind_wind] = min(settings.parout.wind_time-t);
+wind = settings.wind.output_body(:,ind_wind);
 
 % Relative velocities (plus wind);
 ur = u - wind(1);

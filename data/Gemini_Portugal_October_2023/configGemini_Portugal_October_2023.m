@@ -17,6 +17,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 %}
 
 settings.launchDate = [2023 10 13];
+settings.HREmot = true;
 
 %% TRAJECTORY GENERATION PARAMETERS
 settings.Vz_final = 0;

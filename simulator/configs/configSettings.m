@@ -25,7 +25,7 @@ rmfield(settings, fieldsToRemove_settings);
 % % % 
 
 % % % rmfield(contSettings, fieldsToRemove_contSettings);
-
+settings.scenario = conf.scenario;
 %% clear useless variables
 clear GeometryE GeometryF...
     fun...

@@ -1,4 +1,4 @@
-function [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings,sensorData, Y, T, ext, uw, vw, ww)
+function [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings,sensorData, Y, T, ext, uw, vw, ww,para)
 
 %{
         AGGIUNGERE sensorData TRA GLI INPUT ANCHE NEL MAIN
@@ -69,14 +69,21 @@ if freq.accelerometerFrequency > freq.controlFrequency
             Yinterp = Y(iTimeAcc == T, :);
 
         end
-        sensorData.accelerometer.measures(i, :) = accelerometerAscent...
-            (iTimeAcc, Yinterp, settings);
+        if size(settings.parout.partial_time,1)~=size(settings.parout.acc,1)
+            nn = min(size(settings.parout.partial_time,1),size(settings.parout.acc,1));
+            sensorData.accelerometer.measures(i, :) = interp1(settings.parout.partial_time(1:nn,:),settings.parout.acc(1:nn,:),iTimeAcc);
+        else
+            sensorData.accelerometer.measures(i, :) = interp1(settings.parout.partial_time,settings.parout.acc,iTimeAcc);
+        end
     end
 
 elseif freq.accelerometerFrequency == freq.controlFrequency
-
-    sensorData.accelerometer.measures(1, :) = accelerometerAscent...
-        (T(end), Y(end, :), settings); % checkare il tLaunch
+    if size(settings.parout.partial_time,1)~=size(settings.parout.acc,1)   
+        nn = min(size(settings.parout.partial_time,1),size(settings.parout.acc,1));
+        sensorData.accelerometer.measures(i, :) = interp1(settings.parout.partial_time(1:nn,:),settings.parout.acc(1:nn,:),T(end));
+    else
+        sensorData.accelerometer.measures(i, :) = interp1(settings.parout.partial_time,settings.parout.acc,T(end));
+    end
     sensorData.accelerometer.time = T(end);
     sensorData.accelerometer.t0 = T(end);
 else
@@ -93,14 +100,24 @@ else
             q = Y1 - m*T1;
             Yinterp = m*iTimeAcc + q;
             sensorData.accelerometer.t0 = iTimeAcc;
-            sensorData.accelerometer.measures = accelerometerAscent...
-                (iTimeAcc, Yinterp, settings);
+            % accelerometer ascent, ma piu rapido
+            if size(settings.parout.partial_time,1)~=size(settings.parout.acc,1)   
+                nn = min(size(settings.parout.partial_time,1),size(settings.parout.acc,1));
+                sensorData.accelerometer.measures(i, :) = interp1(settings.parout.partial_time(1:nn,:),settings.parout.acc(1:nn,:),iTimeAcc);
+            else
+                sensorData.accelerometer.measures(i, :) = interp1(settings.parout.partial_time,settings.parout.acc,iTimeAcc);
+            end
+
         elseif T(i) - sensorData.accelerometer.t0 == 1/freq.accelerometerFrequency
             iTimeAcc = sensorData.accelerometer.t0 + 1/freq.accelerometerFrequency;
             Yinterp = Y(i, :);
             sensorData.accelerometer.t0 = iTimeAcc;
-            sensorData.accelerometer.measures = accelerometerAscent...
-                (iTimeAcc, Yinterp, settings);
+            if size(settings.parout.partial_time,1)~=size(settings.parout.acc,1) 
+                nn = min(size(settings.parout.partial_time,1),size(settings.parout.acc,1));
+                sensorData.accelerometer.measures(i, :) = interp1(settings.parout.partial_time(1:nn,:),settings.parout.acc(1:nn,:),iTimeAcc);
+            else
+                sensorData.accelerometer.measures(i, :) = interp1(settings.parout.partial_time,settings.parout.acc,iTimeAcc);
+            end
         end
 
 
@@ -331,8 +348,8 @@ else
 
             if T(i) - sensorData.gps.t0 > 1/freq.gpsFrequency
                 iTimegps = sensorData.gps.t0 + 1/freq.gpsFrequency;
-                Y1 = Y(i, 1:6);
-                Y0 = Y(i-1, 1:6);
+                Y1 = Y(i, [1:6, 10:13]);
+                Y0 = Y(i-1, [1:6, 10:13]);
                 T1 = T(i);
                 T0 = T(i-1);
                 % linear interpolation between the 2 states
@@ -342,6 +359,7 @@ else
                 sensorData.gps.positionMeasures(i, :) = -Yinterp(1:3);
                 sensorData.gps.velocityMeasures(i, :) = -quatrotate(quatconj(Yinterp(7:10)), Yinterp(4:6));
                 sensorData.gps.t0 = iTimegps;
+                sensorData.gps.time = iTimegps;
             elseif T(i) - sensorData.gps.t0 == 1/freq.gpsFrequency
                 iTimegps = sensorData.gps.t0 + 1/freq.gpsFrequency;
                 Q = Y(i, 10:13);
@@ -349,12 +367,14 @@ else
                 sensorData.gps.positionMeasures(i, :) = -Y(iTimegps == T, 1:3);
                 sensorData.gps.velocityMeasures(i, :) = -quatrotate(quatconj(Q), V);
                 sensorData.gps.t0 = iTimegps;
+                sensorData.gps.time = iTimegps;
             end
         end
 
 
     end
 end
+
 
 
 
@@ -386,6 +406,7 @@ for i_baro = 1:length(sensorData.barometer_sens)
                 z(i) = -Y(iTimeBarometer == T, 3);
             end
             sensorData.barometer_sens{i_baro}.z = [sensorData.barometer_sens{i_baro}.z; z(i)];
+
         end
          elseif  freq.barometerFrequency == freq.controlFrequency
         iTimeBarometer = T(end);
@@ -430,6 +451,11 @@ for i_baro = 1:length(sensorData.barometer_sens)
     sensorData.barometer_sens{i_baro}.measures = P;
     sensorData.barometer_sens{i_baro}.temperature = Temp;
 end
+
+[Temp, ~, P, ~] = atmosisa(z+settings.z0);
+sensorData.barometer_sens{i_baro}.measures = P;
+sensorData.barometer_sens{i_baro}.temperature = Temp;
+
 %% pitot
 if isfield(freq, 'pitotFrequency')
     if freq.pitotFrequency > freq.controlFrequency
@@ -526,37 +552,38 @@ if isfield(freq, 'pitotFrequency')
 end
 
 %% chamber pressure sensor
- if freq.chamberPressureFrequency > freq.controlFrequency
-     dt = 1/freq.chamberPressureFrequency;
-    sensorData.chamberPressure.time = sensorData.chamberPressure.t0:dt:T(end);
-    sensorData.chamberPressure.t0 = sensorData.chamberPressure.time(end);
-    N = length(sensorData.chamberPressure.time);
-
-    for i = 1:N
-        iTimechamberPressure = sensorData.chamberPressure.time(i);
-        Thrust(i) = interp1(settings.motor.expTime, settings.motor.expThrust,iTimechamberPressure );
-    end
+if contains(settings.mission,'_2023')
+     if freq.chamberPressureFrequency > freq.controlFrequency
+         dt = 1/freq.chamberPressureFrequency;
+        sensorData.chamberPressure.time = sensorData.chamberPressure.t0:dt:T(end);
+        sensorData.chamberPressure.t0 = sensorData.chamberPressure.time(end);
+        N = length(sensorData.chamberPressure.time);
     
-    sensorData.chamberPressure.measures = Thrust/settings.motor.K;
-
-elseif freq.chamberPressureFrequency == freq.controlFrequency
-    sensorData.chamberPressure.time = T(end);
-     Thrust = interp1(settings.motor.expTime, settings.motor.expThrust,T(end));
-    sensorData.chamberPressure.measures = Thrust/settings.motor.K;
-  
-else
-    for i = 1:length(T)
-        if T(i) - sensorData.chamberPressure.t0 > 1/freq.chamberPressureFrequency
-            iTimechamberPressure = sensorData.chamberPressure.t0 + 1/freq.chamberPressureFrequency;
+        for i = 1:N
+            iTimechamberPressure = sensorData.chamberPressure.time(i);
             Thrust(i) = interp1(settings.motor.expTime, settings.motor.expThrust,iTimechamberPressure );
-            sensorData.chamberPressure.measures(i) = Thrust(i)/settings.motor.K;
-            sensorData.chamberPressure.t0 = iTimechamberPressure ;
-        elseif  T(i) - sensorData.chamberPressure.t0 == 1/freq.chamberPressureFrequency
-            iTimechamberPressure = sensorData.chamberPressure.t0 + 1/freq.chamberPressureFrequency;
-            sensorData.chamberPressure.measures(i) = Thrust(i)/settings.motor.K;
-            sensorData.chamberPressure.t0 = iTimechamberPressure;
         end
-
+        
+        sensorData.chamberPressure.measures = Thrust/settings.motor.K;
+    
+    elseif freq.chamberPressureFrequency == freq.controlFrequency
+        sensorData.chamberPressure.time = T(end);
+         Thrust = interp1(settings.motor.expTime, settings.motor.expThrust,T(end));
+        sensorData.chamberPressure.measures = Thrust/settings.motor.K;
+      
+    else
+        for i = 1:length(T)
+            if T(i) - sensorData.chamberPressure.t0 > 1/freq.chamberPressureFrequency
+                iTimechamberPressure = sensorData.chamberPressure.t0 + 1/freq.chamberPressureFrequency;
+                Thrust(i) = interp1(settings.motor.expTime, settings.motor.expThrust,iTimechamberPressure );
+                sensorData.chamberPressure.measures(i) = Thrust(i)/settings.motor.K;
+                sensorData.chamberPressure.t0 = iTimechamberPressure ;
+            elseif  T(i) - sensorData.chamberPressure.t0 == 1/freq.chamberPressureFrequency
+                iTimechamberPressure = sensorData.chamberPressure.t0 + 1/freq.chamberPressureFrequency;
+                sensorData.chamberPressure.measures(i) = Thrust(i)/settings.motor.K;
+                sensorData.chamberPressure.t0 = iTimechamberPressure;
+            end
+    
+        end
     end
 end
-

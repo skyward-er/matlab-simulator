@@ -35,7 +35,7 @@ NT = length(T);
 
 steps = cell(NT,1);
 for k = 1:NT
-   [~,steps{k}] = fun(T(k),Y(k,:),varargin{1},varargin{2}(k),varargin{3},varargin{4});
+   [~,steps{k}] = fun(T(k),Y(k,:),varargin{1},varargin{2},varargin{3},varargin{4});
 end
 
 for i = 1:numel(namesFields)

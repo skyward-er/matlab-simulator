@@ -1,4 +1,4 @@
-function [allSteps] = recallOdeFcn(fun, T, Y, varargin)
+function [allSteps] = RecallOdeFcn(fun, T, Y, varargin)
 %{
 recallOdeFcn - This function allows to compute some parameters used
                inside the ODE integrations.
@@ -31,8 +31,10 @@ flagApVec = false;
 if strcmp(varargin{end}, 'apVec')
     apVec = varargin{end - 2};
     flagApVec = true;
+    varargin = varargin(1:end-1);
+else 
+
 end
-varargin = varargin(1:end-1);
 
 if flagApVec
     [~,firstStep] = fun(T(1), Y(1,:), varargin{1:2}, apVec(1), varargin{end});

@@ -17,6 +17,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 %}
 
 settings.launchDate = [2023 9 18];
+settings.HREmot = true;
 
 %% TRAJECTORY GENERATION PARAMETERS
 settings.Vz_final = 0;
@@ -28,6 +29,7 @@ settings.y_final  = 0;
 
 %% CONTROL AND SENSOR FREQUENCIES
 settings.frequencies.controlFrequency           =   10;                    % [hz] control action frequency 
+settings.frequencies.arbFrequency               =   10;                    % [hz] air brakes control frequency
 settings.frequencies.accelerometerFrequency     =   100;                   % [hz] control action frequency 
 settings.frequencies.gyroFrequency              =   100;                   % [hz] control action frequency 
 settings.frequencies.magnetometerFrequency      =   100;                   % [hz] control action frequency 

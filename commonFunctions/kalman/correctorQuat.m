@@ -47,6 +47,7 @@ H       = [z_mat zeros(3,3)];
 S       = H*P_pred*H'+R;
 
 K       = P_pred*H'/S;
+
 %------------------------------------------------------------------------
 % Correction
 % Innovation computation

@@ -271,7 +271,7 @@ if settings.HREmot
 
 else
     [coeffsValues, angle0] = interpCoeffs(t, alpha, M, beta, absoluteAltitude,...
-        c, settings);
+        round((ap/settings.servo.maxAngle)*2+1), settings);
 end
 % Retrieve Coefficients
 
@@ -388,7 +388,8 @@ else
                 ap_ref = ap_ref_vec(2);
             end
         else 
-            ap_ref = ap_ref_vec; % don't delete this unless you change how the recall ode works.
+            [~,ind_arb] = min(settings.parout.partial_time-t);
+            ap_ref = ap_ref_vec(ind_arb); % don't delete this unless you change how the recall ode works.
         end
         
         dap = (ap_ref-ap)/settings.servo.tau;
@@ -456,7 +457,8 @@ if nargout == 2
     
     parout.accelerations.body_acc = [du, dv, dw];
     parout.accelerations.ang_acc = [dp, dq, dr];
-    
+    F_acc = [-X+T, Y, -Z]';
+    parout.accelerometer.body_acc = F_acc/m;
     parout.coeff.CA = CA;
     parout.coeff.CYB = CYB;
     parout.coeff.CNA = CNA;
@@ -474,10 +476,11 @@ if nargout == 2
     parout.coeff.XCPlon = XCPlon;
     parout.coeff.XCPlat = XCPlat;
         
+    if settings.HREmot
     sgn = sign(dot(cross(Myz, Fyz), [1 0 0])); 
     XCPtot = (sgn * norm(Myz)/norm(Fyz));
     err = 100*abs((acosd(dot(Fyz/norm(Fyz), Myz/norm(Myz))) - 90)/90);
     XCPtot = XCPtot - polyval(settings.regPoli, err); 
     parout.coeff.XCPtot = XCPtot; 
-
+    end
 end

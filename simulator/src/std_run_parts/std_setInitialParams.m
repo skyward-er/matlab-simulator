@@ -10,8 +10,14 @@ t0          =       0;                                                      % Fi
 t1          =       t0 + dt;                                                % Second time step - used in ode as final time
 
 %% kalman initialization
-sensorData.kalman.vz = 1;                                                   % Vertical velocity
-sensorData.kalman.z  = 1;                                                   % Altitude
+if not(settings.scenario == "descent")
+    sensorData.kalman.vz = 0;                                                   % Vertical velocity
+    sensorData.kalman.z  = settings.z0;
+else 
+    sensorData.kalman.vz = settings.Vz_final;                                                   % Vertical velocity
+    sensorData.kalman.z  = settings.z_final;
+end    
+    % Altitude
 
 %% Initialization of sensor measurement time
 control_freq = settings.frequencies.controlFrequency;
@@ -28,6 +34,7 @@ sensorData.magnetometer.t0 = initSensorT0...
 sensorData.gps.t0 = initSensorT0...
     (control_freq,settings.frequencies.gpsFrequency);
 
+
 % triplicate sensors for sensor fault detection testing
 sensorData.barometer_sens{1}.t0 = initSensorT0...
     (control_freq,settings.frequencies.barometerFrequency);
@@ -39,9 +46,10 @@ sensorData.barometer_sens{3}.t0 = initSensorT0...
 sensorData.pitot.t0 = initSensorT0...
     (control_freq,settings.frequencies.pitotFrequency);
 
+if contains(settings.mission,'_2023')
 sensorData.chamberPressure.t0 = initSensorT0...
     (control_freq,settings.frequencies.chamberPressureFrequency);
-
+end
 
 sensorData.barometer_sens{1}.time = [];
 sensorData.barometer_sens{1}.z = [];
@@ -91,6 +99,9 @@ sensorData.kalman.pn_prec = settings.ada.p_ref;                             % se
 % ap_ref_time = zeros(nmax, 1);                                               % Vector of time reference for air brakes
 settings.shutdown = 0;                                                      % engine on
 settings.expShutdown = 0;                                                   % engine expected to be on
+
+%% sensor fault initial conditions
+
 %% ADA initial conditions
 
 if settings.flagADA
@@ -102,7 +113,11 @@ end
 
 if settings.flagNAS
     x_prev    =  [X0; V0; Q0(2:4); Q0(1);0;0;0];
-    x_prev(3) = -settings.z0;
+    if settings.scenario ~="descent"
+        x_prev(3) = -settings.z0;
+    else
+        x_prev(3) = -settings.z_final-settings.z0;
+    end
     vels_prev =  [0;0;0];
     P_prev    =   0.01*eye(12);
 end

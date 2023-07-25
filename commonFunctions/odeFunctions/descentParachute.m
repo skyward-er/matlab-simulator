@@ -1,4 +1,4 @@
-function dY = descentParachute(~, Y, settings, uw, vw, ww, para, uncert)
+function [dY,parout] = descentParachute(~, Y, settings, uw, vw, ww, para, uncert)
 %{ 
 
 descentParachute - ode function of the 3DOF Rigid Rocket-Paraachute Model
@@ -93,28 +93,40 @@ if all(abs(h_vect) < 1e-8)
     h_vect = [-vw uw 0];
 end
 
-t_vers = t_vect/norm(t_vect);            % Tangenzial versor
-h_vers = -h_vect/norm(h_vect);           % horizontal versor
+if ~all(t_vect == 0)
+    t_vers = t_vect/norm(t_vect);            % Tangenzial versor
+    if ~all(h_vect == 0)
+        h_vers = -h_vect/norm(h_vect);           % horizontal versor
+    else
+        h_vers = [0,1,0];
+    end
+    n_vect = cross(t_vers, h_vers);          % Normal vector
+    n_vers = n_vect/norm(n_vect);            % Normal versor
+    if (n_vers(3) > 0)                       % If the normal vector is downward directed
+        n_vect = cross(h_vers, t_vers);
+        n_vers = n_vect/norm(n_vect);
+    end
+else
+    t_vers = [0,0,-1];
 
-n_vect = cross(t_vers, h_vers);          % Normal vector
-n_vers = n_vect/norm(n_vect);            % Normal versor
-
-if (n_vers(3) > 0)                       % If the normal vector is downward directed
-    n_vect = cross(h_vers, t_vers);
-    n_vers = n_vect/norm(n_vect);
+    n_vers = [0,1,0];
 end
+
+
 
 %% FORCES
 D = 0.5*rho*V_norm^2*S*CD*t_vers';       % [N] Drag vector
 L = 0.5*rho*V_norm^2*S*CL*n_vers';       % [N] Lift vector
 Fg = m*g*[0 0 1]';                       % [N] Gravitational Force vector
 F = -D + L + Fg;                         % [N] total forces vector
+F_acc = F-Fg;                            % [N] accelerometer felt forces
 
 %% STATE DERIVATIVES
 % velocity
 du = F(1)/m;
 dv = F(2)/m;
 dw = F(3)/m;
+
 
 %% FINAL DERIVATIVE STATE ASSEMBLING
 dY(1:3) = [u v w]';
@@ -124,3 +136,56 @@ dY(6) = dw;
 
 dY = dY';
 
+%% SAVING THE QUANTITIES FOR THE PLOTS
+
+if nargout == 2
+%     parout.integration.t = t;
+%     
+%     parout.interp.M = M_value;
+%     parout.interp.alpha = alpha_value;
+%     parout.interp.beta = beta_value;
+%     parout.interp.alt = -z;
+%     parout.interp.mass = m;
+%     
+    parout.wind.NED_wind = [uw, vw, ww];
+    parout.wind.body_wind = wind;
+
+%     
+%     parout.rotations.dcm = dcm;
+%     
+%     parout.velocities = Vels;
+%     
+%     parout.forces.AeroDyn_Forces = [X, Y, Z];
+%     parout.forces.T = T;
+%     
+%     parout.air.rho = rho;
+%     parout.air.P = P;
+%     
+    parout.accelerations.body_acc = [du, dv, dw];
+%     parout.accelerations.ang_acc = [dp, dq, dr];
+    parout.accelerometer.body_acc = [F_acc/m]';
+
+%     parout.coeff.CA = CA;
+%     parout.coeff.CYB = CYB;
+%     parout.coeff.CNA = CNA;
+%     parout.coeff.Cl = Cl;
+%     parout.coeff.Clp = Clp;
+%     %--------------------------------------------
+%     %parout.coeff.Clb = Clb;
+%     %--------------------------------------------
+%     parout.coeff.Cma = Cma;
+%     parout.coeff.Cmad = Cmad;
+%     parout.coeff.Cmq = Cmq;
+%     parout.coeff.Cnb = Cnb;
+%     parout.coeff.Cnr = Cnr;
+%     parout.coeff.Cnp = Cnp;
+%     parout.coeff.XCPlon = XCPlon;
+%     parout.coeff.XCPlat = XCPlat;
+%         
+%     sgn = sign(dot(cross(Myz, Fyz), [1 0 0])); 
+%     XCPtot = (sgn * norm(Myz)/norm(Fyz));
+%     err = 100*abs((acosd(dot(Fyz/norm(Fyz), Myz/norm(Myz))) - 90)/90);
+%     XCPtot = XCPtot - polyval(settings.regPoli, err); 
+%     parout.coeff.XCPtot = XCPtot; 
+
+end

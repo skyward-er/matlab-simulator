@@ -25,21 +25,18 @@ OUTPUT:
 
 %% Baro Acquisition loop
 for i_baro = 1:2
-if isfield(sensorData.barometer_sens{i_baro},'time')
-    sp.pn_sens{i_baro}      = zeros(1,length(sensorData.barometer_sens{i_baro}.time));
-    sp.h_baro_sens{i_baro}  = zeros(1,length(sensorData.barometer_sens{i_baro}.time));
-    sp.t_baro_sens{i_baro}  = sensorData.barometer_sens{i_baro}.time';
-
-    for ii=1:length(sensorData.barometer_sens{i_baro}.time)
-        sp.pn_sens{i_baro}(ii)        =      s.MS580301BA01.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,...
-            sensorData.barometer_sens{i_baro}.temperature(ii) - 273.15);
-        sp.pn_sens{i_baro}(ii)        =      sp.pn_sens{i_baro}(ii)*100;
-        sp.h_baro_sens{i_baro}(ii)    =     -atmospalt(sp.pn_sens{i_baro}(ii),'None');
+    if isfield(sensorData.barometer_sens{i_baro},'time')
+        sp.pn_sens{i_baro}      = zeros(1,length(sensorData.barometer_sens{i_baro}.time));
+        sp.h_baro_sens{i_baro}  = zeros(1,length(sensorData.barometer_sens{i_baro}.time));
+        sp.t_baro_sens{i_baro}  = sensorData.barometer_sens{i_baro}.time';
+    
+        for ii=1:length(sensorData.barometer_sens{i_baro}.time)
+            sp.pn_sens{i_baro}(ii)        =      s.MS580301BA01.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,...
+                sensorData.barometer_sens{i_baro}.temperature(ii) - 273.15);
+            sp.pn_sens{i_baro}(ii)        =      sp.pn_sens{i_baro}(ii)*100;
+            sp.h_baro_sens{i_baro}(ii)    =     -atmospalt(sp.pn_sens{i_baro}(ii),'None');
+        end
     end
-    c.pn_tot{i_baro}(c.np_old{i_baro}:c.np_old{i_baro} + size(sp.pn_sens{i_baro} ,2) - 1,1)    = sp.pn_sens{i_baro}(1:end);
-    c.hb_tot{i_baro}(c.np_old{i_baro}:c.np_old{i_baro} + size(sp.pn_sens{i_baro},2) - 1,1)    = sp.h_baro_sens{i_baro}(1:end);
-    c.time_baro{i_baro}(c.np_old{i_baro}:c.np_old{i_baro} + size(sp.pn_sens{i_baro},2) - 1)    =  sp.t_baro_sens{i_baro}(end);
-    c.np_old{i_baro} = c.np_old{i_baro} + size(sp.pn_sens{i_baro},2);
 end
 if isfield(sensorData.barometer_sens{3},'time')
     sp.pn_sens{3}      = zeros(1,length(sensorData.barometer_sens{3}.time));
@@ -141,7 +138,7 @@ if isfield(sensorData.pitot,'time')
 end
 
 %% Chamber Pressure acquisition loop
-
+if contains(settings.mission,'_2023')
     sp.cp      = zeros(1,length(sensorData.chamberPressure.time));
     sp.t_cp    = sensorData.chamberPressure.time;
 
@@ -151,4 +148,5 @@ end
      c.cp_tot(c.ncp_old:c.ncp_old + size(sp.cp,2) - 1,1)    = sp.cp(1:end);
      c.time_cp(c.ncp_old:c.ncp_old + size(sp.cp,2) - 1)    =  sp.t_cp;
      c.ncp_old = c.ncp_old + size(sp.cp,2);
+end
 end

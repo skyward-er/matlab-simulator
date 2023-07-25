@@ -17,7 +17,7 @@ scenarios explanation:
 - "descent"           : to investigate how to do it, we should be able to
                         simulate only from apogee to ground.
 
-- "ballistic"         : all flight, no parachutes, active ascent control (airbrakes or engine shutdown). So ballistic ground
+- "ballistic"         : all flight, no parachutes, active ascent control (airbrakes or engine shutdown). So ballistic: ground
                         apogee ground.
 
 - "full flight"       : all flight, including parachutes and active control
@@ -27,7 +27,7 @@ scenarios explanation:
 
 
 % scenario configuration
-conf.scenario = "descent";
+conf.scenario = "full flight";
 conf.HIL = false;
 
 % WIP flags
@@ -35,7 +35,7 @@ settings.machControlActive  = false; % Switch on the mach control in ascentContr
 settings.HRE                = false; % Switch on if the rocket is mounting a Hybrid Engine, which allows the possibility to shut down the engine
 
 % std_run integration flags
-settings.nmax = 20000;
+settings.nmax = 400000;
 settings.flagStopIntegration     =   true;                                           % while this is true the integration runs
 settings.flagAscent              =   false;                                          % while this is false...
 settings.flagMatr                =   false(settings.nmax, 6);                                 % while this value are false...
@@ -79,8 +79,8 @@ if not(conf.HIL) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
             settings.launchWindow       = false;  % Switch off this to avoid pausing the launch till you press the launch button
             settings.electronics        = false;  % Switch on when testing with Hardware in the loop HIL - NOT IMPLEMENTED YET, STILL TO BE MERGED
-            settings.ascentOnly         = true;   % Switch on to simulate only the ascent phase untill the apogee
-            settings.ballisticFligth    = true;   % Switch on to simulate the balistic fligth without any parachute
+            settings.ascentOnly         = false;   % Switch on to simulate only the ascent phase untill the apogee
+            settings.ballisticFligth    = false;   % Switch on to simulate the balistic fligth without any parachute
             settings.control            = false;  % Switch on to simulate the control
             settings.dataNoise          = true;   % Switch on to simulate the data acquisiton from sensors
             settings.flagNAS            = true;   % Switch on to run the kalman algorithm - note, also to run the airbrakes control algorithm this is needed true
