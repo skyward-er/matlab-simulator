@@ -1,4 +1,4 @@
-function [sensorData,sp,chunk,faulty_sensors] = run_SensorFaultDetection_SVM(sensorData,sp,chunk,settings,t)
+function [sensorData,sp,chunk,faulty_sensors] = run_SensorFaultDetection_SVM(SVM_model,sensorData,sp,chunk,faulty_sensors,flagAscent,t)
 
 %{
 HELP:
@@ -18,17 +18,12 @@ REVISIONS
 release
 
 %}
-if settings.flagAscent
-    SVM_model= settings.SVM_1;
-else
-    SVM_model = settings.SVM_2;
-end
-faulty_sensors = settings.faulty_sensors;
+
 current_detection = faulty_sensors; % da capire come gestire y
 
-for i = 1:length(settings.faulty_sensors)
+for i = 1:length(faulty_sensors)
     if(faulty_sensors(i) == false)
-        [current_detection(i)] = fault_detection_reduced_fft(SVM_model, chunk{i}, settings.flagAscent); %this function takes a chunk of data which goes backwards in time of a window_size
+        [current_detection(i)] = fault_detection_reduced_fft(SVM_model, chunk{i}, flagAscent); %this function takes a chunk of data which goes backwards in time of a window_size
     end
 end
 faulty_sensors = current_detection;
