@@ -107,19 +107,19 @@ s.MAGN_IIS2MDC.transMatrix          =   diag([1 1 1]);          % axis transform
 s.MAGN_IIS2MDC.transMatrix          =   diag([1 1 1]);          % axis transformation
 
 % initial Pitot sensor (differential pressure sensor SSCDRRN015PDAD5)
-s.SSCDRRN015PDAD5 = Sensor(); % presure in mbar, temp should be in C°
+s.SSCDRRN015PDAD5 = Sensor_no_offset(); % presure in mbar, temp should be in C°
 s.SSCDRRN015PDAD5.maxMeasurementRange  =   1034;                   % in mbar (15 psi from datasheet)
 s.SSCDRRN015PDAD5.minMeasurementRange  =   -1034;                  % in mbar (-15 psi from datasheet)
 s.SSCDRRN015PDAD5.offset               =   -1.9327;                % in mbar
 s.SSCDRRN015PDAD5.resolution           =   0.0025*1034*2;          % in mbar, from datasheet
 s.SSCDRRN015PDAD5.noiseVariance        =   2.63;                   % mbar from flight logs of pyxis
-s.SSCDRRN015PDAD5.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
+% s.SSCDRRN015PDAD5.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
 % check 2d offset for pitot
 
 sensorTot.npit_old      =   1;
-sensorTot.np_old{1}        = 1;
-sensorTot.np_old{2}        = 1;
-sensorTot.np_old{3}        = 1;
+sensorTot.np_old{1}     =   1;
+sensorTot.np_old{2}     =   1;
+sensorTot.np_old{3}     =   1;
 sensorTot.na_old        =   1;
 sensorTot.ngps_old      =   1;
 sensorTot.n_est_old     =   1;

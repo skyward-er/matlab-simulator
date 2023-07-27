@@ -35,7 +35,7 @@ if not(settings.scenario == "descent")
     end
 end
 
-% Airbrake surface
+%% Airbrake surface
 if not(settings.scenario == "descent")
     figures.arb_exposed_surface = figure('Name', 'Airbrake exposed surface','ToolBar','auto','Position',[100,100,600,400]);
     dS = settings.arb.surfPol * structIn.Y(:,17);
@@ -51,20 +51,23 @@ if not(settings.scenario == "descent")
         exportgraphics(figures.arb_exposed_surface,'report_images\src_arb_exposed_surface.pdf')
     end
 end
-% Trajectory
+
+%% Trajectory
 figures.trajectory = figure('Name', 'Trajectory','ToolBar','auto','Position',[100,100,600,400]);
-plot3(structIn.Y(1:end-10, 1), structIn.Y(1:end-10, 2), -structIn.Y(1:end-10, 3));
+plot3(structIn.Y(1:end-10, 1), structIn.Y(1:end-10, 2), -structIn.Y(1:end-10, 3),'DisplayName','True trajectory');
 hold on; grid on;
+plot3(structIn.NAS(1:end-10, 1), structIn.NAS(1:end-10, 2), -structIn.NAS(1:end-10, 3)-settings.z0,'DisplayName','NAS trajectory');
+
 if not(settings.scenario == "descent")
-    plot3(structIn.ARB_openingPosition(1),structIn.ARB_openingPosition(2),structIn.ARB_openingPosition(3),'ko')
+    plot3(structIn.ARB_openingPosition(1),structIn.ARB_openingPosition(2),structIn.ARB_openingPosition(3),'ko','DisplayName','Airbrake deployment')
 end
-plot3(structIn.apogee_coordinates(1),structIn.apogee_coordinates(2),structIn.apogee_coordinates(3),'ro')
+plot3(structIn.apogee_coordinates(1),structIn.apogee_coordinates(2),structIn.apogee_coordinates(3),'ro','DisplayName','Apogee')
 xlabel('x [m]');
 ylabel('y [m]');
 zlabel('z [m]');
 title('Trajectory');
 axis equal
-legend('Trajectory','Airbrake deployment','Apogee')
+legend
 if settings.flagExport == true
     exportgraphics(figures.trajectory,'report_images\src_trajectory.pdf')
 end
@@ -142,8 +145,8 @@ if not(settings.scenario == "descent")
     plot(contSettings.reference.Z, contSettings.reference.Vz(:,1),'r','DisplayName','ref min')
     plot(contSettings.reference.Z, contSettings.reference.Vz(:,2),'k','DisplayName','ref max')
 end
-plot( -structIn.Y(settings.flagMatr(:, 2), 3), -v_ned(settings.flagMatr(:, 2),3),'b','DisplayName','Traj')
-plot( -structIn.NAS(settings.flagMatr(:, 2),3)-settings.z0,  -structIn.NAS(settings.flagMatr(:, 2),6),'m--','DisplayName','NAS')
+plot( -structIn.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
+plot( -structIn.NAS(:,3)-settings.z0,  -structIn.NAS(:,6),'m--','DisplayName','NAS')
 % plot( structIn.ADA(:,4),  structIn.ADA(:,5),'b','DisplayName','ADA z')
 yyaxis right
 plot( -structIn.Y(:, 3), structIn.Y(:, 17),'g','DisplayName','arb')

@@ -63,8 +63,9 @@ if freq.accelerometerFrequency > freq.controlFrequency
             T0 = T(index0);
             % linear interpolation between the 2 states
             m = (Y1 - Y0)./(T1 - T0);
-            q = Y1 - m*T1;
-            Yinterp = m*iTimeAcc + q;
+%             q = Y1 - m*T1;
+%             Yinterp = m*iTimeAcc + q;
+            Yinterp = m * (iTimeAcc-T0)+Y0;
         else
             Yinterp = Y(iTimeAcc == T, :);
 
@@ -97,8 +98,9 @@ else
             T0 = T(i-1);
 
             m = (Y1 - Y0)./(T1 - T0);
-            q = Y1 - m*T1;
-            Yinterp = m*iTimeAcc + q;
+%             q = Y1 - m*T1;
+%             Yinterp = m*iTimeAcc + q;
+            Yinterp = m * (iTimeGyro-T0)+Y0;
             sensorData.accelerometer.t0 = iTimeAcc;
             % accelerometer ascent, ma piu rapido
             if size(settings.parout.partial_time,1)~=size(settings.parout.acc,1)
@@ -142,8 +144,9 @@ if freq.gyroFrequency > freq.controlFrequency
             T0 = T(index0);
             % linear interpolation between the 2 states
             m = (Y1 - Y0)./(T1 - T0);
-            q = Y1 - m*T1;
-            sensorData.gyro.measures(i, :) = m*iTimeGyro + q;
+%             q = Y1 - m*T1;
+            Yinterp = m * (iTimeGyro-T0)+Y0;
+            sensorData.gyro.measures(i, :) = Yinterp;
         else
             sensorData.gyro.measures(i, :) = Y(iTimeGyro == T, 7:9);
         end
@@ -163,8 +166,9 @@ else
             T0 = T(i-1);
 
             m = (Y1 - Y0)./(T1 - T0);
-            q = Y1 - m*T1;
-            sensorData.gyro.measures(i, :) = m*iTimeGyro + q;
+%             q = Y1 - m*T1;
+            Yinterp = m  *(iTimeGyro-T0)+Y0;
+            sensorData.gyro.measures(i, :) = Yinterp;
             sensorData.gyro.t0 = iTimeGyro;
         elseif T(i) - sensorData.gyro.t0 == 1/freq.gyroFrequency
             iTimeGyro = sensorData.gyro.t0 + 1/freq.gyroFrequency;
@@ -196,8 +200,9 @@ if freq.magnetometerFrequency > freq.controlFrequency
             T0 = T(index0);
             % linear interpolation between the 2 states
             m = (Y1 - Y0)./(T1 - T0);
-            q = Y1 - m*T1;
-            Yinterp = m*iTimeMagnetometer + q;
+%             q = Y1 - m*T1;
+%             Yinterp = m*iTimeMagnetometer + q;
+            Yinterp = m  *(iTimeMagnetometer-T0)+Y0;
             z(i) = - Yinterp(1);
             Q(i, :) = Yinterp(2:end);
         else
@@ -225,8 +230,9 @@ else
             T0 = T(i-1);
             % linear interpolation between the 2 states
             m = (Y1 - Y0)./(T1 - T0);
-            q = Y1 - m*T1;
-            Yinterp = m*iTimeMagnetometer + q;
+%             q = Y1 - m*T1;
+%             Yinterp = m*iTimeMagnetometer + q;
+            Yinterp = m  *(iTimeMagnetometer-T0)+Y0;
             z = - Yinterp(1);
             Q = Yinterp(2:end);
             magnFieldInertial = magneticFieldApprox(z + settings.z0)';
@@ -263,8 +269,9 @@ if freq.gpsFrequency > freq.controlFrequency
                 T0 = T(index0);
                 % linear interpolation between the 2 states
                 m = (Y1 - Y0)./(T1 - T0);
-                q = Y1 - m*T1;
-                Yinterp = m*iTimegps + q;
+%                 q = Y1 - m*T1;
+%                 Yinterp = m*iTimegps + q;
+                Yinterp = m  *(iTimegps-T0)+Y0;
                 sensorData.gps.positionMeasures(i, :) = Yinterp(1:3);
                 sensorData.gps.velocityMeasures(i, :) = quatrotate(quatconj(Yinterp(7:10)), Yinterp(4:6));
             else
@@ -288,8 +295,9 @@ if freq.gpsFrequency > freq.controlFrequency
                 T0 = T(index0);
                 % linear interpolation between the 2 states
                 m = (Y1 - Y0)./(T1 - T0);
-                q = Y1 - m*T1;
-                Yinterp = m*iTimegps + q;
+%                 q = Y1 - m*T1;
+%                 Yinterp = m*iTimegps + q;
+                Yinterp = m  *(iTimegps-T0)+Y0;
                 sensorData.gps.positionMeasures(i, :) = Yinterp(1:3);
                 sensorData.gps.velocityMeasures(i, :) = Yinterp(4:6);
             else
@@ -325,18 +333,19 @@ else
                 T0 = T(i-1);
                 % linear interpolation between the 2 states
                 m = (Y1 - Y0)./(T1 - T0);
-                q = Y1 - m*T1;
-                Yinterp = m*iTimegps + q;
-                sensorData.gps.positionMeasures(i, :) = -Yinterp(1:3);
-                sensorData.gps.velocityMeasures(i, :) = -quatrotate(quatconj(Yinterp(7:10)), Yinterp(4:6));
+%                 q = Y1 - m*T1;
+%                 Yinterp = m*iTimegps + q;
+                Yinterp = m * (iTimegps-T0)+Y0;
+                sensorData.gps.positionMeasures = Yinterp(1:3);
+                sensorData.gps.velocityMeasures = quatrotate(quatconj(Yinterp(7:10)), Yinterp(4:6));
                 sensorData.gps.t0 = iTimegps;
                 sensorData.gps.time = iTimegps;
             elseif T(i) - sensorData.gps.t0 == 1/freq.gpsFrequency
                 iTimegps = sensorData.gps.t0 + 1/freq.gpsFrequency;
                 Q = Y(i, 10:13);
                 V = Y(i, 4:6);
-                sensorData.gps.positionMeasures(i, :) = -Y(iTimegps == T, 1:3);
-                sensorData.gps.velocityMeasures(i, :) = -quatrotate(quatconj(Q), V);
+                sensorData.gps.positionMeasures = Y(iTimegps == T, 1:3);
+                sensorData.gps.velocityMeasures = quatrotate(quatconj(Q), V);% (i, :)
                 sensorData.gps.t0 = iTimegps;
                 sensorData.gps.time = iTimegps;
             end
@@ -354,8 +363,9 @@ else
                 T0 = T(i-1);
                 % linear interpolation between the 2 states
                 m = (Y1 - Y0)./(T1 - T0);
-                q = Y1 - m*T1;
-                Yinterp = m*iTimegps + q;
+%                 q = Y1 - m*T1;
+%                 Yinterp = m*iTimegps + q;
+                Yinterp = m * (iTimegps-T0)+Y0;
                 sensorData.gps.positionMeasures(i, :) = -Yinterp(1:3);
                 sensorData.gps.velocityMeasures(i, :) = -quatrotate(quatconj(Yinterp(7:10)), Yinterp(4:6));
                 sensorData.gps.t0 = iTimegps;
@@ -399,9 +409,9 @@ for i_baro = 1:length(sensorData.barometer_sens)
                 T0 = T(index0);
                 % linear interpolation between the 2 states
                 m = (Y1 - Y0)./(T1 - T0);
-                q = Y1 - m*T1;
-                z(i) = m*iTimeBarometer + q;
-
+%                 q = Y1 - m*T1;
+%                 z(i) = m*iTimeBarometer + q;
+                z(i) = m * (iTimeBarometer-T0)+Y0;
             else
                 z(i) = -Y(iTimeBarometer == T, 3);
             end
@@ -424,8 +434,9 @@ for i_baro = 1:length(sensorData.barometer_sens)
                 T0 = T(i-1);
                 % linear interpolation between the 2 states
                 m = (Y1 - Y0)./(T1 - T0);
-                q = Y1 - m*T1;
-                z = m*iTimeBarometer + q;
+%                 q = Y1 - m*T1;
+%                 z = m*iTimeBarometer + q;
+                z = m * (iTimeBarometer-T0)+Y0;
                 sensorData.barometer_sens{i_baro}.z = [sensorData.barometer_sens{i_baro}.z; z];
                 sensorData.barometer_sens{i_baro}.t0 = iTimeBarometer;
                 sensorData.barometer_sens{i_baro}.time = [sensorData.barometer_sens{i_baro}.time; iTimeBarometer];
@@ -478,14 +489,16 @@ if isfield(freq, 'pitotFrequency')
                 Y1 = Y(index1, 4);
                 Y0 = Y(index0, 4);
                 m = (Y1 - Y0)./(T1 - T0);
-                q = Y1 - m*T1;
-                vx(i) = m*iTimePitot + q;
+%                 q = Y1 - m*T1;
+%                 vx(i) = m*iTimePitot + q;
+                vx(i) = m * (iTimePitot-T0)+Y0;
                 % linear interpolation between altitude
                 Y1 = Y(index1, 3);
                 Y0 = Y(index0, 3);
                 m = (Y1 - Y0)./(T1 - T0);
-                q = Y1 - m*T1;
-                z_pit(i) = -(m*iTimePitot + q);
+%                 q = Y1 - m*T1;
+%                 z_pit(i) = -(m*iTimePitot + q);
+                z_pit(i) = m * (iTimePitot-T0)+Y0;
             else
                 vx(i) = Y(iTimePitot == T, 4);
                 z_pit(i) = -Y(iTimePitot == T, 3);
@@ -508,14 +521,16 @@ if isfield(freq, 'pitotFrequency')
                 Y1 = Y(i, 4);
                 Y0 = Y(i-1, 4);
                 m = (Y1 - Y0)./(T1 - T0);
-                q = Y1 - m*T1;
-                vx = m*iTimePitot + q;
+%                 q = Y1 - m*T1;
+%                 vx = m*iTimePitot + q;
+                vx = m * (iTimePitot-T0)+Y0;
                 % linear interpolation between altitude
                 Y1 = Y(i, 3);
                 Y0 = Y(i-1, 3);
                 m = (Y1 - Y0)./(T1 - T0);
-                q = Y1 - m*T1;
-                z_pit = -(m*iTimePitot + q);
+%                 q = Y1 - m*T1;
+%                 z_pit = -(m*iTimePitot + q);
+                z_pit = m * (iTimePitot-T0)+Y0;
                 sensorData.pitot.t0 = iTimePitot;
 
             elseif  T(i) - sensorData.pitot.t0 == 1/freq.pitotFrequency
@@ -546,9 +561,9 @@ if isfield(freq, 'pitotFrequency')
         v = (vx + wind_body(1))'; % Speed x_body + wind in x_body direction
 
         sensorData.pitot.temperature = Temp;
-        sensorData.pitot.measures = (0.5*rho'.*v.*v.*sign(v))'; % differential pressure in Pascals
-        %     (0.5*rho'.*v.*v.*sign(v))'
-    end
+%         sensorData.pitot.measures = (0.5*rho.*v.*v.*sign(v))'; % differential pressure in Pascals
+        sensorData.pitot.measures = (0.5*rho.*v.^2)'; % dynamic pressure
+     end
 end
 
 %% chamber pressure sensor

@@ -248,7 +248,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     if settings.dataNoise
         [sp, c] = acquisition_Sys(sensorData, s, c, settings);
     end
-
+    
     %% subsystems
 
     % SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU

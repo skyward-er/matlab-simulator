@@ -98,7 +98,7 @@ if isfield(sensorData.gps,'time')
     sp.gps     = zeros(length(sensorData.gps.time),3);
     sp.gpsv    = zeros(length(sensorData.gps.time),3);
     sp.t_gps   = sensorData.gps.time;
-    for ii=1:length(sensorData.gps.time)
+    for ii=1:length(sensorData.gps.time) 
         [sp.gps(ii,1),sp.gps(ii,2),sp.gps(ii,3)]   =            ...
             s.GPS_NEOM9N.sens( ...
             sensorData.gps.positionMeasures(ii,1),...
@@ -127,10 +127,13 @@ if isfield(sensorData.pitot,'time')
     sp.t_pit  = sensorData.pitot.time;
 
     for ii=1:length(sensorData.pitot.time)
-        %                 sp.dp(ii)        =      s.SSCDRRN015PDAD5.sens(sensorData.pitot.measures(ii)/100,...
-        %                                                             sensorData.pitot.temperature(ii) - 273.15);
-        %                 sp.dp(ii)        =      sp.dp(ii)*100;
-        sp.dp(ii) = sensorData.pitot.measures(ii);
+        sp.dp(ii)        =      s.SSCDRRN015PDAD5.sens(sensorData.pitot.measures(ii)/100,...
+                                                    sensorData.pitot.temperature(ii) - 273.15);
+        if sp.dp(ii) <0
+            sp.dp(ii) = 0;
+        end
+        sp.dp(ii)        =      sp.dp(ii)*100;
+%         sp.dp(ii) = sensorData.pitot.measures(ii);
     end
     c.dp_tot(c.npit_old:c.npit_old + size(sp.dp,2) - 1,1)    = sp.dp(1:end);
     c.time_pit(c.npit_old:c.npit_old + size(sp.dp,2) - 1)    =  sp.t_pit;
