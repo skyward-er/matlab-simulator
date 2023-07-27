@@ -239,8 +239,17 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         error("the extension of the airbrakes exceeds the maximum value of "+num2str(settings.arb.maxExt)+": ext = "+num2str(ext))
     end
 
-    %% subsystems
+    %% simulate sensors
+    % fix on signal frequencies: this interpolates the values if the speed
+    % of the sensor is lower than the control action (or whatever)
+    [sensorData] = manageSignalFrequencies(magneticFieldApprox, settings.flagAscent, settings,sensorData, Yf, Tf, ext, uw, vw, ww, para);
+    [~, ~, p, ~] = atmosisa(-Yf(:,3) + settings.z0) ;
+    % simulate sensor acquisition
+    if settings.dataNoise
+        [sp, c] = acquisition_Sys(sensorData, s, c, settings);
+    end
 
+    %% subsystems
 
     % SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU
 
