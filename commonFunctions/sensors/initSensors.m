@@ -17,12 +17,23 @@ ep      = [ep_p_0(:,2);ep_p_25(:,2);ep_p_85(:,2);ep_p_neg40(:,2)];         % err
 T       = [0*ones(size(ep_p_0(:,1)));25*ones(size(ep_p_25(:,1)));85*ones(size(ep_p_85(:,1)));-40*ones(size(ep_p_neg40(:,1)));];
 ep_data = [p_table,T,ep];
 
+
 s.MS580301BA01 = Sensor(); % presure in mbar, temp should be in C°
 s.MS580301BA01.maxMeasurementRange  =   1100;                   % 1100, 1300 in mbar
 s.MS580301BA01.minMeasurementRange  =   300;                    % 300, 10 in mbar
 s.MS580301BA01.resolution           =   0.012;                  % 0.012, 0.018, 0.027, 0.042, 0.065 in mbar
-s.MS580301BA01.noiseVariance        =   1;                      % guess in mbar
+s.MS580301BA01.noiseVariance        =   0.043043;                      % guess in mbar
 s.MS580301BA01.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
+
+% barometer Gemini sensors
+% sensor 1
+s.HSCMRNN015PAAA5 = Sensor();
+s.HSCMRNN015PAAA5.maxMeasurementRange = 1034.21; % mbar ( 15psi)
+s.HSCMRNN015PAAA5.minMeasurementRange = 0;
+s.HSCMRNN015PAAA5.bit = 12; 
+s.HSCMRNN015PAAA5.resolution = (s.HSCMRNN015PAAA5.maxMeasurementRange -s.HSCMRNN015PAAA5.minMeasurementRange)/(2^s.HSCMRNN015PAAA5.bit);
+s.HSCMRNN015PAAA5.noiseVariance = 0.043043; % from flight logs
+s.HSCMRNN015PAAA5.error2dOffset = ep_data; % I will leave this like this because I don't know how this works
 
 % initial chamber pressure sensor NAT825281
 s.NAT825281 = Sensor(); % presure in mbar, temp should be in C°
@@ -100,13 +111,15 @@ s.SSCDRRN015PDAD5 = Sensor(); % presure in mbar, temp should be in C°
 s.SSCDRRN015PDAD5.maxMeasurementRange  =   1034;                   % in mbar (15 psi from datasheet)
 s.SSCDRRN015PDAD5.minMeasurementRange  =   -1034;                  % in mbar (-15 psi from datasheet)
 s.SSCDRRN015PDAD5.offset               =   -1.9327;                % in mbar
-s.SSCDRRN015PDAD5.resolution           =   1;                      % in mbar
-s.SSCDRRN015PDAD5.noiseVariance        =   75;                     % guess in mbar
+s.SSCDRRN015PDAD5.resolution           =   0.0025*1034*2;          % in mbar, from datasheet
+s.SSCDRRN015PDAD5.noiseVariance        =   2.63;                   % mbar from flight logs of pyxis
 s.SSCDRRN015PDAD5.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
 % check 2d offset for pitot
 
 sensorTot.npit_old      =   1;
-sensorTot.np_old        =   1;
+sensorTot.np_old{1}        = 1;
+sensorTot.np_old{2}        = 1;
+sensorTot.np_old{3}        = 1;
 sensorTot.na_old        =   1;
 sensorTot.ngps_old      =   1;
 sensorTot.n_est_old     =   1;
@@ -114,9 +127,13 @@ sensorTot.n_ada_old     =   1;
 sensorTot.ncp_old       =   1;
 
 % from here are commented in the HIL of Angelo and Emilio, check why:
-sensorTot.pn_tot      =   0;
+sensorTot.pn_tot{1}      =   0;
+sensorTot.pn_tot{2}      =   0;
+sensorTot.pn_tot{3}      =   0;
+sensorTot.hb_tot{1}      =   0;
+sensorTot.hb_tot{2}      =   0;
+sensorTot.hb_tot{3}      =   0;
 sensorTot.cp_tot      =   0;
-sensorTot.hb_tot      =   0;
 sensorTot.accel_tot   =   [0, 0, 0];
 sensorTot.gyro_tot    =   [0, 0, 0];
 sensorTot.mag_tot     =   [0, 0, 0];

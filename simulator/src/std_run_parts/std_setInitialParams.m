@@ -34,8 +34,14 @@ sensorData.magnetometer.t0 = initSensorT0...
 sensorData.gps.t0 = initSensorT0...
     (control_freq,settings.frequencies.gpsFrequency);
 
-sensorData.barometer.t0 = initSensorT0...
-    (control_freq,settings.frequencies.barometerFrequency);% triplicare barometer1, 2 e 3
+
+% triplicate sensors for sensor fault detection testing
+sensorData.barometer_sens{1}.t0 = initSensorT0...
+    (control_freq,settings.frequencies.barometerFrequency);
+sensorData.barometer_sens{2}.t0 = initSensorT0...
+    (control_freq,settings.frequencies.barometerFrequency);
+sensorData.barometer_sens{3}.t0 = initSensorT0...
+    (control_freq,settings.frequencies.barometerFrequency);
 
 sensorData.pitot.t0 = initSensorT0...
     (control_freq,settings.frequencies.pitotFrequency);
@@ -45,9 +51,23 @@ sensorData.chamberPressure.t0 = initSensorT0...
     (control_freq,settings.frequencies.chamberPressureFrequency);
 end
 
+sensorData.barometer_sens{1}.time = [];
+sensorData.barometer_sens{1}.z = [];
+sensorData.barometer_sens{2}.time = [];
+sensorData.barometer_sens{2}.z = [];
+sensorData.barometer_sens{3}.time = [];
+sensorData.barometer_sens{3}.z = [];
+
+sensorData.barometer.t0 = sensorData.barometer_sens{1}.t0;
 sensorData.barometer.time = [];
 sensorData.barometer.z = [];
+
+
+
 settings.baro_old = 0;
+
+
+
 %% while cycle max iterations
 nmax        =       settings.nmax;                                                 % Max iteration number - stops the integration if reached
 
@@ -80,7 +100,15 @@ sensorData.kalman.pn_prec = settings.ada.p_ref;                             % se
 settings.shutdown = 0;                                                      % engine on
 settings.expShutdown = 0;                                                   % engine expected to be on
 
+
 %% sensor fault initial conditions
+chunk{1} = zeros(1,50);
+chunk{2} = zeros(1,50);
+chunk{3} = zeros(1,50);
+faults = [];
+barometer_measure = cell(1,3);
+barometer_time = [];
+sfd_mean_p = [];
 
 %% ADA initial conditions
 

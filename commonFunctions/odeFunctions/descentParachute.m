@@ -1,4 +1,4 @@
-function [dY,parout] = descentParachute(~, Y, settings, uw, vw, ww, para, uncert)
+function [dY,parout] = descentParachute(t, Y, settings, uw, vw, ww, para, uncert)
 %{ 
 
 descentParachute - ode function of the 3DOF Rigid Rocket-Paraachute Model
@@ -46,6 +46,21 @@ u = Y(4);
 v = Y(5);
 w = Y(6);
 
+
+%% CONSTANTS
+S = settings.para(para).S;                                               % [m^2]   Surface
+CD = settings.para(para).CD;                                             % [/] Parachute Drag Coefficient
+CL = settings.para(para).CL;                                             % [/] Parachute Lift Coefficient
+if para == 1
+    pmass = 0 ;                                                          % [kg] detached mass
+else
+    pmass = sum(settings.para(1:para-1).mass) + settings.mnc;
+end
+
+g = 9.80655;                                                             % [N/kg] magnitude of the gravitational field at zero
+m = settings.ms - pmass;                                                 % [kg] descend mass
+
+
 %% ADDING WIND (supposed to be added in NED axes);
 
 if settings.wind.input 
@@ -61,18 +76,6 @@ wr = w - wind(3);
 
 V_norm = norm([ur vr wr]);
 
-%% CONSTANTS
-S = settings.para(para).S;                                               % [m^2]   Surface
-CD = settings.para(para).CD;                                             % [/] Parachute Drag Coefficient
-CL = settings.para(para).CL;                                             % [/] Parachute Lift Coefficient
-if para == 1
-    pmass = 0 ;                                                          % [kg] detached mass
-else
-    pmass = sum(settings.para(1:para-1).mass) + settings.mnc;
-end
-
-g = 9.80655;                                                             % [N/kg] magnitude of the gravitational field at zero
-m = settings.ms - pmass;                                                 % [kg] descend mass
 
 %% ATMOSPHERE DATA
 
@@ -115,11 +118,12 @@ end
 
 
 %% FORCES
-D = 0.5*rho*V_norm^2*S*CD*t_vers';       % [N] Drag vector
-L = 0.5*rho*V_norm^2*S*CL*n_vers';       % [N] Lift vector
-Fg = m*g*[0 0 1]';                       % [N] Gravitational Force vector
-F = -D + L + Fg;                         % [N] total forces vector
-F_acc = F-Fg;                            % [N] accelerometer felt forces
+D = 0.5*rho*V_norm^2*S*CD*t_vers';          % [N] Drag vector
+L = 0.5*rho*V_norm^2*S*CL*n_vers';          % [N] Lift vector
+Fg = m*g*[0 0 1]';                          % [N] Gravitational Force vector
+
+F = -D + L + Fg;                   % [N] total forces vector
+F_acc = F-Fg;                               % [N] accelerometer felt forces
 
 %% STATE DERIVATIVES
 % velocity

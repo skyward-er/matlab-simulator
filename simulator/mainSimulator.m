@@ -72,6 +72,7 @@ end
 
 %% PLOTS
 std_plots(simOutput,settings,contSettings)
+sensor_plots(simOutput)
 
 %% DATA-PRINTING
 printOutput(simOutput,settings);

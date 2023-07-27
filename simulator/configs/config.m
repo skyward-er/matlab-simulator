@@ -49,13 +49,17 @@ configControl;
 %% 11) CONTROL PARAMETERS
 configControlParams;
 
+%% 12) SENSOR FAULT GENERATION
+configFaults;
+
+
 if conf.script ~= "trajectory generation"
-    %% 12) REFERENCES
+    %% 13) REFERENCES
     configReferences;
-    %% 13) SPECIAL CONDITIONS?
+    %% 14) SPECIAL CONDITIONS?
 %     config_SpecialConditions;
 
-    %% 14) DATA EXTRACTION
+    %% 15) DATA EXTRACTION
     configSettings;
 end
 
