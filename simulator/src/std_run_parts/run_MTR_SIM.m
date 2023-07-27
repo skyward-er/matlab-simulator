@@ -53,7 +53,7 @@ t_shutdown = Inf;
 if predicted_apogee(iTimes) >= settings.z_final_MTR
     if ~settings.shutdown
         settings.expShutdown = 1;
-        if contSettings.fault 
+        if contSettings.MTR_fault 
             if contSettings.u
                 settings.shutdown = 0;
                 settings.expTimeEngineCut = Tf(end);

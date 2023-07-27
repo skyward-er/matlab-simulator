@@ -13,6 +13,7 @@ classdef Sensor < handle
         minMeasurementRange; % Max limit of sensor
         maxMeasurementRange; % Min limit of sensor
         
+        bit; % number of bits for the sensor ( if available)
         resolution; % resolution of the sensor
         
         noiseVariance; % Varianze for the gaussian white noise
@@ -122,7 +123,8 @@ classdef Sensor < handle
             %  outputArg: sensor data with white noise
             
             if (~isempty(obj.noiseVariance))
-                inputArg=inputArg+ones(size(inputArg)).*sqrt(obj.noiseVariance).*randn(1,1);
+%                 inputArg=inputArg+ones(size(inputArg)).*sqrt(obj.noiseVariance).*randn(1,1);,
+                inputArg=inputArg+sqrt(obj.noiseVariance).*randn(size(inputArg));
             end
             outputArg = inputArg;
         end

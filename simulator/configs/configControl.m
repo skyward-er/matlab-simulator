@@ -90,12 +90,14 @@ if  (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'c
     contSettings.P_mat = zeros(3);          % initial value for P
     contSettings.R=1e-2*diag([1,1,1]);      % model noise covariance matrix    
     contSettings.Q=0.36; 
-    contSettings.fault = false;
+    contSettings.MTR_fault = false;
 end 
 
 
 %% MAGNETIC MAP
 settings.hmax = 6000;                                                       % [m] Max altitude at which the world magnetic map must be computed
 
-%% TEST DA SPOSTARE PER FORZA 
+%% Sensor fault detection parameters
+% support vector machine
+
  

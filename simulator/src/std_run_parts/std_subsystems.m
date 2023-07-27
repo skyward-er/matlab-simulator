@@ -1,9 +1,35 @@
 %{
 
-This function runs all subsystem in a simulated environment
+This function runs all subsystems in a simulated environment
 
 %}
 
+
+
+
+%% Sensor fault detection
+
+% simulation of the faults
+
+
+% sensor fault detection algorithm
+Nsensors = [1,2,3];
+goodSensors = Nsensors(not(settings.faulty_sensors));
+if settings.flagAscent
+    SVM_model= settings.SVM_1;
+else
+    SVM_model = settings.SVM_2;
+end
+for i = goodSensors
+    chunk{i}(1,1:end-length(sp.pn_sens{i})) = chunk{i}(1+length(sp.pn_sens{i}):end);
+    chunk{i}(1,end-length(sp.pn_sens{i})+1:end) = sp.pn_sens{i};
+    if length(chunk{i})>SVM_model.N_sample
+        warning('chunk length is greater than %d samples',SVM_model.N_sample)
+    end
+end
+[sensorData,sp,chunk,settings.faulty_sensors] = run_SensorFaultDetection_SVM(SVM_model,sensorData,sp,chunk,settings.faulty_sensors,settings.flagAscent,t0);
+
+%% ADA
 if iTimes>3
     if settings.flagADA
         ada_prev  =   xp_ada_tot(end,:);
@@ -16,13 +42,6 @@ if iTimes>3
         P_prev    =   P_c(:,:,end);
     end
 end
-
-%% Sensor Fault Detection
-
-
-
-
-%% ADA
 
 if settings.flagADA && settings.dataNoise && length(sensorData.barometer.time) > 1 ...
         && sensorData.barometer.time(1) >= settings.baro_old

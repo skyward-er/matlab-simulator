@@ -53,7 +53,7 @@ if not(settings.scenario == "descent")
 end
 % Trajectory
 figures.trajectory = figure('Name', 'Trajectory','ToolBar','auto','Position',[100,100,600,400]);
-plot3(structIn.Y(:, 1), structIn.Y(:, 2), -structIn.Y(:, 3));
+plot3(structIn.Y(1:end-10, 1), structIn.Y(1:end-10, 2), -structIn.Y(1:end-10, 3));
 hold on; grid on;
 if not(settings.scenario == "descent")
     plot3(structIn.ARB_openingPosition(1),structIn.ARB_openingPosition(2),structIn.ARB_openingPosition(3),'ko')
@@ -63,7 +63,7 @@ xlabel('x [m]');
 ylabel('y [m]');
 zlabel('z [m]');
 title('Trajectory');
-
+axis equal
 legend('Trajectory','Airbrake deployment','Apogee')
 if settings.flagExport == true
     exportgraphics(figures.trajectory,'report_images\src_trajectory.pdf')
@@ -142,8 +142,8 @@ if not(settings.scenario == "descent")
     plot(contSettings.reference.Z, contSettings.reference.Vz(:,1),'r','DisplayName','ref min')
     plot(contSettings.reference.Z, contSettings.reference.Vz(:,2),'k','DisplayName','ref max')
 end
-plot( -structIn.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
-plot( -structIn.NAS(:,3)-settings.z0,  -structIn.NAS(:,6),'m--','DisplayName','NAS')
+plot( -structIn.Y(settings.flagMatr(:, 2), 3), -v_ned(settings.flagMatr(:, 2),3),'b','DisplayName','Traj')
+plot( -structIn.NAS(settings.flagMatr(:, 2),3)-settings.z0,  -structIn.NAS(settings.flagMatr(:, 2),6),'m--','DisplayName','NAS')
 % plot( structIn.ADA(:,4),  structIn.ADA(:,5),'b','DisplayName','ADA z')
 yyaxis right
 plot( -structIn.Y(:, 3), structIn.Y(:, 17),'g','DisplayName','arb')
