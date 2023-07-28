@@ -562,8 +562,10 @@ if isfield(freq, 'pitotFrequency')
 
         sensorData.pitot.temperature = Temp;
 %         sensorData.pitot.measures = (0.5*rho.*v.*v.*sign(v))'; % differential pressure in Pascals
-        sensorData.pitot.measures = (0.5*rho.*v.^2)'; % dynamic pressure
-     end
+        gamma = 1.4;
+        sensorData.pitot.measures(1,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure 
+        sensorData.pitot.measures(1,2) = P;
+    end
 end
 
 %% chamber pressure sensor

@@ -27,7 +27,7 @@ scenarios explanation:
 
 
 % scenario configuration
-conf.scenario = "controlled ascent";
+conf.scenario = "descent";
 conf.HIL = false;
 
 % WIP flags

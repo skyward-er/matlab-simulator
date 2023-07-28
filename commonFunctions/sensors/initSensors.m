@@ -35,6 +35,16 @@ s.HSCMRNN015PAAA5.resolution = (s.HSCMRNN015PAAA5.maxMeasurementRange -s.HSCMRNN
 s.HSCMRNN015PAAA5.noiseVariance = 0.043043; % from flight logs
 s.HSCMRNN015PAAA5.error2dOffset = ep_data; % I will leave this like this because I don't know how this works
 
+% sensor 1
+s.HSCMRNN030PAAA5 = Sensor_no_offset();
+s.HSCMRNN030PAAA5.maxMeasurementRange = 2*1034.21; % mbar ( 30psi)
+s.HSCMRNN030PAAA5.minMeasurementRange = 0;
+s.HSCMRNN030PAAA5.bit = 12; 
+s.HSCMRNN030PAAA5.resolution = (s.HSCMRNN030PAAA5.maxMeasurementRange -s.HSCMRNN030PAAA5.minMeasurementRange)/(2^s.HSCMRNN030PAAA5.bit);
+s.HSCMRNN030PAAA5.noiseVariance = 2*0.043043; % from flight logs
+% s.HSCMRNN030PAAA5.error2dOffset = ep_data; % I will leave this like this because I don't know how this works
+
+
 % initial chamber pressure sensor NAT825281
 s.NAT825281 = Sensor(); % presure in mbar, temp should be in C°
 s.NAT825281.maxMeasurementRange  =   40000;                   % 1100, 1300 in mbar

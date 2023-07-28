@@ -123,21 +123,28 @@ if isfield(sensorData.gps,'time')
 end
 %% Pitot acquisition loop
 if isfield(sensorData.pitot,'time')
-    sp.dp      = zeros(1,length(sensorData.pitot.time));
+    sp.p0_pitot      = zeros(1,length(sensorData.pitot.time));
+    sp.p_pitot      = zeros(1,length(sensorData.pitot.time));
     sp.t_pit  = sensorData.pitot.time;
 
     for ii=1:length(sensorData.pitot.time)
-        sp.dp(ii)        =      s.SSCDRRN015PDAD5.sens(sensorData.pitot.measures(ii)/100,...
+        sp.p0_pitot(ii)        =      s.HSCMRNN030PAAA5.sens(sensorData.pitot.measures(ii,1)/100,...
                                                     sensorData.pitot.temperature(ii) - 273.15);
-        if sp.dp(ii) <0
-            sp.dp(ii) = 0;
-        end
-        sp.dp(ii)        =      sp.dp(ii)*100;
-%         sp.dp(ii) = sensorData.pitot.measures(ii);
+        sp.p_pitot(ii)        =      s.HSCMRNN015PAAA5.sens(sensorData.pitot.measures(ii,2)/100,...
+                                                    sensorData.pitot.temperature(ii) - 273.15);
+%         if sp.dp(ii) <0
+%             sp.dp(ii) = 0;
+%         end
+%         sp.dp(ii)        =      sp.dp(ii)*100;
+
+        sp.p0_pitot(ii) = sp.p0_pitot(ii)*100;
+        sp.p_pitot(ii) = sp.p_pitot(ii)*100;
     end
-    c.dp_tot(c.npit_old:c.npit_old + size(sp.dp,2) - 1,1)    = sp.dp(1:end);
-    c.time_pit(c.npit_old:c.npit_old + size(sp.dp,2) - 1)    =  sp.t_pit;
-    c.npit_old = c.npit_old + size(sp.dp,2);
+%     c.dp_tot(c.npit_old:c.npit_old + size(sp.dp,2) - 1,1)    = sp.dp(1:end);
+    c.p0_pit_tot(c.npit_old:c.npit_old + size(sp.p0_pitot,2) - 1,1)    = sp.p0_pitot(1:end);
+    c.p_pit_tot(c.npit_old:c.npit_old + size(sp.p_pitot,2) - 1,1)    = sp.p_pitot(1:end);
+    c.time_pit(c.npit_old:c.npit_old + size(sp.p0_pitot,2) - 1)    =  sp.t_pit;
+    c.npit_old = c.npit_old + size(sp.p0_pitot,2);
 end
 
 %% Chamber Pressure acquisition loop
