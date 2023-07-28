@@ -129,3 +129,5 @@ if settings.flagNAS
     vels_prev =  [0;0;0];
     P_prev    =   0.01*eye(12);
 end
+% stop correction with pitot
+settings.flagStopPitotCorrection = false;

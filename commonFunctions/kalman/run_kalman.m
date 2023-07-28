@@ -1,10 +1,11 @@
-function [x_c, v, P_c, kalman] = run_kalman(x_prev, vels_prev, P_prev, sp, kalman, mag_NED,flagAscent)
+function [x_c, v, P_c, kalman] = run_kalman(x_prev, vels_prev, P_prev, sp, kalman, mag_NED,flagAscent,flagStopPitotCorrection)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
 % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@kywarder.eu
 % email: alejandro.montero@skywarder.eu, alessandro.delduca@skywarder.eu
 % Release date: 01/03/2021
+% 
 
 %{
 -----------DESCRIPTION OF FUNCTION:------------------
@@ -158,7 +159,7 @@ for i=2:length(tv)
        index_mag    =  index_mag + 1;  
     end
     
-    if flagAscent
+    if flagAscent && flagStopPitotCorrection
         if tv(i) >= t_pittemp(index_pit)
            [x_lin(i,:),P_lin(4:6,4:6,i),~] = correctionPitot(x_lin(i,:),P_lin(4:6,4:6,i),sp.p0_pitot,sp.p_pitot,kalman.sigma_pitot,xq(i,1:4),kalman.Mach_max);
            index_pit    =  index_pit + 1; 
