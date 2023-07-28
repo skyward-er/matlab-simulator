@@ -27,7 +27,7 @@ scenarios explanation:
 
 
 % scenario configuration
-conf.scenario = "descent";
+conf.scenario = "full flight";
 conf.HIL = false;
 
 % WIP flags
