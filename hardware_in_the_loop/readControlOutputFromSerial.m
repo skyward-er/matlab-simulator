@@ -10,31 +10,37 @@ Release date: 10/03/2021
 
 %}
 
-function [alpha_degree, t_est_tot, n, e, d, vn, ve, vd, qx, qy, qz, qw, bx, by, bz, t_ada_tot, xp_ada_tot, xv_ada_tot] = readControlOutputFromSerial()
-    obswVals = serialbridge("Read", 22);
+function [nas_timestamp, n,e,d, vn,ve,vd, qx,qy,qz,qw, bx,by,bz, ...
+      ada_timestamp, ada_altitude, ada_verticalSpeed, ...
+      airbrakes_opening, estimated_mass, liftoff, burning_shutdown ...
+    ] = readControlOutputFromSerial()
 
-    alpha_degree = obswVals(1);
-    obswVals(2); % garbage
-    obswVals(3);
-    obswVals(4);
-    t_est_tot = obswVals(3) * 2^32 + obswVals(4);
-    n = obswVals(5);
-    e = obswVals(6);
-    d = obswVals(7);
-    vn = obswVals(8);
-    ve = obswVals(9);
-    vd = obswVals(10);
-    qx = obswVals(11);
-    qy = obswVals(12);
-    qz = obswVals(13);
-    qw = obswVals(14);
-    bx = obswVals(15);
-    by = obswVals(16);
-    bz = obswVals(17);
-    t_ada_tot = obswVals(18) * 2^32 + obswVals(19);
-    obswVals(18);
-    obswVals(19);
-    xp_ada_tot = obswVals(20);
-    xv_ada_tot = obswVals(21);
-    obswVals(22); % garbage
+    obswVals = serialbridge("Read", 23);
+
+    % NASState
+    nas_timestamp = obswVals(1) * 2^32 + obswVals(2);
+    n = obswVals(3);
+    e = obswVals(4);
+    d = obswVals(5);
+    vn = obswVals(6);
+    ve = obswVals(7);
+    vd = obswVals(8);
+    qx = obswVals(9);
+    qy = obswVals(10);
+    qz = obswVals(11);
+    qw = obswVals(12);
+    bx = obswVals(13);
+    by = obswVals(14);
+    bz = obswVals(15);
+
+    % ADAState
+    ada_timestamp = obswVals(16) * 2^32 + obswVals(17);
+    ada_altitude = obswVals(18);
+    ada_verticalSpeed = obswVals(19);
+
+    % Other
+    airbrakes_opening = obswVals(20);
+    estimated_mass = obswVals(21);
+    liftoff = obswVals(22);
+    burning_shutdown = obswVals(23);
 end
