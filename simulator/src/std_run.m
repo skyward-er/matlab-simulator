@@ -260,14 +260,15 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         end
         Tf = [t0, t1]';
         Yf = [initialCond'; initialCond']; % check how to fix this
-  
+        para = NaN;
     end
-    
+    if flagFlight
     % recall some useful parameters
-    settings.parout.partial_time = Tf;
-    settings.parout.wind_NED = parout.wind.NED_wind';
-    settings.parout.wind_body = parout.wind.body_wind';
-    settings.parout.acc = parout.accelerometer.body_acc';
+        settings.parout.partial_time = Tf;
+        settings.parout.wind_NED = parout.wind.NED_wind';
+        settings.parout.wind_body = parout.wind.body_wind';
+        settings.parout.acc = parout.accelerometer.body_acc';
+    end
 
     ext = extension_From_Angle(Yf(end,17),settings); % bug fix, check why this happens because sometimes happens that the integration returns a value slightly larger than the max value of extension for airbrakes and this mess things up
     if ext > settings.arb.maxExt
