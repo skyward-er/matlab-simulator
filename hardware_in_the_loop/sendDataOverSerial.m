@@ -20,14 +20,19 @@ function [] = sendDataOverSerial(data, flags)
     dataToBeSent.gps.fix = data.gps.fix;
     dataToBeSent.gps.nsat = data.gps.nsat;
 
-    dataToBeSent.barometer = data.barometer.measures;
-    dataToBeSent.pitot = data.pitot.measures;
+    for i = 1:size(data.barometer_sens, 2)
+        dataToBeSent.barometer_sens(i) = data.barometer_sens{i}.measures(end);
+        temp(i) = data.barometer_sens{i}.temperature(end);
+    end
 
-    dataToBeSent.temperature = data.barometer.temperature(1);
+    dataToBeSent.pitot.dp = data.pitot.measures; %%%%% DA RIVEDERE
 
-    dataToBeSent.kalman.z = data.kalman.z;
-    dataToBeSent.kalman.vz = data.kalman.vz;
-    dataToBeSent.kalman.vMod = data.kalman.vMod;
+    dataToBeSent.temperature = mean(temp);
+
+    % Need to be checked
+    % dataToBeSent.kalman.z = data.kalman.z;
+    % dataToBeSent.kalman.vz = data.kalman.vz;
+    % dataToBeSent.kalman.vMod = data.kalman.vMod;
 
     dataToBeSent.flags.flagFligth = cast(flags(1), "double");
     dataToBeSent.flags.flagAscent = cast(flags(2), "double");

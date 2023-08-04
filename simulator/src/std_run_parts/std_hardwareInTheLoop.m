@@ -13,12 +13,12 @@ if flagsArray(1)
     sensorData.kalman.vz   = Yf(end, 6);
     sensorData.kalman.vMod = norm(Yf(end, 4:6));
 else
-    sensorData.kalman.z    = 0;
+    sensorData.kalman.z    = 160;
     sensorData.kalman.vz   = 0;
     sensorData.kalman.vMod = 0;
 end
 
-% Convert the gps position from meter to degreed
+% Convert the gps position from meter to degrees
 [latitude, longitude, ~] = ned2geodetic( ...
     sensorData.gps.positionMeasures(1), ...
     sensorData.gps.positionMeasures(2), ...
@@ -31,5 +31,5 @@ sensorData.gps.longitude = longitude;
 sensorData.accelerometer.measures = sensorData.accelerometer.measures + (quat2rotm(Yf(1,11:14)) * [0;0;9.81])';
 
 ap_ref_old = ap_ref_new;
-[alpha_aperture, t_est_tot, x_est_tot, xp_ada_tot, xv_ada_tot, t_ada_tot] = run_ARB_HIL(sensorData, flagsArray);
+[alpha_aperture, t_est_tot, x_est_tot, xp_ada_tot, xv_ada_tot, t_ada_tot, estimated_mass, liftoff, burning_shutdown] = run_ARB_HIL(sensorData, flagsArray);
 ap_ref_new = alpha_aperture * settings.servo.maxAngle;  % alpha_aperture:
