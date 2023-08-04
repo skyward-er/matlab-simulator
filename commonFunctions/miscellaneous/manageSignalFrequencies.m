@@ -56,30 +56,30 @@ if freq.accelerometerFrequency > freq.controlFrequency
     sensorData.accelerometer.t0 = sensorData.accelerometer.time(end);
     if isfield(settings, 'parout')
         N = length(sensorData.accelerometer.time);
-    for i = 1:N
-        iTimeAcc = sensorData.accelerometer.time(i);
-        if all(iTimeAcc ~= T)
-            [index0] = find(iTimeAcc < T);
-            index1 = index0(1);
-            index0 = index1 - 1;
-            Y1 = Y(index1, :);
-            Y0 = Y(index0, :);
-            T1 = T(index1);
-            T0 = T(index0);
-            % linear interpolation between the 2 states
-            m = (Y1 - Y0)./(T1 - T0);
-            Yinterp = m * (iTimeAcc-T0)+Y0;
-        else
-            Yinterp = Y(iTimeAcc == T, :);
+        for i = 1:N
+            iTimeAcc = sensorData.accelerometer.time(i);
+            if all(iTimeAcc ~= T)
+                [index0] = find(iTimeAcc < T);
+                index1 = index0(1);
+                index0 = index1 - 1;
+                Y1 = Y(index1, :);
+                Y0 = Y(index0, :);
+                T1 = T(index1);
+                T0 = T(index0);
+                % linear interpolation between the 2 states
+                m = (Y1 - Y0)./(T1 - T0);
+                Yinterp = m * (iTimeAcc-T0)+Y0;
+            else
+                Yinterp = Y(iTimeAcc == T, :);
 
-        end
+            end
             if size(settings.parout.partial_time,1)~=size(settings.parout.acc,1)
                 nn = min(size(settings.parout.partial_time,1),size(settings.parout.acc,1));
                 sensorData.accelerometer.measures(i, :) = interp1(settings.parout.partial_time(1:nn,:),settings.parout.acc(1:nn,:),iTimeAcc);
             else
                 sensorData.accelerometer.measures(i, :) = interp1(settings.parout.partial_time,settings.parout.acc,iTimeAcc);
             end
-    end
+        end
     else
         sensorData.accelerometer.measures = zeros(length(sensorData.accelerometer.time), 3);
     end
@@ -97,7 +97,7 @@ elseif freq.accelerometerFrequency == freq.controlFrequency
     else
         sensorData.accelerometer.measures = zeros(length(sensorData.accelerometer.time), 3);
     end
-    
+
 else
     for i = 1:length(T)
         if T(i) - sensorData.accelerometer.t0 > 1/freq.accelerometerFrequency
@@ -494,18 +494,18 @@ if isfield(freq, 'pitotFrequency')
                 wind_body = quatrotate(Q(i,:),wind_ned);
                 v = (vx(i) + wind_body(1))';
                 sensorData.pitot.temperature(i) = Temp;
-                sensorData.pitot.measures(i,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure 
+                sensorData.pitot.measures(i,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
                 sensorData.pitot.measures(i,2) = P;
             else
                 vx(i) = Y(iTimePitot == T, 4);
                 z_pit(i) = -Y(iTimePitot == T, 3);
-                Q(i,:) = [Y(iTimePitot == T, 10:13)]; 
+                Q(i,:) = [Y(iTimePitot == T, 10:13)];
                 [Temp, a, P, ~] = atmosisa(z_pit(i) + settings.z0);
                 wind_ned = [uw, vw, ww];
                 wind_body = quatrotate(Q(i,:),wind_ned);
                 v = (vx(i) + wind_body(1))';
                 sensorData.pitot.temperature(i) = Temp;
-                sensorData.pitot.measures(i,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure 
+                sensorData.pitot.measures(i,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
                 sensorData.pitot.measures(i,2) = P;
             end
         end
@@ -521,7 +521,7 @@ if isfield(freq, 'pitotFrequency')
         wind_body = quatrotate(Q,wind_ned);
         v = (vx + wind_body(1))';
         sensorData.pitot.temperature = Temp;
-        sensorData.pitot.measures(1,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure 
+        sensorData.pitot.measures(1,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
         sensorData.pitot.measures(1,2) = P;
     else
         for i = 1:length(T)
@@ -551,7 +551,7 @@ if isfield(freq, 'pitotFrequency')
                 wind_body = quatrotate(Q,wind_ned);
                 v = (vx + wind_body(1))';
                 sensorData.pitot.temperature = Temp;
-                sensorData.pitot.measures(1,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure 
+                sensorData.pitot.measures(1,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
                 sensorData.pitot.measures(1,2) = P;
             elseif  T(i) - sensorData.pitot.t0 == 1/freq.pitotFrequency
                 iTimePitot = sensorData.pitot.t0 + 1/freq.pitotFrequency;
@@ -565,7 +565,7 @@ if isfield(freq, 'pitotFrequency')
                 wind_body = quatrotate(Q,wind_ned);
                 v = (vx + wind_body(1))';
                 sensorData.pitot.temperature = Temp;
-                sensorData.pitot.measures(1,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure 
+                sensorData.pitot.measures(1,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
                 sensorData.pitot.measures(1,2) = P;
             end
 
