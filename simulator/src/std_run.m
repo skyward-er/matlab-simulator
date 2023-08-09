@@ -120,7 +120,7 @@ std_setInitialParams;
 
 %% FLAG INITIALIZATION FOR HIL
 if settings.launchWindow
-    %     global windowCreated
+    %     global windowCreatedS
     %
     %     windowCreated = false;
     launchWindow;
@@ -141,7 +141,6 @@ end
 
 % Salvo input/output per testare algoritmo cpp
 contSettings.indice_test = 1; % serve?
-
 while settings.flagStopIntegration && n_old < nmax                          % Starts CHRONO
     iTimes = iTimes + 1;                                                    % Advance the steps
 
@@ -246,7 +245,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     [~, ~, p, ~] = atmosisa(-Yf(:,3) + settings.z0) ;
     % simulate sensor acquisition
     if settings.dataNoise
-        [sp, c] = acquisition_Sys(sensorData, s, c, settings);
+        [sp, c] = acquisition_Sys(sensorData, s, c, settings, t0);
     end
 
     %% subsystems
@@ -346,7 +345,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     %% display step state
 
     if not(settings.montecarlo)
-        disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,end));
+        disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,end) + " iteration: " + iTimes);
     end
 
 end

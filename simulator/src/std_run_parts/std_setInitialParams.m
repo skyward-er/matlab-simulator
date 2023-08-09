@@ -105,6 +105,7 @@ settings.expShutdown = 0;                                                   % en
 chunk{1} = zeros(1,50);
 chunk{2} = zeros(1,50);
 chunk{3} = zeros(1,50);
+filter_array_SFD = zeros(1,settings.sfd.filter_window);
 faults = [];
 barometer_measure = cell(1,3);
 barometer_time = [];
