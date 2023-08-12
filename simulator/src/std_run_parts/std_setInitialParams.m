@@ -130,3 +130,5 @@ if settings.flagNAS
     vels_prev =  [0;0;0];
     P_prev    =   0.01*eye(12);
 end
+
+expulsion = 0;

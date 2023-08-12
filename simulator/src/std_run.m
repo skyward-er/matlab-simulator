@@ -172,10 +172,13 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         flagFlight = true;
     end
 
-    if sensorData.kalman.vz(end) >= -1e-3 && launchFlag && not(settings.scenario == "descent")
+    if sensorData.kalman.vz(end) >= -1e-3 && launchFlag && not(settings.scenario == "descent") && expulsion == 0
+        
         settings.flagAscent = true;                                         % Ascent
+        
     else
         settings.flagAscent = false;                                        % Descent
+        expulsion = 1;
     end
 
     if not(settings.flagAscent) && launchFlag
