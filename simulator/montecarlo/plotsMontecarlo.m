@@ -43,14 +43,14 @@ apogee_time_MODE = mode(apogee_time_vec);
 N_histCol = min(N_sim,100); % best looking if we don't go higher than 200, but if N_sim is less than 200 it gives error if we set it to 200 
 % figure
 save_apogee_histogram = figure;
-histogram(apogee_time_vec,N_histCol)
+histogram(apogee_time_vec,N_histCol,'DisplayName','Time')
 hold on; grid on;
-xline(apogee_time_MEAN,'r--')
-xline(apogee_time_MODE,'g--')
+xline(apogee_time_MEAN,'r--','DisplayName','Average')
+xline(apogee_time_MODE,'g--','DisplayName','Mode')
 xlabel('Apogee value [m]')
 ylabel('Number of apogees in the same interval')
-title('Reached apogee distribution')
-legend('Airbrakes time deploy','Mean', 'Median')
+title('Apogee time distribution')
+legend
 
 %% PLOT MEAN
 save_thrust_apogee_mean = figure;
@@ -297,6 +297,7 @@ ylabel('Total aerodynamic load on airbrakes [kg]')
 for i = 1:length(save_thrust)
     est_mass(i) = save_thrust{i}.estimated_mass(end);
 end
+figure
 hist(est_mass,100)
 xlabel('Mass [kg]')
 ylabel('Number of simulations')
