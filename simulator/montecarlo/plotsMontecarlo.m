@@ -292,3 +292,12 @@ end
 title('Aerodynamic load')
 xlabel('Time [s]')
 ylabel('Total aerodynamic load on airbrakes [kg]')
+
+%% estimated final mass
+for i = 1:length(save_thrust)
+    est_mass(i) = save_thrust{i}.estimated_mass(end);
+end
+hist(est_mass,100)
+xlabel('Mass [kg]')
+ylabel('Number of simulations')
+title('Estimated final mass')
