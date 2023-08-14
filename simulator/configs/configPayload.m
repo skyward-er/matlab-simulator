@@ -1,30 +1,30 @@
 %% payload constants
 % Geometry
 settings.payload.mass = 4.2;                 % [kg]  mass 
-settings.payload.b    = 2.55/2;              % [m]   wingspan 
+settings.payload.b    = 2.06/2;              % [m]   semiwingspan  - vela nuova: 2.55/2;
 settings.payload.c    = 0.8;                 % [m]   mean aero chord
-settings.payload.S    = 2.04;                % [m^2] payload surface 
+settings.payload.S    = 1.64;                % [m^2] payload surface - vela nuova 2.04;
 settings.payload.inertia = [0.42, 0,   0.03;
                             0,    0.4,    0; 
                             0.03, 0, 0.053]; % [kg m^2] [3x3] inertia matrix payload+payload 
 settings.payload.inverseInertia = inv(settings.payload.inertia);
 
 % Aerodynamic constants
-settings.payload.cd0       =  0.25; 
-settings.payload.cdAlpha2  =  0.12;
-settings.payload.cl0       =  0.091;
-settings.payload.clAlpha   =  0.9;
-settings.payload.cm0       =  0.35; 
-settings.payload.cmAlpha   = -0.72;
-settings.payload.cmQ       = -1.49;
-settings.payload.clDeltaA  = -0.0035;
-settings.payload.cnR       = -0.27;
-settings.payload.cnDeltaA  =  0.0115;
+settings.payload.CD0       =  0.25; 
+settings.payload.CDAlpha2  =  0.12;
+settings.payload.CL0       =  0.091;
+settings.payload.CLAlpha   =  0.9;
+settings.payload.Cm0       =  0.35; 
+settings.payload.CmAlpha   = -0.72;
+settings.payload.Cmq       = -1.49;
+settings.payload.CLDeltaA  = -0.0035;
+settings.payload.Cnr       = -0.27;
+settings.payload.CnDeltaA  =  0.0115;
 settings.payload.deltaSMax =  0.1;
-settings.payload.cdDeltaA  = 0.01;
-settings.payload.clP       = -0.84;
-settings.payload.clPhi     = -0.1;
-settings.payload.cLdeltaA  = 0.01;
+settings.payload.CDDeltaA  = 0.01;
+settings.payload.Clp       = -0.84;
+settings.payload.ClPhi     = -0.1;
+settings.payload.ClDeltaA  = 0.01;
 
 % %% Enviornment
 % % Gravity
@@ -51,18 +51,18 @@ settings.payload.err_max = 50;
 
 %% Navigation
 % Set as true to include wind estimation (WES)
-payload.simParam.incWES = true;
+contSettings.payload.flagWES = false;
 
 % Constants for running WES 
-payload.wesParam.calPeriod = 10;       % [s] Time the payload takes to complete a circle
-payload.wesParam.N = 25;               % [-] Samples taken during the circle
-payload.wesParam.f_RLS = 10;           % [Hz] Frequency with which the second part is run
-payload.wesParam.Funv = eye(2);        % [-] Initial condition of Funv
-% payload.wesParam.Funv = 0.001*eye(2); 
-payload.wesParam.fFactor = 1;          % [-] Forgetting factor for RLS (1 -> it does not forget)
+contSettings.WES.calPeriod = 10;       % [s] Time the payload takes to complete a circle
+contSettings.WES.N = 25;               % [-] Samples taken during the circle
+contSettings.WES.f_RLS = 10;           % [Hz] Frequency with which the second part is run
+contSettings.WES.Funv = eye(2);        % [-] Initial condition of Funv
+% contSettings.WES.Funv = 0.001*eye(2); 
+contSettings.WES.fFactor = 1;          % [-] Forgetting factor for RLS (1 -> it does not forget)
 
 % Input during calibration of WES
-payload.wesParam.deltaA = 0.05;        % [-] DeltaA before guidance
+contSettings.WES.deltaA = 0.05;        % [-] DeltaA before guidance
 
 %% Control Algorithm
 % Set as true to include control
@@ -73,25 +73,25 @@ payload.simParam.wind_sub = 1;            % Set as 1 for subtracting and 0 other
 % payload.simParam.WES0 = environment.wind; % Windspeed considered in the subtraction
 
 % P and PI controller
-payload.simParam.Kp = 0.1;
-payload.simParam.Ki = 0.01;
-payload.simParam.uMax = 0.1;
-payload.simParam.uMin = -0.1;
-payload.simParam.controlFreq = 10; % Hz
+contSettings.payload.Kp = 0.01;
+contSettings.payload.Ki = 0.001;
+contSettings.payload.uMax = 0.1;
+contSettings.payload.uMin = -0.1;
+contSettings.payload.controlFreq = 10; % Hz
 
 %% Guidance algorithm
-% Algorithm selection
-    % Set as 1 for simple closed-loop guidance
-    % Set as 2 for t-approach
-payload.simParam.guidance_alg = 2;
+% Algorithm selection: choose from "closed loop", "t-approach"
+contSettings.payload.guidance_alg = "t-approach";
 
 % Guidance start time
-payload.gncParam.guidance_start = 15;
+contSettings.payload.guidance_start = 15;
 
 %% EMC-M1-M2: point definition
-EMC = zeros(1, 2); M1 = zeros(1, 2); M2 = zeros(1, 2);
+EMC = zeros(1, 2); 
+M1 = zeros(1, 2); 
+M2 = zeros(1, 2);
 
-if payload.simParam.guidance_alg == 2
+if contSettings.payload.guidance_alg == "t-approach"
     target = settings.payload.target;
     % define the position of EMC: in line with the target
     mult_EMC   = 1.2;               % How far from target is EMC (between 1 and 1.2)
@@ -126,6 +126,6 @@ if payload.simParam.guidance_alg == 2
     
 end
 
-payload.EMC = EMC;
-payload.M1 = M1;
-payload.M2 = M2;
+contSettings.payload.EMC = EMC;
+contSettings.payload.M1 = M1;
+contSettings.payload.M2 = M2;

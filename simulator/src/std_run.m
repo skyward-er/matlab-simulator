@@ -81,7 +81,7 @@ else
     % Attitude
     Q0 = angle2quat(settings.PHI, 0, 0, 'ZYX')';
     % State   
-    X0 = [0; 0; -settings.z_final];                                      % Position initial condition
+    X0 = [0; 0; -1000];                                      % Position initial condition
     V0 = [settings.Vx_final; settings.Vy_final; settings.Vz_final];                                                             % Velocity initial condition
     W0 = [0; 0; 0];                                                             % Angular speed initial condition
 end
@@ -181,7 +181,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     end
 
     if not(settings.flagAscent) && launchFlag
-        if sensorData.kalman.z >= settings.para(1).z_cut + settings.z0
+        if sensorData.kalman.z >= 1000 %settings.para(1).z_cut + settings.z0
             flagPara1 = true;
             flagPara2 = false;                                              % parafoil drogue
         else
@@ -229,8 +229,8 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                             settings.Iyye*ones(nd, 1), settings.Iyye*ones(nd, 1),zeros(nd,1)];
                     else
                         Y0 = Y0(1:13);
-                        [Tf, Yd] = ode4(@descentParafoil, tspan, Y0, settings, 0);
-                        parout = RecallOdeFcn(@descentParafoil, Tf, Yd, settings, 0);
+                        [Tf, Yd] = ode4(@descentParafoil, tspan, Y0, settings, deltaA);
+                        parout = RecallOdeFcn(@descentParafoil, Tf, Yd, settings, deltaA);
                         [nd, ~] = size(Yd);
                         Yf = [Yd, settings.Ixxe*ones(nd, 1), settings.Iyye*ones(nd, 1), ...
                              settings.Iyye*ones(nd, 1),zeros(nd,1)];
@@ -335,6 +335,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     c.Tf_tot(n_old:n_old+n-1, 1) =  Tf(1:end, 1);
     c.p_tot(n_old:n_old+n-1, 1)  =  p(1:end, 1);
     c.ap_tot(n_old:n_old+n-1) = Yf(1:end,17);
+    deltaA_tot(n_old:n_old+n-1) = deltaA * ones(n,1);
     c.v_ned_tot(n_old:n_old+n-1,:) = v_ned;
     barometer_measure{1} = [barometer_measure{1}, sp.pn_sens{1}(end)];
     barometer_measure{2} = [barometer_measure{2}, sp.pn_sens{2}(end)];
@@ -445,11 +446,10 @@ if exist('t_airbrakes','var')
     struct_out.ARB_allowanceIdx = idx_airbrakes;
     struct_out.ARB_cmdTime = ap_ref_time; % for plots, in order to plot the stairs of the commanded value
     struct_out.ARB_cmd = ap_ref_vec(:,2); % cmd  = commanded
-    struct_out.ARB_cmd = ap_ref_vec(:,2); % cmd  = commanded
     struct_out.ARB_openingPosition = [Yf_tot(idx_airbrakes,1),Yf_tot(idx_airbrakes,2),-Yf_tot(idx_airbrakes,3)];
     struct_out.ARB_openingVelocities = [Yf_tot(idx_airbrakes,4),Yf_tot(idx_airbrakes,5),-Yf_tot(idx_airbrakes,6)];
 end
-
+struct_out.deltaA = deltaA_tot;
 [~,structCutterTimeIndex] = max(struct_out.t);
 struct_out = structCutter(struct_out, "index", 1, structCutterTimeIndex);
 % saveConstWind =  [0]; %??? may be for montecarlo?

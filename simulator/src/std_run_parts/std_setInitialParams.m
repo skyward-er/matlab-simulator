@@ -131,3 +131,8 @@ if settings.flagNAS
 end
 % stop correction with pitot
 settings.flagStopPitotCorrection = false;
+
+% parafoil
+contSettings.payload.saturation = false;
+contSettings.payload.I = 0;
+deltaA = 0;

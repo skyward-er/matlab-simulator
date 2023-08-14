@@ -207,3 +207,13 @@ else
         ap_ref_new = 0;
     end
 end
+if ~settings.flagAscent && settings.parafoil
+    if contSettings.payload.flagWES
+        wind_est = [uw,vw,ww]; % modificare con WIND ESTIMATION
+    else
+        wind_est = [0;0;0];
+    end
+    if flagPara2
+        [deltaA,contSettings] = run_parafoilGuidance(sensorData.kalman.x_c(end,1:3), sensorData.kalman.x_c(end,4:6), wind_est, settings.payload.target, contSettings);
+    end
+end

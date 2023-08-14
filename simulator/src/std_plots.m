@@ -18,6 +18,7 @@ if not(settings.scenario == "descent")
 end
 
 %% Control variable: servo angle + reference values
+% air brakes
 if not(settings.scenario == "descent")
     figures.servo_angle = figure('Name', 'Servo angle after burning phase','ToolBar','auto','Position',[100,100,600,400]);
     plot(structIn.t, structIn.Y(:,17));
@@ -34,7 +35,15 @@ if not(settings.scenario == "descent")
         exportgraphics(figures.servo_angle,'report_images\src_servo_angle.pdf','ContentType','vector')
     end
 end
-
+% parafoil
+if settings.parafoil
+    figures.parafoil_servo_action = figure('Name', 'Parafoil deltaA','ToolBar','auto','Position',[100,100,600,400]);
+    plot(structIn.t,structIn.deltaA,'DisplayName','$\Delta_A$');
+    legend
+    title('Parafoil control action')
+    xlabel('Time (s)')
+    ylabel('Normalized control action (-)')
+end
 %% Airbrake surface
 if not(settings.scenario == "descent")
     figures.arb_exposed_surface = figure('Name', 'Airbrake exposed surface','ToolBar','auto','Position',[100,100,600,400]);
@@ -155,7 +164,7 @@ legend
 
 
 %% ada
-figure('Position',[100,100,600,400])
+figures.ada = figure('Position',[100,100,600,400])
 plot( structIn.t_ada_tot,  structIn.ADA(:,4),'DisplayName','$ADA_{z}$')
 hold on
 plot( structIn.t_ada_tot,  structIn.ADA(:,5),'DisplayName','$ADA_{vz}$')
@@ -168,3 +177,15 @@ figure('Position',[100,100,600,400])
 hold on
 plot( structIn.t_ada_tot,  structIn.ADA(:,2),'DisplayName','ADA dp')
 title('ADA pressure derivative')
+
+%% quaternions
+eul = quat2eul(structIn.Y(:,10:13));
+figures.EulerAngles = figure('Name','Euler angles','Position',[100,100,600,400]);
+plot(structIn.t,eul(:,1),'DisplayName','\phi');
+hold on;
+plot(structIn.t,eul(:,2),'DisplayName','\theta');
+plot(structIn.t,eul(:,3),'DisplayName','\psi');
+legend
+title('Euler angles')
+xlabel('Time (s)')
+ylabel('Angle (rad)')

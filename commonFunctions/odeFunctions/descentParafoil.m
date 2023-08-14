@@ -1,4 +1,4 @@
-function dY = descentParafoil(t,Y,settings,deltaA)
+function [dY,parout] = descentParafoil(t,Y,settings,deltaA)
 
 %% recall states
 % x = Y(1);
@@ -10,7 +10,7 @@ w = Y(6);
 p = Y(7);
 q = Y(8);
 r = Y(9);
-q0 = Y(10);
+q0 = Y(10); % scalar first
 q1 = Y(11);
 q2 = Y(12);
 q3 = Y(13);
@@ -18,6 +18,8 @@ q3 = Y(13);
 %% constants
 % environment
 g = settings.g0/(1 + (-z*1e-3/6371))^2; % [N/kg]  module of gravitational field
+local = settings.Local; 
+
 % geometry
 b = settings.payload.b;                         % [m] wingspan
 c = settings.payload.c;                         % [m] mean aero chord
@@ -27,15 +29,15 @@ inertia = settings.payload.inertia;             % 3x3 inertia matrix
 inverseInertia = settings.payload.inverseInertia; % 3x3 inertia matrix
 
 % aerodynamic coefficients
-CD0 = settings.payload.CD0; CDAlpha2 = settings.payload.CDAlpha;
+CD0 = settings.payload.CD0; CDAlpha2 = settings.payload.CDAlpha2;
 CL0 = settings.payload.CL0; CLAlpha = settings.payload.CLAlpha; 
 Cm0 = settings.payload.Cm0; CmAlpha = settings.payload.CmAlpha; Cmq = settings.payload.Cmq;  
 Cnr = settings.payload.Cnr; 
 Clp = settings.payload.Clp; ClPhi = settings.payload.ClPhi;     
 
 % aerodynamic control coefficients - asymmetric
-CnDeltaA = settings.payload.cnDeltaA; 
-CDDeltaA = settings.payload.cdDeltaA;  
+CnDeltaA = settings.payload.CnDeltaA; 
+CDDeltaA = settings.payload.CDDeltaA;  
 CLDeltaA = settings.payload.CLDeltaA; 
 ClDeltaA = settings.payload.ClDeltaA;
 % aerodynamic control coefficients - symmetric
@@ -45,7 +47,6 @@ deltaSMax = settings.payload.deltaSMax; % max value
 %% rotations
 Q = [q0 q1 q2 q3];
 Q = Q/norm(Q);
-dcm = quatToDcm(Q);
 
 %% ADDING WIND (supposed to be added in NED axes);
 if settings.wind.model
@@ -57,7 +58,9 @@ elseif settings.wind.input
 % elseif  settings.wind.variable
 %     [uw, vw, ww] = windVariableGenerator(t, z, settings.wind);
 end
-
+if not(settings.wind.input) && not(settings.wind.model)
+    uw = settings.constWind(1); vw = settings.constWind(2); ww = settings.constWind(3);
+end
 dcm = quatToDcm(Q);
 eul = quat2eul(Q); 
 eul = flip(eul); % to be compliant with Restu
@@ -104,7 +107,7 @@ DRAG = qFactor * (CD0 + alpha^2 * CDAlpha2 + deltaANormalized * CLDeltaA) * [ur;
 
 F_AERO = (LIFT - DRAG)*S;
 
-Fg = dcm*[0; 0; m*g];        % [N] force due to the gravity in body frame
+Fg = dcm*[0; 0; mass*g];        % [N] force due to the gravity in body frame
 F = Fg + F_AERO;             % [N] total forces vector
 
 %% moments
@@ -118,9 +121,9 @@ M = M_AERO; % no inertia considerations in this model
 %% derivatives computations
 
 % acceleration
-du = F(1)/m - q*w + r*v;
-dv = F(2)/m - r*u + p*w;
-dw = F(3)/m - p*v + q*u;
+du = F(1)/mass - q*w + r*v;
+dv = F(2)/mass - r*u + p*w;
+dw = F(3)/mass - p*v + q*u;
 
 % angular velocity
 OM = [ 0 -p -q -r  ;
@@ -133,7 +136,7 @@ dQQ = 1/2*OM*Q';
 % angular acceleration
 omega = [p;q;r];
 
-angAcc = inverseInertia*(M - cross(omega,inertiaMatrix * omega));
+angAcc = inverseInertia*(M - cross(omega,inertia * omega));
 
 
 %% FINAL DERIVATIVE STATE ASSEMBLING
@@ -144,8 +147,17 @@ dY(6) = dw;
 dY(7:9) = angAcc;
 dY(10:13) = dQQ;
 
+dY = dY';
 
 
+%% parout
+
+parout.wind.NED_wind = [uw, vw, ww];
+parout.wind.body_wind = wind;
+
+parout.accelerations.body_acc = [du, dv, dw];
+
+parout.accelerometer.body_acc = F_AERO/mass;
 
 
 
