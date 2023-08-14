@@ -52,14 +52,16 @@ configControlParams;
 %% 12) SENSOR FAULT GENERATION
 configFaults;
 
+%% 13) PARAFOIL DATA
+payload = configPayload;
 
 if conf.script ~= "trajectory generation"
-    %% 13) REFERENCES
+    %% 14) REFERENCES
     configReferences;
-    %% 14) SPECIAL CONDITIONS?
+    %% 15) SPECIAL CONDITIONS?
 %     config_SpecialConditions;
 
-    %% 15) DATA EXTRACTION
+    %% 16) DATA EXTRACTION
     configSettings;
 end
 
