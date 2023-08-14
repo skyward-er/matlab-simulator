@@ -59,3 +59,4 @@ end
 % quantities independent from mission
 settings.CD_correction = 0.75; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
 settings.CD_correction_ref = 0.75; % same, but for the trajectory generation.
+settings.stopPitotAltitude = 2800;

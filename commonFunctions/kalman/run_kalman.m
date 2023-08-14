@@ -1,10 +1,11 @@
-function [x_c, v, P_c, kalman] = run_kalman(x_prev, vels_prev, P_prev, sp, kalman, mag_NED)
+function [x_c, v, P_c, kalman] = run_kalman(x_prev, vels_prev, P_prev, sp, kalman, mag_NED,flagAscent,flagStopPitotCorrection)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
 % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@kywarder.eu
 % email: alejandro.montero@skywarder.eu, alessandro.delduca@skywarder.eu
 % Release date: 01/03/2021
+% 
 
 %{
 -----------DESCRIPTION OF FUNCTION:------------------
@@ -121,11 +122,13 @@ P_c(:,:,1)  =   P_prev;
 index_GPS=1;
 index_bar=1;
 index_mag=1;
+index_pit=1;
 
 % Time vectors agumentation
 t_gpstemp  = [sp.t_gps  tv(end) + dt_k];
 t_barotemp = [sp.t_baro tv(end) + dt_k];
 t_magtemp  = [sp.t_mag   tv(end) + dt_k];
+t_pittemp = [sp.t_pit tv(end) +dt_k];
 
 [sp.gps(:,1),sp.gps(:,2),sp.gps(:,3)]  = geodetic2ned(sp.gps(:,1), sp.gps(:,2), sp.gps(:,3), kalman.lat0, kalman.lon0, kalman.z0, kalman.spheroid, 'degrees');
 for i=2:length(tv)
@@ -156,6 +159,12 @@ for i=2:length(tv)
        index_mag    =  index_mag + 1;  
     end
     
+    if flagAscent && flagStopPitotCorrection
+        if tv(i) >= t_pittemp(index_pit)
+           [x_lin(i,:),P_lin(4:6,4:6,i),~] = correctionPitot(x_lin(i,:),P_lin(4:6,4:6,i),sp.p0_pitot,sp.p_pitot,kalman.sigma_pitot,xq(i,1:4),kalman.Mach_max);
+           index_pit    =  index_pit + 1; 
+        end
+    end
     x_c(i,:) = [x_lin(i,:),xq(i,:)];
     P_c(1:6,1:6,i)   = P_lin(:,:,i);
     P_c(7:12,7:12,i) = P_q(:,:,i);
