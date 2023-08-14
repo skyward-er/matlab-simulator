@@ -81,11 +81,11 @@ else
     % Attitude
     Q0 = angle2quat(settings.PHI, 0, 0, 'ZYX')';
     % State   
-    X0 = [0; 0; -1000];                                      % Position initial condition
-    V0 = [settings.Vx_final; settings.Vy_final; settings.Vz_final];                                                             % Velocity initial condition
+    X0 = [0; 0; -settings.z_final];                                              % Position initial condition
+    V0 = [settings.Vx_final; settings.Vy_final; settings.Vz_final];             % Velocity initial condition
     W0 = [0; 0; 0];                                                             % Angular speed initial condition
 end
-ap0 = 0;                                                                    % Control servo angle initial condition
+ap0 = 0;                                                                        % Control servo angle initial condition
 
 %%% TEMPORANEO i dati non sono standardizzati a causa del motore ibrido
 %%% rispetto agli anni precedenti
@@ -100,7 +100,7 @@ end
 %%%
 
 initialCond = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf; ap0;];
-Y0 = initialCond;
+Y0 = initialCond';
 
 %% WIND GENERATION
 [uw, vw, ww, Az , El, Mag] = std_setWind(settings);
@@ -168,20 +168,21 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         flagAeroBrakes = false;
     end
 
-    if sensorData.kalman.z < settings.z0-1 || not(launchFlag)
+    if -Y0(end,3) < -1 || not(launchFlag)
         flagFlight = false;
     else
         flagFlight = true;
     end
 
-    if sensorData.kalman.vz(end) >= -1e-3 && launchFlag && not(settings.scenario == "descent")
+    if vz(end) >= -1e-3 && launchFlag && not(settings.scenario == "descent") && ~eventExpulsion
         settings.flagAscent = true;                                         % Ascent
     else
         settings.flagAscent = false;                                        % Descent
+        eventExpulsion = true;
     end
 
     if not(settings.flagAscent) && launchFlag
-        if sensorData.kalman.z >= 1000 %settings.para(1).z_cut + settings.z0
+        if sensorData.kalman.z >= 1500%settings.para(1).z_cut + settings.z0
             flagPara1 = true;
             flagPara2 = false;                                              % parafoil drogue
         else
@@ -286,17 +287,17 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     ap_ref_vec(iTimes,:) = ap_ref;
     ap_ref_time(iTimes) = t1; % because it is commanded in the next step, so we save the step final time
 
-    % vertical velocity and position
-    if settings.flagAscent || (not(settings.flagAscent) && settings.ballisticFligth)
+    % vertical velocity and position if no NAS is involved
+    if  settings.flagAscent || (not(settings.flagAscent) && settings.ballisticFligth)
         Q    =   Yf(end, 10:13);
         vels =   quatrotate(quatconj(Q), Yf(:, 4:6));
-        sensorData.kalman.vz = - vels(end,3);   % down
-        sensorData.kalman.vx =  vels(end,2);   % north
-        sensorData.kalman.vy =  vels(end,1);   % east
+        vz = - vels(end,3);   % down
+        vx =  vels(end,2);   % north
+        vy =  vels(end,1);   % east
     else
-        sensorData.kalman.vz = - Yf(end, 6); % still not NAS state here
-        sensorData.kalman.vx = Yf(end, 5);
-        sensorData.kalman.vy = Yf(end, 4);
+        vz = - Yf(end, 6); % still not NAS state here
+        vx = Yf(end, 5);
+        vy = Yf(end, 4);
     end
 
 
@@ -309,7 +310,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     % atmosphere
     [~, a, ~, ~] = atmosisa(sensorData.kalman.z);        % speed of sound at each sample time, kalman is mean sea level (MSL) so there is no need to add z0
     %   normV = norm(Yf(end, 4:6));
-    normV = norm([sensorData.kalman.vz sensorData.kalman.vx sensorData.kalman.vy]);
+    normV = norm([vz vx vy]);
     mach = normV/a;
 
     % wind update
@@ -379,7 +380,7 @@ Yf = Yf_tot(1:n_old, :);
 Tf = Tf_tot(1:n_old, :);
 
 if not(settings.electronics)
-    t_kalman = sensorData.kalman.time;
+    t_kalman = t_est_tot;
 else
     t_kalman = -1;
 end

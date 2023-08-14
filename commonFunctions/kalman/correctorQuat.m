@@ -89,7 +89,7 @@ qv1 = quat1(1:3);
 qs1 = quat1(4);
 
 qv2 = quat2(1:3);
-qs2 = quat2(4);
+qs2 = quat2(4); % scalar FOURTH in the hamiltonian product
 
 quat = [qs1 * qv2 + qs2 * qv1 - cross( qv1, qv2 ) ;
               qs1 * qs2 - dot( qv1, qv2 )        ];

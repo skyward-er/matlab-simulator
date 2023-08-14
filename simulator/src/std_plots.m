@@ -83,23 +83,59 @@ end
 
 %% Velocities w.r.t. time
 figures.velocities = figure('Name', 'Velocities','ToolBar','auto','Position',[100,100,600,400]);
-plot(structIn.t, structIn.Y(:, 4))
+plot(structIn.t, structIn.Y(:, 4),'DisplayName','Vx')
 hold on; grid on;
-plot(structIn.t, structIn.Y(:, 5))
-plot(structIn.t, structIn.Y(:, 6))
+plot(structIn.t, structIn.Y(:, 5),'DisplayName','Vy')
+plot(structIn.t, structIn.Y(:, 6),'DisplayName','Vz')
 if not(settings.scenario == "descent")
-    xline(structIn.ARB_allowanceTime,'k--')
+    xline(structIn.ARB_allowanceTime,'k--','DisplayName','Air brakes opening')
 end
-    xline(structIn.apogee_time,'r--')
+    xline(structIn.apogee_time,'r--','DisplayName','Apogee')
 xlabel('Time [s]');
 ylabel('Speed V [m/s]');
 title('Velocities');
-legend('Vx', 'Vy', 'Vz','Airbrakes opening','Apogee')
+legend
 
 if settings.flagExport == true
     exportgraphics(figures.velocities,'report_images\src_velocities.pdf')
 end
 
+%% Velocities w.r.t. time against NAS
+V_NAS_BODY = structIn.NAS(:, 4:6);%quatrotate(structIn.NAS(:,10:13), structIn.NAS(:, 4:6));
+figures.velocities = figure('Name', 'Velocities','ToolBar','auto','Position',[100,100,600,400]);
+subplot(3,1,1)
+plot(structIn.t, structIn.Y(:, 4),'DisplayName','Vx')
+hold on; grid on;
+plot(structIn.t_nas, V_NAS_BODY(:, 1),'DisplayName','Vx est')
+
+if not(settings.scenario == "descent")
+    xline(structIn.ARB_allowanceTime,'k--')
+end
+
+subplot(3,1,2)
+plot(structIn.t, structIn.Y(:, 5),'DisplayName','Vy')
+hold on; 
+plot(structIn.t_nas, V_NAS_BODY(:, 2),'DisplayName','Vy est')
+if not(settings.scenario == "descent")
+    xline(structIn.ARB_allowanceTime,'k--')
+end
+
+subplot(3,1,3)
+plot(structIn.t, structIn.Y(:, 6),'DisplayName','Vz')
+hold on;
+plot(structIn.t_nas, V_NAS_BODY(:, 3),'DisplayName','Vz est')
+
+if not(settings.scenario == "descent")
+    xline(structIn.ARB_allowanceTime,'k--','DisplayName','Air brakes opening')
+end
+    xline(structIn.apogee_time,'r--','DisplayName','Apogee')
+xlabel('Time [s]');
+ylabel('Speed V [m/s]');
+title('Velocities');
+
+if settings.flagExport == true
+    exportgraphics(figures.velocities,'report_images\src_velocities.pdf')
+end
 %% Mach w.r.t. time
 figures.Mach_number = figure('Name', 'Velocities','ToolBar','auto','Position',[100,100,600,400]);
 [~, a, ~, ~] = atmosisa(structIn.Y(:, 3));
@@ -180,11 +216,27 @@ title('ADA pressure derivative')
 
 %% quaternions
 eul = quat2eul(structIn.Y(:,10:13));
+eul = flip(eul);
+eul = unwrap(eul);
+eul_NAS = quat2eul(structIn.NAS(:,10:13));
+eul_NAS = flip(eul_NAS);
+eul_NAS = unwrap(eul_NAS);
 figures.EulerAngles = figure('Name','Euler angles','Position',[100,100,600,400]);
+subplot(3,1,1)
 plot(structIn.t,eul(:,1),'DisplayName','\phi');
 hold on;
+plot(structIn.t_nas,eul_NAS(:,1),'DisplayName','\phi est');
+legend
+subplot(3,1,2)
 plot(structIn.t,eul(:,2),'DisplayName','\theta');
+hold on;
+plot(structIn.t_nas,eul_NAS(:,2),'DisplayName','\theta est');
+legend
+subplot(3,1,3)
 plot(structIn.t,eul(:,3),'DisplayName','\psi');
+hold on;
+plot(structIn.t_nas,eul_NAS(:,3),'DisplayName','\psi est');
+
 legend
 title('Euler angles')
 xlabel('Time (s)')

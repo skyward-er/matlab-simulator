@@ -355,7 +355,7 @@ else
 
         for i = 1:length(T)
 
-            if T(i) - sensorData.gps.t0 > 1/freq.gpsFrequency
+            if T(i) - sensorData.gps.t0 - 1/freq.gpsFrequency >1e-6 % to improve stability in case of non exact integration step
                 iTimegps = sensorData.gps.t0 + 1/freq.gpsFrequency;
                 Y1 = Y(i, [1:6, 10:13]);
                 Y0 = Y(i-1, [1:6, 10:13]);
@@ -366,16 +366,16 @@ else
 %                 q = Y1 - m*T1;
 %                 Yinterp = m*iTimegps + q;
                 Yinterp = m * (iTimegps-T0)+Y0;
-                sensorData.gps.positionMeasures(i, :) = -Yinterp(1:3);
-                sensorData.gps.velocityMeasures(i, :) = -quatrotate(quatconj(Yinterp(7:10)), Yinterp(4:6));
+                sensorData.gps.positionMeasures(i, :) = Yinterp(1:3);
+                sensorData.gps.velocityMeasures(i, :) = quatrotate(quatconj(Yinterp(7:10)), Yinterp(4:6));
                 sensorData.gps.t0 = iTimegps;
                 sensorData.gps.time = iTimegps;
-            elseif T(i) - sensorData.gps.t0 == 1/freq.gpsFrequency
+            elseif abs((T(i) - sensorData.gps.t0) - 1/freq.gpsFrequency) < 1e-6
                 iTimegps = sensorData.gps.t0 + 1/freq.gpsFrequency;
                 Q = Y(i, 10:13);
                 V = Y(i, 4:6);
-                sensorData.gps.positionMeasures(i, :) = -Y(iTimegps == T, 1:3);
-                sensorData.gps.velocityMeasures(i, :) = -quatrotate(quatconj(Q), V);
+                sensorData.gps.positionMeasures = Y(i, 1:3);
+                sensorData.gps.velocityMeasures = quatrotate(quatconj(Q), V);
                 sensorData.gps.t0 = iTimegps;
                 sensorData.gps.time = iTimegps;
             end

@@ -99,7 +99,8 @@ sensorData.kalman.pn_prec = settings.ada.p_ref;                             % se
 % ap_ref_time = zeros(nmax, 1);                                               % Vector of time reference for air brakes
 settings.shutdown = 0;                                                      % engine on
 settings.expShutdown = 0;                                                   % engine expected to be on
-
+vz = 0;
+eventExpulsion = false;
 
 %% sensor fault initial conditions
 chunk{1} = zeros(1,50);
