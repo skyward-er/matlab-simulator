@@ -53,7 +53,7 @@ configControlParams;
 configFaults;
 
 %% 13) PARAFOIL DATA
-payload = configPayload;
+configPayload;
 
 if conf.script ~= "trajectory generation"
     %% 14) REFERENCES

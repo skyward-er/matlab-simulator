@@ -117,6 +117,7 @@ std_magneticField;
 
 %% INTEGRATION
 std_setInitialParams;
+dt_ode = 0.01;
 
 %% FLAG INITIALIZATION FOR HIL
 if settings.launchWindow
@@ -191,10 +192,12 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         flagPara1 = false;
         flagPara2 = false;                                                  % no parafoil during ascent
     end
-
+    
     %% dynamics (ODE) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if flagFlight
+    tspan = t0:dt_ode:t1;
 
+    if flagFlight
+    
         if settings.ballisticFligth
             [Tf, Yf] = ode113(@ascentControl, [t0, t1], Y0, [], settings, ap_ref, t_change_ref, tLaunch);
             parout = recallOdeFcn2(@ascentControl, Tf, Yf, settings, Yf(:,17), settings.servo.delay,tLaunch,'apVec');
@@ -205,20 +208,35 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                 parout = recallOdeFcn2(@ascentControl, Tf, Yf, settings, Yf(:,17), settings.servo.delay,tLaunch,'apVec');
                 para = NaN;
             else
+
                 if flagPara1
                     para = 1;
+                    Y0 = Y0(1:6);
+                    [Tf, Yd] = ode4(@descentParachute, tspan, Y0, settings, uw, vw, ww, para); % ..., para, uncert);
+                    parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para);
+                    [nd, ~] = size(Yd);
+                    Yf = [Yd, zeros(nd, 6), ones(nd,1), settings.Ixxe*ones(nd, 1), ...
+                        settings.Iyye*ones(nd, 1), settings.Iyye*ones(nd, 1),zeros(nd,1)];
                 end
                 if flagPara2
-                    para = 2;
-                end
+                    if ~settings.parafoil
+                        para = 2;
+                        Y0 = Y0(1:6);
+                        [Tf, Yd] = ode45(@descentParachute, [t0, t1], Y0, [], settings, uw, vw, ww, para); % ..., para, uncert);
+                        parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para);
+                        [nd, ~] = size(Yd);
+                        Yf = [Yd, zeros(nd, 6), ones(nd,1), settings.Ixxe*ones(nd, 1), ...
+                            settings.Iyye*ones(nd, 1), settings.Iyye*ones(nd, 1),zeros(nd,1)];
+                    else
+                        Y0 = Y0(1:13);
+                        [Tf, Yd] = ode4(@descentParafoil, tspan, Y0, settings, 0);
+                        parout = RecallOdeFcn(@descentParafoil, Tf, Yd, settings, 0);
+                        [nd, ~] = size(Yd);
+                        Yf = [Yd, settings.Ixxe*ones(nd, 1), settings.Iyye*ones(nd, 1), ...
+                             settings.Iyye*ones(nd, 1),zeros(nd,1)];
+                    end
 
-                Y0 = Y0(1:6);
-                [Tf, Yd] = ode45(@descentParachute, [t0, t1], Y0, [], settings, uw, vw, ww, para); % ..., para, uncert);
-                parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para);
-                [nd, ~] = size(Yd);
-                Yf = [Yd, zeros(nd, 6), ones(nd,1), settings.Ixxe*ones(nd, 1), ...
-                    settings.Iyye*ones(nd, 1), settings.Iyye*ones(nd, 1),zeros(nd,1)];
-                
+                end
             end
         end
     else

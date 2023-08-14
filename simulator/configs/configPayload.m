@@ -1,32 +1,30 @@
-function [payload] = configPayload()
-
 %% payload constants
 % Geometry
-payload.geometry.mass = 4.2;                 % [kg]  mass 
-payload.geometry.b    = 2.55/2;              % [m]   wingspan 
-payload.geometry.c    = 0.8;                 % [m]   mean aero chord
-payload.geometry.S    = 2.04;                % [m^2] payload surface 
-Inertia = [0.42, 0,   0.03;
-           0,    0.4,    0; 
-           0.03, 0, 0.053];                  % [kg m^2] [3x3] inertia matrix payload+payload 
-payload.geometry.inverseInertiaMatrix = inv(Inertia);
+settings.payload.mass = 4.2;                 % [kg]  mass 
+settings.payload.b    = 2.55/2;              % [m]   wingspan 
+settings.payload.c    = 0.8;                 % [m]   mean aero chord
+settings.payload.S    = 2.04;                % [m^2] payload surface 
+settings.payload.inertia = [0.42, 0,   0.03;
+                            0,    0.4,    0; 
+                            0.03, 0, 0.053]; % [kg m^2] [3x3] inertia matrix payload+payload 
+settings.payload.inverseInertia = inv(settings.payload.inertia);
 
 % Aerodynamic constants
-payload.aero.cd0       =  0.25; 
-payload.aero.cdAlpha2  =  0.12;
-payload.aero.cl0       =  0.091;
-payload.aero.clAlpha   =  0.9;
-payload.aero.cm0       =  0.35; 
-payload.aero.cmAlpha   = -0.72;
-payload.aero.cmQ       = -1.49;
-payload.aero.clDeltaA  = -0.0035;
-payload.aero.cnR       = -0.27;
-payload.aero.cnDeltaA  =  0.0115;
-payload.aero.deltaSMax =  0.1;
-payload.aero.cdDeltaA  = 0.01;
-payload.aero.clP       = -0.84;
-payload.aero.clPhi     = -0.1;
-payload.aero.cLdeltaA  = 0.01;
+settings.payload.cd0       =  0.25; 
+settings.payload.cdAlpha2  =  0.12;
+settings.payload.cl0       =  0.091;
+settings.payload.clAlpha   =  0.9;
+settings.payload.cm0       =  0.35; 
+settings.payload.cmAlpha   = -0.72;
+settings.payload.cmQ       = -1.49;
+settings.payload.clDeltaA  = -0.0035;
+settings.payload.cnR       = -0.27;
+settings.payload.cnDeltaA  =  0.0115;
+settings.payload.deltaSMax =  0.1;
+settings.payload.cdDeltaA  = 0.01;
+settings.payload.clP       = -0.84;
+settings.payload.clPhi     = -0.1;
+settings.payload.cLdeltaA  = 0.01;
 
 % %% Enviornment
 % % Gravity
@@ -36,20 +34,20 @@ payload.aero.cLdeltaA  = 0.01;
 % environment.wind = [1; 1; 0];      % [m/s] [3x1] Wind velocity vector 
 
 % %% Intial conditions
-% simParam.omega0   = [0;0;0];        % [rad/s] [3x1] Initial angular velocity
-% simParam.velBody0 = [7.3;0;0];      % [m/s] [3x1] Initial velocity
-% simParam.initPos  = [0;0;-400];     % [m] [3x1] Initial position
-% simParam.attitude = [0;0;0];        % [rad] [3x1] Initial attitude
+% settings.payload.omega0   = [0;0;0];        % [rad/s] [3x1] Initial angular velocity
+% settings.payload.velBody0 = [7.3;0;0];      % [m/s] [3x1] Initial velocity
+% settings.payload.initPos  = [0;0;-400];     % [m] [3x1] Initial position
+% settings.payload.attitude = [0;0;0];        % [rad] [3x1] Initial attitude
 
 %% Target
 % Target coordinates 
 x_target = 200;
 y_target = 300;
 z_target = 0;
-payload.target = [x_target; y_target; z_target]; % [m] [3x1] target (IPI)
+settings.payload.target = [x_target; y_target; z_target]; % [m] [3x1] target (IPI)
 
 % Desired maximum error
-payload.err_max = 50;
+settings.payload.err_max = 50;
 
 %% Navigation
 % Set as true to include wind estimation (WES)
@@ -94,7 +92,7 @@ payload.gncParam.guidance_start = 15;
 EMC = zeros(1, 2); M1 = zeros(1, 2); M2 = zeros(1, 2);
 
 if payload.simParam.guidance_alg == 2
-    target = payload.target;
+    target = settings.payload.target;
     % define the position of EMC: in line with the target
     mult_EMC   = 1.2;               % How far from target is EMC (between 1 and 1.2)
     EMC        = target(1:2)*mult_EMC; % Energy Management point [1x2] [m]
@@ -131,5 +129,3 @@ end
 payload.EMC = EMC;
 payload.M1 = M1;
 payload.M2 = M2;
-
-end

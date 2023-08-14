@@ -27,7 +27,8 @@ scenarios explanation:
 
 
 % scenario configuration
-conf.scenario = "controlled ascent";
+conf.scenario = "descent";
+conf.board = "main";            % Either "main" or "payload"
 conf.HIL = false;
 
 % WIP flags
@@ -46,6 +47,7 @@ settings.tuning = true;                 % [-] True if you want to tune the algor
 
 % EXPORT GRAPHICS (from simulations)
 settings.flagExport = false;
+
 
 
 %% ------------------------------- don't modify unless you really know what you are doing, touch only the flags before this line ---------------------------- %%
@@ -155,6 +157,13 @@ elseif conf.HIL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     end
 
 end %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+switch conf.board
+    case "main"
+        settings.parafoil = false;
+    case "payload"
+        settings.parafoil = true;
+end
 
 if not(settings.ballisticFligth) && settings.ascentOnly
     error('To simulate a landing with the parachutes, settings.ascentOnly must be false')
