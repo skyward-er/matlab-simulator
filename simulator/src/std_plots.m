@@ -218,7 +218,7 @@ title('ADA pressure derivative')
 eul = quat2eul(structIn.Y(:,10:13));
 eul = flip(eul);
 eul = unwrap(eul);
-eul_NAS = quat2eul(structIn.NAS(:,10:13));
+eul_NAS = quat2eul(structIn.NAS(:,[10,7:9]));
 eul_NAS = flip(eul_NAS);
 eul_NAS = unwrap(eul_NAS);
 figures.EulerAngles = figure('Name','Euler angles','Position',[100,100,600,400]);

@@ -287,15 +287,15 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     ap_ref_vec(iTimes,:) = ap_ref;
     ap_ref_time(iTimes) = t1; % because it is commanded in the next step, so we save the step final time
 
-    % vertical velocity and position if no NAS is involved
+    % vertical velocity for update of the state machine
     if  settings.flagAscent || (not(settings.flagAscent) && settings.ballisticFligth)
         Q    =   Yf(end, 10:13);
         vels =   quatrotate(quatconj(Q), Yf(:, 4:6));
-        vz = - vels(end,3);   % down
+        vz = - vels(end,3);   % up (there is a -)
         vx =  vels(end,2);   % north
         vy =  vels(end,1);   % east
     else
-        vz = - Yf(end, 6); % still not NAS state here
+        vz = - Yf(end, 6); 
         vx = Yf(end, 5);
         vy = Yf(end, 4);
     end

@@ -26,7 +26,10 @@ function [x_c,P_c,e,z]=correctorQuat(x_pred,P_pred,mag_sam,sigma_mag,mag_NED)
 %---------------------------------------------------------------------------
 % Computation of the covariance matrix of the noise
 R       =  sigma_mag^2*eye(3);
-mag_sam =  mag_sam/norm(mag_sam);
+
+% normalization of the magnetic vectors 
+mag_sam =  deg2rad(mag_sam);%mag_sam/norm(mag_sam);
+mag_NED = deg2rad(mag_NED);%mag_NED/norm(mag_NED);
 
 %--------------------------------------------------------------------------
 % Computation of the output equation and innovation term of the filter
@@ -57,7 +60,7 @@ e       = mag_sam' - z;       %Difference between measured (mag_sam) and
                               %estimated (z) magnetic vectors
 delta_x = (K*e)';             % Error correction computation (delta_x)
 
-r       = [0.5*delta_x(1:3), sqrt(1-0.25*delta_x(1:3)*delta_x(1:3)')];
+r       =[ 0.5*delta_x(1:3),sqrt(1-0.25*delta_x(1:3)*delta_x(1:3)')]; % scalar first
 
 u       = quatProd(r',x_pred(1:4)')';      %The correction of the quaternion
                                            %is done through a multiplication 

@@ -158,7 +158,7 @@ for i=2:length(tv)
         index_mag    =  index_mag + 1;
     end
 
-    if flagAscent && flagStopPitotCorrection
+    if flagAscent && ~flagStopPitotCorrection
         if tv(i) >= t_pittemp(index_pit)
             [x_lin(i,:),P_lin(4:6,4:6,i),~] = correctionPitot(x_lin(i,:),P_lin(4:6,4:6,i),sp.p0_pitot,sp.p_pitot,kalman.sigma_pitot,xq(i,1:4),kalman.Mach_max);
             index_pit    =  index_pit + 1;

@@ -53,10 +53,10 @@ switch true % set this value in configControl.m
 %         end
 
         %% correction with current pitch
-%         if sensorData.kalman.z-settings.z0 < 2800
-%          test = cos(settings.OMEGA-settings.pitch);
-%          ap_ref_new = ap_ref_new * test;
-%         end
+        if sensorData.kalman.z-settings.z0 < 2800
+         test = cos(settings.OMEGA-settings.pitch);
+         ap_ref_new = ap_ref_new * test;
+        end
 
          %% filter
         contSettings.flagFirstControl = false;
