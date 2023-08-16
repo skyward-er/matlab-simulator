@@ -182,12 +182,13 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     end
 
     if not(settings.flagAscent) && launchFlag
-        if sensorData.kalman.z >= 1500%settings.para(1).z_cut + settings.z0
+        if sensorData.kalman.z >= 1500 && ~eventExpulsion2%settings.para(1).z_cut + settings.z0
             flagPara1 = true;
             flagPara2 = false;                                              % parafoil drogue
         else
             flagPara1 = false;
             flagPara2 = true;                                               % parafoil main
+            eventExpulsion2 = true;
         end
     else
         flagPara1 = false;
@@ -366,7 +367,11 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     %% display step state
 
     if not(settings.montecarlo)
-        disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,end));
+        if settings.flagAscent
+            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,end));
+        else
+            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z + ", deltaA: " + deltaA);
+        end
     end
 
 end

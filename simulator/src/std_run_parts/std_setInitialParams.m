@@ -100,7 +100,9 @@ sensorData.kalman.pn_prec = settings.ada.p_ref;                             % se
 settings.shutdown = 0;                                                      % engine on
 settings.expShutdown = 0;                                                   % engine expected to be on
 vz = 0;
-eventExpulsion = false;
+% prevent unwanted changes in state machine
+eventExpulsion = false; % expulsion of the first parachute
+eventExpulsion2 = false; % expulsion of the second parachute
 
 %% sensor fault initial conditions
 chunk{1} = zeros(1,50);

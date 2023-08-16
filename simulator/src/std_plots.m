@@ -101,17 +101,19 @@ if settings.flagExport == true
 end
 
 %% Velocities w.r.t. time against NAS
-V_NAS_BODY = structIn.NAS(:, 4:6);%quatrotate(structIn.NAS(:,10:13), structIn.NAS(:, 4:6));
+V_NAS_BODY = quatrotate(structIn.NAS(:,[10,7:9]), structIn.NAS(:, 4:6));
 figures.velocities = figure('Name', 'Velocities','ToolBar','auto','Position',[100,100,600,400]);
+%
 subplot(3,1,1)
 plot(structIn.t, structIn.Y(:, 4),'DisplayName','Vx')
 hold on; grid on;
 plot(structIn.t_nas, V_NAS_BODY(:, 1),'DisplayName','Vx est')
-
 if not(settings.scenario == "descent")
     xline(structIn.ARB_allowanceTime,'k--')
 end
-
+ylabel('V_x [m/s]');
+legend
+%
 subplot(3,1,2)
 plot(structIn.t, structIn.Y(:, 5),'DisplayName','Vy')
 hold on; 
@@ -119,20 +121,21 @@ plot(structIn.t_nas, V_NAS_BODY(:, 2),'DisplayName','Vy est')
 if not(settings.scenario == "descent")
     xline(structIn.ARB_allowanceTime,'k--')
 end
-
+ylabel('V_y [m/s]');
+legend
+%
 subplot(3,1,3)
 plot(structIn.t, structIn.Y(:, 6),'DisplayName','Vz')
 hold on;
 plot(structIn.t_nas, V_NAS_BODY(:, 3),'DisplayName','Vz est')
-
 if not(settings.scenario == "descent")
     xline(structIn.ARB_allowanceTime,'k--','DisplayName','Air brakes opening')
 end
     xline(structIn.apogee_time,'r--','DisplayName','Apogee')
 xlabel('Time [s]');
-ylabel('Speed V [m/s]');
-title('Velocities');
-
+ylabel('V_z [m/s]');
+sgtitle('Velocities');
+legend
 if settings.flagExport == true
     exportgraphics(figures.velocities,'report_images\src_velocities.pdf')
 end
@@ -222,22 +225,28 @@ eul_NAS = quat2eul(structIn.NAS(:,[10,7:9]));
 eul_NAS = flip(eul_NAS);
 eul_NAS = unwrap(eul_NAS);
 figures.EulerAngles = figure('Name','Euler angles','Position',[100,100,600,400]);
+%
 subplot(3,1,1)
 plot(structIn.t,eul(:,1),'DisplayName','\phi');
 hold on;
 plot(structIn.t_nas,eul_NAS(:,1),'DisplayName','\phi est');
 legend
+ylabel('Roll (rad)')
+%
 subplot(3,1,2)
 plot(structIn.t,eul(:,2),'DisplayName','\theta');
 hold on;
 plot(structIn.t_nas,eul_NAS(:,2),'DisplayName','\theta est');
 legend
+ylabel('Pitch (rad)')
+%
 subplot(3,1,3)
 plot(structIn.t,eul(:,3),'DisplayName','\psi');
 hold on;
 plot(structIn.t_nas,eul_NAS(:,3),'DisplayName','\psi est');
-
+ylabel('Yaw (rad)')
 legend
-title('Euler angles')
+sgtitle('Euler angles')
 xlabel('Time (s)')
-ylabel('Angle (rad)')
+
+
