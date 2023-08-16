@@ -15,7 +15,7 @@ struct_trajectories = load(strcat(ConDataPath, '/Trajectories.mat'));
 contSettings.data_trajectories = struct_trajectories.trajectories_saving;
 
 %% export csv files?
-settings.exportCSV = false;
+settings.exportCSV = true;
 
 
 %% LOAD REFERENCES

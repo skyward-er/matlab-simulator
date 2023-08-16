@@ -360,7 +360,7 @@ Yf = Yf_tot(1:n_old, :);
 Tf = Tf_tot(1:n_old, :);
 
 if not(settings.electronics)
-    t_kalman = sensorData.kalman.time;
+    t_kalman = t_est_tot;
 else
     t_kalman = -1;
 end

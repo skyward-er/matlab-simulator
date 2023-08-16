@@ -59,7 +59,7 @@ switch settings.mission
         contSettings.deltaTfilter = 3; % every deltaTfilter [s] the filter coefficient is diminished by a ratio of filterRatio
         
         % linear filter with altitude
-        contSettings.filter_coeff = 0.9; % starting value, then linear decrease until max Altitude
+        contSettings.filter_coeff0 = 0.9; % starting value, then linear decrease until max Altitude
         contSettings.filterMinAltitude = 1000;
         contSettings.filterMaxAltitude = 3000;
         % set altitude at which open to max

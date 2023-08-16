@@ -73,8 +73,9 @@ switch true % set this value in configControl.m
 % filter of 0.9 if below 1000 meters, linear decrease 0.9 to 0 until 3000,
 % if above open to max
             if h <= contSettings.filterMinAltitude
+                contSettings.filter_coeff = contSettings.filter_coeff0;
             elseif h > contSettings.filterMinAltitude && h<=contSettings.filterMaxAltitude
-                contSettings.filter_coeff = contSettings.filter_coeff - (h - contSettings.filterMinAltitude) * ((contSettings.filter_coeff)/(contSettings.filterMaxAltitude-contSettings.filterMinAltitude));  %linear
+                contSettings.filter_coeff = contSettings.filter_coeff0 - (h - contSettings.filterMinAltitude)/(contSettings.filterMaxAltitude-contSettings.filterMinAltitude) * ((contSettings.filter_coeff0));  %linear
             end
             if h > contSettings.criticalAltitude
                 ap_ref_new = settings.servo.maxAngle;
