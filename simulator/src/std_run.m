@@ -81,7 +81,7 @@ else
     % Attitude
     Q0 = angle2quat(settings.PHI, 0, 0, 'ZYX')';
     % State   
-    X0 = [0; 0; -settings.z_final];                                              % Position initial condition
+    X0 = [0; 0; -1000];                                              % Position initial condition -settings.z_final
     V0 = [settings.Vx_final; settings.Vy_final; settings.Vz_final];             % Velocity initial condition
     W0 = [0; 0; 0];                                                             % Angular speed initial condition
 end
@@ -182,7 +182,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     end
 
     if not(settings.flagAscent) && launchFlag
-        if sensorData.kalman.z >= 1500 && ~eventExpulsion2%settings.para(1).z_cut + settings.z0
+        if sensorData.kalman.z >= settings.para(1).z_cut + settings.z0 && ~eventExpulsion2
             flagPara1 = true;
             flagPara2 = false;                                              % parafoil drogue
         else
@@ -201,38 +201,40 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     if flagFlight
     
         if settings.ballisticFligth
-            [Tf, Yf] = ode113(@ascentControl, [t0, t1], Y0, [], settings, ap_ref, t_change_ref, tLaunch);
+            [Tf, Yf] = ode4(@ascentControl, tspan, Y0, settings, ap_ref, t_change_ref, tLaunch);
+            Yf(:,10:13) = Yf(:,10:13)./vecnorm(Yf(:,10:13),2,2);
             parout = recallOdeFcn2(@ascentControl, Tf, Yf, settings, Yf(:,17), settings.servo.delay,tLaunch,'apVec');
             para = NaN;
         else
             if settings.flagAscent
-                [Tf, Yf] = ode113(@ascentControl, [t0, t1], Y0, [], settings,  ap_ref, t_change_ref, tLaunch);
+                [Tf, Yf] = ode4(@ascentControl, tspan, Y0, settings,  ap_ref, t_change_ref, tLaunch);
+                Yf(:,10:13) = Yf(:,10:13)./vecnorm(Yf(:,10:13),2,2);
                 parout = recallOdeFcn2(@ascentControl, Tf, Yf, settings, Yf(:,17), settings.servo.delay,tLaunch,'apVec');
                 para = NaN;
             else
 
                 if flagPara1
                     para = 1;
-                    Y0 = Y0(1:6);
-                    [Tf, Yd] = ode4(@descentParachute, tspan, Y0, settings, uw, vw, ww, para); % ..., para, uncert);
+                    Y0_ode = Y0(1:6);
+                    [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode, settings, uw, vw, ww, para); % ..., para, uncert);
                     parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para);
                     [nd, ~] = size(Yd);
-                    Yf = [Yd, zeros(nd, 6), ones(nd,1), settings.Ixxe*ones(nd, 1), ...
+                    Yf = [Yd, zeros(nd, 3), ones(nd,1).*Y0(end,10:13), settings.Ixxe*ones(nd, 1), ...
                         settings.Iyye*ones(nd, 1), settings.Iyye*ones(nd, 1),zeros(nd,1)];
                 end
                 if flagPara2
                     if ~settings.parafoil
                         para = 2;
-                        Y0 = Y0(1:6);
-                        [Tf, Yd] = ode45(@descentParachute, [t0, t1], Y0, [], settings, uw, vw, ww, para); % ..., para, uncert);
+                        Y0_ode = Y0(1:6);
+                        [Tf, Yd] = ode45(@descentParachute, [t0, t1], Y0_ode, [], settings, uw, vw, ww, para); % ..., para, uncert);
                         parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para);
                         [nd, ~] = size(Yd);
-                        Yf = [Yd, zeros(nd, 6), ones(nd,1), settings.Ixxe*ones(nd, 1), ...
+                        Yf = [Yd, zeros(nd, 3), ones(nd,1).*Y0(end,10:13), settings.Ixxe*ones(nd, 1), ...
                             settings.Iyye*ones(nd, 1), settings.Iyye*ones(nd, 1),zeros(nd,1)];
                     else
                         Y0 = Y0(1:13);
                         [Tf, Yd] = ode4(@descentParafoil, tspan, Y0, settings, deltaA);
-                        parout = RecallOdeFcn(@descentParafoil, Tf, Yd, settings, deltaA);
+                                                parout = RecallOdeFcn(@descentParafoil, Tf, Yd, settings, deltaA);
                         [nd, ~] = size(Yd);
                         Yf = [Yd, settings.Ixxe*ones(nd, 1), settings.Iyye*ones(nd, 1), ...
                              settings.Iyye*ones(nd, 1),zeros(nd,1)];
@@ -302,11 +304,11 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     end
 
 
-    if lastFlagAscent && not(settings.flagAscent) && not(settings.scenario == "ballistic")
-        Y0 = [Yf(end, 1:3), vels(end,:), Yf(end, 7:end)]; % non sono sicuro del senso di questa riga
-    else
+%     if lastFlagAscent && not(settings.flagAscent) && not(settings.scenario == "ballistic")
+%         Y0 = [Yf(end, 1:3), vels(end,:), Yf(end, 7:end)]; % non sono sicuro del senso di questa riga
+%     else
         Y0 = Yf(end, :);
-    end
+%     end
 
     % atmosphere
     [~, a, ~, ~] = atmosisa(sensorData.kalman.z);        % speed of sound at each sample time, kalman is mean sea level (MSL) so there is no need to add z0
@@ -368,9 +370,9 @@ while settings.flagStopIntegration && n_old < nmax                          % St
 
     if not(settings.montecarlo)
         if settings.flagAscent
-            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,end));
+            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,end) + " quatNorm: "+ vecnorm(Yf(end,10:13)));
         else
-            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z + ", deltaA: " + deltaA);
+            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z + ", deltaA: " + deltaA + " quatNorm: "+ vecnorm(Yf(end,10:13)));
         end
     end
 

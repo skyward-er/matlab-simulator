@@ -71,6 +71,15 @@ if not(settings.scenario == "descent")
     plot3(structIn.ARB_openingPosition(1),structIn.ARB_openingPosition(2),structIn.ARB_openingPosition(3),'ko','DisplayName','Airbrake deployment')
 end
 plot3(structIn.apogee_coordinates(1),structIn.apogee_coordinates(2),structIn.apogee_coordinates(3),'ro','DisplayName','Apogee')
+if settings.parafoil 
+    plot3(settings.payload.target(1),settings.payload.target(2),settings.payload.target(3),'go','DisplayName','Payload Target')
+    if contSettings.payload.guidance_alg == "t-approach"
+        plot3(contSettings.payload.EMC(1),contSettings.payload.EMC(2),settings.payload.target(3),'bd','DisplayName','EMC')
+        plot3(contSettings.payload.M1(1),contSettings.payload.M1(2),settings.payload.target(3),'bs','DisplayName','M1')
+        plot3(contSettings.payload.M2(1),contSettings.payload.M2(2),settings.payload.target(3),'b>','DisplayName','M2')
+    end
+end
+
 xlabel('x [m]');
 ylabel('y [m]');
 zlabel('z [m]');
@@ -203,7 +212,7 @@ legend
 
 
 %% ada
-figures.ada = figure('Position',[100,100,600,400])
+figures.ada = figure('Position',[100,100,600,400]);
 plot( structIn.t_ada_tot,  structIn.ADA(:,4),'DisplayName','$ADA_{z}$')
 hold on
 plot( structIn.t_ada_tot,  structIn.ADA(:,5),'DisplayName','$ADA_{vz}$')
@@ -218,12 +227,46 @@ plot( structIn.t_ada_tot,  structIn.ADA(:,2),'DisplayName','ADA dp')
 title('ADA pressure derivative')
 
 %% quaternions
+figures.EulerAngles = figure('Name','Euler angles','Position',[100,100,600,400]);
+%
+subplot(2,2,1)
+plot(structIn.t,structIn.Y(:,10),'k','DisplayName','q_w');
+hold on;
+plot(structIn.t_nas,structIn.NAS(:,10),'r','DisplayName','q_w est');
+legend
+ylabel('q_w')
+subplot(2,2,2)
+plot(structIn.t,structIn.Y(:,11),'k','DisplayName','q_x');
+hold on;
+plot(structIn.t_nas,structIn.NAS(:,7),'r','DisplayName','q_x est');
+legend
+ylabel('q_x')
+subplot(2,2,3)
+plot(structIn.t,structIn.Y(:,12),'k','DisplayName','q_y');
+hold on;
+plot(structIn.t_nas,structIn.NAS(:,8),'r','DisplayName','q_y est');
+legend
+ylabel('q_y')
+subplot(2,2,4)
+plot(structIn.t,structIn.Y(:,13),'k','DisplayName','q_z');
+hold on;
+plot(structIn.t_nas,structIn.NAS(:,9),'r','DisplayName','q_z est');
+legend
+ylabel('q_z')
+
+legend
+sgtitle('Euler angles')
+xlabel('Time (s)')
+
+%% euler angles
 eul = quat2eul(structIn.Y(:,10:13));
-eul = flip(eul);
+eul = flip(eul,2);
 eul = unwrap(eul);
+eul = rad2deg(eul);
 eul_NAS = quat2eul(structIn.NAS(:,[10,7:9]));
-eul_NAS = flip(eul_NAS);
+eul_NAS = flip(eul_NAS,2);
 eul_NAS = unwrap(eul_NAS);
+eul_NAS = rad2deg(eul_NAS);
 figures.EulerAngles = figure('Name','Euler angles','Position',[100,100,600,400]);
 %
 subplot(3,1,1)
@@ -231,22 +274,35 @@ plot(structIn.t,eul(:,1),'DisplayName','\phi');
 hold on;
 plot(structIn.t_nas,eul_NAS(:,1),'DisplayName','\phi est');
 legend
-ylabel('Roll (rad)')
+ylabel('Roll (°)')
 %
 subplot(3,1,2)
 plot(structIn.t,eul(:,2),'DisplayName','\theta');
 hold on;
 plot(structIn.t_nas,eul_NAS(:,2),'DisplayName','\theta est');
 legend
-ylabel('Pitch (rad)')
+ylabel('Pitch (°)')
 %
 subplot(3,1,3)
 plot(structIn.t,eul(:,3),'DisplayName','\psi');
 hold on;
 plot(structIn.t_nas,eul_NAS(:,3),'DisplayName','\psi est');
-ylabel('Yaw (rad)')
+ylabel('Yaw (°)')
 legend
 sgtitle('Euler angles')
 xlabel('Time (s)')
 
-
+function [] = makeCone(pos_cone, z_coord, name)
+    % pos_cone: position x, y
+    % z_coord: ned position Z every 10 meters (vector)
+    th = linspace(0, 2*pi, 20);
+    X = pos_cone(1);
+    Y = pos_cone(2);
+    R_circ_dim = abs(z_coord)/50;
+    R_circ = R_circ_dim;
+    X_cone = X + R_circ.*cos(th);
+    Y_cone = Y + R_circ.*sin(th);
+    [~,Z_cone] = meshgrid(th,abs(z_coord));
+    surf(X_cone,Y_cone,Z_cone,'FaceAlpha',0.2,'EdgeColor','texturemap','HandleVisibility','off')
+    scatter(pos_cone(1), pos_cone(2),'fill', 'DisplayName', name)
+end

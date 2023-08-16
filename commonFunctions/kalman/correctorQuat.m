@@ -28,15 +28,15 @@ function [x_c,P_c,e,z]=correctorQuat(x_pred,P_pred,mag_sam,sigma_mag,mag_NED)
 R       =  sigma_mag^2*eye(3);
 
 % normalization of the magnetic vectors 
-mag_sam =  deg2rad(mag_sam);%mag_sam/norm(mag_sam);
-mag_NED = deg2rad(mag_NED);%mag_NED/norm(mag_NED);
+mag_sam =  mag_sam/norm(mag_sam);
+mag_NED = mag_NED/norm(mag_NED);
 
 %--------------------------------------------------------------------------
 % Computation of the output equation and innovation term of the filter
 A       = [x_pred(1)^2 - x_pred(2)^2 - x_pred(3)^2 + x_pred(4)^2,               2*(x_pred(1)*x_pred(2) + x_pred(3)*x_pred(4)),                 2*(x_pred(1)*x_pred(3) - x_pred(2)*x_pred(4));
                  2*(x_pred(1)*x_pred(2) - x_pred(3)*x_pred(4)),      -x_pred(1)^2 + x_pred(2)^2 - x_pred(3)^2 + x_pred(4)^2,                2*(x_pred(2)*x_pred(3) + x_pred(1)*x_pred(4)) ;
                  2*(x_pred(1)*x_pred(3) + x_pred(2)*x_pred(4)),               2*(x_pred(2)*x_pred(3) - x_pred(1)*x_pred(4)),       -x_pred(1)^2 - x_pred(2)^2 + x_pred(3)^2 + x_pred(4)^2];
-
+% x_pred è scalar last
 z       = A*mag_NED;                   %Magnetic vector in the body axis (estimated)
 
 z_mat   = [ 0      -z(3)   z(2);
@@ -56,17 +56,17 @@ K       = P_pred*H'/S;
 % Innovation computation
 % mag_sam
 % z
-e       = mag_sam' - z;       %Difference between measured (mag_sam) and 
-                              %estimated (z) magnetic vectors
+e       = mag_sam' - z;       % Difference between measured (mag_sam) and 
+                              % estimated (z) magnetic vectors
 delta_x = (K*e)';             % Error correction computation (delta_x)
 
-r       =[ 0.5*delta_x(1:3),sqrt(1-0.25*delta_x(1:3)*delta_x(1:3)')]; % scalar first
+r       =[0.5*delta_x(1:3),sqrt(1-0.25*delta_x(1:3)*delta_x(1:3)')]; % scalar last
 
 u       = quatProd(r',x_pred(1:4)')';      %The correction of the quaternion
                                            %is done through a multiplication 
                                            %(from which the multiplicative 
                                            %filter gets its name)
-                                           
+                                          
 % Assigment of the new quaternion to the state vector
 x_c(1:4)= u/norm(u);                       %Re-normalisation of the quaternion 
                                            %to avoid issues
@@ -92,7 +92,7 @@ qv1 = quat1(1:3);
 qs1 = quat1(4);
 
 qv2 = quat2(1:3);
-qs2 = quat2(4); % scalar FOURTH in the hamiltonian product
+qs2 = quat2(4); % scalar last in the hamiltonian product
 
 quat = [qs1 * qv2 + qs2 * qv1 - cross( qv1, qv2 ) ;
               qs1 * qs2 - dot( qv1, qv2 )        ];

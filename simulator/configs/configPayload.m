@@ -1,9 +1,9 @@
 %% payload constants
 % Geometry
 settings.payload.mass = 4.2;                 % [kg]  mass 
-settings.payload.b    = 2.06/2;              % [m]   semiwingspan  - vela nuova: 2.55/2;
+settings.payload.b    = 2.55/2;              % [m]   semiwingspan  - vela nuova: 2.55/2;
 settings.payload.c    = 0.8;                 % [m]   mean aero chord
-settings.payload.S    = 1.64;                % [m^2] payload surface - vela nuova 2.04;
+settings.payload.S    = 2.04;                % [m^2] payload surface - vela nuova 2.04;
 settings.payload.inertia = [0.42, 0,   0.03;
                             0,    0.4,    0; 
                             0.03, 0, 0.053]; % [kg m^2] [3x3] inertia matrix payload+payload 
@@ -73,15 +73,15 @@ payload.simParam.wind_sub = 1;            % Set as 1 for subtracting and 0 other
 % payload.simParam.WES0 = environment.wind; % Windspeed considered in the subtraction
 
 % P and PI controller
-contSettings.payload.Kp = 0.01;
-contSettings.payload.Ki = 0.001;
+contSettings.payload.Kp = 0.1;
+contSettings.payload.Ki = 0.01;
 contSettings.payload.uMax = 0.1;
 contSettings.payload.uMin = -0.1;
 contSettings.payload.controlFreq = 10; % Hz
 
 %% Guidance algorithm
 % Algorithm selection: choose from "closed loop", "t-approach"
-contSettings.payload.guidance_alg = "t-approach";
+contSettings.payload.guidance_alg = "closed loop";
 
 % Guidance start time
 contSettings.payload.guidance_start = 15;

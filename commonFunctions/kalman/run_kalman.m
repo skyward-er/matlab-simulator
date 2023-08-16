@@ -154,7 +154,7 @@ for i=2:length(tv)
     end
 
     if tv(i) >= t_magtemp(index_mag)               %Comparison to see the there's a new measurement
-        [xq(i,:),P_q(:,:,i),~,~]    = correctorQuat(xq(i,:),P_q(:,:,i),sp.mag(index_mag,:),kalman.sigma_mag,mag_NED);
+        [xq(i,:),P_q(:,:,i),~,~]        = correctorQuat(xq(i,:),P_q(:,:,i),sp.mag(index_mag,:),kalman.sigma_mag,mag_NED);
         index_mag    =  index_mag + 1;
     end
 

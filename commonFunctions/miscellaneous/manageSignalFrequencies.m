@@ -222,7 +222,7 @@ elseif freq.magnetometerFrequency == freq.controlFrequency
 
 else
     for i = 1:length(T)
-        if T(i) - sensorData.magnetometer.t0 > 1/freq.magnetometerFrequency
+        if T(i) - sensorData.magnetometer.t0 - 1/freq.magnetometerFrequency >1e-6
             iTimeMagnetometer = sensorData.magnetometer.t0 + 1/freq.magnetometerFrequency;
             Y1 = Y(i, [3, 10:13]);
             Y0 = Y(i-1, [3, 10:13]);
@@ -238,7 +238,7 @@ else
             magnFieldInertial = magneticFieldApprox(z + settings.z0)';
             sensorData.magnetometer.measures = quatrotate(Q, magnFieldInertial);
             sensorData.magnetometer.t0 = iTimeMagnetometer;
-        elseif  T(i) - sensorData.magnetometer.t0 == 1/freq.magnetometerFrequency
+        elseif  abs(T(i) - sensorData.magnetometer.t0 - 1/freq.magnetometerFrequency) <1e-6 % for stability purposes this is not an ==
             iTimeMagnetometer = sensorData.magnetometer.t0 + 1/freq.magnetometerFrequency;
             z = - Y(i, 3);
             Q = Y(i, 10:13);

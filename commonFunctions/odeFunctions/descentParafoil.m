@@ -133,23 +133,22 @@ bodyAcc = F/mass - cross(omega,[u;v;w]);
 % dw = F(3)/mass - p*v + q*u;
 
 %% angular velocity - as msa does
-% OM = [ 0 -p -q -r  ;
-%        p  0  r -q  ;
-%        q -r  0  p  ;
-%        r  q -p  0 ];
-% 
-% dQQ = 1/2*OM*Q';
+OM = [ 0 -p -q -r  ;
+       p  0  r -q  ;
+       q -r  0  p  ;
+       r  q -p  0 ];
+
+dQQ = 1/2*OM*Q';
 
 %% angular velocity - as restu does
-Q = [Q(2:4),Q(1)];
-col1 = [Q(4);Q(3);-Q(2);-Q(1)];
-col2 = [-Q(3);Q(4);Q(1);-Q(2)];
-col3 = [Q(2);-Q(1);Q(4);-Q(3)];
-Q_matr = [col1,col2,col3];
-dQQ = 0.5 * Q_matr * omega;
-% angular acceleration
+% Q = [Q(2:4), Q(1)];
+% col1 = [Q(4);Q(3);-Q(2);-Q(1)];
+% col2 = [-Q(3);Q(4);Q(1);-Q(2)];
+% col3 = [Q(2);-Q(1);Q(4);-Q(3)];
+% Q_matr = [col1,col2,col3];
+% dQQ = 0.5 * Q_matr * omega;
 
-
+%% angular acceleration
 angAcc = inverseInertia*(M - cross(omega,inertia * omega));
 
 

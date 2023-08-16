@@ -122,7 +122,7 @@ D = 0.5*rho*V_norm^2*S*CD*t_vers';          % [N] Drag vector
 L = 0.5*rho*V_norm^2*S*CL*n_vers';          % [N] Lift vector
 Fg = m*g*[0 0 1]';                          % [N] Gravitational Force vector
 
-F = -D + L + Fg;                   % [N] total forces vector
+F = -D + L + Fg;                            % [N] total forces vector
 F_acc = F-Fg;                               % [N] accelerometer felt forces
 
 %% STATE DERIVATIVES

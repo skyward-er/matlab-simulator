@@ -216,7 +216,9 @@ if ~settings.flagAscent && settings.parafoil
         wind_est = [0;0;0];
     end
     if flagPara2
-        [deltaA,contSettings] = run_parafoilGuidance(sensorData.kalman.x_c(end,1:3), sensorData.kalman.x_c(end,4:6), wind_est, settings.payload.target, contSettings);
+        pos_est = sensorData.kalman.x_c(end,1:3);
+        pos_est(3) = -pos_est(3)-settings.z0;
+        [deltaA,contSettings] = run_parafoilGuidance(pos_est, sensorData.kalman.x_c(end,4:6), wind_est, settings.payload.target, contSettings);
     end
-
+   
 end
