@@ -79,3 +79,43 @@ printOutput(simOutput,settings);
 
 %% save data
 % save("Simulation_log.mat","Tf","Yf","data_flight")
+
+%% export data for HIL simulations /cpp usage: 
+if settings.exportCSV % this is set in configReferences
+    switch settings.mission
+        case "Gemini_Portugal_October_2023"
+            % first file: trajectories, set in the following way: first
+            % column heights, next N_mass columns vertical velocity with
+            % closed air brakes, next N_mass columns vertical velocity with
+            % open air brakes
+            mkdir(ConDataPath+"/Trajectories_CSV")
+            trajectory_export = zeros(size(contSettings.reference.Z,1),1+2*size(contSettings.reference.Vz,2));
+            trajectory_export(:,1) = contSettings.reference.Z;
+            varNames{1,1} = 'Heights';
+            for i = 1:size(contSettings.reference.Vz,1)
+                for j = 1:size(contSettings.reference.Vz,2)
+                    trajectory_export(:,1+(i-1)*size(contSettings.reference.Vz,2)+j) = contSettings.reference.Vz{i,j};
+                    if i == 1
+                        varNames{1,1+(i-1)*size(contSettings.reference.Vz,2)+j} = ['Vz_closed_m',num2str(contSettings.masses_vec(j))];
+                    else
+                        varNames{1,1+(i-1)*size(contSettings.reference.Vz,2)+j} = ['Vz_open_m',num2str(contSettings.masses_vec(j))];
+                    end
+                end
+            end
+            varNames = replace(varNames,'.','_');
+            for i = 1:size(trajectory_export,2)
+                trajectory_export_table(:,i) = table(trajectory_export(:,i));
+            end
+            trajectory_export_table.Properties.VariableNames = varNames;
+            writetable(trajectory_export_table,ConDataPath+"/Trajectories_CSV/trajectories_Gemini_October.csv")
+            
+            % second file: configuration for the air brakes
+            configValues = [contSettings.filter_coeff,contSettings.filterMinAltitude,contSettings.filterMaxAltitude,contSettings.criticalAltitude,contSettings.masses_vec(1),contSettings.dmass];
+            configABKvarNames = {'STARTING_FILTER_VALUE','CHANGE_FILTER_MINIMUM_ALTITUDE','CHANGE_FILTER_MAXIMUM_ALTITUDE','ABK_CRITICAL_ALTITUDE','LOWEST_MASS','DELTA_MASS'};
+            for i = 1:size(configValues,2)
+                configABK_export_table(1,i) = table(configValues(i));
+            end
+            configABK_export_table.Properties.VariableNames = configABKvarNames;
+            writetable(configABK_export_table,ConDataPath+"/Trajectories_CSV/configABK_Gemini_October.csv")
+    end
+end

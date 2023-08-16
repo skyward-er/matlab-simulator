@@ -40,7 +40,12 @@ switch settings.mission
     case 'Gemini_Portugal_October_2023' 
      
         contSettings.traj_choice = 1; % if 1 performs trajectory choice, if zero it doesn't
-        contSettings.N_mass = 10;     % number of references to generate
+        N_mass = 11;     % number of references to generate
+        mass_min = 28;   % [kg] min mass for trajectory choice
+        mass_max = 30;   % [kg] max mass for trajectory choice
+        contSettings.dmass = 0.2;
+        contSettings.masses_vec = mass_min:contSettings.dmass:mass_max; % masses vector for trajectory generation and choice
+        
 
         contSettings.delta_S_available = (0.0:0.001/4:0.009564*settings.servo.maxAngle)'; 
         
@@ -52,7 +57,13 @@ switch settings.mission
         
         contSettings.Tfilter = 13; % starting time from which the coefficient is diminished.
         contSettings.deltaTfilter = 3; % every deltaTfilter [s] the filter coefficient is diminished by a ratio of filterRatio
-
+        
+        % linear filter with altitude
+        contSettings.filter_coeff = 0.9; % starting value, then linear decrease until max Altitude
+        contSettings.filterMinAltitude = 1000;
+        contSettings.filterMaxAltitude = 3000;
+        % set altitude at which open to max
+        contSettings.criticalAltitude = 2990;
         
 end
 

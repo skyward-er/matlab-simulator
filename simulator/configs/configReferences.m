@@ -14,6 +14,9 @@ called reference
 struct_trajectories = load(strcat(ConDataPath, '/Trajectories.mat'));
 contSettings.data_trajectories = struct_trajectories.trajectories_saving;
 
+%% export csv files?
+settings.exportCSV = false;
+
 
 %% LOAD REFERENCES
 % select the trajectories for the rocket used in the simulation
@@ -100,8 +103,4 @@ end
 contSettings.reference.Vz = V_rescale;
 contSettings.reference.Z = heights;
 
-%% solo per HIL/ cpp - scommentare all'occorrenza
-% mkdir(ConDataPath+"/Trajectories_CSV")
-% for i = 1: size(V_rescale,2)
-%     csvwrite(ConDataPath+"/Trajectories_CSV/referenceInterp"+num2str(i)+".csv",[heights,V_rescale(:,i)])
-% end
+

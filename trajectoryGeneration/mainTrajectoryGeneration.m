@@ -96,14 +96,12 @@ settingsSim.CD_correction_ref = settings.CD_correction_ref;
 
 %% COMPUTE THE TRAJECTORIES BY BACK INTEGRATION
 Ntraj_ARB = length(deltaX_values);
-N_mass = contSettings.N_mass;                            % number of different Mass values
-m_min_ref = 28;
-m_max_ref = 30;
+mass = contSettings.masses_vec;                     % set in config control params
+N_mass = length(mass);                              % number of different Mass values
+
 
 deltaX = 0;
 
-% mass = linspace(settings.ms,settings.m0,N_mass);
-mass = linspace(m_min_ref,m_max_ref,N_mass);
 
 % Pre-allocation
 trajectories_ARB = cell(Ntraj_ARB, N_mass);
