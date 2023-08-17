@@ -5,7 +5,7 @@ function [x_c, v, P_c, kalman] = run_kalman(x_prev, vels_prev, P_prev, sp, kalma
 % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@kywarder.eu
 % email: alejandro.montero@skywarder.eu, alessandro.delduca@skywarder.eu
 % Release date: 01/03/2021
-% 
+%
 
 %{
 -----------DESCRIPTION OF FUNCTION:------------------
@@ -132,53 +132,52 @@ t_pittemp = [sp.t_pit tv(end) +dt_k];
 
 [sp.gps(:,1),sp.gps(:,2),sp.gps(:,3)]  = geodetic2ned(sp.gps(:,1), sp.gps(:,2), sp.gps(:,3), kalman.lat0, kalman.lon0, kalman.z0, kalman.spheroid, 'degrees');
 for i=2:length(tv)
-    %Prediction part
-%     [x_lin(i,:),v(i,:),P_lin(:,:,i)] = predictorLinear(x_lin(i-1,:),v(i-1,:),P_lin(:,:,i-1),...
-%                                                 dt_k,sp.accel(i-1,:),xq(i-1,1:4),kalman.QLinear);
+    %% Prediction part
+
     [x_lin(i,:),v(i,:),P_lin(:,:,i)] = predictorLinear2(x_lin(i-1,:),P_lin(:,:,i-1),...
-                                                dt_k,sp.accel(i-1,:),xq(i-1,1:4),kalman.QLinear);
-    
+        dt_k,sp.accel(i-1,:),xq(i-1,1:4),kalman.QLinear);
+
     [xq(i,:),P_q(:,:,i)]       = predictorQuat(xq(i-1,:),P_q(:,:,i-1),...
-                                               sp.gyro(i-1,:),dt_k,kalman.Qq);            
-                                           
- 
-%Corrections
-     if tv(i) >= t_gpstemp(index_GPS)              %Comparison to see the there's a new measurement
-       [x_lin(i,:),P_lin(:,:,i),~]     = correctionGPS(x_lin(i,:),P_lin(:,:,i),sp.gps(index_GPS,1:2),...
-                                                        sp.gpsv(index_GPS,1:2),kalman.sigma_GPS,nsat,fix);
+        sp.gyro(i-1,:),dt_k,kalman.Qq);
+
+
+    %% Corrections
+    if tv(i) >= t_gpstemp(index_GPS)              %Comparison to see the there's a new measurement
+        [x_lin(i,:),P_lin(:,:,i),~]     = correctionGPS(x_lin(i,:),P_lin(:,:,i),sp.gps(index_GPS,1:2),...
+            sp.gpsv(index_GPS,1:2),kalman.sigma_GPS,nsat,fix);
         index_GPS   =  index_GPS + 1;
-     end
-     
+    end
+
     if tv(i) >= t_barotemp(index_bar)              %Comparison to see the there's a new measurement
-       [x_lin(i,:),P_lin(:,:,i),~]     = correctionBarometer(x_lin(i,:),P_lin(:,:,i),sp.h_baro(index_bar),kalman.sigma_baro);
-        index_bar   =  index_bar + 1;     
+        [x_lin(i,:),P_lin(:,:,i),~]     = correctionBarometer(x_lin(i,:),P_lin(:,:,i),sp.h_baro(index_bar),kalman.sigma_baro);
+        index_bar   =  index_bar + 1;
     end
-         
+
     if tv(i) >= t_magtemp(index_mag)               %Comparison to see the there's a new measurement
-       [xq(i,:),P_q(:,:,i),~,~]    = correctorQuat(xq(i,:),P_q(:,:,i),sp.mag(index_mag,:),kalman.sigma_mag,mag_NED);
-       index_mag    =  index_mag + 1;  
+        [xq(i,:),P_q(:,:,i),~,~]        = correctorQuat(xq(i,:),P_q(:,:,i),sp.mag(index_mag,:),kalman.sigma_mag,mag_NED);
+        index_mag    =  index_mag + 1;
     end
-    
-    if flagAscent && flagStopPitotCorrection
+
+    if flagAscent && ~flagStopPitotCorrection
         if tv(i) >= t_pittemp(index_pit)
-           [x_lin(i,:),P_lin(4:6,4:6,i),~] = correctionPitot(x_lin(i,:),P_lin(4:6,4:6,i),sp.p0_pitot,sp.p_pitot,kalman.sigma_pitot,xq(i,1:4),kalman.Mach_max);
-           index_pit    =  index_pit + 1; 
+            [x_lin(i,:),P_lin(4:6,4:6,i),~] = correctionPitot(x_lin(i,:),P_lin(4:6,4:6,i),sp.p0_pitot,sp.p_pitot,kalman.sigma_pitot,xq(i,1:4),kalman.Mach_max);
+            index_pit    =  index_pit + 1;
         end
     end
     x_c(i,:) = [x_lin(i,:),xq(i,:)];
     P_c(1:6,1:6,i)   = P_lin(:,:,i);
     P_c(7:12,7:12,i) = P_q(:,:,i);
-    
+
     if kalman.flag_apo  == false
-            if -x_c(i,6) < kalman.v_thr && -x_c(i,3) > 100
-                kalman.counter = kalman.counter + 1;
-            else
-                kalman.counter = 0;
-            end
-            if kalman.counter >= kalman.count_thr
-               kalman.t_kalman = tv(i);
-               kalman.flag_apo = true;
-            end
+        if -x_c(i,6) < kalman.v_thr && -x_c(i,3) > 100
+            kalman.counter = kalman.counter + 1;
+        else
+            kalman.counter = 0;
+        end
+        if kalman.counter >= kalman.count_thr
+            kalman.t_kalman = tv(i);
+            kalman.flag_apo = true;
+        end
     end
 end
 end

@@ -62,13 +62,13 @@ if settings.flagNAS && settings.dataNoise
     %     sp.pn = sp.pn(end);
     %     sp.t_baro = sp.t_baro(end);
     
-    [sensorData.kalman.x_c, vels, P_c, settings.kalman]   =  run_kalman(x_prev, vels_prev, P_prev, sp, settings.kalman, XYZ0*0.01,settings.flagAscent,settings.flagStopPitotCorrection);
+    [sensorData.kalman.x_c, vels_NED, P_c, settings.kalman]   =  run_kalman(x_prev, vels_prev, P_prev, sp, settings.kalman, XYZ0*0.01,settings.flagAscent,settings.flagStopPitotCorrection);
     if abs(sensorData.kalman.x_c(3,1)) >settings.stopPitotAltitude+ settings.z0
         settings.flagStopPitotCorrection = true;
     end
     sensorData.kalman.time(iTimes) = Tf(end);
     x_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1,:)  = sensorData.kalman.x_c(:,:); % NAS position output
-    vels_tot(c.n_est_old:c.n_est_old + size(vels(:,1),1)-1,:)  = vels(:,:); % NAS speed output
+    vels_tot(c.n_est_old:c.n_est_old + size(vels_NED(:,1),1)-1,:)  = vels_NED(:,:); % NAS speed output
     t_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1)    = sensorData.accelerometer.time; % NAS time output
     c.n_est_old = c.n_est_old + size(sensorData.kalman.x_c,1);
 
@@ -81,28 +81,7 @@ if settings.flagNAS && settings.dataNoise
     est = sensorData.kalman.vz;
 end
 
-% vertical velocity and position
-% % % % % % if settings.flagAscent || (not(settings.flagAscent) && settings.ballisticFligth)
-% % % % % %     Q    =   Yf(end, 10:13);
-% % % % % %     vels =   quatrotate(quatconj(Q), Yf(:, 4:6));
-% % % % % %     sensorData.kalman.vz = - vels(end,3);   % down
-% % % % % %     sensorData.kalman.vx =   vels(end,2);   % north
-% % % % % %     sensorData.kalman.vy =   vels(end,1);   % east
-% % % % % %     real = sensorData.kalman.vz;
-% % % % % %     est_meno_real = est-real;
-% % % % % %     z = -Yf(end, 3);
-% % % % % % else
-% % % % % %     sensorData.kalman.vz = - Yf(end, 6); % actually not coming from NAS in this case
-% % % % % %     sensorData.kalman.vx = Yf(end, 5);
-% % % % % %     sensorData.kalman.vy = Yf(end, 4);  
-% % % % % % end
 v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
-
-% % % % % % 
-% % % % % % sensorData.kalman.z  = -x_est_tot(end, 3);
-% % % % % % sensorData.kalman.x  =  Yf(end, 2);
-% % % % % % sensorData.kalman.y  =  Yf(end, 1);
-% sensorData.kalman.time = Tf(end); %% CAPIRE A COSA SERVE
 
 %% Engine Control algorithm
     
@@ -161,19 +140,18 @@ if contains(settings.mission,'_2023')
             trajectoryChoice_mass;
         end
     
-        if contSettings.flagFirstControl
+        if contSettings.flagFirstControlABK % set in
     
             t_airbrakes = t0;
             t_last_arb_control = t0;
             idx_airbrakes = n_old+1;
     
         end
-        if Tf(end)-t_last_arb_control >= 1/settings.frequencies.arbFrequency - 1e-5 ||...
-                t_last_arb_control == t_airbrakes
+        if t1-t_last_arb_control >= 1/settings.frequencies.arbFrequency - 1e-5 || t_last_arb_control == t_airbrakes
     
             t_last_arb_control = Tf(end);
             ap_ref_old = ap_ref_new;
-            settings.quat = [x_est_tot(end, 8:10) x_est_tot(end, 7)];
+            settings.quat = [x_est_tot(end, [10,7:9])];
             [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
             [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
     
@@ -185,19 +163,17 @@ if contains(settings.mission,'_2023')
 else
     if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings.control
     
-        if contSettings.flagFirstControl
+        if contSettings.flagFirstControlABK
     
             t_airbrakes = t0;
             t_last_arb_control = t0;
             idx_airbrakes = n_old+1;
     
         end
-        if Tf(end)-t_last_arb_control >= 1/settings.frequencies.arbFrequency - 1e-5 ||...
-                t_last_arb_control == t_airbrakes
-    
-            t_last_arb_control = Tf(end);
+        if t1-t_last_arb_control >= 1/settings.frequencies.arbFrequency - 1e-6 || t_last_arb_control == t_airbrakes
+            t_last_arb_control = t1(end);
             ap_ref_old = ap_ref_new;
-            settings.quat = [x_est_tot(end, 8:10) x_est_tot(end, 7)];
+            settings.quat = [x_est_tot(end, [10,7:9])];
             [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
             [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
     
@@ -207,3 +183,35 @@ else
         ap_ref_new = 0;
     end
 end
+
+%% PARAFOIL
+if ~settings.flagAscent && settings.parafoil 
+    if contSettings.payload.flagWES
+            wind_est = [uw,vw,ww]; % modificare con WIND ESTIMATION
+    else
+            wind_est = [0,0,0];
+    end
+    if flagPara2
+        if contSettings.flagFirstControlPRF % set in
+        
+                t_parafoil = t0;
+                t_last_prf_control = t0;
+                idx_parafoil = n_old+1;
+                contSettings.flagFirstControlPRF = false;
+                if contSettings.payload.guidance_alg == "t-approach"
+                    pos_est = sensorData.kalman.x_c(end,1:3);
+                    pos_est(3) = -pos_est(3)-settings.z0;
+                    [contSettings.payload.EMC,contSettings.payload.M1,contSettings.payload.M2] = setEMCpoints(pos_est,settings.payload.target,contSettings.payload.mult_EMC,contSettings.payload.d);
+                end
+        end
+        if t1-t_last_prf_control >= 1/contSettings.payload.controlFreq - 1e-5 || t_last_prf_control == t_parafoil
+           
+                t_last_prf_control = t1;
+                pos_est = sensorData.kalman.x_c(end,1:3);
+                pos_est(3) = -pos_est(3)-settings.z0;
+                
+                [deltaA,contSettings] = run_parafoilGuidance(pos_est, sensorData.kalman.x_c(end,4:6), wind_est, settings.payload.target, contSettings);
+        end
+    end
+end
+   

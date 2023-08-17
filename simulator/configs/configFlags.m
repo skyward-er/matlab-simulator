@@ -27,7 +27,8 @@ scenarios explanation:
 
 
 % scenario configuration
-conf.scenario = "controlled ascent";
+conf.scenario = "full flight";
+conf.board = "payload";            % Either "main" or "payload"
 conf.HIL = false;
 
 % WIP flags
@@ -46,6 +47,7 @@ settings.tuning = true;                 % [-] True if you want to tune the algor
 
 % EXPORT GRAPHICS (from simulations)
 settings.flagExport = false;
+
 
 
 %% ------------------------------- don't modify unless you really know what you are doing, touch only the flags before this line ---------------------------- %%
@@ -75,7 +77,7 @@ if not(conf.HIL) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             settings.flagNAS            = true;   % Switch on to run the kalman algorithm - note, also to run the airbrakes control algorithm this is needed true
             settings.flagADA            = true;   % Switch on to run the apogee detection algorithm
 
-        case "descent" % WIP    
+        case "descent"     
 
             settings.launchWindow       = false;  % Switch off this to avoid pausing the launch till you press the launch button
             settings.electronics        = false;  % Switch on when testing with Hardware in the loop HIL - NOT IMPLEMENTED YET, STILL TO BE MERGED
@@ -155,6 +157,13 @@ elseif conf.HIL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     end
 
 end %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+switch conf.board
+    case "main"
+        settings.parafoil = false;
+    case "payload"
+        settings.parafoil = true;
+end
 
 if not(settings.ballisticFligth) && settings.ascentOnly
     error('To simulate a landing with the parachutes, settings.ascentOnly must be false')

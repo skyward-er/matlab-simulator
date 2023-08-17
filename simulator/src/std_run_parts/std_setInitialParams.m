@@ -99,8 +99,12 @@ sensorData.kalman.pn_prec = settings.ada.p_ref;                             % se
 % ap_ref_time = zeros(nmax, 1);                                               % Vector of time reference for air brakes
 settings.shutdown = 0;                                                      % engine on
 settings.expShutdown = 0;                                                   % engine expected to be on
-
-
+vz = 0;
+% prevent unwanted changes in state machine
+eventExpulsion = false; % expulsion of the first parachute
+eventExpulsion2 = false; % expulsion of the second parachute
+lastAscentIndex = 0;
+lastDrogueIndex = 0;
 %% sensor fault initial conditions
 chunk{1} = zeros(1,50);
 chunk{2} = zeros(1,50);
@@ -131,3 +135,8 @@ if settings.flagNAS
 end
 % stop correction with pitot
 settings.flagStopPitotCorrection = false;
+
+% parafoil
+contSettings.payload.saturation = false;
+contSettings.payload.I = 0;
+deltaA = 0;

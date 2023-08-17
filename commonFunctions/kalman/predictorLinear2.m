@@ -43,11 +43,11 @@ A       = [q(1)^2 - q(2)^2 - q(3)^2 + q(4)^2,               2*(q(1)*q(2) + q(3)*
                                                 %from body axis to inertial frame 
                                                 %to use the inertial equations of motion                                                
 
-a       =   A'*ab' + [0;0;9.81] ;
+a       =   A'*ab' + [0;0;9.81] ; % body to NED
 
 x(4:6)  =  x_prev(4:6) + dt*a';
 x(1:3)  =  x_prev(1:3) + dt*x_prev(4:6);
-vels    =  ( A*x(4:6)')';
+vels    =  ( A*x(4:6)')'; % NED to body
 %-------------------- Jacobianv -----------------------------------------------
 F              =   sparse(6,6);                %Pre-allocation of gradient 
                                                 %of the derivative of the state

@@ -65,14 +65,16 @@ end
 % T = vector of time used by ODE, [s] also for Tf Ta
 % Y = State = ( x y z | u v w | p q r | q0 q1 q2 q3 | thetax thetay thetaz | ap_ref ) also for Ya,Yf corresponding to T
 
-% simulation:
-
-%%
+%% simulation:
 [simOutput] = std_run(settings,contSettings);
 
 %% PLOTS
 std_plots(simOutput,settings,contSettings)
 sensor_plots(simOutput)
+
+%% state visualiser
+% animateOrientation(simOutput.Y(:,11),simOutput.Y(:,12),simOutput.Y(:,13),simOutput.Y(:,10),simOutput.t)
+% animateOrientation(simOutput.NAS(:,7),simOutput.NAS(:,8),simOutput.NAS(:,9),simOutput.NAS(:,10),simOutput.t_nas)
 
 %% DATA-PRINTING
 printOutput(simOutput,settings);

@@ -37,7 +37,7 @@ switch true % set this value in configControl.m
         [ap_base_filter] = control_Interp(sensorData.kalman.z-settings.z0,sensorData.kalman.vz,contSettings.reference.Z,contSettings.reference.Vz,contSettings.interpType,contSettings.N_forward,settings,contSettings); % cambiare nome alla funzione tra le altre cose
         
         % filter control action
-        if contSettings.flagFirstControl == false % the first reference is given the fastest possible (unfiltered), then filter
+        if contSettings.flagFirstControlABK == false % the first reference is given the fastest possible (unfiltered), then filter
             ap_ref_new = ap_ref_old + (ap_base_filter - ap_ref_old)*contSettings.filter_coeff;
         else
             ap_ref_new = ap_base_filter;
@@ -53,13 +53,13 @@ switch true % set this value in configControl.m
 %         end
 
         %% correction with current pitch
-%         if sensorData.kalman.z-settings.z0 < 2800
-%          test = cos(settings.OMEGA-settings.pitch);
-%          ap_ref_new = ap_ref_new * test;
-%         end
+        if sensorData.kalman.z-settings.z0 < 2800
+         test = cos(settings.OMEGA-settings.pitch);
+         ap_ref_new = ap_ref_new * test;
+        end
 
          %% filter
-        contSettings.flagFirstControl = false;
+        contSettings.flagFirstControlABK = false;
 %         if sensorData.kalman.time(end)>contSettings.Tfilter
 %             contSettings.Tfilter = contSettings.Tfilter+contSettings.deltaTfilter;
 %             contSettings.filter_coeff = contSettings.filter_coeff/contSettings.filterRatio;
@@ -93,12 +93,12 @@ switch true % set this value in configControl.m
             [ap_base_filter] = control_Shooting([-sensorData.kalman.z-settings.z0,sensorData.kalman.vz],ap_ref_new,settings,contSettings.coeff_Cd,settings.arb,init);
 
             % filter control action
-            if contSettings.flagFirstControl == false % the first reference is given the fastest possible (unfiltered), then filter
+            if contSettings.flagFirstControlABK == false % the first reference is given the fastest possible (unfiltered), then filter
                 ap_ref_new = ap_ref_old + (ap_base_filter - ap_ref_old)*contSettings.filter_coeff;
             else
                 ap_ref_new = ap_base_filter;
             end
-            contSettings.flagFirstControl = false;
+            contSettings.flagFirstControlABK = false;
             if sensorData.kalman.time(end)>contSettings.Tfilter
                 contSettings.Tfilter = contSettings.Tfilter+contSettings.deltaTfilter;
                 contSettings.filter_coeff = contSettings.filter_coeff/contSettings.filterRatio;
@@ -149,7 +149,7 @@ switch true % set this value in configControl.m
             [ap_base_filter] = control_PID2refs(sensorData.kalman.z,sensorData.kalman.vz,settings.reference.Z,settings.reference.Vz,contSettings.N_forward,settings,contSettings); % cambiare nome alla funzione tra le altre cose
 
             % filter control action
-            if contSettings.flagFirstControl == false % the first reference is given the fastest possible (unfiltered), then filter
+            if contSettings.flagFirstControlABK == false % the first reference is given the fastest possible (unfiltered), then filter
                 ap_ref_new = ap_ref_old + (ap_base_filter -ap_ref_old)*contSettings.filter_coeff;
             else
                 ap_ref_new = ap_base_filter;
@@ -164,6 +164,6 @@ switch true % set this value in configControl.m
 
 end
 
-contSettings.flagFirstControl = false;
+contSettings.flagFirstControlABK = false;
 
 

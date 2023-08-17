@@ -75,7 +75,7 @@ s.GYRO_LSM9DS1.noiseVariance        =   50;                      % guess in mdps
 s.GYRO_LSM9DS1.offsetX              =   0;                      % +-30e3 in mdps
 s.GYRO_LSM9DS1.offsetY              =   0;                      % +-30e3 in mdps
 s.GYRO_LSM9DS1.offsetZ              =   0;                      % +-30e3 in mdps
-s.GYRO_LSM9DS1.walkDiffusionCoef    =   0;                      % guess
+s.GYRO_LSM9DS1.walkDiffusionCoef    =   1;                      % guess
 s.GYRO_LSM9DS1.dt                   =   0.01;                   % sampling time
 s.GYRO_LSM9DS1.transMatrix          =   diag([1 1 1]);          % axis transformation
 
@@ -88,7 +88,7 @@ s.MAGN_LSM9DS1.noiseVariance        =   4;                      % guess in mgaus
 s.MAGN_LSM9DS1.offsetX              =   0;                      % +-1000 in mgauss
 s.MAGN_LSM9DS1.offsetY              =   0;                      % +-1000 in mgauss
 s.MAGN_LSM9DS1.offsetZ              =   0;                      % +-1000 in mgauss
-s.MAGN_LSM9DS1.walkDiffusionCoef    =   1;                      % guess
+s.MAGN_LSM9DS1.walkDiffusionCoef    =   0;                      % guess
 s.MAGN_LSM9DS1.dt                   =   0.01;                   % sampling time
 s.MAGN_LSM9DS1.transMatrix          =   diag([1 1 1]);          % axis transformation
 
