@@ -69,6 +69,9 @@ end
 [simOutput] = std_run(settings,contSettings);
 
 %% PLOTS
+if ~exist("../commonFunctions/graphics/general-utilities/","dir")
+    warning('To export file you need to download the repository, read the README file in the folder')
+end
 std_plots(simOutput,settings,contSettings)
 sensor_plots(simOutput)
 
@@ -112,8 +115,8 @@ if settings.exportCSV % this is set in configReferences
             writetable(reference_export_table,ConDataPath+"/Trajectories_CSV/references_"+settings.mission+".csv")
             
             % second file: configuration for the air brakes
-            configValues = [contSettings.filter_coeff0,contSettings.filterMinAltitude,contSettings.filterMaxAltitude,contSettings.criticalAltitude,contSettings.masses_vec(1),contSettings.dmass];
-            configABKvarNames = {'STARTING_FILTER_VALUE','CHANGE_FILTER_MINIMUM_ALTITUDE','CHANGE_FILTER_MAXIMUM_ALTITUDE','ABK_CRITICAL_ALTITUDE','LOWEST_MASS','DELTA_MASS'};
+            configValues = [contSettings.reference.deltaZ, contSettings.filter_coeff0,contSettings.filterMinAltitude,contSettings.filterMaxAltitude,contSettings.criticalAltitude,contSettings.masses_vec(1),contSettings.dmass];
+            configABKvarNames = {'REFERENCE_DZ','STARTING_FILTER_VALUE','CHANGE_FILTER_MINIMUM_ALTITUDE','CHANGE_FILTER_MAXIMUM_ALTITUDE','ABK_CRITICAL_ALTITUDE','LOWEST_MASS','DELTA_MASS'};
             for i = 1:size(configValues,2)
                 configABK_export_table(1,i) = table(configValues(i));
             end
@@ -136,7 +139,7 @@ if settings.exportCSV % this is set in configReferences
             trajectory_export_table.Properties.VariableNames = traj_varNames;
             writetable(trajectory_export_table,ConDataPath+"/Trajectories_CSV/trajectories_"+settings.mission+".csv")
 
-            % third file: input - output extrapolation:
+            % fourth file: input - output extrapolation:
             % first column - data with air brakes timestamps;
             % second column - data with air brakes output of the simulation;
             outputABK_export_table = table;

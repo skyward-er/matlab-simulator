@@ -1,5 +1,8 @@
 function std_plots(structIn, settings,contSettings)
 
+if ~exist("report_images\"+settings.mission,"dir")
+    mkdir("report_images\"+settings.mission)
+end
 %% Control variable: servo control action (percentage of angle max)
 if not(settings.scenario == "descent")
     ap_tot_rescale = rescale(structIn.Y(:,17), "InputMin", 0, "InputMax", settings.servo.maxAngle);
@@ -13,7 +16,7 @@ if not(settings.scenario == "descent")
     title('Servo control action [%]');
     legend('Servo percentage','Airbrakes deployment','Apogee')
     if settings.flagExport == true
-        exportgraphics(figures.servo_control_action,'report_images\src_control_action.pdf','ContentType','vector')
+        exportStandardizedFigure(figures.servo_control_action,"report_images\"+settings.mission+"src_control_action.pdf",'ContentType','vector')
     end
 end
 
@@ -32,7 +35,7 @@ if not(settings.scenario == "descent")
     legend('simulated','reference values','Airbrakes deployment','Apogee')
     
     if settings.flagExport == true
-        exportgraphics(figures.servo_angle,'report_images\src_servo_angle.pdf','ContentType','vector')
+        exportStandardizedFigure(figures.servo_angle,"report_images\"+settings.mission+"src_servo_angle.pdf",'ContentType','vector')
     end
 end
 % parafoil
@@ -57,7 +60,7 @@ if not(settings.scenario == "descent")
     title('Airbrake exposed surface');
     
     if settings.flagExport == true
-        exportgraphics(figures.arb_exposed_surface,'report_images\src_arb_exposed_surface.pdf')
+        exportStandardizedFigure(figures.arb_exposed_surface,"report_images\"+settings.mission+"src_arb_exposed_surface.pdf",0.9)
     end
 end
 
@@ -71,14 +74,16 @@ if not(settings.scenario == "descent")
     plot3(structIn.ARB_openingPosition(1),structIn.ARB_openingPosition(2),structIn.ARB_openingPosition(3),'ko','DisplayName','Airbrake deployment')
 end
 plot3(structIn.apogee_coordinates(1),structIn.apogee_coordinates(2),structIn.apogee_coordinates(3),'ro','DisplayName','Apogee')
+plot3(structIn.Y(structIn.events.mainChuteIndex, 1), structIn.Y(structIn.events.mainChuteIndex, 2), -structIn.Y(structIn.events.mainChuteIndex, 3),'d','DisplayName','Main chute opening');
 if settings.parafoil 
     plot3(settings.payload.target(1),settings.payload.target(2),settings.payload.target(3),'go','DisplayName','Payload Target')
-%     if contSettings.payload.guidance_alg == "t-approach"
+    if contSettings.payload.guidance_alg == "t-approach"
         makeCone(structIn.payload.EMC,0:10:-structIn.Y(structIn.events.mainChuteIndex,3),'EMC')
         makeCone(structIn.payload.M1,0:10:-structIn.Y(structIn.events.mainChuteIndex,3),'M1')
         makeCone(structIn.payload.M2,0:10:-structIn.Y(structIn.events.mainChuteIndex,3),'M2')
-%     end
+    end
 end
+
 
 xlabel('x [m]');
 ylabel('y [m]');
@@ -87,12 +92,12 @@ title('Trajectory');
 axis equal
 legend
 if settings.flagExport == true
-    exportgraphics(figures.trajectory,'report_images\src_trajectory.pdf')
+    exportStandardizedFigure(figures.trajectory,"report_images\"+settings.mission+"src_trajectory.pdf",0.9)
 end
 
 %% Velocities BODY w.r.t. time against NAS
 V_NAS_BODY = quatrotate(structIn.NAS(:,[10,7:9]), structIn.NAS(:, 4:6));
-figures.velocities = figure('Name', 'Velocities BODY','ToolBar','auto','Position',[100,100,600,400]);
+figures.velocities_BODY = figure('Name', 'Velocities BODY','ToolBar','auto','Position',[100,100,600,400]);
 %
 subplot(3,1,1)
 plot(structIn.t, structIn.Y(:, 4),'DisplayName','Vx')
@@ -132,12 +137,12 @@ ylabel('V_z [m/s]');
 sgtitle('Velocities BODY');
 legend
 if settings.flagExport == true
-    exportgraphics(figures.velocities,'report_images\src_velocities_BODY.pdf')
+    exportStandardizedFigure(figures.velocities_BODY,"report_images\"+settings.mission+"src_velocities_BODY.pdf",0.9)
 end
 
 %% Velocities NED w.r.t. time against NAS
 V_SIM_NED = quatrotate(quatconj(structIn.Y(:,10:13)), structIn.Y(:, 4:6));
-figures.velocities = figure('Name', 'Velocities NED','ToolBar','auto','Position',[100,100,600,400]);
+figures.velocities_NED = figure('Name', 'Velocities NED','ToolBar','auto','Position',[100,100,600,400]);
 %
 subplot(3,1,1)
 plot(structIn.t, V_SIM_NED(:, 1),'DisplayName','Vn')
@@ -172,7 +177,7 @@ ylabel('V_z [m/s]');
 sgtitle('Velocities NED');
 legend
 if settings.flagExport == true
-    exportgraphics(figures.velocities,'report_images\src_velocities_NED.pdf')
+    exportStandardizedFigure(figures.velocities_NED,"report_images\"+settings.mission+"src_velocities_NED.pdf",0.9)
 end
 
 %% Mach w.r.t. time
@@ -195,7 +200,7 @@ end
 % legend('Mach','Airbrakes deployment','Apogee')
 % 
 % if settings.flagExport == true
-%     exportgraphics(figures.Mach_number,'report_images\src_src_Mach_number.pdf')
+%     exportStandardizedFigure(figures.Mach_number,"report_images\"+settings.mission+"src_src_Mach_number.pdf",0.9)
 % end
 
 %% Predicted vs real apogee
@@ -214,7 +219,7 @@ end
 % % % %     legend('Real altitude','Predicted apogee','shutdown time')
 % % % % 
 % % % %     if settings.flagExport == true
-% % % %         exportgraphics(prediction,'predicted_apogee.pdf')
+% % % %         exportStandardizedFigure(prediction,'predicted_apogee.pdf",0.9)
 % % % %     end
 % % % % 
 % % % % end
@@ -368,7 +373,7 @@ ylabel('r [rad/s]');
 sgtitle('Angular rotations BODY');
 legend
 if settings.flagExport == true
-    exportgraphics(figures.velocities,'report_images\src_Angular_rotations_BODY.pdf')
+    exportStandardizedFigure(figures.velocities,"report_images\"+settings.mission+"src_Angular_rotations_BODY.pdf",0.9)
 end
 
 end
