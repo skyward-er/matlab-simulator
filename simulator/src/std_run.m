@@ -176,6 +176,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
 
     if vz(end) >= -1e-3 && launchFlag && not(settings.scenario == "descent") && ~eventExpulsion
         settings.flagAscent = true;                                         % Ascent
+        lastAscentIndex = n_old;
     else
         settings.flagAscent = false;                                        % Descent
         eventExpulsion = true;
@@ -185,6 +186,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         if sensorData.kalman.z >= settings.para(1).z_cut + settings.z0 && ~eventExpulsion2
             flagPara1 = true;
             flagPara2 = false;                                              % parafoil drogue
+            lastDrogueIndex = n_old;
         else
             flagPara1 = false;
             flagPara2 = true;                                               % parafoil main
@@ -290,7 +292,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     ap_ref_vec(iTimes,:) = ap_ref;
     ap_ref_time(iTimes) = t1; % because it is commanded in the next step, so we save the step final time
 
-    % vertical velocity for update of the state machine
+%     % vertical velocity for update of the state machine
     if  settings.flagAscent || (not(settings.flagAscent) && settings.ballisticFligth)
         Q    =   Yf(end, 10:13);
         vels =   quatrotate(quatconj(Q), Yf(:, 4:6));
@@ -304,11 +306,11 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     end
 
 
-%     if lastFlagAscent && not(settings.flagAscent) && not(settings.scenario == "ballistic")
-%         Y0 = [Yf(end, 1:3), vels(end,:), Yf(end, 7:end)]; % non sono sicuro del senso di questa riga
-%     else
+    if lastFlagAscent && not(settings.flagAscent) && not(settings.scenario == "ballistic")
+        Y0 = [Yf(end, 1:3), vels(end,:), Yf(end, 7:end)]; % non sono sicuro del senso di questa riga
+    else
         Y0 = Yf(end, :);
-%     end
+    end
 
     % atmosphere
     [~, a, ~, ~] = atmosisa(sensorData.kalman.z);        % speed of sound at each sample time, kalman is mean sea level (MSL) so there is no need to add z0
@@ -458,6 +460,9 @@ if exist('t_airbrakes','var')
     struct_out.ARB_openingVelocities = [Yf_tot(idx_airbrakes,4),Yf_tot(idx_airbrakes,5),-Yf_tot(idx_airbrakes,6)];
 end
 struct_out.deltaA = deltaA_tot;
+struct_out.events.drogueIndex = lastAscentIndex+1;
+struct_out.events.mainChuteIndex = lastDrogueIndex+1;
+struct_out.payload = contSettings.payload;
 [~,structCutterTimeIndex] = max(struct_out.t);
 struct_out = structCutter(struct_out, "index", 1, structCutterTimeIndex);
 % saveConstWind =  [0]; %??? may be for montecarlo?

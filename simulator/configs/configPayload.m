@@ -1,9 +1,9 @@
 %% payload constants
 % Geometry
 settings.payload.mass = 4.2;                 % [kg]  mass 
-settings.payload.b    = 2.55/2;              % [m]   semiwingspan  - vela nuova: 2.55/2;
+settings.payload.b    = 2.06/2;              % [m]   semiwingspan  - vela nuova: 2.55/2; - vela vecchia: 2.06/2;
 settings.payload.c    = 0.8;                 % [m]   mean aero chord
-settings.payload.S    = 2.04;                % [m^2] payload surface - vela nuova 2.04;
+settings.payload.S    = 1.64;                % [m^2] payload surface - vela nuova 2.04; - vela vecchia: 1.64;  
 settings.payload.inertia = [0.42, 0,   0.03;
                             0,    0.4,    0; 
                             0.03, 0, 0.053]; % [kg m^2] [3x3] inertia matrix payload+payload 
@@ -51,7 +51,7 @@ settings.payload.err_max = 50;
 
 %% Navigation
 % Set as true to include wind estimation (WES)
-contSettings.payload.flagWES = false;
+contSettings.payload.flagWES = true;
 
 % Constants for running WES 
 contSettings.WES.calPeriod = 10;       % [s] Time the payload takes to complete a circle
@@ -74,14 +74,14 @@ payload.simParam.wind_sub = 1;            % Set as 1 for subtracting and 0 other
 
 % P and PI controller
 contSettings.payload.Kp = 0.1;
-contSettings.payload.Ki = 0.01;
+contSettings.payload.Ki = 0;%0.005;
 contSettings.payload.uMax = 0.1;
 contSettings.payload.uMin = -0.1;
 contSettings.payload.controlFreq = 10; % Hz
 
 %% Guidance algorithm
 % Algorithm selection: choose from "closed loop", "t-approach"
-contSettings.payload.guidance_alg = "closed loop";
+contSettings.payload.guidance_alg = "t-approach";
 
 % Guidance start time
 contSettings.payload.guidance_start = 15;
@@ -92,40 +92,9 @@ M1 = zeros(1, 2);
 M2 = zeros(1, 2);
 
 if contSettings.payload.guidance_alg == "t-approach"
-    target = settings.payload.target;
     % define the position of EMC: in line with the target
-    mult_EMC   = 1.2;               % How far from target is EMC (between 1 and 1.2)
-    EMC        = target(1:2)*mult_EMC; % Energy Management point [1x2] [m]
+    contSettings.payload.mult_EMC   = 1.2;               % How far from target is EMC (between 1 and 1.2)
+    contSettings.payload.d = 20;
+%     [contSettings.payload.EMC,contSettings.payload.M1,contSettings.payload.M2] = setEMCpoints([0;0;0],settings.payload.target,contSettings.payload.mult_EMC,contSettings.payload.d);
 
-    % computation of the target point angle with respect to the NED center
-    norm_point = target/norm(target(1:2));                   
-    psi0       = atan2(norm_point(2),norm_point(1));        % angle [rad]
-    
-    % define d: distance of the lateral points M1 and M2 from the centerline
-    % connecting the center of the NED and the target point
-    d        = 20;                              % [m] Ex: 20, 50, 55, 75
-    
-    % compute the angle between the line connecting the center of the NED and
-    % the target and the direction of the M1 and M2 ( the triangle is
-    % 0-target-M1) the angle is the one on the NED center (RELATIVE ANGLE)
-    psi_man  = atan2(d, norm(target));           
-    
-    % compute the magnitude of the hypotenuse of the 0-target-M1 triangle
-    l_man    = d/sin(psi_man);
-    
-    % compute the angle of the M1 point in absolute frame (ABSOLUTE ANGLE)
-    M2_ang   = psi0 + psi_man;
-    
-    % compute the angle of the M1 point in absolute frame (RELATIVE ANGLE)
-    M1_ang   = psi0 - psi_man;
-    
-    % compose the points M1 and M2 with cosine and sine composition havin as
-    % magnitude the one computed before
-    M1       = [l_man*cos(M1_ang);l_man*sin(M1_ang)];  % Maneuvering point 1 [1x2] [m]
-    M2       = [l_man*cos(M2_ang);l_man*sin(M2_ang)];  % Maneuvering point 2 [1x2] [m]
-    
 end
-
-contSettings.payload.EMC = EMC;
-contSettings.payload.M1 = M1;
-contSettings.payload.M2 = M2;

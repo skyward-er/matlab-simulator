@@ -73,11 +73,11 @@ end
 plot3(structIn.apogee_coordinates(1),structIn.apogee_coordinates(2),structIn.apogee_coordinates(3),'ro','DisplayName','Apogee')
 if settings.parafoil 
     plot3(settings.payload.target(1),settings.payload.target(2),settings.payload.target(3),'go','DisplayName','Payload Target')
-    if contSettings.payload.guidance_alg == "t-approach"
-        plot3(contSettings.payload.EMC(1),contSettings.payload.EMC(2),settings.payload.target(3),'bd','DisplayName','EMC')
-        plot3(contSettings.payload.M1(1),contSettings.payload.M1(2),settings.payload.target(3),'bs','DisplayName','M1')
-        plot3(contSettings.payload.M2(1),contSettings.payload.M2(2),settings.payload.target(3),'b>','DisplayName','M2')
-    end
+%     if contSettings.payload.guidance_alg == "t-approach"
+        makeCone(structIn.payload.EMC,0:10:-structIn.Y(structIn.events.mainChuteIndex,3),'EMC')
+        makeCone(structIn.payload.M1,0:10:-structIn.Y(structIn.events.mainChuteIndex,3),'M1')
+        makeCone(structIn.payload.M2,0:10:-structIn.Y(structIn.events.mainChuteIndex,3),'M2')
+%     end
 end
 
 xlabel('x [m]');
@@ -90,28 +90,9 @@ if settings.flagExport == true
     exportgraphics(figures.trajectory,'report_images\src_trajectory.pdf')
 end
 
-%% Velocities w.r.t. time
-figures.velocities = figure('Name', 'Velocities','ToolBar','auto','Position',[100,100,600,400]);
-plot(structIn.t, structIn.Y(:, 4),'DisplayName','Vx')
-hold on; grid on;
-plot(structIn.t, structIn.Y(:, 5),'DisplayName','Vy')
-plot(structIn.t, structIn.Y(:, 6),'DisplayName','Vz')
-if not(settings.scenario == "descent")
-    xline(structIn.ARB_allowanceTime,'k--','DisplayName','Air brakes opening')
-end
-    xline(structIn.apogee_time,'r--','DisplayName','Apogee')
-xlabel('Time [s]');
-ylabel('Speed V [m/s]');
-title('Velocities');
-legend
-
-if settings.flagExport == true
-    exportgraphics(figures.velocities,'report_images\src_velocities.pdf')
-end
-
-%% Velocities w.r.t. time against NAS
+%% Velocities BODY w.r.t. time against NAS
 V_NAS_BODY = quatrotate(structIn.NAS(:,[10,7:9]), structIn.NAS(:, 4:6));
-figures.velocities = figure('Name', 'Velocities','ToolBar','auto','Position',[100,100,600,400]);
+figures.velocities = figure('Name', 'Velocities BODY','ToolBar','auto','Position',[100,100,600,400]);
 %
 subplot(3,1,1)
 plot(structIn.t, structIn.Y(:, 4),'DisplayName','Vx')
@@ -143,11 +124,52 @@ end
     xline(structIn.apogee_time,'r--','DisplayName','Apogee')
 xlabel('Time [s]');
 ylabel('V_z [m/s]');
-sgtitle('Velocities');
+sgtitle('Velocities BODY');
 legend
 if settings.flagExport == true
-    exportgraphics(figures.velocities,'report_images\src_velocities.pdf')
+    exportgraphics(figures.velocities,'report_images\src_velocities_BODY.pdf')
 end
+
+%% Velocities NED w.r.t. time against NAS
+V_SIM_NED = quatrotate(quatconj(structIn.Y(:,10:13)), structIn.Y(:, 4:6));
+figures.velocities = figure('Name', 'Velocities NED','ToolBar','auto','Position',[100,100,600,400]);
+%
+subplot(3,1,1)
+plot(structIn.t, V_SIM_NED(:, 1),'DisplayName','Vn')
+hold on; grid on;
+plot(structIn.t_nas, structIn.NAS(:, 4),'DisplayName','Vn est')
+if not(settings.scenario == "descent")
+    xline(structIn.ARB_allowanceTime,'k--')
+end
+ylabel('V_x [m/s]');
+legend
+%
+subplot(3,1,2)
+plot(structIn.t, V_SIM_NED(:, 2),'DisplayName','Ve')
+hold on; 
+plot(structIn.t_nas,structIn.NAS(:, 5) ,'DisplayName','Ve est')
+if not(settings.scenario == "descent")
+    xline(structIn.ARB_allowanceTime,'k--')
+end
+ylabel('V_y [m/s]');
+legend
+%
+subplot(3,1,3)
+plot(structIn.t, V_SIM_NED(:, 3),'DisplayName','Vd')
+hold on;
+plot(structIn.t_nas, structIn.NAS(:, 6),'DisplayName','Vd est')
+if not(settings.scenario == "descent")
+    xline(structIn.ARB_allowanceTime,'k--','DisplayName','Air brakes opening')
+end
+    xline(structIn.apogee_time,'r--','DisplayName','Apogee')
+xlabel('Time [s]');
+ylabel('V_z [m/s]');
+sgtitle('Velocities NED');
+legend
+if settings.flagExport == true
+    exportgraphics(figures.velocities,'report_images\src_velocities_NED.pdf')
+end
+
 %% Mach w.r.t. time
 figures.Mach_number = figure('Name', 'Velocities','ToolBar','auto','Position',[100,100,600,400]);
 [~, a, ~, ~] = atmosisa(structIn.Y(:, 3));
@@ -292,9 +314,15 @@ legend
 sgtitle('Euler angles')
 xlabel('Time (s)')
 
+end
+    
 function [] = makeCone(pos_cone, z_coord, name)
     % pos_cone: position x, y
     % z_coord: ned position Z every 10 meters (vector)
+    % name: string to display in the legend
+    if size(z_coord,2)>1
+        z_coord = z_coord';
+    end
     th = linspace(0, 2*pi, 20);
     X = pos_cone(1);
     Y = pos_cone(2);

@@ -161,15 +161,14 @@ if contains(settings.mission,'_2023')
             trajectoryChoice_mass;
         end
     
-        if contSettings.flagFirstControl
+        if contSettings.flagFirstControlABK % set in
     
             t_airbrakes = t0;
             t_last_arb_control = t0;
             idx_airbrakes = n_old+1;
     
         end
-        if Tf(end)-t_last_arb_control >= 1/settings.frequencies.arbFrequency - 1e-5 ||...
-                t_last_arb_control == t_airbrakes
+        if t1-t_last_arb_control >= 1/settings.frequencies.arbFrequency - 1e-5 || t_last_arb_control == t_airbrakes
     
             t_last_arb_control = Tf(end);
             ap_ref_old = ap_ref_new;
@@ -185,17 +184,15 @@ if contains(settings.mission,'_2023')
 else
     if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings.control
     
-        if contSettings.flagFirstControl
+        if contSettings.flagFirstControlABK
     
             t_airbrakes = t0;
             t_last_arb_control = t0;
             idx_airbrakes = n_old+1;
     
         end
-        if Tf(end)-t_last_arb_control >= 1/settings.frequencies.arbFrequency - 1e-5 ||...
-                t_last_arb_control == t_airbrakes
-    
-            t_last_arb_control = Tf(end);
+        if t1-t_last_arb_control >= 1/settings.frequencies.arbFrequency - 1e-6 || t_last_arb_control == t_airbrakes
+            t_last_arb_control = t1(end);
             ap_ref_old = ap_ref_new;
             settings.quat = [x_est_tot(end, [10,7:9])];
             [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
@@ -209,16 +206,33 @@ else
 end
 
 %% PARAFOIL
-if ~settings.flagAscent && settings.parafoil
+if ~settings.flagAscent && settings.parafoil 
     if contSettings.payload.flagWES
-        wind_est = [uw,vw,ww]; % modificare con WIND ESTIMATION
+            wind_est = [uw,vw,ww]; % modificare con WIND ESTIMATION
     else
-        wind_est = [0;0;0];
+            wind_est = [0,0,0];
     end
     if flagPara2
-        pos_est = sensorData.kalman.x_c(end,1:3);
-        pos_est(3) = -pos_est(3)-settings.z0;
-        [deltaA,contSettings] = run_parafoilGuidance(pos_est, sensorData.kalman.x_c(end,4:6), wind_est, settings.payload.target, contSettings);
+        if contSettings.flagFirstControlPRF % set in
+        
+                t_parafoil = t0;
+                t_last_prf_control = t0;
+                idx_parafoil = n_old+1;
+                contSettings.flagFirstControlPRF = false;
+                if contSettings.payload.guidance_alg == "t-approach"
+                    pos_est = sensorData.kalman.x_c(end,1:3);
+                    pos_est(3) = -pos_est(3)-settings.z0;
+                    [contSettings.payload.EMC,contSettings.payload.M1,contSettings.payload.M2] = setEMCpoints(pos_est,settings.payload.target,contSettings.payload.mult_EMC,contSettings.payload.d);
+                end
+        end
+        if t1-t_last_prf_control >= 1/contSettings.payload.controlFreq - 1e-5 || t_last_prf_control == t_parafoil
+           
+                t_last_prf_control = t1;
+                pos_est = sensorData.kalman.x_c(end,1:3);
+                pos_est(3) = -pos_est(3)-settings.z0;
+                
+                [deltaA,contSettings] = run_parafoilGuidance(pos_est, sensorData.kalman.x_c(end,4:6), wind_est, settings.payload.target, contSettings);
+        end
     end
-   
 end
+   

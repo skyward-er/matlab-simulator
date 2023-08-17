@@ -11,7 +11,7 @@ function head_ref  = EMguidance(pos,target,EMC,M1,M2)
     Y   = pos(2);        % [m] Y position in inertial frame
     Z   = pos(3);
     x_c = [X; Y];        % current x-y plane position
-    x_f  = target;       % target x-y plane position
+    x_f  = target(1:2);       % target x-y plane position
     
     %% heading setpoint computation
     % the algorithm define wich point is the current target in order to follow

@@ -15,6 +15,10 @@ function [deltaA, contSettings] = run_parafoilGuidance(pos_est, vel_est, wind_es
 %
 % deltaA = deflection angle
 
+if size(vel_est) ~= size(wind_est)
+    wind_est = wind_est';
+end
+
 %% GUIDANCE
 switch contSettings.payload.guidance_alg
 
@@ -30,7 +34,7 @@ end
     
 %% CONTROL
 
-if ~contSettings.payload.flagWES
+% if ~contSettings.payload.flagWES
     
     % compute velocity difference
     deltaVel = vel_est - wind_est;
@@ -50,7 +54,8 @@ if ~contSettings.payload.flagWES
     [deltaA,contSettings.payload.saturation] = Saturation(deltaA,contSettings.payload.uMin, contSettings.payload.uMax);
    
      % inserire WES conditions
-end
+     % storia dei 15 secondi di calibrazione etc
+% end
 
 
 

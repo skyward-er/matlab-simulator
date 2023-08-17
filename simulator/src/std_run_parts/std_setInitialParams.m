@@ -103,7 +103,8 @@ vz = 0;
 % prevent unwanted changes in state machine
 eventExpulsion = false; % expulsion of the first parachute
 eventExpulsion2 = false; % expulsion of the second parachute
-
+lastAscentIndex = 0;
+lastDrogueIndex = 0;
 %% sensor fault initial conditions
 chunk{1} = zeros(1,50);
 chunk{2} = zeros(1,50);
