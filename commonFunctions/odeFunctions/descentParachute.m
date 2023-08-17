@@ -1,4 +1,4 @@
-function [dY,parout] = descentParachute(t, Y, settings, uw, vw, ww, para, uncert)
+function [dY,parout] = descentParachute(t, Y, settings, uw, vw, ww, para, Q ,uncert)
 %{ 
 
 descentParachute - ode function of the 3DOF Rigid Rocket-Paraachute Model
@@ -47,6 +47,7 @@ v = Y(5);
 w = Y(6);
 
 
+
 %% CONSTANTS
 S = settings.para(para).S;                                               % [m^2]   Surface
 CD = settings.para(para).CD;                                             % [/] Parachute Drag Coefficient
@@ -67,7 +68,13 @@ if settings.wind.input
     [uw, vw, ww] = wind_input_generator(settings, z, uncert);    
 end
 
-wind = [uw vw ww];
+% new version
+% dcm = quatToDcm(Q);
+% wind = dcm*[uw; vw; ww]; % body
+% Vels = dcm'*[u; v; w]; % ned
+
+wind =[uw; vw; ww]; % body
+Vels = [u; v; w];
 
 % Relative velocities (plus wind);
 ur = u - wind(1);
@@ -89,15 +96,15 @@ end
 % The parachutes are approximated as rectangular surfaces with the normal
 % vector perpendicular to the relative velocity
 
-t_vect = [ur vr wr];                     % Tangenzial vector
+t_vect = [ur vr wr];                     % Tangential vector
 h_vect = [-vr ur 0];                     % horizontal vector    
 
 if all(abs(h_vect) < 1e-8)
     h_vect = [-vw uw 0];
 end
 
-if ~all(t_vect == 0)
-    t_vers = t_vect/norm(t_vect);            % Tangenzial versor
+% if ~all(t_vect == 0)
+    t_vers = t_vect/norm(t_vect);            % Tangential versor
     if ~all(h_vect == 0)
         h_vers = -h_vect/norm(h_vect);           % horizontal versor
     else
@@ -109,11 +116,11 @@ if ~all(t_vect == 0)
         n_vect = cross(h_vers, t_vers);
         n_vers = n_vect/norm(n_vect);
     end
-else
-    t_vers = [0,0,-1];
-
-    n_vers = [0,1,0];
-end
+% else
+%     t_vers = [0,0,-1];
+% 
+%     n_vers = [0,1,0];
+% end
 
 
 
@@ -133,7 +140,7 @@ dw = F(3)/m;
 
 
 %% FINAL DERIVATIVE STATE ASSEMBLING
-dY(1:3) = [u v w]';
+dY(1:3) = Vels; % ned
 dY(4) = du;
 dY(5) = dv;
 dY(6) = dw;

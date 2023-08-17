@@ -62,13 +62,13 @@ if settings.flagNAS && settings.dataNoise
     %     sp.pn = sp.pn(end);
     %     sp.t_baro = sp.t_baro(end);
     
-    [sensorData.kalman.x_c, vels, P_c, settings.kalman]   =  run_kalman(x_prev, vels_prev, P_prev, sp, settings.kalman, XYZ0*0.01,settings.flagAscent,settings.flagStopPitotCorrection);
+    [sensorData.kalman.x_c, vels_NED, P_c, settings.kalman]   =  run_kalman(x_prev, vels_prev, P_prev, sp, settings.kalman, XYZ0*0.01,settings.flagAscent,settings.flagStopPitotCorrection);
     if abs(sensorData.kalman.x_c(3,1)) >settings.stopPitotAltitude+ settings.z0
         settings.flagStopPitotCorrection = true;
     end
     sensorData.kalman.time(iTimes) = Tf(end);
     x_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1,:)  = sensorData.kalman.x_c(:,:); % NAS position output
-    vels_tot(c.n_est_old:c.n_est_old + size(vels(:,1),1)-1,:)  = vels(:,:); % NAS speed output
+    vels_tot(c.n_est_old:c.n_est_old + size(vels_NED(:,1),1)-1,:)  = vels_NED(:,:); % NAS speed output
     t_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1)    = sensorData.accelerometer.time; % NAS time output
     c.n_est_old = c.n_est_old + size(sensorData.kalman.x_c,1);
 
@@ -81,28 +81,7 @@ if settings.flagNAS && settings.dataNoise
     est = sensorData.kalman.vz;
 end
 
-% vertical velocity and position
-% % % % % % if settings.flagAscent || (not(settings.flagAscent) && settings.ballisticFligth)
-% % % % % %     Q    =   Yf(end, 10:13);
-% % % % % %     vels =   quatrotate(quatconj(Q), Yf(:, 4:6));
-% % % % % %     sensorData.kalman.vz = - vels(end,3);   % down
-% % % % % %     sensorData.kalman.vx =   vels(end,2);   % north
-% % % % % %     sensorData.kalman.vy =   vels(end,1);   % east
-% % % % % %     real = sensorData.kalman.vz;
-% % % % % %     est_meno_real = est-real;
-% % % % % %     z = -Yf(end, 3);
-% % % % % % else
-% % % % % %     sensorData.kalman.vz = - Yf(end, 6); % actually not coming from NAS in this case
-% % % % % %     sensorData.kalman.vx = Yf(end, 5);
-% % % % % %     sensorData.kalman.vy = Yf(end, 4);  
-% % % % % % end
 v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
-
-% % % % % % 
-% % % % % % sensorData.kalman.z  = -x_est_tot(end, 3);
-% % % % % % sensorData.kalman.x  =  Yf(end, 2);
-% % % % % % sensorData.kalman.y  =  Yf(end, 1);
-% sensorData.kalman.time = Tf(end); %% CAPIRE A COSA SERVE
 
 %% Engine Control algorithm
     

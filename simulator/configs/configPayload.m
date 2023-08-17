@@ -41,8 +41,8 @@ settings.payload.ClDeltaA  = 0.01;
 
 %% Target
 % Target coordinates 
-x_target = 200;
-y_target = 300;
+x_target = 50;
+y_target = 50;
 z_target = 0;
 settings.payload.target = [x_target; y_target; z_target]; % [m] [3x1] target (IPI)
 

@@ -61,15 +61,17 @@ end
 if not(settings.wind.input) && not(settings.wind.model)
     uw = settings.constWind(1); vw = settings.constWind(2); ww = settings.constWind(3);
 end
+% rotation ned to body
 dcm = quatToDcm(Q); % we want it scalar first
 eul = quat2eul(Q);  % we want it scalar first, output PSI, THETA, PHI
-eul = flip(eul);    % to have PHI, THETA, PSI
+eul = flip(eul,2);    % to have PHI, THETA, PSI
 wind_body = dcm*[uw; vw; ww];
 
 % Relative velocities
-ur = u - wind_body(1);
+ur = abs(u - wind_body(1)); % abs to evade problem of negative vx body in forces computation
 vr = v - wind_body(2);
 wr = w - wind_body(3);
+
 
 % Body to Inertial velocities
 Vels_NED = dcm'*[u; v; w];
@@ -103,13 +105,13 @@ qFactor = 0.5*rho*V_norm;            % [Pa * s / m] dynamic pressure/vNorm
 multFactorX = 0.5 * b / V_norm;       % booooooooooh   
 multFactorY = 0.5 * c / V_norm;       % booooooooooh   
 
-% aerodynamic forces
+% aerodynamic forces (body frame)
 LIFT = qFactor * (CL0 + alpha * CLAlpha + deltaANormalized * CLDeltaA) * [wr; 0; -ur];
 DRAG = qFactor * (CD0 + alpha^2 * CDAlpha2 + deltaANormalized * CDDeltaA) * [ur; vr; wr];
 
 F_AERO = (LIFT - DRAG)*S;
 
-% Inertial to body gravity force:
+% Inertial to body gravity force (in body frame):
 Fg = dcm*[0; 0; mass*g];        % [N] force due to the gravity in body frame
 
 % total force assembly
@@ -125,13 +127,10 @@ M = M_AERO; % no inertia considerations in this model
 
 %% derivatives computations
 omega = [p;q;r];
+
 % acceleration
 bodyAcc = F/mass - cross(omega,[u;v;w]);
-% 
-% du = F(1)/mass - q*w + r*v;
-% dv = F(2)/mass - r*u + p*w;
-% dw = F(3)/mass - p*v + q*u;
-
+ 
 %% angular velocity - as msa does
 OM = [ 0 -p -q -r  ;
        p  0  r -q  ;
