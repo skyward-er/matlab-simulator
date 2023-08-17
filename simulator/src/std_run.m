@@ -295,7 +295,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     ap_ref_time(iTimes) = t1; % because it is commanded in the next step, so we save the step final time
 
     %% vertical velocity for update of the state machine
-    if  settings.flagAscent || (not(settings.flagAscent) && settings.ballisticFligth) %|| flagPara2
+    if  settings.flagAscent || (not(settings.flagAscent) && settings.ballisticFligth) || flagPara2
         Q    =   Yf(end, 10:13);
         vels =   quatrotate(quatconj(Q), Yf(end, 4:6));
         vz = - vels(3);   % up (there is a -)
