@@ -43,10 +43,13 @@ settings.flagMatr                =   false(settings.nmax, 6);                   
 settings.lastLaunchFlag = true; % LEAVE THIS TO TRUE UNLESS YOU KNOW WHAT YOU ARE DOING (other wise it won't stop if you set only ascent simulation)
 
 % ALGORITHM TUNING
-settings.tuning = true;                 % [-] True if you want to tune the algorithm
+settings.tuning = true;                 % [-] True if you want to tune the algorithm (resets the random seed)
 
 % EXPORT GRAPHICS (from simulations)
-settings.flagExport = true;
+settings.flagExportPLOTS = false;
+
+% export csv files for CPP implementation?
+settings.flagExportCSV = false;
 
 
 

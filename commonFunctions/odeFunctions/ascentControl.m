@@ -132,14 +132,27 @@ Q = [q0 q1 q2 q3];
 Q = Q/norm(Q);
 
 %% ADDING WIND (supposed to be added in NED axes);
-if settings.wind.model
+% if settings.wind.model
+% 
+%     [uw, vw, ww] = windMatlabGenerator(settings, z, t);
+% 
+% elseif settings.wind.input
+%     [uw, vw, ww] = windInputGenerator(settings, z, uncert);
+% % elseif  settings.wind.variable
+% %     [uw, vw, ww] = windVariableGenerator(t, z, settings.wind);
+% end
 
+switch settings.windModel
+
+    case "atmospherical"
     [uw, vw, ww] = windMatlabGenerator(settings, z, t);
-
-elseif settings.wind.input
+    
+    case "multiplicative"
+    uncert = settings.wind.input_uncertainty;
     [uw, vw, ww] = windInputGenerator(settings, z, uncert);
-% elseif  settings.wind.variable
-%     [uw, vw, ww] = windVariableGenerator(t, z, settings.wind);
+
+    case "constant"
+    uw = settings.constWind(1); vw = settings.constWind(2); ww = settings.constWind(3);
 end
 
 dcm = quatToDcm(Q);

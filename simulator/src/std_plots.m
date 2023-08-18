@@ -15,8 +15,8 @@ if not(settings.scenario == "descent")
     ylabel('Extension [%]');
     title('Servo control action [%]');
     legend('Servo percentage','Airbrakes deployment','Apogee')
-    if settings.flagExport == true
-        exportStandardizedFigure(figures.servo_control_action,"report_images\"+settings.mission+"src_control_action.pdf",'ContentType','vector')
+    if settings.flagExportPLOTS == true
+        exportStandardizedFigure(figures.servo_control_action,"report_images\"+settings.mission+"\src_control_action.pdf",0.9)
     end
 end
 
@@ -34,8 +34,8 @@ if not(settings.scenario == "descent")
     title('Servo angle');
     legend('simulated','reference values','Airbrakes deployment','Apogee')
     
-    if settings.flagExport == true
-        exportStandardizedFigure(figures.servo_angle,"report_images\"+settings.mission+"src_servo_angle.pdf",'ContentType','vector')
+    if settings.flagExportPLOTS == true
+        exportStandardizedFigure(figures.servo_angle,"report_images\"+settings.mission+"\src_servo_angle.pdf",0.9)
     end
 end
 % parafoil
@@ -59,8 +59,8 @@ if not(settings.scenario == "descent")
     ylabel('dS [m^2]');
     title('Airbrake exposed surface');
     
-    if settings.flagExport == true
-        exportStandardizedFigure(figures.arb_exposed_surface,"report_images\"+settings.mission+"src_arb_exposed_surface.pdf",0.9)
+    if settings.flagExportPLOTS == true
+        exportStandardizedFigure(figures.arb_exposed_surface,"report_images\"+settings.mission+"\src_arb_exposed_surface.pdf",0.9)
     end
 end
 
@@ -91,8 +91,8 @@ zlabel('z [m]');
 title('Trajectory');
 axis equal
 legend
-if settings.flagExport == true
-    exportStandardizedFigure(figures.trajectory,"report_images\"+settings.mission+"src_trajectory.pdf",0.9)
+if settings.flagExportPLOTS == true
+    exportStandardizedFigure(figures.trajectory,"report_images\"+settings.mission+"\src_trajectory.pdf",0.9)
 end
 
 %% Velocities BODY w.r.t. time against NAS
@@ -136,8 +136,8 @@ xlabel('Time [s]');
 ylabel('V_z [m/s]');
 sgtitle('Velocities BODY');
 legend
-if settings.flagExport == true
-    exportStandardizedFigure(figures.velocities_BODY,"report_images\"+settings.mission+"src_velocities_BODY.pdf",0.9)
+if settings.flagExportPLOTS == true
+    exportStandardizedFigure(figures.velocities_BODY,"report_images\"+settings.mission+"\src_velocities_BODY.pdf",0.9)
 end
 
 %% Velocities NED w.r.t. time against NAS
@@ -176,8 +176,8 @@ xlabel('Time [s]');
 ylabel('V_z [m/s]');
 sgtitle('Velocities NED');
 legend
-if settings.flagExport == true
-    exportStandardizedFigure(figures.velocities_NED,"report_images\"+settings.mission+"src_velocities_NED.pdf",0.9)
+if settings.flagExportPLOTS == true
+    exportStandardizedFigure(figures.velocities_NED,"report_images\"+settings.mission+"\src_velocities_NED.pdf",0.9)
 end
 
 %% Mach w.r.t. time
@@ -199,7 +199,7 @@ end
 % title('Velocities');
 % legend('Mach','Airbrakes deployment','Apogee')
 % 
-% if settings.flagExport == true
+% if settings.flagExportPLOTS == true
 %     exportStandardizedFigure(figures.Mach_number,"report_images\"+settings.mission+"src_src_Mach_number.pdf",0.9)
 % end
 
@@ -218,7 +218,7 @@ end
 % % % %     title('Predicted vs Real apogee');
 % % % %     legend('Real altitude','Predicted apogee','shutdown time')
 % % % % 
-% % % %     if settings.flagExport == true
+% % % %     if settings.flagExportPLOTS == true
 % % % %         exportStandardizedFigure(prediction,'predicted_apogee.pdf",0.9)
 % % % %     end
 % % % % 
@@ -372,8 +372,8 @@ xlabel('Time [s]');
 ylabel('r [rad/s]');
 sgtitle('Angular rotations BODY');
 legend
-if settings.flagExport == true
-    exportStandardizedFigure(figures.velocities,"report_images\"+settings.mission+"src_Angular_rotations_BODY.pdf",0.9)
+if settings.flagExportPLOTS == true
+    exportStandardizedFigure(figures.velocities,"report_images\"+settings.mission+"\src_Angular_rotations_BODY.pdf",0.9)
 end
 
 end
