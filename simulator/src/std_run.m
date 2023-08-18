@@ -184,7 +184,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     end
 
     if not(settings.flagAscent) && launchFlag
-        if sensorData.kalman.z >= settings.para(1).z_cut + settings.z0 && ~eventExpulsion2 % settings.para(1).z_cut + settings.z0 
+        if sensorData.kalman.z >= 1500 && ~eventExpulsion2 % settings.para(1).z_cut + settings.z0 
             flagPara1 = true;
             flagPara2 = false;                                              % parafoil drogue
             lastDrogueIndex = n_old;

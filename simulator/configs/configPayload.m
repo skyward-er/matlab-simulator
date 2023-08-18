@@ -1,9 +1,9 @@
 %% payload constants
 % Geometry
 settings.payload.mass = 4.2;                 % [kg]  mass 
-settings.payload.b    = 2.06/2;              % [m]   semiwingspan  - vela nuova: 2.55/2; - vela vecchia: 2.06/2;
+settings.payload.b    = 2.55/2;              % [m]   semiwingspan  - vela nuova: 2.55/2; - vela vecchia: 2.06/2;
 settings.payload.c    = 0.8;                 % [m]   mean aero chord
-settings.payload.S    = 1.64;                % [m^2] payload surface - vela nuova 2.04; - vela vecchia: 1.64;  
+settings.payload.S    = 2.04;                % [m^2] payload surface - vela nuova 2.04; - vela vecchia: 1.64;  
 settings.payload.inertia = [0.42, 0,   0.03;
                             0,    0.4,    0; 
                             0.03, 0, 0.053]; % [kg m^2] [3x3] inertia matrix payload+payload 
@@ -53,16 +53,19 @@ settings.payload.err_max = 50;
 % Set as true to include wind estimation (WES)
 contSettings.payload.flagWES = true;
 
-% Constants for running WES 
+% WES input constants
 contSettings.WES.calPeriod = 10;       % [s] Time the payload takes to complete a circle
-contSettings.WES.N = 25;               % [-] Samples taken during the circle
+contSettings.WES.N_cal = 25;               % [-] Samples taken during the circle
+contSettings.WES.fFactor = 1;          % [-] Forgetting factor for RLS (1 -> it does not forget)
+
+% WES recursive constants (?)
 contSettings.WES.f_RLS = 10;           % [Hz] Frequency with which the second part is run
 contSettings.WES.Funv = eye(2);        % [-] Initial condition of Funv
 % contSettings.WES.Funv = 0.001*eye(2); 
-contSettings.WES.fFactor = 1;          % [-] Forgetting factor for RLS (1 -> it does not forget)
 
-% Input during calibration of WES
+% WES control action
 contSettings.WES.deltaA = 0.05;        % [-] DeltaA before guidance
+
 
 %% Control Algorithm
 % Set as true to include control

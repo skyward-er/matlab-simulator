@@ -83,13 +83,12 @@ if settings.parafoil
         makeCone(structIn.payload.M2,0:10:-structIn.Y(structIn.events.mainChuteIndex,3),'M2')
     end
 end
-
-
 xlabel('x [m]');
 ylabel('y [m]');
 zlabel('z [m]');
 title('Trajectory');
 axis equal
+view([157,55])
 legend
 if settings.flagExportPLOTS == true
     exportStandardizedFigure(figures.trajectory,"report_images\"+settings.mission+"\src_trajectory.pdf",0.9)
