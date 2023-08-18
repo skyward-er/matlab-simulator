@@ -75,7 +75,7 @@ if not(settings.scenario == "descent")
 end
 plot3(structIn.apogee_coordinates(1),structIn.apogee_coordinates(2),structIn.apogee_coordinates(3),'ro','DisplayName','Apogee')
 plot3(structIn.Y(structIn.events.mainChuteIndex, 1), structIn.Y(structIn.events.mainChuteIndex, 2), -structIn.Y(structIn.events.mainChuteIndex, 3),'d','DisplayName','Main chute opening');
-if settings.parafoil 
+if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
     plot3(settings.payload.target(1),settings.payload.target(2),settings.payload.target(3),'go','DisplayName','Payload Target')
     if contSettings.payload.guidance_alg == "t-approach"
         makeCone(structIn.payload.EMC,0:10:-structIn.Y(structIn.events.mainChuteIndex,3),'EMC')

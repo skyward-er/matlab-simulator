@@ -27,7 +27,7 @@ scenarios explanation:
 
 
 % scenario configuration
-conf.scenario = "descent";
+conf.scenario = "controlled ascent";
 conf.board = "payload";            % Either "main" or "payload"
 conf.HIL = false;
 
@@ -49,7 +49,7 @@ settings.tuning = true;                 % [-] True if you want to tune the algor
 settings.flagExportPLOTS = false;
 
 % export csv files for CPP implementation?
-settings.flagExportCSV = false;
+settings.flagExportCSV = true;
 
 
 

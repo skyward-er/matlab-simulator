@@ -103,4 +103,18 @@ settings.hmax = 6000;                                                       % [m
 %% Sensor fault detection parameters
 % support vector machine
 
+%% parafoil
+contSettings.payload.saturation = false;
+contSettings.payload.I = 0;
+contSettings.payload.deltaA_0 = 0;
+%% WES
+contSettings.WES.wind_est = [0,0];
+contSettings.WES.A = [];
+contSettings.WES.b = [];
+contSettings.WES.V_mean = [0,0];
+contSettings.WES.V2_mean = 0;
+contSettings.WES.N = 0;
+% contSettings.WES.V_h_i = 0; % it is not used in the simulation, what is
+% it?
+contSettings.WES.state = 1;
  
