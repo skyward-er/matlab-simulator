@@ -4,40 +4,40 @@ if ~exist("report_images\"+settings.mission,"dir")
     mkdir("report_images\"+settings.mission)
 end
 %% Control variable: servo control action (percentage of angle max)
-if not(settings.scenario == "descent")
-    ap_tot_rescale = rescale(structIn.Y(:,17), "InputMin", 0, "InputMax", settings.servo.maxAngle);
-    figures.servo_control_action = figure('Name', 'Servo angle after burning phase','ToolBar','auto','Position',[100,100,600,400]);
-    plot(structIn.t, ap_tot_rescale*100);
-    hold on; grid on;
-    xline(structIn.ARB_allowanceTime,'k--')
-    xline(structIn.apogee_time,'r--')
-    xlabel('Time [s]');
-    ylabel('Extension [%]');
-    title('Servo control action [%]');
-    legend('Servo percentage','Airbrakes deployment','Apogee')
-    if settings.flagExport == true
-        exportStandardizedFigure(figures.servo_control_action,"report_images\"+settings.mission+"src_control_action.pdf",'ContentType','vector')
-    end
-end
+% if not(settings.scenario == "descent")
+%     ap_tot_rescale = rescale(structIn.Y(:,17), "InputMin", 0, "InputMax", settings.servo.maxAngle);
+%     figures.servo_control_action = figure('Name', 'Servo angle after burning phase','ToolBar','auto','Position',[100,100,600,400]);
+%     plot(structIn.t, ap_tot_rescale*100);
+%     hold on; grid on;
+%     xline(structIn.ARB_allowanceTime,'k--')
+%     xline(structIn.apogee_time,'r--')
+%     xlabel('Time [s]');
+%     ylabel('Extension [%]');
+%     title('Servo control action [%]');
+%     legend('Servo percentage','Airbrakes deployment','Apogee')
+%     if settings.flagExport == true
+%         exportStandardizedFigure(figures.servo_control_action,"report_images\"+settings.mission+"\src_control_action.pdf",'ContentType','vector')
+%     end
+% end
 
 %% Control variable: servo angle + reference values
 % air brakes
-if not(settings.scenario == "descent")
-    figures.servo_angle = figure('Name', 'Servo angle after burning phase','ToolBar','auto','Position',[100,100,600,400]);
-    plot(structIn.t, structIn.Y(:,17));
-    hold on; grid on;
-    stairs(structIn.ARB_cmdTime,structIn.ARB_cmd,'r');
-    xline(structIn.ARB_allowanceTime,'k--')
-    xline(structIn.apogee_time,'r--')
-    xlabel('Time [s]');
-    ylabel('$\alpha$ [rad]');
-    title('Servo angle');
-    legend('simulated','reference values','Airbrakes deployment','Apogee')
-    
-    if settings.flagExport == true
-        exportStandardizedFigure(figures.servo_angle,"report_images\"+settings.mission+"src_servo_angle.pdf",'ContentType','vector')
-    end
-end
+% if not(settings.scenario == "descent")
+%     figures.servo_angle = figure('Name', 'Servo angle after burning phase','ToolBar','auto','Position',[100,100,600,400]);
+%     plot(structIn.t, structIn.Y(:,17));
+%     hold on; grid on;
+%     stairs(structIn.ARB_cmdTime,structIn.ARB_cmd,'r');
+%     xline(structIn.ARB_allowanceTime,'k--')
+%     xline(structIn.apogee_time,'r--')
+%     xlabel('Time [s]');
+%     ylabel('$\alpha$ [rad]');
+%     title('Servo angle');
+%     legend('simulated','reference values','Airbrakes deployment','Apogee')
+%     
+%     if settings.flagExport == true
+%         exportStandardizedFigure(figures.servo_angle,"report_images\"+settings.mission+"\src_servo_angle.pdf",'ContentType','vector')
+%     end
+% end
 % parafoil
 if settings.parafoil
     figures.parafoil_servo_action = figure('Name', 'Parafoil deltaA','ToolBar','auto','Position',[100,100,600,400]);
@@ -48,21 +48,21 @@ if settings.parafoil
     ylabel('Normalized control action (-)')
 end
 %% Airbrake surface
-if not(settings.scenario == "descent")
-    figures.arb_exposed_surface = figure('Name', 'Airbrake exposed surface','ToolBar','auto','Position',[100,100,600,400]);
-    dS = settings.arb.surfPol * structIn.Y(:,17);
-    plot(structIn.t, dS);
-    hold on; grid on;
-    xline(structIn.ARB_allowanceTime,'k--')
-    xline(structIn.apogee_time,'r--')
-    xlabel('Time [s]');
-    ylabel('dS [m^2]');
-    title('Airbrake exposed surface');
-    
-    if settings.flagExport == true
-        exportStandardizedFigure(figures.arb_exposed_surface,"report_images\"+settings.mission+"src_arb_exposed_surface.pdf",0.9)
-    end
-end
+% if not(settings.scenario == "descent")
+%     figures.arb_exposed_surface = figure('Name', 'Airbrake exposed surface','ToolBar','auto','Position',[100,100,600,400]);
+%     dS = settings.arb.surfPol * structIn.Y(:,17);
+%     plot(structIn.t, dS);
+%     hold on; grid on;
+%     xline(structIn.ARB_allowanceTime,'k--')
+%     xline(structIn.apogee_time,'r--')
+%     xlabel('Time [s]');
+%     ylabel('dS [m^2]');
+%     title('Airbrake exposed surface');
+%     
+%     if settings.flagExport == true
+%         exportStandardizedFigure(figures.arb_exposed_surface,"report_images\"+settings.mission+"\src_arb_exposed_surface.pdf",0.9)
+%     end
+% end
 
 %% Trajectory
 figures.trajectory = figure('Name', 'Trajectory','ToolBar','auto','Position',[100,100,600,400]);
@@ -83,16 +83,15 @@ if settings.parafoil
         makeCone(structIn.payload.M2,0:10:-structIn.Y(structIn.events.mainChuteIndex,3),'M2')
     end
 end
-
-
 xlabel('x [m]');
 ylabel('y [m]');
 zlabel('z [m]');
 title('Trajectory');
 axis equal
+view([157,55])
 legend
 if settings.flagExport == true
-    exportStandardizedFigure(figures.trajectory,"report_images\"+settings.mission+"src_trajectory.pdf",0.9)
+    exportStandardizedFigure(figures.trajectory,"report_images\"+settings.mission+"\src_trajectory.pdf",0.9,'addMarkers',false)
 end
 
 %% Velocities BODY w.r.t. time against NAS
@@ -137,7 +136,7 @@ ylabel('V_z [m/s]');
 sgtitle('Velocities BODY');
 legend
 if settings.flagExport == true
-    exportStandardizedFigure(figures.velocities_BODY,"report_images\"+settings.mission+"src_velocities_BODY.pdf",0.9)
+    exportStandardizedFigure(figures.velocities_BODY,"report_images\"+settings.mission+"\src_velocities_BODY.pdf",0.9)
 end
 
 %% Velocities NED w.r.t. time against NAS
@@ -177,7 +176,7 @@ ylabel('V_z [m/s]');
 sgtitle('Velocities NED');
 legend
 if settings.flagExport == true
-    exportStandardizedFigure(figures.velocities_NED,"report_images\"+settings.mission+"src_velocities_NED.pdf",0.9)
+    exportStandardizedFigure(figures.velocities_NED,"report_images\"+settings.mission+"\src_velocities_NED.pdf",0.9)
 end
 
 %% Mach w.r.t. time
@@ -200,7 +199,7 @@ end
 % legend('Mach','Airbrakes deployment','Apogee')
 % 
 % if settings.flagExport == true
-%     exportStandardizedFigure(figures.Mach_number,"report_images\"+settings.mission+"src_src_Mach_number.pdf",0.9)
+%     exportStandardizedFigure(figures.Mach_number,"report_images\"+settings.mission+"\src_src_Mach_number.pdf",0.9)
 % end
 
 %% Predicted vs real apogee
@@ -373,7 +372,7 @@ ylabel('r [rad/s]');
 sgtitle('Angular rotations BODY');
 legend
 if settings.flagExport == true
-    exportStandardizedFigure(figures.velocities,"report_images\"+settings.mission+"src_Angular_rotations_BODY.pdf",0.9)
+    exportStandardizedFigure(figures.velocities,"report_images\"+settings.mission+"\src_Angular_rotations_BODY.pdf",0.9)
 end
 
 end

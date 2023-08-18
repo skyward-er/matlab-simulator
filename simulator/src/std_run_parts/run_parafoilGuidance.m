@@ -34,8 +34,9 @@ end
     
 %% CONTROL
 
-% if ~contSettings.payload.flagWES
-    
+if contSettings.WES.state == 1
+    deltaA = contSettings.WES.deltaA;
+else
     % compute velocity difference
     deltaVel = vel_est - wind_est;
     psi = atan2(deltaVel(2),deltaVel(1));
@@ -55,7 +56,8 @@ end
    
      % inserire WES conditions
      % storia dei 15 secondi di calibrazione etc
-% end
+
+end
 
 
 

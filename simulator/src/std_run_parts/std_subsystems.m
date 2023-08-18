@@ -186,16 +186,11 @@ end
 
 %% PARAFOIL
 if ~settings.flagAscent && settings.parafoil 
-    if contSettings.payload.flagWES
-            wind_est = [uw,vw,ww]; % modificare con WIND ESTIMATION
-    else
-            wind_est = [0,0,0];
-    end
     if flagPara2
         if contSettings.flagFirstControlPRF % set in
         
-                t_parafoil = t0;
-                t_last_prf_control = t0;
+                t_parafoil = t1;
+                t_last_prf_control = t1;
                 idx_parafoil = n_old+1;
                 contSettings.flagFirstControlPRF = false;
                 if contSettings.payload.guidance_alg == "t-approach"
@@ -204,13 +199,28 @@ if ~settings.flagAscent && settings.parafoil
                     [contSettings.payload.EMC,contSettings.payload.M1,contSettings.payload.M2] = setEMCpoints(pos_est,settings.payload.target,contSettings.payload.mult_EMC,contSettings.payload.d);
                 end
         end
+        if contSettings.payload.flagWES
+                if t1 < t_parafoil + contSettings.payload.guidance_start
+                    contSettings.WES.state = 1;
+                else
+                    contSettings.WES.state = 2;
+                end
+                vel_est = sensorData.kalman.x_c(end,4:5);
+                [contSettings.WES] = run_WES(vel_est,contSettings.WES);
+%                 wind_est = [uw,vw,ww]; % modificare con WIND ESTIMATION
+                wind_est = [contSettings.WES.wind_est];
+        else
+                wind_est = [0,0];
+        end
+    
+
         if t1-t_last_prf_control >= 1/contSettings.payload.controlFreq - 1e-5 || t_last_prf_control == t_parafoil
            
                 t_last_prf_control = t1;
                 pos_est = sensorData.kalman.x_c(end,1:3);
                 pos_est(3) = -pos_est(3)-settings.z0;
                 
-                [deltaA,contSettings] = run_parafoilGuidance(pos_est, sensorData.kalman.x_c(end,4:6), wind_est, settings.payload.target, contSettings);
+                [deltaA,contSettings] = run_parafoilGuidance(pos_est, sensorData.kalman.x_c(end,4:5), wind_est, settings.payload.target, contSettings);
         end
     end
 end
