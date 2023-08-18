@@ -83,8 +83,8 @@ end
 
 v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
 
+
 %% Engine Control algorithm
-    
 if contains(settings.mission,'_2023')
     if Tf(end) <= settings.tb+0.5 &&...
        (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
@@ -125,6 +125,8 @@ else
         settings.expShutdown = 1;
     end
 end
+
+
 %% ARB Control algorithm
 if contains(settings.mission,'_2023')
     if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings.control...
@@ -132,12 +134,15 @@ if contains(settings.mission,'_2023')
             && Tf(end) > settings.expTimeEngineCut + 0.5
     
         if str2double(settings.mission(end)) > 2 % only for mission after october 2022
-            %% TEST WITH MASS ESTIMATION THAT DOESN'T WORK
-            % mass = mass_dry
-    %         m = settings.ms;
-    %         m = settings.ms + (settings.m0-settings.ms)/2; 
-            %%
-            trajectoryChoice_mass;
+            
+            if contSettings.traj_choice == 1 && settings.expShutdown
+                    if ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
+                        m = settings.ms;
+                    else
+                        m = estimated_mass(end);
+                    end
+                contSettings = trajectoryChoice_mass(m,contSettings);
+            end
         end
     
         if contSettings.flagFirstControlABK % set in
@@ -184,6 +189,7 @@ else
     end
 end
 
+
 %% PARAFOIL
 if ~settings.flagAscent && settings.parafoil 
     if flagPara2
@@ -207,7 +213,6 @@ if ~settings.flagAscent && settings.parafoil
                 end
                 vel_est = sensorData.kalman.x_c(end,4:5);
                 [contSettings.WES] = run_WES(vel_est,contSettings.WES);
-%                 wind_est = [uw,vw,ww]; % modificare con WIND ESTIMATION
                 wind_est = [contSettings.WES.wind_est];
         else
                 wind_est = [0,0];

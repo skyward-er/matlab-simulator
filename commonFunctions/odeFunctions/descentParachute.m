@@ -64,14 +64,23 @@ m = settings.ms - pmass;                                                 % [kg] 
 
 %% ADDING WIND (supposed to be added in NED axes);
 
-if settings.wind.input 
-    [uw, vw, ww] = wind_input_generator(settings, z, uncert);    
+% if settings.wind.input 
+%     [uw, vw, ww] = wind_input_generator(settings, z, uncert);    
+% end
+
+switch settings.windModel
+
+    case "atmospherical"
+    [uw, vw, ww] = windMatlabGenerator(settings, z, t);
+    
+    case "multiplicative"
+    uncert = settings.wind.input_uncertainty;
+    [uw, vw, ww] = windInputGenerator(settings, z, uncert);
+
+    case "constant"
+    uw = settings.constWind(1); vw = settings.constWind(2); ww = settings.constWind(3);
 end
 
-% new version
-% dcm = quatToDcm(Q);
-% wind = dcm*[uw; vw; ww]; % body
-% Vels = dcm'*[u; v; w]; % ned
 
 wind =[uw; vw; ww]; % body
 Vels = [u; v; w];

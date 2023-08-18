@@ -8,16 +8,15 @@
     
     AUTHOR: Giuseppe Brentino giuseppe.brentino@skywarder.eu
 
+    update: Marco Marchesi marco.marchesi@skywarder.eu
+            made this a function instead of a simple script
+
 %}
 
-if contSettings.traj_choice == 1 && settings.expShutdown
-
-    if ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
-        m = settings.ms;
-    end
+function contSettings = trajectoryChoice_mass(m,contSettings)
 
     contSettings.traj_choice=0;
-    %from here m needs to be replaced with the estimated mass after shutdown
+    
     [~,index] = min( abs(m-contSettings.masses_vec) );
     Vz_temp = zeros( length( contSettings.reference.Vz{1,1} ),2);
     Vz_temp(:,1) = contSettings.reference.Vz{1,index};
@@ -25,3 +24,4 @@ if contSettings.traj_choice == 1 && settings.expShutdown
     contSettings.reference.Vz = Vz_temp;
     
 end
+
