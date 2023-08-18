@@ -107,6 +107,7 @@ settings.hmax = 6000;                                                       % [m
 contSettings.payload.saturation = false;
 contSettings.payload.I = 0;
 contSettings.payload.deltaA_0 = 0;
+
 %% WES
 contSettings.WES.wind_est = [0,0];
 contSettings.WES.A = [];

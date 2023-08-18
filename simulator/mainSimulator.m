@@ -91,5 +91,7 @@ if settings.flagExportCSV % this is set in configFlags
     % air brakes
     export_HILdataABK;
     % parafoil
-    export_HILdataPRF;
+    if settings.scenario == "descent" || settings.scenario == "full flight"
+        export_HILdataPRF;
+    end
 end
