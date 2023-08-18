@@ -14,9 +14,6 @@ called reference
 struct_trajectories = load(strcat(ConDataPath, '/Trajectories.mat'));
 contSettings.data_trajectories = struct_trajectories.trajectories_saving;
 
-%% export csv files?
-settings.exportCSV = true;
-
 
 %% LOAD REFERENCES
 % select the trajectories for the rocket used in the simulation

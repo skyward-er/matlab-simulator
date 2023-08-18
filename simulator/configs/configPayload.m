@@ -98,6 +98,5 @@ if contSettings.payload.guidance_alg == "t-approach"
     % define the position of EMC: in line with the target
     contSettings.payload.mult_EMC   = 1.2;               % How far from target is EMC (between 1 and 1.2)
     contSettings.payload.d = 20;
-%     [contSettings.payload.EMC,contSettings.payload.M1,contSettings.payload.M2] = setEMCpoints([0;0;0],settings.payload.target,contSettings.payload.mult_EMC,contSettings.payload.d);
-
+    
 end

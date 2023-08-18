@@ -13,7 +13,7 @@ NOTE: wind azimuth angle indications (wind directed towards):
 
 
 % select which model you want to use:
-settings.windModel = "constant"; % choose between: "constant" "multiplicative" "atmospheric"
+settings.windModel = "multiplicative"; % choose between: "constant" "multiplicative" "atmospheric"
 
 
 
@@ -43,7 +43,7 @@ if conf.script == "simulator"
             % Wind is generated for every altitude interpolating with the coefficient defined below
             settings.wind.input = true;
             settings.wind.model = false;
-            settings.wind.inputGround  = 9;                                         % [m/s] Wind magnitude at the ground
+            settings.wind.inputGround  = 3;                                         % [m/s] Wind magnitude at the ground
             settings.wind.inputAlt     = 4000/1100*[0 50 100 200 350 500 700 900 1100];       % [m] Altitude vector
             settings.wind.inputMult    = [0 1 2 3 4 4.5 5 5.5 6]*50;                 % [-] Percentage of increasing magnitude at each altitude
             settings.wind.inputAzimut  = 200*pi/180*ones(1,9);                       % [deg] Wind azimut angle at each altitude (toward wind incoming direction)
