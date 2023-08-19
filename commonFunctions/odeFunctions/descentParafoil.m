@@ -1,4 +1,4 @@
-function [dY,parout] = descentParafoil(t,Y,settings,deltaA)
+function [dY,parout] = descentParafoil(t,Y,settings,contSettings,deltaA_ref_vec,t_change_ref)
 
 %% recall states
 % x = Y(1);
@@ -14,6 +14,21 @@ q0 = Y(10); % scalar first
 q1 = Y(11);
 q2 = Y(12);
 q3 = Y(13);
+deltaA = Y(14);
+
+
+
+% saturation on servo angle, needed if the actuation is faster than the
+% integration step 
+if deltaA > contSettings.payload.uMax
+    deltaA = contSettings.payload.uMax;
+    flagAngleSaturation = true;
+elseif deltaA < contSettings.payload.uMin
+    deltaA = contSettings.payload.uMin;
+    flagAngleSaturation = true;
+else 
+    flagAngleSaturation = false;
+end
 
 %% constants
 % environment
@@ -113,6 +128,10 @@ else
 end
 
 %% controls
+if settings.identification
+    [~,idx_deltaA] = min(abs(t-deltaA_ref(:,1)));
+    deltaA_ref = deltaA_ref(idx_deltaA,2);
+end
 deltaANormalized = deltaA / deltaSMax;
 
 %% forces
@@ -154,26 +173,39 @@ OM = [ 0 -p -q -r  ;
 
 dQQ = 1/2*OM*Q';
 
-%% angular velocity - as restu does
-% Q = [Q(2:4), Q(1)];
-% col1 = [Q(4);Q(3);-Q(2);-Q(1)];
-% col2 = [-Q(3);Q(4);Q(1);-Q(2)];
-% col3 = [Q(2);-Q(1);Q(4);-Q(3)];
-% Q_matr = [col1,col2,col3];
-% dQQ = 0.5 * Q_matr * omega;
-
 %% angular acceleration
 angAcc = inverseInertia*(M - cross(omega,inertia * omega));
+
+%% actuator dynamics
+
+% set velocity of servo (air brakes)
+if length(deltaA_ref_vec)==2 % for the recallOdeFunction
+    if t < t_change_ref
+        deltaA_ref = deltaA_ref_vec(1);    
+    else
+        deltaA_ref = deltaA_ref_vec(2);
+    end
+else 
+    [~,ind_deltaA] = min(settings.parout.partial_time-t);
+    deltaA_ref = deltaA_ref_vec(ind_deltaA); % don't delete this unless you change how the recall ode works.
+end
+
+ddeltaA = (deltaA_ref-deltaA)/contSettings.payload.deltaA_tau;
+if abs(ddeltaA) >contSettings.payload.deltaA_maxSpeed
+    ddeltaA = sign(deltaA_ref-deltaA)*contSettings.payload.deltaA_maxSpeed; % concettualmente sta roba è sbagliata perchè dipende dal passo di integrazione, fixare
+end
+
+if flagAngleSaturation
+    ddeltaA = 0;
+end
 
 
 %% FINAL DERIVATIVE STATE ASSEMBLING
 dY(1:3) = Vels_NED;
 dY(4:6) = bodyAcc;
-% dY(4) = du;
-% dY(5) = dv;
-% dY(6) = dw;
 dY(7:9) = angAcc;
 dY(10:13) = dQQ;
+dY(14) = ddeltaA;
 
 dY = dY';
 

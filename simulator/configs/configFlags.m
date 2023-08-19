@@ -27,7 +27,7 @@ scenarios explanation:
 
 
 % scenario configuration
-conf.scenario = "full flight";
+conf.scenario = "descent";
 conf.board = "payload";            % Either "main" or "payload"
 conf.HIL = false;
 
@@ -45,6 +45,8 @@ settings.lastLaunchFlag = true; % LEAVE THIS TO TRUE UNLESS YOU KNOW WHAT YOU AR
 % ALGORITHM TUNING
 settings.tuning = true;                 % [-] True if you want to tune the algorithm (resets the random seed)
 
+% Identification
+settings.identification = false;
 % EXPORT GRAPHICS (from simulations)
 settings.flagExportPLOTS = false;
 

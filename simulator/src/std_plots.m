@@ -3,22 +3,6 @@ function std_plots(structIn, settings,contSettings)
 if ~exist("report_images\"+settings.mission,"dir")
     mkdir("report_images\"+settings.mission)
 end
-%% Control variable: servo control action (percentage of angle max)
-if not(settings.scenario == "descent")
-    ap_tot_rescale = rescale(structIn.Y(:,17), "InputMin", 0, "InputMax", settings.servo.maxAngle);
-    figures.servo_control_action = figure('Name', 'Servo angle after burning phase','ToolBar','auto','Position',[100,100,600,400]);
-    plot(structIn.t, ap_tot_rescale*100);
-    hold on; grid on;
-    xline(structIn.ARB_allowanceTime,'k--')
-    xline(structIn.apogee_time,'r--')
-    xlabel('Time [s]');
-    ylabel('Extension [%]');
-    title('Servo control action [%]');
-    legend('Servo percentage','Airbrakes deployment','Apogee')
-    if settings.flagExportPLOTS == true
-        exportStandardizedFigure(figures.servo_control_action,"report_images\"+settings.mission+"\src_control_action.pdf",0.9)
-    end
-end
 
 %% Control variable: servo angle + reference values
 % air brakes
@@ -41,27 +25,14 @@ end
 % parafoil
 if settings.parafoil
     figures.parafoil_servo_action = figure('Name', 'Parafoil deltaA','ToolBar','auto','Position',[100,100,600,400]);
-    plot(structIn.t,structIn.deltaA,'DisplayName','$\Delta_A$');
+    plot(structIn.t,structIn.deltaA,'DisplayName','\Delta_A');
+    hold on;
+    stairs(structIn.t,structIn.deltaAcmd,'DisplayName','\Delta_A cmd');
+    xline(structIn.t(structIn.events.mainChuteIndex),'--','DisplayName','Parafoil deployment')
     legend
     title('Parafoil control action')
     xlabel('Time (s)')
     ylabel('Normalized control action (-)')
-end
-%% Airbrake surface
-if not(settings.scenario == "descent")
-    figures.arb_exposed_surface = figure('Name', 'Airbrake exposed surface','ToolBar','auto','Position',[100,100,600,400]);
-    dS = settings.arb.surfPol * structIn.Y(:,17);
-    plot(structIn.t, dS);
-    hold on; grid on;
-    xline(structIn.ARB_allowanceTime,'k--')
-    xline(structIn.apogee_time,'r--')
-    xlabel('Time [s]');
-    ylabel('dS [m^2]');
-    title('Airbrake exposed surface');
-    
-    if settings.flagExportPLOTS == true
-        exportStandardizedFigure(figures.arb_exposed_surface,"report_images\"+settings.mission+"\src_arb_exposed_surface.pdf",0.9)
-    end
 end
 
 %% Trajectory

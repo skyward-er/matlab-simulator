@@ -1,4 +1,4 @@
-function [deltaA, contSettings] = run_parafoilGuidance(pos_est, vel_est, wind_est, target, contSettings)
+function [deltaA_ref, contSettings] = run_parafoilGuidance(pos_est, vel_est, wind_est, target, contSettings)
 % HELP:
 % 
 % parafoil guidance algorithm
@@ -13,7 +13,7 @@ function [deltaA, contSettings] = run_parafoilGuidance(pos_est, vel_est, wind_es
 % 
 % OUTPUT: 
 %
-% deltaA = deflection angle
+% deltaA_ref = commanded deflection angle
 
 if size(vel_est) ~= size(wind_est)
     wind_est = wind_est';
@@ -35,7 +35,7 @@ end
 %% CONTROL
 
 if contSettings.WES.state == 1
-    deltaA = contSettings.WES.deltaA;
+    deltaA_ref = contSettings.WES.deltaA;
 else
     % compute velocity difference
     deltaVel = vel_est - wind_est;
@@ -50,9 +50,9 @@ else
     
 
 
-    deltaA = P + contSettings.payload.I;
+    deltaA_ref = P + contSettings.payload.I;
 
-    [deltaA,contSettings.payload.saturation] = Saturation(deltaA,contSettings.payload.uMin, contSettings.payload.uMax);
+    [deltaA_ref,contSettings.payload.saturation] = Saturation(deltaA_ref,contSettings.payload.uMin, contSettings.payload.uMax);
    
      % inserire WES conditions
      % storia dei 15 secondi di calibrazione etc

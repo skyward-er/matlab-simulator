@@ -219,13 +219,13 @@ if ~settings.flagAscent && settings.parafoil
         end
     
 
-        if t1-t_last_prf_control >= 1/contSettings.payload.controlFreq - 1e-5 || t_last_prf_control == t_parafoil
-           
+        if t1-t_last_prf_control >= 1/contSettings.payload.controlFreq - 1e-6 || t_last_prf_control == t_parafoil
+                deltaA_ref_old = deltaA_ref_new;
                 t_last_prf_control = t1;
                 pos_est = sensorData.kalman.x_c(end,1:3);
                 pos_est(3) = -pos_est(3)-settings.z0;
                 
-                [deltaA,contSettings] = run_parafoilGuidance(pos_est, sensorData.kalman.x_c(end,4:5), wind_est, settings.payload.target, contSettings);
+                [deltaA_ref_new,contSettings] = run_parafoilGuidance(pos_est, sensorData.kalman.x_c(end,4:5), wind_est, settings.payload.target, contSettings);
         end
     end
 end

@@ -72,7 +72,7 @@ end
 if ~exist("../commonFunctions/graphics/general-utilities/","dir")
     warning('To export file you need to download the repository, read the README file in the folder')
 end
-% std_plots(simOutput,settings,contSettings)
+std_plots(simOutput,settings,contSettings)
 % sensor_plots(simOutput)
 
 %% state visualiser
