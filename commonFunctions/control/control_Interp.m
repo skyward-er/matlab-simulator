@@ -33,31 +33,32 @@ V_ref = contSettings.reference.Vz;
 N_forward = contSettings.N_forward;
 
 % find reference altitude index
-index_z = floor(z/deltaZ) + N_forward;
+index_z = floor(z/deltaZ) + N_forward + 1; % +1 because we are 1-based on matlab, on CPP the formula is just """  floor(z/deltaZ) + N_forward """  (0-based), pay attention!
 if index_z > length(z_ref)
     index_z = length(z_ref);
-elseif index_z <= 0
+elseif index_z <= 1
     index_z = 1;
 end
 
-% sets how many points in advance it has to check
-% V_ref = [V_ref ; zeros(N_forward,size(V_ref,2))];
+% choose points on velocity references
 V_extrema = V_ref(index_z,[1,end]); 
 
-
+% percentage 
 if Vz<V_extrema(1) % use the vertical component of vector V, check if it is the first or second
 
     percentage = 0;
 
-elseif Vz>=V_extrema(1) && Vz<V_extrema(end)
+elseif Vz>V_extrema(end)
+ 
+    percentage = 1;
+ 
+else
     switch contSettings.interpType
         case 'linear'
             percentage = (Vz-V_extrema(1))/(V_extrema(2)-V_extrema(1)); % percentage = 0 if completely on trajectory 1, percentage = 1 if completely on trajectory 2
         case 'sinusoidal'
             percentage = 0.5+0.5*cos(-pi+pi*(Vz-V_extrema(1))/(V_extrema(2)-V_extrema(1))); % same as choice 1, but with a sinusoidal approach
     end
-else
-    percentage = 1;
 end
 
 alpha0_base = settings.servo.minAngle* (1-percentage) + settings.servo.maxAngle * percentage;

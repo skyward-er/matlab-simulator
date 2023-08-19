@@ -95,16 +95,21 @@ iTimes      =       0;                                                      % It
 c.ctr_start =      -1;                                                      % Air brake control parameter initial condition
 i           =       1;                                                      % Index for while loop
 sensorData.kalman.pn_prec = settings.ada.p_ref;                             % settings for ADA and KALMAN
-% ap_ref_vec  = zeros(nmax, 2);                                               % Matrix N x 2 to save reference angle vector
-% ap_ref_time = zeros(nmax, 1);                                               % Vector of time reference for air brakes
+% ap_ref_vec  = zeros(nmax, 2);                                             % Matrix N x 2 to save reference angle vector
+% ap_ref_time = zeros(nmax, 1);                                             % Vector of time reference for air brakes
 settings.shutdown = 0;                                                      % engine on
 settings.expShutdown = 0;                                                   % engine expected to be on
 vz = 0;
 % prevent unwanted changes in state machine
 eventExpulsion = false; % expulsion of the first parachute
 eventExpulsion2 = false; % expulsion of the second parachute
+eventLanding = false; % landing event
+
 lastAscentIndex = 0;
 lastDrogueIndex = 0;
+idx_apogee = NaN;
+idx_landing = NaN;
+
 %% sensor fault initial conditions
 chunk{1} = zeros(1,50);
 chunk{2} = zeros(1,50);
@@ -136,5 +141,5 @@ end
 % stop correction with pitot
 settings.flagStopPitotCorrection = false;
 
-
+%% parafoil
 deltaA = contSettings.payload.deltaA_0;
