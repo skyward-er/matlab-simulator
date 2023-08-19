@@ -81,7 +81,7 @@ else
     % Attitude
     Q0 = angle2quat(settings.PHI, 0, 0, 'ZYX')';
     % State   
-    X0 = [0; 0; -1000];                                              % Position initial condition -settings.z_final
+    X0 = [0; 0; -settings.z_final];                                              % Position initial condition -settings.z_final
     V0 = [0; 0; settings.Vz_final];             % Velocity initial condition
     W0 = [0; 0; 0];                                                             % Angular speed initial condition
 end
@@ -177,17 +177,17 @@ while settings.flagStopIntegration && n_old < nmax                          % St
 
     if vz(end) >= -1e-3 && launchFlag && not(settings.scenario == "descent") && ~eventExpulsion
         settings.flagAscent = true;                                         % Ascent
-        lastAscentIndex = n_old;
+        lastAscentIndex = n_old-1;
     else
         settings.flagAscent = false;                                        % Descent
         eventExpulsion = true;
     end
 
     if not(settings.flagAscent) && launchFlag
-        if sensorData.kalman.z >= 1500 && ~eventExpulsion2 % settings.para(1).z_cut + settings.z0 
+        if sensorData.kalman.z >= settings.para(1).z_cut + settings.z0 && ~eventExpulsion2 % settings.para(1).z_cut + settings.z0 
             flagPara1 = true;
             flagPara2 = false;                                              % parafoil drogue
-            lastDrogueIndex = n_old;
+            lastDrogueIndex = n_old-1;
         else
             flagPara1 = false;
             flagPara2 = true;                                               % parafoil main
@@ -248,6 +248,10 @@ while settings.flagStopIntegration && n_old < nmax                          % St
             end
         end
     else
+        if (settings.scenario == "descent" || settings.scenario == "full flight") && ~eventLanding && max(-Yf_tot(:,3))> 150 % this last condition is to prevent saving this value when on ramp
+            idx_landing = n_old-1;
+            eventLanding = true;
+        end
         Tf = [t0, t1]';
         Yf = [initialCond'; initialCond']; % check how to fix this
   
@@ -427,27 +431,37 @@ end
 [~, idx_apo] = max(-Yf_tot(:,3));
 
 %% output
-struct_out.t = Tf_tot;
-struct_out.Y = Yf_tot;
+% simulation states
+struct_out.t = Tf;
+struct_out.Y = Yf;
+struct_out.quat = Yf(:,10:13);
+% aerodynamic quantities
 struct_out.qdyn = qdyn;
+struct_out.cp = c.cp_tot;
+% wind
 struct_out.windMag = settings.wind.Mag;
 struct_out.windAz = settings.wind.Az;
 struct_out.windEl = settings.wind.El;
 struct_out.windVel(1) = uw;
 struct_out.windVel(2) = vw;
 struct_out.windVel(3) = ww;
-struct_out.t_ada = t_ada;
-struct_out.t_nas = t_kalman;
+% ADA
 struct_out.t_ada_tot = t_ada_tot;
-struct_out.apogee_time = Tf_tot(idx_apo);
+struct_out.ADA = [xp_ada_tot xv_ada_tot];
+struct_out.t_ada = t_ada;
+% NAS
+struct_out.t_nas = t_kalman;
+struct_out.NAS = x_est_tot;
+% apogee
+struct_out.apogee_time = Tf(idx_apo);
 struct_out.apogee_idx = idx_apo;
 struct_out.apogee_coordinates = [Yf_tot(idx_apo,1),Yf_tot(idx_apo,2),-Yf_tot(idx_apo,3)];
 struct_out.apogee_speed = [Yf_tot(idx_apo,4),Yf_tot(idx_apo,5),-Yf_tot(idx_apo,6)];
-struct_out.apogee_radius = sqrt(struct_out.apogee_coordinates(1)^2+struct_out.apogee_coordinates(2)^2);
+struct_out.apogee_radius = norm(struct_out.apogee_coordinates(1:2));
+% recall
 struct_out.recall = dataAscent;
-struct_out.NAS = x_est_tot;
-struct_out.ADA = [xp_ada_tot xv_ada_tot];
-struct_out.cp = c.cp_tot;
+
+
 if settings.HREmot
     struct_out.t_shutdown = settings.timeEngineCut;
     if strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')
@@ -456,7 +470,7 @@ if settings.HREmot
         struct_out.estimated_pressure = estimated_pressure;
     end
 end
-struct_out.quat = Yf(:,10:13);
+
 struct_out.contSettings = contSettings;
 struct_out.barometer_measures = barometer_measure;
 struct_out.barometer_times = barometer_time;
@@ -469,14 +483,40 @@ if exist('t_airbrakes','var')
     struct_out.ARB_cmd = ap_ref_vec(:,2); % cmd  = commanded
     struct_out.ARB_openingPosition = [Yf_tot(idx_airbrakes,1),Yf_tot(idx_airbrakes,2),-Yf_tot(idx_airbrakes,3)];
     struct_out.ARB_openingVelocities = [Yf_tot(idx_airbrakes,4),Yf_tot(idx_airbrakes,5),-Yf_tot(idx_airbrakes,6)];
+else
+    struct_out.ARB_allowanceTime = NaN;
+    struct_out.ARB_allowanceIdx = NaN;
+    struct_out.ARB_cmdTime = NaN; 
+    struct_out.ARB_cmd = NaN; 
+    struct_out.ARB_openingPosition = NaN;
+    struct_out.ARB_openingVelocities = NaN;
 end
-struct_out.deltaA = deltaA_tot;
-struct_out.events.drogueIndex = lastAscentIndex+1;
-struct_out.events.mainChuteIndex = lastDrogueIndex+1;
+% parafoil 
+if settings.scenario == "descent" || settings.scenario == "full flight"
+    struct_out.deltaA = deltaA_tot;
+    % events
+    struct_out.events.drogueIndex = lastAscentIndex+1;
+    struct_out.events.mainChuteIndex = lastDrogueIndex+1;
+    % landing
+    struct_out.landing_position = Yf(idx_landing,1:3);
+    struct_out.landing_velocities_BODY = Yf(idx_landing,4:6);
+    struct_out.landing_velocities_NED = quatrotate(quatconj(Yf(idx_landing,10:13)),Yf(idx_landing,4:6));
+    % deployment
+    struct_out.parafoil_deploy_altitude_set = settings.para(1).z_cut + settings.z0; % set altitude for deployment
+    struct_out.parafoil_deploy_position = Yf(lastDrogueIndex+1,1:3); % actual position of deployment
+    struct_out.parafoil_deploy_velocity = Yf(lastDrogueIndex+1,4:6); 
+else
+    struct_out.deltaA = NaN;
+    struct_out.events.drogueIndex = NaN;
+    struct_out.events.mainChuteIndex = NaN;
+    struct_out.landing_position =NaN;
+    struct_out.landing_velocities_BODY = NaN;
+    struct_out.landing_velocities_NED = NaN;
+    struct_out.parafoil_deploy_altitude_set = NaN;
+    struct_out.parafoil_deploy_position = NaN;
+    struct_out.parafoil_deploy_velocity = NaN;
+end
+% settings for payload
 struct_out.payload = contSettings.payload;
-[~,structCutterTimeIndex] = max(struct_out.t);
-struct_out = structCutter(struct_out, "index", 1, structCutterTimeIndex);
-% saveConstWind =  [0]; %??? may be for montecarlo?
-
 
 
