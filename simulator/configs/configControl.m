@@ -69,8 +69,12 @@ end
 
 
 % For interpolation reference algorithm only:
-contSettings.N_forward = 2; % how many steps in advance have to check on speed to interpolate
+contSettings.N_forward = 1; % how many steps in advance have to check on speed to interpolate
 contSettings.interpType = 'linear'; % choose between: 'linear' , 'sinusoidal'
+
+%% Interp algorithm flags
+contSettings.flagCorrectWithPitch = false;
+
 
 %% ENGINE CONTROL
 % these need to be updated after every static fire test
