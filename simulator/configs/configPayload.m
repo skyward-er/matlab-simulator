@@ -77,11 +77,13 @@ payload.simParam.wind_sub = 1;            % Set as 1 for subtracting and 0 other
 
 % P and PI controller
 contSettings.payload.Kp = 0.1;
-contSettings.payload.Ki = 0;%0.005;
+contSettings.payload.Ki = 0.001;
 contSettings.payload.uMax = 0.1;
 contSettings.payload.uMin = -0.1;
 contSettings.payload.controlFreq = 10; % Hz
-
+contSettings.payload.deltaA_tau = 0.05; % [s], absolutely arbitrary value
+contSettings.payload.deltaA_delay = 0.05; % [s], absolutely arbitrary value
+contSettings.payload.deltaA_maxSpeed = deg2rad(300);
 %% Guidance algorithm
 % Algorithm selection: choose from "closed loop", "t-approach"
 contSettings.payload.guidance_alg = "t-approach";

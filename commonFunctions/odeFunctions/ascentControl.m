@@ -407,7 +407,7 @@ else
         
         dap = (ap_ref-ap)/settings.servo.tau;
         if abs(dap) >settings.servo.maxSpeed
-            dap = sign(ap_ref-ap)*settings.servo.maxSpeed;
+            dap = sign(ap_ref-ap)*settings.servo.maxSpeed; % concettualmente sta roba è sbagliata perchè dipende dal passo di integrazione, fixare
         end
     
         if flagAngleSaturation
