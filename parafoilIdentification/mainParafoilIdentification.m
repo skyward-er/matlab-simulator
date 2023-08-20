@@ -97,7 +97,7 @@ log_deltaA  = csvDataLogExtractor(filedeltaA,"sec");
 % axis equal
 
 %% trim struct
-t_start = 622;
+t_start = 630;
 t_end = 674;
 
 log_NAS = structCutter(log_NAS,'timestamp',t_start,t_end);
@@ -223,8 +223,7 @@ function [outJ] = computeCostFunction(x, t_m, y_m, R_m, settings, contSettings,d
     % Run simulation
     Y0 = [y_m(1,1:6), zeros(1,3), [y_m(1,10), y_m(1,7:9)],0]; % ode wants pos, vel, om, quat, deltaA as states, while nas retrieves only pos, vel, quat
     Y0(1,4:6) = quatrotate(Y0(1,10:13),Y0(1,4:6));
-    %     Y0 = [zeros(1,2),-3000,zeros(1,6),1,zeros(1,4)];  
-    try
+%     try
     [t_sim, y_sim] = callSimulator(deltaA, settings,contSettings,t_m,Y0 );
     
     % Rotate body velocities to ned
@@ -252,9 +251,9 @@ function [outJ] = computeCostFunction(x, t_m, y_m, R_m, settings, contSettings,d
     % Cost computation
     J = J + (R_m*diff')*diff;       
     outJ = norm(J);
-    catch
-        outJ = 1000000000*(1+ rand(1));
-    end
+%     catch
+%         outJ = 1000000000*(1+ rand(1));
+%     end
 end
 
 function [T, Y] = callSimulator(deltaA,settings,contSettings,t_m, Y0)
