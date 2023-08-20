@@ -30,13 +30,10 @@ for i = goodSensors
 end
 [sensorData,sp,chunk,settings.faulty_sensors, settings.sfd] = run_SensorFaultDetection_SVM(settings.sfd, SVM_model,sensorData,sp,chunk,settings.faulty_sensors,settings.flagAscent,t0);
 
-%if iTimes > 5
-    normalizedCutOffFrequency_baro = 10 / (0.5 * 50); % Normalize the cut-off frequency
-    %[butter_b, butter_a] = butter(4, normalizedCutOffFrequency_baro, 'low'); % Butterworth low-pass filter coefficients
-    %sp.pn = filter(butter_b, butter_a, sp.pn);
-%    sp.pn = lowpass(sp.pn, normalizedCutOffFrequency_baro);
-%end
 
+
+%THE FOLLOWING CODE IS AN IMPLEMENTATION OF A MEDIAN WINDOW FILTER (DEFAULT
+%FILTER WINDOW IS 25)
 for i = 1:settings.sfd.filter_window - 1
     filter_array_SFD(i) = filter_array_SFD(i + 1);
 end
@@ -45,6 +42,20 @@ if iTimes > settings.sfd.filter_window
     median_filter_baro = medfilt1(filter_array_SFD, settings.sfd.filter_window);
     sp.pn = ones(1,2).*median_filter_baro(end); 
 end
+
+%THE FOLLOWIN CODE IS AN IMPLEMENTATION OF A DISCRETE LOWPASS FILTER
+%(FILTER WINDOW HAS TO BE SET TO 2)
+
+
+if iTimes > 1
+    lowpass_filter_baro = settings.sfd.lambda_baro*lowpass_filter_baro + (settings.sfd.lowpass_filter_gain/settings.sfd.lowpass_filter_cutoff_freq)*(1-settings.sfd.lambda_baro)*prev_sppn_input;
+    prev_sppn_input = sp.pn(1,1);
+    sp.pn = ones(1,2).*lowpass_filter_baro; 
+else
+    lowpass_filter_baro = sp.pn(1, 1);
+    prev_sppn_input = sp.pn(1, 1);
+end
+
 %% ADA
 if iTimes>3
     if settings.flagADA

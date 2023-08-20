@@ -73,8 +73,10 @@ release
         pn(i_baro,:) = sp.pn_sens{Sensors(i_baro)};
     end
     
-    [sp.h_baro, sfd.W1] = wt_mean(h_baro, faulty_sensors, sfd.W1, sfd.max_weight);
-    [sp.pn, sfd.W2] = wt_mean(pn, faulty_sensors, sfd.W2, sfd.max_weight);
+    [sp.h_baro, sfd.W1] = wt_mean_h(sfd, sfd.h_baro_prev,  h_baro, faulty_sensors, sfd.W1, sfd.max_weight);
+    sfd.h_baro_prev = sp.h_baro(1,1);
+    [sp.pn, sfd.W2] = wt_mean_baro(sfd, sfd.pn_prev, pn, faulty_sensors, sfd.W2, sfd.max_weight);
+    sfd.pn_prev = sp.pn(1,1);
     %sp.h_baro = mean(h_baro,1);
     %sp.pn = mean(pn,1);
 
@@ -103,50 +105,109 @@ end
 function h = getaltitude(p, temp_ref, p_ref)
     a  = 0.0065;
     n  = 9.807/(287.05*a);
-    
-    h  = temp_ref / a * (1 - (p / p_ref)^(1/n));
+    for i = 1:length(p)
+        h(i) = 100 * temp_ref / a * (1 - (p(i) / p_ref)^(1/n));
+    end
 end
 
 
 
-function [weighted_transient_mean, W] = wt_mean(V, F, W, max_weight)
-%{
-HELP:
-In the scope of fault recovery, it provides a value of the mean between
-values of the sensors and transits from the inclusion or lack there of of
-them in case of fault detection
-
-
-INPUT:
-- V: vector of values
-- F: vector of flags that signals the fault detection in case of true
-- W: vector of weights associated with the values
-OUTPUT:
-- weights: vector of weights associated with the values
-- weighted_transient_mean: conditional mean obtained from the alg. of the
-various values
-Authors: Alessandro Donadi
-Skyward Experimental Rocketry | AVN Dept | GNC 
-email: alessandro.donadi@skywarder.eu
-
-REVISIONS
-1 -  Revision date: 30/07/2023
-release
-
-%}
-W_current = W;
-min_weight = 0;
-k = 0.25;
+function [weighted_transient_mean, W] = wt_mean_h(sfd, prev, V, F, W, max_weight)
+    %{
+    HELP:
+    In the scope of fault recovery, it provides a value of the mean between
+    values of the sensors and transits from the inclusion or lack there of of
+    them in case of fault detection
+    
+    
+    INPUT:
+    - V: vector of values
+    - F: vector of flags that signals the fault detection in case of true
+    - W: vector of weights associated with the values
+    OUTPUT:
+    - weights: vector of weights associated with the values
+    - weighted_transient_mean: conditional mean obtained from the alg. of the
+    various values
+    Authors: Alessandro Donadi
+    Skyward Experimental Rocketry | AVN Dept | GNC 
+    email: alessandro.donadi@skywarder.eu
+    
+    REVISIONS
+    1 -  Revision date: 30/07/2023
+    release
+    
+    %}
+    W_current = W;
+    min_weight = 0;
+    %k = 0.25;
+    k = sfd.max_step * (sfd.rough_apogee_estimate - abs(prev))/(sfd.rough_apogee_estimate - sfd.z0) + sfd.min_step;
+    if k < sfd.min_step
+        k = sfd.min_step;
+    elseif k> sfd.max_step + sfd.min_step
+        k = sfd.max_step + + sfd.min_step;
+    end
     for j = 1:length(V(1,:))
         W = W_current;
         sum_d = 0;
         sum_n = 0;
         for i = 1:length(V(:, 1))
-            if isequal(F(i), false) && W(i) ~= max_weight % to be kept
-                W(i) = W(i) + k;
+            if isequal(F(i), false) && W(i) + k(1) < max_weight % to be kept
+                W(i) = W(i) + k(1);
             end
-            if isequal(F(i), true) && W(i) ~= min_weight % to be excluded
-                W(i) = W(i) - k;
+            if isequal(F(i), true) && W(i) - k(1) > min_weight % to be excluded
+                W(i) = W(i) - k(1);
+            end
+            sum_d = sum_d + W(i)*V(i);
+            sum_n = sum_n + W(i);
+        end
+        weighted_transient_mean(j) = sum_d/sum_n;
+    end
+    
+end
+
+function [weighted_transient_mean, W] = wt_mean_baro(sfd, prev, V, F, W, max_weight)
+    %{
+    HELP:
+    In the scope of fault recovery, it provides a value of the mean between
+    values of the sensors and transits from the inclusion or lack there of of
+    them in case of fault detection
+    
+    
+    INPUT:
+    - V: vector of values
+    - F: vector of flags that signals the fault detection in case of true
+    - W: vector of weights associated with the values
+    OUTPUT:
+    - weights: vector of weights associated with the values
+    - weighted_transient_mean: conditional mean obtained from the alg. of the
+    various values
+    Authors: Alessandro Donadi
+    Skyward Experimental Rocketry | AVN Dept | GNC 
+    email: alessandro.donadi@skywarder.eu
+    
+    REVISIONS
+    1 -  Revision date: 30/07/2023
+    release
+    
+    %}
+    W_current = W;
+    min_weight = 0;
+    k = sfd.max_step * (prev -  sfd.max_rough_press+100)/(sfd.press_ref - sfd.max_rough_press+100) + sfd.min_step;
+    if k < sfd.min_step
+        k = sfd.min_step;
+    elseif k> sfd.max_step + sfd.min_step
+        k = sfd.max_step + sfd.min_step;
+    end
+    for j = 1:length(V(1,:))
+        W = W_current;
+        sum_d = 0;
+        sum_n = 0;
+        for i = 1:length(V(:, 1))
+            if isequal(F(i), false) && W(i) + k(1) < max_weight % to be kept
+                W(i) = W(i) + k(1);
+            end
+            if isequal(F(i), true) && W(i) - k(1) > min_weight % to be excluded
+                W(i) = W(i) - k(1);
             end
             sum_d = sum_d + W(i)*V(i);
             sum_n = sum_n + W(i);
