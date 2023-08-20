@@ -499,7 +499,7 @@ if exist('t_airbrakes','var')
     struct_out.ARB_allowanceTime = t_airbrakes;
     struct_out.ARB_allowanceIdx = idx_airbrakes;
     struct_out.ARB_cmdTime = ap_ref_time_tot; % for plots, in order to plot the stairs of the commanded value
-    struct_out.ARB_cmd = ap_ref_tot(:,2); % cmd  = commanded
+    struct_out.ARB_cmd = ap_ref_tot; % cmd  = commanded
     struct_out.ARB_openingPosition = [Yf_tot(idx_airbrakes,1),Yf_tot(idx_airbrakes,2),-Yf_tot(idx_airbrakes,3)];
     struct_out.ARB_openingVelocities = [Yf_tot(idx_airbrakes,4),Yf_tot(idx_airbrakes,5),-Yf_tot(idx_airbrakes,6)];
 else
