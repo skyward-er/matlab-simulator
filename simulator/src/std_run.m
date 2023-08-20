@@ -213,9 +213,12 @@ while settings.flagStopIntegration && n_old < nmax                          % St
             para = NaN;
         else
             if settings.flagAscent
-                [Tf, Yf] = ode4(@ascentControl, tspan, Y0, settings,  ap_ref, t_change_ref_ABK, tLaunch);
+                Y0_ode = Y0(1:17);
+                [Tf, Yd] = ode4(@ascentControl, tspan, Y0_ode, settings,  ap_ref, t_change_ref_ABK, tLaunch);
 %                 Yf(:,10:13) = Yf(:,10:13)./vecnorm(Yf(:,10:13),2,2);
-                parout = recallOdeFcn2(@ascentControl, Tf, Yf, settings, Yf(:,17), settings.servo.delay,tLaunch,'apVec');
+                parout = recallOdeFcn2(@ascentControl, Tf, Yd, settings, Yd(:,17), settings.servo.delay,tLaunch,'apVec');
+                [nd, ~] = size(Yd);
+                Yf = [Yd, ones(nd,1)*Y0(end,18)];
                 para = NaN;
             else
 
@@ -301,8 +304,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     
     % parafoil control action update for the ODE
     deltaA_ref = [ deltaA_ref_old deltaA_ref_new ];
-    deltaA_ref_vec(iTimes,:) = deltaA_ref;
-    deltaA_ref_time(iTimes) = t1; % because it is commanded in the next step, so we save the step final time
+    
 
     %% vertical velocity for update of the state machine
     if  settings.flagAscent || (not(settings.flagAscent) && settings.ballisticFligth) || flagPara2
@@ -496,8 +498,8 @@ struct_out.faults = faults;
 if exist('t_airbrakes','var')
     struct_out.ARB_allowanceTime = t_airbrakes;
     struct_out.ARB_allowanceIdx = idx_airbrakes;
-    struct_out.ARB_cmdTime = ap_ref_time; % for plots, in order to plot the stairs of the commanded value
-    struct_out.ARB_cmd = ap_ref_vec(:,2); % cmd  = commanded
+    struct_out.ARB_cmdTime = ap_ref_time_tot; % for plots, in order to plot the stairs of the commanded value
+    struct_out.ARB_cmd = ap_ref_tot(:,2); % cmd  = commanded
     struct_out.ARB_openingPosition = [Yf_tot(idx_airbrakes,1),Yf_tot(idx_airbrakes,2),-Yf_tot(idx_airbrakes,3)];
     struct_out.ARB_openingVelocities = [Yf_tot(idx_airbrakes,4),Yf_tot(idx_airbrakes,5),-Yf_tot(idx_airbrakes,6)];
 else

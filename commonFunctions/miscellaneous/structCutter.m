@@ -1,3 +1,21 @@
+function structOut = structCutter(structIn,type,t0,t1,options,freq)
+
+% HELP:
+% use this function to cut out unwanted values from struct arrays
+% 
+% INPUT:
+% - structIn: struct that you want to trim from timestamp t0 to timestamp t1
+% - t0: initial trim time
+% - t1: final trim time
+% - options: specify some options for the function. Possible options:
+%       
+%     "resample"    to resample a struct with a given frequency (interp1
+%                   approach)
+%
+% - freq: frequency of resampling
+% OUTPUT: 
+% - structOut: trimmed struct 
+
 %{ 
 
 structCutter()
@@ -8,23 +26,10 @@ Author: Marco Marchesi - GNC iptl
 -       Release: 03/09/2022
 %}
 
-function structOut = structCutter(structIn,type,t0,t1,options,freq)
 
-%{
-HELP:
-use this function to cut out unwanted values from struct arrays
 
-INPUT:
-- structIn: struct that you want to trim from timestamp t0 to timestamp t1
-- t0: initial trim time
-- t1: final trim time
-- options: specify some options for the function
-    - "resample" to resample a struct with a given frequency
-- freq: frequency of resampling
-OUTPUT: 
-- structOut: trimmed struct 
 
-%}
+
 
 if nargin < 5
    
@@ -48,6 +53,11 @@ switch type
         
         if length(structIn.(namesStructIn{1}))-len1 == 0 || len1 == 0
             warning('OCIO! You set time window values out of the timestamp boundaries. Also check if the timestamp is in seconds or microseconds.')
+            if len1 == 0
+                len1 = 1;
+            else
+                len1 = len1-1;
+            end
         end
 
     case "index"

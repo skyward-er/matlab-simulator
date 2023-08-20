@@ -128,17 +128,18 @@ else
 end
 
 %% controls
-if settings.identification
-    [~,idx_deltaA] = min(abs(t-deltaA_ref(:,1)));
-    deltaA_ref = deltaA_ref(idx_deltaA,2);
-end
+
 deltaANormalized = deltaA / deltaSMax;
 
 %% forces
 qFactor = 0.5*rho*V_norm;            % [Pa * s / m] dynamic pressure/vNorm
-multFactorX = 0.5 * b / V_norm;       % booooooooooh   
-multFactorY = 0.5 * c / V_norm;       % booooooooooh   
-
+if V_norm >1e-9
+    multFactorX = 0.5 * b / V_norm;       % booooooooooh   
+    multFactorY = 0.5 * c / V_norm;       % booooooooooh   
+else
+    multFactorX = 0;       % booooooooooh   
+    multFactorY = 0;       % booooooooooh   
+end    
 % aerodynamic forces (body frame)
 LIFT = qFactor * (CL0 + alpha * CLAlpha + deltaANormalized * CLDeltaA) * [wr; 0; -ur];
 DRAG = qFactor * (CD0 + alpha^2 * CDAlpha2 + deltaANormalized * CDDeltaA) * [ur; vr; wr];
@@ -179,15 +180,20 @@ angAcc = inverseInertia*(M - cross(omega,inertia * omega));
 %% actuator dynamics
 
 % set velocity of servo (air brakes)
-if length(deltaA_ref_vec)==2 % for the recallOdeFunction
-    if t < t_change_ref
-        deltaA_ref = deltaA_ref_vec(1);    
-    else
-        deltaA_ref = deltaA_ref_vec(2);
+if ~settings.identification 
+    if length(deltaA_ref_vec)==2 % for the recallOdeFunction
+        if t < t_change_ref
+            deltaA_ref = deltaA_ref_vec(1);    
+        else
+            deltaA_ref = deltaA_ref_vec(2);
+        end
+    else 
+        [~,ind_deltaA] = min(settings.parout.partial_time-t);
+        deltaA_ref = deltaA_ref_vec(ind_deltaA); % don't delete this unless you change how the recall ode works.
     end
-else 
-    [~,ind_deltaA] = min(settings.parout.partial_time-t);
-    deltaA_ref = deltaA_ref_vec(ind_deltaA); % don't delete this unless you change how the recall ode works.
+else
+    [~,idx_deltaA] = min(abs(t-deltaA_ref_vec(:,1))); % if we are trying to identify we need to have the same input of the flight
+    deltaA_ref = deltaA_ref_vec(idx_deltaA,2);
 end
 
 ddeltaA = (deltaA_ref-deltaA)/contSettings.payload.deltaA_tau;

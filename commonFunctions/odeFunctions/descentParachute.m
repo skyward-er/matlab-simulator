@@ -112,7 +112,7 @@ if all(abs(h_vect) < 1e-8)
     h_vect = [-vw uw 0];
 end
 
-% if ~all(t_vect == 0)
+if ~all(t_vect == 0)
     t_vers = t_vect/norm(t_vect);            % Tangential versor
     if ~all(h_vect == 0)
         h_vers = -h_vect/norm(h_vect);           % horizontal versor
@@ -125,11 +125,11 @@ end
         n_vect = cross(h_vers, t_vers);
         n_vers = n_vect/norm(n_vect);
     end
-% else
-%     t_vers = [0,0,-1];
-% 
-%     n_vers = [0,1,0];
-% end
+else
+    t_vers = [0,0,-1];
+
+    n_vers = [0,0,0];
+end
 
 
 
