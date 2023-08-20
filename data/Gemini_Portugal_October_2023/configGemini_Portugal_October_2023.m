@@ -136,3 +136,29 @@ settings.ada.counter     =   0;
 settings.ada.t_ada       =   -1;                                           % Apogee detection timestamp
 settings.ada.flag_apo    =   false;                                        % True when the apogee is detected
 
+%% SENSOR FAULT DETECTION SETTINGS
+
+
+settings.sfd.F = [1      0        0;
+                  0       1        0;
+                  0       0        1];
+
+settings.sfd.H = [1       0        0];
+
+
+settings.sfd.P1_h = [0.1    0      0;
+                     0      0.1    0;
+                     0      0      0.1];
+
+settings.sfd.P1_pn = settings.sfd.P1_h;
+[settings.sfd.temp_ref, ~, settings.sfd.press_ref, ~] = atmosisa(settings.z0);
+settings.sfd.press_ref;
+settings.sfd.a_pn = [settings.sfd.press_ref 0 0]';
+%settings.sfd.a_pn = ones(3, 1)*press_ref;
+
+settings.sfd.max_weight = 50;
+settings.sfd.W1 = ones(3, 1)*settings.sfd.max_weight;
+settings.sfd.W2 = settings.sfd.W1;
+settings.sfd.V = zeros(1, 3);
+
+settings.sfd.filter_window = 25;

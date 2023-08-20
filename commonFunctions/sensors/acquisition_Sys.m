@@ -1,4 +1,4 @@
-function [sp, c] = acquisition_Sys(sensorData, s, c,settings)
+function [sp, c] = acquisition_Sys(sensorData, s, c,settings, t)
 %{
 Routine to simulate the data acquisition from the sensors, that use the
 class sensors in: "skyward-matlab-control-simulator\sensors"
@@ -31,9 +31,11 @@ for i_baro = 1:2
         sp.t_baro_sens{i_baro}  = sensorData.barometer_sens{i_baro}.time';
     
         for ii=1:length(sensorData.barometer_sens{i_baro}.time)
+            s.MS580401BA01.secondPhase = settings.flagAscent;
             sp.pn_sens{i_baro}(ii)        =      s.MS580301BA01.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,...
                 sensorData.barometer_sens{i_baro}.temperature(ii) - 273.15);
             sp.pn_sens{i_baro}(ii)        =      sp.pn_sens{i_baro}(ii)*100;
+            [~, sp.pn_sens{i_baro}(ii)] = s.MS580301BA01.applyFailure(sp.pn_sens{i_baro}(ii), t);
             sp.h_baro_sens{i_baro}(ii)    =     -atmospalt(sp.pn_sens{i_baro}(ii),'None');
         end
     end
@@ -44,9 +46,11 @@ if isfield(sensorData.barometer_sens{3},'time')
     sp.t_baro_sens{3}  = sensorData.barometer_sens{3}.time';
 
     for ii=1:length(sensorData.barometer_sens{3}.time)
+        s.HSCMRNN015PAAA5.secondPhase = settings.flagAscent;
         sp.pn_sens{3}(ii)        =      s.HSCMRNN015PAAA5.sens(sensorData.barometer_sens{3}.measures(ii)/100,...
             sensorData.barometer_sens{3}.temperature(ii) - 273.15);
         sp.pn_sens{3}(ii)        =      sp.pn_sens{3}(ii)*100;
+        [~, sp.pn_sens{3}(ii)] = s.HSCMRNN015PAAA5.applyFailure(sp.pn_sens{3}(ii), t);
         sp.h_baro_sens{3}(ii)    =     -atmospalt(sp.pn_sens{3}(ii),'None');
     end
     c.pn_tot{3}(c.np_old{3}:c.np_old{3} + size(sp.pn_sens{3} ,2) - 1,1)    = sp.pn_sens{3}(1:end);

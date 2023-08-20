@@ -90,6 +90,7 @@ INPUTS:
         Pout   =  (eye(3) - K*Ct) * P;
 
         xp(ii,:)  =   x';
+        %xp(ii,1)  =   p_baro(1);
         
         xv(ii,1)  =   getaltitude(xp(ii,1),ada.temp_ref, ada.p_ref);
         xv(ii,2)  =   getvelocity(xp(ii,1),xp(ii,2),ada.temp_ref, ada.p_ref);

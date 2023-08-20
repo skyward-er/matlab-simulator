@@ -1,4 +1,4 @@
-%{
+ %{
 
 This function runs all subsystems in a simulated environment
 
@@ -15,6 +15,7 @@ This function runs all subsystems in a simulated environment
 % sensor fault detection algorithm
 Nsensors = [1,2,3];
 goodSensors = Nsensors(not(settings.faulty_sensors));
+sensor_sim_second_phase = settings.flagAscent;
 if settings.flagAscent
     SVM_model= settings.SVM_1;
 else
@@ -27,8 +28,23 @@ for i = goodSensors
         warning('chunk length is greater than %d samples',SVM_model.N_sample)
     end
 end
-[sensorData,sp,chunk,settings.faulty_sensors] = run_SensorFaultDetection_SVM(SVM_model,sensorData,sp,chunk,settings.faulty_sensors,settings.flagAscent,t0);
+[sensorData,sp,chunk,settings.faulty_sensors, settings.sfd] = run_SensorFaultDetection_SVM(settings.sfd, SVM_model,sensorData,sp,chunk,settings.faulty_sensors,settings.flagAscent,t0);
 
+%if iTimes > 5
+    normalizedCutOffFrequency_baro = 10 / (0.5 * 50); % Normalize the cut-off frequency
+    %[butter_b, butter_a] = butter(4, normalizedCutOffFrequency_baro, 'low'); % Butterworth low-pass filter coefficients
+    %sp.pn = filter(butter_b, butter_a, sp.pn);
+%    sp.pn = lowpass(sp.pn, normalizedCutOffFrequency_baro);
+%end
+
+for i = 1:settings.sfd.filter_window - 1
+    filter_array_SFD(i) = filter_array_SFD(i + 1);
+end
+filter_array_SFD(settings.sfd.filter_window) = sp.pn(1,1);
+if iTimes > settings.sfd.filter_window
+    median_filter_baro = medfilt1(filter_array_SFD, settings.sfd.filter_window);
+    sp.pn = ones(1,2).*median_filter_baro(end); 
+end
 %% ADA
 if iTimes>3
     if settings.flagADA

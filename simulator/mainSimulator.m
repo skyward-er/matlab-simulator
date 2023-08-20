@@ -73,7 +73,7 @@ if ~exist("../commonFunctions/graphics/general-utilities/","dir")
     warning('To export file you need to download the repository, read the README file in the folder')
 end
 std_plots(simOutput,settings,contSettings)
-% sensor_plots(simOutput)
+sensor_plots(simOutput)
 
 %% state visualiser
 % animateOrientation(simOutput.Y(:,11),simOutput.Y(:,12),simOutput.Y(:,13),simOutput.Y(:,10),simOutput.t)
