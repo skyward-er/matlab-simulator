@@ -23,9 +23,9 @@ s.MS580301BA01.maxMeasurementRange  =   1100;                   % 1100, 1300 in 
 s.MS580301BA01.minMeasurementRange  =   300;                    % 300, 10 in mbar
 s.MS580301BA01.resolution           =   0.012;                  % 0.012, 0.018, 0.027, 0.042, 0.065 in mbar
 %s.MS580301BA01.resolution           =   0;                  % 0.012, 0.018, 0.027, 0.042, 0.065 in mbar
-%s.MS580301BA01.noiseVariance        =   0.043043;                      % guess in mbar
-s.MS580301BA01.noiseVariance        =   0;
-s.MS580301BA01.twoPhaseNoise        =   1;  
+s.MS580301BA01.noiseVariance        =   0.043043;                      % guess in mbar
+%s.MS580301BA01.noiseVariance        =   0;
+s.MS580301BA01.twoPhaseNoise        =   0;  
 s.MS580301BA01.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
 % fault generation
 s.MS580301BA01 = s.MS580301BA01.setOffset(1000); % i don't know the unit of measurment as of now
@@ -41,9 +41,9 @@ s.HSCMRNN015PAAA5.minMeasurementRange = 0;
 s.HSCMRNN015PAAA5.bit = 12; 
 s.HSCMRNN015PAAA5.resolution = (s.HSCMRNN015PAAA5.maxMeasurementRange -s.HSCMRNN015PAAA5.minMeasurementRange)/(2^s.HSCMRNN015PAAA5.bit);
 %s.HSCMRNN015PAAA5.resolution = 0;
-%s.HSCMRNN015PAAA5.noiseVariance = 0.043043; % from flight logs
-s.HSCMRNN015PAAA5.noiseVariance = 0.0; % from flight logs
-s.HSCMRNN015PAAA5.twoPhaseNoise        =   1;  
+s.HSCMRNN015PAAA5.noiseVariance = 0.043043; % from flight logs
+%s.HSCMRNN015PAAA5.noiseVariance = 0.0; % from flight logs
+s.HSCMRNN015PAAA5.twoPhaseNoise        =   0;  
 s.HSCMRNN015PAAA5.error2dOffset = ep_data; % I will leave this like this because I don't know how this works
 % fault generation
 %s.HSCMRNN015PAAA5 = s.HSCMRNN015PAAA5.setOffset(1000); % i don't know the unit of measurment as of now

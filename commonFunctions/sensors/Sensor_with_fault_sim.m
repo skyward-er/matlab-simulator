@@ -78,7 +78,7 @@ classdef Sensor_with_fault_sim < handle
             inputArg=obj.whiteNoise(inputArg);
             inputArg=obj.addOffset(inputArg);
             inputArg=obj.addTempOffset(inputArg,temp);
-            %inputArg=obj.quantization(inputArg);
+            inputArg=obj.quantization(inputArg);
             inputArg=obj.saturation(inputArg); 
             outputArg = inputArg;
         end
