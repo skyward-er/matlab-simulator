@@ -47,7 +47,7 @@ v = Y(5);
 w = Y(6);
 
 
-
+local = settings.Local;
 %% CONSTANTS
 S = settings.para(para).S;                                               % [m^2]   Surface
 CD = settings.para(para).CD;                                             % [/] Parachute Drag Coefficient
@@ -58,14 +58,26 @@ else
     pmass = sum(settings.para(1:para-1).mass) + settings.mnc;
 end
 
-g = 9.80655;                                                             % [N/kg] magnitude of the gravitational field at zero
-m = settings.ms - pmass;                                                 % [kg] descend mass
+                                                           % [N/kg] magnitude of the gravitational field at zero
 
+m = settings.ms - pmass;                                                 % [kg] descend mass
+g = settings.g0/(1 + (-z*1e-3/6371))^2;                                         % [N/kg]  module of gravitational field
 
 %% ADDING WIND (supposed to be added in NED axes);
 
-% if settings.wind.input 
-%     [uw, vw, ww] = wind_input_generator(settings, z, uncert);    
+% if settings.wind.model
+%     
+%     if settings.stoch.N > 1
+%         [uw, vw, ww] = windMatlabGenerator(settings, z, t, Hour, Day);
+%     else
+%         [uw, vw, ww] = windMatlabGenerator(settings, z, t);
+%     end
+%     
+% elseif settings.wind.input
+%     [uw, vw, ww] = windInputGenerator(settings, z, uncert);
+% 
+% elseif settings.wind.variable
+%     [uw, vw, ww] = windVariableGenerator(z, settings.stoch);
 % end
 
 switch settings.windModel
@@ -94,65 +106,61 @@ V_norm = norm([ur vr wr]);
 
 
 %% ATMOSPHERE DATA
-
-if -z < 0
+if -z < 0        % z is directed as the gravity vector
     z = 0;
 end
 
-[~, ~, ~, rho] = atmosisa(-z+settings.z0);
+absoluteAltitude = -z + settings.z0;
+[~, ~, P, rho] = atmosphereData(absoluteAltitude, g, local);
 
 %% REFERENCE FRAME
 % The parachutes are approximated as rectangular surfaces with the normal
 % vector perpendicular to the relative velocity
 
-t_vect = [ur vr wr];                     % Tangential vector
-h_vect = [-vr ur 0];                     % horizontal vector    
+t_vect = [ur vr wr];                     % Tangenzial vector
+h_vect = [vr -ur 0];                     % horizontal vector    
 
 if all(abs(h_vect) < 1e-8)
-    h_vect = [-vw uw 0];
+    h_vect = [vw -uw 0];
 end
 
-if ~all(t_vect == 0)
-    t_vers = t_vect/norm(t_vect);            % Tangential versor
-    if ~all(h_vect == 0)
-        h_vers = -h_vect/norm(h_vect);           % horizontal versor
-    else
-        h_vers = [0,1,0];
-    end
-    n_vect = cross(t_vers, h_vers);          % Normal vector
-    n_vers = n_vect/norm(n_vect);            % Normal versor
-    if (n_vers(3) > 0)                       % If the normal vector is downward directed
-        n_vect = cross(h_vers, t_vers);
-        n_vers = n_vect/norm(n_vect);
-    end
-else
-    t_vers = [0,0,-1];
+n_vect = cross(t_vect, h_vect);          % Normal vector
 
-    n_vers = [0,0,0];
+if norm(t_vect) < 1e-8
+    t_vers = [0 0 0];
+else
+    t_vers = t_vect/norm(t_vect);            % Tangenzial versor
+end
+
+if norm(n_vect) < 1e-8
+    n_vers = [0 0 0]; 
+else
+    n_vers = n_vect/norm(n_vect);           % normal versor
+end
+
+if (n_vers(3) > 0)                          % If the normal vector is downward directed
+    n_vers = -n_vers;
 end
 
 
 
 %% FORCES
-D = 0.5*rho*V_norm^2*S*CD*t_vers';          % [N] Drag vector
-L = 0.5*rho*V_norm^2*S*CL*n_vers';          % [N] Lift vector
-Fg = m*g*[0 0 1]';                          % [N] Gravitational Force vector
+D = -0.5*rho*V_norm^2*S*CD*t_vers';       % [N] Drag vector
+L = 0.5*rho*V_norm^2*S*CL*n_vers';       % [N] Lift vector
+Fg = m*g*[0 0 1]';                       % [N] Gravitational Force vector
+F = L + Fg + D;                          % [N] total forces vector
 
-F = -D + L + Fg;                            % [N] total forces vector
 F_acc = F-Fg;                               % [N] accelerometer felt forces
 
 %% STATE DERIVATIVES
 % velocity
-du = F(1)/m;
-dv = F(2)/m;
-dw = F(3)/m;
+acc = F/m;
 
 
 %% FINAL DERIVATIVE STATE ASSEMBLING
 dY(1:3) = Vels; % ned
-dY(4) = du;
-dY(5) = dv;
-dY(6) = dw;
+dY(4:6) = acc;
+
 
 dY = dY';
 
@@ -178,10 +186,10 @@ if nargout == 2
 %     parout.forces.AeroDyn_Forces = [X, Y, Z];
 %     parout.forces.T = T;
 %     
-%     parout.air.rho = rho;
-%     parout.air.P = P;
+    parout.air.rho = rho;
+    parout.air.P = P;
 %     
-    parout.accelerations.body_acc = [du, dv, dw];
+    parout.accelerations.body_acc = acc;
 %     parout.accelerations.ang_acc = [dp, dq, dr];
     parout.accelerometer.body_acc = [F_acc/m]';
 

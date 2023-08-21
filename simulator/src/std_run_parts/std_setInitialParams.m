@@ -151,3 +151,4 @@ settings.flagStopPitotCorrection = false;
 
 %% parafoil
 deltaA = contSettings.payload.deltaA_0;
+para = 1;

@@ -407,8 +407,10 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     if not(settings.montecarlo)
         if settings.flagAscent
             disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,17)); %  + ", quatNorm: "+ vecnorm(Yf(end,10:13))
-        else
+        elseif flagPara2
             disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z + ", deltaA_ref: " + deltaA_ref_new + ", deltaA_ode: " + Yf(end,18)); % +", quatNorm: "+ vecnorm(Yf(end,10:13))
+        else
+            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z);
         end
     end
 

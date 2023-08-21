@@ -227,6 +227,7 @@ if ~settings.flagAscent && settings.parafoil
                 
                 [deltaA_ref_new,contSettings] = run_parafoilGuidance(pos_est, sensorData.kalman.x_c(end,4:5), wind_est, settings.payload.target, contSettings);
         end
+        
     end
 end
    

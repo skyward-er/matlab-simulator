@@ -133,13 +133,13 @@ deltaANormalized = deltaA / deltaSMax;
 
 %% forces
 qFactor = 0.5*rho*V_norm;            % [Pa * s / m] dynamic pressure/vNorm
-if V_norm >1e-9
-    multFactorX = 0.5 * b / V_norm;       % booooooooooh   
-    multFactorY = 0.5 * c / V_norm;       % booooooooooh   
-else
-    multFactorX = 0;       % booooooooooh   
-    multFactorY = 0;       % booooooooooh   
-end    
+% if V_norm >1e-9
+    multFactorX = 0.5 * b;       % booooooooooh   
+    multFactorY = 0.5 * c;       % booooooooooh   
+% else
+%     multFactorX = 0;       % booooooooooh   
+%     multFactorY = 0;       % booooooooooh   
+% end    
 % aerodynamic forces (body frame)
 LIFT = qFactor * (CL0 + alpha * CLAlpha + deltaANormalized * CLDeltaA) * [wr; 0; -ur];
 DRAG = qFactor * (CD0 + alpha^2 * CDAlpha2 + deltaANormalized * CDDeltaA) * [ur; vr; wr];
@@ -153,11 +153,11 @@ Fg = dcm*[0; 0; mass*g];        % [N] force due to the gravity in body frame
 F = Fg + F_AERO;             % [N] total forces vector
 
 %% moments
-Mx = (eul(1) * ClPhi + multFactorX * Clp * p + deltaANormalized * ClDeltaA) * b;
-My = (alpha * CmAlpha + multFactorY * Cmq * q + Cm0) * c;
-Mz = (r * multFactorX * Cnr + deltaANormalized * CnDeltaA) * b; % bizzarre
+Mx = (eul(1) * ClPhi *V_norm + multFactorX * Clp * p + deltaANormalized * ClDeltaA *V_norm) * b;
+My = (alpha * CmAlpha *V_norm+ multFactorY * Cmq * q + Cm0*V_norm) * c;
+Mz = (r * multFactorX * Cnr + deltaANormalized * CnDeltaA*V_norm) * b; % bizzarre
 
-M_AERO = [Mx; My; Mz] * qFactor * V_norm * S; 
+M_AERO = [Mx; My; Mz] * qFactor  * S; 
 M = M_AERO; % no inertia considerations in this model
 
 %% derivatives computations
@@ -179,7 +179,7 @@ angAcc = inverseInertia*(M - cross(omega,inertia * omega));
 
 %% actuator dynamics
 
-% set velocity of servo (air brakes)
+% set velocity of servo (controller)
 if ~settings.identification 
     if length(deltaA_ref_vec)==2 % for the recallOdeFunction
         if t < t_change_ref
