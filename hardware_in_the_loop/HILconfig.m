@@ -15,7 +15,8 @@ Release date: 10/03/2021
 
 % Windows, e.g. "COM6"
 % Linux, e.g. "/dev/ttyACM0"
-hil_settings.serial_port = "/dev/tty.usbserial-DN037JYN";
+% hil_settings.serial_port = "/dev/tty.usbserial-DN037JYN";
+hil_settings.serial_port = "COM7";
 
 % Windows, e.g. 256000
 % Linux, e.g. 115200
