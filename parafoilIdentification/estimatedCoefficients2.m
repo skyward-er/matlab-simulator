@@ -1,0 +1,14 @@
+settings.payload.CD0       = 0.425955;
+settings.payload.CDAlpha2  = 0.005669;
+settings.payload.CL0       = 0.015268;
+settings.payload.CLAlpha   = 1.749449;
+settings.payload.Cm0       = 0.407617;
+settings.payload.CmAlpha   = -0.494357;
+settings.payload.Cmq       = -0.004047;
+settings.payload.CLDeltaA  = -0.003623;
+settings.payload.Cnr       = -0.160565;
+settings.payload.CnDeltaA  = 0.020436;
+settings.payload.CDDeltaA  = 0.000021;
+settings.payload.Clp       = -1.679998;
+settings.payload.ClPhi     = -0.000000;
+settings.payload.ClDeltaA  = 0.000703;
