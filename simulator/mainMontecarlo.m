@@ -15,7 +15,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 clearvars -except ZTARGET_CYCLE
-close all; clear all; clc;
+close all; clear; clc;
 
 %% recall the first part of the MAIN script
 % adds folders to the path and retrieves rocket, mission, simulation, etc
@@ -47,8 +47,9 @@ config;
 rng default
 settings.montecarlo = true;
 matlab_graphics;
+
 %% how many simulations
-N_sim = 1000; % set to at least 500
+N_sim = 10; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 
 %% stochastic parameters
@@ -109,17 +110,33 @@ switch simulationType_thrust
         stoch.expThrust = (1./thrust_percentage) * settings.motor.expTime;          % burning time - same notation as thrust here
 end
 
+
+%% check on the simulation profile:
+go = '';
+while ~strcmp(go,'yes') && ~strcmp(go,'y') && ~strcmp(go,'no') && ~strcmp(go,'n')
+    go = input('Did you check that the profile of the simulation? \nA.K.A. did you check settings.scenario = "controlled ascent" or " "descent" or whatever? ("yes" or "no") \n','s');
+    if go == "yes" || go == "y"
+        fprintf('All right, let''s go \n\n')
+    elseif go == "no" || go == "n"
+        fprintf('Set it then. Simulation is stopped. \n\n')
+        return
+    else
+        fprintf('You typed something different from the options, retry. \n\n')
+    end
+end
+
 %% save arrays
 
 % algorithms
 algorithm_vec = {'interp';'NoControl';'engine';'complete'; 'PID_2021'; 'shooting'}; % interpolation, no control, engine shutdown, engine+arb, PID change every 2s, shooting
+
 
 %% do you want to save the results?
 
 flagSaveOffline = input('Do you want to save the results offline? ("yes" or "no"): ','s');
 flagSaveOnline = input('Do you want to save the resuts online? (oneDrive) ("yes" or "no"): ','s');
 
-if flagSaveOnline == "yes"
+if flagSaveOnline == "yes" || flagSaveOnline == "y"
     computer = input('Who is running the simulation? ("Marco" or "Giuseppe" or "Hpe" or whatever): ','s');
 end
 
@@ -143,9 +160,11 @@ for alg_index = 4
 
     %save arrays
     save_thrust = cell(size(stoch.thrust,1),1);
-    apogee.thrust = [];
+    apogee.altitude = [];
     N_ApogeeWithinTarget = 0;
     N_ApogeeWithinTarget_50 = 0;
+    N_landings_within50m = 0;
+    N_landings_within150m = 0;
     wind_Mag = zeros(N_sim,1);
     wind_el = zeros(N_sim,1);
     wind_az = zeros(N_sim,1);
@@ -179,7 +198,7 @@ for alg_index = 4
         end
         
         if displayIter == true
-            fprintf("simulation = " + num2str(i) + " of " + num2str(N_sim) + ", algorithm: " + contSettings.algorithm +"\n");
+            fprintf("simulation = " + num2str(i) + " of " + num2str(N_sim) + ", algorithm: " + contSettings.algorithm +", scenario: "+ settings.scenario +"\n");
         end
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STD_RUN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -196,7 +215,7 @@ for alg_index = 4
     for i = 1:N_sim
 
         % apogee
-        apogee.thrust(i) = save_thrust{i}.apogee_coordinates(3);
+        apogee.altitude(i) = save_thrust{i}.apogee_coordinates(3);
 
         % radius of apogee (horizontal) from the initial point
         apogee.radius(i) = save_thrust{i}.apogee_radius;
@@ -214,45 +233,85 @@ for alg_index = 4
             wind_az(i) = save_thrust{i}.windAz;
             %wind elevation
             wind_el(i) = save_thrust{i}.windEl;
-            %reached apogee time
-            apogee.times(i) = save_thrust{i}.apogee_time;
         end
-
-        % within +-10 meters target apogees:
-        if abs(apogee.thrust(i) - settings.z_final)<=10
+        %reached apogee time
+        apogee.times(i) = save_thrust{i}.apogee_time;
+        apogee.prediction(i) = save_thrust{i}.predicted_apogee(end);
+        apogee.prediction_last_time(i) = length(save_thrust{i}.predicted_apogee)/settings.frequencies.controlFrequency;
+       
+        % save apogees within +-10 meters from target:
+        if abs(apogee.altitude(i) - settings.z_final)<=10
             N_ApogeeWithinTarget = N_ApogeeWithinTarget +1; % save how many apogees sit in the +-50 m from target
         end
-          % within +-50 meters target apogees:
-          
-        if abs(apogee.thrust(i) - settings.z_final)<=50
+        % save apogees within +-50 meters from target:
+        if abs(apogee.altitude(i) - settings.z_final)<=50
             N_ApogeeWithinTarget_50 = N_ApogeeWithinTarget_50 +1; % save how many apogees sit in the +-50 m from target
         end
-          
+       
+        % landing
+        landing.position(i,:) = save_thrust{i}.landing_position;
+        landing.velocities_BODY(i,:) = save_thrust{i}.landing_velocities_BODY;
+        landing.velocities_NED(i,:) = save_thrust{i}.landing_velocities_NED;
+        landing.distance_to_target(i) = norm(settings.payload.target(1:2)-landing.position(i,1:2)');
+
+        % save apogees within 50 meters (radius) from target:
+        if landing.distance_to_target(i) <= 50
+            N_landings_within50m = N_landings_within50m +1; % save how many apogees sit in the +-50 m from target
+        end
+        % save apogees within 150 meters (radius) from target:
+        if landing.distance_to_target(i) <= 150
+            N_landings_within150m = N_landings_within150m +1; % save how many apogees sit in the +-50 m from target
+        end
     end
+    
+    % merit parameters
+    apogee.altitude_mean = mean(apogee.altitude);
+    apogee.altitude_std = std(apogee.altitude);
 
+    landing.distance_mean = mean(landing.distance_to_target);
+    landing.distance_std = std(landing.distance_to_target);
 
-    apogee.thrust_mean = mean(apogee.thrust);
-    apogee.thrust_std = std(apogee.thrust);
-
+    % save t_shutdown
     t_shutdown.mean = mean(t_shutdown.value);
     t_shutdown.std = std(t_shutdown.value);
 
+    % save apogee horizontal position 
     apogee.radius_mean = mean(apogee.radius);
     apogee.radius_std = std(apogee.radius);
     apogee.radius_max = max(apogee.radius);
     apogee.radius_min = min(apogee.radius);
-
+    
+    % save apogee speed
     apogee.horizontalSpeed_mean = mean(apogee.horizontalSpeed);
     apogee.horizontalSpeed_std = std(apogee.horizontalSpeed);
     apogee.horizontalSpeed_max = max(apogee.horizontalSpeed);
     apogee.horizontalSpeed_min = min(apogee.horizontalSpeed);
 
-    apogee.accuracy = N_ApogeeWithinTarget/N_sim*100; % percentage, so*100
-    apogee.accuracy_50 = N_ApogeeWithinTarget_50/N_sim*100; % percentage, so*100
+    % save landing speed
+    landing.verticalSpeed_mean = mean(landing.velocities_NED(:,3));
+    landing.verticalSpeed_std = std(landing.velocities_NED(:,3));
+    landing.verticalSpeed_max = max(landing.velocities_NED(:,3));
+    landing.verticalSpeed_min = min(landing.velocities_NED(:,3));
 
+    
+    landing.horizontalSpeed_mean = mean(norm(landing.velocities_NED(:,1:2)));
+    landing.horizontalSpeed_std = std(norm(landing.velocities_NED(:,1:2)));
+    landing.horizontalSpeed_max = max(norm(landing.velocities_NED(:,1:2)));
+    landing.horizontalSpeed_min = min(norm(landing.velocities_NED(:,1:2)));
+
+    % accuracy
+    apogee.accuracy_10 = N_ApogeeWithinTarget/N_sim*100; % percentage, so*100
+    apogee.accuracy_50 = N_ApogeeWithinTarget_50/N_sim*100; % percentage, so*100
+    
+    landing.accuracy_50 = N_landings_within50m/N_sim*100;
+    landing.accuracy_150 = N_landings_within150m/N_sim*100;
+
+    % montecarlo parameters
     for i = 1:N_sim
-        save_thrust{i}.mu = mean(apogee.thrust(1:i));
-        save_thrust{i}.sigma = std(apogee.thrust(1:i));
+        apogee_mu(i) = mean(apogee.altitude(1:i));
+        apogee_sigma(i) = std(apogee.altitude(1:i));
+        landing_mu(i) = mean(landing.distance_to_target(1:i));
+        landing_sigma(i) = std(landing.distance_to_target(1:i));
     end
 
     %% PLOTS
@@ -261,10 +320,12 @@ for alg_index = 4
     
     %% SAVE
     % save plots
-    saveDate = string(datestr(date,29));
+    saveDate = replace(string(datetime),":","_");
+    saveDate = replace(saveDate," ","__");
+    saveDate = replace(saveDate,"-","_");
     folder = [];
 
-    if flagSaveOffline == "yes"
+    if flagSaveOffline == "yes" || flagSaveOffline == "y"
         switch  settings.mission
 
             case 'Pyxis_Portugal_October_2022'
@@ -278,23 +339,25 @@ for alg_index = 4
         end
 
     end
-    if flagSaveOnline == "yes"
+    if flagSaveOnline == "yes" || flagSaveOnline == "y"
         if computer == "Marco" || computer == "marco"
-            folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\AIR BRAKES\MONTECARLO E TUNING\"+settings.mission+"\wind_input\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % online
+            folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\AIR BRAKES\MONTECARLO E TUNING\"+settings.mission+"\full_flight\"+contSettings.algorithm+"\"+num2str(N_sim)+"_"+simulationType_thrust+"_"+saveDate]; % online
         end
     end
 
-    if flagSaveOffline == "yes" || flagSaveOnline == "yes"
+    if flagSaveOffline == "yes" || flagSaveOnline == "yes" || flagSaveOffline == "y" || flagSaveOnline == "y"
         for i = 1:length(folder)
-            mkdir(folder(i))
+            if ~exist(folder(i),"dir")
+                mkdir(folder(i))
+            end
             saveas(save_plot_histogram,folder(i)+"\histogramPlot")
             saveas(save_plotControl,folder(i)+"\controlPlot")
             saveas(save_plotApogee,folder(i)+"\apogeelPlot")
             saveas(save_plotTrajectory,folder(i)+"\TrajectoryPlot")
             saveas(save_thrust_apogee_probability,folder(i)+"\ApogeeProbabilityPlot")
-            saveas(save_thrust_apogee_mean,folder(i)+"\ApogeeMeanOverNsimPlot")
-            saveas(save_thrust_apogee_std,folder(i)+"\ApogeeStdOverNsimPlot")
+            saveas(save_montecarlo_apogee_params,folder(i)+"\ApogeeMontecarloAnalysisPlot")
             saveas(save_t_shutdown_histogram,folder(i)+"\t_shutdownPlot")
+            saveas(save_landing_ellipses,folder(i)+"\landingPositions")
 
             if exist('save_arb_deploy_histogram','var')
                 saveas(save_arb_deploy_histogram,folder(i)+"\ARBdeployTimeHistogram")
@@ -319,14 +382,33 @@ for alg_index = 4
 %                          
             % Save results.txt
             fid = fopen( folder(i)+"\"+contSettings.algorithm+"Results"+saveDate+".txt", 'wt' );  % CAMBIA IL NOME
-            fprintf(fid,'Algorithm: %s \n',contSettings.algorithm );
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%
+            fprintf(fid,'SIMULATION \n\n');
             fprintf(fid,'Number of simulations: %d \n \n',N_sim); % Cambia n_sim
-            fprintf(fid,'Parameters: \n');
             fprintf(fid,'Target apogee: %d \n',settings.z_final);
-            fprintf(fid,'Thrust: +-50%% at 3*sigma, total impulse constant \n');
+            if (settings.scenario == "descent" || settings.scenario == "full flight") && settings.parafoil
+                fprintf(fid,'Target landing: %d \n',settings.payload.target);
+            end
+            fprintf(fid,'Total impulse +-5%% at 3 sigma \n');
+            fprintf(fid,'CA: %.2f simulation, %.2f reference \n\n\n',settings.CD_correction, settings.CD_correction_ref);
+
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%
+            fprintf(fid,'AIR BRAKES \n\n');
+            fprintf(fid,'Algorithm: %s \n',contSettings.algorithm );
             fprintf(fid,'Engine shut-down control frequency: %d Hz \n',settings.frequencies.controlFrequency);
             fprintf(fid,'Airbrakes control frequency: %d Hz \n',settings.frequencies.arbFrequency );
             fprintf(fid,'Initial Mach number at which the control algorithm starts: %.3f \n\n',settings.MachControl);
+            fprintf(fid,'Other parameters specific of the simulation: \n');
+            fprintf(fid,'Filter coefficient: %.3f \n', contSettings.filter_coeff);
+            fprintf(fid,'Target for shutdown: %d \n',settings.z_final_MTR );
+            if contSettings.algorithm == "interp" || contSettings.algorithm == "complete" 
+                fprintf(fid,'N_forward: %d \n', contSettings.N_forward);
+                fprintf(fid,'Delta Z (reference): %d \n',contSettings.reference.deltaZ);
+                fprintf(fid,'Filter linear decrease starting at: %d m\n', contSettings.filterMinAltitude);
+                fprintf(fid,'Filter initial value: %d \n', contSettings.filter_coeff0);
+                fprintf(fid,'Interpolation type: %s \n', contSettings.interpType);
+                fprintf(fid,'Correction with current pitch angle: %s \n\n\n',contSettings.flagCorrectWithPitch);
+            end
             % %             switch alg_index
             % %                 case 2
             % %                     fprintf(fid,'P = %d \n',contSettings.Kp );
@@ -337,6 +419,9 @@ for alg_index = 4
             % %                     fprintf(fid,'I = %d \n',contSettings.Ki );
             % %                     fprintf(fid,'Change reference trajectory every %d seconds \n\n',contSettings.deltaZ_change );
             % %             end
+
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%
+            fprintf(fid,'WIND \n\n ');
             fprintf(fid,'Wind model: %s \n',settings.windModel);
             if settings.windModel == "constant"
                 fprintf(fid,'Wind model parameters: \n'); % inserisci tutti i parametri del vento
@@ -347,41 +432,52 @@ for alg_index = 4
                 fprintf(fid,'Wind maximum elevation: %d [°] \n\n\n',rad2deg(settings.wind.ElMax));
             else
                 fprintf(fid,'Wind model parameters: \n'); % inserisci tutti i parametri del vento
-                fprintf(fid,'Ground wind Magnitude: 0-%d m/s\n\n',settings.wind.MagMax);
+                fprintf(fid,'Ground wind Magnitude: 0-%d m/s\n\n\n',settings.wind.MagMax);
+            end
+
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%
+            if (settings.scenario == "descent" || settings.scenario == "full flight") && settings.parafoil
+                fprintf(fid,'PARAFOIL \n\n');
+                fprintf(fid,'Guidance approach %s \n',contSettings.payload.guidance_alg);
+                fprintf(fid,'PID proportional gain %s \n',contSettings.payload.Kp);
+                fprintf(fid,'PID integral gain %s \n',contSettings.payload.Ki);
+                fprintf(fid,'Opening altitude %s \n',settings.para(1).z_cut);
             end
             
-            %%%%%%%%%%%%%%%
-            fprintf(fid,'Results: \n');
-            fprintf(fid,'Max apogee: %.2f \n',max(apogee.thrust));
-            fprintf(fid,'Min apogee: %.2f \n',min(apogee.thrust));
-            fprintf(fid,'Mean apogee: %.2f \n',apogee.thrust_mean);
-            fprintf(fid,'Apogee standard deviation 3sigma: %.4f \n',3*apogee.thrust_std);
-            fprintf(fid,'Apogees within +-10m from target (gaussian): %.2f %% \n',apogee.accuracy_gaussian);
-            fprintf(fid,'Apogees within +-10m from target (ratio): %.2f %% \n\n',apogee.accuracy);
-            fprintf(fid,'Apogees within +-50m from target (gaussian): %.2f %% \n',apogee.accuracy_gaussian_50);
-            fprintf(fid,'Apogees within +-50m from target (ratio): %.2f %% \n\n',apogee.accuracy_50);
-            fprintf(fid,'Apogees horizontal distance from origin mean : %.2f [m] \n',apogee.radius_mean);
-            fprintf(fid,'Apogees horizontal distance from origin std : %.2f [m] \n\n',apogee.radius_std);
-            fprintf(fid,'Apogees horizontal speed mean : %.2f [m/s] \n',apogee.horizontalSpeed_mean);
-            fprintf(fid,'Apogees horizontal speed std : %.2f [m/s] \n\n',apogee.horizontalSpeed_std);
-            fprintf(fid,'Mean shutdown time : %.3f [m/s] \n',t_shutdown.mean);
-            fprintf(fid,'Standard deviation of shutdown time : %.3f [m/s] \n\n\n',t_shutdown.std);
-            %%%%%%%%%%%%%%%
-            fprintf(fid,'Other parameters specific of the simulation: \n\n');
-            fprintf(fid,'Filter coefficient: %.3f \n', contSettings.filter_coeff);
-              fprintf(fid,'Target for shutdown: %d \n',settings.z_final_MTR );
-            if contSettings.algorithm == "interp" || contSettings.algorithm == "complete" 
-                fprintf(fid,'N_forward: %d \n', contSettings.N_forward);
-                fprintf(fid,'Delta Z (reference): %d \n',contSettings.reference.deltaZ);
-                fprintf(fid,'Filter diminished every: %d m\n', contSettings.deltaZfilter);
-                fprintf(fid,'Filter diminished by ratio: %d \n', contSettings.filterRatio);
-                fprintf(fid,'Filter diminishing starts at: %d m \n', contSettings.Zfilter);
-                fprintf(fid,'Interpolation type: %s \n', contSettings.interpType);
-
-                fprintf(fid,'Correction with current pitch angle: yes \n\n');
-%                 fprintf(fid,'CA: %.1f simulation, %.1f reference \n',settings.CD_correction, settings.CD_correction_ref);
-                fprintf(fid,'CA: 0.75 simulation, 1 open reference, 0.75 closed reference \n');
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%
+            if settings.scenario ~= "descent"
+                fprintf(fid,'RESULTS APOGEE\n\n');
+                fprintf(fid,'Max apogee: %.2f m\n',max(apogee.altitude));
+                fprintf(fid,'Min apogee: %.2f m\n',min(apogee.altitude));
+                fprintf(fid,'Mean apogee: %.2f m\n',apogee.altitude_mean);
+                fprintf(fid,'Apogee standard deviation 3sigma: %.4f \n',3*apogee.altitude_std);
+                fprintf(fid,'Apogees within +-10m from target (gaussian): %.2f %% \n',apogee.accuracy_gaussian_10);
+                fprintf(fid,'Apogees within +-10m from target (ratio): %.2f %% \n\n',apogee.accuracy_10);
+                fprintf(fid,'Apogees within +-50m from target (gaussian): %.2f %% \n',apogee.accuracy_gaussian_50);
+                fprintf(fid,'Apogees within +-50m from target (ratio): %.2f %% \n\n',apogee.accuracy_50);
+                fprintf(fid,'Apogees horizontal distance from origin mean : %.2f [m] \n',apogee.radius_mean);
+                fprintf(fid,'Apogees horizontal distance from origin std : %.2f [m] \n\n',apogee.radius_std);
+                fprintf(fid,'Apogees horizontal speed mean : %.2f [m/s] \n',apogee.horizontalSpeed_mean);
+                fprintf(fid,'Apogees horizontal speed std : %.2f [m/s] \n\n',apogee.horizontalSpeed_std);
+                fprintf(fid,'Mean shutdown time : %.3f [m/s] \n',t_shutdown.mean);
+                fprintf(fid,'Standard deviation of shutdown time : %.3f [m/s] \n\n\n',t_shutdown.std);
             end
+            if (settings.scenario == "descent" || settings.scenario == "full flight") && settings.parafoil
+                fprintf(fid,'RESULTS LANDING\n\n');
+                fprintf(fid,'Max distance to target: %.2f m\n',max(landing.distance_to_target));
+                fprintf(fid,'Min distance to target: %.2f m\n',min(landing.distance_to_target));
+                fprintf(fid,'Mean distance to target: %.2f m\n',min(landing.distance_mean));
+                fprintf(fid,'Distance standard deviation 3sigma: %.4f \n',3*landing.distance_std);
+                fprintf(fid,'Landings within 50m from target (ratio): %.2f %% \n\n',landing.accuracy_50);
+                fprintf(fid,'Landings within 150m from target (ratio): %.2f %% \n\n',landing.accuracy_150);
+                fprintf(fid,'Apogees horizontal speed mean : %.2f [m/s] \n',apogee.horizontalSpeed_mean);
+                fprintf(fid,'Apogees horizontal speed std : %.2f [m/s] \n\n',apogee.horizontalSpeed_std);
+                fprintf(fid,'Mean shutdown time : %.3f [m/s] \n',t_shutdown.mean);
+                fprintf(fid,'Standard deviation of shutdown time : %.3f [m/s] \n\n\n',t_shutdown.std);
+            end
+
+            
+            
             fclose(fid);
         end
     end

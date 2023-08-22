@@ -132,14 +132,27 @@ Q = [q0 q1 q2 q3];
 Q = Q/norm(Q);
 
 %% ADDING WIND (supposed to be added in NED axes);
-if settings.wind.model
+% if settings.wind.model
+% 
+%     [uw, vw, ww] = windMatlabGenerator(settings, z, t);
+% 
+% elseif settings.wind.input
+%     [uw, vw, ww] = windInputGenerator(settings, z, uncert);
+% % elseif  settings.wind.variable
+% %     [uw, vw, ww] = windVariableGenerator(t, z, settings.wind);
+% end
 
+switch settings.windModel
+
+    case "atmospherical"
     [uw, vw, ww] = windMatlabGenerator(settings, z, t);
-
-elseif settings.wind.input
+    
+    case "multiplicative"
+    uncert = settings.wind.input_uncertainty;
     [uw, vw, ww] = windInputGenerator(settings, z, uncert);
-% elseif  settings.wind.variable
-%     [uw, vw, ww] = windVariableGenerator(t, z, settings.wind);
+
+    case "constant"
+    uw = settings.constWind(1); vw = settings.constWind(2); ww = settings.constWind(3);
 end
 
 dcm = quatToDcm(Q);
@@ -356,7 +369,7 @@ else
     Y = qdyn*S*CY;                      % [N] y-body component of the aerodynamics force
     Z = qdyn*S*CN;                      % [N] z-body component of the aerodynamics force
     Fg = dcm*[0; 0; m*g];               % [N] force due to the gravity in body frame
-    F = Fg + [-X+T, Y, -Z]';             % [N] total forces vector
+    F = Fg + [-X+T, Y, -Z]';            % [N] total forces vector
     
     %-----------------------------------------------------
     %F = Fg + [-X+T*cos(chi), Y+T*sin(chi), -Z]';             % [N] total forces vector
@@ -394,7 +407,7 @@ else
         
         dap = (ap_ref-ap)/settings.servo.tau;
         if abs(dap) >settings.servo.maxSpeed
-            dap = sign(ap_ref-ap)*settings.servo.maxSpeed;
+            dap = sign(ap_ref-ap)*settings.servo.maxSpeed; % concettualmente sta roba è sbagliata perchè dipende dal passo di integrazione, fixare
         end
     
         if flagAngleSaturation

@@ -96,10 +96,12 @@ settingsSim.CD_correction_ref = settings.CD_correction_ref;
 
 %% COMPUTE THE TRAJECTORIES BY BACK INTEGRATION
 Ntraj_ARB = length(deltaX_values);
-N_mass = contSettings.N_mass;                            % number of different Mass values
+mass = contSettings.masses_vec;                     % set in config control params
+N_mass = length(mass);                              % number of different Mass values
+
 
 deltaX = 0;
-mass = linspace(settings.ms,settings.m0,N_mass);
+
 
 % Pre-allocation
 trajectories_ARB = cell(Ntraj_ARB, N_mass);
@@ -157,7 +159,7 @@ trajectories_saving_MTR{j} = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref', 
 end
 %% SAVING
 %  settings.save = false;
-load test
+% load test
 if ~settings.save
     warning('save is set to false')
 end

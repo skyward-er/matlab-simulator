@@ -2,6 +2,9 @@
 **/*.asv
 **/slprj/**
 **/*.slxc
-MontecarloResults/
+simulator/montecarlo/results/
+data/Gemini_Portugal_October_2023/HIL_CPP_files_ABK/
+data/Gemini_Portugal_October_2023/HIL_CPP_files_PRF/
 **/*.pdf
 **/*.mat
+**/*.fig

@@ -53,7 +53,10 @@ contSettings.rate_limiter      =    60/0.13;                                % da
 
 % Filtering
 contSettings.filter_coeff = 0.5;                                            % set this value to 1 to ignore filtering action
-contSettings.flagFirstControl = true;                                       % if it is the first iter the control action is not filtered, then the filter acts
+
+% flag initialization
+contSettings.flagFirstControlABK = true;                                       % if it is the first iter the control action is not filtered, then the filter acts
+contSettings.flagFirstControlPRF = true;
 
 % compatibility checks:
 if contSettings.filter_coeff > 1
@@ -66,8 +69,12 @@ end
 
 
 % For interpolation reference algorithm only:
-contSettings.N_forward = 2; % how many steps in advance have to check on speed to interpolate
+contSettings.N_forward = 1; % how many steps in advance have to check on speed to interpolate
 contSettings.interpType = 'linear'; % choose between: 'linear' , 'sinusoidal'
+
+%% Interp algorithm flags
+contSettings.flagCorrectWithPitch = false;
+
 
 %% ENGINE CONTROL
 % these need to be updated after every static fire test
@@ -100,4 +107,19 @@ settings.hmax = 6000;                                                       % [m
 %% Sensor fault detection parameters
 % support vector machine
 
+%% parafoil
+contSettings.payload.saturation = false;
+contSettings.payload.I = 0;
+contSettings.payload.deltaA_0 = 0;
+
+%% WES
+contSettings.WES.wind_est = [0,0];
+contSettings.WES.A = [];
+contSettings.WES.b = [];
+contSettings.WES.V_mean = [0,0];
+contSettings.WES.V2_mean = 0;
+contSettings.WES.N = 0;
+% contSettings.WES.V_h_i = 0; % it is not used in the simulation, what is
+% it?
+contSettings.WES.state = 1;
  

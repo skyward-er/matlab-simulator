@@ -1,4 +1,4 @@
-function [dY,parout] = descentParachute(t, Y, settings, uw, vw, ww, para, uncert)
+function [dY,parout] = descentParachute(t, Y, settings, uw, vw, ww, para, Q ,uncert)
 %{ 
 
 descentParachute - ode function of the 3DOF Rigid Rocket-Paraachute Model
@@ -47,6 +47,7 @@ v = Y(5);
 w = Y(6);
 
 
+
 %% CONSTANTS
 S = settings.para(para).S;                                               % [m^2]   Surface
 CD = settings.para(para).CD;                                             % [/] Parachute Drag Coefficient
@@ -63,11 +64,26 @@ m = settings.ms - pmass;                                                 % [kg] 
 
 %% ADDING WIND (supposed to be added in NED axes);
 
-if settings.wind.input 
-    [uw, vw, ww] = wind_input_generator(settings, z, uncert);    
+% if settings.wind.input 
+%     [uw, vw, ww] = wind_input_generator(settings, z, uncert);    
+% end
+
+switch settings.windModel
+
+    case "atmospherical"
+    [uw, vw, ww] = windMatlabGenerator(settings, z, t);
+    
+    case "multiplicative"
+    uncert = settings.wind.input_uncertainty;
+    [uw, vw, ww] = windInputGenerator(settings, z, uncert);
+
+    case "constant"
+    uw = settings.constWind(1); vw = settings.constWind(2); ww = settings.constWind(3);
 end
 
-wind = [uw vw ww];
+
+wind =[uw; vw; ww]; % body
+Vels = [u; v; w];
 
 % Relative velocities (plus wind);
 ur = u - wind(1);
@@ -89,7 +105,7 @@ end
 % The parachutes are approximated as rectangular surfaces with the normal
 % vector perpendicular to the relative velocity
 
-t_vect = [ur vr wr];                     % Tangenzial vector
+t_vect = [ur vr wr];                     % Tangential vector
 h_vect = [-vr ur 0];                     % horizontal vector    
 
 if all(abs(h_vect) < 1e-8)
@@ -97,7 +113,7 @@ if all(abs(h_vect) < 1e-8)
 end
 
 if ~all(t_vect == 0)
-    t_vers = t_vect/norm(t_vect);            % Tangenzial versor
+    t_vers = t_vect/norm(t_vect);            % Tangential versor
     if ~all(h_vect == 0)
         h_vers = -h_vect/norm(h_vect);           % horizontal versor
     else
@@ -112,7 +128,7 @@ if ~all(t_vect == 0)
 else
     t_vers = [0,0,-1];
 
-    n_vers = [0,1,0];
+    n_vers = [0,0,0];
 end
 
 
@@ -122,7 +138,7 @@ D = 0.5*rho*V_norm^2*S*CD*t_vers';          % [N] Drag vector
 L = 0.5*rho*V_norm^2*S*CL*n_vers';          % [N] Lift vector
 Fg = m*g*[0 0 1]';                          % [N] Gravitational Force vector
 
-F = -D + L + Fg;                   % [N] total forces vector
+F = -D + L + Fg;                            % [N] total forces vector
 F_acc = F-Fg;                               % [N] accelerometer felt forces
 
 %% STATE DERIVATIVES
@@ -133,7 +149,7 @@ dw = F(3)/m;
 
 
 %% FINAL DERIVATIVE STATE ASSEMBLING
-dY(1:3) = [u v w]';
+dY(1:3) = Vels; % ned
 dY(4) = du;
 dY(5) = dv;
 dY(6) = dw;

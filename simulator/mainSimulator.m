@@ -72,11 +72,29 @@ end
 [simOutput] = std_run(settings,contSettings);
 
 %% PLOTS
+if ~exist("../commonFunctions/graphics/general-utilities/","dir")
+    warning('To export file you need to download the repository, read the README file in the folder')
+end
 std_plots(simOutput,settings,contSettings)
 sensor_plots(simOutput)
+
+%% state visualiser
+% animateOrientation(simOutput.Y(:,11),simOutput.Y(:,12),simOutput.Y(:,13),simOutput.Y(:,10),simOutput.t)
+% animateOrientation(simOutput.NAS(:,7),simOutput.NAS(:,8),simOutput.NAS(:,9),simOutput.NAS(:,10),simOutput.t_nas)
 
 %% DATA-PRINTING
 printOutput(simOutput,settings);
 
 %% save data
 % save("Simulation_log.mat","Tf","Yf","data_flight")
+
+%% export data for HIL simulations /cpp usage: 
+% the files are stored in the folder 
+if settings.flagExportCSV % this is set in configFlags
+    % air brakes
+    export_HILdataABK;
+    % parafoil
+    if settings.scenario == "descent" || settings.scenario == "full flight"
+        export_HILdataPRF;
+    end
+end

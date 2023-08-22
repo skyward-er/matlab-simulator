@@ -79,15 +79,23 @@ windAz = [];
 ap_ref_new = 0;                                                             % air brakes closed until Mach < settings.MachControl
 ap_ref_old = 0;
 ap_ref = [ ap_ref_old ap_ref_new ];
+% servo motor time delay - in ode it needs to be set to change reference value
+t_change_ref_ABK =      t0 + settings.servo.delay;
+t_last_arb_control = 0;
+%% parafoil control action initialization
+deltaA_ref_new = 0;
+deltaA_ref_old = 0;
+deltaA_ref = [deltaA_ref_old,deltaA_ref_new];
+% servo motor time delay - in ode it needs to be set to change reference value
+t_change_ref_PRF =      t0 + contSettings.payload.deltaA_delay;
+t_last_prf_control = 0;
 
-%% servo motor time delay - in ode it needs to be set to change reference value
-t_change_ref =      t0 + settings.servo.delay;
 
 %% initialization of other variables - for speed purposes
 mach        =       0;                                                      % Mach number
 ext         =       0;                                                      % air brake extension
 n_old       =       1;                                                      % Iteration number (first iter-> n=1)
-Yf_tot      =       zeros(nmax, length(Y0));                                % State vector for ode integration
+Yf_tot      =       zeros(nmax, size(Y0,2));                                % State vector for ode integration
 Tf_tot      =       zeros(nmax, 1);                                         % Time vector for ode integration
 ext_tot     =       zeros(nmax, 1);                                         % Air brake extension vector
 cpuTimes    =       zeros(nmax, 1);                                         % Vector of iterations
@@ -95,11 +103,20 @@ iTimes      =       0;                                                      % It
 c.ctr_start =      -1;                                                      % Air brake control parameter initial condition
 i           =       1;                                                      % Index for while loop
 sensorData.kalman.pn_prec = settings.ada.p_ref;                             % settings for ADA and KALMAN
-% ap_ref_vec  = zeros(nmax, 2);                                               % Matrix N x 2 to save reference angle vector
-% ap_ref_time = zeros(nmax, 1);                                               % Vector of time reference for air brakes
+% ap_ref_vec  = zeros(nmax, 2);                                             % Matrix N x 2 to save reference angle vector
+% ap_ref_time = zeros(nmax, 1);                                             % Vector of time reference for air brakes
 settings.shutdown = 0;                                                      % engine on
 settings.expShutdown = 0;                                                   % engine expected to be on
+vz = 0;
+% prevent unwanted changes in state machine
+eventExpulsion = false; % expulsion of the first parachute
+eventExpulsion2 = false; % expulsion of the second parachute
+eventLanding = false; % landing event
 
+lastAscentIndex = 0;
+lastDrogueIndex = 0;
+idx_apogee = NaN;
+idx_landing = NaN;
 
 %% sensor fault initial conditions
 chunk{1} = zeros(1,50);
@@ -130,5 +147,8 @@ if settings.flagNAS
     vels_prev =  [0;0;0];
     P_prev    =   0.01*eye(12);
 end
+% stop correction with pitot
+settings.flagStopPitotCorrection = false;
 
-expulsion = 0;
+%% parafoil
+deltaA = contSettings.payload.deltaA_0;

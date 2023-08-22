@@ -29,66 +29,11 @@ OUTPUT:
 switch true % set this value in configControl.m
 
     case strcmp(contSettings.algorithm,'interp') || strcmp(contSettings.algorithm,'complete')
-        % interpolation algorithm: takes two references (max and
-        % min extension) and decides how much to open with an
-        % interpolation at fixed altitude of the actual velocity
-        % w.r.t. the two references.
+        % help in the function
 
-        [ap_base_filter] = control_Interp(sensorData.kalman.z-settings.z0,sensorData.kalman.vz,contSettings.reference.Z,contSettings.reference.Vz,contSettings.interpType,contSettings.N_forward,settings,contSettings); % cambiare nome alla funzione tra le altre cose
+        [ap_ref_new,contSettings] = control_Interp(sensorData.kalman.z-settings.z0,sensorData.kalman.vz,settings,contSettings,ap_ref_old); % cambiare nome alla funzione tra le altre cose
+      
         
-        % filter control action
-        if contSettings.flagFirstControl == false % the first reference is given the fastest possible (unfiltered), then filter
-            ap_ref_new = ap_ref_old + (ap_base_filter - ap_ref_old)*contSettings.filter_coeff;
-        else
-            ap_ref_new = ap_base_filter;
-        end
-        
-        %% correction with pitch at shutdown
-%         switch true
-%             case  rad2deg(settings.pitchCut)<=70
-%                   ap_ref_new = ap_ref_new/1.2;
-%             case  rad2deg(settings.pitchCut)>70 &&  rad2deg(settings.pitchCut)<=78
-%                 coeff = interp1([70 78],[1.15 1], rad2deg(settings.pitchCut));
-%                 ap_ref_new = ap_ref_new/coeff;   
-%         end
-
-        %% correction with current pitch
-%         if sensorData.kalman.z-settings.z0 < 2800
-%          test = cos(settings.OMEGA-settings.pitch);
-%          ap_ref_new = ap_ref_new * test;
-%         end
-
-         %% filter
-        contSettings.flagFirstControl = false;
-%         if sensorData.kalman.time(end)>contSettings.Tfilter
-%             contSettings.Tfilter = contSettings.Tfilter+contSettings.deltaTfilter;
-%             contSettings.filter_coeff = contSettings.filter_coeff/contSettings.filterRatio;
-%         end
-
-%         if sensorData.kalman.z(end)>contSettings.Zfilter
-%             contSettings.Zfilter = contSettings.Zfilter+ contSettings.deltaZfilter;
-%             contSettings.filter_coeff = contSettings.filter_coeff/contSettings.filterRatio;
-%         end
-        
-         h = sensorData.kalman.z-settings.z0;
-% 
-         contSettings.filter_coeff = 0.9 - (h - 1000) * ((0.9)/2000);  %linear
-%          contSettings.filter_coeff = 1* (0.1/1)^((h - 1000) / 2000); % exponential
-%          contSettings.filter_coeff = -1/(3300^2) * (h)^2 + 0.9; % parabolic (bad)
-%            contSettings.filter_coeff = 6.30187797115758e-14*h^4 -6.11171732035364e-10*h^3 + ...
-%                2.35468794275658e-06*h^2 + -0.00444100005800747*h...  % v_ref
-%                + 3.52867224599647 ; 
-%            if  contSettings.filter_coeff > 1
-%                 contSettings.filter_coeff = 1;
-%            elseif  contSettings.filter_coeff < 0.1
-%                     contSettings.filter_coeff = 0.1;
-%            end
-            
-
-        if sensorData.kalman.z-settings.z0 > 2990
-            ap_ref_new = settings.servo.maxAngle;
-        end
-       
     case strcmp (contSettings.algorithm,'shooting')
         % shooting algorithm:
 
@@ -101,12 +46,12 @@ switch true % set this value in configControl.m
             [ap_base_filter] = control_Shooting([-sensorData.kalman.z-settings.z0,sensorData.kalman.vz],ap_ref_new,settings,contSettings.coeff_Cd,settings.arb,init);
 
             % filter control action
-            if contSettings.flagFirstControl == false % the first reference is given the fastest possible (unfiltered), then filter
+            if contSettings.flagFirstControlABK == false % the first reference is given the fastest possible (unfiltered), then filter
                 ap_ref_new = ap_ref_old + (ap_base_filter - ap_ref_old)*contSettings.filter_coeff;
             else
                 ap_ref_new = ap_base_filter;
             end
-            contSettings.flagFirstControl = false;
+            contSettings.flagFirstControlABK = false;
             if sensorData.kalman.time(end)>contSettings.Tfilter
                 contSettings.Tfilter = contSettings.Tfilter+contSettings.deltaTfilter;
                 contSettings.filter_coeff = contSettings.filter_coeff/contSettings.filterRatio;
@@ -157,7 +102,7 @@ switch true % set this value in configControl.m
             [ap_base_filter] = control_PID2refs(sensorData.kalman.z,sensorData.kalman.vz,settings.reference.Z,settings.reference.Vz,contSettings.N_forward,settings,contSettings); % cambiare nome alla funzione tra le altre cose
 
             % filter control action
-            if contSettings.flagFirstControl == false % the first reference is given the fastest possible (unfiltered), then filter
+            if contSettings.flagFirstControlABK == false % the first reference is given the fastest possible (unfiltered), then filter
                 ap_ref_new = ap_ref_old + (ap_base_filter -ap_ref_old)*contSettings.filter_coeff;
             else
                 ap_ref_new = ap_base_filter;
@@ -172,6 +117,6 @@ switch true % set this value in configControl.m
 
 end
 
-contSettings.flagFirstControl = false;
+contSettings.flagFirstControlABK = false;
 
 

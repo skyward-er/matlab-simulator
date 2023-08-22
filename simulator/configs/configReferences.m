@@ -101,8 +101,3 @@ contSettings.reference.Vz = V_rescale;
 contSettings.reference.Z = heights;
 
 
-%% solo per HIL/ cpp - scommentare all'occorrenza
-% mkdir(ConDataPath+"/Trajectories_CSV")
-% for i = 1: size(V_rescale,2)
-%     csvwrite(ConDataPath+"/Trajectories_CSV/referenceInterp"+num2str(i)+".csv",[heights,V_rescale(:,i)])
-% end
