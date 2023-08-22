@@ -195,38 +195,38 @@ end
 % % % % end
 
 %% reference
-% figure('Position',[100,100,600,400])
-% yyaxis left
-% hold on
-% contSettings = structIn.contSettings; % because the trajectory are chosen during the simulation, not a priori
-% v_ned = quatrotate(quatconj(structIn.Y(:, 10:13)), structIn.Y(:, 4:6));
-% if not(settings.scenario == "descent")
-%     plot(contSettings.reference.Z, contSettings.reference.Vz(:,1),'r','DisplayName','ref min')
-%     plot(contSettings.reference.Z, contSettings.reference.Vz(:,2),'k','DisplayName','ref max')
-% end
-% plot( -structIn.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
-% plot( -structIn.NAS(:,3)-settings.z0,  -structIn.NAS(:,6),'m--','DisplayName','NAS')
-% % plot( structIn.ADA(:,4),  structIn.ADA(:,5),'b','DisplayName','ADA z')
-% yyaxis right
-% plot( -structIn.Y(:, 3), structIn.Y(:, 17),'g','DisplayName','arb')
-% 
-% legend
+figure('Position',[100,100,600,400])
+yyaxis left
+hold on
+contSettings = structIn.contSettings; % because the trajectory are chosen during the simulation, not a priori
+v_ned = quatrotate(quatconj(structIn.Y(:, 10:13)), structIn.Y(:, 4:6));
+if not(settings.scenario == "descent")
+    plot(contSettings.reference.Z, contSettings.reference.Vz(:,1),'r','DisplayName','ref min')
+    plot(contSettings.reference.Z, contSettings.reference.Vz(:,2),'k','DisplayName','ref max')
+end
+plot( -structIn.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
+plot( -structIn.NAS(:,3)-settings.z0,  -structIn.NAS(:,6),'m--','DisplayName','NAS')
+% plot( structIn.ADA(:,4),  structIn.ADA(:,5),'b','DisplayName','ADA z')
+yyaxis right
+plot( -structIn.Y(:, 3), structIn.Y(:, 17),'g','DisplayName','arb')
+
+legend
 
 
 %% ada
-% figures.ada = figure('Position',[100,100,600,400]);
-% plot( structIn.t_ada_tot,  structIn.ADA(:,4),'DisplayName','$ADA_{z}$')
-% hold on
-% plot( structIn.t_ada_tot,  structIn.ADA(:,5),'DisplayName','$ADA_{vz}$')
-% plot( structIn.t,  -structIn.Y(:,3),'DisplayName','True z')
-% plot( structIn.t,  -structIn.Y(:,6),'DisplayName','True Vz')
-% legend;
-% title('ADA vs trajectory')
-% 
-% figure('Position',[100,100,600,400])
-% hold on
-% plot( structIn.t_ada_tot,  structIn.ADA(:,2),'DisplayName','ADA dp')
-% title('ADA pressure derivative')
+figures.ada = figure('Position',[100,100,600,400]);
+plot( structIn.t_ada_tot,  structIn.ADA(:,4),'DisplayName','$ADA_{z}$')
+hold on
+plot( structIn.t_ada_tot,  structIn.ADA(:,5),'DisplayName','$ADA_{vz}$')
+plot( structIn.t,  -structIn.Y(:,3),'DisplayName','True z')
+plot( structIn.t,  -structIn.Y(:,6),'DisplayName','True Vz')
+legend;
+title('ADA vs trajectory')
+
+figure('Position',[100,100,600,400])
+hold on
+plot( structIn.t_ada_tot,  structIn.ADA(:,2),'DisplayName','ADA dp')
+title('ADA pressure derivative')
 
 %% quaternions
 figures.EulerAngles = figure('Name','Euler angles','Position',[100,100,600,400]);

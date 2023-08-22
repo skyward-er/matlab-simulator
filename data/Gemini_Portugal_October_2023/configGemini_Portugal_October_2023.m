@@ -172,7 +172,7 @@ settings.sfd.pn_prev = settings.sfd.press_ref;  %previous values necessary for d
 settings.sfd.filter_window = 25;
 
 %DISCRETE LOWPASS FILTER
-lateness = 1.5; % transient time to get to asintotic desired to set filter parameters, it also translates into a delay in the sensor reading
+lateness = 0.01; % transient time to get to asintotic desired to set filter parameters, it also translates into a delay in the sensor reading
 settings.sfd.lowpass_filter_gain = 5/lateness; % gain of the lowpass filter
 lowpass_filter_T = 0.2; %s period, the inverse of the alg. freq.
 settings.sfd.lowpass_filter_cutoff_freq = 5/lateness; %Hz
