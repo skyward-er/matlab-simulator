@@ -53,29 +53,29 @@ end
 
 saveFileName  = "estimatedCoefficients";
 %% generate guesses for aerodynamic coefficients
-x0(1)     =  0.25;   % cd0
-x0(2)     =  0.12;   % cdAlpha2
-x0(3)     =  0.091;  % cl0
-x0(4)     =  0.9;    % clAlpha
-x0(5)     =  0.35;   % cm0
-x0(6)     = -0.72;   % cmAlpha
-x0(7)     = -1.49;   % cm!
-x0(8)     = -0.0035; % clDeltaA
-x0(9)     = -0.27;   % cnR\
-x0(10)    =  0.0115; % cnDeltaA
-x0(11)    =  0.1;    % deltaSMax
-x0(12)    =  0.01;   % cdDeltaA
-x0(13)    = -0.84;   % clP
-x0(14)    = -0.1;    % clPhi
-x0(15)    =  0.01;   % cLdeltaA
+x0(1,1)     =  0.25;   % cd0
+x0(2.1)     =  0.12;   % cdAlpha2
+x0(3,1)     =  0.091;  % cl0
+x0(4,1)     =  0.9;    % clAlpha
+x0(5,1)     =  0.35;   % cm0
+x0(6,1)     = -0.72;   % cmAlpha
+x0(7,1)     = -1.49;   % cm!
+x0(8,1)     = -0.0035; % clDeltaA
+x0(9,1)     = -0.27;   % cnR\
+x0(10,1)    =  0.0115; % cnDeltaA
+% x0(11,1)    =  0.1;    % deltaSMax
+x0(11,1)    =  0.01;   % cdDeltaA
+x0(12,1)    = -0.84;   % clP
+x0(13,1)    = -0.1;    % clPhi
+x0(14,1)    =  0.01;   % cLdeltaA
 
 
 % Constraints
 A1 = diag(-(x0>0)+(x0<0));
-b1 = zeros(15, 1);
+b1 = zeros(size(x0));
 
 A2 = diag((x0>0)-(x0<0));
-b2 = 2*A2*x0';
+b2 = 2*A2*x0;
 
 A = [A1;A2];
 b = [b1;b2];
@@ -206,11 +206,11 @@ if flagOverwrite
     fprintf(fid,"settings.payload.CLDeltaA  = %.2f;\n",x(8));
     fprintf(fid,"settings.payload.Cnr       = %.2f;\n",x(9));
     fprintf(fid,"settings.payload.CnDeltaA  = %.2f;\n",x(10));
-    fprintf(fid,"settings.payload.deltaSMax = %.2f;\n",x(11));
-    fprintf(fid,"settings.payload.CDDeltaA  = %.2f;\n",x(12));
-    fprintf(fid,"settings.payload.Clp       = %.2f;\n",x(13));
-    fprintf(fid,"settings.payload.ClPhi     = %.2f;\n",x(14));
-    fprintf(fid,"settings.payload.ClDeltaA  = %.2f;\n",x(15));
+    % fprintf(fid,"settings.payload.deltaSMax = %.2f;\n",x(11));
+    fprintf(fid,"settings.payload.CDDeltaA  = %.2f;\n",x(11));
+    fprintf(fid,"settings.payload.Clp       = %.2f;\n",x(12));
+    fprintf(fid,"settings.payload.ClPhi     = %.2f;\n",x(13));
+    fprintf(fid,"settings.payload.ClDeltaA  = %.2f;\n",x(14));
     fclose(fid);
 else
     idx = 0;
@@ -230,11 +230,11 @@ else
     fprintf(fid,"settings.payload.CLDeltaA  = %.2f;\n",x(8));
     fprintf(fid,"settings.payload.Cnr       = %.2f;\n",x(9));
     fprintf(fid,"settings.payload.CnDeltaA  = %.2f;\n",x(10));
-    fprintf(fid,"settings.payload.deltaSMax = %.2f;\n",x(11));
-    fprintf(fid,"settings.payload.CDDeltaA  = %.2f;\n",x(12));
-    fprintf(fid,"settings.payload.Clp       = %.2f;\n",x(13));
-    fprintf(fid,"settings.payload.ClPhi     = %.2f;\n",x(14));
-    fprintf(fid,"settings.payload.ClDeltaA  = %.2f;\n",x(15));
+    % fprintf(fid,"settings.payload.deltaSMax = %.2f;\n",x(11));
+    fprintf(fid,"settings.payload.CDDeltaA  = %.2f;\n",x(11));
+    fprintf(fid,"settings.payload.Clp       = %.2f;\n",x(12));
+    fprintf(fid,"settings.payload.ClPhi     = %.2f;\n",x(13));
+    fprintf(fid,"settings.payload.ClDeltaA  = %.2f;\n",x(14));
     fclose(fid); 
 end
 %% verification of the estimation
@@ -320,11 +320,11 @@ function [outJ] = computeCostFunction(x, t_m, y_m, R_m, settings, contSettings,d
     settings.payload.CLDeltaA  =  x(8);
     settings.payload.Cnr       =  x(9);
     settings.payload.CnDeltaA  =  x(10);
-    settings.payload.deltaSMax =  x(11);
-    settings.payload.CDDeltaA  =  x(12);
-    settings.payload.Clp       =  x(13);
-    settings.payload.ClPhi     =  x(14);
-    settings.payload.ClDeltaA  =  x(15);
+    % settings.payload.deltaSMax =  x(11);
+    settings.payload.CDDeltaA  =  x(11);
+    settings.payload.Clp       =  x(12);
+    settings.payload.ClPhi     =  x(13);
+    settings.payload.ClDeltaA  =  x(14);
 
     % Initialize cost
     J = zeros(size(R_m));
