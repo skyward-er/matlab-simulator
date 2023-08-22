@@ -40,8 +40,8 @@ settings.frequencies.chamberPressureFrequency   =   50;                    % [hz
 settings.frequencies.pitotFrequency             =   20;                    % [hz] sensor frequency
 
 % Servo (MARK STAR - HBL 3850)
-settings.servo.tau = 0.0461;                                                % Servo motor time constant 
-settings.servo.delay = 0.0468;                                              % Servo motor delay
+settings.servo.tau = 0.0374588;                                                % Servo motor time constant 
+settings.servo.delay = 0.070548;                                              % Servo motor delay
 settings.servo.tau_acc = 0.01;                                              % Servo motor acceleration time constant
 settings.servo.maxSpeed = deg2rad(300);                     %[rad/s]        % max rpm speed of the servo motor
 settings.servo.minAngle = 0;                                                % min servo angle
