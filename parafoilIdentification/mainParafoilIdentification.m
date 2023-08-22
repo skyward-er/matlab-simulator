@@ -43,6 +43,15 @@ config;
 %% settings specific for the identification (overwrite or define new parameters of the settings structure)
 settings.identification = true;
 
+%% do you want to overwrite coefficients?
+flagOverwrite = input('Do you want to overwrite coefficients? (y/n)','s');
+if flagOverwrite == "y"
+    flagOverwrite = true;
+else
+    flagOverwrite  =false;
+end
+
+saveFileName  = "estimatedCoefficients";
 %% generate guesses for aerodynamic coefficients
 x0(1)     =  0.25;   % cd0
 x0(2)     =  0.12;   % cdAlpha2
@@ -73,7 +82,7 @@ b = [b1;b2];
 
 
 % Covariance matrix:
-R = eye(6); % take it from NAS in the future
+R = eye(9); % take it from NAS in the future
 R_m = R^-1;
 
 %% extract data from simulation
@@ -185,24 +194,49 @@ end
 % x = ga(fun, 15, A, b, [], [], [], [], [], options);
 
 %% print a .m with the new estimated coefficients
-fid = fopen("estimatedCoefficients.m","w");
-fprintf(fid,"settings.payload.CD0       = %.2f;\n",x(1));
-fprintf(fid,"settings.payload.CDAlpha2  = %.2f;\n",x(2));
-fprintf(fid,"settings.payload.CL0       = %.2f;\n",x(3));
-fprintf(fid,"settings.payload.CLAlpha   = %.2f;\n",x(4));
-fprintf(fid,"settings.payload.Cm0       = %.2f;\n",x(5));
-fprintf(fid,"settings.payload.CmAlpha   = %.2f;\n",x(6));
-fprintf(fid,"settings.payload.Cmq       = %.2f;\n",x(7));
-fprintf(fid,"settings.payload.CLDeltaA  = %.2f;\n",x(8));
-fprintf(fid,"settings.payload.Cnr       = %.2f;\n",x(9));
-fprintf(fid,"settings.payload.CnDeltaA  = %.2f;\n",x(10));
-fprintf(fid,"settings.payload.deltaSMax = %.2f;\n",x(11));
-fprintf(fid,"settings.payload.CDDeltaA  = %.2f;\n",x(12));
-fprintf(fid,"settings.payload.Clp       = %.2f;\n",x(13));
-fprintf(fid,"settings.payload.ClPhi     = %.2f;\n",x(14));
-fprintf(fid,"settings.payload.ClDeltaA  = %.2f;\n",x(15));
-fclose(fid);
-
+if flagOverwrite
+    fid = fopen(saveFileName+".m","w");
+    fprintf(fid,"settings.payload.CD0       = %.2f;\n",x(1));
+    fprintf(fid,"settings.payload.CDAlpha2  = %.2f;\n",x(2));
+    fprintf(fid,"settings.payload.CL0       = %.2f;\n",x(3));
+    fprintf(fid,"settings.payload.CLAlpha   = %.2f;\n",x(4));
+    fprintf(fid,"settings.payload.Cm0       = %.2f;\n",x(5));
+    fprintf(fid,"settings.payload.CmAlpha   = %.2f;\n",x(6));
+    fprintf(fid,"settings.payload.Cmq       = %.2f;\n",x(7));
+    fprintf(fid,"settings.payload.CLDeltaA  = %.2f;\n",x(8));
+    fprintf(fid,"settings.payload.Cnr       = %.2f;\n",x(9));
+    fprintf(fid,"settings.payload.CnDeltaA  = %.2f;\n",x(10));
+    fprintf(fid,"settings.payload.deltaSMax = %.2f;\n",x(11));
+    fprintf(fid,"settings.payload.CDDeltaA  = %.2f;\n",x(12));
+    fprintf(fid,"settings.payload.Clp       = %.2f;\n",x(13));
+    fprintf(fid,"settings.payload.ClPhi     = %.2f;\n",x(14));
+    fprintf(fid,"settings.payload.ClDeltaA  = %.2f;\n",x(15));
+    fclose(fid);
+else
+    idx = 0;
+    saveFileNameNew = saveFileName;
+    while exist(saveFileNameNew,"file")
+        idx = idx+1;
+        saveFileNameNew = saveFileName + num2str(idx);
+    end
+    fid = fopen(saveFileNameNew+".m","w");
+    fprintf(fid,"settings.payload.CD0       = %.2f;\n",x(1));
+    fprintf(fid,"settings.payload.CDAlpha2  = %.2f;\n",x(2));
+    fprintf(fid,"settings.payload.CL0       = %.2f;\n",x(3));
+    fprintf(fid,"settings.payload.CLAlpha   = %.2f;\n",x(4));
+    fprintf(fid,"settings.payload.Cm0       = %.2f;\n",x(5));
+    fprintf(fid,"settings.payload.CmAlpha   = %.2f;\n",x(6));
+    fprintf(fid,"settings.payload.Cmq       = %.2f;\n",x(7));
+    fprintf(fid,"settings.payload.CLDeltaA  = %.2f;\n",x(8));
+    fprintf(fid,"settings.payload.Cnr       = %.2f;\n",x(9));
+    fprintf(fid,"settings.payload.CnDeltaA  = %.2f;\n",x(10));
+    fprintf(fid,"settings.payload.deltaSMax = %.2f;\n",x(11));
+    fprintf(fid,"settings.payload.CDDeltaA  = %.2f;\n",x(12));
+    fprintf(fid,"settings.payload.Clp       = %.2f;\n",x(13));
+    fprintf(fid,"settings.payload.ClPhi     = %.2f;\n",x(14));
+    fprintf(fid,"settings.payload.ClDeltaA  = %.2f;\n",x(15));
+    fclose(fid); 
+end
 %% verification of the estimation
     Y0 = [y_m(1,1:6), zeros(1,3), [y_m(1,10), y_m(1,7:9)],0]; % ode wants pos, vel, om, quat, deltaA as states, while nas retrieves only pos, vel, quat
 %     Y0 = [y_m(1,1:6), zeros(1,3), 1,0,0,0,0];
@@ -311,7 +345,7 @@ function [outJ] = computeCostFunction(x, t_m, y_m, R_m, settings, contSettings,d
     y_sim = interp1(t_sim, y_sim, t_m);
 
     % Compute difference between both
-    diff(:,1:3) = y_m(:,1:3) - y_sim(:,1:3);
+    diff(:,1:6) = y_m(:,1:6) - y_sim(:,1:6);
 
     % convert quaternions to euler angles
     eul_sim = quat2eul(y_sim(:,[10,7:9]));
@@ -322,7 +356,7 @@ function [outJ] = computeCostFunction(x, t_m, y_m, R_m, settings, contSettings,d
     eul_m = flip(eul_m,2);
     eul_m = unwrap(eul_m);
 
-    diff(:,4:6) = angdiff(eul_sim,eul_m);
+    diff(:,7:9) = angdiff(eul_sim,eul_m);
     
 
     % Cost computation
