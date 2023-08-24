@@ -10,29 +10,28 @@ Release date: 17/08/2022
 
 %}
 
-function [] = sendDataOverSerial(data, flags)
-    dataToBeSent.accelerometer = data.accelerometer.measures;
-    dataToBeSent.gyro = data.gyro.measures;
-    dataToBeSent.magnetometer = data.magnetometer.measures;
+function [] = sendDataOverSerial(sensorData, sp, flags)
+    dataToBeSent.accelerometer = sensorData.accelerometer.measures;
+    dataToBeSent.gyro = sensorData.gyro.measures;
+    dataToBeSent.magnetometer = sensorData.magnetometer.measures;
 
-    dataToBeSent.gps.positionMeasures = [data.gps.latitude, data.gps.longitude, data.gps.positionMeasures(3)];
-    dataToBeSent.gps.velocityMeasures = data.gps.velocityMeasures;
-    dataToBeSent.gps.fix = data.gps.fix;
-    dataToBeSent.gps.nsat = data.gps.nsat;
+    dataToBeSent.gps.positionMeasures = [sensorData.gps.latitude, sensorData.gps.longitude, sensorData.gps.positionMeasures(3)];
+    dataToBeSent.gps.velocityMeasures = sensorData.gps.velocityMeasures;
+    dataToBeSent.gps.fix = sensorData.gps.fix;
+    dataToBeSent.gps.nsat = sensorData.gps.nsat;
 
-    for i = 1:size(data.barometer_sens, 2)
-        dataToBeSent.barometer_sens(i) = data.barometer_sens{i}.measures(end);
-        temp(i) = data.barometer_sens{i}.temperature(end);
+    temp = zeros(1, size(sensorData.barometer_sens, 2));
+    for i = 1:size(sensorData.barometer_sens, 2)
+        dataToBeSent.barometer_sens(i) = sensorData.barometer_sens{i}.measures(end);
+        temp(i) = sensorData.barometer_sens{i}.temperature(end);
     end
 
-    dataToBeSent.pitot.dp = data.pitot.measures; %%%%% DA RIVEDERE
+    dataToBeSent.pitot.dp = sp.p0_pitot - sp.p_pitot;
+    if dataToBeSent.pitot.dp < 0
+        dataToBeSent.pitot.dp = 0;
+    end
 
     dataToBeSent.temperature = mean(temp);
-
-    % Need to be checked
-    % dataToBeSent.kalman.z = data.kalman.z;
-    % dataToBeSent.kalman.vz = data.kalman.vz;
-    % dataToBeSent.kalman.vMod = data.kalman.vMod;
 
     dataToBeSent.flags.flagFligth = cast(flags(1), "double");
     dataToBeSent.flags.flagAscent = cast(flags(2), "double");
