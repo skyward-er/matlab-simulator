@@ -90,8 +90,9 @@ R_m = R^-1;
 
 %% extract data from simulation
 % file
-fileNAS     = "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\parafoil\log37\log37_Boardcore__NASState.csv";
-filedeltaA  = "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\parafoil\log37\log37_Parafoil__WingAlgorithmData.csv";
+logN = "log37";
+fileNAS     = "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\parafoil\"+logN+"\"+logN+"_Boardcore__NASState.csv";
+filedeltaA  = "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\parafoil\"+logN+"\"+logN+"_Parafoil__WingAlgorithmData.csv";
 % readmatrix("")
 
 % extraction
@@ -107,8 +108,24 @@ log_deltaA  = csvDataLogExtractor(filedeltaA,"sec");
 % axis equal
 
 %% trim struct
-t_start = 630;
-t_end = 674;
+switch logN
+    case "log05"
+        t_start = 836.96;
+        t_end = 900;
+    case "log08"
+        t_start = 700;
+        t_end = 800;
+    case "log12"
+        t_start = 820; 
+        t_end = 930; 
+    case "log16"
+        t_start = 400;
+        t_end = 500;
+    case "log37"
+        t_start = 630;
+        t_end = 674;
+end
+
 
 log_NAS = structCutter(log_NAS,'timestamp',t_start,t_end);
 log_deltaA = structCutter(log_deltaA,'timestamp',t_start,t_end);
