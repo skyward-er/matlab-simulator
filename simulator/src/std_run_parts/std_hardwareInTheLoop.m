@@ -23,7 +23,7 @@ sensorData.gps.longitude = longitude;
 sp.accel = sp.accel + (quat2rotm(Yf(1,11:14)) * [0;0;9.81])';
 
 % Execute serial communication with obsw
-[alpha_aperture, t_nas, x_est, xp_ada, xv_ada, t_ada, estimated_mass, liftoff, burning_shutdown] = run_ARB_HIL(sensorData, sp, flagsArray);
+[alpha_aperture, t_nas, x_est, xp_ada, xv_ada, t_ada, estimated_mass, liftoff, burning_shutdown] = run_ARB_HIL(sensorData, sp, settings.z0, flagsArray);
 
 %% Update Airbrakes data
 
@@ -80,12 +80,15 @@ c.n_ada_old = c.n_ada_old + size(xp_ada,1);
 
 %% Update Mass estimation data
 
+lastShutdown = settings.shutdown;
 settings.shutdown = burning_shutdown;
 estimated_pressure = NaN;
+predicted_apogee = NaN;               % Need to check if it will be passed by obsw or NaN is enough
 
-if settings.shutdown && Tf(end) < settings.tb
-    t_shutdown = Tf(end);
-    settings.expShutdown = 1;
+if settings.shutdown && ~lastShutdown           % && Tf(end) < settings.tb 
+                                                % Modified second condition as it would leave an unhandled branch
+    t_shutdown = Tf(end);                       % (settings.shutdown && Tf(end) >= settings.tb) that could lead to unintended behavior
+    settings.expShutdown = 1;                   % as values would not be set but motor would still be shutdown.
     settings.timeEngineCut = t_shutdown;
     settings.expTimeEngineCut = t_shutdown;
     settings.IengineCut = Yf(end,14:16);
