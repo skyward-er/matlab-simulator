@@ -19,7 +19,8 @@ sensorData.gps.latitude = latitude;
 sensorData.gps.longitude = longitude;
 
 % Add gravity acceleration
-sensorData.accelerometer.measures = sensorData.accelerometer.measures + (quat2rotm(Yf(1,11:14)) * [0;0;9.81])';
+% sensorData.accelerometer.measures = sensorData.accelerometer.measures + (quat2rotm(Yf(1,11:14)) * [0;0;9.81])';
+sp.accel = sp.accel + (quat2rotm(Yf(1,11:14)) * [0;0;9.81])';
 
 % Execute serial communication with obsw
 [alpha_aperture, t_nas, x_est, xp_ada, xv_ada, t_ada, estimated_mass, liftoff, burning_shutdown] = run_ARB_HIL(sensorData, sp, flagsArray);

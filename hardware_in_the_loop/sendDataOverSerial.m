@@ -11,18 +11,19 @@ Release date: 17/08/2022
 %}
 
 function [] = sendDataOverSerial(sensorData, sp, flags)
-    dataToBeSent.accelerometer = sensorData.accelerometer.measures;
-    dataToBeSent.gyro = sensorData.gyro.measures;
+    dataToBeSent.accelerometer = sp.accel;
+    dataToBeSent.gyro = sp.gyro;
     dataToBeSent.magnetometer = sensorData.magnetometer.measures;
 
     dataToBeSent.gps.positionMeasures = [sensorData.gps.latitude, sensorData.gps.longitude, sensorData.gps.positionMeasures(3)];
     dataToBeSent.gps.velocityMeasures = sensorData.gps.velocityMeasures;
-    dataToBeSent.gps.fix = sensorData.gps.fix;
-    dataToBeSent.gps.nsat = sensorData.gps.nsat;
+    dataToBeSent.gps.fix = sp.gps_fix;
+    dataToBeSent.gps.nsat = sp.gps_nsat;
 
     temp = zeros(1, size(sensorData.barometer_sens, 2));
     for i = 1:size(sensorData.barometer_sens, 2)
-        dataToBeSent.barometer_sens(i) = sensorData.barometer_sens{i}.measures(end);
+        % dataToBeSent.barometer_sens(i) = sensorData.barometer_sens{i}.measures(end);
+        dataToBeSent.barometer_sens(i) = sp.pn_sens{i};
         temp(i) = sensorData.barometer_sens{i}.temperature(end);
     end
 
