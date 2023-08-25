@@ -15,8 +15,7 @@ function [nas_timestamp, n,e,d, vn,ve,vd, qx,qy,qz,qw, bx,by,bz, ...
       airbrakes_opening, estimated_mass, liftoff, burning_shutdown ...
     ] = readControlOutputFromSerial()
 
-    % obswVals = serialbridge("Read", 23);
-    obswVals = ones(1,23);
+    obswVals = serialbridge("Read", 23);
 
     % NASState
     nas_timestamp = obswVals(1) * 2^32 + obswVals(2);
