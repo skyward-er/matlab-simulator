@@ -10,21 +10,18 @@ Release date: 17/08/2022
 
 %}
 
-function [] = sendDataOverSerial(sensorData, sp, flags)
+function [] = sendDataOverSerial(sensorData, sp, z0, flags)
     dataToBeSent.accelerometer = sp.accel;
     dataToBeSent.gyro = sp.gyro;
     dataToBeSent.magnetometer = sensorData.magnetometer.measures;
 
-    dataToBeSent.gps.positionMeasures = [sensorData.gps.latitude, sensorData.gps.longitude, sensorData.gps.positionMeasures(3)];
-    dataToBeSent.gps.velocityMeasures = sensorData.gps.velocityMeasures;
+    dataToBeSent.gps.positionMeasures = [sp.gps(:, 1:2), (sp.gps(:, 3) - z0)];
+    dataToBeSent.gps.velocityMeasures = sp.gpsv;
     dataToBeSent.gps.fix = sp.gps_fix;
     dataToBeSent.gps.nsat = sp.gps_nsat;
 
-    temp = zeros(1, size(sensorData.barometer_sens, 2));
-    for i = 1:size(sensorData.barometer_sens, 2)
-        % dataToBeSent.barometer_sens(i) = sensorData.barometer_sens{i}.measures(end);
-        dataToBeSent.barometer_sens(i) = sp.pn_sens{i};
-        temp(i) = sensorData.barometer_sens{i}.temperature(end);
+    for i = 1:size(sp.pn_sens, 2)
+        dataToBeSent.barometer_sens(i, :) = reshape(sp.pn_sens{i}, 1, []);
     end
 
     dataToBeSent.pitot.dp = sp.p0_pitot - sp.p_pitot;
@@ -32,6 +29,10 @@ function [] = sendDataOverSerial(sensorData, sp, flags)
         dataToBeSent.pitot.dp = 0;
     end
 
+    temp = zeros(1, size(sensorData.barometer_sens, 2));
+    for i = 1:length(temp)
+        temp(i) = sensorData.barometer_sens{i}.temperature(end);
+    end
     dataToBeSent.temperature = mean(temp);
 
     dataToBeSent.flags.flagFligth = cast(flags(1), "double");
