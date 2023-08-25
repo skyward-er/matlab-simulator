@@ -1,4 +1,4 @@
-function [dY,parout] = descentParafoil(t,Y,settings,contSettings,deltaA_ref_vec,t_change_ref)
+function [dY,parout] = descentParafoil(t,Y,settings,contSettings,deltaA_ref_vec,t_change_ref,tlaunch)
 
 %% recall states
 % x = Y(1);
@@ -17,7 +17,7 @@ q3 = Y(13);
 deltaA = Y(14);
 
 
-
+t = t-tlaunch;
 % saturation on servo angle, needed if the actuation is faster than the
 % integration step 
 if deltaA > contSettings.payload.uMax
@@ -133,14 +133,10 @@ deltaANormalized = deltaA / deltaSMax;
 
 %% forces
 qFactor = 0.5*rho*V_norm;            % [Pa * s / m] dynamic pressure/vNorm
-% if V_norm >1e-9
-    multFactorX = 0.5 * b;       % booooooooooh   
-    multFactorY = 0.5 * c;       % booooooooooh   
-% else
-%     multFactorX = 0;       % booooooooooh   
-%     multFactorY = 0;       % booooooooooh   
-% end    
-% aerodynamic forces (body frame)
+
+multFactorX = 0.5 * b;       % booooooooooh   
+multFactorY = 0.5 * c;       % booooooooooh   
+
 LIFT = qFactor * (CL0 + alpha * CLAlpha + deltaANormalized * CLDeltaA) * [wr; 0; -ur];
 DRAG = qFactor * (CD0 + alpha^2 * CDAlpha2 + deltaANormalized * CDDeltaA) * [ur; vr; wr];
 

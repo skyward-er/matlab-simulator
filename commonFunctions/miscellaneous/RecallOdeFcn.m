@@ -29,7 +29,7 @@ All rights reserved
 %}
 flagApVec = false;
 if strcmp(varargin{end}, 'apVec')
-    apVec = varargin{end - 2};
+    apVec = varargin{end - 3};
     flagApVec = true;
     varargin = varargin(1:end-1);
 else 
@@ -37,7 +37,7 @@ else
 end
 
 if flagApVec
-    [~,firstStep] = fun(T(1), Y(1,:), varargin{1:2}, apVec(1), varargin{end});
+    [~,firstStep] = fun(T(1), Y(1,:), varargin{1:2}, apVec(1), varargin{end-1:end});
 else
     [~,firstStep] = fun(T(1), Y(1,:), varargin{:});
 end
@@ -49,7 +49,7 @@ steps = cell(NT,1);
 
 for k = 1:NT
     if flagApVec
-        [~,steps{k}] = fun(T(k), Y(k,:), varargin{1:2}, apVec(k), varargin{end});
+        [~,steps{k}] = fun(T(k), Y(k,:), varargin{1:2}, apVec(k), varargin{end-1:end});
     else
         [~,steps{k}] = fun(T(k), Y(k,:), varargin{:});
     end

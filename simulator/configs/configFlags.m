@@ -27,7 +27,7 @@ scenarios explanation:
 
 
 % scenario configuration
-conf.scenario = "descent";
+conf.scenario = "controlled ascent";
 conf.board = "payload";            % Either "main" or "payload"
 conf.HIL = false;
 

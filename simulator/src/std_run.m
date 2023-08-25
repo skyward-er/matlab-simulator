@@ -81,7 +81,7 @@ else
     % Attitude
     Q0 = angle2quat(settings.PHI, 0, 0, 'ZYX')';
     % State   
-    X0 = [0; 0; -settings.z_final];                                              % Position initial condition -settings.z_final
+    X0 = [0; 0; -1000];                                              % Position initial condition -settings.z_final
     V0 = [0; 0; settings.Vz_final];             % Velocity initial condition
     W0 = [0; 0; 0];                                                             % Angular speed initial condition
 end
@@ -206,17 +206,17 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     
         if settings.ballisticFligth
             Y0_ode = Y0(1:17);
-            [Tf, Yd] = ode4(@ascentControl, tspan, Y0_ode, settings, ap_ref, t_change_ref_ABK, tLaunch);
-            parout = recallOdeFcn2(@ascentControl, Tf, Yd, settings, Yd(:,17), settings.servo.delay,tLaunch,'apVec');
+            [Tf, Yd] = ode4(@ascentControl, tspan, Y0_ode, settings,[], ap_ref, t_change_ref_ABK, tLaunch);
+            parout = RecallOdeFcn(@ascentControl, Tf, Yd, settings,[], Yd(:,17), t_change_ref_ABK,tLaunch,'apVec');
             [nd, ~] = size(Yd);
             Yf = [Yd, ones(nd,1)*Y0(end,18)];
             para = NaN;
         else
             if settings.flagAscent
                 Y0_ode = Y0(1:17);
-                [Tf, Yd] = ode4(@ascentControl, tspan, Y0_ode, settings,  ap_ref, t_change_ref_ABK, tLaunch);
+                [Tf, Yd] = ode4(@ascentControl, tspan, Y0_ode, settings,[],  ap_ref, t_change_ref_ABK, tLaunch);
 %                 Yf(:,10:13) = Yf(:,10:13)./vecnorm(Yf(:,10:13),2,2);
-                parout = recallOdeFcn2(@ascentControl, Tf, Yd, settings, Yd(:,17), settings.servo.delay,tLaunch,'apVec');
+                parout = RecallOdeFcn(@ascentControl, Tf, Yd, settings,[], Yd(:,17), t_change_ref_ABK,tLaunch,'apVec');
                 [nd, ~] = size(Yd);
                 Yf = [Yd, ones(nd,1)*Y0(end,18)];
                 para = NaN;
@@ -225,8 +225,8 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                 if flagPara1
                     para = 1;
                     Y0_ode = Y0(:,1:6);
-                    [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode, settings, uw, vw, ww, para, Y0(end,10:13)); % ..., para, uncert);
-                    parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para, Y0(end,10:13));
+                    [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode, settings, uw, vw, ww, para, Y0(end,10:13),tLaunch); % ..., para, uncert);
+                    parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para, Y0(end,10:13),tLaunch);
                     [nd, ~] = size(Yd);
                     Yf = [Yd, zeros(nd, 3), ones(nd,1).*Y0(end,10:13), settings.Ixxe*ones(nd, 1), ...
                         settings.Iyye*ones(nd, 1), settings.Iyye*ones(nd, 1),zeros(nd,2)];
@@ -235,7 +235,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                     if ~settings.parafoil
                         para = 2;
                         Y0_ode = Y0(:,1:6);
-                        [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode,  settings, uw, vw, ww, para, Y0(end,10:13)); % ..., para, uncert);
+                        [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode,  settings, uw, vw, ww, para, Y0(end,10:13),tLaunch); % ..., para, uncert);
                         parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para, Y0(end,10:13));
                         [nd, ~] = size(Yd);
                         Yf = [Yd, zeros(nd, 3), ones(nd,1).*Y0(end,10:13), settings.Ixxe*ones(nd, 1), ...
@@ -243,8 +243,8 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                        
                     else
                         Y0_ode = Y0(:,[1:13,18]);
-                        [Tf, Yd] = ode4(@descentParafoil, tspan, Y0_ode, settings,contSettings, deltaA_ref, t_change_ref_PRF);
-                        parout = RecallOdeFcn(@descentParafoil, Tf, Yd, settings,contSettings, deltaA_ref,t_change_ref_PRF);
+                        [Tf, Yd] = ode4(@descentParafoil, tspan, Y0_ode, settings,contSettings, deltaA_ref, t_change_ref_PRF,tLaunch);
+                        parout = RecallOdeFcn(@descentParafoil, Tf, Yd, settings,contSettings, Yd(:,14),t_change_ref_PRF,tLaunch,'apVec');
                         [nd, ~] = size(Yd);
                         Yf = [Yd(:,1:13), settings.Ixxe*ones(nd, 1), settings.Iyye*ones(nd, 1), ...
                              settings.Iyye*ones(nd, 1),zeros(nd,1),Yd(:,14)];

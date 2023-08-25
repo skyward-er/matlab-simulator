@@ -1,4 +1,4 @@
-function [dY, parout] = ascentControl(t, Y, settings, ap_ref_vec,t_change_ref, tLaunch,varargin)
+function [dY, parout] = ascentControl(t, Y, settings, contSettings, ap_ref_vec,t_change_ref, tLaunch,varargin)
 %{
 ascent - ode function of the 6DOF Rigid Rocket Model
 
@@ -17,6 +17,7 @@ OUTPUTS:
 - dY,      double [16, 1] state derivatives
 - parout,  struct, interesting fligth quantities structure (aerodyn coefficients, forces and so on..)
 
+DO NOT CHANGE THE INPUTS, OTHERWISE THE RECALL BREAKS
 
 CALLED FUNCTIONS: windMatlabGenerator, windInputGenerator, quatToDcm, interpCoeffs
 
