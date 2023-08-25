@@ -1,4 +1,4 @@
-function [airbrakes_opening, nas_timestamp, x_est_tot, ada_altitude, ada_verticalSpeed, ada_timestamp, estimated_mass, liftoff, burning_shutdown] = run_ARB_HIL(sensorData, sp, flagsArray)
+function [airbrakes_opening, nas_timestamp, x_est_tot, ada_altitude, ada_verticalSpeed, ada_timestamp, estimated_mass, liftoff, burning_shutdown] = run_ARB_HIL(sensorData, sp, z0, flagsArray)
 
     % airbrakes_opening     -> percentage opening of the airbrakes (% 0<=alpha_degree<=1)
     % nas_timestamp         -> current NAS timestamp
@@ -15,7 +15,7 @@ function [airbrakes_opening, nas_timestamp, x_est_tot, ada_altitude, ada_vertica
     sp.gps_nsat = 16;
 
     % sending sensor data over the serial port
-    sendDataOverSerial(sensorData, sp, flagsArray);
+    sendDataOverSerial(sensorData, sp, z0, flagsArray);
 
     % waiting for the response of the obsw
     [nas_timestamp, n,e,d, vn,ve,vd, qx,qy,qz,qw, bx,by,bz, ...
