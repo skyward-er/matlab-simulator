@@ -11,8 +11,8 @@ function [airbrakes_opening, nas_timestamp, x_est_tot, ada_altitude, ada_vertica
     % burning_shutdown      -> flag set to true if motor needs to be shutdown
 
     % set gps fix and number of satellites
-    sensorData.gps.fix = 3;
-    sensorData.gps.nsat = 16;
+    sp.gps_fix = 3;
+    sp.gps_nsat = 16;
 
     % sending sensor data over the serial port
     sendDataOverSerial(sensorData, sp, flagsArray);
