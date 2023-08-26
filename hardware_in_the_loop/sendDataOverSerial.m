@@ -13,7 +13,7 @@ Release date: 17/08/2022
 function [] = sendDataOverSerial(sensorData, sp, z0, flags)
     dataToBeSent.accelerometer = sp.accel;
     dataToBeSent.gyro = sp.gyro;
-    dataToBeSent.magnetometer = sensorData.magnetometer.measures;
+    dataToBeSent.magnetometer = sp.mag;
 
     dataToBeSent.gps.positionMeasures = [sp.gps(:, 1:2), (sp.gps(:, 3) - z0)];
     dataToBeSent.gps.velocityMeasures = sp.gpsv;
@@ -28,6 +28,9 @@ function [] = sendDataOverSerial(sensorData, sp, z0, flags)
     if dataToBeSent.pitot.dp < 0
         dataToBeSent.pitot.dp = 0;
     end
+    dataToBeSent.pitot.p0 = sp.p0_pitot;
+
+    dataToBeSent.chamberPressure = sp.cp;
 
     temp = zeros(1, size(sensorData.barometer_sens, 2));
     for i = 1:length(temp)
