@@ -100,7 +100,8 @@ if contains(settings.mission,'_2023')
 end
 %%%
 
-initialCond = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf; ap0; deltaA0];
+% initialCond = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf; ap0; deltaA0];
+initialCond = [X0; V0; W0; Q0; ap0; deltaA0];
 Y0 = initialCond';
 
 %% WIND GENERATION
@@ -205,20 +206,20 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     if flagFlight
     
         if settings.ballisticFligth
-            Y0_ode = Y0(1:17);
-            [Tf, Yd] = ode4(@ascentControl, tspan, Y0_ode, settings,[], ap_ref, t_change_ref_ABK, tLaunch);
-            parout = RecallOdeFcn(@ascentControl, Tf, Yd, settings,[], Yd(:,17), t_change_ref_ABK,tLaunch,'apVec');
+            Y0_ode = Y0(1:14);
+            [Tf, Yd] = ode4(@ascentControlV2, tspan, Y0_ode, settings,[], ap_ref, t_change_ref_ABK, tLaunch);
+            parout = RecallOdeFcn(@ascentControlV2, Tf, Yd, settings,[], Yd(:,14), t_change_ref_ABK,tLaunch,'apVec');
             [nd, ~] = size(Yd);
-            Yf = [Yd, ones(nd,1)*Y0(end,18)];
+            Yf = [Yd, ones(nd,1)*Y0(end,15)];
             para = NaN;
         else
             if settings.flagAscent
-                Y0_ode = Y0(1:17);
-                [Tf, Yd] = ode4(@ascentControl, tspan, Y0_ode, settings,[],  ap_ref, t_change_ref_ABK, tLaunch);
+                Y0_ode = Y0(1:14);
+                [Tf, Yd] = ode4(@ascentControlV2, tspan, Y0_ode, settings,[],  ap_ref, t_change_ref_ABK, tLaunch);
 %                 Yf(:,10:13) = Yf(:,10:13)./vecnorm(Yf(:,10:13),2,2);
-                parout = RecallOdeFcn(@ascentControl, Tf, Yd, settings,[], Yd(:,17), t_change_ref_ABK,tLaunch,'apVec');
+                parout = RecallOdeFcn(@ascentControlV2, Tf, Yd, settings,[], Yd(:,14), t_change_ref_ABK,tLaunch,'apVec');
                 [nd, ~] = size(Yd);
-                Yf = [Yd, ones(nd,1)*Y0(end,18)];
+                Yf = [Yd, ones(nd,1)*Y0(end,15)];
                 para = NaN;
             else
 
@@ -228,8 +229,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                     [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode, settings, uw, vw, ww, para, Y0(end,10:13),tLaunch); % ..., para, uncert);
                     parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para, Y0(end,10:13),tLaunch);
                     [nd, ~] = size(Yd);
-                    Yf = [Yd, zeros(nd, 3), ones(nd,1).*Y0(end,10:13), settings.Ixxe*ones(nd, 1), ...
-                        settings.Iyye*ones(nd, 1), settings.Iyye*ones(nd, 1),zeros(nd,2)];
+                    Yf = [Yd, zeros(nd, 3), ones(nd,1).*Y0(end,10:13), zeros(nd,2)];
                 end
                 if flagPara2
                     if ~settings.parafoil
@@ -238,16 +238,14 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                         [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode,  settings, uw, vw, ww, para, Y0(end,10:13),tLaunch); % ..., para, uncert);
                         parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para, Y0(end,10:13));
                         [nd, ~] = size(Yd);
-                        Yf = [Yd, zeros(nd, 3), ones(nd,1).*Y0(end,10:13), settings.Ixxe*ones(nd, 1), ...
-                            settings.Iyye*ones(nd, 1), settings.Iyye*ones(nd, 1),zeros(nd,2)];
+                        Yf = [Yd, zeros(nd, 3), ones(nd,1).*Y0(end,10:13), zeros(nd,2)];
                        
                     else
-                        Y0_ode = Y0(:,[1:13,18]);
+                        Y0_ode = Y0(:,[1:13,15]);
                         [Tf, Yd] = ode4(@descentParafoil, tspan, Y0_ode, settings,contSettings, deltaA_ref, t_change_ref_PRF,tLaunch);
                         parout = RecallOdeFcn(@descentParafoil, Tf, Yd, settings,contSettings, Yd(:,14),t_change_ref_PRF,tLaunch,'apVec');
                         [nd, ~] = size(Yd);
-                        Yf = [Yd(:,1:13), settings.Ixxe*ones(nd, 1), settings.Iyye*ones(nd, 1), ...
-                             settings.Iyye*ones(nd, 1),zeros(nd,1),Yd(:,14)];
+                        Yf = [Yd(:,1:13), zeros(nd,1),Yd(:,14)];
                     end
 
                 end
@@ -269,7 +267,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     settings.parout.wind_body = parout.wind.body_wind';
     settings.parout.acc = parout.accelerometer.body_acc';
 
-    ext = extension_From_Angle(Yf(end,17),settings); % bug fix, check why this happens because sometimes happens that the integration returns a value slightly larger than the max value of extension for airbrakes and this mess things up
+    ext = extension_From_Angle(Yf(end,14),settings); % bug fix, check why this happens because sometimes happens that the integration returns a value slightly larger than the max value of extension for airbrakes and this mess things up
     if ext > settings.arb.maxExt
         ext = settings.arb.maxExt;
         error("the extension of the airbrakes exceeds the maximum value of "+num2str(settings.arb.maxExt)+": ext = "+num2str(ext))
@@ -366,9 +364,9 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     c.Yf_tot(n_old:n_old+n-1, :) =  Yf(1:end, :);
     c.Tf_tot(n_old:n_old+n-1, 1) =  Tf(1:end, 1);
     c.p_tot(n_old:n_old+n-1, 1)  =  p(1:end, 1);
-    c.ap_tot(n_old:n_old+n-1) = Yf(1:end,17);
+    c.ap_tot(n_old:n_old+n-1) = Yf(1:end,14);
     deltaAcmd_tot(n_old:n_old+n-1) = deltaA_ref(end) * ones(n,1);
-    deltaA_tot(n_old:n_old+n-1) = Yf(1:end,18);
+    deltaA_tot(n_old:n_old+n-1) = Yf(1:end,15);
     ap_ref_tot(n_old:n_old+n-1) = ap_ref(2)* ones(n,1);
     ap_ref_time_tot(n_old:n_old+n-1) = t1* ones(n,1);
     c.v_ned_tot(n_old:n_old+n-1,:) = v_ned;
@@ -406,9 +404,9 @@ while settings.flagStopIntegration && n_old < nmax                          % St
 
     if not(settings.montecarlo)
         if settings.flagAscent
-            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,17)); %  + ", quatNorm: "+ vecnorm(Yf(end,10:13))
+            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,14)); %  + ", quatNorm: "+ vecnorm(Yf(end,10:13))
         elseif flagPara2
-            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z + ", deltaA_ref: " + deltaA_ref_new + ", deltaA_ode: " + Yf(end,18)); % +", quatNorm: "+ vecnorm(Yf(end,10:13))
+            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z + ", deltaA_ref: " + deltaA_ref_new + ", deltaA_ode: " + Yf(end,15)); % +", quatNorm: "+ vecnorm(Yf(end,10:13))
         else
             disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z);
         end
@@ -443,7 +441,7 @@ end
 
 if ~settings.electronics && ~settings.montecarlo && not(settings.scenario == "descent")
     settings.wind.output_time = Tf;
-    dataAscent = recallOdeFcn2(@ascentControl, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, c.ap_tot, settings.servo.delay,tLaunch,'apVec');
+    dataAscent = recallOdeFcn2(@ascentControlV2, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, c.ap_tot, settings.servo.delay,tLaunch,'apVec');
 else
     dataAscent = [];
 end
@@ -497,6 +495,12 @@ struct_out.barometer_measures = barometer_measure;
 struct_out.barometer_times = barometer_time;
 struct_out.sfd_mean_p = sfd_mean_p;
 struct_out.faults = faults;
+if exist('t_shutdown','var')
+    struct_out.t_shutdown = t_shutdown;
+else
+    struct_out.t_shutdown = inf;
+end
+
 if exist('t_airbrakes','var')
     struct_out.ARB_allowanceTime = t_airbrakes;
     struct_out.ARB_allowanceIdx = idx_airbrakes;

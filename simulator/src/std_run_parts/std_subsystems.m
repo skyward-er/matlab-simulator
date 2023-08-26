@@ -103,7 +103,7 @@ if contains(settings.mission,'_2023')
               settings.expShutdown = 1;
                 settings.timeEngineCut = t_shutdown;
                 settings.expTimeEngineCut = t_shutdown;
-                settings.IengineCut = Yf(end,14:16);
+                % settings.IengineCut = Yf(end,14:16);
                 settings.expMengineCut = m - settings.ms;
                 settings.shutdown = 1;
                 settings = settingsEngineCut(settings);

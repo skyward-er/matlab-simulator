@@ -33,14 +33,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
     
     %% ELSE CHECK FOR UPDATE
     cd(repoPath)
-    [~, string] = system("git status");
-    actualCommit = splitlines(extractAfter(string, "HEAD detached at "));
-    
+    [~, string] = system("git show -s");
+    actualCommit = splitlines(extractAfter(string, "commit "));
     % 7 digits code of the actual commit
     actualCommit = actualCommit{1};
     
-    str = urlread(headUrl);
-    href = extractAfter(headUrl, 'https://github.com/');
+    str = webread(headUrl);
+    % https://git.skywarder.eu/afd/msa/msa-toolkit/-/commits/dev WIP
+    href = extractAfter(headUrl, 'https://git.skywarder.eu/');
     str1 = extractAfter(str, strcat('href="/', href, '/commit/'));
     if isempty(str1)
         str1 = extractAfter(str, strcat('href="/', href, '/tree/'));
@@ -49,7 +49,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     str2 = extractBefore(str1, '">');
     
     % 7 digits code of the last commit of the wanted repository
-    wantedCommit = str2(1:7);
+    wantedCommit = str2(1:8);
     
     if strcmp(actualCommit, wantedCommit)
         status = 1;

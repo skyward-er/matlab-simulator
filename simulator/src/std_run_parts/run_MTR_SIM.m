@@ -62,7 +62,7 @@ if predicted_apogee(iTimes) >= settings.z_final_MTR
             t_shutdown = Tf(end);
             settings.timeEngineCut = t_shutdown + 0.3;
             settings.expTimeEngineCut = t_shutdown;
-            settings.IengineCut = Yf(end,14:16);
+            % settings.IengineCut = Yf(end,14:16);
             settings.expMengineCut = m - settings.ms;
             if Tf(end) > settings.timeEngineCut
                 settings.shutdown = 1;

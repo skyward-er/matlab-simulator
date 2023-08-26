@@ -69,7 +69,7 @@ end
 
 
 % For interpolation reference algorithm only:
-contSettings.N_forward = 1; % how many steps in advance have to check on speed to interpolate
+contSettings.N_forward = 0; % how many steps in advance have to check on speed to interpolate
 contSettings.interpType = 'linear'; % choose between: 'linear' , 'sinusoidal'
 
 %% Interp algorithm flags

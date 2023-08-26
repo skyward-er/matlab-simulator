@@ -184,6 +184,9 @@ delete('Trajectory_generation.slxc')
 rmdir('slprj', 's')
 warning on
 
+%% remove this return if you want to set hybrid references
+return
+
 %% hybrid references
 if settings.CD_correction_ref == 1
     datcom_0_closed = trajectories_saving{1,end};

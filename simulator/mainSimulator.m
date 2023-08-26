@@ -38,10 +38,24 @@ addpath(genpath(currentPath));
 addpath(genpath(commonFunctionsPath));
 
 %% CHECK IF MSA-TOOLKIT IS UPDATED
-msaToolkitURL = 'https://github.com/skyward-er/msa-toolkit';
+msaToolkitURL = 'https://git.skywarder.eu/afd/msa/msa-toolkit';
 localRepoPath = '../data/msa-toolkit';
-%  status = checkLastCommit(msaToolkitURL, localRepoPath, pwd);
-%  submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
+% status = checkLastCommit(msaToolkitURL, localRepoPath, pwd);
+% submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
+if ~exist('../data/msa-toolkit/data')
+    answer = input('WARNING! You don''have the msa toolkit installed. Do you want to install it? (y/n)','s');
+    if answer == "y" || answer == "yes"
+        cloneType = input('Which type of clone do you want to use? (SSH/HTTP)','s');
+        if cloneType =="SSH" || cloneType == "ssh"
+        system('git clone "git@git.skywarder.eu:afd/msa/msa-toolkit.git"')
+        elseif cloneType == "HTTP" || cloneType == "http"
+        system('git clone "https://git.skywarder.eu/afd/msa/msa-toolkit.git" ../data/')
+        else
+        fprintf('\n WARNING! Input not valid: aborting')
+        return
+        end
+    end
+end
 
 %% CONFIGs
 

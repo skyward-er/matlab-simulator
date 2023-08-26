@@ -7,7 +7,7 @@ folder path configuration script
 % Retrieve MSA-Toolkit rocket data
 dataPath = strcat('../data/msa-toolkit/data/', settings.mission);
 addpath(dataPath);
-simulationsData; 
+run([dataPath,'/simulationsData.m']); 
 
 commonFunctionsPath = '../data/msa-toolkit/commonFunctions';
 addpath(genpath(commonFunctionsPath))
