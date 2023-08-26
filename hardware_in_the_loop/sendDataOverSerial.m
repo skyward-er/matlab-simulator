@@ -1,16 +1,27 @@
+function [] = sendDataOverSerial(sensorData, sp, z0, flags)
+
 %{
+-----------DESCRIPTION OF FUNCTION:------------------
+Use the serial communication to send flight phases flags and simulated
+sensors data to the microcontroller running the obsw
 
-SEND DATA OVER SERIAL - use the serial to send flight phases flags and
-                        sensors and velocities data to the microcontroller
-
-Author: Emilio Corigliano
-Skyward Experimental Rocketry | ELC Dept | electronics@skywarder.eu
-email: emilio.corigliano@skywarder.eu
-Release date: 17/08/2022
-
+INPUTS:
+    - sensorData:           strcut containing all raw simulated sensors data (no noise applied, needed only for temperature data)
+    - sp:                   struct containing all the simulated sensors data (with respective noise applied)
+    - z0:                   launchpad altitude
+    - flagsArray:           array with all the flags that need to be sent to obsw
 %}
 
-function [] = sendDataOverSerial(sensorData, sp, z0, flags)
+% Author: Emilio Corigliano
+% Skyward Experimental Rocketry | ELC Dept | electronics@skywarder.eu
+% email: emilio.corigliano@skywarder.eu
+% Release date: 17/08/2022
+
+% Author: Pier Francesco Bachini
+% Skyward Experimental Rocketry | AVN Dept
+% email: pierfrancesco.bachini@skywarder.eu
+% Revision date: 27/08/2022
+
     dataToBeSent.accelerometer = sp.accel;
     dataToBeSent.gyro = sp.gyro;
     dataToBeSent.magnetometer = sp.mag;

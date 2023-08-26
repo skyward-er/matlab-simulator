@@ -1,19 +1,34 @@
-%{
-
-READ CONTROL OUTPUT FROM SERIAL - use the serial to get the control
-                                  output from the microcontroller
-
-Author: Emilio Corigliano
-Skyward Experimental Rocketry | ELC Dept | electronics@skywarder.eu
-email: emilio.corigliano@skywarder.eu
-Release date: 10/03/2021
-
-%}
-
 function [nas_timestamp, n,e,d, vn,ve,vd, qx,qy,qz,qw, bx,by,bz, ...
       ada_timestamp, ada_altitude, ada_verticalSpeed, ...
       airbrakes_opening, estimated_mass, liftoff, burning_shutdown ...
     ] = readControlOutputFromSerial()
+
+%{
+-----------DESCRIPTION OF FUNCTION:------------------
+Use the serial communication to read control output from the microcontroller running the obsw
+
+OUTPUTS:
+    - nas_timestamp:            current NAS timestamp
+    - n,e,d,vn,ve,vd,   
+        qx,qy,qz,qw,bx,by,bz:   current NAS state
+    - ada_timestamp:            current ADA timestamp
+    - ada_altitude:             current estimated ADA altitude (mslAltitude)
+    - ada_verticalSpeed:        current estimated ADA vertical speed
+    - airbrakes_opening:        percentage opening of the airbrakes (% 0<=alpha_degree<=1)  
+    - estimated_mass:           mass estimated by the MEA obsw algorithm 
+    - liftoff:                  flag set to true if rocket is launched
+    - burning_shutdown:         flag set to true if motor needs to be shutdown
+%}
+
+% Author: Emilio Corigliano
+% Skyward Experimental Rocketry | ELC Dept | electronics@skywarder.eu
+% email: emilio.corigliano@skywarder.eu
+% Release date: 10/03/2021
+
+% Author: Pier Francesco Bachini
+% Skyward Experimental Rocketry | AVN Dept
+% email: pierfrancesco.bachini@skywarder.eu
+% Revision date: 27/08/2022
 
     obswVals = serialbridge("Read", 23);
 
