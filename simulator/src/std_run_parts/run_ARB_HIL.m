@@ -1,14 +1,37 @@
 function [airbrakes_opening, nas_timestamp, x_est_tot, ada_altitude, ada_verticalSpeed, ada_timestamp, estimated_mass, liftoff, burning_shutdown] = run_ARB_HIL(sensorData, sp, z0, flagsArray)
 
-    % airbrakes_opening     -> percentage opening of the airbrakes (% 0<=alpha_degree<=1)
-    % nas_timestamp         -> current NAS timestamp
-    % x_est_tot             -> current NAS state
-    % ada_altitude          -> current estimated ADA altitude (mslAltitude)
-    % ada_verticalSpeed     -> current estimated ADA vertical speed
-    % ada_timestamp         -> current ADA timestamp
-    % estimated_mass        -> mass estimated by the MEA obsw algorithm 
-    % liftoff               -> flag set to true if rocket is launched
-    % burning_shutdown      -> flag set to true if motor needs to be shutdown
+%{
+-----------DESCRIPTION OF FUNCTION:------------------
+This function handles the communication between matlab simulator and obsw HIL, 
+adding necessary data to sensor struct, formatting received data and
+checking if liftoff command was sent by obsw.
+
+INPUTS:
+    - sensorData:           strcut containing all raw simulated sensors data (no noise applied, needed only for temperature data)
+    - sp:                   struct containing all the simulated sensors data (with respective noise applied)
+    - z0:                   launchpad altitude
+    - flagsArray:           array with all the flags that need to be sent to obsw
+
+OUTPUTS:
+    - airbrakes_opening:    percentage opening of the airbrakes (% 0<=alpha_degree<=1)
+    - nas_timestamp:        current NAS timestamp
+    - x_est_tot:            current NAS state
+    - ada_altitude:         current estimated ADA altitude (mslAltitude)
+    - ada_verticalSpeed:    current estimated ADA vertical speed
+    - ada_timestamp:        current ADA timestamp
+    - estimated_mass:       mass estimated by the MEA obsw algorithm 
+    - liftoff:              flag set to true if rocket is launched
+    - burning_shutdown:     flag set to true if motor needs to be shutdown
+%}
+
+% Author: Emilio Corigliano
+% Skyward Experimental Rocketry | ELC Dept | electronics@skywarder.eu
+% email: emilio.corigliano@skywarder.eu
+
+% Author: Pier Francesco Bachini
+% Skyward Experimental Rocketry | AVN Dept
+% email: pierfrancesco.bachini@skywarder.eu
+% Revision date: 27/08/2022
 
     % set gps fix and number of satellites
     sp.gps_fix = 3;
