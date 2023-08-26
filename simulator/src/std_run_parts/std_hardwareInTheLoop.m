@@ -85,6 +85,10 @@ settings.shutdown = burning_shutdown;
 estimated_pressure = NaN;
 predicted_apogee = NaN;               % Need to check if it will be passed by obsw or NaN is enough
 
+if ~settings.shutdown
+    m = estimated_mass;
+end
+
 if settings.shutdown && ~lastShutdown           % && Tf(end) < settings.tb 
                                                 % Modified second condition as it would leave an unhandled branch
     t_shutdown = Tf(end);                       % (settings.shutdown && Tf(end) >= settings.tb) that could lead to unintended behavior
@@ -112,6 +116,23 @@ end
 
 %% Update Sensor fault data
 
-% Temporary code as sensor fault is not yet implemented on obsw hil
-faulty_sensors = [];
-sp.pn_sens = sp.pn_sens;
+% NOTE: As sensor fault detection is not yet completely implemented on
+% obsw, the algorithm is currently run on the simulator. 
+% This code is temporary and will be changed with the hil implementation
+% once it is completed.
+
+Nsensors = [1,2,3];
+goodSensors = Nsensors(not(settings.faulty_sensors));
+if settings.flagAscent
+    SVM_model= settings.SVM_1;
+else
+    SVM_model = settings.SVM_2;
+end
+for i = goodSensors
+    chunk{i}(1,1:end-length(sp.pn_sens{i})) = chunk{i}(1+length(sp.pn_sens{i}):end);
+    chunk{i}(1,end-length(sp.pn_sens{i})+1:end) = sp.pn_sens{i};
+    if length(chunk{i})>SVM_model.N_sample
+        warning('chunk length is greater than %d samples',SVM_model.N_sample)
+    end
+end
+[sensorData,sp,chunk,settings.faulty_sensors] = run_SensorFaultDetection_SVM(SVM_model,sensorData,sp,chunk,settings.faulty_sensors,settings.flagAscent,t0);
