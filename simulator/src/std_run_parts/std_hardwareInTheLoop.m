@@ -50,38 +50,36 @@ end
 
 % Execute serial communication with obsw
 if ~settings.parafoil
-    [alpha_aperture, t_nas, x_est, xp_ada, xv_ada, t_ada, estimated_mass, liftoff, burning_shutdown] = run_MAIN_HIL(sensorData, sp, settings.z0, flagsArray);
+    [alpha_aperture, x_est, xp_ada, xv_ada, estimated_mass, liftoff, burning_shutdown, ~] = run_MAIN_HIL(sensorData, sp, settings.z0, flagsArray);
 else
     error("Missing payaload HIL!");
 end
-%% Update Airbrakes data
 
-if flagAeroBrakes && mach < settings.MachControl
-    if contSettings.flagFirstControlABK % set in
-        t_airbrakes = t0;
-        t_last_arb_control = t0;
-        idx_airbrakes = n_old+1;
-        contSettings.flagFirstControlABK = false;
-    else
-        % Update previous control value for airbrakes
-        ap_ref_old = ap_ref_new;
-        t_last_arb_control = Tf(end);
-        settings.quat = [x_est_tot(end, [10,7:9])];
-        [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
-    end
-end
+flagFlight = flagsArray(1);
+settings.flagAscent = flagsArray(2);
+flagBurning = flagsArray(3);
+flagAeroBrakes = flagsArray(4);
+flagPara1 = flagsArray(5);
+flagPara2 = flagsArray(6);
 
-ap_ref_new = alpha_aperture * settings.servo.maxAngle;  % alpha_aperture:
+%% Update ADA data
+% Missing:
+% settings.ada.t_ada as the time where the predicted apogee by ada is
+
+xp_ada_tot(c.n_ada_old:c.n_ada_old + size(xp_ada(:,1),1) -1,:)  = xp_ada(1:end,:);
+xv_ada_tot(c.n_ada_old:c.n_ada_old + size(xv_ada(:,1),1)-1,:)   = xv_ada(1:end,:);
+t_ada_tot(c.n_ada_old:c.n_ada_old + size(xp_ada(:,1),1)-1)      = 0;
+c.n_ada_old = c.n_ada_old + size(xp_ada,1);
 
 %% Update NAS data
 
-if ~flagsArray(1)
+if ~flagFlight
     sensorData.kalman.z    = settings.z0;
     sensorData.kalman.vz   = 0;
     sensorData.kalman.vMod = 0;
 else
-    sensorData.kalman.x  =  x_est_tot(end, 2);
-    sensorData.kalman.y  =  x_est_tot(end, 1);
+    sensorData.kalman.x  =  x_est_tot(end, 1);
+    sensorData.kalman.y  =  x_est_tot(end, 2);
     sensorData.kalman.z  =  x_est_tot(end, 3);
     sensorData.kalman.vx =  x_est_tot(end, 4);   % north
     sensorData.kalman.vy =  x_est_tot(end, 5);   % east
@@ -91,21 +89,13 @@ end
 sensorData.kalman.time(iTimes) = Tf(end);
 sensorData.kalman.x_c = x_est;
 x_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1,:)  = sensorData.kalman.x_c(:,:); % NAS position output
-t_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1)    = t_nas; % NAS time output
+t_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1)    = sensorData.accelerometer.time(1); % NAS time output
 c.n_est_old = c.n_est_old + size(sensorData.kalman.x_c,1);
 
 Q = x_est(end, [10, 7:9]);
 vels = quatrotate(Q, Yf(end, 4:6));
 vels_tot(c.n_est_old:c.n_est_old + size(vels(:,1),1)-1,:) = vels(:,:); % NAS speed output
 
-%% Update ADA data
-% Missing:
-% settings.ada.t_ada as the time where the predicted apogee by ada is
-
-xp_ada_tot(c.n_ada_old:c.n_ada_old + size(xp_ada(:,1),1) -1,:)  = xp_ada(1:end,:);
-xv_ada_tot(c.n_ada_old:c.n_ada_old + size(xv_ada(:,1),1)-1,:)   = xv_ada(1:end,:);
-t_ada_tot(c.n_ada_old:c.n_ada_old + size(xp_ada(:,1),1)-1)      = t_ada;
-c.n_ada_old = c.n_ada_old + size(xp_ada,1);
 
 %% Update Mass estimation data
 
@@ -118,10 +108,10 @@ if ~settings.shutdown
     m = estimated_mass;
 end
 
-if settings.shutdown && ~lastShutdown           % && Tf(end) < settings.tb 
-                                                % Modified second condition as it would leave an unhandled branch
-    t_shutdown = Tf(end);                       % (settings.shutdown && Tf(end) >= settings.tb) that could lead to unintended behavior
-    settings.expShutdown = 1;                   % as values would not be set but motor would still be shutdown.
+if settings.shutdown && ~lastShutdown && flagFlight     % && Tf(end) < settings.tb 
+                                                        % Modified second condition as it would leave an unhandled branch
+    t_shutdown = Tf(end);                               % (settings.shutdown && Tf(end) >= settings.tb) that could lead to unintended behavior
+    settings.expShutdown = 1;                           % as values would not be set but motor would still be shutdown.
     settings.timeEngineCut = t_shutdown;
     settings.expTimeEngineCut = t_shutdown;
     settings.expMengineCut = m - settings.ms;
@@ -141,3 +131,21 @@ elseif ~settings.shutdown && Tf(end) >= settings.tb
     [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
 end
 
+%% Update Airbrakes data
+
+if flagAeroBrakes && mach < settings.MachControl
+    if contSettings.flagFirstControlABK % set in
+        t_airbrakes = t0;
+        t_last_arb_control = t0;
+        idx_airbrakes = n_old+1;
+        contSettings.flagFirstControlABK = false;
+    else
+        % Update previous control value for airbrakes
+        ap_ref_old = ap_ref_new;
+        t_last_arb_control = Tf(end);
+        settings.quat = [x_est_tot(end, [10,7:9])];
+        [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
+    end
+end
+
+ap_ref_new = alpha_aperture * settings.servo.maxAngle;  % alpha_aperture:
