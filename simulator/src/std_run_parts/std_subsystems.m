@@ -76,7 +76,7 @@ if settings.flagNAS && settings.dataNoise
     sensorData.kalman.y  =  x_est_tot(end, 1);
     sensorData.kalman.vx =  x_est_tot(end, 4);   % north
     sensorData.kalman.vy =  x_est_tot(end, 5);   % east
-    sensorData.kalman.vz = -x_est_tot(end, 6);   % down
+    sensorData.kalman.vz =  x_est_tot(end, 6);   % down
 end
 
 v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));

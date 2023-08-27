@@ -28,7 +28,7 @@ scenarios explanation:
 
 % scenario configuration
 conf.scenario = "full flight";
-conf.board = "payload";            % Either "main" or "payload"
+conf.board = "main";            % Either "main" or "payload"
 conf.HIL = false;
 
 % WIP flags
