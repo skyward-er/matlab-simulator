@@ -4,6 +4,30 @@ hardware in the loop script
 
 %}
 
+%% Update Sensor fault data
+
+% NOTE: As sensor fault detection is not yet completely implemented on
+% obsw, the algorithm is currently run on the simulator. 
+% This code is temporary and will be changed with the hil implementation
+% once it is completed.
+
+Nsensors = [1,2,3];
+goodSensors = Nsensors(not(settings.faulty_sensors));
+if settings.flagAscent
+    SVM_model= settings.SVM_1;
+else
+    SVM_model = settings.SVM_2;
+end
+for i = goodSensors
+    chunk{i}(1,1:end-length(sp.pn_sens{i})) = chunk{i}(1+length(sp.pn_sens{i}):end);
+    chunk{i}(1,end-length(sp.pn_sens{i})+1:end) = sp.pn_sens{i};
+    if length(chunk{i})>SVM_model.N_sample
+        warning('chunk length is greater than %d samples',SVM_model.N_sample)
+    end
+end
+[sensorData,sp,chunk,settings.faulty_sensors] = run_SensorFaultDetection_SVM(SVM_model,sensorData,sp,chunk,settings.faulty_sensors,settings.flagAscent,t0);
+
+
 %% Prepare data to be sent to and read from obsw
 v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
 
@@ -18,13 +42,18 @@ flagsArray = [flagFlight, settings.flagAscent, flagBurning, flagAeroBrakes, flag
 sensorData.gps.latitude = latitude;
 sensorData.gps.longitude = longitude;
 
-% Add gravity acceleration
-% sensorData.accelerometer.measures = sensorData.accelerometer.measures + (quat2rotm(Yf(1,11:14)) * [0;0;9.81])';
-sp.accel = sp.accel + (quat2rotm(Yf(1,11:14)) * [0;0;9.81])';
+% Add gravity acceleration only when still on ramp
+if ~flagsArray(1)
+    % sensorData.accelerometer.measures = sensorData.accelerometer.measures + (quat2rotm(Yf(1,11:14)) * [0;0;9.81])';
+    sp.accel = sp.accel + (quat2rotm(Yf(end,10:13)) * [0;0;9.81])';
+end
 
 % Execute serial communication with obsw
-[alpha_aperture, t_nas, x_est, xp_ada, xv_ada, t_ada, estimated_mass, liftoff, burning_shutdown] = run_ARB_HIL(sensorData, sp, settings.z0, flagsArray);
-
+if ~settings.parafoil
+    [alpha_aperture, t_nas, x_est, xp_ada, xv_ada, t_ada, estimated_mass, liftoff, burning_shutdown] = run_MAIN_HIL(sensorData, sp, settings.z0, flagsArray);
+else
+    error("Missing payaload HIL!");
+end
 %% Update Airbrakes data
 
 if flagAeroBrakes && mach < settings.MachControl
@@ -37,8 +66,8 @@ if flagAeroBrakes && mach < settings.MachControl
         % Update previous control value for airbrakes
         ap_ref_old = ap_ref_new;
         t_last_arb_control = Tf(end);
-        [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
         settings.quat = [x_est_tot(end, [10,7:9])];
+        [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
     end
 end
 
@@ -53,10 +82,10 @@ if ~flagsArray(1)
 else
     sensorData.kalman.x  =  x_est_tot(end, 2);
     sensorData.kalman.y  =  x_est_tot(end, 1);
-    sensorData.kalman.z  = -x_est_tot(end, 3);
+    sensorData.kalman.z  =  x_est_tot(end, 3);
     sensorData.kalman.vx =  x_est_tot(end, 4);   % north
     sensorData.kalman.vy =  x_est_tot(end, 5);   % east
-    sensorData.kalman.vz = -x_est_tot(end, 6);   % down
+    sensorData.kalman.vz =  x_est_tot(end, 6);   % down
 end
 
 sensorData.kalman.time(iTimes) = Tf(end);
@@ -65,8 +94,8 @@ x_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1,:)  = s
 t_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1)    = t_nas; % NAS time output
 c.n_est_old = c.n_est_old + size(sensorData.kalman.x_c,1);
 
-Q = x_est(end, 7:10);
-vels = quatrotate(quatconj(Q), Yf(end, 4:6));
+Q = x_est(end, [10, 7:9]);
+vels = quatrotate(Q, Yf(end, 4:6));
 vels_tot(c.n_est_old:c.n_est_old + size(vels(:,1),1)-1,:) = vels(:,:); % NAS speed output
 
 %% Update ADA data
@@ -95,44 +124,20 @@ if settings.shutdown && ~lastShutdown           % && Tf(end) < settings.tb
     settings.expShutdown = 1;                   % as values would not be set but motor would still be shutdown.
     settings.timeEngineCut = t_shutdown;
     settings.expTimeEngineCut = t_shutdown;
-    settings.IengineCut = Yf(end,14:16);
     settings.expMengineCut = m - settings.ms;
     settings.shutdown = 1;
     settings = settingsEngineCut(settings);
-    settings.quatCut = [x_est_tot(end, 8:10) x_est_tot(end, 7)];
+    settings.quatCut = [x_est_tot(end, 10) x_est_tot(end, 7:9)];
     [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
 elseif ~settings.shutdown && Tf(end) >= settings.tb
     t_shutdown = settings.tb;
     settings.expShutdown = 1;
     settings.timeEngineCut = t_shutdown;
     settings.expTimeEngineCut = t_shutdown;
-    settings.IengineCut = Yf(end,14:16);
     settings.expMengineCut = m - settings.ms;
     settings.shutdown = 1;
     settings = settingsEngineCut(settings);
-    settings.quatCut = [x_est_tot(end, 8:10) x_est_tot(end, 7)];
+    settings.quatCut = [x_est_tot(end, 10) x_est_tot(end, 7:9)];
     [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
 end
 
-%% Update Sensor fault data
-
-% NOTE: As sensor fault detection is not yet completely implemented on
-% obsw, the algorithm is currently run on the simulator. 
-% This code is temporary and will be changed with the hil implementation
-% once it is completed.
-
-Nsensors = [1,2,3];
-goodSensors = Nsensors(not(settings.faulty_sensors));
-if settings.flagAscent
-    SVM_model= settings.SVM_1;
-else
-    SVM_model = settings.SVM_2;
-end
-for i = goodSensors
-    chunk{i}(1,1:end-length(sp.pn_sens{i})) = chunk{i}(1+length(sp.pn_sens{i}):end);
-    chunk{i}(1,end-length(sp.pn_sens{i})+1:end) = sp.pn_sens{i};
-    if length(chunk{i})>SVM_model.N_sample
-        warning('chunk length is greater than %d samples',SVM_model.N_sample)
-    end
-end
-[sensorData,sp,chunk,settings.faulty_sensors] = run_SensorFaultDetection_SVM(SVM_model,sensorData,sp,chunk,settings.faulty_sensors,settings.flagAscent,t0);
