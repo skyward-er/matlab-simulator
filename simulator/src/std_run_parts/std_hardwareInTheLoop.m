@@ -19,11 +19,10 @@ sensorData.gps.latitude = latitude;
 sensorData.gps.longitude = longitude;
 
 % Add gravity acceleration
-% sensorData.accelerometer.measures = sensorData.accelerometer.measures + (quat2rotm(Yf(1,11:14)) * [0;0;9.81])';
-sp.accel = sp.accel + (quat2rotm(Yf(1,11:14)) * [0;0;9.81])';
+sensorData.accelerometer.measures = sensorData.accelerometer.measures + (quat2rotm(Yf(1,11:14)) * [0;0;9.81])';
 
 % Execute serial communication with obsw
-[alpha_aperture, t_nas, x_est, xp_ada, xv_ada, t_ada, estimated_mass, liftoff, burning_shutdown] = run_ARB_HIL(sensorData, sp, settings.z0, flagsArray);
+[alpha_aperture, t_nas, x_est, xp_ada, xv_ada, t_ada, estimated_mass, liftoff, burning_shutdown] = run_ARB_HIL(sensorData, sp, flagsArray);
 
 %% Update Airbrakes data
 
@@ -80,19 +79,12 @@ c.n_ada_old = c.n_ada_old + size(xp_ada,1);
 
 %% Update Mass estimation data
 
-lastShutdown = settings.shutdown;
 settings.shutdown = burning_shutdown;
 estimated_pressure = NaN;
-predicted_apogee = NaN;               % Need to check if it will be passed by obsw or NaN is enough
 
-if ~settings.shutdown
-    m = estimated_mass;
-end
-
-if settings.shutdown && ~lastShutdown           % && Tf(end) < settings.tb 
-                                                % Modified second condition as it would leave an unhandled branch
-    t_shutdown = Tf(end);                       % (settings.shutdown && Tf(end) >= settings.tb) that could lead to unintended behavior
-    settings.expShutdown = 1;                   % as values would not be set but motor would still be shutdown.
+if settings.shutdown && Tf(end) < settings.tb
+    t_shutdown = Tf(end);
+    settings.expShutdown = 1;
     settings.timeEngineCut = t_shutdown;
     settings.expTimeEngineCut = t_shutdown;
     settings.IengineCut = Yf(end,14:16);
@@ -116,23 +108,6 @@ end
 
 %% Update Sensor fault data
 
-% NOTE: As sensor fault detection is not yet completely implemented on
-% obsw, the algorithm is currently run on the simulator. 
-% This code is temporary and will be changed with the hil implementation
-% once it is completed.
-
-Nsensors = [1,2,3];
-goodSensors = Nsensors(not(settings.faulty_sensors));
-if settings.flagAscent
-    SVM_model= settings.SVM_1;
-else
-    SVM_model = settings.SVM_2;
-end
-for i = goodSensors
-    chunk{i}(1,1:end-length(sp.pn_sens{i})) = chunk{i}(1+length(sp.pn_sens{i}):end);
-    chunk{i}(1,end-length(sp.pn_sens{i})+1:end) = sp.pn_sens{i};
-    if length(chunk{i})>SVM_model.N_sample
-        warning('chunk length is greater than %d samples',SVM_model.N_sample)
-    end
-end
-[sensorData,sp,chunk,settings.faulty_sensors] = run_SensorFaultDetection_SVM(SVM_model,sensorData,sp,chunk,settings.faulty_sensors,settings.flagAscent,t0);
+% Temporary code as sensor fault is not yet implemented on obsw hil
+faulty_sensors = [];
+sp.pn_sens = sp.pn_sens;
