@@ -14,7 +14,15 @@ INPUTS:
 
 % Author: Emilio Corigliano
 % Skyward Experimental Rocketry | ELC Dept | electronics@skywarder.eu
-    dataToBeSent.accelerometer = sp.accel;
+% email: emilio.corigliano@skywarder.eu
+% Release date: 17/08/2022
+
+% Author: Pier Francesco Bachini
+% Skyward Experimental Rocketry | AVN Dept
+% email: pierfrancesco.bachini@skywarder.eu
+% Revision date: 27/08/2022
+
+dataToBeSent.accelerometer = sp.accel;
     dataToBeSent.gyro = sp.gyro;
     dataToBeSent.magnetometer = sp.mag;
 
