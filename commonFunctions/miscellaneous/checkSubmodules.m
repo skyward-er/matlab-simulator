@@ -28,9 +28,9 @@ else
     cd(currentPath)
 end
 
+localRepoPath_generalUtilities = '..\commonFunctions\graphics\general-utilities\';
 if ~exist('..\commonFunctions\graphics\general-utilities\','dir')
     % clone repo
-    localRepoPath_generalUtilities = '..\commonFunctions\graphics\general-utilities\';
     answer = input('WARNING! You don''have the exportStandardizedFigure installed. Do you want to install it? (y/n)','s');
     if answer == "y" || answer == "yes"
         
