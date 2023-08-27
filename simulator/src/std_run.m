@@ -177,12 +177,14 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         flagFlight = true;
     end
 
-    if vz(end) >= -1 && launchFlag && not(settings.scenario == "descent") && ~eventExpulsion
-        settings.flagAscent = true;                                         % Ascent
-        lastAscentIndex = n_old-1;
-    else
-        settings.flagAscent = false;                                        % Descent
-        eventExpulsion = true;
+    if flagFlight
+        if vz(end) >= -1 && launchFlag && not(settings.scenario == "descent") && ~eventExpulsion
+            settings.flagAscent = true;                                         % Ascent
+            lastAscentIndex = n_old-1;
+        else
+            settings.flagAscent = false;                                        % Descent
+            eventExpulsion = true;
+        end
     end
 
     if not(settings.flagAscent) && launchFlag
