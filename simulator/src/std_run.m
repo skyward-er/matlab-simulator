@@ -177,7 +177,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         flagFlight = true;
     end
 
-    if vz(end) >= -1e-3 && launchFlag && not(settings.scenario == "descent") && ~eventExpulsion
+    if vz(end) >= -1 && launchFlag && not(settings.scenario == "descent") && ~eventExpulsion
         settings.flagAscent = true;                                         % Ascent
         lastAscentIndex = n_old-1;
     else
@@ -186,7 +186,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     end
 
     if not(settings.flagAscent) && launchFlag
-        if sensorData.kalman.z >= settings.para(1).z_cut + settings.z0 && ~eventExpulsion2 % settings.para(1).z_cut + settings.z0 
+        if -sensorData.kalman.z >= settings.para(1).z_cut + settings.z0 && ~eventExpulsion2 % settings.para(1).z_cut + settings.z0 
             flagPara1 = true;
             flagPara2 = false;                                              % parafoil drogue
             lastDrogueIndex = n_old-1;
@@ -309,7 +309,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     if  settings.flagAscent || (not(settings.flagAscent) && settings.ballisticFligth) || flagPara2
         Q    =   Yf(end, 10:13);
         vels =   quatrotate(quatconj(Q), Yf(end, 4:6));
-        vz = - vels(3);   % up (there is a -)
+        vz = -vels(3);   % up (there is a -)
         vx =  vels(2);   % north
         vy =  vels(1);   % east
     else
@@ -335,7 +335,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     end
 
     %% atmosphere
-    [~, a, ~, ~] = atmosisa(sensorData.kalman.z);        % speed of sound at each sample time, kalman is mean sea level (MSL) so there is no need to add z0
+    [~, a, ~, ~] = atmosisa(-sensorData.kalman.z);        % speed of sound at each sample time, kalman is mean sea level (MSL) so there is no need to add z0
     %   normV = norm(Yf(end, 4:6));
     normV = norm([vz vx vy]);
     mach = normV/a;
@@ -405,11 +405,11 @@ while settings.flagStopIntegration && n_old < nmax                          % St
 
     if not(settings.montecarlo)
         if settings.flagAscent
-            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,14)); %  + ", quatNorm: "+ vecnorm(Yf(end,10:13))
+            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + -sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,14)); %  + ", quatNorm: "+ vecnorm(Yf(end,10:13))
         elseif flagPara2
-            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z + ", deltaA_ref: " + deltaA_ref_new + ", deltaA_ode: " + Yf(end,15)); % +", quatNorm: "+ vecnorm(Yf(end,10:13))
+            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + -sensorData.kalman.z + ", deltaA_ref: " + deltaA_ref_new + ", deltaA_ode: " + Yf(end,15)); % +", quatNorm: "+ vecnorm(Yf(end,10:13))
         else
-            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + sensorData.kalman.z);
+            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + -sensorData.kalman.z);
         end
     end
 

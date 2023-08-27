@@ -31,19 +31,19 @@ switch true % set this value in configControl.m
     case strcmp(contSettings.algorithm,'interp') || strcmp(contSettings.algorithm,'complete')
         % help in the function
 
-        [ap_ref_new,contSettings] = control_Interp(sensorData.kalman.z-settings.z0,sensorData.kalman.vz,settings,contSettings,ap_ref_old); % cambiare nome alla funzione tra le altre cose
+        [ap_ref_new,contSettings] = control_Interp(-sensorData.kalman.z-settings.z0,-sensorData.kalman.vz,settings,contSettings,ap_ref_old); % cambiare nome alla funzione tra le altre cose
       
         
     case strcmp (contSettings.algorithm,'shooting')
         % shooting algorithm:
 
-        [ap_ref_new] = control_Interp(sensorData.kalman.z-settings.z0,sensorData.kalman.vz,contSettings.reference.Z,contSettings.reference.Vz,'linear',contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
+        [ap_ref_new] = control_Interp(-sensorData.kalman.z-settings.z0,-sensorData.kalman.vz,contSettings.reference.Z,contSettings.reference.Vz,'linear',contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
         init.options = optimoptions("lsqnonlin","Display","off");
         
         if not(contSettings.flagFilter)
-            [ap_ref_new] = control_Shooting([-sensorData.kalman.z-settings.z0,sensorData.kalman.vz],ap_ref_new,settings,contSettings.coeff_Cd,settings.arb,init);
+            [ap_ref_new] = control_Shooting([-sensorData.kalman.z-settings.z0,-sensorData.kalman.vz],ap_ref_new,settings,contSettings.coeff_Cd,settings.arb,init);
         else
-            [ap_base_filter] = control_Shooting([-sensorData.kalman.z-settings.z0,sensorData.kalman.vz],ap_ref_new,settings,contSettings.coeff_Cd,settings.arb,init);
+            [ap_base_filter] = control_Shooting([-sensorData.kalman.z-settings.z0,-sensorData.kalman.vz],ap_ref_new,settings,contSettings.coeff_Cd,settings.arb,init);
 
             % filter control action
             if contSettings.flagFirstControlABK == false % the first reference is given the fastest possible (unfiltered), then filter
@@ -65,7 +65,7 @@ switch true % set this value in configControl.m
         % tries to follow it with a PI controller.
 
         
-        V_norm = norm([sensorData.kalman.vx, sensorData.kalman.vy, sensorData.kalman.vz]);
+        V_norm = norm([sensorData.kalman.vx, sensorData.kalman.vy, -sensorData.kalman.vz]);
         % still don't know what these are, but they are useful (at
         % least it seems):
         zc    =    exp_mean(-sensorData.kalman.x_c(:,3),0.8);
@@ -99,7 +99,7 @@ switch true % set this value in configControl.m
 
         else
  
-            [ap_base_filter] = control_PID2refs(sensorData.kalman.z,sensorData.kalman.vz,settings.reference.Z,settings.reference.Vz,contSettings.N_forward,settings,contSettings); % cambiare nome alla funzione tra le altre cose
+            [ap_base_filter] = control_PID2refs(-sensorData.kalman.z,-sensorData.kalman.vz,settings.reference.Z,settings.reference.Vz,contSettings.N_forward,settings,contSettings); % cambiare nome alla funzione tra le altre cose
 
             % filter control action
             if contSettings.flagFirstControlABK == false % the first reference is given the fastest possible (unfiltered), then filter

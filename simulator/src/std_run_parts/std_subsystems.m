@@ -71,7 +71,7 @@ if settings.flagNAS && settings.dataNoise
     t_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1)    = sensorData.accelerometer.time; % NAS time output
     c.n_est_old = c.n_est_old + size(sensorData.kalman.x_c,1);
 
-    sensorData.kalman.z  = -x_est_tot(end, 3);
+    sensorData.kalman.z  =  x_est_tot(end, 3);
     sensorData.kalman.x  =  x_est_tot(end, 2);
     sensorData.kalman.y  =  x_est_tot(end, 1);
     sensorData.kalman.vx =  x_est_tot(end, 4);   % north
@@ -85,17 +85,17 @@ v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
 %% Engine Control algorithm
 if contains(settings.mission,'_2023')
     if Tf(end) <= settings.tb+0.5 &&...
-       (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
-    
-    if isnan(c.cp_tot(end))
-        c.cp_tot(end) = 0;
-    end
-        if ~settings.shutdown 
-           [t_shutdown,settings,contSettings,predicted_apogee,estimated_mass,estimated_pressure] =...
-               run_MTR_SIM (contSettings,sensorData,settings,iTimes,c,Tf,Yf,x_est_tot);
-           m = estimated_mass(end);
+            (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
+
+        if isnan(c.cp_tot(end))
+            c.cp_tot(end) = 0;
         end
-    
+        if ~settings.shutdown
+            [t_shutdown,settings,contSettings,predicted_apogee,estimated_mass,estimated_pressure] =...
+                run_MTR_SIM (contSettings,sensorData,settings,iTimes,c,Tf,Yf,x_est_tot);
+            m = estimated_mass(end);
+        end
+
         if ~settings.shutdown && Tf(end) >= settings.tb
               t_shutdown = settings.tb;
               settings.expShutdown = 1;
@@ -107,9 +107,9 @@ if contains(settings.mission,'_2023')
                 settings.quatCut = [x_est_tot(end, 8:10) x_est_tot(end, 7)];
                 [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
         end
-    % plot brutti per ora perchè
-    % predicted_apogee,estimated_mass,estimated_pressure dovrebbero essere dati
-    % in input a run_MTR_SIM
+        % plot brutti per ora perchè
+        % predicted_apogee,estimated_mass,estimated_pressure dovrebbero essere dati
+        % in input a run_MTR_SIM
     elseif ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')) && ...
             Tf(end) > settings.tb
         settings.shutdown = 1;
