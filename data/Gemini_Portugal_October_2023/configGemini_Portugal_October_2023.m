@@ -31,6 +31,7 @@ settings.y_final  = 0;
 %% CONTROL AND SENSOR FREQUENCIES
 settings.frequencies.controlFrequency           =   50;                    % [hz] control action frequency
 settings.frequencies.arbFrequency               =   10;                    % [hz] air brakes control frequency
+settings.frequencies.prfFrequency               =   1;                    % [hz] parafoil control frequency
 settings.frequencies.accelerometerFrequency     =   100;                   % [hz] sensor frequency
 settings.frequencies.gyroFrequency              =   100;                   % [hz] sensor frequency
 settings.frequencies.magnetometerFrequency      =   100;                   % [hz] sensor frequency
@@ -55,7 +56,7 @@ settings.arb.extPol(4) = 0.03129;                                           % co
 settings.arb.maxExt = settings.hprot(end);
 
 % servo angle to exposed surface of the airbrakes (GEMINI)
-settings.arb.surfPol = 0.00932857142857;                                            % coefficient for surface - alpha
+settings.arb.surfPol = 0.00932857142857;                                    % coefficient for surface - alpha
 
 % servo angle to guide angle (PYXIS)
 settings.arb.guidePol(1) = -9.4265;                                         % coefficient for guide - sin(alpha...)

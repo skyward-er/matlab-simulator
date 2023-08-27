@@ -12,10 +12,20 @@ settings.montecarlo = false;                                                % se
 % settings.stoch.Day;
 % settings.stoch.Hour;
 
-%% how many simulations
+if settings.montecarlo 
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% how many simulations
 N_sim = 10; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
+displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
 
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% %%%%%%%%%%%%%%%%% untouchable parameters (unless you know really well what you are doing) %%%%%%%%%%%%%%%
 %% stochastic parameters
 
 switch simulationType_thrust
@@ -80,4 +90,4 @@ end
 % algorithms
 algorithm_vec = {'interp';'NoControl';'engine';'complete'; 'PID_2021'; 'shooting'}; % interpolation, no control, engine shutdown, engine+arb, PID change every 2s, shooting
 
-displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
+end

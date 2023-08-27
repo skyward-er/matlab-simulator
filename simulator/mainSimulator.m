@@ -21,7 +21,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 
-close all; clear; clc;
+if ~exist('flagSubmodulesUpdated','var') % every first time you use the simulator checks for updates, then stops doing it (note: if you clear all vars it starts doing it)
+    close all; clear; clc;
+else
+    close all; clc;
+    clearvars -except flagSubmodulesUpdated
+end
 
 %% path loading
 
@@ -38,7 +43,10 @@ addpath(genpath(currentPath));
 addpath(genpath(commonFunctionsPath));
 
 %% CHECK SUBMODULES UPDATES
-checkSubmodules;
+if ~exist('flagSubmodulesUpdated','var')
+    checkSubmodules;
+    flagSubmodulesUpdated = true;
+end
 
 %% CONFIGs
 

@@ -28,6 +28,10 @@ Skyward Experimental Rocketry | ELC-SCS Dept
 email: angelo.gaillet@skywarder.eu
 Release date: 24/08/2022
 
+Author: Marco Marchesi
+Skyward Experimental Rocketry | ELC-SCS Dept
+email: marco.marchesi@skywarder.eu
+Release date: 27/08/2023
 %}
 
 % acc = accelerationOnlyAscent(t, Y, settings, c, uw, vw, ww, uncert)
@@ -63,8 +67,6 @@ if freq.accelerometerFrequency > freq.controlFrequency
             T0 = T(index0);
             % linear interpolation between the 2 states
             m = (Y1 - Y0)./(T1 - T0);
-%             q = Y1 - m*T1;
-%             Yinterp = m*iTimeAcc + q;
             Yinterp = m * (iTimeAcc-T0)+Y0;
         else
             Yinterp = Y(iTimeAcc == T, :);
@@ -98,8 +100,6 @@ else
             T0 = T(i-1);
 
             m = (Y1 - Y0)./(T1 - T0);
-%             q = Y1 - m*T1;
-%             Yinterp = m*iTimeAcc + q;
             Yinterp = m * (iTimeGyro-T0)+Y0;
             sensorData.accelerometer.t0 = iTimeAcc;
             % accelerometer ascent, ma piu rapido
@@ -144,7 +144,6 @@ if freq.gyroFrequency > freq.controlFrequency
             T0 = T(index0);
             % linear interpolation between the 2 states
             m = (Y1 - Y0)./(T1 - T0);
-%             q = Y1 - m*T1;
             Yinterp = m * (iTimeGyro-T0)+Y0;
             sensorData.gyro.measures(i, :) = Yinterp;
         else
@@ -166,7 +165,6 @@ else
             T0 = T(i-1);
 
             m = (Y1 - Y0)./(T1 - T0);
-%             q = Y1 - m*T1;
             Yinterp = m  *(iTimeGyro-T0)+Y0;
             sensorData.gyro.measures(i, :) = Yinterp;
             sensorData.gyro.t0 = iTimeGyro;
@@ -200,8 +198,6 @@ if freq.magnetometerFrequency > freq.controlFrequency
             T0 = T(index0);
             % linear interpolation between the 2 states
             m = (Y1 - Y0)./(T1 - T0);
-%             q = Y1 - m*T1;
-%             Yinterp = m*iTimeMagnetometer + q;
             Yinterp = m  *(iTimeMagnetometer-T0)+Y0;
             z(i) = - Yinterp(1);
             Q(i, :) = Yinterp(2:end);
@@ -230,8 +226,6 @@ else
             T0 = T(i-1);
             % linear interpolation between the 2 states
             m = (Y1 - Y0)./(T1 - T0);
-%             q = Y1 - m*T1;
-%             Yinterp = m*iTimeMagnetometer + q;
             Yinterp = m  *(iTimeMagnetometer-T0)+Y0;
             z = - Yinterp(1);
             Q = Yinterp(2:end);
@@ -269,8 +263,6 @@ if freq.gpsFrequency > freq.controlFrequency
                 T0 = T(index0);
                 % linear interpolation between the 2 states
                 m = (Y1 - Y0)./(T1 - T0);
-%                 q = Y1 - m*T1;
-%                 Yinterp = m*iTimegps + q;
                 Yinterp = m  *(iTimegps-T0)+Y0;
                 sensorData.gps.positionMeasures(i, :) = Yinterp(1:3);
                 sensorData.gps.velocityMeasures(i, :) = quatrotate(quatconj(Yinterp(7:10)), Yinterp(4:6));
@@ -295,8 +287,6 @@ if freq.gpsFrequency > freq.controlFrequency
                 T0 = T(index0);
                 % linear interpolation between the 2 states
                 m = (Y1 - Y0)./(T1 - T0);
-%                 q = Y1 - m*T1;
-%                 Yinterp = m*iTimegps + q;
                 Yinterp = m  *(iTimegps-T0)+Y0;
                 sensorData.gps.positionMeasures(i, :) = Yinterp(1:3);
                 sensorData.gps.velocityMeasures(i, :) = Yinterp(4:6);
@@ -333,8 +323,6 @@ else
                 T0 = T(i-1);
                 % linear interpolation between the 2 states
                 m = (Y1 - Y0)./(T1 - T0);
-%                 q = Y1 - m*T1;
-%                 Yinterp = m*iTimegps + q;
                 Yinterp = m * (iTimegps-T0)+Y0;
                 sensorData.gps.positionMeasures = Yinterp(1:3);
                 sensorData.gps.velocityMeasures = quatrotate(quatconj(Yinterp(7:10)), Yinterp(4:6));
@@ -363,8 +351,6 @@ else
                 T0 = T(i-1);
                 % linear interpolation between the 2 states
                 m = (Y1 - Y0)./(T1 - T0);
-%                 q = Y1 - m*T1;
-%                 Yinterp = m*iTimegps + q;
                 Yinterp = m * (iTimegps-T0)+Y0;
                 sensorData.gps.positionMeasures(i, :) = Yinterp(1:3);
                 sensorData.gps.velocityMeasures(i, :) = quatrotate(quatconj(Yinterp(7:10)), Yinterp(4:6));
@@ -409,8 +395,6 @@ for i_baro = 1:length(sensorData.barometer_sens)
                 T0 = T(index0);
                 % linear interpolation between the 2 states
                 m = (Y1 - Y0)./(T1 - T0);
-%                 q = Y1 - m*T1;
-%                 z(i) = m*iTimeBarometer + q;
                 z(i) = m * (iTimeBarometer-T0)+Y0;
             else
                 z(i) = -Y(iTimeBarometer == T, 3);
@@ -434,8 +418,6 @@ for i_baro = 1:length(sensorData.barometer_sens)
                 T0 = T(i-1);
                 % linear interpolation between the 2 states
                 m = (Y1 - Y0)./(T1 - T0);
-%                 q = Y1 - m*T1;
-%                 z = m*iTimeBarometer + q;
                 z = m * (iTimeBarometer-T0)+Y0;
                 sensorData.barometer_sens{i_baro}.z = [sensorData.barometer_sens{i_baro}.z; z];
                 sensorData.barometer_sens{i_baro}.t0 = iTimeBarometer;
@@ -468,7 +450,9 @@ sensorData.barometer_sens{i_baro}.measures = P;
 sensorData.barometer_sens{i_baro}.temperature = Temp;
 
 %% pitot
+
 if isfield(freq, 'pitotFrequency')
+    gamma = 1.4;
     if freq.pitotFrequency > freq.controlFrequency
 
         dt = 1/freq.pitotFrequency;
@@ -480,6 +464,7 @@ if isfield(freq, 'pitotFrequency')
         for i = 1:N
             iTimePitot = sensorData.pitot.time(i);
             if all(iTimePitot ~= T)
+                % define indexes and time steps
                 [index0] = find(iTimePitot < T);
                 index1 = index0(1);
                 index0 = index1 - 1;
@@ -489,19 +474,35 @@ if isfield(freq, 'pitotFrequency')
                 Y1 = Y(index1, 4);
                 Y0 = Y(index0, 4);
                 m = (Y1 - Y0)./(T1 - T0);
-%                 q = Y1 - m*T1;
-%                 vx(i) = m*iTimePitot + q;
                 vx(i) = m * (iTimePitot-T0)+Y0;
                 % linear interpolation between altitude
                 Y1 = Y(index1, 3);
                 Y0 = Y(index0, 3);
                 m = (Y1 - Y0)./(T1 - T0);
-%                 q = Y1 - m*T1;
-%                 z_pit(i) = -(m*iTimePitot + q);
                 z_pit(i) = m * (iTimePitot-T0)+Y0;
+                % quaternions
+                Y1 = Y(index1, 10:13);  % lo vuole scalar last?
+                Y0 = Y(index0, 10:13);
+                m = (Y1 - Y0)./(T1 - T0);
+                Q(i,:) = m * (iTimePitot-T0)+Y0;
+                [Temp, a, P, ~] = atmosisa(z_pit(i) + settings.z0);
+                wind_ned = [uw, vw, ww];
+                wind_body = quatrotate(Q(i,:),wind_ned);
+                v = (vx(i) + wind_body(1))';
+                sensorData.pitot.temperature(i) = Temp;
+                sensorData.pitot.measures(i,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure 
+                sensorData.pitot.measures(i,2) = P;
             else
                 vx(i) = Y(iTimePitot == T, 4);
                 z_pit(i) = -Y(iTimePitot == T, 3);
+                Q(i,:) = [Y(iTimePitot == T, 10:13)]; 
+                [Temp, a, P, ~] = atmosisa(z_pit(i) + settings.z0);
+                wind_ned = [uw, vw, ww];
+                wind_body = quatrotate(Q(i,:),wind_ned);
+                v = (vx(i) + wind_body(1))';
+                sensorData.pitot.temperature(i) = Temp;
+                sensorData.pitot.measures(i,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure 
+                sensorData.pitot.measures(i,2) = P;
             end
         end
 
@@ -510,7 +511,14 @@ if isfield(freq, 'pitotFrequency')
         sensorData.pitot.t0 = T(end);
         vx = Y(end, 4);
         z_pit  = -Y(end, 3);
-
+        Q = Y(end, 10:13);
+        [Temp, a, P, ~] = atmosisa(z_pit + settings.z0);
+        wind_ned = [uw, vw, ww];
+        wind_body = quatrotate(Q,wind_ned);
+        v = (vx + wind_body(1))';
+        sensorData.pitot.temperature = Temp;
+        sensorData.pitot.measures(1,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure 
+        sensorData.pitot.measures(1,2) = P;
     else
         for i = 1:length(T)
             if T(i) - sensorData.pitot.t0 > 1/freq.pitotFrequency
@@ -521,51 +529,46 @@ if isfield(freq, 'pitotFrequency')
                 Y1 = Y(i, 4);
                 Y0 = Y(i-1, 4);
                 m = (Y1 - Y0)./(T1 - T0);
-%                 q = Y1 - m*T1;
-%                 vx = m*iTimePitot + q;
                 vx = m * (iTimePitot-T0)+Y0;
                 % linear interpolation between altitude
                 Y1 = Y(i, 3);
                 Y0 = Y(i-1, 3);
                 m = (Y1 - Y0)./(T1 - T0);
-%                 q = Y1 - m*T1;
-%                 z_pit = -(m*iTimePitot + q);
                 z_pit = m * (iTimePitot-T0)+Y0;
+                % linear interpolation between quaternions (this is very
+                % bad to do)
+                Y1 = Y(i, 10:13);
+                Y0 = Y(i-1, 10:13);
+                m = (Y1 - Y0)./(T1 - T0);
+                Q = m * (iTimePitot-T0)+Y0;
                 sensorData.pitot.t0 = iTimePitot;
-
+                [Temp, a, P, ~] = atmosisa(z_pit + settings.z0);
+                wind_ned = [uw, vw, ww];
+                wind_body = quatrotate(Q,wind_ned);
+                v = (vx + wind_body(1))';
+                sensorData.pitot.temperature = Temp;
+                sensorData.pitot.measures(1,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure 
+                sensorData.pitot.measures(1,2) = P;
             elseif  T(i) - sensorData.pitot.t0 == 1/freq.pitotFrequency
                 iTimePitot = sensorData.pitot.t0 + 1/freq.pitotFrequency;
                 z_pit = -Y(i, 3);
                 sensorData.pitot.t0 = iTimePitot;
                 sensorData.pitot.time = iTimePitot;
                 vx = Y(end, 4);
+                Q = Y(end,10:13);
+                [Temp, a, P, ~] = atmosisa(z_pit + settings.z0);
+                wind_ned = [uw, vw, ww];
+                wind_body = quatrotate(Q,wind_ned);
+                v = (vx + wind_body(1))';
+                sensorData.pitot.temperature = Temp;
+                sensorData.pitot.measures(1,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure 
+                sensorData.pitot.measures(1,2) = P;
             end
 
         end
 
     end
 
-    if exist('z_pit','var')
-        [Temp, a, P, rho] = atmosisa(z_pit + settings.z0);
-
-        Q = [Y(end, 11:13),Y(end, 10)];
-
-        ned2body  = [Q(1)^2 - Q(2)^2 - Q(3)^2 + Q(4)^2,       2*(Q(1)*Q(2) - Q(3)*Q(4)),              2*(Q(1)*Q(3) + Q(2)*Q(4));
-            2*(Q(1)*Q(2) + Q(3)*Q(4)),               -Q(1)^2 + Q(2)^2 - Q(3)^2 + Q(4)^2,     2*(Q(2)*Q(3) - Q(1)*Q(4));
-            2*(Q(1)*Q(3) - Q(2)*Q(4)),               2*(Q(2)*Q(3) + Q(1)*Q(4)),              -Q(1)^2 - Q(2)^2 + Q(3)^2 + Q(4)^2]';
-
-        wind_ned = [uw, vw, ww]';
-
-        wind_body = ned2body*wind_ned;
-
-        v = (vx + wind_body(1))'; % Speed x_body + wind in x_body direction
-
-        sensorData.pitot.temperature = Temp;
-%         sensorData.pitot.measures = (0.5*rho.*v.*v.*sign(v))'; % differential pressure in Pascals
-        gamma = 1.4;
-        sensorData.pitot.measures(1,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure 
-        sensorData.pitot.measures(1,2) = P;
-    end
 end
 
 %% chamber pressure sensor

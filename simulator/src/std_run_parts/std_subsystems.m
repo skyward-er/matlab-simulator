@@ -51,7 +51,6 @@ if settings.flagADA && settings.dataNoise && length(sensorData.barometer.time) >
     xv_ada_tot(c.n_ada_old:c.n_ada_old + size(xv_ada(:,1),1)-1,:)  = xv_ada(1:end,:);
     t_ada_tot(c.n_ada_old:c.n_ada_old + size(xp_ada(:,1),1)-1)     = sensorData.barometer.time;
     c.n_ada_old = c.n_ada_old + size(xp_ada,1);
-
     settings.baro_old = sensorData.barometer.time(end);
 end
 
@@ -78,7 +77,6 @@ if settings.flagNAS && settings.dataNoise
     sensorData.kalman.vx =  x_est_tot(end, 4);   % north
     sensorData.kalman.vy =  x_est_tot(end, 5);   % east
     sensorData.kalman.vz = -x_est_tot(end, 6);   % down
-    est = sensorData.kalman.vz;
 end
 
 v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
@@ -103,7 +101,6 @@ if contains(settings.mission,'_2023')
               settings.expShutdown = 1;
                 settings.timeEngineCut = t_shutdown;
                 settings.expTimeEngineCut = t_shutdown;
-                % settings.IengineCut = Yf(end,14:16);
                 settings.expMengineCut = m - settings.ms;
                 settings.shutdown = 1;
                 settings = settingsEngineCut(settings);
@@ -219,7 +216,7 @@ if ~settings.flagAscent && settings.parafoil
         end
     
 
-        if t1-t_last_prf_control >= 1/contSettings.payload.controlFreq - 1e-6 || t_last_prf_control == t_parafoil
+        if t1-t_last_prf_control >= 1/settings.frequencies.prfFrequency - 1e-6 || t_last_prf_control == t_parafoil
                 deltaA_ref_old = deltaA_ref_new;
                 t_last_prf_control = t1;
                 pos_est = sensorData.kalman.x_c(end,1:3);
