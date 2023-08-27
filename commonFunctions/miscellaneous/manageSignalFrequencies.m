@@ -54,7 +54,8 @@ if freq.accelerometerFrequency > freq.controlFrequency
     dt = 1/freq.accelerometerFrequency;
     sensorData.accelerometer.time = sensorData.accelerometer.t0:dt:T(end);
     sensorData.accelerometer.t0 = sensorData.accelerometer.time(end);
-    N = length(sensorData.accelerometer.time);
+    if isfield(settings, 'parout')
+        N = length(sensorData.accelerometer.time);
     for i = 1:N
         iTimeAcc = sensorData.accelerometer.time(i);
         if all(iTimeAcc ~= T)
@@ -72,25 +73,32 @@ if freq.accelerometerFrequency > freq.controlFrequency
             Yinterp = Y(iTimeAcc == T, :);
 
         end
-        if size(settings.parout.partial_time,1)~=size(settings.parout.acc,1)
-            nn = min(size(settings.parout.partial_time,1),size(settings.parout.acc,1));
-            sensorData.accelerometer.measures(i, :) = interp1(settings.parout.partial_time(1:nn,:),settings.parout.acc(1:nn,:),iTimeAcc);
-        else
-            sensorData.accelerometer.measures(i, :) = interp1(settings.parout.partial_time,settings.parout.acc,iTimeAcc);
-        end
+            if size(settings.parout.partial_time,1)~=size(settings.parout.acc,1)
+                nn = min(size(settings.parout.partial_time,1),size(settings.parout.acc,1));
+                sensorData.accelerometer.measures(i, :) = interp1(settings.parout.partial_time(1:nn,:),settings.parout.acc(1:nn,:),iTimeAcc);
+            else
+                sensorData.accelerometer.measures(i, :) = interp1(settings.parout.partial_time,settings.parout.acc,iTimeAcc);
+            end
+    end
+    else
+        sensorData.accelerometer.measures = zeros(length(sensorData.accelerometer.time), 3);
     end
 
 elseif freq.accelerometerFrequency == freq.controlFrequency
-    if size(settings.parout.partial_time,1)~=size(settings.parout.acc,1)
-        nn = min(size(settings.parout.partial_time,1),size(settings.parout.acc,1));
-        sensorData.accelerometer.measures(i, :) = interp1(settings.parout.partial_time(1:nn,:),settings.parout.acc(1:nn,:),T(end));
-    else
-        sensorData.accelerometer.measures(i, :) = interp1(settings.parout.partial_time,settings.parout.acc,T(end));
-    end
     sensorData.accelerometer.time = T(end);
     sensorData.accelerometer.t0 = T(end);
+    if isfield(settings, 'parout')
+        if size(settings.parout.partial_time,1)~=size(settings.parout.acc,1)
+            nn = min(size(settings.parout.partial_time,1),size(settings.parout.acc,1));
+            sensorData.accelerometer.measures(i, :) = interp1(settings.parout.partial_time(1:nn,:),settings.parout.acc(1:nn,:),T(end));
+        else
+            sensorData.accelerometer.measures(i, :) = interp1(settings.parout.partial_time,settings.parout.acc,T(end));
+        end
+    else
+        sensorData.accelerometer.measures = zeros(length(sensorData.accelerometer.time), 3);
+    end
+    
 else
-
     for i = 1:length(T)
         if T(i) - sensorData.accelerometer.t0 > 1/freq.accelerometerFrequency
             iTimeAcc = sensorData.accelerometer.t0 + 1/freq.accelerometerFrequency;
@@ -370,10 +378,6 @@ else
 
     end
 end
-
-
-
-
 
 %% barometer
 for i_baro = 1:length(sensorData.barometer_sens)
