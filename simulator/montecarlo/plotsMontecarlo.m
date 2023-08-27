@@ -13,7 +13,9 @@ xlabel('Apogee value [m]')
 ylabel('Number of apogees in the same interval')
 sgtitle('Reached apogee distribution')
 legend('Range of acceptable apogees')
- exportgraphics(save_plot_histogram,'new_cont_const.pdf','ContentType','vector')
+
+
+
 %% AIRBRAKE DEPLOY TIME HISTOGRAM - this plot is particularly interesting for the shadowmodes
 if ~(strcmp(contSettings.algorithm,'engine')||strcmp(contSettings.algorithm,'NoControl'))
     arb_deploy_time_vec = zeros(N_sim,1);
@@ -83,7 +85,7 @@ end
 %% PLOT CONTROL
 save_plotControl = figure;
 for i = floor(linspace(1,N_sim,5))
-    plot(save_thrust{i}.t,save_thrust{i}.Y(:,17))
+    plot(save_thrust{i}.t,save_thrust{i}.Y(:,14))
     hold on; grid on;
 end
 sgtitle('Control action')
@@ -286,7 +288,7 @@ qdyn_max = zeros(size(save_thrust));
 max_force_kg = zeros(size(save_thrust));
 for i =1:N_sim
     qdyn_max(i) = max(save_thrust{i}.qdyn);
-    dS = 3*0.009564 * save_thrust{i}.Y(:,17);
+    dS = 3*0.009564 * save_thrust{i}.Y(:,14);
     force = save_thrust{i}.qdyn .* dS;
     max_force_kg(i) = max(force/9.81);
 end
