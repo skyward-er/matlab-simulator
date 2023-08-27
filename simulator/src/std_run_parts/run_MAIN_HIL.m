@@ -1,4 +1,4 @@
-function [airbrakes_opening, nas_timestamp, x_est_tot, ada_altitude, ada_verticalSpeed, ada_timestamp, estimated_mass, liftoff, burning_shutdown] = run_ARB_HIL(sensorData, sp, z0, flagsArray)
+function [airbrakes_opening, nas_timestamp, x_est_tot, ada_altitude, ada_verticalSpeed, ada_timestamp, estimated_mass, liftoff, burning_shutdown] = run_MAIN_HIL(sensorData, sp, z0, flagsArray)
 
 %{
 -----------DESCRIPTION OF FUNCTION:------------------
@@ -47,7 +47,7 @@ OUTPUTS:
     ] = readControlOutputFromSerial();
     
     % Create nas estimated state array
-    x_est_tot = [n, e, d, vn, ve, vd, qw, qx, qy, qz, bx, by, bz];
+    x_est_tot = [n, e, d, vn, ve, vd, qx, qy, qz, qw, bx, by, bz];
 
     % if the obsw sends an opening of -1 while the flag isLaunch is still
     % false, triggers the liftoff and the opening of aerobrake is set to 0
