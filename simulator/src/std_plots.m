@@ -37,33 +37,33 @@ end
 
 %% Trajectory
 figures.trajectory = figure('Name', 'Trajectory','ToolBar','auto','Position',[100,100,600,400]);
-plot3(structIn.Y(1:end-10, 1), structIn.Y(1:end-10, 2), -structIn.Y(1:end-10, 3),'DisplayName','True trajectory');
+plot3(structIn.Y(1:end-10, 2), structIn.Y(1:end-10, 1), -structIn.Y(1:end-10, 3),'DisplayName','True trajectory');
 hold on; grid on;
-plot3(structIn.NAS(1:end-10, 1), structIn.NAS(1:end-10, 2), -structIn.NAS(1:end-10, 3)-settings.z0,'DisplayName','NAS trajectory');
+plot3(structIn.NAS(1:end-10, 2), structIn.NAS(1:end-10, 1), -structIn.NAS(1:end-10, 3)-settings.z0,'DisplayName','NAS trajectory');
 
 if not(settings.scenario == "descent")
-    plot3(structIn.ARB_openingPosition(1),structIn.ARB_openingPosition(2),structIn.ARB_openingPosition(3),'ko','DisplayName','Airbrake deployment')
+    plot3(structIn.ARB_openingPosition(2),structIn.ARB_openingPosition(1),structIn.ARB_openingPosition(3),'ko','DisplayName','Airbrake deployment')
 end
-plot3(structIn.apogee_coordinates(1),structIn.apogee_coordinates(2),structIn.apogee_coordinates(3),'ro','DisplayName','Apogee')
+plot3(structIn.apogee_coordinates(2),structIn.apogee_coordinates(1),structIn.apogee_coordinates(3),'ro','DisplayName','Apogee')
 
 if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    plot3(structIn.Y(structIn.events.mainChuteIndex, 1), structIn.Y(structIn.events.mainChuteIndex, 2), -structIn.Y(structIn.events.mainChuteIndex, 3),'d','DisplayName','Main chute opening');
-    plot3(settings.payload.target(1),settings.payload.target(2),settings.payload.target(3),'go','DisplayName','Payload Target')
+    plot3(structIn.Y(structIn.events.mainChuteIndex, 2), structIn.Y(structIn.events.mainChuteIndex, 1), -structIn.Y(structIn.events.mainChuteIndex, 3),'d','DisplayName','Main chute opening');
+    plot3(settings.payload.target(2),settings.payload.target(1),settings.payload.target(3),'go','DisplayName','Payload Target')
     if contSettings.payload.guidance_alg == "t-approach"
-        makeCone(structIn.payload.EMC,0:10:-structIn.Y(structIn.events.mainChuteIndex,3),'EMC')
-        makeCone(structIn.payload.M1,0:10:-structIn.Y(structIn.events.mainChuteIndex,3),'M1')
-        makeCone(structIn.payload.M2,0:10:-structIn.Y(structIn.events.mainChuteIndex,3),'M2')
+        makeCone(structIn.payload.EMC([2,1]),0:10:-structIn.Y(structIn.events.mainChuteIndex,3),'EMC')
+        makeCone(structIn.payload.M1([2,1]),0:10:-structIn.Y(structIn.events.mainChuteIndex,3),'M1')
+        makeCone(structIn.payload.M2([2,1]),0:10:-structIn.Y(structIn.events.mainChuteIndex,3),'M2')
     end
 end
-xlabel('x [m]');
-ylabel('y [m]');
-zlabel('z [m]');
-title('Trajectory');
+xlabel('E [m]');
+ylabel('N [m]');
+zlabel('U [m]');
+title('Trajectory (ENU)');
 axis equal
 view([157,55])
 legend
 if settings.flagExportPLOTS == true
-    exportStandardizedFigure(figures.trajectory,"report_images\"+settings.mission+"\src_trajectory.pdf",0.9)
+    exportStandardizedFigure(figures.trajectory,"report_images\"+settings.mission+"\src_trajectory.pdf",0.49)
 end
 
 %% Velocities BODY w.r.t. time against NAS
@@ -374,22 +374,4 @@ if settings.flagExportPLOTS == true
 end
 
 end
-    
-function [] = makeCone(pos_cone, z_coord, name)
-    % pos_cone: position x, y
-    % z_coord: ned position Z every 10 meters (vector)
-    % name: string to display in the legend
-    if size(z_coord,2)>1
-        z_coord = z_coord';
-    end
-    th = linspace(0, 2*pi, 20);
-    X = pos_cone(1);
-    Y = pos_cone(2);
-    R_circ_dim = abs(z_coord)/50;
-    R_circ = R_circ_dim;
-    X_cone = X + R_circ.*cos(th);
-    Y_cone = Y + R_circ.*sin(th);
-    [~,Z_cone] = meshgrid(th,abs(z_coord));
-    surf(X_cone,Y_cone,Z_cone,'FaceAlpha',0.2,'EdgeColor','texturemap','HandleVisibility','off')
-    scatter(pos_cone(1), pos_cone(2),'fill', 'DisplayName', name)
-end
+   

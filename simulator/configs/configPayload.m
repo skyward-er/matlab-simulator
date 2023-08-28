@@ -1,4 +1,8 @@
 %% payload constants
+% Target coordinates 
+x_target = 0;
+y_target = 0;
+z_target = 0;
 % Geometry
 settings.payload.mass = 4.2;                 % [kg]  mass 
 settings.payload.b    = 2.55/2;              % [m]   semiwingspan  - vela nuova: 2.55/2; - vela vecchia: 2.06/2;
@@ -40,10 +44,6 @@ settings.payload.ClDeltaA  = 0.01;
 % settings.payload.attitude = [0;0;0];        % [rad] [3x1] Initial attitude
 
 %% Target
-% Target coordinates 
-x_target = 50;
-y_target = 50;
-z_target = 0;
 settings.payload.target = [x_target; y_target; z_target]; % [m] [3x1] target (IPI)
 
 % Desired maximum error
@@ -77,11 +77,11 @@ payload.simParam.wind_sub = 1;            % Set as 1 for subtracting and 0 other
 
 % P and PI controller
 contSettings.payload.Kp = 0.1;
-contSettings.payload.Ki = 0.001;
+contSettings.payload.Ki = 0;
 contSettings.payload.uMax = 0.1;
 contSettings.payload.uMin = -0.1;
-contSettings.payload.deltaA_tau = 1; % [s], absolutely arbitrary value
-contSettings.payload.deltaA_delay = 1; % [s], absolutely arbitrary value
+contSettings.payload.deltaA_tau = 0.05; % [s], absolutely arbitrary value
+contSettings.payload.deltaA_delay = 0; % [s], absolutely arbitrary value
 contSettings.payload.deltaA_maxSpeed = deg2rad(300);
 
 %% Guidance algorithm

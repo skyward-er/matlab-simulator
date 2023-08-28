@@ -81,8 +81,8 @@ else
     % Attitude
     Q0 = angle2quat(settings.PHI, 0, 0, 'ZYX')';
     % State   
-    X0 = [0; 0; -1000];                                              % Position initial condition -settings.z_final
-    V0 = [0; 0; settings.Vz_final];             % Velocity initial condition
+    X0 = [0; 0; -settings.z_final];                                              % Position initial condition -settings.z_final
+    V0 = [0; 0; -settings.Vz_final];             % Velocity initial condition
     W0 = [0; 0; 0];                                                             % Angular speed initial condition
 end
 ap0 = 0;                                                                        % Control servo angle initial condition
