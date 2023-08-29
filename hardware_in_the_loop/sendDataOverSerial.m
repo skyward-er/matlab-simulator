@@ -33,23 +33,19 @@ INPUTS:
     dataToBeSent.gps.nsat = sp.gps_nsat;
 
     for i = 1:size(sp.pn_sens, 2)
-        dataToBeSent.barometer_sens(i, :) = reshape(sp.pn_sens{i}(1:end - 1), 1, []);
+        dataToBeSent.barometer_sens(i, :) = sp.pn_sens{i};
 
         if isempty(dataToBeSent.barometer_sens(i, :))
-            dataToBeSent.barometer_sens(i, :) = reshape(sp.pn_sens{i}(1:end), 1, []);
+            dataToBeSent.barometer_sens(i, :) = reshape(sp.pn_sens{i}(1:end-1), 1, []);
         end
 
     end
 
-    dataToBeSent.chamberPressure = sp.cp;
+    dataToBeSent.chamberPressure = sp.cp(1:end-1);
 
-    dataToBeSent.pitot.dp = sp.p0_pitot - sp.p_pitot;
+    dataToBeSent.pitot.dp = sp.p0_pitot(1:end-1) - sp.p_pitot(1:end-1);
 
-    if dataToBeSent.pitot.dp < 0
-        dataToBeSent.pitot.dp = 0;
-    end
-
-    dataToBeSent.pitot.p0 = sp.p0_pitot;
+    dataToBeSent.pitot.p0 = sp.p0_pitot(1:end-1);
 
     dataToBeSent.temperature = sensorData.barometer_sens{1}.temperature(end);
 

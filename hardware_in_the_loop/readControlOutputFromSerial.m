@@ -28,7 +28,7 @@ OUTPUTS:
     % Revision date: 27/08/2022
 
     % NASState
-    obswVals = serialbridge("Read", 31)
+    obswVals = serialbridge("Read", 31);
 
     actuatorData.ada.mslAltitude = obswVals(1);
     actuatorData.ada.aglAltitude = obswVals(2);
