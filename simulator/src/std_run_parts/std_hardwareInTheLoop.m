@@ -43,24 +43,28 @@ sensorData.gps.latitude = latitude;
 sensorData.gps.longitude = longitude;
 
 % Add gravity acceleration only when still on ramp
-if ~flagsArray(1)
+if ~flagFlight
     % sensorData.accelerometer.measures = sensorData.accelerometer.measures + (quat2rotm(Yf(1,11:14)) * [0;0;9.81])';
     sp.accel = sp.accel + (quat2rotm(Yf(end,10:13)) * [0;0;9.81])';
 end
 
 % Execute serial communication with obsw
 if ~settings.parafoil
-    [alpha_aperture, x_est, xp_ada, xv_ada, estimated_mass, liftoff, burning_shutdown, ~] = run_MAIN_HIL(sensorData, sp, settings.z0, flagsArray);
+    [alpha_aperture, x_est, xp_ada, xv_ada, estimated_mass, liftoff, burning_shutdown, flagsArrayHIL] = run_MAIN_HIL(sensorData, sp, settings.z0, flagsArray);
 else
     error("Missing payaload HIL!");
 end
 
-flagFlight = flagsArray(1);
-settings.flagAscent = flagsArray(2);
-flagBurning = flagsArray(3);
-flagAeroBrakes = flagsArray(4);
-flagPara1 = flagsArray(5);
-flagPara2 = flagsArray(6);
+flagFlight = flagsArrayHIL(1);
+settings.flagAscent = flagsArrayHIL(2);
+flagBurning = flagsArrayHIL(3);
+flagAeroBrakes = flagsArrayHIL(4);
+flagPara1 = flagsArrayHIL(5);
+flagPara2 = flagsArrayHIL(6);
+
+disp("HIL flight: " + flagsArrayHIL(1) + ", ascent: " + flagsArrayHIL(2) + ...
+    ", burning: " + flagsArrayHIL(3) + ", airbrakes: " + flagsArrayHIL(4) + ...
+    ", para1: " + flagsArrayHIL(5) + ", para2: " + flagsArrayHIL(6));
 
 %% Update ADA data
 % Missing:
@@ -74,7 +78,7 @@ c.n_ada_old = c.n_ada_old + size(xp_ada,1);
 %% Update NAS data
 
 if ~flagFlight
-    sensorData.kalman.z    = settings.z0;
+    sensorData.kalman.z    = -settings.z0;
     sensorData.kalman.vz   = 0;
     sensorData.kalman.vMod = 0;
 else
