@@ -29,7 +29,7 @@ scenarios explanation:
 % scenario configuration
 conf.scenario = "full flight";
 conf.board = "main";            % Either "main" or "payload"
-conf.HIL = false;
+conf.HIL = true;
 
 % WIP flags
 settings.machControlActive  = false; % Switch on the mach control in ascentControl.m
@@ -154,8 +154,8 @@ elseif conf.HIL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         case "full flight"
 
-            settings.ascentOnly         = true;   % Switch on to simulate only the ascent phase untill the apogee
-            settings.ballisticFligth    = true;   % Switch on to simulate the balistic fligth without any parachute
+            settings.ascentOnly         = false;   % Switch on to simulate only the ascent phase untill the apogee
+            settings.ballisticFligth    = false;   % Switch on to simulate the balistic fligth without any parachute
             settings.control            = true;   % Switch on to simulate the control
             settings.dataNoise          = true;   % Switch on to simulate the data acquisiton from sensors
             
