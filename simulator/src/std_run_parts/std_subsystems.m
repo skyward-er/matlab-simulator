@@ -47,10 +47,10 @@ if settings.flagADA && settings.dataNoise && length(sensorData.barometer.time) >
         && sensorData.barometer.time(1) >= settings.baro_old
     [xp_ada, xv_ada, P_ada, settings.ada]   =  run_ADA(ada_prev, Pada_prev, sp.pn, sensorData.barometer.time, settings.ada);
 
-    xp_ada_tot(c.n_ada_old:c.n_ada_old + size(xp_ada(:,1),1) -1,:)  = xp_ada(1:end,:);
-    xv_ada_tot(c.n_ada_old:c.n_ada_old + size(xv_ada(:,1),1)-1,:)  = xv_ada(1:end,:);
-    t_ada_tot(c.n_ada_old:c.n_ada_old + size(xp_ada(:,1),1)-1)     = sensorData.barometer.time;
-    c.n_ada_old = c.n_ada_old + size(xp_ada,1);
+    xp_ada_tot(sensorTot.n_ada_old:sensorTot.n_ada_old + size(xp_ada(:,1),1) -1,:)  = xp_ada(1:end,:);
+    xv_ada_tot(sensorTot.n_ada_old:sensorTot.n_ada_old + size(xv_ada(:,1),1)-1,:)  = xv_ada(1:end,:);
+    t_ada_tot(sensorTot.n_ada_old:sensorTot.n_ada_old + size(xp_ada(:,1),1)-1)     = sensorData.barometer.time;
+    sensorTot.n_ada_old = sensorTot.n_ada_old + size(xp_ada,1);
     settings.baro_old = sensorData.barometer.time(end);
 end
 
@@ -66,10 +66,10 @@ if settings.flagNAS && settings.dataNoise
         settings.flagStopPitotCorrection = true;
     end
     sensorData.kalman.time(iTimes) = Tf(end);
-    x_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1,:)  = sensorData.kalman.x_c(:,:); % NAS position output
-    vels_tot(c.n_est_old:c.n_est_old + size(vels_NED(:,1),1)-1,:)  = vels_NED(:,:); % NAS speed output
-    t_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1)    = sensorData.accelerometer.time; % NAS time output
-    c.n_est_old = c.n_est_old + size(sensorData.kalman.x_c,1);
+    x_est_tot(sensorTot.n_est_old:sensorTot.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1,:)  = sensorData.kalman.x_c(:,:); % NAS position output
+    vels_tot(sensorTot.n_est_old:sensorTot.n_est_old + size(vels_NED(:,1),1)-1,:)  = vels_NED(:,:); % NAS speed output
+    t_est_tot(sensorTot.n_est_old:sensorTot.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1)    = sensorData.accelerometer.time; % NAS time output
+    sensorTot.n_est_old = sensorTot.n_est_old + size(sensorData.kalman.x_c,1);
 
     sensorData.kalman.z  =  x_est_tot(end, 3);
     sensorData.kalman.x  =  x_est_tot(end, 2);
@@ -87,12 +87,12 @@ if contains(settings.mission,'_2023')
     if Tf(end) <= settings.tb+0.5 &&...
             (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
 
-        if isnan(c.cp_tot(end))
-            c.cp_tot(end) = 0;
+        if isnan(sensorTot.cp_tot(end))
+            sensorTot.cp_tot(end) = 0;
         end
         if ~settings.shutdown
             [t_shutdown,settings,contSettings,predicted_apogee,estimated_mass,estimated_pressure] =...
-                run_MTR_SIM (contSettings,sensorData,settings,iTimes,c,Tf,Yf,x_est_tot);
+                run_MTR_SIM (contSettings,sensorData,settings,iTimes,sensorTot,Tf,Yf,x_est_tot);
             m = estimated_mass(end);
         end
 

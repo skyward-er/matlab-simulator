@@ -112,7 +112,7 @@ settings.wind.El = El;
 settings.wind.Az = Az;
 
 %% SENSORS INIT
-[s, c] = initSensors(settings.lat0, settings.lon0, settings.z0);
+[sensorSettings, sensorTot] = initSensors(settings.lat0, settings.lon0, settings.z0);
 
 %% MAGNETIC FIELD MODEL
 std_magneticField;
@@ -123,14 +123,7 @@ dt_ode = 0.01;
 
 %% FLAG INITIALIZATION FOR HIL
 if settings.launchWindow
-    %     global windowCreated
-    %
-    %     windowCreated = false;
     launchWindow;
-    %     while not(windowCreated)
-    %         pause(0.01);
-    %     end
-
     launchFlag = false;
 else
     launchFlag = true;
@@ -220,7 +213,6 @@ while settings.flagStopIntegration && n_old < nmax                          % St
             if settings.flagAscent
                 Y0_ode = Y0(1:14);
                 [Tf, Yd] = ode4(@ascentControlV2, tspan, Y0_ode, settings,[],  ap_ref, t_change_ref_ABK, tLaunch);
-%                 Yf(:,10:13) = Yf(:,10:13)./vecnorm(Yf(:,10:13),2,2);
                 parout = RecallOdeFcn(@ascentControlV2, Tf, Yd, settings,[], Yd(:,14), t_change_ref_ABK,tLaunch,'apVec');
                 [nd, ~] = size(Yd);
                 Yf = [Yd, ones(nd,1)*Y0(end,15)];
@@ -281,11 +273,10 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     %% simulate sensors
     % fix on signal frequencies: this interpolates the values if the speed
     % of the sensor is lower than the control action (or whatever)
-    [sensorData] = manageSignalFrequencies(magneticFieldApprox, settings.flagAscent, settings,sensorData, Yf, Tf, ext, uw, vw, ww, para);
-    [~, ~, p, ~] = atmosisa(-Yf(:,3) + settings.z0) ;
+    [sensorData] = manageSignalFrequencies(magneticFieldApprox, settings.flagAscent, settings,sensorData, Yf, Tf, uw, vw, ww);
     % simulate sensor acquisition
     if settings.dataNoise
-        [sp, c] = acquisition_Sys(sensorData, s, c, settings);
+        [sp, sensorTot] = acquisition_Sys(sensorData, sensorSettings, sensorTot, settings);
     end
     
     %% subsystems
@@ -366,15 +357,15 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     [n, ~] = size(Yf);
     Yf_tot(n_old:n_old+n-1, :)   =  Yf(1:end, :);
     Tf_tot(n_old:n_old+n-1, 1)   =  Tf(1:end, 1);
-    c.Yf_tot(n_old:n_old+n-1, :) =  Yf(1:end, :);
-    c.Tf_tot(n_old:n_old+n-1, 1) =  Tf(1:end, 1);
-    c.p_tot(n_old:n_old+n-1, 1)  =  p(1:end, 1);
-    c.ap_tot(n_old:n_old+n-1) = Yf(1:end,14);
+    sensorTot.Yf_tot(n_old:n_old+n-1, :) =  Yf(1:end, :);
+    sensorTot.Tf_tot(n_old:n_old+n-1, 1) =  Tf(1:end, 1);
+    % sensorTot.p_tot(n_old:n_old+n-1, 1)  =  p(1:end, 1);
+    sensorTot.ap_tot(n_old:n_old+n-1) = Yf(1:end,14);
     deltaAcmd_tot(n_old:n_old+n-1) = deltaA_ref(end) * ones(n,1);
     deltaA_tot(n_old:n_old+n-1) = Yf(1:end,15);
     ap_ref_tot(n_old:n_old+n-1) = ap_ref(2)* ones(n,1);
     ap_ref_time_tot(n_old:n_old+n-1) = t1* ones(n,1);
-    c.v_ned_tot(n_old:n_old+n-1,:) = v_ned;
+    sensorTot.v_ned_tot(n_old:n_old+n-1,:) = v_ned;
     barometer_measure{1} = [barometer_measure{1}, sp.pn_sens{1}(end)];
     barometer_measure{2} = [barometer_measure{2}, sp.pn_sens{2}(end)];
     barometer_measure{3} = [barometer_measure{3}, sp.pn_sens{3}(end)];
@@ -446,7 +437,7 @@ end
 
 if ~settings.electronics && ~settings.montecarlo && not(settings.scenario == "descent")
     settings.wind.output_time = Tf;
-    dataAscent = recallOdeFcn2(@ascentControlV2, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, c.ap_tot, settings.servo.delay,tLaunch,'apVec');
+    dataAscent = recallOdeFcn2(@ascentControlV2, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, sensorTot.ap_tot, settings.servo.delay,tLaunch,'apVec');
 else
     dataAscent = [];
 end
@@ -461,7 +452,7 @@ struct_out.Y = Yf;
 struct_out.quat = Yf(:,10:13);
 % aerodynamic quantities
 struct_out.qdyn = qdyn;
-struct_out.cp = c.cp_tot;
+struct_out.cp = sensorTot.cp_tot;
 % wind
 struct_out.windMag = settings.wind.Mag;
 struct_out.windAz = settings.wind.Az;
