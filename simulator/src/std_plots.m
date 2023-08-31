@@ -205,12 +205,14 @@ end
 figure('Position',[100,100,600,400])
 yyaxis left
 hold on
-contSettings = structIn.contSettings; % because the trajectory are chosen during the simulation, not a priori
-v_ned = quatrotate(quatconj(structIn.Y(:, 10:13)), structIn.Y(:, 4:6));
-if not(settings.scenario == "descent")
-    plot(contSettings.reference.Z, contSettings.reference.Vz(:,1),'r','DisplayName','ref min')
-    plot(contSettings.reference.Z, contSettings.reference.Vz(:,2),'k','DisplayName','ref max')
+if ~conf.HIL
+    contSettings = structIn.contSettings; % because the trajectory are chosen during the simulation, not a priori
+    if not(settings.scenario == "descent")
+        plot(contSettings.reference.Z, contSettings.reference.Vz(:,1),'r','DisplayName','ref min')
+        plot(contSettings.reference.Z, contSettings.reference.Vz(:,2),'k','DisplayName','ref max')
+    end
 end
+v_ned = quatrotate(quatconj(structIn.Y(:, 10:13)), structIn.Y(:, 4:6));
 plot( -structIn.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
 plot( -structIn.NAS(:,3)-settings.z0,  -structIn.NAS(:,6),'m--','DisplayName','NAS')
 % plot( structIn.ADA(:,4),  structIn.ADA(:,5),'b','DisplayName','ADA z')
