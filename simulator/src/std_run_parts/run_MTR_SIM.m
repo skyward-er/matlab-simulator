@@ -39,15 +39,15 @@ contSettings.xe=contSettings.xe + K* ((c.cp_tot(end)-1950)/1000 - estimated_pres
 estimated_mass(iTimes) = contSettings.xe(3);
 m = estimated_mass(iTimes);
 % magic formula seguire traiettorie è meglio?
-CD(iTimes) = settings.CD_correction_ref*getDrag(norm([sensorData.kalman.vx,sensorData.kalman.vy,sensorData.kalman.vz]), sensorData.kalman.z, 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
-[~,~,~,rho] = atmosisa(sensorData.kalman.z);
+CD(iTimes) = settings.CD_correction_ref*getDrag(norm([sensorData.kalman.vx,sensorData.kalman.vy,sensorData.kalman.vz]), -sensorData.kalman.z, 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
+[~,~,~,rho] = atmosisa(-sensorData.kalman.z);
 
 %% TEST WITH MASS ESTIMATION THAT DOESN'T WORK
 % mass = mass_dry
 % m = settings.ms;
 % m = settings.ms + (settings.m0-settings.ms)/2; 
 %%
-predicted_apogee(iTimes) = sensorData.kalman.z-settings.z0 + 1/(2*( 0.5*rho * CD(iTimes) * settings.S / m))...
+predicted_apogee(iTimes) = -sensorData.kalman.z-settings.z0 + 1/(2*( 0.5*rho * CD(iTimes) * settings.S / m))...
     * log(1 + (sensorData.kalman.vz^2 * (0.5 * rho * CD(iTimes) * settings.S) / m) / 9.81 );
 t_shutdown = Inf;
 if predicted_apogee(iTimes) >= settings.z_final_MTR
@@ -67,7 +67,7 @@ if predicted_apogee(iTimes) >= settings.z_final_MTR
             if Tf(end) > settings.timeEngineCut
                 settings.shutdown = 1;
                 settings = settingsEngineCut(settings);
-                settings.quatCut = [x_est_tot(end, 8:10) x_est_tot(end, 7)];
+                settings.quatCut = [x_est_tot(end, 10) x_est_tot(end, 7:9)];
                 [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
             end
         end
@@ -86,7 +86,7 @@ end
 %     settings.expTimeEngineCut = t_shutdown;
 %     end
 %     settings = settingsEngineCut(settings);
-%     settings.quatCut = [x_est_tot(end, 8:10) x_est_tot(end, 7)];
+%     settings.quatCut = [x_est_tot(end, 10) x_est_tot(end, 7:9)];
 %     [~,settings.pitchCut,~]  = quat2angle(settings.quatCut,'ZYX');
 % elseif Tf(end) < settings.tb 
 %     t_shutdown = inf;
