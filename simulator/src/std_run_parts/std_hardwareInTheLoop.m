@@ -78,7 +78,7 @@ c.n_ada_old = c.n_ada_old + size(xp_ada,1);
 %% Update NAS data
 
 if ~flagFlight
-    sensorData.kalman.z    = -settings.z0;
+    sensorData.kalman.z    = 0;
     sensorData.kalman.vz   = 0;
     sensorData.kalman.vMod = 0;
 else
