@@ -14,6 +14,14 @@ REVISIONS:
 - 3     15/04/2022, update,     Marco Marchesi, SCS department
                     Latest control algorithms
 
+- 4     01/09/2023, update,     Marco Marchesi, GNC IPT
+                                Giuseppe Brentino, GNC IPT
+                                Pier Francesco Bachini, GNC IPT
+                                Alessandro Donadi, GNC IPT
+                    Parafoil simulation, latest control algorithms, 
+                    sensor fault detection, engine shut-down, and much
+                    more.
+
 Copyright © 2022, Skyward Experimental Rocketry, SCS department
 All rights reserved
 

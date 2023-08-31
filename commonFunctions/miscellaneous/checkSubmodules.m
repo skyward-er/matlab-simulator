@@ -3,7 +3,7 @@ localRepoPath_msaToolkit = '../data/msa-toolkit';
 % status = checkLastCommit(msaToolkitURL, localRepoPath, pwd);
 % submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
 if ~exist('../data/msa-toolkit/data',"dir")
-    answer = input('WARNING! You don''have the msa toolkit installed. Do you want to install it? (y/n)','s');
+    answer = input('WARNING! You don''have the msa toolkit installed. Do you want to install it? (mandatory) (y/n)','s');
     if answer == "y" || answer == "yes"
         cloneType = input('Which type of clone do you want to use? (SSH/HTTP) ','s');
         branchName = input('Which branch do you want to checkout? ','s');
@@ -31,15 +31,15 @@ end
 localRepoPath_generalUtilities = '..\commonFunctions\graphics\general-utilities\';
 if ~exist([localRepoPath_generalUtilities,'exportStandardizedFigure'],'file')
     % clone repo
-    answer = input('WARNING! You don''have the exportStandardizedFigure installed. Do you want to install it? (y/n)','s');
+    answer = input('WARNING! You don''have the exportStandardizedFigure installed. Do you want to install it? (recommended) (y/n)','s');
     if answer == "y" || answer == "yes"
         
         cloneType = input('Which type of clone do you want to use? (SSH/HTTP) ','s');
         if cloneType =="SSH" || cloneType == "ssh"
-            mkdir('..\commonFunctions\graphics\general-utilities\')    
+            mkdir(localRepoPath_generalUtilities)    
             system(['git clone "git@git.skywarder.eu:skyward/general-utilities.git" ',localRepoPath_generalUtilities])
         elseif cloneType == "HTTP" || cloneType == "http"
-            mkdir('..\commonFunctions\graphics\general-utilities\')
+            mkdir(localRepoPath_generalUtilities)
             system(['git clone "https://git.skywarder.eu/skyward/general-utilities.git" ',localRepoPath_generalUtilities])
         else
             fprintf('\n WARNING! Input not valid: aborting')
