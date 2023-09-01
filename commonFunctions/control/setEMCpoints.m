@@ -1,4 +1,4 @@
-function [EMC,M1,M2] = setEMCpoints(pos,target,mult_EMC,d)
+function [EMC,M1,M2] = setEMCpoints(pos,target,payload)
 
 % HELP
 %
@@ -9,6 +9,9 @@ function [EMC,M1,M2] = setEMCpoints(pos,target,mult_EMC,d)
 % target - target point in NED coordinates
 % mult_EMC - multiplicative factor for t-approach
 % d - distance of lateral points
+
+mult_EMC = payload.mult_EMC;
+d = payload.d;
 
 if all(size(pos)~=[3,1]) % we want it column vector
     pos = pos';

@@ -276,13 +276,13 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     [sensorData] = manageSignalFrequencies(magneticFieldApprox, settings.flagAscent, settings,sensorData, Yf, Tf, uw, vw, ww);
     % simulate sensor acquisition
     if settings.dataNoise
-        [sp, sensorTot] = acquisition_Sys(sensorData, sensorSettings, sensorTot, settings);
+        [sensorData, sensorTot] = acquisition_Sys(sensorData, sensorSettings, sensorTot, settings);
     end
     
     %% subsystems
 
     % SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU
-    settings.electronics = true;
+    % settings.electronics = true; % ELIMINARE? PIER?
     if not(settings.electronics)
 
         std_subsystems;
@@ -357,21 +357,16 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     [n, ~] = size(Yf);
     Yf_tot(n_old:n_old+n-1, :)   =  Yf(1:end, :);
     Tf_tot(n_old:n_old+n-1, 1)   =  Tf(1:end, 1);
-    sensorTot.Yf_tot(n_old:n_old+n-1, :) =  Yf(1:end, :);
-    sensorTot.Tf_tot(n_old:n_old+n-1, 1) =  Tf(1:end, 1);
-    % sensorTot.p_tot(n_old:n_old+n-1, 1)  =  p(1:end, 1);
-    sensorTot.ap_tot(n_old:n_old+n-1) = Yf(1:end,14);
     deltaAcmd_tot(n_old:n_old+n-1) = deltaA_ref(end) * ones(n,1);
-    deltaA_tot(n_old:n_old+n-1) = Yf(1:end,15);
+    deltaAcmd_time_tot(n_old:n_old+n-1) =  t1* ones(n,1);
     ap_ref_tot(n_old:n_old+n-1) = ap_ref(2)* ones(n,1);
     ap_ref_time_tot(n_old:n_old+n-1) = t1* ones(n,1);
-    sensorTot.v_ned_tot(n_old:n_old+n-1,:) = v_ned;
-    barometer_measure{1} = [barometer_measure{1}, sp.barometer_sens{1}.measures(end)];
-    barometer_measure{2} = [barometer_measure{2}, sp.barometer_sens{2}.measures(end)];
-    barometer_measure{3} = [barometer_measure{3}, sp.barometer_sens{3}.measures(end)];
-    barometer_time = [barometer_time t1];
-    sfd_mean_p = [sfd_mean_p sp.barometer.measures];
-    faults = [faults; settings.faulty_sensors];
+    barometer_measure{1}(iTimes) = sensorData.barometer_sens{1}.measures(end);
+    barometer_measure{2}(iTimes) = sensorData.barometer_sens{2}.measures(end);
+    barometer_measure{3}(iTimes) = sensorData.barometer_sens{3}.measures(end);
+    sensorTot.sfd.barometer_time(iTimes) = t1;
+    sensorTot.sfd.pressure(iTimes) = sensorData.barometer.measures(end);
+    sensorTot.sfd.faults(n_old:n_old+n-1,:) = ones(n,1) * settings.faulty_sensors;
     n_old = n_old + n -1;
 
 
@@ -419,12 +414,12 @@ Yf = Yf_tot(1:n_old, :);
 Tf = Tf_tot(1:n_old, :);
 
 if not(settings.electronics)
-    t_kalman = t_est_tot;
+    t_kalman = sensorTot.nas.t;
 else
     t_kalman = -1;
 end
 
-t_ada    = settings.ada.t_ada;
+t_ada    = sensorTot.ada.t;
 settings.flagMatr = settings.flagMatr(1:n_old, :);
 
 %% other useful parameters:
@@ -437,7 +432,7 @@ end
 
 if ~settings.electronics && ~settings.montecarlo && not(settings.scenario == "descent")
     settings.wind.output_time = Tf;
-    dataAscent = recallOdeFcn2(@ascentControlV2, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, sensorTot.ap_tot, settings.servo.delay,tLaunch,'apVec');
+    dataAscent = recallOdeFcn2(@ascentControlV2, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, Yf(:,14), settings.servo.delay,tLaunch,'apVec');
 else
     dataAscent = [];
 end
@@ -452,7 +447,7 @@ struct_out.Y = Yf;
 struct_out.quat = Yf(:,10:13);
 % aerodynamic quantities
 struct_out.qdyn = qdyn;
-struct_out.cp = sensorTot.cp_tot;
+struct_out.cp = sensorTot.cp;
 % wind
 struct_out.windMag = settings.wind.Mag;
 struct_out.windAz = settings.wind.Az;
@@ -461,12 +456,16 @@ struct_out.windVel(1) = uw;
 struct_out.windVel(2) = vw;
 struct_out.windVel(3) = ww;
 % ADA
-struct_out.t_ada_tot = t_ada_tot;
-struct_out.ADA = [xp_ada_tot xv_ada_tot];
-struct_out.t_ada = t_ada;
+struct_out.ADA = sensorTot.ada;
 % NAS
-struct_out.t_nas = t_kalman;
-struct_out.NAS = x_est_tot;
+struct_out.NAS = sensorTot.nas;
+% MEA
+if settings.HREmot
+    struct_out.MEA = sensorTot.mea;
+end
+% SFD
+struct_out.sfd = sensorTot.sfd;
+
 % apogee
 struct_out.apogee_time = Tf(idx_apo);
 struct_out.apogee_idx = idx_apo;
@@ -477,25 +476,12 @@ struct_out.apogee_radius = norm(struct_out.apogee_coordinates(1:2));
 struct_out.recall = dataAscent;
 
 
-if settings.HREmot
-    struct_out.t_shutdown = settings.timeEngineCut;
-    if strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')
-        struct_out.predicted_apogee = predicted_apogee;
-        struct_out.estimated_mass = estimated_mass;
-        struct_out.estimated_pressure = estimated_pressure;
-    end
-end
 
 struct_out.contSettings = contSettings;
 struct_out.barometer_measures = barometer_measure;
 struct_out.barometer_times = barometer_time;
-struct_out.sfd_mean_p = sfd_mean_p;
-struct_out.faults = faults;
-if exist('t_shutdown','var')
-    struct_out.t_shutdown = t_shutdown;
-else
-    struct_out.t_shutdown = inf;
-end
+
+
 
 if exist('t_airbrakes','var')
     struct_out.ARB_allowanceTime = t_airbrakes;

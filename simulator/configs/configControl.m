@@ -81,20 +81,15 @@ contSettings.flagCorrectWithPitch = false;
 settings.motor.K = 92.0088;
 
 contSettings.Engine_model_A1 = [1.435871191228868,-0.469001276508780,0;1,0,0;-0.002045309260755,0.001867496708935,1];
-
-
 contSettings.Engine_model_B1 = [4;0;0];
-
 contSettings.Engine_model_C1 = [1.780138883879285,-1.625379384370081,0];
 
 % contSettings.Engine_model_Kgain = [0.237322102194205;0.242208876758461;-0.000686466033197479];
 
-%% engine control initialization
+%% engine control initialization - Mass Estimation Algorithm
 
 if  (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
-    contSettings.xe = [0,0,settings.m0]';     % initial state estimate
     contSettings.u = 1;                      % initial valve position ( 1 = open, 0 = closed )
-    contSettings.P_mat = zeros(3);          % initial value for P
     contSettings.R=1e-2*diag([1,1,1]);      % model noise covariance matrix    
     contSettings.Q=0.36; 
     contSettings.MTR_fault = false;

@@ -205,7 +205,7 @@ end
 figure('Position',[100,100,600,400])
 yyaxis left
 hold on
-if ~conf.HIL
+if ~settings.electronics
     contSettings = structIn.contSettings; % because the trajectory are chosen during the simulation, not a priori
     if not(settings.scenario == "descent")
         plot(contSettings.reference.Z, contSettings.reference.Vz(:,1),'r','DisplayName','ref min')
