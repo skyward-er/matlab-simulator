@@ -27,7 +27,7 @@ function [outJ] = computeCostFunction(x, t_m, y_m, R_m, settings, contSettings,A
     % Run simulation
     % recall initial state
     % ode wants NED, VBODY, p,q,r, qw, qx, qy, qz, deltaA as states, while nas retrieves only NED, VNED, qx,qy,qz,qw
-    Y0 = [y_m(1,1:6), zeros(1,3), [y_m(1,10), y_m(1,7:9)],0]; 
+    Y0 = [y_m(1,1:6), zeros(1,3), y_m(1,7:10),0]; 
 
     % rotate velocities in body frame
     Y0(1,4:6) = quatrotate(Y0(1,10:13),Y0(1,4:6));

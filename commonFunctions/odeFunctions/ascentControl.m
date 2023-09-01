@@ -62,7 +62,7 @@ if ap > settings.servo.maxAngle
 elseif ap < settings.servo.minAngle
     ap = settings.servo.minAngle;
     flagAngleSaturation = true;
-else 
+else
     flagAngleSaturation = false;
 end
 
@@ -83,7 +83,7 @@ end
 
 %% INERTIAS
 
-if t < tb 
+if t < tb
     if t < settings.timeEngineCut
         I = interpLinear(settings.motor.expTime, settings.I, t);
         Idot = interpLinear(settings.motor.expTime, settings.Idot, t);
@@ -111,31 +111,31 @@ Q = Q/norm(Q);
 %% ADDING WIND (supposed to be added in NED axes);
 % MSA wind
 % if settings.wind.model
-% 
+%
 %     if settings.stoch.N > 1
 %         [uw, vw, ww] = windMatlabGenerator(settings, z, t, Hour, Day);
 %     else
 %         [uw, vw, ww] = windMatlabGenerator(settings, z, t);
 %     end
-% 
+%
 % elseif settings.wind.input
 %     [uw, vw, ww] = windInputGenerator(settings, z, uncert);
 % elseif  settings.wind.variable
-% 
+%
 %     [uw, vw, ww] = windVariableGenerator(z, settings.stoch);
 % end
 
 switch settings.windModel
 
     case "atmospherical"
-    [uw, vw, ww] = windMatlabGenerator(settings, z, t);
-    
+        [uw, vw, ww] = windMatlabGenerator(settings, z, t);
+
     case "multiplicative"
-    uncert = settings.wind.input_uncertainty;
-    [uw, vw, ww] = windInputGenerator(settings, z, uncert);
+        uncert = settings.wind.input_uncertainty;
+        [uw, vw, ww] = windInputGenerator(settings, z, uncert);
 
     case "constant"
-    uw = settings.constWind(1); vw = settings.constWind(2); ww = settings.constWind(3);
+        uw = settings.constWind(1); vw = settings.constWind(2); ww = settings.constWind(3);
 end
 
 dcm = quatToDcm(Q);
@@ -163,7 +163,7 @@ M_value = M;
 
 %% TIME-DEPENDENTS VARIABLES
 if t < tb
-    
+
     if t < settings.timeEngineCut
         m = interpLinear(settings.motor.expTime, settings.mTotalTime, t);
         T = interpLinear(settings.motor.expTime, settings.motor.expThrust, t);
@@ -175,7 +175,7 @@ if t < tb
     end
 
 else     % for t >= tb the fligth condition is the empty one(no interpolation needed)
-    
+
     if settings.timeEngineCut < tb
         m = settings.ms + settings.expMengineCut;
     else
@@ -225,15 +225,15 @@ elseif ext > ext1
     c2 = 3;
     ext2 = settings.arb.maxExt;
     [coeffsValues2, angle2] = interpCoeffs(t, alpha, M, beta, absoluteAltitude,...
-    c2, settings);
+        c2, settings);
 
-     coeffsValues = coeffsValues1 + ( (coeffsValues2 - coeffsValues1).*(ext-ext1)./(ext2-ext1) );
-     % angle0 = angle1 + ( (angle2 - angle1).*(ext-ext1)./(ext2-ext1) );
+    coeffsValues = coeffsValues1 + ( (coeffsValues2 - coeffsValues1).*(ext-ext1)./(ext2-ext1) );
+    % angle0 = angle1 + ( (angle2 - angle1).*(ext-ext1)./(ext2-ext1) );
 else
     c2 = 1;
     ext2 = 0;
     [coeffsValues2, angle2] = interpCoeffs(t, alpha, M, beta, absoluteAltitude,...
-    c2, settings);
+        c2, settings);
 
     coeffsValues = coeffsValues1 + ( (coeffsValues2 - coeffsValues1).*(ext-ext1)./(ext2-ext1) );
     % angle0 = angle1 + ( (angle2 - angle1).*(ext-ext1)./(ext2-ext1) );
@@ -266,16 +266,16 @@ Cn = (Cn0 + Cnb*(beta - beta0));
 if abs(alpha) <= pi/180
     XCPlon = Cma/CNA;
 else
-    XCPlon = Cm/CN; 
+    XCPlon = Cm/CN;
 end
- 
+
 % XCPlat = Cn/CY;
 
 
 if abs(beta) <= pi/180
-    XCPlat = Cnb/CYB; 
+    XCPlat = Cnb/CYB;
 else
-    XCPlat = Cn/CY; 
+    XCPlat = Cn/CY;
 end
 
 % if Cn == 0 && CY == 0
@@ -298,7 +298,7 @@ if -z < settings.lrampa*sin(OMEGA)      % No torque on the launchpad
     dq = 0;
     dr = 0;
     dap = 0;
-    
+
     alpha_value = NaN;
     beta_value = NaN;
     Y = 0;
@@ -309,11 +309,11 @@ if -z < settings.lrampa*sin(OMEGA)      % No torque on the launchpad
     if T < Fg                           % No velocity untill T = Fg
         du = 0;
     end
-    
-    XCPtot = NaN; 
-    
+
+    XCPtot = NaN;
+
 else
-%% FORCES
+    %% FORCES
     % first computed in the body-frame reference system
     qdyn = 0.5*rho*V_norm^2;            % [Pa] dynamics pressure
     qdynL_V = 0.5*rho*V_norm*S*C;
@@ -323,12 +323,12 @@ else
     Z = qdyn*S*CN;                      % [N] z-body component of the aerodynamics force
     Fg = dcm*[0; 0; m*g];               % [N] force due to the gravity in body frame
     F = Fg + [-X+T, Y, -Z]';             % [N] total forces vector
-    
+
     %-----------------------------------------------------
     %F = Fg + [-X+T*cos(chi), Y+T*sin(chi), -Z]';             % [N] total forces vector
     %-----------------------------------------------------
 
-%% STATE DERIVATIVES
+    %% STATE DERIVATIVES
     % velocity
     du = F(1)/m - q*w + r*v;
     dv = F(2)/m - r*u + p*w;
@@ -341,112 +341,119 @@ else
     dr = (Ixx - Iyy)/Izz*p*q + qdynL_V/Izz*(V_norm*Cn + (Cnr*r+Cnp*p)*C/2)...
         - Izzdot*r/Izz;
 
-    % Compute the aerodynamici roll angle 
-    [~, phi] = getAlphaPhi(alpha, beta); 
-        
+    % Compute the aerodynamici roll angle
+    [~, phi] = getAlphaPhi(alpha, beta);
+
     % Aerodynamic-force coefficient in the alpha-total plane
-    CFaTot = sin(phi)*CY + cos(phi)*(-CN);      
+    CFaTot = sin(phi)*CY + cos(phi)*(-CN);
     % Aerodynanic-moment coefficient in the alpha-total plane
     CMaTot = cos(phi)*Cm - sin(phi)*Cn;
 
     XCPtot = CMaTot/CFaTot;
 
-    % flagSpeedSaturation = false;
-    if (M_value < settings.MachControl && settings.expShutdown) %|| ~settings.machControlActive
-        % set velocity of servo (air brakes)
-        if length(ap_ref_vec)==2 % for the recallOdeFunction
-            if t < t_change_ref
-                ap_ref = ap_ref_vec(1);    
-            else
-                ap_ref = ap_ref_vec(2);
-            end
-        else 
-            [~,ind_arb] = min(settings.parout.partial_time-t);
-            ap_ref = ap_ref_vec(ind_arb); % don't delete this unless you change how the recall ode works.
-        end
-        
-        dap = (ap_ref-ap)/settings.servo.tau;
-        if abs(dap) >settings.servo.maxSpeed
-            dap = sign(ap_ref-ap)*settings.servo.maxSpeed; % concettualmente sta roba è sbagliata perchè dipende dal passo di integrazione, fixare
-        end
-    
-        if flagAngleSaturation
-            dap = 0;
-        end
 
-    else 
+    if ~settings.identification
+
+        if (M_value < settings.MachControl) %|| ~settings.machControlActive
+            % set velocity of servo (air brakes)
+            if length(ap_ref_vec)==2 % for the recallOdeFunction
+                if t < t_change_ref
+                    ap_ref = ap_ref_vec(1);
+                else
+                    ap_ref = ap_ref_vec(2);
+                end
+            else
+                [~,ind_arb] = min(settings.parout.partial_time-t);
+                ap_ref = ap_ref_vec(ind_arb); % don't delete this unless you change how the recall ode works.
+            end
+        else
+            ap_ref = 0;
+        end
+   
+       
+    else
+        [~,idx_ABK] = min(abs(t-ap_ref_vec(:,1))); % if we are trying to identify we need to have the same input of the flight
+        ap_ref = ap_ref_vec(idx_ABK,2);
+    end
+
+    dap = (ap_ref-ap)/settings.servo.tau;
+    if abs(dap) >settings.servo.maxSpeed
+        dap = sign(ap_ref-ap)*settings.servo.maxSpeed; % concettualmente sta roba è sbagliata perchè dipende dal passo di integrazione, fixare
+    end
+
+    if flagAngleSaturation
         dap = 0;
     end
 end
-% Quaternions
-OM = [ 0 -p -q -r  ;
-       p  0  r -q  ;
-       q -r  0  p  ;
-       r  q -p  0 ];
+    % Quaternions
+    OM = [ 0 -p -q -r  ;
+        p  0  r -q  ;
+        q -r  0  p  ;
+        r  q -p  0 ];
 
-dQQ = 1/2*OM*Q';
+    dQQ = 1/2*OM*Q';
 
-%% FINAL DERIVATIVE STATE ASSEMBLING
-dY(1:3) = Vels;
-dY(4) = du;
-dY(5) = dv;
-dY(6) = dw;
-dY(7) = dp;
-dY(8) = dq;
-dY(9) = dr;
-dY(10:13) = dQQ;
-dY(14) = dap;
-dY = dY';
+    %% FINAL DERIVATIVE STATE ASSEMBLING
+    dY(1:3) = Vels;
+    dY(4) = du;
+    dY(5) = dv;
+    dY(6) = dw;
+    dY(7) = dp;
+    dY(8) = dq;
+    dY(9) = dr;
+    dY(10:13) = dQQ;
+    dY(14) = dap;
+    dY = dY';
 
-%% SAVING THE QUANTITIES FOR THE PLOTS
+    %% SAVING THE QUANTITIES FOR THE PLOTS
 
-if nargout == 2
-    parout.integration.t = t;
-    
-    parout.interp.M = M_value;
-    parout.interp.alpha = alpha_value;
-    parout.interp.beta = beta_value;
-    parout.interp.alt = -z;
-    parout.interp.mass = m;
-    parout.interp.inertias = [Ixx, Iyy, Izz]; 
+    if nargout == 2
+        parout.integration.t = t;
 
-    parout.wind.NED_wind = [uw, vw, ww];
-    parout.wind.body_wind = wind;
-    
-    parout.rotations.dcm = dcm;
-    
-    parout.velocities = Vels;
-    
-    parout.forces.AeroDyn_Forces = [X, Y, Z];
-    parout.forces.T = T;
-    
-    parout.air.rho = rho;
-    parout.air.P = P;
-    
-    parout.accelerations.body_acc = [du, dv, dw];
-    parout.accelerations.ang_acc = [dp, dq, dr];
-    F_acc = [-X+T, Y, -Z]';
-    parout.accelerometer.body_acc = F_acc/m;
-    
-    parout.coeff.CA = CA;
-    parout.coeff.CYB = CYB;
-    parout.coeff.CNA = CNA;
-    parout.coeff.Cl = Cl;
-    parout.coeff.Clp = Clp;
-    %--------------------------------------------
-    %parout.coeff.Clb = Clb;
-    %--------------------------------------------
-    parout.coeff.Cma = Cma;
-    parout.coeff.Cmad = Cmad;
-    parout.coeff.Cmq = Cmq;
-    parout.coeff.Cnb = Cnb;
-    parout.coeff.Cnr = Cnr;
-    parout.coeff.Cnp = Cnp;
-    parout.coeff.XCPlon = XCPlon;
-    parout.coeff.XCPlat = XCPlat;
+        parout.interp.M = M_value;
+        parout.interp.alpha = alpha_value;
+        parout.interp.beta = beta_value;
+        parout.interp.alt = -z;
+        parout.interp.mass = m;
+        parout.interp.inertias = [Ixx, Iyy, Izz];
 
+        parout.wind.NED_wind = [uw, vw, ww];
+        parout.wind.body_wind = wind;
 
-    parout.coeff.XCPtot = XCPtot; 
+        parout.rotations.dcm = dcm;
+
+        parout.velocities = Vels;
+
+        parout.forces.AeroDyn_Forces = [X, Y, Z];
+        parout.forces.T = T;
+
+        parout.air.rho = rho;
+        parout.air.P = P;
+
+        parout.accelerations.body_acc = [du, dv, dw];
+        parout.accelerations.ang_acc = [dp, dq, dr];
+        F_acc = [-X+T, Y, -Z]';
+        parout.accelerometer.body_acc = F_acc/m;
+
+        parout.coeff.CA = CA;
+        parout.coeff.CYB = CYB;
+        parout.coeff.CNA = CNA;
+        parout.coeff.Cl = Cl;
+        parout.coeff.Clp = Clp;
+        %--------------------------------------------
+        %parout.coeff.Clb = Clb;
+        %--------------------------------------------
+        parout.coeff.Cma = Cma;
+        parout.coeff.Cmad = Cmad;
+        parout.coeff.Cmq = Cmq;
+        parout.coeff.Cnb = Cnb;
+        parout.coeff.Cnr = Cnr;
+        parout.coeff.Cnp = Cnp;
+        parout.coeff.XCPlon = XCPlon;
+        parout.coeff.XCPlat = XCPlat;
 
 
-end
+        parout.coeff.XCPtot = XCPtot;
+
+
+    end

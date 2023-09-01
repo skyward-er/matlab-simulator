@@ -16,7 +16,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 
-settings.launchDate = [2021 10 13];
+settings.launchDate = [2022 10 13];
 settings.HREmot = false;
 
 %% TRAJECTORY GENERATION PARAMETERS
@@ -132,4 +132,4 @@ settings.ada.counter     =   0;
 settings.ada.t_ada       =   -1;                                           % Apogee detection timestamp
 settings.ada.flag_apo    =   false;                                        % True when the apogee is detected
 
-
+%% MEA TUNING PARAMETERS

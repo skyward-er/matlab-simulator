@@ -86,24 +86,35 @@ log_NAS     = csvDataLogExtractor(fileNAS,"sec");
 log_ABK  = csvDataLogExtractor(fileOutputABK,"sec");
 
 % plot to see where you want to trim the struct
-% figure
-% subplot(1,2,1)
-% plot(log_NAS.timestamp, log_NAS.d)
-% subplot(1,2,2)
-% plot3(log_NAS.n, log_NAS.e, -log_NAS.d)
-% axis equal
+figure
+subplot(1,2,1)
+plot(log_NAS.timestamp, log_NAS.d)
+subplot(1,2,2)
+plot3(log_NAS.n, log_NAS.e, -log_NAS.d)
+axis equal
 
-% figure
-% subplot(3,1,1)
-% plot(log_NAS.timestamp, log_NAS.vn)
-% subplot(3,1,2)
-% plot(log_NAS.timestamp, log_NAS.ve)
-% subplot(3,1,3)
-% plot(log_NAS.timestamp, log_NAS.vd)
+figure
+subplot(3,1,1)
+plot(log_NAS.timestamp, log_NAS.vn)
+subplot(3,1,2)
+plot(log_NAS.timestamp, log_NAS.ve)
+subplot(3,1,3)
+plot(log_NAS.timestamp, log_NAS.vd)
 
 %% trim struct to ascent only
-t_start =3334; % after burning time, else 3328
+% IT IS VERY IMPORTANT TO SET THIS PARAMETER CORRECTLY, 
+% set it to the burning time exhaust (aka the peak of velocity)
+% Then the initial time of the simulation is set to the burning time,
+% therefore the dynamics do not comprehend the thrust. That is why it is
+% very important to set this correctly
+
+t_start =3338; 
 t_end = 3350;
+
+% the problem of this identification is that the estimated quaternions are
+% not precise (at least for pyxis, maybe for gemini will be different)
+% therefore the initial condition can have very different quaternions with
+% respect to the ones that were in reality during flight
 
 log_NAS = structCutter(log_NAS,'timestamp',t_start,t_end);
 log_ABK = structCutter(log_ABK,'timestamp',t_start,t_end);
@@ -131,7 +142,7 @@ for i = 1: length(t_m)
     end
 end
 ABK_value = ABK_value*settings.servo.maxAngle;
-time_offset = t_m(1);
+time_offset = t_m(1)-settings.motor.expTime(end);
 ABK_time = ABK_time-time_offset;
 t_m = t_m-time_offset;
 ABK_perc = [ABK_time,ABK_value];
@@ -191,7 +202,7 @@ x = fmincon(fun, x0, A, b, [], [], [], [], [], options);
 %% print a .m with the new estimated coefficients
 saveFileNameNew = saveFileName;
 if flagOverwrite
-    fid = fopen(saveFileName+".m","w");
+    fid = fopen(saveFileNameNew+".m","w");
     fprintf(fid,"settings.CD_correction = %.6f;\n",x(1));
     fclose(fid);
 else
