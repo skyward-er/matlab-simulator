@@ -90,10 +90,10 @@ R_m = R^-1;
 
 %% extract data from simulation
 % file
-logN = "log37";
-fileNAS     = "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\parafoil\"+logN+"\"+logN+"_Boardcore__NASState.csv";
-filedeltaA  = "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\parafoil\"+logN+"\"+logN+"_Parafoil__WingAlgorithmData.csv";
-% readmatrix("")
+logN = "log05";
+user = "Max";
+fileNAS     = "C:\Users\"+user+"\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\parafoil\"+logN+"\"+logN+"_Boardcore__NASState.csv";
+filedeltaA  = "C:\Users\"+user+"\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\parafoil\"+logN+"\"+logN+"_Parafoil__WingAlgorithmData.csv";
 
 % extraction
 log_NAS     = csvDataLogExtractor(fileNAS,"sec");
@@ -140,14 +140,13 @@ log_deltaA = structCutter(log_deltaA,'timestamp',t_start,t_end);
 
 %% extract arrays
 t_m = log_NAS.timestamp;
-t_m = t_m-t_m(1);
 y_m = [log_NAS.n,log_NAS.e,log_NAS.d, log_NAS.vn, log_NAS.ve, log_NAS. vd, log_NAS.qw, log_NAS.qx, log_NAS.qy, log_NAS.qz];
 
 deltaA_time = t_m;
 for i = 1: length(t_m)
-    idx = find(t_m(i)>deltaA_time,1,"first");
+    idx = find(t_m(i)>log_deltaA.WingAlgorithmTimestamp,1,"last");
     if idx > 0
-        deltaA_value(i,1) = log_deltaA.servo1Angle(idx);
+        deltaA_value(i,1) = log_deltaA.pidOutput(idx);
     else
         deltaA_value(i,1) = 0;
     end
@@ -159,10 +158,18 @@ if forced_angle ~= 0
     warning('WARNING: you set a forced angle different from zero, be sure this is intended')
     warning('on');
 end
+t_m = t_m-t_m(1);
+deltaA_time = deltaA_time - t_m(1);
 deltaA = [deltaA_time,deltaA_value+forced_angle];
 % there are no angular velocities in the NAS states, so keep it like this
 % for now
-
+% 
+% check the correctness of the timestamps
+figure
+plot(log_deltaA.WingAlgorithmTimestamp,log_deltaA.pidOutput,'DisplayName','log')
+hold on;
+plot(deltaA_time,deltaA_value,'DisplayName','array')
+legend
 %% compute WIND
 for i = 1:length(t_m)
     [contSettings.WES] = run_WES(y_m(i,4:5),contSettings.WES);
