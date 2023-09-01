@@ -158,8 +158,8 @@ if forced_angle ~= 0
     warning('WARNING: you set a forced angle different from zero, be sure this is intended')
     warning('on');
 end
-t_m = t_m-t_m(1);
 deltaA_time = deltaA_time - t_m(1);
+t_m = t_m-t_m(1);
 deltaA = [deltaA_time,deltaA_value+forced_angle];
 % there are no angular velocities in the NAS states, so keep it like this
 % for now
