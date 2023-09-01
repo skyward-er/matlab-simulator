@@ -181,31 +181,31 @@ end
 % end
 
 % Predicted vs real apogee
-% if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
-%     prediction = figure('Name', 'Predicted apogee','ToolBar','auto');
-%     hold on;
-%     grid on;
-% 
-%     plot(structIn.t, -structIn.Y(:, 3));
-%     plot(0:1/settings.frequencies.controlFrequency:settings.tb-0.02, structIn.predicted_apogee);
-%     xline(structIn.t_shutdown,'r--')
-% 
-%     xlabel('Time t [s]');
-%     ylabel('Altitude AGL [m]');
-%     title('Predicted vs Real apogee');
-%     legend('Real altitude','Predicted apogee','shutdown time')
-% 
-%     if settings.flagExportPLOTS == true
-%         exportStandardizedFigure(prediction,'predicted_apogee.pdf',0.9)
-%     end
-% 
-% end
+if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')) && contains(settings.mission,'2023')
+    prediction = figure('Name', 'Predicted apogee','ToolBar','auto');
+    hold on;
+    grid on;
 
-% reference
+    plot(structIn.t, -structIn.Y(:, 3));
+    plot(structIn.predicted_apogee_time, structIn.predicted_apogee);
+    xline(structIn.t_shutdown,'r--')
+
+    xlabel('Time t [s]');
+    ylabel('Altitude AGL [m]');
+    title('Predicted vs Real apogee');
+    legend('Real altitude','Predicted apogee','shutdown time')
+
+    if settings.flagExportPLOTS == true
+        exportStandardizedFigure(prediction,'predicted_apogee.pdf',0.9)
+    end
+
+end
+
+%% reference
 figure('Position',[100,100,600,400])
 yyaxis left
 hold on
-if ~conf.HIL
+if ~settings.electronics
     contSettings = structIn.contSettings; % because the trajectory are chosen during the simulation, not a priori
     if not(settings.scenario == "descent")
         plot(contSettings.reference.Z, contSettings.reference.Vz(:,1),'r','DisplayName','ref min')

@@ -211,17 +211,16 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     
         if settings.ballisticFligth
             Y0_ode = Y0(1:14);
-            [Tf, Yd] = ode4(@ascentControlV2, tspan, Y0_ode, settings,[], ap_ref, t_change_ref_ABK, tLaunch);
-            parout = RecallOdeFcn(@ascentControlV2, Tf, Yd, settings,[], Yd(:,14), t_change_ref_ABK,tLaunch,'apVec');
+            [Tf, Yd] = ode4(@ascentControl, tspan, Y0_ode, settings,[], ap_ref, t_change_ref_ABK, tLaunch);
+            parout = RecallOdeFcn(@ascentControl, Tf, Yd, settings,[], Yd(:,14), t_change_ref_ABK,tLaunch,'apVec');
             [nd, ~] = size(Yd);
             Yf = [Yd, ones(nd,1)*Y0(end,15)];
             para = NaN;
         else
             if settings.flagAscent
                 Y0_ode = Y0(1:14);
-                [Tf, Yd] = ode4(@ascentControlV2, tspan, Y0_ode, settings,[],  ap_ref, t_change_ref_ABK, tLaunch);
-%                 Yf(:,10:13) = Yf(:,10:13)./vecnorm(Yf(:,10:13),2,2);
-                parout = RecallOdeFcn(@ascentControlV2, Tf, Yd, settings,[], Yd(:,14), t_change_ref_ABK,tLaunch,'apVec');
+                [Tf, Yd] = ode4(@ascentControl, tspan, Y0_ode, settings,[],  ap_ref, t_change_ref_ABK, tLaunch);
+                parout = RecallOdeFcn(@ascentControl, Tf, Yd, settings,[], Yd(:,14), t_change_ref_ABK,tLaunch,'apVec');
                 [nd, ~] = size(Yd);
                 Yf = [Yd, ones(nd,1)*Y0(end,15)];
                 para = NaN;
@@ -446,7 +445,7 @@ end
 
 if ~settings.electronics && ~settings.montecarlo && not(settings.scenario == "descent")
     settings.wind.output_time = Tf;
-    dataAscent = recallOdeFcn2(@ascentControlV2, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, c.ap_tot, settings.servo.delay,tLaunch,'apVec');
+    dataAscent = recallOdeFcn2(@ascentControl, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, c.ap_tot, settings.servo.delay,tLaunch,'apVec');
 else
     dataAscent = [];
 end
@@ -490,6 +489,7 @@ if settings.HREmot
     struct_out.t_shutdown = settings.timeEngineCut;
     if strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')
         struct_out.predicted_apogee = predicted_apogee;
+        struct_out.predicted_apogee_time = tPrediction;
         struct_out.estimated_mass = estimated_mass;
         struct_out.estimated_pressure = estimated_pressure;
     end

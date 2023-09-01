@@ -1,15 +1,14 @@
-function [dY, parout] = ascentControl(t, Y, settings, contSettings, ap_ref_vec,t_change_ref, tLaunch,varargin)
+function [dY, parout] = ascentControl(t, Y,  settings, contSettings, ap_ref_vec,t_change_ref, tLaunch,varargin)
 %{
 ascent - ode function of the 6DOF Rigid Rocket Model
 
 INPUTS:
 - t,       double [1, 1] integration time [s];
-- Y,       double [16, 1] state vector [ x y z | u v w | p q r | q0 q1 q2 q3 | Ixx Iyy Izz]:
+- Y,       double [13, 1] state vector [ x y z | u v w | p q r | q0 q1 q2 q3]:
 
                                 * (x y z), NED{north, east, down} horizontal frame;
                                 * (u v w), body frame velocities;
                                 * (p q r), body frame angular rates;
-                                * (Ixx Iyy Izz), Inertias;
                                 * (q0 q1 q2 q3), attitude unit quaternion;
 - settings, struct(motor, CoeffsE, CoeffsF, para, ode, stoch, prob, wind), rocket data structure;
 
@@ -17,7 +16,6 @@ OUTPUTS:
 - dY,      double [16, 1] state derivatives
 - parout,  struct, interesting fligth quantities structure (aerodyn coefficients, forces and so on..)
 
-DO NOT CHANGE THE INPUTS, OTHERWISE THE RECALL BREAKS
 
 CALLED FUNCTIONS: windMatlabGenerator, windInputGenerator, quatToDcm, interpCoeffs
 
@@ -54,12 +52,8 @@ q0 = Y(10);
 q1 = Y(11);
 q2 = Y(12);
 q3 = Y(13);
-Ixx = Y(14);
-Iyy = Y(15);
-Izz = Y(16);
-ap =  Y(17);
+ap =  Y(14);
 
-t = t - tLaunch;
 
 % saturation on servo angle
 if ap > settings.servo.maxAngle
@@ -71,13 +65,13 @@ elseif ap < settings.servo.minAngle
 else 
     flagAngleSaturation = false;
 end
+
 %% CONSTANTS
 S = settings.S;                         % [m^2]   cross surface
 C = settings.C;                         % [m]     caliber
 g = settings.g0/(1 + (-z*1e-3/6371))^2; % [N/kg]  module of gravitational field
 tb = settings.tb;                       % [s]     Burning Time
 local = settings.Local;                 % vector containing inputs for atmosphereData
-
 
 OMEGA = settings.OMEGA;
 uncert = [0, 0];
@@ -88,59 +82,47 @@ end
 
 
 %% INERTIAS
-if settings.HREmot
-    if t < tb 
-        if t < settings.timeEngineCut
-            Ixx = interpLinear(settings.motor.expTime, settings.I(1,:), t);
-            Iyy = interpLinear(settings.motor.expTime, settings.I(2,:), t);
-            Izz = interpLinear(settings.motor.expTime, settings.I(3,:), t);
 
-            Ixxdot = interpLinear(settings.motor.expTime, settings.Idot(1,:), t);
-            Iyydot = interpLinear(settings.motor.expTime, settings.Idot(2,:), t);
-            Izzdot = interpLinear(settings.motor.expTime, settings.Idot(3,:), t);
-        else
-            I = settings.IengineCut;
-            Idot = zeros(3, 1);
-            Ixx = I(1); Iyy = I(2); Izz = I(3);
-            Ixxdot = Idot(1); Iyydot = Idot(2); Izzdot = Idot(3);
-        end
+if t < tb 
+    if t < settings.timeEngineCut
+        I = interpLinear(settings.motor.expTime, settings.I, t);
+        Idot = interpLinear(settings.motor.expTime, settings.Idot, t);
     else
-        if settings.timeEngineCut < tb
-            I = settings.IengineCut;
-            Ixx = I(1); Iyy = I(2); Izz = I(3);
-        else
-            I = settings.I(:, end);
-            Ixx = I(1); Iyy = I(2); Izz = I(3);
-        end
+        I = settings.IengineCut;
         Idot = zeros(3, 1);
-        Ixxdot = Idot(1); Iyydot = Idot(2); Izzdot = Idot(3);
     end
-  
 else
-    % inertias for full configuration (with all the propellant embarqued) obtained with CAD's
-    Ixxf = settings.Ixxf;        % [kg*m^2] Inertia to x-axis
-    Iyyf = settings.Iyyf;        % [kg*m^2] Inertia to y-axis
-    Izzf = settings.Izzf;        % [kg*m^2] Inertia to z-axis
-
-    % inertias for empty configuration (all the propellant consumed) obtained with CAD's
-    Ixxe = settings.Ixxe;        % [kg*m^2] Inertia to x-axis
-    Iyye = settings.Iyye;        % [kg*m^2] Inertia to y-axis
-    Izze = settings.Izze;        % [kg*m^2] Inertia to z-axis
+    if settings.timeEngineCut < tb
+        I = settings.IengineCut;
+    else
+        I = settings.I(:, end);
+    end
+    Idot = zeros(3, 1);
 end
+Ixx = I(1); Iyy = I(2); Izz = I(3);
+Ixxdot = Idot(1); Iyydot = Idot(2); Izzdot = Idot(3);
+
+
 
 %% QUATERION ATTITUDE
 Q = [q0 q1 q2 q3];
 Q = Q/norm(Q);
 
 %% ADDING WIND (supposed to be added in NED axes);
+% MSA wind
 % if settings.wind.model
 % 
-%     [uw, vw, ww] = windMatlabGenerator(settings, z, t);
+%     if settings.stoch.N > 1
+%         [uw, vw, ww] = windMatlabGenerator(settings, z, t, Hour, Day);
+%     else
+%         [uw, vw, ww] = windMatlabGenerator(settings, z, t);
+%     end
 % 
 % elseif settings.wind.input
 %     [uw, vw, ww] = windInputGenerator(settings, z, uncert);
-% % elseif  settings.wind.variable
-% %     [uw, vw, ww] = windVariableGenerator(t, z, settings.wind);
+% elseif  settings.wind.variable
+% 
+%     [uw, vw, ww] = windVariableGenerator(z, settings.stoch);
 % end
 
 switch settings.windModel
@@ -181,38 +163,25 @@ M_value = M;
 
 %% TIME-DEPENDENTS VARIABLES
 if t < tb
-    if settings.HREmot
-        if t < settings.timeEngineCut
-            m = interpLinear(settings.motor.expTime, settings.mTotalTime, t);
-            T = interpLinear(settings.motor.expTime, settings.motor.expThrust, t);
-            Pe = interpLinear(settings.motor.expTime, settings.motor.Pe, t);
-            T = T + settings.motor.Ae*(Pe - P);
-        else
-            m = settings.expMengineCut + settings.ms;
-            T = 0;
-        end
-    else
-        dI = 1/tb*([Ixxf Iyyf Izzf]' - [Ixxe Iyye Izze]');
-        m = settings.ms + interpLinear(settings.motor.expTime, settings.motor.expM, t);
-        Ixxdot = -dI(1);
-        Iyydot = -dI(2);
-        Izzdot = -dI(3);
+    
+    if t < settings.timeEngineCut
+        m = interpLinear(settings.motor.expTime, settings.mTotalTime, t);
         T = interpLinear(settings.motor.expTime, settings.motor.expThrust, t);
+        Pe = interpLinear(settings.motor.expTime, settings.motor.Pe, t);
+        T = T + settings.motor.Ae*(Pe - P);
+    else
+        m = settings.expMengineCut + settings.ms;
+        T = 0;
     end
 
 else     % for t >= tb the fligth condition is the empty one(no interpolation needed)
-    if settings.HREmot
-        if settings.timeEngineCut < tb
-            m = settings.ms + settings.expMengineCut;
-        else
-            m = settings.ms + settings.motor.expM(end);
-        end
+    
+    if settings.timeEngineCut < tb
+        m = settings.ms + settings.expMengineCut;
     else
-        m = settings.ms;
-        Ixxdot = 0;
-        Iyydot = 0;
-        Izzdot = 0;
+        m = settings.ms + settings.motor.expM(end);
     end
+
     T = 0;
 end
 
@@ -232,64 +201,48 @@ beta_value = beta;
 %% CHOSING THE EMPTY CONDITION VALUE
 % interpolation of the coefficients with the value in the nearest condition of the Coeffs matrix
 
-%{
-    c = 1: estensione = 0%
-    c = 2: estensione = 50%
-    c = 3: estensione = 100%
-    
-    --> interpCoeffsHRE con c1=2
-        if ext < 50% --> interpCoeffsHRE con c2=1
-        else --> interpCoeffsHRE con c2=3;
-    
-    --> linear interpolation of coeffsValue
-        coeffsValue = coeffsValue1 + ( (coeffsValue2 - coeffsValue1).*(ext-c1)./(c2-c1) )
-%}
-
-
-
-% if t >= settings.tControl && M <= settings.MachControl
-%     c = settings.control;
-% else
-%     c = 1;
-% end
+if t >= settings.tControl && M <= settings.MachControl
+    c = settings.control;
+else
+    c = 1;
+end
 
 %% INTERPOLATE AERODYNAMIC COEFFICIENTS:
-if settings.HREmot
-    c1 = 2;
-    ext1 = settings.arb.maxExt/2;
-    [coeffsValues1, angle1] = interpCoeffsHRE(t, alpha, M, beta, absoluteAltitude,...
-        c1, settings);
-    ext = extension_From_Angle(ap, settings);
 
-    if ext == ext1
-        coeffsValues = coeffsValues1;
-        angle0 = angle1;
-    elseif ext > ext1
-        c2 = 3;
-        ext2 = settings.arb.maxExt;
-        [coeffsValues2, angle2] = interpCoeffsHRE(t, alpha, M, beta, absoluteAltitude,...
-        c2, settings);
+% [coeffsValues, angle0] = interpCoeffs(t, alpha, M, beta, absoluteAltitude,...
+%     c, settings);
 
-         coeffsValues = coeffsValues1 + ( (coeffsValues2 - coeffsValues1).*(ext-ext1)./(ext2-ext1) );
-         angle0 = angle1 + ( (angle2 - angle1).*(ext-ext1)./(ext2-ext1) );
-    else
-        c2 = 1;
-        ext2 = 0;
-        [coeffsValues2, angle2] = interpCoeffsHRE(t, alpha, M, beta, absoluteAltitude,...
-        c2, settings);
+c1 = 2;
+ext1 = settings.arb.maxExt/2;
+[coeffsValues1, angle0] = interpCoeffs(t, alpha, M, beta, absoluteAltitude,...
+    c1, settings);
+ext = extension_From_Angle(ap, settings);
 
-        coeffsValues = coeffsValues1 + ( (coeffsValues2 - coeffsValues1).*(ext-ext1)./(ext2-ext1) );
-        angle0 = angle1 + ( (angle2 - angle1).*(ext-ext1)./(ext2-ext1) );
-    end
-   
+if ext == ext1
+    coeffsValues = coeffsValues1;
+    % angle0 = angle1;
+elseif ext > ext1
+    c2 = 3;
+    ext2 = settings.arb.maxExt;
+    [coeffsValues2, angle2] = interpCoeffs(t, alpha, M, beta, absoluteAltitude,...
+    c2, settings);
 
+     coeffsValues = coeffsValues1 + ( (coeffsValues2 - coeffsValues1).*(ext-ext1)./(ext2-ext1) );
+     % angle0 = angle1 + ( (angle2 - angle1).*(ext-ext1)./(ext2-ext1) );
 else
-    [coeffsValues, angle0] = interpCoeffs(t, alpha, M, beta, absoluteAltitude,...
-        round((ap/settings.servo.maxAngle)*2+1), settings);
+    c2 = 1;
+    ext2 = 0;
+    [coeffsValues2, angle2] = interpCoeffs(t, alpha, M, beta, absoluteAltitude,...
+    c2, settings);
+
+    coeffsValues = coeffsValues1 + ( (coeffsValues2 - coeffsValues1).*(ext-ext1)./(ext2-ext1) );
+    % angle0 = angle1 + ( (angle2 - angle1).*(ext-ext1)./(ext2-ext1) );
 end
+
 % Retrieve Coefficients
 
-CA = coeffsValues(1)*settings.CD_correction; CYB = coeffsValues(2); CY0 = coeffsValues(3);
+
+CA = settings.CD_correction*coeffsValues(1); CYB = coeffsValues(2); CY0 = coeffsValues(3);
 CNA = coeffsValues(4); CN0 = coeffsValues(5); Cl = coeffsValues(6);
 Clp = coeffsValues(7); Cma = coeffsValues(8); Cm0 = coeffsValues(9);
 Cmad = coeffsValues(10); Cmq = coeffsValues(11); Cnb = coeffsValues(12);
@@ -321,7 +274,6 @@ end
 
 if abs(beta) <= pi/180
     XCPlat = Cnb/CYB; 
-    XCPlat = -5; 
 else
     XCPlat = Cn/CY; 
 end
@@ -346,7 +298,7 @@ if -z < settings.lrampa*sin(OMEGA)      % No torque on the launchpad
     dq = 0;
     dr = 0;
     dap = 0;
-
+    
     alpha_value = NaN;
     beta_value = NaN;
     Y = 0;
@@ -357,9 +309,9 @@ if -z < settings.lrampa*sin(OMEGA)      % No torque on the launchpad
     if T < Fg                           % No velocity untill T = Fg
         du = 0;
     end
-    Fyz = [0, nan, nan]; 
-    Myz = [0, nan, nan]; 
-
+    
+    XCPtot = NaN; 
+    
 else
 %% FORCES
     % first computed in the body-frame reference system
@@ -370,7 +322,7 @@ else
     Y = qdyn*S*CY;                      % [N] y-body component of the aerodynamics force
     Z = qdyn*S*CN;                      % [N] z-body component of the aerodynamics force
     Fg = dcm*[0; 0; m*g];               % [N] force due to the gravity in body frame
-    F = Fg + [-X+T, Y, -Z]';            % [N] total forces vector
+    F = Fg + [-X+T, Y, -Z]';             % [N] total forces vector
     
     %-----------------------------------------------------
     %F = Fg + [-X+T*cos(chi), Y+T*sin(chi), -Z]';             % [N] total forces vector
@@ -388,9 +340,16 @@ else
         - Iyydot*q/Iyy;
     dr = (Ixx - Iyy)/Izz*p*q + qdynL_V/Izz*(V_norm*Cn + (Cnr*r+Cnp*p)*C/2)...
         - Izzdot*r/Izz;
-    
-    Fyz = [0, CY, -CN]; 
-    Myz = [0, Cm, Cn]; 
+
+    % Compute the aerodynamici roll angle 
+    [~, phi] = getAlphaPhi(alpha, beta); 
+        
+    % Aerodynamic-force coefficient in the alpha-total plane
+    CFaTot = sin(phi)*CY + cos(phi)*(-CN);      
+    % Aerodynanic-moment coefficient in the alpha-total plane
+    CMaTot = cos(phi)*Cm - sin(phi)*Cn;
+
+    XCPtot = CMaTot/CFaTot;
 
     % flagSpeedSaturation = false;
     if (M_value < settings.MachControl && settings.expShutdown) %|| ~settings.machControlActive
@@ -418,7 +377,6 @@ else
     else 
         dap = 0;
     end
-
 end
 % Quaternions
 OM = [ 0 -p -q -r  ;
@@ -437,12 +395,7 @@ dY(7) = dp;
 dY(8) = dq;
 dY(9) = dr;
 dY(10:13) = dQQ;
-dY(14) = Ixxdot;
-dY(15) = Iyydot;
-dY(16) = Izzdot;
-% dap = 0;
-dY(17) = dap;
-
+dY(14) = dap;
 dY = dY';
 
 %% SAVING THE QUANTITIES FOR THE PLOTS
@@ -455,7 +408,8 @@ if nargout == 2
     parout.interp.beta = beta_value;
     parout.interp.alt = -z;
     parout.interp.mass = m;
-    
+    parout.interp.inertias = [Ixx, Iyy, Izz]; 
+
     parout.wind.NED_wind = [uw, vw, ww];
     parout.wind.body_wind = wind;
     
@@ -473,6 +427,7 @@ if nargout == 2
     parout.accelerations.ang_acc = [dp, dq, dr];
     F_acc = [-X+T, Y, -Z]';
     parout.accelerometer.body_acc = F_acc/m;
+    
     parout.coeff.CA = CA;
     parout.coeff.CYB = CYB;
     parout.coeff.CNA = CNA;
@@ -489,12 +444,9 @@ if nargout == 2
     parout.coeff.Cnp = Cnp;
     parout.coeff.XCPlon = XCPlon;
     parout.coeff.XCPlat = XCPlat;
-        
-    if settings.HREmot
-    sgn = sign(dot(cross(Myz, Fyz), [1 0 0])); 
-    XCPtot = (sgn * norm(Myz)/norm(Fyz));
-    err = 100*abs((acosd(dot(Fyz/norm(Fyz), Myz/norm(Myz))) - 90)/90);
-    XCPtot = XCPtot - polyval(settings.regPoli, err); 
+
+
     parout.coeff.XCPtot = XCPtot; 
-    end
+
+
 end

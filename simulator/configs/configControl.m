@@ -93,7 +93,7 @@ contSettings.Engine_model_C1 = [1.780138883879285,-1.625379384370081,0];
 
 if  (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
     contSettings.xe = [0,0,settings.m0]';     % initial state estimate
-    contSettings.u = 1;                      % initial valve position ( 1 = open, 0 = closed )
+    contSettings.valve_pos = 1;                      % initial valve position ( 1 = open, 0 = closed )
     contSettings.P_mat = zeros(3);          % initial value for P
     contSettings.R=1e-2*diag([1,1,1]);      % model noise covariance matrix    
     contSettings.Q=0.36; 

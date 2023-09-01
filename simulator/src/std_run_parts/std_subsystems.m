@@ -91,14 +91,14 @@ if contains(settings.mission,'_2023')
             c.cp_tot(end) = 0;
         end
         if ~settings.shutdown
-            [t_shutdown,settings,contSettings,predicted_apogee,estimated_mass,estimated_pressure] =...
-                run_MTR_SIM (contSettings,sensorData,settings,iTimes,c,Tf,Yf,x_est_tot);
+            [t_shutdown,settings,contSettings,predicted_apogee(iTimes),tPrediction(iTimes),estimated_mass,estimated_pressure] =...
+                run_MTR_SIM (contSettings,sensorData,settings,iTimes,c,Tf,x_est_tot);
             m = estimated_mass(end);
         end
 
         if ~settings.shutdown && Tf(end) >= settings.tb
-              t_shutdown = settings.tb;
-              settings.expShutdown = 1;
+                t_shutdown = settings.tb;
+                settings.expShutdown = 1;
                 settings.timeEngineCut = t_shutdown;
                 settings.expTimeEngineCut = t_shutdown;
                 settings.expMengineCut = m - settings.ms;

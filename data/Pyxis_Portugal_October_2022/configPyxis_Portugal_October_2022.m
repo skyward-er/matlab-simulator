@@ -69,7 +69,7 @@ settings.arb.R = 66e-3;                                                     % tr
 x = @(alpha) settings.arb.extPol(1)*alpha.^4 + ...
     settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + ...
     settings.arb.extPol(4).*alpha;
-fun = @(alpha) x(alpha) - settings.Controls(end);
+fun = @(alpha) x(alpha) - settings.hprot(end);
 settings.servo.maxAngle = fzero(fun, deg2rad(50));
 settings.servo.maxAngle = fix(settings.servo.maxAngle*1e9)/1e9; % to avoid computational error propagation (truncates the angle to the ninth decimal)
 
@@ -80,6 +80,9 @@ settings.kalman.sigma_mag     =   1;                                       % [mg
 settings.kalman.sigma_GPS     =   5;                                       % [mg^2]     estimated GPS variance
 settings.kalman.sigma_w       =   1;                                       % [rad^2/s^2]   estimated gyroscope variance;
 settings.kalman.sigma_beta    =   1e-4;                                    % [rad/s^2]   estimated gyroscope bias variance;
+settings.kalman.sigma_pitot   =  10;
+
+settings.kalman.Mach_max = 0.9;  % max value for kalman 
 
 settings.kalman.v_thr         =   2.5;                                     % Velocity threshold for the detected apogee
 settings.kalman.count_thr     =   5;                                       % If the apogee is detected count_thr time, the algorithm will return the apogee event

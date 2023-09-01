@@ -86,7 +86,7 @@ settings.kalman.sigma_w       =   10;                                       % [r
 settings.kalman.sigma_beta    =   1e-4;                                    % [rad/s^2]   estimated gyroscope bias variance;
 settings.kalman.sigma_pitot   =  10;    %DA CAMBIARE
 
-settings.kalman.Mach_max = 0.9; % max mach number expected for the mission (for kalman with pitot update purposes)
+settings.kalman.Mach_max = 0.85; % max mach number expected for the mission (for kalman with pitot update purposes)
 
 
 settings.kalman.v_thr         =   2.5;                                     % Velocity threshold for the detected apogee

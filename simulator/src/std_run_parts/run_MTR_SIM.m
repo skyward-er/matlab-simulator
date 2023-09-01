@@ -1,21 +1,11 @@
-function [t_shutdown,settings,contSettings,predicted_apogee,estimated_mass,estimated_pressure] =...
-    run_MTR_SIM (contSettings,sensorData,settings,iTimes,c,Tf,Yf,x_est_tot)
+function [t_shutdown,settings,contSettings,predicted_apogee,tPrediction,estimated_mass,estimated_pressure] =...
+    run_MTR_SIM (contSettings,sensorData,settings,iTimes,c,Tf,x_est_tot)
 
 % mass estimation
 
     A = contSettings.Engine_model_A1;
     B = contSettings.Engine_model_B1;
     C = contSettings.Engine_model_C1;
-
-% %  estimated_pressure(iTimes) = C * contSettings.xe;
-% %     e =  (c.cp_tot(end)-1950) - estimated_pressure(iTimes)*1000;
-% %     e = e/1000;
-% %     K=(A*contSettings.P_mat*C')/(C*contSettings.P_mat*C'+contSettings.Q);
-% %     contSettings.P_mat=(A*contSettings.P_mat*A'+contSettings.R)-K*(A*contSettings.P_mat*C')';
-% %     contSettings.xe=A*contSettings.xe + K*e+B*u;
-% %
-% %       estimated_mass(iTimes) = contSettings.xe(3);
-% %       m = estimated_mass(iTimes);
 
 % prediction
 
@@ -47,14 +37,16 @@ CD(iTimes) = settings.CD_correction_ref*getDrag(norm([sensorData.kalman.vx,senso
 % m = settings.ms;
 % m = settings.ms + (settings.m0-settings.ms)/2; 
 %%
-predicted_apogee(iTimes) = -sensorData.kalman.z-settings.z0 + 1/(2*( 0.5*rho * CD(iTimes) * settings.S / m))...
+predicted_apogee = -sensorData.kalman.z-settings.z0 + 1/(2*( 0.5*rho * CD(iTimes) * settings.S / m))...
     * log(1 + (sensorData.kalman.vz^2 * (0.5 * rho * CD(iTimes) * settings.S) / m) / 9.81 );
+tPrediction = Tf(end);
 t_shutdown = Inf;
-if predicted_apogee(iTimes) >= settings.z_final_MTR
+if predicted_apogee >= settings.z_final_MTR
     if ~settings.shutdown
         settings.expShutdown = 1;
+        settings.shutdown = true;
         if contSettings.MTR_fault 
-            if contSettings.u
+            if contSettings.valve_pos
                 settings.shutdown = 0;
                 settings.expTimeEngineCut = Tf(end);
             end
@@ -62,7 +54,7 @@ if predicted_apogee(iTimes) >= settings.z_final_MTR
             t_shutdown = Tf(end);
             settings.timeEngineCut = t_shutdown + 0.3;
             settings.expTimeEngineCut = t_shutdown;
-            % settings.IengineCut = Yf(end,14:16);
+            settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, Tf(end));
             settings.expMengineCut = m - settings.ms;
             if Tf(end) > settings.timeEngineCut
                 settings.shutdown = 1;
@@ -71,23 +63,8 @@ if predicted_apogee(iTimes) >= settings.z_final_MTR
                 [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
             end
         end
-        contSettings.u = 0;
+        contSettings.valve_pos = 0;
     else
         t_shutdown = inf;
     end
 end
-
-
-% if ~settings.shutdown && Tf(end) >= settings.tb 
-%     settings.shutdown = 1;
-%     t_shutdown = settings.tb;
-%     if contSettings.fault
-%     settings.timeEngineCut = t_shutdown;
-%     settings.expTimeEngineCut = t_shutdown;
-%     end
-%     settings = settingsEngineCut(settings);
-%     settings.quatCut = [x_est_tot(end, 10) x_est_tot(end, 7:9)];
-%     [~,settings.pitchCut,~]  = quat2angle(settings.quatCut,'ZYX');
-% elseif Tf(end) < settings.tb 
-%     t_shutdown = inf;
-% end
