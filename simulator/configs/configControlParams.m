@@ -10,7 +10,15 @@ switch settings.mission
     case 'Lynx_Portugal_October_2021'
 
         contSettings.delta_S_available = (0.0:0.001/4:0.01017)';
-    
+        contSettings.filter_coeff0 = 0.9; % starting value, then linear decrease until max Altitude
+        contSettings.filterMinAltitude = 1000;
+        contSettings.filterMaxAltitude = 3000;
+        % set altitude at which open to max
+        contSettings.criticalAltitude = 2990;
+        
+        settings.stopPitotAltitude = 2800;
+        settings.CD_correction = 1; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
+
     case 'Lynx_Roccaraso_September_2021'
 
         contSettings.delta_S_available = (0.0:0.001/4:0.01017)';
@@ -30,6 +38,9 @@ switch settings.mission
         % set altitude at which open to max
         contSettings.criticalAltitude = 2990;
         
+        settings.stopPitotAltitude = 2800;
+        settings.CD_correction = 1; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
+
     case 'Pyxis_Roccaraso_September_2022'
     
         contSettings.delta_S_available = (0.0:0.001/4:0.009564*settings.servo.maxAngle)'; 
@@ -42,8 +53,16 @@ switch settings.mission
         
         contSettings.Tfilter = 8; % starting time from which the coefficient is diminished.
         contSettings.deltaTfilter = 2; % every deltaTfilter [s] the filter coefficient is diminished by a ratio of filterRatio
-           
         
+        % linear filter with altitude
+        contSettings.filter_coeff0 = 0.9; % starting value, then linear decrease until max Altitude
+        contSettings.filterMinAltitude = 400;
+        contSettings.filterMaxAltitude = 1500;
+        % set altitude at which open to max
+        contSettings.criticalAltitude = 1500;
+        
+        settings.stopPitotAltitude = 800;
+        settings.CD_correction = 1; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
 
     case 'Gemini_Portugal_October_2023' 
      
@@ -72,10 +91,12 @@ switch settings.mission
         contSettings.filterMaxAltitude = 3000;
         % set altitude at which open to max
         contSettings.criticalAltitude = 2990;
+        settings.stopPitotAltitude = 2800;
+
+        settings.CD_correction = 0.75; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
+
         
 end
 
 % quantities independent from mission
-settings.CD_correction = 0.75; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
 settings.CD_correction_ref = 0.75; % same, but for the trajectory generation.
-settings.stopPitotAltitude = 2800;

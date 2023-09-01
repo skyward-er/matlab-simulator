@@ -60,9 +60,6 @@ if conf.script ~= "trajectory generation"
     configReferences;
     %% 15) SPECIAL CONDITIONS?
 %     config_SpecialConditions;
-
-    %% 16) DATA EXTRACTION
-    configSettings;
 end
 
 

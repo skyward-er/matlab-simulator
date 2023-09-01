@@ -78,9 +78,24 @@ R = eye(6);
 R_m = inv(R);
 %% extract data from simulation
 user = "Max";
-fileNAS = "C:\Users\"+user+"\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\flights\euroc 2022\2022-10-13-pyxis-euroc\SRAD_main\Boardcore_NASState";
-fileOutputABK = "C:\Users\"+user+"\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\flights\euroc 2022\2022-10-13-pyxis-euroc\SRAD_main\Boardcore_ServoData";
 
+switch settings.mission
+
+    case 'Pyxis_Portugal_October_2022'
+        fileNAS = "C:\Users\"+user+"\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\flights\euroc 2022\2022-10-13-pyxis-euroc\SRAD_main\Boardcore_NASState";
+        fileOutputABK = "C:\Users\"+user+"\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\flights\euroc 2022\2022-10-13-pyxis-euroc\SRAD_main\Boardcore_ServoData";
+    
+        t_start =3338; 
+        t_end = 3350;
+
+    case 'Pyxis_Roccaraso_September_2022'
+        fileNAS = "C:\Users\"+user+"\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\flights\2022-09-17-pyxis-roccaraso\logs\SRAD_main\normalized\Boardcore_NASState";
+        fileOutputABK = "C:\Users\"+user+"\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\flights\2022-09-17-pyxis-roccaraso\logs\SRAD_main\normalized\Boardcore_ServoData";
+        
+        t_start =3338; 
+        t_end = 3350;
+
+end
 % extraction
 log_NAS     = csvDataLogExtractor(fileNAS,"sec");
 log_ABK  = csvDataLogExtractor(fileOutputABK,"sec");
@@ -102,15 +117,11 @@ subplot(3,1,3)
 plot(log_NAS.timestamp, log_NAS.vd)
 
 %% trim struct to ascent only
-% IT IS VERY IMPORTANT TO SET THIS PARAMETER CORRECTLY, 
+% IT IS VERY IMPORTANT TO SET THE STARTING AND ENDING TIME PARAMETER CORRECTLY, 
 % set it to the burning time exhaust (aka the peak of velocity)
 % Then the initial time of the simulation is set to the burning time,
 % therefore the dynamics do not comprehend the thrust. That is why it is
 % very important to set this correctly
-
-t_start =3338; 
-t_end = 3350;
-
 % the problem of this identification is that the estimated quaternions are
 % not precise (at least for pyxis, maybe for gemini will be different)
 % therefore the initial condition can have very different quaternions with
