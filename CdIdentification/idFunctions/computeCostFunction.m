@@ -7,7 +7,7 @@
 %
 % The "FULL" version uses all the dof for the computation and aims to estimate all the
 % 14  aerodynamic coefficients of the parafoil
-function [outJ] = computeCostFunctionFULL(x, t_m, y_m, R_m, settings, contSettings,deltaA)
+function [outJ] = computeCostFunction(x, t_m, y_m, R_m, settings, contSettings,deltaA)
     % Compute cost function for the parameter estimation.
     % Inputs
     %   - x:   Coefficients
@@ -26,21 +26,8 @@ function [outJ] = computeCostFunctionFULL(x, t_m, y_m, R_m, settings, contSettin
       
     % Initialize parameters
     
-    settings.payload.CD0       =  x(1); 
-    settings.payload.CDAlpha2  =  x(2);
-    settings.payload.CL0       =  x(3);
-    settings.payload.CLAlpha   =  x(4);
-    settings.payload.Cm0       =  x(5);
-    settings.payload.CmAlpha   =  x(6);
-    settings.payload.Cmq       =  x(7);
-    settings.payload.Cnr       =  x(8);
-    settings.payload.Clp       =  x(9);
-    settings.payload.ClPhi     =  x(10);
-    settings.payload.CLDeltaA  =  x(11);
-    settings.payload.CDDeltaA  =  x(12);
-    settings.payload.ClDeltaA  =  x(13);
-    settings.payload.CnDeltaA  =  x(14);
-    % settings.payload.deltaSMax =  x(15);
+    settings.CD_correction = x;
+
 
     % Initialize cost
     J = zeros(size(R_m));
@@ -54,7 +41,7 @@ function [outJ] = computeCostFunctionFULL(x, t_m, y_m, R_m, settings, contSettin
     % rotate velocities in body frame
     Y0(1,4:6) = quatrotate(Y0(1,10:13),Y0(1,4:6));
 
-    [t_sim, y_sim] = callSimulator(deltaA, settings,contSettings,t_m,Y0 );
+    [t_sim, y_sim] = callSimulatorAscent(deltaA, settings,contSettings,t_m,Y0 );
     
     % Interpolation of simulation - teoricamente inutile se usiamo t_m come
     % vettore per la ode

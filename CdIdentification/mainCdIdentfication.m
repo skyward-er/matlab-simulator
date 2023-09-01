@@ -11,7 +11,12 @@ todo:
 
 %% init
 
-clear; close all; clc;
+if ~exist('flagSubmodulesUpdated','var') % every first time you use the simulator checks for updates, then stops doing it (note: if you clear all vars it starts doing it)
+    close all; clear; clc;
+else
+    close all; clc;
+    clearvars -except flagSubmodulesUpdated
+end
 
 %% path loading
 
@@ -27,16 +32,18 @@ addpath(genpath("../simulator"));
 % Common Functions path
 addpath(genpath(commonFunctionsPath));
 
-%% CHECK IF MSA-TOOLKIT IS UPDATED
-msaToolkitURL = 'https://github.com/skyward-er/msa-toolkit';
-localRepoPath = '../data/msa-toolkit';
-%  status = checkLastCommit(msaToolkitURL, localRepoPath, pwd);
-%  submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
+%% CHECK SUBMODULES UPDATES
+if ~exist('flagSubmodulesUpdated','var')
+    checkSubmodules;
+    flagSubmodulesUpdated = true;
+end
 
 %% CONFIGs
 
 conf.script = "simulator"; % this defines which configuration scripts to run
-config; 
+cd("../simulator/")
+config;
+cd(currentPath)
 % set that we are in the identification phase, so you can recall deltaA in
 % the ode
 
@@ -67,10 +74,12 @@ A = [A1;A2];
 b = [b1;b2];
 
 % in this way it should be constrained in the [0 : 2] interval
-
+R = 1;
+R_m = inv(R);
 %% extract data from simulation
-fileNAS = "C:\Users\Max\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\flights\euroc 2022\2022-10-13-pyxis-euroc\SRAD_main\Boardcore_NASState";
-fileOutputABK = "C:\Users\Max\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\flights\euroc 2022\2022-10-13-pyxis-euroc\SRAD_main\Boardcore_ServoData";
+user = "Max";
+fileNAS = "C:\Users\"+user+"\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\flights\euroc 2022\2022-10-13-pyxis-euroc\SRAD_main\Boardcore_NASState";
+fileOutputABK = "C:\Users\"+user+"\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\flights\euroc 2022\2022-10-13-pyxis-euroc\SRAD_main\Boardcore_ServoData";
 
 % extraction
 log_NAS     = csvDataLogExtractor(fileNAS,"sec");
@@ -113,16 +122,16 @@ for i = 1: length(t_m)
         ABK_value(i,1) = 0;
     end
 end
-t_m = t_m-t_m(1);
 ABK_time = ABK_time-t_m(1);
+t_m = t_m-t_m(1);
 ABK_perc = [ABK_time,ABK_value];
 
 %check correctness of the timestamps
-figure
-plot(log_ABK.timestamp,log_ABK.position,'DisplayName','ABK log')
-hold on
-plot(ABK_time,ABK_value,'DisplayName','ABK log')
-legend
+% figure
+% plot(log_ABK.timestamp,log_ABK.position,'DisplayName','ABK log')
+% hold on
+% plot(ABK_time,ABK_value,'DisplayName','ABK log')
+% legend
 
 % % % %% compute WIND
 % this was done for the parafoil, for the rocket it is much harder to
@@ -153,6 +162,8 @@ legend
 % % % settings.wind.ElMax     =   0*pi/180;                 % [rad] Maximum Elevation, user input in degrees (ex. 0) (Max == 90 Deg)
 % % % settings.wind.AzMin     =   mean(wind_angle);              % [rad] Minimum Azimuth, user input in degrees (ex. 90)
 % % % settings.wind.AzMax     =   mean(wind_angle);              % [rad] Maximum Azimuth, user input in degrees (ex. 90)
+[uw, vw, ww, Az , El, Mag] = std_setWind(settings);
+settings.constWind = [uw, vw, ww];
 
 %% PARAMETER ESTIMATION
 options = optimoptions('fmincon','Display','iter-detailed');
@@ -161,27 +172,27 @@ fun = @(x) computeCostFunction(x, t_m, y_m, R_m, settings, contSettings,ABK_perc
 % deltaA must be a vector input with first column timestamps, second column
 % values
 done = false;
-while ~done
-    try
-        % randomise initial guess
+% while ~done
+%     try
+        % % randomise initial guess
         rnd_coeff = 0.1;
         x0 = unifrnd(x0 - sign(x0).*x0*rnd_coeff, x0 + sign(x0).*x0*rnd_coeff);
         x = fmincon(fun, x0, A, b, [], [], [], [], [], options);
         done = true;
-    catch
-        done = false;
-        warning('on')
-        warning('Simulation failed; restarting...')
-        warning('off')
-    end
-end
+    % catch
+    %     done = false;
+    %     warning('on')
+    %     warning('Simulation failed; restarting...')
+    %     warning('off')
+    % end
+% end
 % x = ga(fun, 15, A, b, [], [], [], [], [], options);
 
 %% print a .m with the new estimated coefficients
 saveFileNameNew = saveFileName;
 if flagOverwrite
     fid = fopen(saveFileName+".m","w");
-    fprintf(fid,"contSettings.CD_correction = %.6f;\n",x(1));
+    fprintf(fid,"settings.CD_correction = %.6f;\n",x(1));
     fclose(fid);
 else
     idx = 0;
@@ -189,32 +200,17 @@ else
         idx = idx+1;
         saveFileNameNew = saveFileName + num2str(idx);
     end
-    fid = fopen(saveFileName+".m","w");
+    fid = fopen(saveFileNameNew+".m","w");
     fprintf(fid,"settings.payload.CD0       = %.6f;\n",x(1));
-    fprintf(fid,"settings.payload.CDAlpha2  = %.6f;\n",x(2));
-    fprintf(fid,"settings.payload.CL0       = %.6f;\n",x(3));
-    fprintf(fid,"settings.payload.CLAlpha   = %.6f;\n",x(4));
-    fprintf(fid,"settings.payload.Cm0       = %.6f;\n",x(5));
-    fprintf(fid,"settings.payload.CmAlpha   = %.6f;\n",x(6));
-    fprintf(fid,"settings.payload.Cmq       = %.6f;\n",x(7));
-    fprintf(fid,"settings.payload.Cnr       = %.6f;\n",x(8));
-    fprintf(fid,"settings.payload.Clp       = %.6f;\n",x(9));
-    fprintf(fid,"settings.payload.ClPhi     = %.6f;\n",x(10));
-    fprintf(fid,"settings.payload.CLDeltaA  = %.6f;\n",x(11));
-    fprintf(fid,"settings.payload.CDDeltaA  = %.6f;\n",x(12));
-    fprintf(fid,"settings.payload.ClDeltaA  = %.6f;\n",x(13));
-    fprintf(fid,"settings.payload.CnDeltaA  = %.6f;\n",x(14));
-    % fprintf(fid,"settings.payload.deltaSMax = %.6f;\n",x(15));
     fclose(fid);
 end
 %% verification of the estimation
-    Y0 = [y_m(1,1:6), zeros(1,3), [y_m(1,10), y_m(1,7:9)],0]; % ode wants pos, vel, om, quat, deltaA as states, while nas retrieves only pos, vel, quat
-%     Y0 = [y_m(1,1:6), zeros(1,3), 1,0,0,0,0];
-    Y0(1,4:6) = quatrotate(Y0(1,10:13),Y0(1,4:6));
+Y0 = [y_m(1,1:6), zeros(1,3), [y_m(1,10), y_m(1,7:9)],0]; % ode wants pos, vel, om, quat, deltaA as states, while nas retrieves only pos, vel, quat
+Y0(1,4:6) = quatrotate(Y0(1,10:13),Y0(1,4:6));
 % recall estimated coefficients for the simulation
 run(saveFileNameNew)
 % call simulation
-[t_sim, y_sim] = callSimulator(ABK_perc, settings,contSettings,t_m,Y0 );
+[t_sim, y_sim] = callSimulatorAscent(ABK_perc, settings,contSettings,t_m,Y0);
 
 % plot results
 figure
@@ -244,8 +240,8 @@ hold on;
 plot(t_sim,y_sim(:,6),'DisplayName','Simulated')
 ylabel('V_D')
 
-load('gong')
-sound(0.2*y,Fs)
+% load('gong')
+% sound(0.2*y,Fs)
 
 return
 %% test on the actual simulator with a target

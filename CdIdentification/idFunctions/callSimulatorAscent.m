@@ -11,12 +11,9 @@
 % T: time
 % Y: state array, the collumns are already reordered to fit with the NAS on
 % board! (which has: N, E, D, VN, VE, VD, qx, qy, qx, qw)
-function [T, Y] = callSimulator(deltaA,settings,contSettings,t_m, Y0)
-    [uw, vw, ww, ~ , ~, ~] = std_setWind(settings);
-    settings.constWind = [uw, vw, ww];
-    tspan = t_m';
-    deltaA(:,1) = deltaA(:,1)-t_m(1);
-    [T,Y]  = ode4(@descentParafoil,tspan,Y0,settings,contSettings,deltaA);
+
+function [T, Y] = callSimulatorAscent(ABK_pos,settings,contSettings,t_m, Y0)
+    [T,Y]  = ode4(@ascentControlV2,t_m',Y0,settings,contSettings,ABK_pos,[], 0);
     % readjust states to have only the NAS ones
     Y = Y(:,[1:6,11:13,10]);
 
