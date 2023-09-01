@@ -7,7 +7,7 @@
 %
 % The "FULL" version uses all the dof for the computation and aims to estimate all the
 % 14  aerodynamic coefficients of the parafoil
-function [outJ] = computeCostFunction(x, t_m, y_m, R_m, settings, contSettings,deltaA)
+function [outJ] = computeCostFunction(x, t_m, y_m, R_m, settings, contSettings,ABK)
     % Compute cost function for the parameter estimation.
     % Inputs
     %   - x:   Coefficients
@@ -41,26 +41,14 @@ function [outJ] = computeCostFunction(x, t_m, y_m, R_m, settings, contSettings,d
     % rotate velocities in body frame
     Y0(1,4:6) = quatrotate(Y0(1,10:13),Y0(1,4:6));
 
-    [t_sim, y_sim] = callSimulatorAscent(deltaA, settings,contSettings,t_m,Y0 );
+    [t_sim, y_sim] = callSimulatorAscent(ABK, settings,contSettings,t_m,Y0 );
     
     % Interpolation of simulation - teoricamente inutile se usiamo t_m come
     % vettore per la ode
     y_sim = interp1(t_sim, y_sim, t_m);
 
     % Compute difference between both
-    diff(:,1:6) = y_m(:,1:6) - y_sim(:,1:6);
-
-    % convert quaternions to euler angles
-    eul_sim = quat2eul(y_sim(:,[10,7:9]));
-    eul_sim = flip(eul_sim,2);
-    eul_sim = unwrap(eul_sim);
-
-    eul_m = quat2eul(y_m(:,[10,7:9]));
-    eul_m = flip(eul_m,2);
-    eul_m = unwrap(eul_m);
-
-    diff(:,7:9) = angdiff(eul_sim,eul_m);
-    
+    diff(:,1:6) = y_m(:,1:6) - y_sim(:,1:6);    
 
     % Cost computation
     J = J + (R_m*diff')*diff;       
