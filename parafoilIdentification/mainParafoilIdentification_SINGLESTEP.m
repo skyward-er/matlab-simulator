@@ -205,7 +205,7 @@ fun = @(x) computeCostFunctionFULL(x, t_m, y_m, R_m, settings, contSettings,delt
 done = false;
 while ~done
     try
-        randomise initial guess
+        % randomise initial guess
         rnd_coeff = 0.1;
         x0 = unifrnd(x0 - sign(x0).*x0*rnd_coeff, x0 + sign(x0).*x0*rnd_coeff);
         x = fmincon(fun, x0, A, b, [], [], [], [], [], options);
@@ -265,7 +265,6 @@ else
 end
 %% verification of the estimation
     Y0 = [y_m(1,1:6), zeros(1,3), [y_m(1,10), y_m(1,7:9)],0]; % ode wants pos, vel, om, quat, deltaA as states, while nas retrieves only pos, vel, quat
-%     Y0 = [y_m(1,1:6), zeros(1,3), 1,0,0,0,0];
     Y0(1,4:6) = quatrotate(Y0(1,10:13),Y0(1,4:6));
 % recall estimated coefficients for the simulation
 run(saveFileNameNew)
