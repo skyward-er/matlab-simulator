@@ -163,13 +163,13 @@ deltaA_time = deltaA_time - t_m(1);
 deltaA = [deltaA_time,deltaA_value+forced_angle];
 % there are no angular velocities in the NAS states, so keep it like this
 % for now
-% 
+
 % check the correctness of the timestamps
-figure
-plot(log_deltaA.WingAlgorithmTimestamp,log_deltaA.pidOutput,'DisplayName','log')
-hold on;
-plot(deltaA_time,deltaA_value,'DisplayName','array')
-legend
+% figure
+% plot(log_deltaA.WingAlgorithmTimestamp,log_deltaA.pidOutput,'DisplayName','log')
+% hold on;
+% plot(deltaA_time,deltaA_value,'DisplayName','array')
+% legend
 %% compute WIND
 for i = 1:length(t_m)
     [contSettings.WES] = run_WES(y_m(i,4:5),contSettings.WES);
@@ -185,8 +185,8 @@ wind_angle = atan2(wind_est(:,2),wind_est(:,1));
 % plot(t_m, wind_est(:,2),'DisplayName','VN');
 % plot(t_m, vecnorm(wind_est,2,2),'DisplayName','VNORM');
 % legend
-figure
-plot(t_m,wind_angle)
+% figure
+% plot(t_m,wind_angle)
 % overwrite the wind constants:
 
 
@@ -199,14 +199,13 @@ settings.wind.AzMax     =   mean(wind_angle);              % [rad] Maximum Azimu
 
 %% PARAMETER ESTIMATION
 options = optimoptions('fmincon','Display','iter-detailed');
-% options = optimoptions('ga','PlotFcn', @gaplotbestf);
-fun = @(x) computeCostFunction(x, t_m, y_m, R_m, settings, contSettings,deltaA);
+fun = @(x) computeCostFunctionFULL(x, t_m, y_m, R_m, settings, contSettings,deltaA);
 % deltaA must be a vector input with first column timestamps, second column
 % values
 done = false;
 while ~done
     try
-        % randomise initial guess
+        randomise initial guess
         rnd_coeff = 0.1;
         x0 = unifrnd(x0 - sign(x0).*x0*rnd_coeff, x0 + sign(x0).*x0*rnd_coeff);
         x = fmincon(fun, x0, A, b, [], [], [], [], [], options);
@@ -218,7 +217,7 @@ while ~done
         warning('off')
     end
 end
-% x = ga(fun, 15, A, b, [], [], [], [], [], options);
+
 
 %% print a .m with the new estimated coefficients
 saveFileNameNew = saveFileName;

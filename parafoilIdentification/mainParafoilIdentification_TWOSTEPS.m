@@ -166,9 +166,9 @@ y_m = [log_NAS.n,log_NAS.e,log_NAS.d, log_NAS.vn, log_NAS.ve, log_NAS. vd, log_N
 
 deltaA_time = t_m;
 for i = 1: length(t_m)
-    idx = find(t_m(i)>deltaA_time,1,"first");
+    idx = find(t_m(i)>log_deltaA.WingAlgorithmTimestamp,1,"last");
     if idx > 0
-        deltaA_value(i,1) = log_deltaA.servo1Angle(idx);
+        deltaA_value(i,1) = log_deltaA.pidOutput(idx);
     else
         deltaA_value(i,1) = 0;
     end

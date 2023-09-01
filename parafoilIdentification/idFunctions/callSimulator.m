@@ -16,7 +16,7 @@ function [T, Y] = callSimulator(deltaA,settings,contSettings,t_m, Y0)
     settings.constWind = [uw, vw, ww];
     tspan = t_m';
     deltaA(:,1) = deltaA(:,1)-t_m(1);
-    [T,Y]  = ode4(@descentParafoil,tspan,Y0,settings,contSettings,deltaA);
+    [T,Y]  = ode4(@descentParafoil,tspan,Y0,settings,contSettings,deltaA,[],0);
     % readjust states to have only the NAS ones
     Y = Y(:,[1:6,11:13,10]);
 
