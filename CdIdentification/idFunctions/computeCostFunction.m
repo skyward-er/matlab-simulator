@@ -11,15 +11,7 @@ function [outJ] = computeCostFunction(x, t_m, y_m, R_m, settings, contSettings,A
     % Compute cost function for the parameter estimation.
     % Inputs
     %   - x:   Coefficients
-    %   - y_m: 3D matrix with test results (i, j, k)
-    %             - i is the test number
-    %             - j is the sample number
-    %             - k is the state number
-    %                  -1-3:    position (inertial frame)
-    %                  -4-6:    quaternions
-    %                  -7-9:   velocity (body frame)
-    %                  -10-12:  angular velocity (body frame)
-    %                  -13-14:  input sig (control)
+    %   - y_m: nas measurements
     %   - R_m: Inverse of covariance matrix R^-1
     % Output
     %   - J:   Cost function used for the optimization
@@ -27,7 +19,6 @@ function [outJ] = computeCostFunction(x, t_m, y_m, R_m, settings, contSettings,A
     % Initialize parameters
     
     settings.CD_correction = x;
-
 
     % Initialize cost
     J = zeros(size(R_m));

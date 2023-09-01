@@ -86,20 +86,20 @@ log_NAS     = csvDataLogExtractor(fileNAS,"sec");
 log_ABK  = csvDataLogExtractor(fileOutputABK,"sec");
 
 % plot to see where you want to trim the struct
-figure
-subplot(1,2,1)
-plot(log_NAS.timestamp, log_NAS.d)
-subplot(1,2,2)
-plot3(log_NAS.n, log_NAS.e, -log_NAS.d)
-axis equal
+% figure
+% subplot(1,2,1)
+% plot(log_NAS.timestamp, log_NAS.d)
+% subplot(1,2,2)
+% plot3(log_NAS.n, log_NAS.e, -log_NAS.d)
+% axis equal
 
-figure
-subplot(3,1,1)
-plot(log_NAS.timestamp, log_NAS.vn)
-subplot(3,1,2)
-plot(log_NAS.timestamp, log_NAS.ve)
-subplot(3,1,3)
-plot(log_NAS.timestamp, log_NAS.vd)
+% figure
+% subplot(3,1,1)
+% plot(log_NAS.timestamp, log_NAS.vn)
+% subplot(3,1,2)
+% plot(log_NAS.timestamp, log_NAS.ve)
+% subplot(3,1,3)
+% plot(log_NAS.timestamp, log_NAS.vd)
 
 %% trim struct to ascent only
 t_start =3334; % after burning time, else 3328
@@ -136,11 +136,11 @@ ABK_time = ABK_time-time_offset;
 t_m = t_m-time_offset;
 ABK_perc = [ABK_time,ABK_value];
 %check correctness of the timestamps
-figure
-plot(log_ABK.timestamp-time_offset,log_ABK.position*settings.servo.maxAngle,'DisplayName','ABK log')
-hold on
-plot(ABK_time,ABK_value,'DisplayName','ABK log')
-legend
+% figure
+% plot(log_ABK.timestamp-time_offset,log_ABK.position*settings.servo.maxAngle,'DisplayName','ABK log')
+% hold on
+% plot(ABK_time,ABK_value,'DisplayName','ABK log')
+% legend
 
 
 
@@ -179,26 +179,14 @@ settings.constWind = [uw, vw, ww];
 
 %% PARAMETER ESTIMATION
 options = optimoptions('fmincon','Display','iter-detailed');
-% options = optimoptions('ga','PlotFcn', @gaplotbestf);
 fun = @(x) computeCostFunction(x, t_m, y_m, R_m, settings, contSettings,ABK_perc);
 % deltaA must be a vector input with first column timestamps, second column
 % values
-done = false;
-% while ~done
-%     try
-        % % randomise initial guess
-        rnd_coeff = 0.1;
-        x0 = unifrnd(x0 - sign(x0).*x0*rnd_coeff, x0 + sign(x0).*x0*rnd_coeff);
-        x = fmincon(fun, x0, A, b, [], [], [], [], [], options);
-        done = true;
-    % catch
-    %     done = false;
-    %     warning('on')
-    %     warning('Simulation failed; restarting...')
-    %     warning('off')
-    % end
-% end
-% x = ga(fun, 15, A, b, [], [], [], [], [], options);
+
+rnd_coeff = 0.1;
+x0 = unifrnd(x0 - sign(x0).*x0*rnd_coeff, x0 + sign(x0).*x0*rnd_coeff);
+x = fmincon(fun, x0, A, b, [], [], [], [], [], options);
+
 
 %% print a .m with the new estimated coefficients
 saveFileNameNew = saveFileName;
@@ -216,11 +204,16 @@ else
     fprintf(fid,"settings.CD_correction = %.6f;\n",x(1));
     fclose(fid);
 end
+
 %% verification of the estimation
-Y0 = [y_m(1,1:6), zeros(1,3), [y_m(1,10), y_m(1,7:9)],0]; % ode wants pos, vel, om, quat, deltaA as states, while nas retrieves only pos, vel, quat
+% Y0 = [y_m(1,1:6), zeros(1,3), [y_m(1,10), y_m(1,7:9)],0]; % ode wants pos, vel, om, quat, deltaA as states, while nas retrieves only pos, vel, quat
+Y0 = [y_m(1,1:6), zeros(1,3), y_m(1,7:10),0]; % ode wants pos, vel, om, quat, deltaA as states, while nas retrieves only pos, vel, quat
 Y0(1,4:6) = quatrotate(Y0(1,10:13),Y0(1,4:6));
+
+
 % recall estimated coefficients for the simulation
 run(saveFileNameNew)
+
 % call simulation
 [t_sim, y_sim] = callSimulatorAscent(ABK_perc, settings,contSettings,t_m,Y0);
 
@@ -251,6 +244,34 @@ plot(t_m,y_m(:,6),'DisplayName','Measured')
 hold on;
 plot(t_sim,y_sim(:,6),'DisplayName','Simulated')
 ylabel('V_D')
+legend
+sgtitle('Velocities')
+
+
+figure
+subplot(2,2,1)
+plot(t_m,y_m(:,7),'DisplayName','Measured')
+hold on;
+plot(t_sim,y_sim(:,10),'DisplayName','Simulated')
+subplot(2,2,2)
+plot(t_m,y_m(:,8),'DisplayName','Measured')
+hold on;
+plot(t_sim,y_sim(:,11),'DisplayName','Simulated')
+subplot(2,2,3)
+plot(t_m,y_m(:,9),'DisplayName','Measured')
+hold on;
+plot(t_sim,y_sim(:,12),'DisplayName','Simulated')
+subplot(2,2,4)
+plot(t_m,y_m(:,10),'DisplayName','Measured')
+hold on;
+plot(t_sim,y_sim(:,13),'DisplayName','Simulated')
+legend
+sgtitle('Quaternions')
+
+figure
+plot(ABK_perc(:,1),ABK_perc(:,2),'DisplayName','Measured')
+hold on;
+plot(t_sim,y_sim(:,14),'DisplayName','Simulated')
 
 % load('gong')
 % sound(0.2*y,Fs)
@@ -267,12 +288,3 @@ estimatedCorrectionFactor;
 [simOutput] = std_run(settings,contSettings);
 settings.flagExportPLOTS = false;
 std_plots(simOutput,settings,contSettings)
-
-
-
-
-
-
-
-
-    

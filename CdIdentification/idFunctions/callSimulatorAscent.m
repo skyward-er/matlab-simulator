@@ -15,9 +15,9 @@
 function [T, Y] = callSimulatorAscent(ABK_pos,settings,contSettings,t_m, Y0)
     [T,Y]  = ode4(@ascentControlV2,t_m',Y0,settings,contSettings,ABK_pos,[], 0);
     % readjust states to have only the NAS ones
-    Y = Y(:,[1:6,11:13,10]);
+    % Y = Y(:,[1:9,11:13,10,14]);
 
     % Rotate body velocities to ned
-    Y(:,4:6) = quatrotate(quatconj(Y(:,[10,7:9])),Y(:,4:6));
+    Y(:,4:6) = quatrotate(quatconj(Y(:,[7:10])),Y(:,4:6));
 
 end
