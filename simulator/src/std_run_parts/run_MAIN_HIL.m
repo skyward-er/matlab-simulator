@@ -31,13 +31,13 @@ OUTPUTS:
     % Author: Pier Francesco Bachini
     % Skyward Experimental Rocketry | AVN Dept
     % email: pierfrancesco.bachini@skywarder.eu
-    % Revision date: 27/08/2022
+    % Revision date: 27/08/2023
 
     global isLaunch
 
     % set gps fix and number of satellites
-    sp.gps_fix = 3;
-    sp.gps_nsat = 16;
+    sp.gps.fix = 3;
+    sp.gps.nsat = 16;
 
     % sending sensor data over the serial port
     sendDataOverSerial(sensorData, sp, z0, flagsArray);

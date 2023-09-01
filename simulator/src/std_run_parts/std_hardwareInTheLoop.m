@@ -19,8 +19,8 @@ else
     SVM_model = settings.SVM_2;
 end
 for i = goodSensors
-    chunk{i}(1,1:end-length(sp.pn_sens{i})) = chunk{i}(1+length(sp.pn_sens{i}):end);
-    chunk{i}(1,end-length(sp.pn_sens{i})+1:end) = sp.pn_sens{i};
+    chunk{i}(1,1:end-length(sp.barometer_sens{i}.measures)) = chunk{i}(1+length(sp.barometer_sens{i}.measures):end);
+    chunk{i}(1,end-length(sp.barometer_sens{i}.measures)+1:end) = sp.barometer_sens{i}.measures;
     if length(chunk{i})>SVM_model.N_sample
         warning('chunk length is greater than %d samples',SVM_model.N_sample)
     end
@@ -33,19 +33,9 @@ v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
 
 flagsArray = [flagFlight, settings.flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2];
 
-% Convert the gps position from meter to degrees
-[latitude, longitude, ~] = ned2geodetic( ...
-    sensorData.gps.positionMeasures(1), ...
-    sensorData.gps.positionMeasures(2), ...
-    sensorData.gps.positionMeasures(3), ...
-    settings.lat0, settings.lon0, settings.z0, wgs84Ellipsoid);
-sensorData.gps.latitude = latitude;
-sensorData.gps.longitude = longitude;
-
 % Add gravity acceleration only when still on ramp
 if ~flagFlight
-    % sensorData.accelerometer.measures = sensorData.accelerometer.measures + (quat2rotm(Yf(1,11:14)) * [0;0;9.81])';
-    sp.accel = sp.accel + (quat2rotm(Yf(end,10:13)) * [0;0;9.81])';
+    sp.accelerometer.measures = sp.accelerometer.measures + (quat2rotm(Yf(end,10:13)) * [0;0;9.81])';
 end
 
 % Execute serial communication with obsw
@@ -93,7 +83,7 @@ end
 sensorData.kalman.time(iTimes) = Tf(end);
 sensorData.kalman.x_c = x_est;
 x_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1,:)  = sensorData.kalman.x_c(:,:); % NAS position output
-t_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1)    = sensorData.accelerometer.time(1); % NAS time output
+t_est_tot(c.n_est_old:c.n_est_old + size(sensorData.kalman.x_c(:,1),1)-1)    = sensorData.accelerometer.time(end); % NAS time output
 c.n_est_old = c.n_est_old + size(sensorData.kalman.x_c,1);
 
 Q = x_est(end, [10, 7:9]);

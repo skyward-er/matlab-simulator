@@ -20,34 +20,34 @@ INPUTS:
     % Author: Pier Francesco Bachini
     % Skyward Experimental Rocketry | AVN Dept
     % email: pierfrancesco.bachini@skywarder.eu
-    % Revision date: 27/08/2022
+    % Revision date: 27/08/2023
 
     % For a replication in the timestamps we take all the values but the last one
-    dataToBeSent.accelerometer = sp.accel(1:end - 1, :);
-    dataToBeSent.gyro = sp.gyro(1:end - 1, :);
-    dataToBeSent.magnetometer = sp.mag(1:end - 1, :);
+    dataToBeSent.accelerometer = sp.accelerometer.measures(1:end - 1, :);
+    dataToBeSent.gyro = sp.gyro.measures(1:end - 1, :);
+    dataToBeSent.magnetometer = sp.magnetometer.measures(1:end - 1, :);
 
-    dataToBeSent.gps.positionMeasures = [sp.gps(:, 1:2), - (sp.gps(:, 3) - z0)];
-    dataToBeSent.gps.velocityMeasures = sp.gpsv;
-    dataToBeSent.gps.fix = sp.gps_fix;
-    dataToBeSent.gps.nsat = sp.gps_nsat;
+    dataToBeSent.gps.positionMeasures = [sp.gps.positionMeasures(:, 1:2), - (sp.gps.positionMeasures(:, 3) - z0)];
+    dataToBeSent.gps.velocityMeasures = sp.gps.velocityMeasures;
+    dataToBeSent.gps.fix = sp.gps.fix;
+    dataToBeSent.gps.nsat = sp.gps.nsat;
 
-    for i = 1:size(sp.pn_sens, 2)
-        dataToBeSent.barometer_sens(i, :) = sp.pn_sens{i};
+    for i = 1:size(sp.barometer_sens, 2)
+        dataToBeSent.barometer_sens(i, :) = sp.barometer_sens{i}.measures;
 
         if isempty(dataToBeSent.barometer_sens(i, :))
-            dataToBeSent.barometer_sens(i, :) = reshape(sp.pn_sens{i}(1:end-1), 1, []);
+            dataToBeSent.barometer_sens(i, :) = reshape(sp.barometer_sens{i}.measures(1:end-1), 1, []);
         end
 
     end
 
-    dataToBeSent.chamberPressure = sp.cp(1:end-1);
+    dataToBeSent.chamberPressure = sp.chamberPressure.measures(1:end-1);
 
-    dataToBeSent.pitot.dp = sp.p0_pitot(1:end-1) - sp.p_pitot(1:end-1);
+    dataToBeSent.pitot.dp = sp.pitot.pTotMeasures(1:end-1) - sp.pitot.pStatMeasures(1:end-1);
 
-    dataToBeSent.pitot.p0 = sp.p0_pitot(1:end-1);
+    dataToBeSent.pitot.p0 = sp.pitot.pTotMeasures(1:end-1);
 
-    dataToBeSent.temperature = sensorData.barometer_sens{1}.temperature(end);
+    dataToBeSent.temperature = sp.barometer_sens{1}.temperature(end);
 
     dataToBeSent.flags.flagFligth = cast(flags(1), "double");
     dataToBeSent.flags.flagAscent = cast(flags(2), "double");
