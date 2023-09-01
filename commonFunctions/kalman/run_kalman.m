@@ -97,8 +97,8 @@ For more information check the navigation system report
                  INSTANTS. [12x12x10]
 -----------------------------------------------------------------------
 %}
-tv          =   sp.t_acc;
-[fix, nsat] =   gpsFix(sp.accel);
+tv          =   sp.accelerometer.time;
+[fix, nsat] =   gpsFix(sp.accelerometer.measures);
 
 dt_k        =   tv(2)-tv(1);                 % Time step of the kalman
 x_lin       =   zeros(length(tv),6);         % Pre-allocation of corrected estimation
@@ -125,42 +125,42 @@ index_mag=1;
 index_pit=1;
 
 % Time vectors agumentation
-t_gpstemp  = [sp.t_gps,  tv(end) + dt_k];
-t_barotemp = [sp.t_baro, tv(end) + dt_k];
-t_magtemp  = [sp.t_mag,  tv(end) + dt_k];
-t_pittemp  = [sp.t_pit,   tv(end) + dt_k];
+t_gpstemp  = [sp.gps.time,  tv(end) + dt_k];
+t_barotemp = [sp.barometer.time, tv(end) + dt_k];
+t_magtemp  = [sp.magnetometer.time,  tv(end) + dt_k];
+t_pittemp  = [sp.pitot.time,   tv(end) + dt_k];
 
-[sp.gps(:,1),sp.gps(:,2),sp.gps(:,3)]  = geodetic2ned(sp.gps(:,1), sp.gps(:,2), sp.gps(:,3), kalman.lat0, kalman.lon0, kalman.z0, kalman.spheroid, 'degrees');
+[sp.gps.positionMeasures(:,1),sp.gps.positionMeasures(:,2),sp.gps.positionMeasures(:,3)]  = geodetic2ned(sp.gps.positionMeasures(:,1), sp.gps.positionMeasures(:,2), sp.gps.positionMeasures(:,3), kalman.lat0, kalman.lon0, kalman.z0, kalman.spheroid, 'degrees');
 for i=2:length(tv)
     %% Prediction part
 
     [x_lin(i,:),v(i,:),P_lin(:,:,i)] = predictorLinear2(x_lin(i-1,:),P_lin(:,:,i-1),...
-        dt_k,sp.accel(i-1,:),xq(i-1,1:4),kalman.QLinear);
+        dt_k,sp.accelerometer.measures(i-1,:),xq(i-1,1:4),kalman.QLinear);
 
     [xq(i,:),P_q(:,:,i)]       = predictorQuat(xq(i-1,:),P_q(:,:,i-1),...
-        sp.gyro(i-1,:),dt_k,kalman.Qq);
+        sp.gyro.measures(i-1,:),dt_k,kalman.Qq);
 
 
     %% Corrections
     if tv(i) >= t_gpstemp(index_GPS)              %Comparison to see the there's a new measurement
-        [x_lin(i,:),P_lin(:,:,i),~]     = correctionGPS(x_lin(i,:),P_lin(:,:,i),sp.gps(index_GPS,1:2),...
-            sp.gpsv(index_GPS,1:2),kalman.sigma_GPS,nsat,fix);
+        [x_lin(i,:),P_lin(:,:,i),~]     = correctionGPS(x_lin(i,:),P_lin(:,:,i),sp.gps.positionMeasures(index_GPS,1:2),...
+            sp.gps.velocityMeasures(index_GPS,1:2),kalman.sigma_GPS,nsat,fix);
         index_GPS   =  index_GPS + 1;
     end
 
     if tv(i) >= t_barotemp(index_bar)              %Comparison to see the there's a new measurement
-        [x_lin(i,:),P_lin(:,:,i),~]     = correctionBarometer(x_lin(i,:),P_lin(:,:,i),sp.h_baro(index_bar),kalman.sigma_baro);
+        [x_lin(i,:),P_lin(:,:,i),~]     = correctionBarometer(x_lin(i,:),P_lin(:,:,i),sp.barometer.z(index_bar),kalman.sigma_baro);
         index_bar   =  index_bar + 1;
     end
 
     if tv(i) >= t_magtemp(index_mag)               %Comparison to see the there's a new measurement
-        [xq(i,:),P_q(:,:,i),~,~]        = correctorQuat(xq(i,:),P_q(:,:,i),sp.mag(index_mag,:),kalman.sigma_mag,mag_NED);
+        [xq(i,:),P_q(:,:,i),~,~]        = correctorQuat(xq(i,:),P_q(:,:,i),sp.magnetometer.measures(index_mag,:),kalman.sigma_mag,mag_NED);
         index_mag    =  index_mag + 1;
     end
 
     if flagAscent && ~flagStopPitotCorrection
         if tv(i) >= t_pittemp(index_pit)
-            [x_lin(i,:),P_lin(4:6,4:6,i),~] = correctionPitot(x_lin(i,:),P_lin(4:6,4:6,i),sp.p0_pitot(index_pit,:),sp.p_pitot(index_pit,:),kalman.sigma_pitot,xq(i,1:4),kalman.Mach_max);
+            [x_lin(i,:),P_lin(4:6,4:6,i),~] = correctionPitot(x_lin(i,:),P_lin(4:6,4:6,i),sp.pitot.pTotMeasures(index_pit,:),sp.pitot.pStatMeasures(index_pit,:),kalman.sigma_pitot,xq(i,1:4),kalman.Mach_max);
             index_pit    =  index_pit + 1;
         end
     end

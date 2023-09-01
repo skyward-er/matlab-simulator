@@ -21,8 +21,8 @@ else
     SVM_model = settings.SVM_2;
 end
 for i = goodSensors
-    chunk{i}(1,1:end-length(sp.pn_sens{i})) = chunk{i}(1+length(sp.pn_sens{i}):end);
-    chunk{i}(1,end-length(sp.pn_sens{i})+1:end) = sp.pn_sens{i};
+    chunk{i}(1,1:end-length(sp.barometer_sens{i}.measures)) = chunk{i}(1+length(sp.barometer_sens{i}.measures):end);
+    chunk{i}(1,end-length(sp.barometer_sens{i}.measures)+1:end) = sp.barometer_sens{i}.measures;
     if length(chunk{i})>SVM_model.N_sample
         warning('chunk length is greater than %d samples',SVM_model.N_sample)
     end
@@ -45,7 +45,7 @@ end
 
 if settings.flagADA && settings.dataNoise && length(sensorData.barometer.time) > 1 ...
         && sensorData.barometer.time(1) >= settings.baro_old
-    [xp_ada, xv_ada, P_ada, settings.ada]   =  run_ADA(ada_prev, Pada_prev, sp.pn, sensorData.barometer.time, settings.ada);
+    [xp_ada, xv_ada, P_ada, settings.ada]   =  run_ADA(ada_prev, Pada_prev, sp.barometer.measures, sensorData.barometer.time, settings.ada);
 
     xp_ada_tot(sensorTot.n_ada_old:sensorTot.n_ada_old + size(xp_ada(:,1),1) -1,:)  = xp_ada(1:end,:);
     xv_ada_tot(sensorTot.n_ada_old:sensorTot.n_ada_old + size(xv_ada(:,1),1)-1,:)  = xv_ada(1:end,:);

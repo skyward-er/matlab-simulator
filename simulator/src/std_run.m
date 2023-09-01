@@ -282,7 +282,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     %% subsystems
 
     % SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU
-
+    settings.electronics = true;
     if not(settings.electronics)
 
         std_subsystems;
@@ -366,11 +366,11 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     ap_ref_tot(n_old:n_old+n-1) = ap_ref(2)* ones(n,1);
     ap_ref_time_tot(n_old:n_old+n-1) = t1* ones(n,1);
     sensorTot.v_ned_tot(n_old:n_old+n-1,:) = v_ned;
-    barometer_measure{1} = [barometer_measure{1}, sp.pn_sens{1}(end)];
-    barometer_measure{2} = [barometer_measure{2}, sp.pn_sens{2}(end)];
-    barometer_measure{3} = [barometer_measure{3}, sp.pn_sens{3}(end)];
+    barometer_measure{1} = [barometer_measure{1}, sp.barometer_sens{1}.measures(end)];
+    barometer_measure{2} = [barometer_measure{2}, sp.barometer_sens{2}.measures(end)];
+    barometer_measure{3} = [barometer_measure{3}, sp.barometer_sens{3}.measures(end)];
     barometer_time = [barometer_time t1];
-    sfd_mean_p = [sfd_mean_p sp.pn(end)];
+    sfd_mean_p = [sfd_mean_p sp.barometer.measures];
     faults = [faults; settings.faulty_sensors];
     n_old = n_old + n -1;
 

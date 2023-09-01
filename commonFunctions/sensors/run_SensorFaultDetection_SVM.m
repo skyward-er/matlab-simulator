@@ -39,12 +39,12 @@ goodSensors = goodSensors(not(faulty_sensors));
 
 sensorData.barometer.time = sensorData.barometer_sens{1}.time';
 sensorData.barometer.t0 = sensorData.barometer_sens{1}.t0;
-sp.t_baro = sensorData.barometer.time;
-h_baro = zeros(length(goodSensors),length(sp.h_baro_sens{1}));
-pn = zeros(length(goodSensors),length(sp.pn_sens{1}));
+sp.barometer.time = sensorData.barometer.time;
+h_baro = zeros(length(goodSensors),length(sp.barometer_sens{1}.z));
+pn = zeros(length(goodSensors),length(sp.barometer_sens{1}.measures));
 for i_baro = 1:length(goodSensors)
-    h_baro(i_baro,:) = sp.h_baro_sens{goodSensors(i_baro)};
-    pn(i_baro,:) = sp.pn_sens{goodSensors(i_baro)};
+    h_baro(i_baro,:) = sp.barometer_sens{goodSensors(i_baro)}.z; 
+    pn(i_baro,:) = sp.barometer_sens{goodSensors(i_baro)}.measures;
 end
-sp.h_baro = mean(h_baro,1);
-sp.pn = mean(pn,1);
+sp.barometer.z = mean(h_baro,1);
+sp.barometer.measures = mean(pn,1);
