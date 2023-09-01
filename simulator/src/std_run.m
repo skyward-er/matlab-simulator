@@ -282,7 +282,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     %% subsystems
 
     % SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU
-    % settings.electronics = true; % ELIMINARE? PIER?
+    
     if not(settings.electronics)
 
         std_subsystems;
