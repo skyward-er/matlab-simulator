@@ -7,7 +7,7 @@ hardware in the loop script
 %% Update Sensor fault data
 
 % NOTE: As sensor fault detection is not yet completely implemented on
-% obsw, the algorithm is currently run on the simulator. 
+% obsw, the algorithm is currently run on the simulator.
 % This code is temporary and will be changed with the hil implementation
 % once it is completed.
 
@@ -29,7 +29,6 @@ end
 
 
 %% Prepare data to be sent to and read from obsw
-v_ned = quatrotate(quatconj(Yf(:, 10:13)), Yf(:, 4:6));
 
 flagsArray = [flagFlight, settings.flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2];
 
@@ -74,8 +73,8 @@ settings.baro_old = sensorData.barometer.time(end);
 sensorData.nas.time(iTimes) = Tf(end);
 sensorData.nas.states = hilData.nas.x_est;
 
-sensorTot.nas.x(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.x(:,1),1)-1,:)  = sensorData.nas.x(:,:); % NAS output
-sensorTot.nas.t(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.x(:,1),1)-1)    = sensorData.accelerometer.time(end); % NAS time output
+sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-1,:)  = sensorData.nas.states(:,:); % NAS output
+sensorTot.nas.time(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-1)    = sensorData.accelerometer.time(end); % NAS time output
 sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1);
 
 if ~flagFlight
@@ -117,7 +116,7 @@ if settings.shutdown && not(lastShutdown) && flagFlight     % Need to check if t
     settings.expMengineCut = m - settings.ms;
     settings.shutdown = 1;
     settings = settingsEngineCut(settings);
-    settings.quatCut = [sensorTot.nas.x(end,10) sensorTot.nas.x(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
+    settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
     [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
     sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
 elseif ~settings.shutdown && Tf(end) >= settings.tb
@@ -128,7 +127,7 @@ elseif ~settings.shutdown && Tf(end) >= settings.tb
     settings.expMengineCut = m - settings.ms;
     settings.shutdown = 1;
     settings = settingsEngineCut(settings);
-    settings.quatCut = [sensorTot.nas.x(end,10) sensorTot.nas.x(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
+    settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
     [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
     sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
 end
@@ -145,7 +144,7 @@ if flagAeroBrakes && mach < settings.MachControl
         % Update previous control value for airbrakes
         ap_ref_old = ap_ref_new;
         t_last_arb_control = Tf(end);
-        settings.quat = [sensorTot.nas.x(end, [10,7:9])];
+        settings.quat = [sensorTot.nas.states(end, [10,7:9])];
         [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
     end
 end
