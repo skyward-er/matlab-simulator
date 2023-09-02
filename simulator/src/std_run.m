@@ -422,12 +422,6 @@ end
 t_ada    = settings.ada.t_ada;
 settings.flagMatr = settings.flagMatr(1:n_old, :);
 
-%% other useful parameters:
-qdyn = zeros(size(Yf,1),1);
-for k = 1:size(Yf,1)
-    [~,~,~,rho] = atmosisa(-Yf(k,3));
-    qdyn(k,1) = 1/2 * norm([Yf(k,4), Yf(k,5), Yf(k,6)])^2 * rho;
-end
 %% RETRIVE PARAMETERS FROM THE ODE (RECALL ODE)
 
 if ~settings.electronics && ~settings.montecarlo && not(settings.scenario == "descent")

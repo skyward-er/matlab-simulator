@@ -20,8 +20,8 @@ legend('Range of acceptable apogees')
 if ~(strcmp(contSettings.algorithm,'engine')||strcmp(contSettings.algorithm,'NoControl'))
     arb_deploy_time_vec = zeros(N_sim,1);
     for i = 1: N_sim
-        if isfield(save_thrust{i},'ARB_allowanceTime')
-        arb_deploy_time_vec(i) = save_thrust{i}.ARB_allowanceTime;
+        if isfield(save_thrust{i},'ARB')
+            arb_deploy_time_vec(i) = save_thrust{i}.ARB.allowanceTime;
         end
     end
     arb_deploy_time_MEAN = mean(arb_deploy_time_vec);
@@ -41,7 +41,7 @@ end
 %% APOGEE TIME HISTOGRAM - this plot is particularly interesting for the shadowmodes
 apogee_time_vec = zeros(N_sim,1);
 for i = 1: N_sim
-    apogee_time_vec(i) = save_thrust{i}.apogee_time;
+    apogee_time_vec(i) = save_thrust{i}.apogee.time;
 end
 apogee_time_MEAN = mean(apogee_time_vec);
 apogee_time_MODE = mode(apogee_time_vec);
@@ -124,7 +124,7 @@ legend(contSettings.algorithm);
     save_tShutdown_wind = figure;
     subplot(1,3,1)
     for i = 1:N_sim
-        plot(wind_el(i),save_thrust{i}.t_shutdown,'.')
+        plot(wind_el(i),save_thrust{i}.sensors.mea.t_shutdown,'.')
         hold on; grid on;
     end
     title('shutdown time w.r.t. wind elevation')
@@ -134,7 +134,7 @@ legend(contSettings.algorithm);
     %%%
     subplot(1,3,2)
     for i = 1:N_sim
-        plot(wind_az(i),save_thrust{i}.t_shutdown,'.')
+        plot(wind_az(i),save_thrust{i}.sensors.mea.t_shutdown,'.')
         hold on; grid on;
     end
     title('shutdown time w.r.t. wind azimuth')
@@ -146,7 +146,7 @@ legend(contSettings.algorithm);
     %%%
     subplot(1,3,3)
     for i = 1:N_sim
-        plot(thrust_percentage(i),save_thrust{i}.t_shutdown,'.')
+        plot(thrust_percentage(i),save_thrust{i}.sensors.mea.t_shutdown,'.')
         hold on;
         grid on;
     end
@@ -160,7 +160,7 @@ legend(contSettings.algorithm);
 %% PLOT TRAJECTORY
 
 save_plotTrajectory = figure;
-for i = floor(linspace(1,size(save_thrust,1),500))
+for i = floor(linspace(1,size(save_thrust,1),50))
     plot3(save_thrust{i}.Y(1:end-2,1),save_thrust{i}.Y(1:end-2,2),-save_thrust{i}.Y(1:end-2,3),'HandleVisibility','off');
     hold on; grid on;
 end
@@ -207,11 +207,11 @@ end
 %% PLOT APOGEE 3D
 if ~settings.wind.model && ~settings.wind.input
     for i = 1:N_sim
-        wind_Mag(i) = save_thrust{i}.windMag;
-        wind_az(i) = save_thrust{i}.windAz;
-        wind_el(i) = save_thrust{i}.windEl;
+        wind_Mag(i) = save_thrust{i}.wind.Mag;
+        wind_az(i) = save_thrust{i}.wind.Az;
+        wind_el(i) = save_thrust{i}.wind.El;
     end
-save_apogee_3D = figure('units','normalized','outerposition',[0 0 1 1]);
+save_apogee_3D = figure('units','normalized');
 %%%%%%%%%% wind magnitude - thrust - apogee
 subplot(2,2,1)
 hold on; grid on;
@@ -287,10 +287,12 @@ end
 qdyn_max = zeros(size(save_thrust));
 max_force_kg = zeros(size(save_thrust));
 for i =1:N_sim
-    qdyn_max(i) = max(save_thrust{i}.qdyn);
-    dS = 3*0.009564 * save_thrust{i}.Y(:,14);
-    force = save_thrust{i}.qdyn .* dS;
-    max_force_kg(i) = max(force/9.81);
+    [~,~,~,rho] = atmosisa(-save_thrust{i}.Y(:,3));
+    qdyn = 1/2 * vecnorm(save_thrust{i}.Y(:,4:6),2,2).^2 .* rho;
+    qdyn_max(i) = max(abs(qdyn));
+    dS = 3*settings.arb.surfPol * save_thrust{i}.Y(:,14);
+    force = qdyn .* dS;
+    max_force_kg(i) = max(abs(force))/9.81;
 end
 
 save_dynamic_pressure_and_forces = figure;
@@ -312,7 +314,7 @@ xlabel('Max Load on ABK (kg)')
 %% PLOT ESTIMATED FINAL MASS
 est_mass = zeros(size(save_thrust));
 for i = 1:length(save_thrust)
-    est_mass(i) = save_thrust{i}.estimated_mass(end);
+    est_mass(i) = save_thrust{i}.sensors.mea.mass(end);
 end
 figure
 histogram(est_mass,N_histCol)

@@ -59,6 +59,7 @@ end
 %% CONFIGs
 
 conf.script = "simulator"; % this defines which configuration scripts to run
+settings.montecarlo = false;
 config; 
 
 %% ALGORITHM TUNING

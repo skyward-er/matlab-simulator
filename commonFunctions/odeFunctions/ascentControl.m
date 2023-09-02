@@ -429,6 +429,7 @@ end
 
         parout.air.rho = rho;
         parout.air.P = P;
+        parout.air.qdyn = 0.5*rho*V_norm^2;
 
         parout.accelerations.body_acc = [du, dv, dw];
         parout.accelerations.ang_acc = [dp, dq, dr];

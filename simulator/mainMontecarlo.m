@@ -15,7 +15,13 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 clearvars -except ZTARGET_CYCLE
-close all; clear; clc;
+
+if ~exist('flagSubmodulesUpdated','var') % every first time you use the simulator checks for updates, then stops doing it (note: if you clear all vars it starts doing it)
+    close all; clear; clc;
+else
+    close all; clc;
+    clearvars -except flagSubmodulesUpdated
+end
 
 %% recall the first part of the MAIN script
 % adds folders to the path and retrieves rocket, mission, simulation, etc
@@ -41,11 +47,11 @@ addpath(genpath(commonFunctionsPath));
 
 %% CONFIGs
 conf.script = "simulator";
+settings.montecarlo = true;
 config;
 
 %% MONTECARLO SETTINGS
 rng default
-settings.montecarlo = true;
 matlab_graphics;
 
 %% check on the simulation profile:
@@ -147,29 +153,30 @@ for alg_index = 4
     for i = 1:N_sim
 
         % apogee
-        apogee.altitude(i) = save_thrust{i}.apogee_coordinates(3);
+        apogee.altitude(i) = save_thrust{i}.apogee.coordinates(3);
 
         % radius of apogee (horizontal) from the initial point
-        apogee.radius(i) = save_thrust{i}.apogee_radius;
+        apogee.radius(i) = save_thrust{i}.apogee.radius;
 
         % horizontal speed at apogee
-        apogee.horizontalSpeed(i) = norm(save_thrust{i}.Y(end,4:6)); % in theory this is the body frame, but as the last point is the apogee we should have only  horizontal velocity, so all the components must be taken
+        idx_apo = save_thrust{i}.apogee.idx;
+        apogee.horizontalSpeed(i) = norm(save_thrust{i}.Y(idx_apo,4:6)); % this is in body frame, but as the last point is the apogee we should have only  horizontal velocity, so all the components must be taken
 
         % time of engine shutdown
-        t_shutdown.value(i) = save_thrust{i}.t_shutdown;
+        t_shutdown.value(i) = save_thrust{i}.sensors.mea.t_shutdown;
 
         if ~settings.wind.model && ~settings.wind.input
             % wind magnitude
-            wind_Mag(i) = save_thrust{i}.windMag;
+            wind_Mag(i) = save_thrust{i}.wind.Mag;
             % wind azimuth
-            wind_az(i) = save_thrust{i}.windAz;
+            wind_az(i) = save_thrust{i}.wind.Az;
             %wind elevation
-            wind_el(i) = save_thrust{i}.windEl;
+            wind_el(i) = save_thrust{i}.wind.El;
         end
         %reached apogee time
-        apogee.times(i) = save_thrust{i}.apogee_time;
-        apogee.prediction(i) = save_thrust{i}.predicted_apogee(end);
-        apogee.prediction_last_time(i) = length(save_thrust{i}.predicted_apogee)/settings.frequencies.controlFrequency;
+        apogee.times(i) = save_thrust{i}.apogee.time;
+        apogee.prediction(i) = save_thrust{i}.sensors.mea.prediction(end);
+        apogee.prediction_last_time(i) = save_thrust{i}.sensors.mea.prediction(end)/settings.frequencies.controlFrequency;
        
         % save apogees within +-10 meters from target:
         if abs(apogee.altitude(i) - settings.z_final)<=10
@@ -181,9 +188,9 @@ for alg_index = 4
         end
        
         % landing
-        landing.position(i,:) = save_thrust{i}.landing_position;
-        landing.velocities_BODY(i,:) = save_thrust{i}.landing_velocities_BODY;
-        landing.velocities_NED(i,:) = save_thrust{i}.landing_velocities_NED;
+        landing.position(i,:) = save_thrust{i}.PRF.landing_position;
+        landing.velocities_BODY(i,:) = save_thrust{i}.PRF.landing_velocities_BODY;
+        landing.velocities_NED(i,:) = save_thrust{i}.PRF.landing_velocities_NED;
         landing.distance_to_target(i) = norm(settings.payload.target(1:2)-landing.position(i,1:2)');
 
         % save apogees within 50 meters (radius) from target:
@@ -245,7 +252,8 @@ for alg_index = 4
         landing_mu(i) = mean(landing.distance_to_target(1:i));
         landing_sigma(i) = std(landing.distance_to_target(1:i));
     end
-
+    
+    
     %% PLOTS
 
     plotsMontecarlo;

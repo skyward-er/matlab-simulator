@@ -221,15 +221,11 @@ dY = dY';
 parout.wind.NED_wind = [uw, vw, ww];
 parout.wind.body_wind = wind_body;
 
+
+parout.air.qdyn = 0.5*rho*V_norm^2;
 parout.accelerations.body_acc = bodyAcc;%[du, dv, dw];
 
 parout.accelerometer.body_acc = F_AERO/mass;
-
-
-
-
-
-
 
 
 
