@@ -90,10 +90,10 @@ R_m = R^-1;
 
 %% extract data from simulation
 % file
-logN = "log37";
-fileNAS     = "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\parafoil\"+logN+"\"+logN+"_Boardcore__NASState.csv";
-filedeltaA  = "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\parafoil\"+logN+"\"+logN+"_Parafoil__WingAlgorithmData.csv";
-% readmatrix("")
+logN = "log05";
+user = "Max";
+fileNAS     = "C:\Users\"+user+"\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\parafoil\"+logN+"\"+logN+"_Boardcore__NASState.csv";
+filedeltaA  = "C:\Users\"+user+"\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\parafoil\"+logN+"\"+logN+"_Parafoil__WingAlgorithmData.csv";
 
 % extraction
 log_NAS     = csvDataLogExtractor(fileNAS,"sec");
@@ -140,14 +140,13 @@ log_deltaA = structCutter(log_deltaA,'timestamp',t_start,t_end);
 
 %% extract arrays
 t_m = log_NAS.timestamp;
-t_m = t_m-t_m(1);
 y_m = [log_NAS.n,log_NAS.e,log_NAS.d, log_NAS.vn, log_NAS.ve, log_NAS. vd, log_NAS.qw, log_NAS.qx, log_NAS.qy, log_NAS.qz];
 
 deltaA_time = t_m;
 for i = 1: length(t_m)
-    idx = find(t_m(i)>deltaA_time,1,"first");
+    idx = find(t_m(i)>log_deltaA.WingAlgorithmTimestamp,1,"last");
     if idx > 0
-        deltaA_value(i,1) = log_deltaA.servo1Angle(idx);
+        deltaA_value(i,1) = log_deltaA.pidOutput(idx);
     else
         deltaA_value(i,1) = 0;
     end
@@ -159,10 +158,18 @@ if forced_angle ~= 0
     warning('WARNING: you set a forced angle different from zero, be sure this is intended')
     warning('on');
 end
+deltaA_time = deltaA_time - t_m(1);
+t_m = t_m-t_m(1);
 deltaA = [deltaA_time,deltaA_value+forced_angle];
 % there are no angular velocities in the NAS states, so keep it like this
 % for now
 
+% check the correctness of the timestamps
+% figure
+% plot(log_deltaA.WingAlgorithmTimestamp,log_deltaA.pidOutput,'DisplayName','log')
+% hold on;
+% plot(deltaA_time,deltaA_value,'DisplayName','array')
+% legend
 %% compute WIND
 for i = 1:length(t_m)
     [contSettings.WES] = run_WES(y_m(i,4:5),contSettings.WES);
@@ -178,8 +185,8 @@ wind_angle = atan2(wind_est(:,2),wind_est(:,1));
 % plot(t_m, wind_est(:,2),'DisplayName','VN');
 % plot(t_m, vecnorm(wind_est,2,2),'DisplayName','VNORM');
 % legend
-figure
-plot(t_m,wind_angle)
+% figure
+% plot(t_m,wind_angle)
 % overwrite the wind constants:
 
 
@@ -192,8 +199,7 @@ settings.wind.AzMax     =   mean(wind_angle);              % [rad] Maximum Azimu
 
 %% PARAMETER ESTIMATION
 options = optimoptions('fmincon','Display','iter-detailed');
-% options = optimoptions('ga','PlotFcn', @gaplotbestf);
-fun = @(x) computeCostFunction(x, t_m, y_m, R_m, settings, contSettings,deltaA);
+fun = @(x) computeCostFunctionFULL(x, t_m, y_m, R_m, settings, contSettings,deltaA);
 % deltaA must be a vector input with first column timestamps, second column
 % values
 done = false;
@@ -211,7 +217,7 @@ while ~done
         warning('off')
     end
 end
-% x = ga(fun, 15, A, b, [], [], [], [], [], options);
+
 
 %% print a .m with the new estimated coefficients
 saveFileNameNew = saveFileName;
@@ -259,7 +265,6 @@ else
 end
 %% verification of the estimation
     Y0 = [y_m(1,1:6), zeros(1,3), [y_m(1,10), y_m(1,7:9)],0]; % ode wants pos, vel, om, quat, deltaA as states, while nas retrieves only pos, vel, quat
-%     Y0 = [y_m(1,1:6), zeros(1,3), 1,0,0,0,0];
     Y0(1,4:6) = quatrotate(Y0(1,10:13),Y0(1,4:6));
 % recall estimated coefficients for the simulation
 run(saveFileNameNew)

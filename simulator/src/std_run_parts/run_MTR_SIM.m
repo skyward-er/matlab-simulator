@@ -39,8 +39,9 @@ t_shutdown = Inf;
 if predicted_apogee >= settings.z_final_MTR
     if ~settings.shutdown
         settings.expShutdown = 1;
+        settings.shutdown = true;
         if contSettings.MTR_fault 
-            if contSettings.u
+            if contSettings.valve_pos
                 settings.shutdown = 0;
                 settings.expTimeEngineCut = Tf(end);
             end
@@ -48,7 +49,7 @@ if predicted_apogee >= settings.z_final_MTR
             t_shutdown = Tf(end);
             settings.timeEngineCut = t_shutdown + 0.3;
             settings.expTimeEngineCut = t_shutdown;
-            % settings.IengineCut = Yf(end,14:16);
+            settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, Tf(end));
             settings.expMengineCut = m - settings.ms;
             if Tf(end) > settings.timeEngineCut
                 settings.shutdown = 1;
@@ -57,7 +58,7 @@ if predicted_apogee >= settings.z_final_MTR
                 [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
             end
         end
-        contSettings.u = 0;
+        contSettings.valve_pos = 0;
     else
         t_shutdown = inf;
     end

@@ -173,6 +173,8 @@ end
 if not(settings.ballisticFligth) && settings.ascentOnly
     error('To simulate a landing with the parachutes, settings.ascentOnly must be false')
 end
+settings.scenario = conf.scenario;
+
 %% %% uncomment when the MSA toolkit is updated
 
 % if settings.mission == 'NewRocket_2023' 

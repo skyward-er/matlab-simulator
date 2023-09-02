@@ -137,3 +137,5 @@ settings.ada.counter     =   0;
 settings.ada.t_ada       =   -1;                                           % Apogee detection timestamp
 settings.ada.flag_apo    =   false;                                        % True when the apogee is detected
 
+
+%% MEA TUNING PARAMETERS

@@ -204,16 +204,16 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     
         if settings.ballisticFligth
             Y0_ode = Y0(1:14);
-            [Tf, Yd] = ode4(@ascentControlV2, tspan, Y0_ode, settings,[], ap_ref, t_change_ref_ABK, tLaunch);
-            parout = RecallOdeFcn(@ascentControlV2, Tf, Yd, settings,[], Yd(:,14), t_change_ref_ABK,tLaunch,'apVec');
+            [Tf, Yd] = ode4(@ascentControl, tspan, Y0_ode, settings,[], ap_ref, t_change_ref_ABK, tLaunch);
+            parout = RecallOdeFcn(@ascentControl, Tf, Yd, settings,[], Yd(:,14), t_change_ref_ABK,tLaunch,'apVec');
             [nd, ~] = size(Yd);
             Yf = [Yd, ones(nd,1)*Y0(end,15)];
             para = NaN;
         else
             if settings.flagAscent
                 Y0_ode = Y0(1:14);
-                [Tf, Yd] = ode4(@ascentControlV2, tspan, Y0_ode, settings,[],  ap_ref, t_change_ref_ABK, tLaunch);
-                parout = RecallOdeFcn(@ascentControlV2, Tf, Yd, settings,[], Yd(:,14), t_change_ref_ABK,tLaunch,'apVec');
+                [Tf, Yd] = ode4(@ascentControl, tspan, Y0_ode, settings,[],  ap_ref, t_change_ref_ABK, tLaunch);
+                parout = RecallOdeFcn(@ascentControl, Tf, Yd, settings,[], Yd(:,14), t_change_ref_ABK,tLaunch,'apVec');
                 [nd, ~] = size(Yd);
                 Yf = [Yd, ones(nd,1)*Y0(end,15)];
                 para = NaN;
@@ -267,7 +267,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     ext = extension_From_Angle(Yf(end,14),settings); % bug fix, check why this happens because sometimes happens that the integration returns a value slightly larger than the max value of extension for airbrakes and this mess things up
     if ext > settings.arb.maxExt
         ext = settings.arb.maxExt;
-        error("the extension of the airbrakes exceeds the maximum value of "+num2str(settings.arb.maxExt)+": ext = "+num2str(ext))
+        % error("the extension of the airbrakes exceeds the maximum value of "+num2str(settings.arb.maxExt)+": ext = "+num2str(ext))
     end
 
     %% simulate sensors
@@ -282,7 +282,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     %% subsystems
 
     % SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU
-    
+
     if not(settings.electronics)
 
         std_subsystems;
@@ -462,52 +462,4 @@ struct_out.apogee.speed = [Yf_tot(idx_apo,4),Yf_tot(idx_apo,5),-Yf_tot(idx_apo,6
 struct_out.apogee.radius = norm(struct_out.apogee.coordinates(1:2));
 % recall
 struct_out.recall = dataAscent;
-
-struct_out.contSettings = contSettings;
-
-if exist('t_airbrakes','var')
-    struct_out.ARB.allowanceTime = t_airbrakes;
-    struct_out.ARB.allowanceIdx = idx_airbrakes;
-    struct_out.ARB.cmdTime = ap_ref_time_tot; % for plots, in order to plot the stairs of the commanded value
-    struct_out.ARB.cmdPosition = ap_ref_tot; % cmd  = commanded
-    struct_out.ARB.openingPosition = [Yf_tot(idx_airbrakes,1),Yf_tot(idx_airbrakes,2),-Yf_tot(idx_airbrakes,3)];
-    struct_out.ARB.openingVelocities = [Yf_tot(idx_airbrakes,4),Yf_tot(idx_airbrakes,5),-Yf_tot(idx_airbrakes,6)];
-else
-    struct_out.ARB.allowanceTime = NaN;
-    struct_out.ARB.allowanceIdx = NaN;
-    struct_out.ARB.cmdTime = NaN; 
-    struct_out.ARB.cmdPosition = NaN; 
-    struct_out.ARB.openingPosition = NaN;
-    struct_out.ARB.openingVelocities = NaN;
-end
-% parafoil 
-if settings.scenario == "descent" || settings.scenario == "full flight"
-    
-    struct_out.PRF.deltaAcmd = deltaAcmd_tot;
-    % events
-    struct_out.events.drogueIndex = lastAscentIndex+1;
-    struct_out.events.mainChuteIndex = lastDrogueIndex+1;
-    % landing
-    struct_out.PRF.landing_position = Yf(idx_landing,1:3);
-    struct_out.PRF.landing_velocities_BODY = Yf(idx_landing,4:6);
-    struct_out.PRF.landing_velocities_NED = quatrotate(quatconj(Yf(idx_landing,10:13)),Yf(idx_landing,4:6));
-    % deployment
-    struct_out.PRF.deploy_altitude_set = settings.para(1).z_cut + settings.z0; % set altitude for deployment
-    struct_out.PRF.deploy_position = Yf(lastDrogueIndex+1,1:3); % actual position of deployment
-    struct_out.PRF.deploy_velocity = Yf(lastDrogueIndex+1,4:6); 
-else
-    
-    struct_out.PRF.deltaAcmd = NaN;
-    struct_out.events.drogueIndex = NaN;
-    struct_out.events.mainChuteIndex = NaN;
-    struct_out.PRF.landing_position =NaN;
-    struct_out.PRF.landing_velocities_BODY = NaN;
-    struct_out.PRF.landing_velocities_NED = NaN;
-    struct_out.PRF.deploy_altitude_set = NaN;
-    struct_out.PRF.deploy_position = NaN;
-    struct_out.PRF.deploy_velocity = NaN;
-end
-% settings for payload
-struct_out.payload = contSettings.payload;
-
 

@@ -161,19 +161,20 @@ log_deltaA = structCutter(log_deltaA,'timestamp',t_start,t_end);
 
 %% extract arrays
 t_m = log_NAS.timestamp;
-t_m = t_m-t_m(1);
 y_m = [log_NAS.n,log_NAS.e,log_NAS.d, log_NAS.vn, log_NAS.ve, log_NAS. vd, log_NAS.qw, log_NAS.qx, log_NAS.qy, log_NAS.qz];
 
 deltaA_time = t_m;
 for i = 1: length(t_m)
-    idx = find(t_m(i)>deltaA_time,1,"first");
+    idx = find(t_m(i)>log_deltaA.WingAlgorithmTimestamp,1,"last");
     if idx > 0
-        deltaA_value(i,1) = log_deltaA.servo1Angle(idx);
+        deltaA_value(i,1) = log_deltaA.pidOutput(idx);
     else
         deltaA_value(i,1) = 0;
     end
 end
 % define input array
+deltaA_time = deltaA_time - t_m(1);
+t_m = t_m-t_m(1);
 deltaA1 = [deltaA_time,zeros(size(deltaA_time))];
 % apply a forced angle (it can be useful if the parafoil does weird things, like in log37)
 forced_angle = 0.01;
