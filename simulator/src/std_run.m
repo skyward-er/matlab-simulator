@@ -432,7 +432,7 @@ end
 
 if ~settings.electronics && ~settings.montecarlo && not(settings.scenario == "descent")
     settings.wind.output_time = Tf;
-    dataAscent = recallOdeFcn2(@ascentControlV2, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, Yf(:,14), settings.servo.delay,tLaunch,'apVec');
+    dataAscent = recallOdeFcn2(@ascentControl, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, Yf(:,14), settings.servo.delay,tLaunch,'apVec');
 else
     dataAscent = [];
 end
@@ -463,3 +463,49 @@ struct_out.apogee.radius = norm(struct_out.apogee.coordinates(1:2));
 % recall
 struct_out.recall = dataAscent;
 
+struct_out.contSettings = contSettings;
+
+if exist('t_airbrakes','var')
+    struct_out.ARB.allowanceTime = t_airbrakes;
+    struct_out.ARB.allowanceIdx = idx_airbrakes;
+    struct_out.ARB.cmdTime = ap_ref_time_tot; % for plots, in order to plot the stairs of the commanded value
+    struct_out.ARB.cmdPosition = ap_ref_tot; % cmd  = commanded
+    struct_out.ARB.openingPosition = [Yf_tot(idx_airbrakes,1),Yf_tot(idx_airbrakes,2),-Yf_tot(idx_airbrakes,3)];
+    struct_out.ARB.openingVelocities = [Yf_tot(idx_airbrakes,4),Yf_tot(idx_airbrakes,5),-Yf_tot(idx_airbrakes,6)];
+else
+    struct_out.ARB.allowanceTime = NaN;
+    struct_out.ARB.allowanceIdx = NaN;
+    struct_out.ARB.cmdTime = NaN; 
+    struct_out.ARB.cmdPosition = NaN; 
+    struct_out.ARB.openingPosition = NaN;
+    struct_out.ARB.openingVelocities = NaN;
+end
+% parafoil 
+if settings.scenario == "descent" || settings.scenario == "full flight"
+    
+    struct_out.PRF.deltaAcmd = deltaAcmd_tot;
+    % events
+    struct_out.events.drogueIndex = lastAscentIndex+1;
+    struct_out.events.mainChuteIndex = lastDrogueIndex+1;
+    % landing
+    struct_out.PRF.landing_position = Yf(idx_landing,1:3);
+    struct_out.PRF.landing_velocities_BODY = Yf(idx_landing,4:6);
+    struct_out.PRF.landing_velocities_NED = quatrotate(quatconj(Yf(idx_landing,10:13)),Yf(idx_landing,4:6));
+    % deployment
+    struct_out.PRF.deploy_altitude_set = settings.para(1).z_cut + settings.z0; % set altitude for deployment
+    struct_out.PRF.deploy_position = Yf(lastDrogueIndex+1,1:3); % actual position of deployment
+    struct_out.PRF.deploy_velocity = Yf(lastDrogueIndex+1,4:6); 
+else
+    
+    struct_out.PRF.deltaAcmd = NaN;
+    struct_out.events.drogueIndex = NaN;
+    struct_out.events.mainChuteIndex = NaN;
+    struct_out.PRF.landing_position =NaN;
+    struct_out.PRF.landing_velocities_BODY = NaN;
+    struct_out.PRF.landing_velocities_NED = NaN;
+    struct_out.PRF.deploy_altitude_set = NaN;
+    struct_out.PRF.deploy_position = NaN;
+    struct_out.PRF.deploy_velocity = NaN;
+end
+% settings for payload
+struct_out.payload = contSettings.payload;

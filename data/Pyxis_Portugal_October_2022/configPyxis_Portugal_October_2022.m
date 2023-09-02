@@ -73,31 +73,31 @@ fun = @(alpha) x(alpha) - settings.hprot(end);
 settings.servo.maxAngle = fzero(fun, deg2rad(50));
 settings.servo.maxAngle = fix(settings.servo.maxAngle*1e9)/1e9; % to avoid computational error propagation (truncates the angle to the ninth decimal)
 
-%% KALMAN TUNING PARAMETERS
-settings.kalman.dt_k          =   0.02;                                    % [s]        kalman time step
-settings.kalman.sigma_baro    =   5;                                       % [m/2]   estimated barometer variance    
-settings.kalman.sigma_mag     =   1;                                       % [mgauss^2] estimated magnetometer variance    
-settings.kalman.sigma_GPS     =   5;                                       % [mg^2]     estimated GPS variance
-settings.kalman.sigma_w       =   1;                                       % [rad^2/s^2]   estimated gyroscope variance;
-settings.kalman.sigma_beta    =   1e-4;                                    % [rad/s^2]   estimated gyroscope bias variance;
-settings.kalman.sigma_pitot   =  10;
+%% NAS TUNING PARAMETERS
+settings.nas.dt_k          =   0.02;                                    % [s]        nas time step
+settings.nas.sigma_baro    =   5;                                       % [m/2]   estimated barometer variance    
+settings.nas.sigma_mag     =   1;                                       % [mgauss^2] estimated magnetometer variance    
+settings.nas.sigma_GPS     =   5;                                       % [mg^2]     estimated GPS variance
+settings.nas.sigma_w       =   1;                                       % [rad^2/s^2]   estimated gyroscope variance;
+settings.nas.sigma_beta    =   1e-4;                                    % [rad/s^2]   estimated gyroscope bias variance;
+settings.nas.sigma_pitot   =  10;
 
-settings.kalman.Mach_max = 0.9;  % max value for kalman 
+settings.nas.Mach_max = 0.9;  % max value for nas 
 
-settings.kalman.v_thr         =   2.5;                                     % Velocity threshold for the detected apogee
-settings.kalman.count_thr     =   5;                                       % If the apogee is detected count_thr time, the algorithm will return the apogee event
-settings.kalman.counter       =   0;
+settings.nas.v_thr         =   2.5;                                     % Velocity threshold for the detected apogee
+settings.nas.count_thr     =   5;                                       % If the apogee is detected count_thr time, the algorithm will return the apogee event
+settings.nas.counter       =   0;
 
-settings.kalman.t_kalman      =   -1;                                      % Apogee detection timestamp
-settings.kalman.flag_apo      =   false;                                   % True when the apogee is detected
+settings.nas.t_kalman      =   -1;                                      % Apogee detection timestamp
+settings.nas.flag_apo      =   false;                                   % True when the apogee is detected
 
-settings.kalman.lat0          = settings.lat0;
-settings.kalman.lon0          = settings.lon0;
-settings.kalman.z0            = -settings.z0;
-settings.kalman.spheroid      = wgs84Ellipsoid;
+settings.nas.lat0          = settings.lat0;
+settings.nas.lon0          = settings.lon0;
+settings.nas.z0            = -settings.z0;
+settings.nas.spheroid      = wgs84Ellipsoid;
 
 % Process noise covariance matrix for the linear dynamics
-settings.kalman.QLinear       =   0.005*...
+settings.nas.QLinear       =   0.005*...
                                  [4       0       0        0        0       0;
                                   0       4       0        0        0       0;
                                   0       0       4        0        0       0;
@@ -106,8 +106,8 @@ settings.kalman.QLinear       =   0.005*...
                                   0       0       0        0        0       2];
 
 % Process noise covariance matrix for the quaternion dynamics
-settings.kalman.Qq              =   [(settings.kalman.sigma_w^2*settings.kalman.dt_k+(1/3)*settings.kalman.sigma_beta^2*settings.kalman.dt_k^3)*eye(3)          0.5*settings.kalman.sigma_beta^2*settings.kalman.dt_k^2*eye(3);
-                                      0.5*settings.kalman.sigma_beta^2*settings.kalman.dt_k^2*eye(3)                                              settings.kalman.sigma_beta^2*settings.kalman.dt_k*eye(3)];
+settings.nas.Qq              =   [(settings.nas.sigma_w^2*settings.nas.dt_k+(1/3)*settings.nas.sigma_beta^2*settings.nas.dt_k^3)*eye(3)          0.5*settings.nas.sigma_beta^2*settings.nas.dt_k^2*eye(3);
+                                      0.5*settings.nas.sigma_beta^2*settings.nas.dt_k^2*eye(3)                                              settings.nas.sigma_beta^2*settings.nas.dt_k*eye(3)];
 %% ADA TUNING PARAMETER
 
 settings.ada.Q           =   [1     0       0;                             % Process noise covariance matrix
