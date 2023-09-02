@@ -2,14 +2,14 @@ function printOutput(structIn,settings)
 
 % POSITIONS
 x = structIn.Y(:,1);
-y =  structIn.Y(:,2);
+y = structIn.Y(:,2);
 z = -structIn.Y(:,3);
 t = structIn.t;
 
 X = [x, y, z];
 
-[max_z, i_apo] = max(z);
-T_apo = t(i_apo);
+[max_z] = max(z);
+T_apo = structIn.apogee.time;
 
 % VELOCITIES
 u =  structIn.Y(:,4);
@@ -20,8 +20,8 @@ V = [u, v, w];
 
 
 % ADA and NAS
-t_ada = structIn.t_ada;
-t_nas = structIn.t_nas;
+t_ada = structIn.apogee.time_ada;
+t_nas = structIn.apogee.time_nas;
 
 % MAXIMUM POSITIONS, VELOCITIES AND ACCELERATION
 abs_X = vecnorm(X');

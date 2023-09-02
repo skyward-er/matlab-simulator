@@ -1,4 +1,4 @@
-function [x_c, v, P_c, kalman] = run_kalman(x_prev, vels_prev, P_prev, sp, kalman, mag_NED,flagAscent,flagStopPitotCorrection)
+function [x, P_c,nas] = run_NAS(x_prev, P_prev, mag_NED,sensorData,settings)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
@@ -11,7 +11,7 @@ function [x_c, v, P_c, kalman] = run_kalman(x_prev, vels_prev, P_prev, sp, kalma
 -----------DESCRIPTION OF FUNCTION:------------------
 This function implement a "Multiplicative extended kalman filter" that takes 
 the angular velocity, the acceleration and the sensors outputs from the
-previous integration and estimates the current vector of state of the rocket (x_c)
+previous integration and estimates the current vector of state of the rocket (x)
 and its covariance matrix (P_c).
 For more information check the navigation system report 
     -INPUTS: 
@@ -97,14 +97,17 @@ For more information check the navigation system report
                  INSTANTS. [12x12x10]
 -----------------------------------------------------------------------
 %}
-tv          =   sp.t_acc;
-[fix, nsat] =   gpsFix(sp.accel);
+nas = settings.nas;
+flagAscent = settings.flagAscent;
+flagStopPitotCorrection = settings.flagStopPitotCorrection;
+
+tv          =   sensorData.accelerometer.time;
+[fix, nsat] =   gpsFix(sensorData.accelerometer.measures);
 
 dt_k        =   tv(2)-tv(1);                 % Time step of the kalman
 x_lin       =   zeros(length(tv),6);         % Pre-allocation of corrected estimation
 xq          =   zeros(length(tv),7);         % Pre-allocation of quaternions and biases
-x_c         =   zeros(length(tv),13);
-v           =   zeros(length(tv),3);
+x           =   zeros(length(tv),13);
 
 P_c         =   zeros(12,12,length(tv));
 P_lin       =   zeros(6,6,length(tv));       %Pre-allocation of the covariance matrix
@@ -112,8 +115,7 @@ P_q         =   zeros(6,6,length(tv));
 
 x_lin(1,:)  =   x_prev(1:6);                 % Allocation of the initial value
 xq(1,:)     =   x_prev(7:13);
-v(1,:)      =   vels_prev;
-x_c(1,:)    =   [x_lin(1,:),xq(1,:)];
+x(1,:)      =   [x_lin(1,:),xq(1,:)];
 
 P_lin(:,:,1)=   P_prev(1:6,1:6);
 P_q(:,:,1)  =   P_prev(7:12,7:12);
@@ -125,58 +127,58 @@ index_mag=1;
 index_pit=1;
 
 % Time vectors agumentation
-t_gpstemp  = [sp.t_gps,  tv(end) + dt_k];
-t_barotemp = [sp.t_baro, tv(end) + dt_k];
-t_magtemp  = [sp.t_mag,  tv(end) + dt_k];
-t_pittemp  = [sp.t_pit,   tv(end) + dt_k];
+t_gpstemp  = [sensorData.gps.time,  tv(end) + dt_k];
+t_barotemp = [sensorData.barometer.time, tv(end) + dt_k];
+t_magtemp  = [sensorData.magnetometer.time,  tv(end) + dt_k];
+t_pittemp  = [sensorData.pitot.time,   tv(end) + dt_k];
 
-[sp.gps(:,1),sp.gps(:,2),sp.gps(:,3)]  = geodetic2ned(sp.gps(:,1), sp.gps(:,2), sp.gps(:,3), kalman.lat0, kalman.lon0, kalman.z0, kalman.spheroid, 'degrees');
+[sensorData.gps.positionMeasures(:,1),sensorData.gps.positionMeasures(:,2),sensorData.gps.positionMeasures(:,3)]  = geodetic2ned(sensorData.gps.positionMeasures(:,1), sensorData.gps.positionMeasures(:,2), sensorData.gps.positionMeasures(:,3), nas.lat0, nas.lon0, nas.z0, nas.spheroid, 'degrees');
 for i=2:length(tv)
     %% Prediction part
 
-    [x_lin(i,:),v(i,:),P_lin(:,:,i)] = predictorLinear2(x_lin(i-1,:),P_lin(:,:,i-1),...
-        dt_k,sp.accel(i-1,:),xq(i-1,1:4),kalman.QLinear);
+    [x_lin(i,:),~,P_lin(:,:,i)] = predictorLinear2(x_lin(i-1,:),P_lin(:,:,i-1),...
+        dt_k,sensorData.accelerometer.measures(i-1,:),xq(i-1,1:4),nas.QLinear);
 
     [xq(i,:),P_q(:,:,i)]       = predictorQuat(xq(i-1,:),P_q(:,:,i-1),...
-        sp.gyro(i-1,:),dt_k,kalman.Qq);
+        sensorData.gyro.measures(i-1,:),dt_k,nas.Qq);
 
 
     %% Corrections
     if tv(i) >= t_gpstemp(index_GPS)              %Comparison to see the there's a new measurement
-        [x_lin(i,:),P_lin(:,:,i),~]     = correctionGPS(x_lin(i,:),P_lin(:,:,i),sp.gps(index_GPS,1:2),...
-            sp.gpsv(index_GPS,1:2),kalman.sigma_GPS,nsat,fix);
+        [x_lin(i,:),P_lin(:,:,i),~]     = correctionGPS(x_lin(i,:),P_lin(:,:,i),sensorData.gps.positionMeasures(index_GPS,1:2),...
+            sensorData.gps.velocityMeasures(index_GPS,1:2),nas.sigma_GPS,nsat,fix);
         index_GPS   =  index_GPS + 1;
     end
 
     if tv(i) >= t_barotemp(index_bar)              %Comparison to see the there's a new measurement
-        [x_lin(i,:),P_lin(:,:,i),~]     = correctionBarometer(x_lin(i,:),P_lin(:,:,i),sp.h_baro(index_bar),kalman.sigma_baro);
+        [x_lin(i,:),P_lin(:,:,i),~]     = correctionBarometer(x_lin(i,:),P_lin(:,:,i),sensorData.barometer.z(index_bar),nas.sigma_baro);
         index_bar   =  index_bar + 1;
     end
 
     if tv(i) >= t_magtemp(index_mag)               %Comparison to see the there's a new measurement
-        [xq(i,:),P_q(:,:,i),~,~]        = correctorQuat(xq(i,:),P_q(:,:,i),sp.mag(index_mag,:),kalman.sigma_mag,mag_NED);
+        [xq(i,:),P_q(:,:,i),~,~]        = correctorQuat(xq(i,:),P_q(:,:,i),sensorData.magnetometer.measures(index_mag,:),nas.sigma_mag,mag_NED);
         index_mag    =  index_mag + 1;
     end
 
     if flagAscent && ~flagStopPitotCorrection
         if tv(i) >= t_pittemp(index_pit)
-            [x_lin(i,:),P_lin(4:6,4:6,i),~] = correctionPitot(x_lin(i,:),P_lin(4:6,4:6,i),sp.p0_pitot(index_pit,:),sp.p_pitot(index_pit,:),kalman.sigma_pitot,xq(i,1:4),kalman.Mach_max);
+            [x_lin(i,:),P_lin(4:6,4:6,i),~] = correctionPitot(x_lin(i,:),P_lin(4:6,4:6,i),sensorData.pitot.pTotMeasures(index_pit,:),sensorData.pitot.pStatMeasures(index_pit,:),nas.sigma_pitot,xq(i,1:4),nas.Mach_max);
             index_pit    =  index_pit + 1;
         end
     end
-    x_c(i,:) = [x_lin(i,:),xq(i,:)];
+    x(i,:) = [x_lin(i,:),xq(i,:)];
     P_c(1:6,1:6,i)   = P_lin(:,:,i);
     P_c(7:12,7:12,i) = P_q(:,:,i);
 
-    if kalman.flag_apo  == false
-        if -x_c(i,6) < kalman.v_thr && -x_c(i,3) > 100
-            kalman.counter = kalman.counter + 1;
+    if nas.flag_apo  == false
+        if -x(i,6) < nas.v_thr && -x(i,3) > 100 + settings.z0
+            nas.counter = nas.counter + 1;
         else
-            kalman.counter = 0;
+            nas.counter = 0;
         end
-        if kalman.counter >= kalman.count_thr
-            kalman.t_kalman = tv(i);
-            kalman.flag_apo = true;
+        if nas.counter >= nas.count_thr
+            nas.t_nas = tv(i);
+            nas.flag_apo = true;
         end
     end
 end

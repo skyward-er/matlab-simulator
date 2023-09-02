@@ -1,4 +1,4 @@
-function [dY,parout] = descentParafoil(t,Y,settings,contSettings,deltaA_ref_vec,t_change_ref,tlaunch)
+function [dY,parout] = descentParafoil(t,Y,settings,contSettings,deltaA_ref_vec,t_change_ref,tlaunch,varargin)
 
 %% recall states
 % x = Y(1);
@@ -184,7 +184,11 @@ if ~settings.identification
             deltaA_ref = deltaA_ref_vec(2);
         end
     else 
-        [~,ind_deltaA] = min(settings.parout.partial_time-t);
+        if exist('settings.parout','var')
+            [~,ind_deltaA] = min(settings.parout.partial_time-t);
+        else
+            ind_deltaA = 1;
+        end
         deltaA_ref = deltaA_ref_vec(ind_deltaA); % don't delete this unless you change how the recall ode works.
     end
 else

@@ -1,11 +1,10 @@
-function [t_shutdown,settings,contSettings,predicted_apogee,tPrediction,estimated_mass,estimated_pressure] =...
-    run_MTR_SIM (contSettings,sensorData,settings,iTimes,c,Tf,x_est_tot)
+function [t_shutdown,settings,contSettings,sensorData] = run_MTR_SIM (contSettings,sensorData,settings,sensorTot,Tf)
 
 % mass estimation
 
-    A = contSettings.Engine_model_A1;
-    B = contSettings.Engine_model_B1;
-    C = contSettings.Engine_model_C1;
+A = contSettings.Engine_model_A1;
+B = contSettings.Engine_model_B1;
+C = contSettings.Engine_model_C1;
 
 % prediction
 
@@ -15,31 +14,27 @@ else
     u = 1;
 end
 
-contSettings.xe=A*contSettings.xe + B*u;
-contSettings.P_mat = A*contSettings.P_mat*A' + contSettings.R;
+sensorData.mea.x = A*sensorData.mea.x + B*u;
+sensorData.mea.P = A*sensorData.mea.P*A' + contSettings.R;
 % correction
-S = C*contSettings.P_mat*C' + contSettings.Q;
+S = C*sensorData.mea.P*C' + contSettings.Q;
 if ~det(S)<1e-3
-    K = contSettings.P_mat*C'*inv(S);
-    contSettings.P_mat = (eye(3)-K*C)*contSettings.P_mat;
+    K = sensorData.mea.P*C'*inv(S);
+    sensorData.mea.P = (eye(3)-K*C)*sensorData.mea.P;
 end
-estimated_pressure(iTimes) = C * contSettings.xe;
-contSettings.xe=contSettings.xe + K* ((c.cp_tot(end)-1950)/1000 - estimated_pressure(iTimes));
+estimated_pressure = C * sensorData.mea.x;
+sensorData.mea.x = sensorData.mea.x + K* ((sensorTot.comb_chamber.measures(end)-1950)/1000 - estimated_pressure);
 
-estimated_mass(iTimes) = contSettings.xe(3);
-m = estimated_mass(iTimes);
+estimated_mass = sensorData.mea.x(3);
+m = estimated_mass;
 % magic formula seguire traiettorie è meglio?
-CD(iTimes) = settings.CD_correction_ref*getDrag(norm([sensorData.kalman.vx,sensorData.kalman.vy,sensorData.kalman.vz]), -sensorData.kalman.z, 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
+CD = settings.CD_correction_ref*getDrag(norm([sensorData.kalman.vx,sensorData.kalman.vy,-sensorData.kalman.vz]), -sensorData.kalman.z, 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
 [~,~,~,rho] = atmosisa(-sensorData.kalman.z);
 
 %% TEST WITH MASS ESTIMATION THAT DOESN'T WORK
-% mass = mass_dry
-% m = settings.ms;
-% m = settings.ms + (settings.m0-settings.ms)/2; 
-%%
-predicted_apogee = -sensorData.kalman.z-settings.z0 + 1/(2*( 0.5*rho * CD(iTimes) * settings.S / m))...
-    * log(1 + (sensorData.kalman.vz^2 * (0.5 * rho * CD(iTimes) * settings.S) / m) / 9.81 );
-tPrediction = Tf(end);
+
+predicted_apogee = -sensorData.kalman.z-settings.z0 + 1/(2*( 0.5*rho * CD * settings.S / m))...
+    * log(1 + (sensorData.kalman.vz^2 * (0.5 * rho * CD * settings.S) / m) / 9.81 );
 t_shutdown = Inf;
 if predicted_apogee >= settings.z_final_MTR
     if ~settings.shutdown
@@ -59,7 +54,7 @@ if predicted_apogee >= settings.z_final_MTR
             if Tf(end) > settings.timeEngineCut
                 settings.shutdown = 1;
                 settings = settingsEngineCut(settings);
-                settings.quatCut = [x_est_tot(end, 10) x_est_tot(end, 7:9)];
+                settings.quatCut = [sensorTot.nas.x(end, 10) sensorTot.nas.x(end, 7:9)];
                 [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
             end
         end
@@ -68,3 +63,8 @@ if predicted_apogee >= settings.z_final_MTR
         t_shutdown = inf;
     end
 end
+sensorData.mea.predicted_apogee = predicted_apogee(end);
+sensorData.mea.estimated_mass = estimated_mass(end);
+sensorData.mea.estimated_pressure = estimated_pressure(end);
+
+

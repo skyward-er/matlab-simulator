@@ -12,10 +12,10 @@ t1          =       t0 + dt;                                                % Se
 %% kalman initialization
 if not(settings.scenario == "descent")
     sensorData.kalman.vz = 0;                                                   % Vertical velocity
-    sensorData.kalman.z  = settings.z0;
+    sensorData.kalman.z  = -settings.z0;
 else 
-    sensorData.kalman.vz = settings.Vz_final;                                                   % Vertical velocity
-    sensorData.kalman.z  = settings.z_final;
+    sensorData.kalman.vz = -settings.Vz_final;                                                   % Vertical velocity
+    sensorData.kalman.z  = -settings.z_final;
 end    
     % Altitude
 
@@ -79,6 +79,7 @@ windAz = [];
 ap_ref_new = 0;                                                             % air brakes closed until Mach < settings.MachControl
 ap_ref_old = 0;
 ap_ref = [ ap_ref_old ap_ref_new ];
+
 % servo motor time delay - in ode it needs to be set to change reference value
 t_change_ref_ABK =      t0 + settings.servo.delay;
 t_last_arb_control = 0;
@@ -102,7 +103,7 @@ cpuTimes    =       zeros(nmax, 1);                                         % Ve
 iTimes      =       0;                                                      % Iteration
 c.ctr_start =      -1;                                                      % Air brake control parameter initial condition
 i           =       1;                                                      % Index for while loop
-sensorData.kalman.pn_prec = settings.ada.p_ref;                             % settings for ADA and KALMAN
+sensorData.nas.pn_prec = settings.ada.p_ref;                                % settings for ADA and KALMAN
 % ap_ref_vec  = zeros(nmax, 2);                                             % Matrix N x 2 to save reference angle vector
 % ap_ref_time = zeros(nmax, 1);                                             % Vector of time reference for air brakes
 settings.shutdown = 0;                                                      % engine on
@@ -119,22 +120,22 @@ idx_apogee = NaN;
 idx_landing = NaN;
 
 %% sensor fault initial conditions
-chunk{1} = zeros(1,50);
-chunk{2} = zeros(1,50);
-chunk{3} = zeros(1,50);
+sensorData.chunk{1} = zeros(1,50);
+sensorData.chunk{2} = zeros(1,50);
+sensorData.chunk{3} = zeros(1,50);
 faults = [];
 barometer_measure = cell(1,3);
 barometer_time = [];
 sfd_mean_p = [];
 
-%% ADA initial conditions
+%% ADA initial conditions (Apogee Detection Algorithm)
 
 if settings.flagADA
     ada_prev  =   settings.ada.x0;
     Pada_prev =   settings.ada.P0;
 end
 
-%% NAS initial conditions
+%% NAS initial conditions (Navigation and Attitude System)
 
 if settings.flagNAS
     x_prev    =  [X0; V0; Q0(2:4); Q0(1);0;0;0];
@@ -152,3 +153,7 @@ settings.flagStopPitotCorrection = false;
 %% parafoil
 deltaA = contSettings.payload.deltaA_0;
 para = 1;
+
+%% MEA PARAMETERS (mass estimation algorithm) 
+sensorData.mea.x = [0,0,settings.m0]';     % initial state estimate
+sensorData.mea.P = zeros(3);          % initial value for P

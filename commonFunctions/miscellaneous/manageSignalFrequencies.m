@@ -1,4 +1,4 @@
-function [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings,sensorData, Y, T, ext, uw, vw, ww,para)
+function [sensorData] = manageSignalFrequencies(magneticFieldApprox, flagAscent, settings,sensorData, Y, T, uw, vw, ww)
 
 %{
         AGGIUNGERE sensorData TRA GLI INPUT ANCHE NEL MAIN
@@ -494,8 +494,8 @@ if isfield(freq, 'pitotFrequency')
                 wind_body = quatrotate(Q(i,:),wind_ned);
                 v = (vx(i) + wind_body(1))';
                 sensorData.pitot.temperature(i) = Temp;
-                sensorData.pitot.measures(i,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
-                sensorData.pitot.measures(i,2) = P;
+                sensorData.pitot.pTotMeasures(i) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
+                sensorData.pitot.pStatMeasures(i) = P;
             else
                 vx(i) = Y(iTimePitot == T, 4);
                 z_pit(i) = -Y(iTimePitot == T, 3);
@@ -504,9 +504,9 @@ if isfield(freq, 'pitotFrequency')
                 wind_ned = [uw, vw, ww];
                 wind_body = quatrotate(Q(i,:),wind_ned);
                 v = (vx(i) + wind_body(1))';
-                sensorData.pitot.temperature(i) = Temp;
-                sensorData.pitot.measures(i,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
-                sensorData.pitot.measures(i,2) = P;
+                sensorData.pitot.temperature(i,1) = Temp;
+                sensorData.pitot.pTotMeasures(i,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
+                sensorData.pitot.pStatMeasures(i,1) = P;
             end
         end
 
@@ -521,8 +521,8 @@ if isfield(freq, 'pitotFrequency')
         wind_body = quatrotate(Q,wind_ned);
         v = (vx + wind_body(1))';
         sensorData.pitot.temperature = Temp;
-        sensorData.pitot.measures(1,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
-        sensorData.pitot.measures(1,2) = P;
+        sensorData.pitot.pTotMeasures = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
+        sensorData.pitot.pStatMeasures = P;
     else
         for i = 1:length(T)
             if T(i) - sensorData.pitot.t0 > 1/freq.pitotFrequency
@@ -551,8 +551,8 @@ if isfield(freq, 'pitotFrequency')
                 wind_body = quatrotate(Q,wind_ned);
                 v = (vx + wind_body(1))';
                 sensorData.pitot.temperature = Temp;
-                sensorData.pitot.measures(1,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
-                sensorData.pitot.measures(1,2) = P;
+                sensorData.pitot.pTotMeasures = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
+                sensorData.pitot.pStatmeasures = P;
             elseif  T(i) - sensorData.pitot.t0 == 1/freq.pitotFrequency
                 iTimePitot = sensorData.pitot.t0 + 1/freq.pitotFrequency;
                 z_pit = -Y(i, 3);
@@ -565,8 +565,8 @@ if isfield(freq, 'pitotFrequency')
                 wind_body = quatrotate(Q,wind_ned);
                 v = (vx + wind_body(1))';
                 sensorData.pitot.temperature = Temp;
-                sensorData.pitot.measures(1,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
-                sensorData.pitot.measures(1,2) = P;
+                sensorData.pitot.pTotMeasures = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
+                sensorData.pitot.pStatMeasures = P;
             end
 
         end
