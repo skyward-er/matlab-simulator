@@ -6,34 +6,34 @@ end
 
 %% Control variable: servo angle + reference values
 % air brakes
-if not(settings.scenario == "descent")
-    figures.servo_angle = figure('Name', 'Servo angle after burning phase','ToolBar','auto','Position',[100,100,600,400]);
-    plot(structIn.t, structIn.Y(:,17));
-    hold on; grid on;
-    stairs(structIn.ARB_cmdTime,structIn.ARB_cmd,'r');
-    xline(structIn.ARB_allowanceTime,'k--')
-    xline(structIn.apogee_time,'r--')
-    xlabel('Time [s]');
-    ylabel('$\alpha$ [rad]');
-    title('Servo angle');
-    legend('simulated','reference values','Airbrakes deployment','Apogee')
-    
-    if settings.flagExportPLOTS == true
-        exportStandardizedFigure(figures.servo_angle,"report_images\"+settings.mission+"\src_servo_angle.pdf",0.9)
-    end
-end
-% parafoil
-if settings.parafoil
-    figures.parafoil_servo_action = figure('Name', 'Parafoil deltaA','ToolBar','auto','Position',[100,100,600,400]);
-    plot(structIn.t,structIn.deltaA,'DisplayName','\Delta_A');
-    hold on;
-    stairs(structIn.t,structIn.deltaAcmd,'DisplayName','\Delta_A cmd');
-    xline(structIn.t(structIn.events.mainChuteIndex),'--','DisplayName','Parafoil deployment')
-    legend
-    title('Parafoil control action')
-    xlabel('Time (s)')
-    ylabel('Normalized control action (-)')
-end
+% if not(settings.scenario == "descent")
+%     figures.servo_angle = figure('Name', 'Servo angle after burning phase','ToolBar','auto','Position',[100,100,600,400]);
+%     plot(structIn.t, structIn.Y(:,17));
+%     hold on; grid on;
+%     stairs(structIn.ARB_cmdTime,structIn.ARB_cmd,'r');
+%     xline(structIn.ARB_allowanceTime,'k--')
+%     xline(structIn.apogee_time,'r--')
+%     xlabel('Time [s]');
+%     ylabel('$\alpha$ [rad]');
+%     title('Servo angle');
+%     legend('simulated','reference values','Airbrakes deployment','Apogee')
+% 
+%     if settings.flagExportPLOTS == true
+%         exportStandardizedFigure(figures.servo_angle,"report_images\"+settings.mission+"\src_servo_angle.pdf",0.9)
+%     end
+% end
+% % parafoil
+% if settings.parafoil
+%     figures.parafoil_servo_action = figure('Name', 'Parafoil deltaA','ToolBar','auto','Position',[100,100,600,400]);
+%     plot(structIn.t,structIn.deltaA,'DisplayName','\Delta_A');
+%     hold on;
+%     stairs(structIn.t,structIn.deltaAcmd,'DisplayName','\Delta_A cmd');
+%     xline(structIn.t(structIn.events.mainChuteIndex),'--','DisplayName','Parafoil deployment')
+%     legend
+%     title('Parafoil control action')
+%     xlabel('Time (s)')
+%     ylabel('Normalized control action (-)')
+% end
 
 %% Trajectory
 figures.trajectory = figure('Name', 'Trajectory','ToolBar','auto','Position',[100,100,600,400]);

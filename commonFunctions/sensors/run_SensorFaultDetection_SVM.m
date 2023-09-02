@@ -144,7 +144,7 @@ function [weighted_transient_mean, W] = wt_mean_h(sfd, prev, V, F, W, max_weight
     if k < sfd.min_step
         k = sfd.min_step;
     elseif k> sfd.max_step + sfd.min_step
-        k = sfd.max_step + + sfd.min_step;
+        k = sfd.max_step + sfd.min_step;
     end
     for j = 1:length(V(1,:))
         W = W_current;
