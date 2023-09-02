@@ -311,9 +311,9 @@ for alg_index = 4
             end
             saveas(save_dynamic_pressure_and_forces,folder(i)+"\dynamicPressureAndForces")
            
-            for j = 1:N_sim
-                save_thrust{j} = rmfield(save_thrust{j},'Y'); % remove ode data to save space
-            end
+%             for j = 1:N_sim
+%                 save_thrust{j} = rmfield(save_thrust{j},'Y'); % remove ode data to save space. EDIT: no... no I don't think I will 
+%             end
             save(folder(i)+"\saveThrust.mat","save_thrust","apogee","N_sim","settings","thrust_percentage") % add "save_thrust", > 2GB for 1000 sim
 % 
 %            exportStandardizedFigure(save_plot_histogram,'report_images\mc_Histogram',0.9)
