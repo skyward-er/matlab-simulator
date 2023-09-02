@@ -1,4 +1,4 @@
-function [s, sensorTot]  = initSensors(lat0, lon0, z0)
+function [s, sensorTot]  = initSensors(settings)
 % Initialize all sensors
     
 % Author: Jan Hammelman
@@ -6,7 +6,12 @@ function [s, sensorTot]  = initSensors(lat0, lon0, z0)
 % email: jan.hammelmann@skywarder.eu,alessandro.delduca@skywarder.eu
 % Release date: 01/03/2021
 
-% initial barometer sensor MS580301BA01
+%% extract info
+lat0 = settings.lat0;
+lon0 = settings.lon0;
+z0   = settings.z0;
+
+%% initial barometer sensor MS580301BA01
 ep_p_0     =  csvread('ep_p_0.csv');
 ep_p_25    =  csvread('ep_p_25.csv');
 ep_p_85    =  csvread('ep_p_85.csv');
@@ -25,7 +30,7 @@ s.MS580301BA01.resolution           =   0.012;                  % 0.012, 0.018, 
 s.MS580301BA01.noiseVariance        =   0.043043;                      % guess in mbar
 s.MS580301BA01.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
 
-% barometer Gemini sensors
+%% barometer Gemini sensors
 % sensor 1
 s.HSCMRNN015PAAA5 = Sensor();
 s.HSCMRNN015PAAA5.maxMeasurementRange = 1034.21; % mbar ( 15psi)
@@ -45,7 +50,7 @@ s.HSCMRNN030PAAA5.noiseVariance = 2*0.043043; % from flight logs
 % s.HSCMRNN030PAAA5.error2dOffset = ep_data; % I will leave this like this because I don't know how this works
 
 
-% initial chamber pressure sensor NAT825281
+%% initial chamber pressure sensor NAT825281
 s.NAT825281 = Sensor(); % presure in mbar, temp should be in C°
 s.NAT825281.maxMeasurementRange  =   40000;                   % 1100, 1300 in mbar
 s.NAT825281.minMeasurementRange  =   0;                    % 300, 10 in mbar
@@ -54,7 +59,7 @@ s.NAT825281.noiseVariance        =   60000;                      %  mbar
 s.NAT825281.resolution           =   1;     % random value stolen from baro
 % check 2d offset for chamber pressure sensor
 
-% initial accelerometer sensor from LSM9DS1
+%% initial accelerometer sensor from LSM9DS1
 s.ACCEL_LSM9DS1 = Sensor3D(); % acceleration in mg
 s.ACCEL_LSM9DS1.maxMeasurementRange =   16000;                  % 2000, 4000, 8000, 16000 in mg
 s.ACCEL_LSM9DS1.minMeasurementRange =  -16000;                  % -2000, -4000, -8000, -16000 in mg
@@ -66,7 +71,7 @@ s.ACCEL_LSM9DS1.offsetZ             =   0;                      % +-90 in mg
 s.ACCEL_LSM9DS1.walkDiffusionCoef   =   0;                      % guess
 s.ACCEL_LSM9DS1.dt                  =   0.01;                   % sampling time
 
-% initial gyroscope sensor from LSM9DS1
+%% initial gyroscope sensor from LSM9DS1
 s.GYRO_LSM9DS1 = Sensor3D(); % angular rate in mdps
 s.GYRO_LSM9DS1.maxMeasurementRange  =   245e3;                  % 245e3, 500e3, 2000e3 in mdps
 s.GYRO_LSM9DS1.minMeasurementRange  =  -245e3;                  % -245e3, -500e3, -2000e3 in mdps
@@ -79,7 +84,7 @@ s.GYRO_LSM9DS1.walkDiffusionCoef    =   1;                      % guess
 s.GYRO_LSM9DS1.dt                   =   0.01;                   % sampling time
 s.GYRO_LSM9DS1.transMatrix          =   diag([1 1 1]);          % axis transformation
 
-% initial megnetometer sensor from LSM9DS1
+%% initial megnetometer sensor from LSM9DS1
 s.MAGN_LSM9DS1=Sensor3D(); % magnetic field in mgauss
 s.MAGN_LSM9DS1.maxMeasurementRange  =   16000;                  % 4000, 8000, 12000, 16000 in mgauss
 s.MAGN_LSM9DS1.minMeasurementRange  =  -16000;                  % -4000, -8000, -12000, -16000 in mgauss
@@ -92,7 +97,7 @@ s.MAGN_LSM9DS1.walkDiffusionCoef    =   0;                      % guess
 s.MAGN_LSM9DS1.dt                   =   0.01;                   % sampling time
 s.MAGN_LSM9DS1.transMatrix          =   diag([1 1 1]);          % axis transformation
 
-% initial GPS sensor from NEO-M9N
+%% initial GPS sensor from NEO-M9N
 s.GPS_NEOM9N = Sensor3D();                                      % lon, in degree lat in deree, alt in m
 s.GPS_NEOM9N.noiseVariance          =   2;                      % in m
 s.GPS_NEOM9N.transMatrix            =   diag([1 1 1]);          % axis transformation
@@ -101,7 +106,7 @@ s.lon0                              =   lon0;
 s.z0                                =   z0;
 s.spheroid                          =   wgs84Ellipsoid;
 
-% initial megnetometer sensor from IIS2MDC: TODO
+%% initial megnetometer sensor from IIS2MDC: TODO
 s.MAGN_IIS2MDC = Sensor3D();                                    % magnetic field in mgauss, temp should be in C°-25C°
 s.MAGN_IIS2MDC.maxMeasurementRange  =   49152;                  % in mgauss
 s.MAGN_IIS2MDC.minMeasurementRange  =   -49152;                 % in mgauss
@@ -116,7 +121,7 @@ s.MAGN_IIS2MDC.dt                   =   0.01;                   % sampling time
 s.MAGN_IIS2MDC.transMatrix          =   diag([1 1 1]);          % axis transformation
 s.MAGN_IIS2MDC.transMatrix          =   diag([1 1 1]);          % axis transformation
 
-% initial Pitot sensor (differential pressure sensor SSCDRRN015PDAD5)
+%% initial Pitot sensor (differential pressure sensor SSCDRRN015PDAD5)
 s.SSCDRRN015PDAD5 = Sensor_no_offset(); % presure in mbar, temp should be in C°
 s.SSCDRRN015PDAD5.maxMeasurementRange  =   1034;                   % in mbar (15 psi from datasheet)
 s.SSCDRRN015PDAD5.minMeasurementRange  =   -1034;                  % in mbar (-15 psi from datasheet)
@@ -126,26 +131,32 @@ s.SSCDRRN015PDAD5.noiseVariance        =   2.63;                   % mbar from f
 % s.SSCDRRN015PDAD5.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
 % check 2d offset for pitot
 
-sensorTot.npit_old      =   1;
-sensorTot.np_old{1}     =   1;
-sensorTot.np_old{2}     =   1;
-sensorTot.np_old{3}     =   1;
-sensorTot.na_old        =   1;
-sensorTot.ngps_old      =   1;
-sensorTot.nas.n_old     =   1;
-sensorTot.ada.n_old     =   1;
-sensorTot.ncp_old       =   1;
 
-% from here are commented in the HIL of Angelo and Emilio, check why:
-sensorTot.pn{1}         =   0;
-sensorTot.pn{2}         =   0;
-sensorTot.pn{3}         =   0;
-sensorTot.hb{1}         =   0;
-sensorTot.hb{2}         =   0;
-sensorTot.hb{3}         =   0;
-sensorTot.cp            =   0;
-sensorTot.accelerometer =   [0, 0, 0];
-sensorTot.gyro          =   [0, 0, 0];
-sensorTot.magnetometer  =   [0, 0, 0];
-sensorTot.gps           =   [0, 0, 0];
-sensorTot.gpsv          =   [0, 0, 0];
+% total measurements
+sensorTot.barometer_sens{1}.pressure_measures   =   0;
+sensorTot.barometer_sens{2}.pressure_measures   =   0;
+sensorTot.barometer_sens{3}.pressure_measures   =   0;
+sensorTot.barometer_sens{1}.altitude            =   0;
+sensorTot.barometer_sens{2}.altitude            =   0;
+sensorTot.barometer_sens{3}.altitude            =   0;
+sensorTot.comb_chamber.measures                 =   0;
+sensorTot.imu.accelerometer_measures            =   [0, 0, 0];
+sensorTot.imu.gyro_measures                     =   [0, 0, 0];
+sensorTot.imu.magnetometer_measures             =   [0, 0, 0];
+sensorTot.gps.position_measures                 =   [0, 0, 0];
+sensorTot.gps.velocity_measures                 =   [0, 0, 0];
+sensorTot.pitot.total_pressure                  =   0;
+sensorTot.pitot.static_pressure                 =   0;
+
+% initialization of the indexes
+sensorTot.barometer_sens{1}.n_old = 1;
+sensorTot.barometer_sens{2}.n_old = 1;
+sensorTot.barometer_sens{3}.n_old = 1;
+sensorTot.imu.n_old = 1;
+sensorTot.gps.n_old = 1;
+sensorTot.pitot.n_old = 1;
+sensorTot.comb_chamber.n_old = 1;
+sensorTot.ada.n_old = 1;
+sensorTot.nas.n_old = 1;
+sensorTot.mea.n_old = 1;
+sensorTot.sfd.n_old = 1;

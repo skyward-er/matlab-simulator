@@ -23,7 +23,7 @@ if ~det(S)<1e-3
     sensorData.mea.P = (eye(3)-K*C)*sensorData.mea.P;
 end
 estimated_pressure = C * sensorData.mea.x;
-sensorData.mea.x = sensorData.mea.x + K* ((sensorTot.cp(end)-1950)/1000 - estimated_pressure);
+sensorData.mea.x = sensorData.mea.x + K* ((sensorTot.comb_chamber.measures(end)-1950)/1000 - estimated_pressure);
 
 estimated_mass = sensorData.mea.x(3);
 m = estimated_mass;

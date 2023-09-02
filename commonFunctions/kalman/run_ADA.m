@@ -1,4 +1,4 @@
-function [xp, xv, Pout, ada]   =  run_ADA(xin, Pin, p_baro, t_baro, ada)
+function [xp, xv, Pout, ada]   =  run_ADA(xin, Pin, p_baro, t_baro, settings)
 
 % Author: Alessandro Del Duca
 % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@skywarder.eu
@@ -61,6 +61,7 @@ INPUTS:
 
 -----------------------------------------------------------------------
 %}
+ada = settings.ada;
 
     dt = t_baro(2) - t_baro(1);
     
@@ -95,7 +96,7 @@ INPUTS:
         xv(ii,2)  =   getvelocity(xp(ii,1),xp(ii,2),ada.temp_ref, ada.p_ref);
         
         if ada.flag_apo  == false
-            if xv(ii,2) < ada.v_thr
+            if xv(ii,2) < ada.v_thr && xv(ii,1) > 100 + settings.z0
                 ada.counter = ada.counter + 1;
             else
                 ada.counter = 0;

@@ -107,7 +107,7 @@ tv          =   sensorData.accelerometer.time;
 dt_k        =   tv(2)-tv(1);                 % Time step of the kalman
 x_lin       =   zeros(length(tv),6);         % Pre-allocation of corrected estimation
 xq          =   zeros(length(tv),7);         % Pre-allocation of quaternions and biases
-x         =   zeros(length(tv),13);
+x           =   zeros(length(tv),13);
 
 P_c         =   zeros(12,12,length(tv));
 P_lin       =   zeros(6,6,length(tv));       %Pre-allocation of the covariance matrix
@@ -115,7 +115,7 @@ P_q         =   zeros(6,6,length(tv));
 
 x_lin(1,:)  =   x_prev(1:6);                 % Allocation of the initial value
 xq(1,:)     =   x_prev(7:13);
-x(1,:)    =   [x_lin(1,:),xq(1,:)];
+x(1,:)      =   [x_lin(1,:),xq(1,:)];
 
 P_lin(:,:,1)=   P_prev(1:6,1:6);
 P_q(:,:,1)  =   P_prev(7:12,7:12);
@@ -171,13 +171,13 @@ for i=2:length(tv)
     P_c(7:12,7:12,i) = P_q(:,:,i);
 
     if nas.flag_apo  == false
-        if -x(i,6) < nas.v_thr && -x(i,3) > 100
+        if -x(i,6) < nas.v_thr && -x(i,3) > 100 + settings.z0
             nas.counter = nas.counter + 1;
         else
             nas.counter = 0;
         end
         if nas.counter >= nas.count_thr
-            nas.t_kalman = tv(i);
+            nas.t_nas = tv(i);
             nas.flag_apo = true;
         end
     end

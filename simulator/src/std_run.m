@@ -112,7 +112,7 @@ settings.wind.El = El;
 settings.wind.Az = Az;
 
 %% SENSORS INIT
-[sensorSettings, sensorTot] = initSensors(settings.lat0, settings.lon0, settings.z0);
+[sensorSettings, sensorTot] = initSensors(settings);
 
 %% MAGNETIC FIELD MODEL
 std_magneticField;
@@ -364,7 +364,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     barometer_measure{1}(iTimes) = sensorData.barometer_sens{1}.measures(end);
     barometer_measure{2}(iTimes) = sensorData.barometer_sens{2}.measures(end);
     barometer_measure{3}(iTimes) = sensorData.barometer_sens{3}.measures(end);
-    sensorTot.sfd.barometer_time(iTimes) = t1;
+    sensorTot.sfd.time(iTimes) = t1;
     sensorTot.sfd.pressure(iTimes) = sensorData.barometer.measures(end);
     sensorTot.sfd.faults(n_old:n_old+n-1,:) = ones(n,1) * settings.faulty_sensors;
     n_old = n_old + n -1;
@@ -414,12 +414,12 @@ Yf = Yf_tot(1:n_old, :);
 Tf = Tf_tot(1:n_old, :);
 
 if not(settings.electronics)
-    t_kalman = sensorTot.nas.t;
+    t_nas = settings.nas.t_nas;
 else
-    t_kalman = -1;
+    t_nas = -1;
 end
 
-t_ada    = sensorTot.ada.t;
+t_ada    = settings.ada.t_ada;
 settings.flagMatr = settings.flagMatr(1:n_old, :);
 
 %% other useful parameters:
@@ -444,86 +444,68 @@ end
 % simulation states
 struct_out.t = Tf;
 struct_out.Y = Yf;
-struct_out.quat = Yf(:,10:13);
-% aerodynamic quantities
-struct_out.qdyn = qdyn;
-struct_out.cp = sensorTot.cp;
 % wind
-struct_out.windMag = settings.wind.Mag;
-struct_out.windAz = settings.wind.Az;
-struct_out.windEl = settings.wind.El;
-struct_out.windVel(1) = uw;
-struct_out.windVel(2) = vw;
-struct_out.windVel(3) = ww;
-% ADA
-struct_out.ADA = sensorTot.ada;
-% NAS
-struct_out.NAS = sensorTot.nas;
-% MEA
-if settings.HREmot
-    struct_out.MEA = sensorTot.mea;
-end
-% SFD
-struct_out.sfd = sensorTot.sfd;
+struct_out.wind.Mag = settings.wind.Mag;
+struct_out.wind.Az = settings.wind.Az;
+struct_out.wind.El = settings.wind.El;
+struct_out.wind.Vel = [uw, vw, ww];
 
+% sensors (ADA, NAS, MEA, SFD, and all sensor data are stored here)
+struct_out.sensors = sensorTot;
 % apogee
-struct_out.apogee_time = Tf(idx_apo);
-struct_out.apogee_idx = idx_apo;
-struct_out.apogee_coordinates = [Yf_tot(idx_apo,1),Yf_tot(idx_apo,2),-Yf_tot(idx_apo,3)];
-struct_out.apogee_speed = [Yf_tot(idx_apo,4),Yf_tot(idx_apo,5),-Yf_tot(idx_apo,6)];
-struct_out.apogee_radius = norm(struct_out.apogee_coordinates(1:2));
+struct_out.apogee.time = Tf(idx_apo);
+struct_out.apogee.time_ada = t_ada;
+struct_out.apogee.time_nas = t_nas;
+struct_out.apogee.idx = idx_apo;
+struct_out.apogee.coordinates = [Yf_tot(idx_apo,1),Yf_tot(idx_apo,2),-Yf_tot(idx_apo,3)];
+struct_out.apogee.speed = [Yf_tot(idx_apo,4),Yf_tot(idx_apo,5),-Yf_tot(idx_apo,6)];
+struct_out.apogee.radius = norm(struct_out.apogee.coordinates(1:2));
 % recall
 struct_out.recall = dataAscent;
 
-
-
 struct_out.contSettings = contSettings;
-struct_out.barometer_measures = barometer_measure;
-struct_out.barometer_times = barometer_time;
-
-
 
 if exist('t_airbrakes','var')
-    struct_out.ARB_allowanceTime = t_airbrakes;
-    struct_out.ARB_allowanceIdx = idx_airbrakes;
-    struct_out.ARB_cmdTime = ap_ref_time_tot; % for plots, in order to plot the stairs of the commanded value
-    struct_out.ARB_cmd = ap_ref_tot; % cmd  = commanded
-    struct_out.ARB_openingPosition = [Yf_tot(idx_airbrakes,1),Yf_tot(idx_airbrakes,2),-Yf_tot(idx_airbrakes,3)];
-    struct_out.ARB_openingVelocities = [Yf_tot(idx_airbrakes,4),Yf_tot(idx_airbrakes,5),-Yf_tot(idx_airbrakes,6)];
+    struct_out.ARB.allowanceTime = t_airbrakes;
+    struct_out.ARB.allowanceIdx = idx_airbrakes;
+    struct_out.ARB.cmdTime = ap_ref_time_tot; % for plots, in order to plot the stairs of the commanded value
+    struct_out.ARB.cmdPosition = ap_ref_tot; % cmd  = commanded
+    struct_out.ARB.openingPosition = [Yf_tot(idx_airbrakes,1),Yf_tot(idx_airbrakes,2),-Yf_tot(idx_airbrakes,3)];
+    struct_out.ARB.openingVelocities = [Yf_tot(idx_airbrakes,4),Yf_tot(idx_airbrakes,5),-Yf_tot(idx_airbrakes,6)];
 else
-    struct_out.ARB_allowanceTime = NaN;
-    struct_out.ARB_allowanceIdx = NaN;
-    struct_out.ARB_cmdTime = NaN; 
-    struct_out.ARB_cmd = NaN; 
-    struct_out.ARB_openingPosition = NaN;
-    struct_out.ARB_openingVelocities = NaN;
+    struct_out.ARB.allowanceTime = NaN;
+    struct_out.ARB.allowanceIdx = NaN;
+    struct_out.ARB.cmdTime = NaN; 
+    struct_out.ARB.cmdPosition = NaN; 
+    struct_out.ARB.openingPosition = NaN;
+    struct_out.ARB.openingVelocities = NaN;
 end
 % parafoil 
 if settings.scenario == "descent" || settings.scenario == "full flight"
-    struct_out.deltaA = deltaA_tot;
-    struct_out.deltaAcmd = deltaAcmd_tot;
+    
+    struct_out.PRF.deltaAcmd = deltaAcmd_tot;
     % events
     struct_out.events.drogueIndex = lastAscentIndex+1;
     struct_out.events.mainChuteIndex = lastDrogueIndex+1;
     % landing
-    struct_out.landing_position = Yf(idx_landing,1:3);
-    struct_out.landing_velocities_BODY = Yf(idx_landing,4:6);
-    struct_out.landing_velocities_NED = quatrotate(quatconj(Yf(idx_landing,10:13)),Yf(idx_landing,4:6));
+    struct_out.PRF.landing_position = Yf(idx_landing,1:3);
+    struct_out.PRF.landing_velocities_BODY = Yf(idx_landing,4:6);
+    struct_out.PRF.landing_velocities_NED = quatrotate(quatconj(Yf(idx_landing,10:13)),Yf(idx_landing,4:6));
     % deployment
-    struct_out.parafoil_deploy_altitude_set = settings.para(1).z_cut + settings.z0; % set altitude for deployment
-    struct_out.parafoil_deploy_position = Yf(lastDrogueIndex+1,1:3); % actual position of deployment
-    struct_out.parafoil_deploy_velocity = Yf(lastDrogueIndex+1,4:6); 
+    struct_out.PRF.deploy_altitude_set = settings.para(1).z_cut + settings.z0; % set altitude for deployment
+    struct_out.PRF.deploy_position = Yf(lastDrogueIndex+1,1:3); % actual position of deployment
+    struct_out.PRF.deploy_velocity = Yf(lastDrogueIndex+1,4:6); 
 else
-    struct_out.deltaA = NaN;
-    struct_out.deltaAcmd = NaN;
+    
+    struct_out.PRF.deltaAcmd = NaN;
     struct_out.events.drogueIndex = NaN;
     struct_out.events.mainChuteIndex = NaN;
-    struct_out.landing_position =NaN;
-    struct_out.landing_velocities_BODY = NaN;
-    struct_out.landing_velocities_NED = NaN;
-    struct_out.parafoil_deploy_altitude_set = NaN;
-    struct_out.parafoil_deploy_position = NaN;
-    struct_out.parafoil_deploy_velocity = NaN;
+    struct_out.PRF.landing_position =NaN;
+    struct_out.PRF.landing_velocities_BODY = NaN;
+    struct_out.PRF.landing_velocities_NED = NaN;
+    struct_out.PRF.deploy_altitude_set = NaN;
+    struct_out.PRF.deploy_position = NaN;
+    struct_out.PRF.deploy_velocity = NaN;
 end
 % settings for payload
 struct_out.payload = contSettings.payload;

@@ -352,7 +352,6 @@ else
     XCPtot = CMaTot/CFaTot;
 
     % flagSpeedSaturation = false;
-    if (M_value < settings.MachControl && settings.expShutdown) %|| ~settings.machControlActive
         % set velocity of servo (air brakes)
         if length(ap_ref_vec)==2 % for the recallOdeFunction
             if t < t_change_ref
@@ -361,10 +360,14 @@ else
                 ap_ref = ap_ref_vec(2);
             end
         else 
-            [~,ind_arb] = min(settings.parout.partial_time-t);
+            if exist('settings.parout','var')
+                [~,ind_arb] = min(settings.parout.partial_time-t);
+            else
+                ind_arb = 1;
+            end
             ap_ref = ap_ref_vec(ind_arb); % don't delete this unless you change how the recall ode works.
-        end
         
+        end
         dap = (ap_ref-ap)/settings.servo.tau;
         if abs(dap) >settings.servo.maxSpeed
             dap = sign(ap_ref-ap)*settings.servo.maxSpeed; % concettualmente sta roba è sbagliata perchè dipende dal passo di integrazione, fixare
@@ -374,9 +377,6 @@ else
             dap = 0;
         end
 
-    else 
-        dap = 0;
-    end
 end
 % Quaternions
 OM = [ 0 -p -q -r  ;

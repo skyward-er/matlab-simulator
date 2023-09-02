@@ -72,23 +72,23 @@ settings.baro_old = sensorData.barometer.time(end);
 %% Update NAS data
 
 sensorData.nas.time(iTimes) = Tf(end);
-sensorData.nas.x = hilData.nas.x_est;
+sensorData.nas.states = hilData.nas.x_est;
 
 sensorTot.nas.x(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.x(:,1),1)-1,:)  = sensorData.nas.x(:,:); % NAS output
 sensorTot.nas.t(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.x(:,1),1)-1)    = sensorData.accelerometer.time(end); % NAS time output
-sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.x,1);
+sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1);
 
 if ~flagFlight
     sensorData.kalman.z    = 0;
     sensorData.kalman.vz   = 0;
     sensorData.kalman.vMod = 0;
 else
-    sensorData.kalman.x  =  sensorTot.nas.x(end, 2);
-    sensorData.kalman.y  =  sensorTot.nas.x(end, 1);
-    sensorData.kalman.z  =  sensorTot.nas.x(end, 3);
-    sensorData.kalman.vx =  sensorTot.nas.x(end, 4);   % north
-    sensorData.kalman.vy =  sensorTot.nas.x(end, 5);   % east
-    sensorData.kalman.vz =  sensorTot.nas.x(end, 6);   % down
+    sensorData.kalman.x  =  sensorTot.nas.states(end, 2);
+    sensorData.kalman.y  =  sensorTot.nas.states(end, 1);
+    sensorData.kalman.z  =  sensorTot.nas.states(end, 3);
+    sensorData.kalman.vx =  sensorTot.nas.states(end, 4);   % north
+    sensorData.kalman.vy =  sensorTot.nas.states(end, 5);   % east
+    sensorData.kalman.vz =  sensorTot.nas.states(end, 6);   % down
 end
 
 %% Update Mass estimation data

@@ -37,19 +37,18 @@ if iTimes>3
     end
 
     if  settings.flagNAS
-        x_prev    =   sensorData.nas.x(end,:);
-        % vels_prev =   vels_tot(end,:);
+        x_prev    =   sensorData.nas.states(end,:);
         P_prev    =   sensorData.nas.P(:,:,end);
     end
 end
 
 if settings.flagADA && settings.dataNoise && length(sensorData.barometer.time) > 1 ...
         && sensorData.barometer.time(1) >= settings.baro_old
-    [sensorData.ada.xp, sensorData.ada.xv, sensorData.ada.P, settings.ada]   =  run_ADA(ada_prev, Pada_prev, sensorData.barometer.measures, sensorData.barometer.time, settings.ada);
+    [sensorData.ada.xp, sensorData.ada.xv, sensorData.ada.P, settings.ada]   =  run_ADA(ada_prev, Pada_prev, sensorData.barometer.measures, sensorData.barometer.time, settings);
 
     sensorTot.ada.xp(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1) -1,:)  = sensorData.ada.xp(1:end,:);
     sensorTot.ada.xv(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xv(:,1),1)-1,:)  = sensorData.ada.xv(1:end,:);
-    sensorTot.ada.t(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1)-1)     = sensorData.barometer.time;
+    sensorTot.ada.time(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1)-1)     = sensorData.barometer.time;
     sensorTot.ada.n_old = sensorTot.ada.n_old + size(sensorData.ada.xp,1);
     settings.baro_old = sensorData.barometer.time(end);
 end
@@ -58,23 +57,23 @@ end
 
 if settings.flagNAS && settings.dataNoise
     
-    [sensorData.nas.x, sensorData.nas.P, settings.nas]   =  run_NAS(x_prev, P_prev,  XYZ0*0.01, sensorData, settings);
-    if abs(sensorData.nas.x(3,1)) >settings.stopPitotAltitude+ settings.z0
+    [sensorData.nas.states, sensorData.nas.P, settings.nas]   =  run_NAS(x_prev, P_prev,  XYZ0*0.01, sensorData, settings);
+    if abs(sensorData.nas.states(3,1)) >settings.stopPitotAltitude+ settings.z0
         settings.flagStopPitotCorrection = true;
     end
     sensorData.nas.time(iTimes) = Tf(end);
-    sensorTot.nas.x(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.x(:,1),1)-1,:)  = sensorData.nas.x(:,:); % NAS output
-    sensorTot.nas.t(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.x(:,1),1)-1)    = sensorData.accelerometer.time; % NAS time output
-    sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.x,1);
+    sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-1,:)  = sensorData.nas.states(:,:); % NAS output
+    sensorTot.nas.time(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-1)    = sensorData.accelerometer.time; % NAS time output
+    sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1);
 
 
     %%%%%%%%%%%%%%%%%% DA RIVEDERE L'UTILIZZO DI QUESTE VARIABILI ASSOLUTAMENTE %%%%%%%%%%%%%%%%%%%%%%%%
-    sensorData.kalman.z  =  sensorTot.nas.x(end, 3);
-    sensorData.kalman.x  =  sensorTot.nas.x(end, 2);
-    sensorData.kalman.y  =  sensorTot.nas.x(end, 1);
-    sensorData.kalman.vx =  sensorTot.nas.x(end, 4);   % north
-    sensorData.kalman.vy =  sensorTot.nas.x(end, 5);   % east
-    sensorData.kalman.vz =  sensorTot.nas.x(end, 6);   % down
+    sensorData.kalman.z  =  sensorTot.nas.states(end, 3);
+    sensorData.kalman.x  =  sensorTot.nas.states(end, 2);
+    sensorData.kalman.y  =  sensorTot.nas.states(end, 1);
+    sensorData.kalman.vx =  sensorTot.nas.states(end, 4);   % north
+    sensorData.kalman.vy =  sensorTot.nas.states(end, 5);   % east
+    sensorData.kalman.vz =  sensorTot.nas.states(end, 6);   % down
 end
 
 %% Engine Control algorithm
@@ -82,8 +81,8 @@ if contains(settings.mission,'_2023')
     if Tf(end) <= settings.tb+0.5 &&...
             (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
 
-        if isnan(sensorTot.cp(end))
-            sensorTot.cp(end) = 0;
+        if isnan(sensorTot.comb_chamber.measures(end))
+            sensorTot.comb_chamber.measures(end) = 0;
         end
         if ~settings.shutdown
             [t_shutdown,settings,contSettings,sensorData] =run_MTR_SIM (contSettings,sensorData,settings,sensorTot,Tf);
@@ -92,6 +91,7 @@ if contains(settings.mission,'_2023')
             sensorTot.mea.mass(iTimes) = sensorData.mea.estimated_mass;
             sensorTot.mea.prediction(iTimes) = sensorData.mea.predicted_apogee;
             sensorTot.mea.t_shutdown = t_shutdown;
+            sensorTot.mea.time(iTimes) = t1;
         end
 
         if ~settings.shutdown && Tf(end) >= settings.tb
@@ -102,7 +102,7 @@ if contains(settings.mission,'_2023')
             settings.expMengineCut = m - settings.ms;
             settings.shutdown = 1;
             settings = settingsEngineCut(settings);
-            settings.quatCut = [sensorTot.nas.x(end,10) sensorTot.nas.x(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
+            settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
             [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
             sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
         end
@@ -147,7 +147,7 @@ if contains(settings.mission,'_2023')
         if t1-t_last_arb_control >= 1/settings.frequencies.arbFrequency - 1e-5 || t_last_arb_control == t_airbrakes
             t_last_arb_control = Tf(end);
             ap_ref_old = ap_ref_new;
-            settings.quat = [sensorTot.nas.x(end, [10,7:9])];
+            settings.quat = [sensorTot.nas.states(end, [10,7:9])];
             [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
             [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
         end
@@ -167,7 +167,7 @@ else
         if t1-t_last_arb_control >= 1/settings.frequencies.arbFrequency - 1e-6 || t_last_arb_control == t_airbrakes
             t_last_arb_control = t1(end);
             ap_ref_old = ap_ref_new;
-            settings.quat = [sensorTot.nas.x(end, [10,7:9])];
+            settings.quat = [sensorTot.nas.states(end, [10,7:9])];
             [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
             [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
     
@@ -189,7 +189,7 @@ if ~settings.flagAscent && settings.parafoil
                 idx_parafoil = n_old+1;
                 contSettings.flagFirstControlPRF = false;
                 if contSettings.payload.guidance_alg == "t-approach"
-                    pos_est = sensorData.nas.x(end,1:3);
+                    pos_est = sensorData.nas.states(end,1:3);
                     pos_est(3) = -pos_est(3)-settings.z0;
                     [contSettings.payload.EMC,contSettings.payload.M1,contSettings.payload.M2] = setEMCpoints(pos_est,settings.payload.target,contSettings.payload);
                 end
@@ -200,9 +200,11 @@ if ~settings.flagAscent && settings.parafoil
                 else
                     contSettings.WES.state = 2;
                 end
-                vel_est = sensorData.kalman.x_c(end,4:5);
+                vel_est = sensorData.nas.states(end,4:5);
                 [contSettings.WES] = run_WES(vel_est,contSettings.WES);
                 wind_est = [contSettings.WES.wind_est];
+                sensorTot.wes.measure(iTimes,:) = wind_est; 
+                sensorTot.wes.time(iTimes) = t1; 
         else
                 wind_est = [0,0];
         end
@@ -211,10 +213,10 @@ if ~settings.flagAscent && settings.parafoil
         if t1-t_last_prf_control >= 1/settings.frequencies.prfFrequency - 1e-6 || t_last_prf_control == t_parafoil
                 deltaA_ref_old = deltaA_ref_new;
                 t_last_prf_control = t1;
-                pos_est = sensorData.kalman.x_c(end,1:3);
+                pos_est = sensorData.nas.states(end,1:3);
                 pos_est(3) = -pos_est(3)-settings.z0;
                 
-                [deltaA_ref_new,contSettings] = run_parafoilGuidance(pos_est, sensorData.kalman.x_c(end,4:5), wind_est, settings.payload.target, contSettings);
+                [deltaA_ref_new,contSettings] = run_parafoilGuidance(pos_est, sensorData.nas.states(end,4:5), wind_est, settings.payload.target, contSettings);
         end
         
     end

@@ -12,10 +12,10 @@ t1          =       t0 + dt;                                                % Se
 %% kalman initialization
 if not(settings.scenario == "descent")
     sensorData.kalman.vz = 0;                                                   % Vertical velocity
-    sensorData.kalman.z  = settings.z0;
+    sensorData.kalman.z  = -settings.z0;
 else 
-    sensorData.kalman.vz = settings.Vz_final;                                                   % Vertical velocity
-    sensorData.kalman.z  = settings.z_final;
+    sensorData.kalman.vz = -settings.Vz_final;                                                   % Vertical velocity
+    sensorData.kalman.z  = -settings.z_final;
 end    
     % Altitude
 
