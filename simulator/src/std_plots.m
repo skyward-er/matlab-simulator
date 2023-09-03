@@ -177,26 +177,30 @@ end
 %     exportStandardizedFigure(figures.Mach_number,"report_images\"+settings.mission+"src_src_Mach_number.pdf",0.9)
 % end
 
-% Predicted vs real apogee
-% if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
-%     prediction = figure('Name', 'Predicted apogee','ToolBar','auto');
-%     hold on;
-%     grid on;
-% 
-%     plot(structIn.t, -structIn.Y(:, 3));
-%     plot(0:1/settings.frequencies.controlFrequency:settings.tb-0.02, structIn.sensors.mea.predicted_apogee);
-%     xline(structIn.t_shutdown,'r--')
-% 
-%     xlabel('Time t [s]');
-%     ylabel('Altitude AGL [m]');
-%     title('Predicted vs Real apogee');
-%     legend('Real altitude','Predicted apogee','shutdown time')
-% 
-%     if settings.flagExportPLOTS == true
-%         exportStandardizedFigure(prediction,'predicted_apogee.pdf',0.9)
-%     end
-% 
-% end
+%% MASS ESTIMATION ALGORITHM
+if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
+    figures.MEA = figure('Name', 'Predicted apogee','ToolBar','auto');
+    subplot(2,1,1)
+    plot(structIn.t, -structIn.Y(:, 3),'DisplayName','Altitude');
+    hold on; grid on;
+    plot(structIn.sensors.mea.time, structIn.sensors.mea.prediction,'DisplayName','Prediction');
+    legend
+    subplot(2,1,2)
+    plot(structIn.sensors.mea.time, structIn.sensors.mea.mass   ,'DisplayName','Mass');
+    legend
+    xline(structIn.t_shutdown,'r--')
+    xlabel('Time t [s]');
+    ylabel('Altitude AGL [m]');
+    title('Predicted vs Real apogee');
+    
+
+    
+
+    if settings.flagExportPLOTS == true
+        exportStandardizedFigure(figures.MEA,'predicted_apogee.pdf',0.9)
+    end
+
+end
 
 %% reference
 figure('Position',[100,100,600,400])
