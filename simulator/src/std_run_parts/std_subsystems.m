@@ -29,6 +29,11 @@ for i = goodSensors
 end
 [sensorData,settings.faulty_sensors] = run_SensorFaultDetection_SVM(SVM_model,sensorData,settings.faulty_sensors,settings.flagAscent,t1);
 
+sensorTot.barometer.pressure_measures(sensorTot.barometer.n_old:sensorTot.barometer.n_old + size(sensorData.barometer.measures' ,1) - 1,:)    = sensorData.barometer.measures';
+sensorTot.barometer.altitude(sensorTot.barometer.n_old:sensorTot.barometer.n_old + size(sensorData.barometer.measures',1) - 1,:)    = sensorData.barometer.z';
+sensorTot.barometer.time(sensorTot.barometer.n_old:sensorTot.barometer.n_old + size(sensorData.barometer.measures',1) - 1)    =  sensorData.barometer.time;
+sensorTot.barometer.n_old = sensorTot.barometer.n_old + size(sensorData.barometer.measures,1);
+
 %% ADA
 if iTimes>3
     if settings.flagADA
@@ -42,8 +47,7 @@ if iTimes>3
     end
 end
 
-if settings.flagADA && settings.dataNoise && length(sensorData.barometer.time) > 1 ...
-        && sensorData.barometer.time(1) >= settings.baro_old
+if settings.flagADA && settings.dataNoise && sensorData.barometer.time(1) >= settings.baro_old
     [sensorData.ada.xp, sensorData.ada.xv, sensorData.ada.P, settings.ada]   =  run_ADA(ada_prev, Pada_prev, sensorData.barometer.measures, sensorData.barometer.time, settings);
 
     sensorTot.ada.xp(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1) -1,:)  = sensorData.ada.xp(1:end,:);
@@ -57,14 +61,14 @@ end
 
 if settings.flagNAS && settings.dataNoise
     
-    [sensorData.nas.states, sensorData.nas.P, settings.nas]   =  run_NAS(x_prev, P_prev,  XYZ0*0.01, sensorData, settings);
-    if abs(sensorData.nas.states(3,1)) >settings.stopPitotAltitude+ settings.z0
+    [sensorData, settings.nas]   =  run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings);
+    if abs(sensorData.nas.states(1,3)) >settings.stopPitotAltitude+ settings.z0
         settings.flagStopPitotCorrection = true;
     end
-    sensorData.nas.time(iTimes) = Tf(end);
-    sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-1,:)  = sensorData.nas.states(:,:); % NAS output
-    sensorTot.nas.time(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-1)    = sensorData.accelerometer.time; % NAS time output
-    sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1);
+    sensorData.nas.time =  sensorData.nas.time(end):1/settings.frequencies.NASFrequency:Tf(end);
+    sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2,:)  = sensorData.nas.states(2:end,:); % NAS output
+    sensorTot.nas.time(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.time(2:end); % NAS time output
+    sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1) -1;
 
 
     %%%%%%%%%%%%%%%%%% DA RIVEDERE L'UTILIZZO DI QUESTE VARIABILI ASSOLUTAMENTE %%%%%%%%%%%%%%%%%%%%%%%%

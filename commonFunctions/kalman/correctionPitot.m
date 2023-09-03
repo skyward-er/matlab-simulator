@@ -32,14 +32,6 @@ function [x,P,y_res] = correctionPitot(x_pred,P_pred,p0,p,sigma_p,q,Mach_max)
 threshold      =   10e-11;
 x = x_pred;
 
-
-
-% A       = [q(1)^2 - q(2)^2 - q(3)^2 + q(4)^2,               2*(q(1)*q(2) + q(3)*q(4)),                 2*(q(1)*q(3) - q(2)*q(4));
-%     2*(q(1)*q(2) - q(3)*q(4)),      -q(1)^2 + q(2)^2 - q(3)^2 + q(4)^2,                2*(q(2)*q(3) + q(1)*q(4)) ;
-%     2*(q(1)*q(3) + q(2)*q(4)),               2*(q(2)*q(3) - q(1)*q(4)),       -q(1)^2 - q(2)^2 + q(3)^2 + q(4)^2];
-% 
-% v_body_prev = A*x_pred(4:6)';
-
 % compute total pressure from pitot measurements
 dp = p0 - p;        % total pressure
 if dp < 0 
@@ -56,39 +48,29 @@ M2 = 2/(gamma-1) * ( (p0/p)^(( gamma-1 )/gamma) -1 );
 % compute covariance
 R              =   sqrt(2*sigma_p/rho);
 
-% v_xbody = sqrt(M2) * a;
 v_pitot = sqrt(M2) * a;
 
-H           = zeros(1, 3);                            %Update of the matrix H
+H           = zeros(1, 3);                          %Update of the matrix H
 qdyn        = 0.5*rho*x_pred(6)^2/sqrt(1-(x_pred(6)/a)^2);
-H(1,3)      = qdyn/(dp)*(sqrt(M2)/Mach_max);
+H(1,3)      = qdyn/(dp)*(M2/Mach_max^2);
 if any(isnan(H))
     H = zeros(1,3);
 end
-S           =   H*P_pred*H'+R;                %Matrix necessary for the correction factor
+S           =   H*P_pred*H'+R;                      %Matrix necessary for the correction factor
 
 if cond(S) > threshold
 
     e       =  -v_pitot - x_pred(6);
-    K       =   P_pred*H'/S;                   %Kalman correction factor % K must be non dimensional
+    K       =   P_pred*H'/S;                        %Kalman correction factor % K must be non dimensional
 
-%     x(4:6)       =   v_body_prev' + (K*e)';               %Corrector step of the state
     x(4:6)       =   x_pred(4:6) + (K*e)';
 
-    P       =   (eye(3) - K*H)*P_pred;        %Corrector step of the state covariance
+    P       =   (eye(3) - K*H)*P_pred;              %Corrector step of the state covariance
 else
     x       =   x_pred;
     P       =   P_pred;
 end
 
-%-------------------------- to do
-% vx_body_corr         =   x(4);                          %Corrected output expectation
-
-% y_res_1  =  vx_body_corr;
-
-% y_res = [y_res_1; v_body_prev(2:3)];
-
-% y_res = A'*y_res;
 y_res = x(6)+v_pitot;
 
 end

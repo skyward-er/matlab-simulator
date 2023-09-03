@@ -63,7 +63,7 @@ INPUTS:
 %}
 ada = settings.ada;
 
-    dt = t_baro(2) - t_baro(1);
+    dt = 1/settings.frequencies.barometerFrequency;
     
     x  = xin';
     

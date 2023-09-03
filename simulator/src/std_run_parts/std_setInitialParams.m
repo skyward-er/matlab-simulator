@@ -131,22 +131,25 @@ sfd_mean_p = [];
 %% ADA initial conditions (Apogee Detection Algorithm)
 
 if settings.flagADA
+    sensorData.ada.xp = settings.ada.x0;
     ada_prev  =   settings.ada.x0;
     Pada_prev =   settings.ada.P0;
+    sensorData.ada.time = 0;
 end
 
 %% NAS initial conditions (Navigation and Attitude System)
 
 if settings.flagNAS
-    x_prev    =  [X0; V0; Q0(2:4); Q0(1);0;0;0];
+    % initialize states of the NAS 
+    sensorData.nas.states = [X0; V0; Q0(2:4); Q0(1);0;0;0]';
     if settings.scenario ~="descent"
-        x_prev(3) = -settings.z0;
+        sensorData.nas.states(3) = -settings.z0;
     else
-        x_prev(3) = -settings.z_final-settings.z0;
+        sensorData.nas.states(3) = -settings.z_final-settings.z0;
     end
-    vels_prev =  [0;0;0];
-    P_prev    =   0.01*eye(12);
+    sensorData.nas.P = 0.01*eye(12);
 end
+sensorData.nas.time = 0;
 % stop correction with pitot
 settings.flagStopPitotCorrection = false;
 

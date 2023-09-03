@@ -14,7 +14,6 @@ All rights reserved
 SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
-clearvars -except ZTARGET_CYCLE
 
 if ~exist('flagSubmodulesUpdated','var') % every first time you use the simulator checks for updates, then stops doing it (note: if you clear all vars it starts doing it)
     close all; clear; clc;
@@ -57,7 +56,7 @@ matlab_graphics;
 %% check on the simulation profile:
 go = '';
 while ~strcmp(go,'yes') && ~strcmp(go,'y') && ~strcmp(go,'no') && ~strcmp(go,'n')
-    go = input('Did you check that the profile of the simulation? \nA.K.A. did you check settings.scenario = "controlled ascent" or " "descent" or whatever? ("yes" or "no") \n','s');
+    go = input('Did you check the profile of the simulation? \nA.K.A. did you check that: settings.scenario = "controlled ascent" or " "descent" or whatever? (y/n) \n','s');
     if go == "yes" || go == "y"
         fprintf('All right, let''s go \n\n')
     elseif go == "no" || go == "n"
@@ -71,8 +70,8 @@ end
 
 %% do you want to save the results?
 
-flagSaveOffline = input('Do you want to save the results offline? ("yes" or "no"): ','s');
-flagSaveOnline = input('Do you want to save the resuts online? (oneDrive) ("yes" or "no"): ','s');
+flagSaveOffline = input('Do you want to save the results offline? (y/n): ','s');
+flagSaveOnline = input('Do you want to save the resuts online? (oneDrive) (y/n): ','s');
 
 if flagSaveOnline == "yes" || flagSaveOnline == "y"
     computer = input('Who is running the simulation? ("Marco" or "Giuseppe" or "Hpe" or whatever): ','s');
@@ -91,7 +90,8 @@ clearvars   msaToolkitURL Itot
 
 settings_mont_init = struct('x',[]);
 
-% start simulation
+
+%% start simulation
 for alg_index = 4
 
     contSettings.algorithm = algorithm_vec{alg_index};
@@ -110,8 +110,6 @@ for alg_index = 4
 
     parfor i = 1:N_sim
         settings_mont = settings_mont_init;
-        %         contSettings_mont = contSettings;
-        %         reference_mont = reference;
 
         settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
         settings_mont.motor.expTime = stoch.expThrust(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
@@ -188,27 +186,35 @@ for alg_index = 4
         end
        
         % landing
-        landing.position(i,:) = save_thrust{i}.PRF.landing_position;
-        landing.velocities_BODY(i,:) = save_thrust{i}.PRF.landing_velocities_BODY;
-        landing.velocities_NED(i,:) = save_thrust{i}.PRF.landing_velocities_NED;
-        landing.distance_to_target(i) = norm(settings.payload.target(1:2)-landing.position(i,1:2)');
-
-        % save apogees within 50 meters (radius) from target:
-        if landing.distance_to_target(i) <= 50
-            N_landings_within50m = N_landings_within50m +1; % save how many apogees sit in the +-50 m from target
-        end
-        % save apogees within 150 meters (radius) from target:
-        if landing.distance_to_target(i) <= 150
-            N_landings_within150m = N_landings_within150m +1; % save how many apogees sit in the +-50 m from target
+        if ~isnan(save_thrust{i}.PRF.landing_position)
+            landing.position(i,:) = save_thrust{i}.PRF.landing_position;
+            landing.velocities_BODY(i,:) = save_thrust{i}.PRF.landing_velocities_BODY;
+            landing.velocities_NED(i,:) = save_thrust{i}.PRF.landing_velocities_NED;
+            landing.distance_to_target(i) = norm(settings.payload.target(1:2)-landing.position(i,1:2)');
+    
+            % save apogees within 50 meters (radius) from target:
+            if landing.distance_to_target(i) <= 50
+                N_landings_within50m = N_landings_within50m +1; % save how many apogees sit in the +-50 m from target
+            end
+            % save apogees within 150 meters (radius) from target:
+            if landing.distance_to_target(i) <= 150
+                N_landings_within150m = N_landings_within150m +1; % save how many apogees sit in the +-50 m from target
+            end
+        else
+            landing.position(i,:) = [NaN NaN NaN];
+            landing.velocities_BODY(i,:) = [NaN NaN NaN];
+            landing.velocities_NED(i,:) = [NaN NaN NaN];
+            landing.distance_to_target(i) = NaN;
+    
+            N_landings_within50m = NaN; % save how many apogees sit in the +-50 m from target
+            N_landings_within150m = NaN; % save how many apogees sit in the +-50 m from target
+            
         end
     end
     
     % merit parameters
     apogee.altitude_mean = mean(apogee.altitude);
     apogee.altitude_std = std(apogee.altitude);
-
-    landing.distance_mean = mean(landing.distance_to_target);
-    landing.distance_std = std(landing.distance_to_target);
 
     % save t_shutdown
     t_shutdown.mean = mean(t_shutdown.value);
@@ -225,30 +231,59 @@ for alg_index = 4
     apogee.horizontalSpeed_std = std(apogee.horizontalSpeed);
     apogee.horizontalSpeed_max = max(apogee.horizontalSpeed);
     apogee.horizontalSpeed_min = min(apogee.horizontalSpeed);
-
-    % save landing speed
-    landing.verticalSpeed_mean = mean(landing.velocities_NED(:,3));
-    landing.verticalSpeed_std = std(landing.velocities_NED(:,3));
-    landing.verticalSpeed_max = max(landing.velocities_NED(:,3));
-    landing.verticalSpeed_min = min(landing.velocities_NED(:,3));
-
     
-    landing.horizontalSpeed_mean = mean(norm(landing.velocities_NED(:,1:2)));
-    landing.horizontalSpeed_std = std(norm(landing.velocities_NED(:,1:2)));
-    landing.horizontalSpeed_max = max(norm(landing.velocities_NED(:,1:2)));
-    landing.horizontalSpeed_min = min(norm(landing.velocities_NED(:,1:2)));
-
     % accuracy
     apogee.accuracy_10 = N_ApogeeWithinTarget/N_sim*100; % percentage, so*100
     apogee.accuracy_50 = N_ApogeeWithinTarget_50/N_sim*100; % percentage, so*100
-    
-    landing.accuracy_50 = N_landings_within50m/N_sim*100;
-    landing.accuracy_150 = N_landings_within150m/N_sim*100;
+
+    % save landing speed
+    if ~isnan(landing.velocities_NED(1,3))
+
+        landing.distance_mean = mean(landing.distance_to_target);
+        landing.distance_std = std(landing.distance_to_target);
+
+        landing.verticalSpeed_mean = mean(landing.velocities_NED(:,3));
+        landing.verticalSpeed_std = std(landing.velocities_NED(:,3));
+        landing.verticalSpeed_max = max(landing.velocities_NED(:,3));
+        landing.verticalSpeed_min = min(landing.velocities_NED(:,3));
+
+
+        landing.horizontalSpeed_mean = mean(norm(landing.velocities_NED(:,1:2)));
+        landing.horizontalSpeed_std = std(norm(landing.velocities_NED(:,1:2)));
+        landing.horizontalSpeed_max = max(norm(landing.velocities_NED(:,1:2)));
+        landing.horizontalSpeed_min = min(norm(landing.velocities_NED(:,1:2)));
+
+        landing.accuracy_50 = N_landings_within50m/N_sim*100;
+        landing.accuracy_150 = N_landings_within150m/N_sim*100;
+
+
+    else
+        
+        landing.distance_mean = NaN;
+        landing.distance_std = NaN;
+
+        landing.verticalSpeed_mean = NaN;
+        landing.verticalSpeed_std = NaN;
+        landing.verticalSpeed_max = NaN;
+        landing.verticalSpeed_min = NaN;
+
+
+        landing.horizontalSpeed_mean = NaN;
+        landing.horizontalSpeed_std = NaN;
+        landing.horizontalSpeed_max = NaN;
+        landing.horizontalSpeed_min = NaN;
+
+        landing.accuracy_50 = NaN;
+        landing.accuracy_150 = NaN;
+
+    end
+   
 
     % montecarlo parameters
     for i = 1:N_sim
         apogee_mu(i) = mean(apogee.altitude(1:i));
         apogee_sigma(i) = std(apogee.altitude(1:i));
+
         landing_mu(i) = mean(landing.distance_to_target(1:i));
         landing_sigma(i) = std(landing.distance_to_target(1:i));
     end
@@ -281,7 +316,7 @@ for alg_index = 4
     end
     if flagSaveOnline == "yes" || flagSaveOnline == "y"
         if computer == "Marco" || computer == "marco"
-            folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\AIR BRAKES\MONTECARLO E TUNING\"+settings.mission+"\full_flight\"+contSettings.algorithm+"\"+num2str(N_sim)+"_"+simulationType_thrust+"_"+saveDate]; % online
+            folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\AIR BRAKES\MONTECARLO E TUNING\"+settings.mission+"\"+conf.scenario+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"_"+simulationType_thrust+"_"+saveDate]; % online
         end
     end
 

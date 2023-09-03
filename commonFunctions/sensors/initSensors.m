@@ -1,4 +1,4 @@
-function [s, sensorTot]  = initSensors(settings)
+function [s, sensorTot]  = initSensors(settings,sensorData)
 % Initialize all sensors
     
 % Author: Jan Hammelman
@@ -133,30 +133,53 @@ s.SSCDRRN015PDAD5.noiseVariance        =   2.63;                   % mbar from f
 
 
 % total measurements
-sensorTot.barometer_sens{1}.pressure_measures   =   0;
-sensorTot.barometer_sens{2}.pressure_measures   =   0;
-sensorTot.barometer_sens{3}.pressure_measures   =   0;
-sensorTot.barometer_sens{1}.altitude            =   0;
-sensorTot.barometer_sens{2}.altitude            =   0;
-sensorTot.barometer_sens{3}.altitude            =   0;
+[~,~,P0,~] = atmosisa(settings.z0);
+sensorTot.barometer_sens{1}.pressure_measures   =   P0;
+sensorTot.barometer_sens{2}.pressure_measures   =   P0;
+sensorTot.barometer_sens{3}.pressure_measures   =   P0;
+sensorTot.barometer_sens{1}.altitude            =   -settings.z0;
+sensorTot.barometer_sens{2}.altitude            =   -settings.z0;
+sensorTot.barometer_sens{3}.altitude            =   -settings.z0;
+sensorTot.barometer.pressure_measures           =   P0;
+sensorTot.barometer.altitude                    =   -settings.z0;
 sensorTot.comb_chamber.measures                 =   0;
 sensorTot.imu.accelerometer_measures            =   [0, 0, 0];
 sensorTot.imu.gyro_measures                     =   [0, 0, 0];
 sensorTot.imu.magnetometer_measures             =   [0, 0, 0];
 sensorTot.gps.position_measures                 =   [0, 0, 0];
 sensorTot.gps.velocity_measures                 =   [0, 0, 0];
-sensorTot.pitot.total_pressure                  =   0;
-sensorTot.pitot.static_pressure                 =   0;
+sensorTot.pitot.total_pressure                  =   P0;
+sensorTot.pitot.static_pressure                 =   P0;
+sensorTot.nas.states                            =   sensorData.nas.states;
+
+
+% inizializzare i tempi dei sensori a 0 e poi mettere tutti i n_old = 2
+sensorTot.barometer_sens{1}.time    =   0;
+sensorTot.barometer_sens{2}.time    =   0;
+sensorTot.barometer_sens{3}.time    =   0;
+sensorTot.barometer_sens{1}.time    =   0;
+sensorTot.barometer_sens{2}.time    =   0;
+sensorTot.barometer_sens{3}.time    =   0;
+sensorTot.barometer.time            =   0;
+sensorTot.comb_chamber.time         =   0;
+sensorTot.imu.time                  =   0;
+sensorTot.gps.time                  =   0;
+sensorTot.pitot.time                =   0;
+sensorTot.nas.time                  =   0;
+sensorTot.ada.time                  =   0;
+
+
 
 % initialization of the indexes
-sensorTot.barometer_sens{1}.n_old = 1;
-sensorTot.barometer_sens{2}.n_old = 1;
-sensorTot.barometer_sens{3}.n_old = 1;
-sensorTot.imu.n_old = 1;
-sensorTot.gps.n_old = 1;
-sensorTot.pitot.n_old = 1;
-sensorTot.comb_chamber.n_old = 1;
-sensorTot.ada.n_old = 1;
-sensorTot.nas.n_old = 1;
-sensorTot.mea.n_old = 1;
-sensorTot.sfd.n_old = 1;
+sensorTot.barometer_sens{1}.n_old = 2;
+sensorTot.barometer_sens{2}.n_old = 2;
+sensorTot.barometer_sens{3}.n_old = 2;
+sensorTot.barometer.n_old = 2;
+sensorTot.imu.n_old = 2;
+sensorTot.gps.n_old = 2;
+sensorTot.pitot.n_old = 2;
+sensorTot.comb_chamber.n_old = 2;
+sensorTot.ada.n_old = 2;
+sensorTot.nas.n_old = 2;
+sensorTot.mea.n_old = 2;
+sensorTot.sfd.n_old = 2;

@@ -1,4 +1,4 @@
-function [x, P_c,nas] = run_NAS(x_prev, P_prev, mag_NED,sensorData,settings)
+function [sensorData,nas] = run_NAS(Tf, mag_NED,sensorData,sensorTot,settings)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
@@ -98,10 +98,9 @@ For more information check the navigation system report
 -----------------------------------------------------------------------
 %}
 nas = settings.nas;
-flagAscent = settings.flagAscent;
-flagStopPitotCorrection = settings.flagStopPitotCorrection;
 
-tv          =   sensorData.accelerometer.time;
+% tv          =   sensorData.accelerometer.time(1):1/settings.frequencies.NASFrequency:sensorData.accelerometer.time(end);
+tv          =   sensorTot.nas.time(end):1/settings.frequencies.NASFrequency:Tf;
 [fix, nsat] =   gpsFix(sensorData.accelerometer.measures);
 
 dt_k        =   tv(2)-tv(1);                 % Time step of the kalman
@@ -110,16 +109,25 @@ xq          =   zeros(length(tv),7);         % Pre-allocation of quaternions and
 x           =   zeros(length(tv),13);
 
 P_c         =   zeros(12,12,length(tv));
-P_lin       =   zeros(6,6,length(tv));       %Pre-allocation of the covariance matrix
+P_lin       =   zeros(6,6,length(tv));       % Pre-allocation of the covariance matrix
 P_q         =   zeros(6,6,length(tv));
 
-x_lin(1,:)  =   x_prev(1:6);                 % Allocation of the initial value
-xq(1,:)     =   x_prev(7:13);
+% x_lin(1,:)  =   x_prev(1:6);                 % Allocation of the initial value
+x_lin(1,:)  =   sensorData.nas.states(end,1:6);                 % Allocation of the initial value
+
+% xq(1,:)     =   x_prev(7:13);
+xq(1,:)     =   sensorData.nas.states(end,7:13);
+
 x(1,:)      =   [x_lin(1,:),xq(1,:)];
 
-P_lin(:,:,1)=   P_prev(1:6,1:6);
-P_q(:,:,1)  =   P_prev(7:12,7:12);
-P_c(:,:,1)  =   P_prev;
+% P_lin(:,:,1)=   P_prev(1:6,1:6);
+% P_q(:,:,1)  =   P_prev(7:12,7:12);
+% P_c(:,:,1)  =   P_prev;
+
+P_lin(:,:,1)=   sensorData.nas.P(1:6,1:6,end);
+P_q(:,:,1)  =   sensorData.nas.P(7:12,7:12,end);
+P_c(:,:,1)  =   sensorData.nas.P(:,:,end);
+
 
 index_GPS=1;
 index_bar=1;
@@ -127,45 +135,41 @@ index_mag=1;
 index_pit=1;
 
 % Time vectors agumentation
-t_gpstemp  = [sensorData.gps.time,  tv(end) + dt_k];
-t_barotemp = [sensorData.barometer.time, tv(end) + dt_k];
-t_magtemp  = [sensorData.magnetometer.time,  tv(end) + dt_k];
-t_pittemp  = [sensorData.pitot.time,   tv(end) + dt_k];
+t_gpstemp  = [sensorTot.gps.time];
+t_barotemp = [sensorTot.barometer.time];
+t_imutemp  = [sensorTot.imu.time];
+t_pittemp  = [sensorTot.pitot.time];
 
-[sensorData.gps.positionMeasures(:,1),sensorData.gps.positionMeasures(:,2),sensorData.gps.positionMeasures(:,3)]  = geodetic2ned(sensorData.gps.positionMeasures(:,1), sensorData.gps.positionMeasures(:,2), sensorData.gps.positionMeasures(:,3), nas.lat0, nas.lon0, nas.z0, nas.spheroid, 'degrees');
+
 for i=2:length(tv)
     %% Prediction part
 
+    index_imu   =  find(tv(i) >= t_imutemp,1,"last");
     [x_lin(i,:),~,P_lin(:,:,i)] = predictorLinear2(x_lin(i-1,:),P_lin(:,:,i-1),...
-        dt_k,sensorData.accelerometer.measures(i-1,:),xq(i-1,1:4),nas.QLinear);
-
+        dt_k,sensorTot.imu.accelerometer_measures(index_imu,:),xq(i-1,1:4),nas.QLinear);
+    
     [xq(i,:),P_q(:,:,i)]       = predictorQuat(xq(i-1,:),P_q(:,:,i-1),...
-        sensorData.gyro.measures(i-1,:),dt_k,nas.Qq);
-
+        sensorTot.imu.gyro_measures(index_imu,:),dt_k,nas.Qq);
 
     %% Corrections
-    if tv(i) >= t_gpstemp(index_GPS)              %Comparison to see the there's a new measurement
-        [x_lin(i,:),P_lin(:,:,i),~]     = correctionGPS(x_lin(i,:),P_lin(:,:,i),sensorData.gps.positionMeasures(index_GPS,1:2),...
-            sensorData.gps.velocityMeasures(index_GPS,1:2),nas.sigma_GPS,nsat,fix);
-        index_GPS   =  index_GPS + 1;
-    end
+    %gps
+    index_GPS   =  find(tv(i) >= t_gpstemp,1,"last");
+    [x_lin(i,:),P_lin(:,:,i),~]     = correctionGPS(x_lin(i,:),P_lin(:,:,i),sensorTot.gps.position_measures(index_GPS,1:2),...
+                                                    sensorTot.gps.velocity_measures(index_GPS,1:2),nas.sigma_GPS,nsat,fix);
 
-    if tv(i) >= t_barotemp(index_bar)              %Comparison to see the there's a new measurement
-        [x_lin(i,:),P_lin(:,:,i),~]     = correctionBarometer(x_lin(i,:),P_lin(:,:,i),sensorData.barometer.z(index_bar),nas.sigma_baro);
-        index_bar   =  index_bar + 1;
-    end
+    % barometer
+    index_bar   =  find(tv(i) >= t_barotemp,1,"last");
+    [x_lin(i,:),P_lin(:,:,i),~]     = correctionBarometer(x_lin(i,:),P_lin(:,:,i),sensorTot.barometer.altitude(index_bar),nas.sigma_baro);
 
-    if tv(i) >= t_magtemp(index_mag)               %Comparison to see the there's a new measurement
-        [xq(i,:),P_q(:,:,i),~,~]        = correctorQuat(xq(i,:),P_q(:,:,i),sensorData.magnetometer.measures(index_mag,:),nas.sigma_mag,mag_NED);
-        index_mag    =  index_mag + 1;
-    end
+    % magnetometer
+    [xq(i,:),P_q(:,:,i),~,~]        = correctorQuat(xq(i,:),P_q(:,:,i),sensorTot.imu.magnetometer_measures(index_imu,:),nas.sigma_mag,mag_NED);
 
-    if flagAscent && ~flagStopPitotCorrection
-        if tv(i) >= t_pittemp(index_pit)
-            [x_lin(i,:),P_lin(4:6,4:6,i),~] = correctionPitot(x_lin(i,:),P_lin(4:6,4:6,i),sensorData.pitot.pTotMeasures(index_pit,:),sensorData.pitot.pStatMeasures(index_pit,:),nas.sigma_pitot,xq(i,1:4),nas.Mach_max);
-            index_pit    =  index_pit + 1;
-        end
-    end
+    % pitot    
+    if settings.flagAscent && ~settings.flagStopPitotCorrection
+        index_pit   =  find(tv(i) >= t_pittemp,1,"last");
+        [x_lin(i,:),P_lin(4:6,4:6,i),~] = correctionPitot(x_lin(i,:),P_lin(4:6,4:6,i),sensorTot.pitot.total_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot,xq(i,1:4),nas.Mach_max);
+    end 
+
     x(i,:) = [x_lin(i,:),xq(i,:)];
     P_c(1:6,1:6,i)   = P_lin(:,:,i);
     P_c(7:12,7:12,i) = P_q(:,:,i);
@@ -182,4 +186,6 @@ for i=2:length(tv)
         end
     end
 end
+sensorData.nas.states= x;
+sensorData.nas.P = P_c;
 end

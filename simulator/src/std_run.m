@@ -111,15 +111,16 @@ settings.wind.Mag = Mag;
 settings.wind.El = El;
 settings.wind.Az = Az;
 
-%% SENSORS INIT
-[sensorSettings, sensorTot] = initSensors(settings);
-
-%% MAGNETIC FIELD MODEL
-std_magneticField;
 
 %% INTEGRATION
 std_setInitialParams;
 dt_ode = 0.01;
+
+%% SENSORS INIT
+[sensorSettings, sensorTot] = initSensors(settings,sensorData);
+
+%% MAGNETIC FIELD MODEL
+std_magneticField;
 
 %% FLAG INITIALIZATION FOR HIL
 if settings.launchWindow
@@ -271,8 +272,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     end
 
     %% simulate sensors
-    % fix on signal frequencies: this interpolates the values if the speed
-    % of the sensor is lower than the control action (or whatever)
+
     [sensorData] = manageSignalFrequencies(magneticFieldApprox, settings.flagAscent, settings,sensorData, Yf, Tf, uw, vw, ww);
     % simulate sensor acquisition
     if settings.dataNoise

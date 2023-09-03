@@ -39,6 +39,8 @@ settings.frequencies.gpsFrequency               =   10;                    % [hz
 settings.frequencies.barometerFrequency         =   20;                    % [hz] sensor frequency
 settings.frequencies.chamberPressureFrequency   =   50;                    % [hz] sensor frequency
 settings.frequencies.pitotFrequency             =   20;                    % [hz] sensor frequency
+settings.frequencies.NASFrequency               =   50;                    % [hz] sensor frequency
+settings.frequencies.ADAFrequency               =   50;                    % [hz] sensor frequency % al momento non so quanto sia
 
 % Servo (MARK STAR - HBL 3850)
 settings.servo.tau = 0.0374588;                                                % Servo motor time constant 
@@ -93,13 +95,14 @@ settings.nas.v_thr         =   2.5;                                     % Veloci
 settings.nas.count_thr     =   5;                                       % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.nas.counter       =   0;
 
-settings.nas.t_kalman      =   -1;                                      % Apogee detection timestamp
+settings.nas.t_nas      =   -1;                                      % Apogee detection timestamp
 settings.nas.flag_apo      =   false;                                   % True when the apogee is detected
 
 settings.nas.lat0          = settings.lat0;
 settings.nas.lon0          = settings.lon0;
 settings.nas.z0            = -settings.z0;
 settings.nas.spheroid      = wgs84Ellipsoid;
+
 
 % Process noise covariance matrix for the linear dynamics
 settings.nas.QLinear       =   0.005*...
