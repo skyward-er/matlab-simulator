@@ -1,22 +1,32 @@
 %% set options for plots
-N_histCol = min(N_sim,100); % best looking if we don't go higher than 200, but if N_sim is less than 200 it gives error if we set it to 200
-
+N_histCol = min(N_sim,25); % best looking if we don't go higher than 200, but if N_sim is less than 200 it gives error if we set it to 200
+sim_per_interval = N_sim/N_histCol;
 
 %% PLOT HISTOGRAM
 save_plot_histogram = figure;
 hold on; grid on;
-xline(settings.z_final-10, 'r--', 'LineWidth', 1)
-xline(settings.z_final+10, 'r--', 'LineWidth', 1)
-histogram(apogee.altitude,N_histCol)
-xlim([settings.z_final-150 , settings.z_final+150])
+xline(settings.z_final-10, 'r--', 'LineWidth', 1,'DisplayName','-10m from target')
+xline(settings.z_final+10, 'r--', 'LineWidth', 1,'DisplayName','+10m from target')
+histogram(apogee.altitude,N_histCol,'DisplayName','Apogee altitude')
+xlim([min(apogee.altitude)-10 , max(apogee.altitude)+10])
 xlabel('Apogee value [m]')
 ylabel('Number of apogees in the same interval')
 sgtitle('Reached apogee distribution')
-legend('Range of acceptable apogees')
+legend
+
+save_plot_histogram_cumulative = figure;
+hold on; grid on;
+xline(settings.z_final-10, 'r--', 'LineWidth', 1,'DisplayName','-10m from target')
+xline(settings.z_final+10, 'r--', 'LineWidth', 1,'DisplayName','+10m from target')
+histogram(apogee.altitude,N_histCol,'Normalization','cdf','DisplayName','Apogee altitude')
+xlim([min(apogee.altitude)-10 , max(apogee.altitude)+10])
+xlabel('Apogee value [m]')
+ylabel('Normalized cdf')
+title(['Apogee cdf (',num2str(sim_per_interval),' sim/column)'])
+legend
 
 
-
-%% AIRBRAKE DEPLOY TIME HISTOGRAM - this plot is particularly interesting for the shadowmodes
+%% AIRBRAKE DEPLOY TIME HISTOGRAM - this plot is particularly useful for the shadowmodes, never erase it
 if ~(strcmp(contSettings.algorithm,'engine')||strcmp(contSettings.algorithm,'NoControl'))
     arb_deploy_time_vec = zeros(N_sim,1);
     for i = 1: N_sim
@@ -26,7 +36,6 @@ if ~(strcmp(contSettings.algorithm,'engine')||strcmp(contSettings.algorithm,'NoC
     end
     arb_deploy_time_MEAN = mean(arb_deploy_time_vec);
     arb_deploy_time_MODE = mode(arb_deploy_time_vec);
-    N_histCol = min(N_sim,100); % best looking if we don't go higher than 200, but if N_sim is less than 200 it gives error if we set it to 200
     % figure
     save_arb_deploy_histogram = figure;
     histogram(arb_deploy_time_vec,N_histCol)
@@ -37,15 +46,25 @@ if ~(strcmp(contSettings.algorithm,'engine')||strcmp(contSettings.algorithm,'NoC
     ylabel('Number of occurrences in the same interval')
     sgtitle("Airbrakes deployment time's distribution")
     legend('Airbrakes time deploy','Mean', 'Median')
+
+    save_arb_deploy_histogram_cumulative = figure;
+    histogram(arb_deploy_time_vec,N_histCol,'Normalization','cdf')
+    hold on; grid on;
+    xline(arb_deploy_time_MEAN,'r--')
+    xline(arb_deploy_time_MODE,'g--')
+    xlabel('Airbrakes deployment time [s]')
+    ylabel('Number of occurrences in the same interval')
+    sgtitle("Cumulative airbrakes deployment time")
+    legend('Airbrakes time deploy','Mean', 'Median')
+
 end
-%% APOGEE TIME HISTOGRAM - this plot is particularly interesting for the shadowmodes
+%% APOGEE TIME HISTOGRAM - this plot is particularly useful for the shadowmodes
 apogee_time_vec = zeros(N_sim,1);
 for i = 1: N_sim
     apogee_time_vec(i) = save_thrust{i}.apogee.time;
 end
 apogee_time_MEAN = mean(apogee_time_vec);
 apogee_time_MODE = mode(apogee_time_vec);
-N_histCol = min(N_sim,100); % best looking if we don't go higher than 200, but if N_sim is less than 200 it gives error if we set it to 200 
 % figure
 save_apogee_histogram = figure;
 histogram(apogee_time_vec,N_histCol,'DisplayName','Time')
@@ -57,6 +76,15 @@ ylabel('Number of apogees in the same interval')
 sgtitle('Apogee time distribution')
 legend
 
+save_apogee_histogram = figure;
+histogram(apogee_time_vec,N_histCol,'Normalization','cdf','DisplayName','Time')
+hold on; grid on;
+xline(apogee_time_MEAN,'r--','DisplayName','Average')
+xline(apogee_time_MODE,'g--','DisplayName','Mode')
+xlabel('Apogee value (m)')
+ylabel('Number of apogees in the same interval')
+sgtitle('Cumulative apogee time')
+legend
 %% PLOT APOGEE MONTECARLO STATISTICS
 if settings.scenario ~= "descent"
     save_montecarlo_apogee_params = figure;
@@ -112,8 +140,6 @@ legend(contSettings.algorithm);
 
 %% PLOT SHUTDOWN TIME 2D
 %%% t_shutdown histogram
-    N_histCol = min(N_sim,100); 
-
     save_t_shutdown_histogram = figure;
     histogram(t_shutdown.value,N_histCol)
     xlabel('Shutdown time (s)')
