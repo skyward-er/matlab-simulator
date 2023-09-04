@@ -119,10 +119,18 @@ idx_apogee = NaN;
 idx_landing = NaN;
 
 %% sensor fault initial conditions
-chunk{1} = zeros(1,50);
-chunk{2} = zeros(1,50);
-chunk{3} = zeros(1,50);
-filter_array_SFD = zeros(1,settings.sfd.filter_window);
+
+settings.sfd.chunk{1} = zeros(1,50);
+settings.sfd.chunk{2} = zeros(1,50);
+settings.sfd.chunk{3} = zeros(1,50);
+settings.sfd.filter_array_SFD = zeros(1,settings.sfd.filter_window); %for median filter
+settings.sfd.lowpass_filter_baro = settings.sfd.press_ref; %for lowpass filter
+settings.sfd.prev_sppn_input = settings.sfd.press_ref;%for lowpass filter
+settings.sfd.h_baro_prev = settings.z0; %previous values necessary for determining the current step for weight change
+settings.sfd.pn_prev = settings.sfd.press_ref;  %previous values necessary for determining the current step for weight change
+
+
+%following conditions are used for logging purposes
 faults = [];
 barometer_measure = cell(1,3);
 barometer_time = [];

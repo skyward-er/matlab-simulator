@@ -9,52 +9,9 @@ This function runs all subsystems in a simulated environment
 
 %% Sensor fault detection
 
-% simulation of the faults
 
+[sensorData,sp, settings] = run_SensorFaultDetection_SVM(settings, iTimes, sensorData,sp,t0);
 
-% sensor fault detection algorithm
-Nsensors = [1,2,3];
-goodSensors = Nsensors(not(settings.faulty_sensors));
-sensor_sim_second_phase = settings.flagAscent;
-if settings.flagAscent
-    SVM_model= settings.SVM_1;
-else
-    SVM_model = settings.SVM_2;
-end
-for i = goodSensors
-    chunk{i}(1,1:end-length(sp.pn_sens{i})) = chunk{i}(1+length(sp.pn_sens{i}):end);
-    chunk{i}(1,end-length(sp.pn_sens{i})+1:end) = sp.pn_sens{i};
-    if length(chunk{i})>SVM_model.N_sample
-        warning('chunk length is greater than %d samples',SVM_model.N_sample)
-    end
-end
-[sensorData,sp,chunk,settings.faulty_sensors, settings.sfd] = run_SensorFaultDetection_SVM(settings.sfd, SVM_model,sensorData,sp,chunk,settings.faulty_sensors,settings.flagAscent,t0);
-
-
-
-%THE FOLLOWING CODE IS AN IMPLEMENTATION OF A MEDIAN WINDOW FILTER (DEFAULT
-%FILTER WINDOW IS 25)
-for i = 1:settings.sfd.filter_window - 1
-    filter_array_SFD(i) = filter_array_SFD(i + 1);
-end
-filter_array_SFD(settings.sfd.filter_window) = sp.pn(1,1);
-if iTimes > settings.sfd.filter_window
-    median_filter_baro = medfilt1(filter_array_SFD, settings.sfd.filter_window);
-    sp.pn = ones(1,2).*median_filter_baro(end); 
-end
-
-%THE FOLLOWIN CODE IS AN IMPLEMENTATION OF A DISCRETE LOWPASS FILTER
-%(FILTER WINDOW HAS TO BE SET TO 2)
-
-
-if iTimes > 1
-    lowpass_filter_baro = settings.sfd.lambda_baro*lowpass_filter_baro + (settings.sfd.lowpass_filter_gain/settings.sfd.lowpass_filter_cutoff_freq)*(1-settings.sfd.lambda_baro)*prev_sppn_input;
-    prev_sppn_input = sp.pn(1,1);
-    sp.pn = ones(1,2).*lowpass_filter_baro; 
-else
-    lowpass_filter_baro = sp.pn(1, 1);
-    prev_sppn_input = sp.pn(1, 1);
-end
 
 %% ADA
 if iTimes>3

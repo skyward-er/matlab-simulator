@@ -91,6 +91,8 @@ printOutput(simOutput,settings);
 %% export data for HIL simulations /cpp usage: 
 % the files are stored in the folder 
 if settings.flagExportCSV % this is set in configFlags
+    % sensor fault detection
+    export_HILdataSFD;
     % air brakes
     export_HILdataABK;
     % parafoil

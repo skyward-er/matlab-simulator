@@ -42,7 +42,7 @@ switch settings.mission
         configValues = [contSettings.reference.deltaZ, contSettings.filter_coeff0,contSettings.filterMinAltitude,contSettings.filterMaxAltitude,contSettings.criticalAltitude,contSettings.masses_vec(1),contSettings.dmass,simOutput.estimated_mass(end),contSettings.N_forward];
         configABKvarNames = {'REFERENCE_DZ','STARTING_FILTER_VALUE','CHANGE_FILTER_MINIMUM_ALTITUDE','CHANGE_FILTER_MAXIMUM_ALTITUDE','ABK_CRITICAL_ALTITUDE','LOWEST_MASS','DELTA_MASS','ESTIMATED_MASS','N_FORWARD'};
         for i = 1:size(configValues,2)
-            configABK_export_table(1,i) = table(configValues(1,i));
+            configABK_export_table(:,i) = table(configValues(:,i));
         end
         configABK_export_table.Properties.VariableNames = configABKvarNames;
         writetable(configABK_export_table,ConDataPath+"/HIL_CPP_files_ABK/ABK_configABK_"+settings.mission+".csv")

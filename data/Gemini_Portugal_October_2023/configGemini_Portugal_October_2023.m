@@ -137,46 +137,36 @@ settings.ada.t_ada       =   -1;                                           % Apo
 settings.ada.flag_apo    =   false;                                        % True when the apogee is detected
 
 %% SENSOR FAULT DETECTION SETTINGS
-% 
-% 
-% settings.sfd.F = [1      0        0;
-%                   0       1        0;
-%                   0       0        1];
-% 
-% settings.sfd.H = [1       0        0];
-% 
-% 
-% settings.sfd.P1_h = [0.1    0      0;
-%                      0      0.1    0;
-%                      0      0      0.1];
 
-% settings.sfd.P1_pn = settings.sfd.P1_h;
-%[settings.sfd.temp_ref, ~, settings.sfd.press_ref, ~] = atmosisa(settings.z0);
+
+% the following settings are used for determining the step of weight change in run_SensorFaultDetection_SVM.m
+
 settings.sfd.rough_apogee_estimate = 3100; %maximum height estimation necessary for determing the variable change in weight (can be approximate, it's not critical if wrong)
 [~, ~, settings.sfd.press_ref, ~] = atmosisa(settings.z0);
 [~, ~, settings.sfd.max_rough_press, ~] = atmosisa(settings.sfd.rough_apogee_estimate);
-settings.sfd.a_pn = [settings.sfd.press_ref 0 0]';
-%settings.sfd.a_pn = ones(3, 1)*press_ref;
 
 settings.sfd.max_weight = 50; % the max weight of the weighted mean for each sensor
-settings.sfd.min_step = 0.1; % min step of change in weight for each iteration of sfd in case of a change
-settings.sfd.max_step = 20 - settings.sfd.min_step; % max step of change in weight for each iteration of sfd in case of a change is this value plus the previous value
+settings.sfd.min_step = 0.01; % min step of change in weight for each iteration of sfd in case of a change
+settings.sfd.max_step = 10 - settings.sfd.min_step; % max step of change in weight for each iteration of sfd in case of a change is this value plus the previous value
 settings.sfd.z0 = settings.z0; %minimum height estimation necessary for determing the variable change in weight (can be approximate, it's not critical if wrong)
 
 
 settings.sfd.W1 = ones(3, 1)*settings.sfd.max_weight; % array of weights for weighted mean for each barometer for height estimation
 settings.sfd.W2 = settings.sfd.W1; % array of weights for weighted mean for each barometer for pressure estimation
 
-settings.sfd.h_baro_prev = settings.z0; %previous values necessary for determining the current step for weight change
-settings.sfd.pn_prev = settings.sfd.press_ref;  %previous values necessary for determining the current step for weight change
+%these settings are used as vars where i memorize previous values for
+%coming up with a weight change value
+
+
 
 % MEDIAN FILTER 
-settings.sfd.filter_window = 1;
+settings.sfd.filter_window = 20;
+%settings.sfd.filter_array_SFD = zeros(1,sfd.filter_window);
 
 %DISCRETE LOWPASS FILTER
 lateness = 0.01; % transient time to get to asintotic desired to set filter parameters, it also translates into a delay in the sensor reading
 settings.sfd.lowpass_filter_gain = 5/lateness; % gain of the lowpass filter
-lowpass_filter_T = 0.2; %s period, the inverse of the alg. freq.
+lowpass_filter_T = (settings.frequencies.controlFrequency)^(-1); %s period, the inverse of the alg. freq.
 settings.sfd.lowpass_filter_cutoff_freq = 5/lateness; %Hz
 settings.sfd.lambda_baro = exp(-settings.sfd.lowpass_filter_gain*lowpass_filter_T);
 

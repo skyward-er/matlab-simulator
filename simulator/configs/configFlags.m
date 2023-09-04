@@ -27,7 +27,7 @@ scenarios explanation:
 
 
 % scenario configuration
-conf.scenario = "descent";
+conf.scenario = "full flight";
 conf.board = "payload";            % Either "main" or "payload"
 conf.HIL = false;
 
@@ -51,7 +51,7 @@ settings.identification = false;
 settings.flagExportPLOTS = false;
 
 % export csv files for CPP implementation?
-settings.flagExportCSV = false;
+settings.flagExportCSV = true;
 
 
 
