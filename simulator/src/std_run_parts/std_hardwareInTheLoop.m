@@ -37,11 +37,14 @@ if ~flagFlight
     sensorData.accelerometer.measures = sensorData.accelerometer.measures + (quat2rotm(Yf(end,10:13)) * [0;0;9.81])';
 end
 
+% extract frequencies from settings struct
+freq = settings.frequencies;
+
 % Execute serial communication with obsw
 if ~settings.parafoil
-    [hilData] = run_MAIN_HIL(sensorData, settings.z0, flagsArray);
+    [hilData] = run_MAIN_HIL(sensorData, sensorSettings, freq, flagsArray);
 else
-    error("Missing payaload HIL!");
+    [hilData] = run_PAY_HIL(sensorData, sensorSettings, freq, flagsArray);
 end
 
 flagFlight = hilData.flagsArray(1);
@@ -106,6 +109,7 @@ if ~settings.shutdown
     sensorTot.mea.pressure(iTimes) = sensorData.mea.estimated_pressure;
     sensorTot.mea.mass(iTimes) = sensorData.mea.estimated_mass;
     sensorTot.mea.prediction(iTimes) = sensorData.mea.predicted_apogee;
+    sensorTot.mea.time(iTimes) = t1;
 end
 
 if settings.shutdown && not(lastShutdown) && flagFlight     % Need to check if this happens only once or the condition can be met multiple times
@@ -148,6 +152,5 @@ if flagAeroBrakes && mach < settings.MachControl
         [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
     end
 end
-if hilData.abk.updating
-    ap_ref_new = hilData.abk.airbrakes_opening * settings.servo.maxAngle;  % alpha_aperture:
-end
+    
+ap_ref_new = hilData.abk.airbrakes_opening * settings.servo.maxAngle;  % alpha_aperture:
