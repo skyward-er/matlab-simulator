@@ -3,7 +3,7 @@ N_histCol = min(N_sim,25); % best looking if we don't go higher than 200, but if
 sim_per_interval = N_sim/N_histCol;
 
 %% PLOT HISTOGRAM
-save_plot_histogram = figure;
+montFigures.apogee_histogram_pdf = figure;
 hold on; grid on;
 xline(settings.z_final-10, 'r--', 'LineWidth', 1,'DisplayName','-10m from target')
 xline(settings.z_final+10, 'r--', 'LineWidth', 1,'DisplayName','+10m from target')
@@ -14,7 +14,7 @@ ylabel('Number of apogees in the same interval')
 sgtitle('Reached apogee distribution')
 legend
 
-save_plot_histogram_cumulative = figure;
+montFigures.apogee_histogram_cumulative = figure;
 hold on; grid on;
 xline(settings.z_final-10, 'r--', 'LineWidth', 1,'DisplayName','-10m from target')
 xline(settings.z_final+10, 'r--', 'LineWidth', 1,'DisplayName','+10m from target')
@@ -37,7 +37,7 @@ if ~(strcmp(contSettings.algorithm,'engine')||strcmp(contSettings.algorithm,'NoC
     arb_deploy_time_MEAN = mean(arb_deploy_time_vec);
     arb_deploy_time_MODE = mode(arb_deploy_time_vec);
     % figure
-    save_arb_deploy_histogram = figure;
+montFigures.arb_deploy_histogram_pdf = figure;
     histogram(arb_deploy_time_vec,N_histCol)
     hold on; grid on;
     xline(arb_deploy_time_MEAN,'r--')
@@ -47,7 +47,7 @@ if ~(strcmp(contSettings.algorithm,'engine')||strcmp(contSettings.algorithm,'NoC
     sgtitle("Airbrakes deployment time's distribution")
     legend('Airbrakes time deploy','Mean', 'Median')
 
-    save_arb_deploy_histogram_cumulative = figure;
+montFigures.arb_deploy_histogram_cumulative = figure;
     histogram(arb_deploy_time_vec,N_histCol,'Normalization','cdf')
     hold on; grid on;
     xline(arb_deploy_time_MEAN,'r--')
@@ -65,8 +65,9 @@ for i = 1: N_sim
 end
 apogee_time_MEAN = mean(apogee_time_vec);
 apogee_time_MODE = mode(apogee_time_vec);
+
 % figure
-save_apogee_histogram = figure;
+montFigures.apogee_time_histogram_pdf = figure;
 histogram(apogee_time_vec,N_histCol,'DisplayName','Time')
 hold on; grid on;
 xline(apogee_time_MEAN,'r--','DisplayName','Average')
@@ -76,7 +77,7 @@ ylabel('Number of apogees in the same interval')
 sgtitle('Apogee time distribution')
 legend
 
-save_apogee_histogram = figure;
+montFigures.apogee_time_histogram_cumulative = figure;
 histogram(apogee_time_vec,N_histCol,'Normalization','cdf','DisplayName','Time')
 hold on; grid on;
 xline(apogee_time_MEAN,'r--','DisplayName','Average')
@@ -87,7 +88,7 @@ sgtitle('Cumulative apogee time')
 legend
 %% PLOT APOGEE MONTECARLO STATISTICS
 if settings.scenario ~= "descent"
-    save_montecarlo_apogee_params = figure;
+montFigures.montecarlo_apogee_statistics = figure;
     subplot(2,1,1)
     plot(1:N_sim,apogee_mu,'DisplayName','Increasing mean')
     ylabel("Mean value")
@@ -99,7 +100,8 @@ if settings.scenario ~= "descent"
 end
 
 %% PLOT LANDING MONTECARLO STATISTICS
-if (settings.scenario == "descent" || settings.scenario == "full flight") && settings.parafoil    save_montecarlo_apogee_params = figure;
+if (settings.scenario == "descent" || settings.scenario == "full flight") && settings.parafoil    
+montFigures.montecarlo_landing_statistics = figure;
     subplot(2,1,1)
     plot(1:N_sim,landing_mu,'DisplayName','Increasing mean')
     ylabel("Mean value")
@@ -111,7 +113,7 @@ if (settings.scenario == "descent" || settings.scenario == "full flight") && set
 end
 
 %% PLOT CONTROL
-save_plotControl = figure;
+montFigures.control_action = figure;
 for i = floor(linspace(1,N_sim,5))
     plot(save_thrust{i}.t,save_thrust{i}.Y(:,14))
     hold on; grid on;
@@ -121,8 +123,8 @@ xlabel('Time (s)')
 ylabel('Servo angle \alpha (rad)')
 legend(contSettings.algorithm);
 
-%% PLOT APOGEE 2D
-save_plotApogee = figure('units','pixels','position',[0 0 800 600]);
+%% PLOT APOGEE wrt THRUST
+montFigures.apogee_wrt_thrust = figure('units','pixels','position',[0 0 800 600]);
  hold on; grid on;
 for i = 1:N_sim
     plot(thrust_percentage(i),apogee.altitude(i),'.','color',[0, 0.447, 0.741])
@@ -138,16 +140,41 @@ ylim([2900 3100])
 text(1, 3080,"target apogee: "+num2str(settings.z_final))
 legend(contSettings.algorithm);
 
+%% PLOT APOGEE wrt 
+montFigures.apogee_wrt_thrust = figure('units','pixels','position',[0 0 800 600]);
+ hold on; grid on;
+for i = 1:N_sim
+    plot(thrust_percentage(i),apogee.altitude(i),'.','color',[0, 0.447, 0.741])
+   
+end
+yline(settings.z_final-10,'r--')
+yline(settings.z_final+10,'r--')
+sgtitle('Apogee w.r.t. thrust')
+xlabel('Thrust percentage w.r.t. nominal (%)')
+ylabel('Apogee (m)')
+xlim([0.85 1.15])
+ylim([2900 3100])
+text(1, 3080,"target apogee: "+num2str(settings.z_final))
+legend(contSettings.algorithm);
+
+
+
 %% PLOT SHUTDOWN TIME 2D
 %%% t_shutdown histogram
-    save_t_shutdown_histogram = figure;
+if settings.scenario~= "descent"
+    montFigures.t_shutdown_histogram_pdf = figure;
     histogram(t_shutdown.value,N_histCol)
     xlabel('Shutdown time (s)')
     ylabel('Number of shutdowns in the same time interval')
     sgtitle('Engine shutdown time distribution')
-
+    
+    montFigures.t_shutdown_histogram_cumulative = figure;
+    histogram(t_shutdown.value,N_histCol,'Normalization','cdf')
+    xlabel('Shutdown time (s)')
+    ylabel('Shutdown time cdf')
+    sgtitle('Engine shutdown time cumulative distribution')
  %%% t_shutdown wrt wind
-    save_tShutdown_wind = figure;
+    montFigures.tShutdown_wind = figure;
     subplot(1,3,1)
     for i = 1:N_sim
         plot(wind_el(i),save_thrust{i}.sensors.mea.t_shutdown,'.')
@@ -182,47 +209,32 @@ legend(contSettings.algorithm);
     legend(contSettings.algorithm);
 
    
+end
 
 %% PLOT TRAJECTORY
-
-save_plotTrajectory = figure;
-for i = floor(linspace(1,size(save_thrust,1),50))
-    plot3(save_thrust{i}.Y(1:end-2,1),save_thrust{i}.Y(1:end-2,2),-save_thrust{i}.Y(1:end-2,3),'HandleVisibility','off');
-    hold on; grid on;
-end
-if (settings.scenario == "descent" || settings.scenario == "full flight") && settings.parafoil
-    plot3(settings.payload.target(1),settings.payload.target(2),settings.payload.target(3),'go','DisplayName','Target')
-    drawCircle(settings.payload.target,50,'+-50 meters','r')
-    drawCircle(settings.payload.target,150,'+-150 meters','b')
-end
-sgtitle('Trajectories')
-xlabel('x [m]')
-ylabel('y [m]')
-zlabel('z [m]')
-axis equal
-legend;
-
-%% PLOT VELOCITIES - useless plot
 % 
-% save_plotVelocity = figure;
-% for i = 1:size(save_thrust,1)
-%     plot(save_thrust{i}.t,save_thrust{i}.Y(:,4));
+% montFigures.trajectory_examples = figure;
+% for i = floor(linspace(1,size(save_thrust,1),50))
+%     plot3(save_thrust{i}.Y(1:end-2,1),save_thrust{i}.Y(1:end-2,2),-save_thrust{i}.Y(1:end-2,3),'HandleVisibility','off');
 %     hold on; grid on;
-%     plot(save_thrust{i}.t,save_thrust{i}.Y(:,5));
-%     plot(save_thrust{i}.t,save_thrust{i}.Y(:,6));
 % end
-% sgtitle('Velocities')
-% xlabel('Vx_b [m/s]')
-% ylabel('Vy_b [m/s]')
-% zlabel('Vz_b [m/s]')
-% legend(contSettings.algorithm);
+% if (settings.scenario == "descent" || settings.scenario == "full flight") && settings.parafoil
+%     plot3(settings.payload.target(1),settings.payload.target(2),settings.payload.target(3),'go','DisplayName','Target')
+%     drawCircle(settings.payload.target,50,'+-50 meters','r')
+%     drawCircle(settings.payload.target,150,'+-150 meters','b')
+% end
+% sgtitle('Trajectories')
+% xlabel('x [m]')
+% ylabel('y [m]')
+% zlabel('z [m]')
+% axis equal
+% legend;
 
 %% Predicted apogee
 if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
-    save_predicted_apogee = figure;
-    hold on;
-    grid on
+    montFigures.apogee_prediction = figure;
     scatter(apogee.prediction_last_time,apogee.prediction,'k','DisplayName','Prediction');
+    hold on;  grid on;
     scatter(apogee.prediction_last_time,apogee.altitude,'r','DisplayName','Simulated');
     sgtitle('Predicted vs real apogee')
     xlabel('time [s]')
@@ -237,7 +249,7 @@ if ~settings.wind.model && ~settings.wind.input
         wind_az(i) = save_thrust{i}.wind.Az;
         wind_el(i) = save_thrust{i}.wind.El;
     end
-save_apogee_3D = figure('units','normalized');
+montFigures.apogee_3D_wind_thrust = figure;
 %%%%%%%%%% wind magnitude - thrust - apogee
 subplot(2,2,1)
 hold on; grid on;
@@ -284,28 +296,22 @@ end
  
 
 %% PLOT PROBABILITY FUNCTION
-% gaussian 10m    
-p_10 = normcdf([settings.z_final-10, settings.z_final+10],apogee.altitude_mean,apogee.altitude_std);
-apogee.accuracy_gaussian_10 =( p_10(2) - p_10(1) )*100;
-% gaussian 50m
-p_50 = normcdf([settings.z_final-50, settings.z_final+50],apogee.altitude_mean,apogee.altitude_std);
-apogee.accuracy_gaussian_50 =( p_50(2) - p_50(1) )*100;
-
-if N_sim>1
-    save_thrust_apogee_probability = figure;
-    pd = fitdist(apogee.altitude','Normal');    % create normal distribution object to compute mu and sigma
-    % probability to reach an apogee between 2990 and 3010
-    x_values = linspace(settings.z_final-500,settings.z_final+500,1000);   % possible apogees
-    y = pdf(pd,x_values);                  % array of values of the probability density function
-    hold on; grid on;
-    xlabel('Reached apogee','Interpreter','latex','FontSize',15,'FontWeight','bold')
-    ylabel('Probability density','Interpreter','latex','FontSize',15,'FontWeight','bold')
-    plot(x_values,y)
-    xline(settings.z_final,'r--')
-    xline(10000000000)
-    legend('Apogee Gaussian distribution','Target',contSettings.algorithm)
-    xlim([min(x_values), max(x_values)])
-end
+% 
+% if N_sim>1
+%     save_thrust_apogee_probability = figure;
+%     pd = fitdist(apogee.altitude','Normal');    % create normal distribution object to compute mu and sigma
+%     % probability to reach an apogee between 2990 and 3010
+%     x_values = linspace(settings.z_final-500,settings.z_final+500,1000);   % possible apogees
+%     y = pdf(pd,x_values);                  % array of values of the probability density function
+%     hold on; grid on;
+%     xlabel('Reached apogee','Interpreter','latex','FontSize',15,'FontWeight','bold')
+%     ylabel('Probability density','Interpreter','latex','FontSize',15,'FontWeight','bold')
+%     plot(x_values,y)
+%     xline(settings.z_final,'r--')
+%     xline(10000000000)
+%     legend('Apogee Gaussian distribution','Target',contSettings.algorithm)
+%     xlim([min(x_values), max(x_values)])
+% end
 
 
 %% PLOT DYNAMIC PRESSURE
@@ -321,7 +327,7 @@ for i =1:N_sim
     max_force_kg(i) = max(abs(force))/9.81;
 end
 
-save_dynamic_pressure_and_forces = figure;
+montFigures.dynamic_pressure_and_forces = figure;
 %%%%%%%%%%% max dynamic pressure (Pa)
 subplot(2,1,1)
 histogram(qdyn_max,N_histCol)
@@ -339,13 +345,25 @@ xlabel('Max Load on ABK (kg)')
 
 %% PLOT ESTIMATED FINAL MASS
 est_mass = zeros(size(save_thrust));
+true_mass = zeros(size(save_thrust));
 for i = 1:length(save_thrust)
     est_mass(i) = save_thrust{i}.sensors.mea.mass(end);
+    true_mass(i) = save_thrust{i}.sensors.mea.true_mass_at_shutdown;
 end
-figure
+montFigures.estimated_mass_histogram_pdf = figure;
 histogram(est_mass,N_histCol)
-xlabel('Mass (kg)')
+hold on;
+histogram(true_mass,N_histCol,'DisplayName','Simulated')
+xlabel('Mass [kg]')
 ylabel('Number of simulations')
+sgtitle('Estimated final mass')
+
+montFigures.estimated_mass_histogram_cumulative = figure;
+histogram(est_mass,N_histCol,'DisplayName','Estimated','Normalization','cdf')
+hold on;
+histogram(true_mass,N_histCol,'DisplayName','Simulated','Normalization','cdf')
+xlabel('Mass [kg]')
+ylabel('Apogee time cdf')
 sgtitle('Estimated final mass')
 
 %% parafoil
@@ -356,9 +374,9 @@ hold on;
 plot3(settings.payload.target(1),settings.payload.target(2),settings.payload.target(3),'go','DisplayName','Target')
 drawCircle(settings.payload.target,50,'+-50 meters','r')
 drawCircle(settings.payload.target,150,'+-150 meters','b')
-xlabel('North (m)')
-ylabel('East (m)')
-zlabel('Down')
+xlabel('North [m]')
+ylabel('East [m]')
+zlabel('Down [m]')
 axis equal
 sgtitle('Landing positions')
 legend

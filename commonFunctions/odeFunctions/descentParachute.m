@@ -173,7 +173,7 @@ if nargout == 2
 %     parout.interp.alpha = alpha_value;
 %     parout.interp.beta = beta_value;
 %     parout.interp.alt = -z;
-%     parout.interp.mass = m;
+    parout.interp.mass = m;
 %     
     parout.wind.NED_wind = [uw, vw, ww];
     parout.wind.body_wind = wind;

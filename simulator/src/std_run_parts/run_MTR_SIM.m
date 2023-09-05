@@ -1,7 +1,9 @@
 function [t_shutdown,settings,contSettings,sensorData] = run_MTR_SIM (contSettings,sensorData,settings,sensorTot,Tf)
 
-% mass estimation
 
+
+% mass estimation
+freq_ratio = settings.frequencies.MEAFrequency/settings.frequencies.controlFrequency;
 A = contSettings.Engine_model_A1;
 B = contSettings.Engine_model_B1;
 C = contSettings.Engine_model_C1;
@@ -13,9 +15,10 @@ if Tf(end) >= settings.timeEngineCut
 else
     u = 1;
 end
-
-sensorData.mea.x = A*sensorData.mea.x + B*u;
-sensorData.mea.P = A*sensorData.mea.P*A' + contSettings.R;
+for i = 1:1/freq_ratio
+    sensorData.mea.x = A*sensorData.mea.x + B*u;
+    sensorData.mea.P = A*sensorData.mea.P*A' + contSettings.R;
+end
 % correction
 S = C*sensorData.mea.P*C' + contSettings.Q;
 if ~det(S)<1e-3
@@ -26,15 +29,16 @@ estimated_pressure = C * sensorData.mea.x;
 sensorData.mea.x = sensorData.mea.x + K* ((sensorTot.comb_chamber.measures(end)-1950)/1000 - estimated_pressure);
 
 estimated_mass = sensorData.mea.x(3);
-m = estimated_mass;
+m_est = estimated_mass;
+
 % magic formula seguire traiettorie è meglio?
 CD = settings.CD_correction_ref*getDrag(norm([sensorData.kalman.vx,sensorData.kalman.vy,-sensorData.kalman.vz]), -sensorData.kalman.z, 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
 [~,~,~,rho] = atmosisa(-sensorData.kalman.z);
 
 %% TEST WITH MASS ESTIMATION THAT DOESN'T WORK
 
-predicted_apogee = -sensorData.kalman.z-settings.z0 + 1/(2*( 0.5*rho * CD * settings.S / m))...
-    * log(1 + (sensorData.kalman.vz^2 * (0.5 * rho * CD * settings.S) / m) / 9.81 );
+predicted_apogee = -sensorData.kalman.z-settings.z0 + 1/(2*( 0.5*rho * CD * settings.S / m_est))...
+    * log(1 + (sensorData.kalman.vz^2 * (0.5 * rho * CD * settings.S) / m_est) / 9.81 );
 t_shutdown = Inf;
 if predicted_apogee >= settings.z_final_MTR
     if ~settings.shutdown
@@ -50,7 +54,8 @@ if predicted_apogee >= settings.z_final_MTR
             settings.timeEngineCut = t_shutdown + 0.3;
             settings.expTimeEngineCut = t_shutdown;
             settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, Tf(end));
-            settings.expMengineCut = m - settings.ms;
+            m_true_in_3_dseconds = settings.parout.m(end)+mean(diff(settings.parout.m))/mean(diff(Tf))*0.3; % mass that we will have in 0.3 seconds from the shutdown time (circa)
+            settings.expMengineCut = m_true_in_3_dseconds - settings.ms;
             if Tf(end) > settings.timeEngineCut
                 settings.shutdown = 1;
                 settings = settingsEngineCut(settings);

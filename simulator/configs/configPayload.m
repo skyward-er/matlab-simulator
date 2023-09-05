@@ -1,8 +1,9 @@
 %% payload constants
 % Target coordinates 
-x_target = 0;
-y_target = 0;
+x_target = 200;
+y_target = 200;
 z_target = 0;
+
 % Geometry
 settings.payload.mass = 4.2;                 % [kg]  mass 
 settings.payload.b    = 2.55/2;              % [m]   semiwingspan  - vela nuova: 2.55/2; - vela vecchia: 2.06/2;
@@ -80,7 +81,7 @@ contSettings.payload.Kp = 0.1;
 contSettings.payload.Ki = 0;
 contSettings.payload.uMax = 0.1;
 contSettings.payload.uMin = -0.1;
-contSettings.payload.deltaA_tau = 0.05; % [s], absolutely arbitrary value
+contSettings.payload.deltaA_tau = 0.4; % [s], absolutely arbitrary value
 contSettings.payload.deltaA_delay = 0; % [s], absolutely arbitrary value
 contSettings.payload.deltaA_maxSpeed = deg2rad(300);
 

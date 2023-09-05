@@ -99,7 +99,7 @@ for alg_index = 4
     %save arrays
     save_thrust = cell(size(stoch.thrust,1),1);
     apogee.altitude = [];
-    N_ApogeeWithinTarget = 0;
+    N_ApogeeWithinTarget_10 = 0;
     N_ApogeeWithinTarget_50 = 0;
     N_landings_within50m = 0;
     N_landings_within150m = 0;
@@ -113,11 +113,12 @@ for alg_index = 4
 
         settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
         settings_mont.motor.expTime = stoch.expThrust(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
-        settings_mont.tb = max( stoch.expThrust(i,stoch.expThrust(i,:)<=settings.tb) );                              % initialize the burning time of the current simulation (parfor purposes)
+        settings_mont.tb = max( stoch.expThrust(i,stoch.expThrust(i,:)<=settings.tb) );     % initialize the burning time of the current simulation (parfor purposes)
         settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
+        settings_mont.mass_offset = stoch.mass_offset(i);
 
         % Define coeffs matrix for the i-th simulation
-        settings_mont.Coeffs = settings.Coeffs* (1+aer_percentage(i));
+        settings_mont.Coeffs = settings.Coeffs* (1+stoch.aer_percentage(i));
 
 
         % set the wind parameters
@@ -158,7 +159,7 @@ for alg_index = 4
 
         % horizontal speed at apogee
         idx_apo = save_thrust{i}.apogee.idx;
-        apogee.horizontalSpeed(i) = norm(save_thrust{i}.Y(idx_apo,4:6)); % this is in body frame, but as the last point is the apogee we should have only  horizontal velocity, so all the components must be taken
+        apogee.horizontalSpeed(i) = norm(save_thrust{i}.apogee.speed); % this is in body frame, but as the last point is the apogee we should have only  horizontal velocity, so all the components must be taken
 
         % time of engine shutdown
         t_shutdown.value(i) = save_thrust{i}.sensors.mea.t_shutdown;
@@ -174,15 +175,15 @@ for alg_index = 4
         %reached apogee time
         apogee.times(i) = save_thrust{i}.apogee.time;
         apogee.prediction(i) = save_thrust{i}.sensors.mea.prediction(end);
-        apogee.prediction_last_time(i) = save_thrust{i}.sensors.mea.prediction(end)/settings.frequencies.controlFrequency;
+        apogee.prediction_last_time(i) = save_thrust{i}.sensors.mea.time(end); % checkare
        
         % save apogees within +-10 meters from target:
         if abs(apogee.altitude(i) - settings.z_final)<=10
-            N_ApogeeWithinTarget = N_ApogeeWithinTarget +1; % save how many apogees sit in the +-50 m from target
+            N_ApogeeWithinTarget_10 = N_ApogeeWithinTarget_10 +1; 
         end
         % save apogees within +-50 meters from target:
         if abs(apogee.altitude(i) - settings.z_final)<=50
-            N_ApogeeWithinTarget_50 = N_ApogeeWithinTarget_50 +1; % save how many apogees sit in the +-50 m from target
+            N_ApogeeWithinTarget_50 = N_ApogeeWithinTarget_50 +1; 
         end
        
         % landing
@@ -233,7 +234,7 @@ for alg_index = 4
     apogee.horizontalSpeed_min = min(apogee.horizontalSpeed);
     
     % accuracy
-    apogee.accuracy_10 = N_ApogeeWithinTarget/N_sim*100; % percentage, so*100
+    apogee.accuracy_10 = N_ApogeeWithinTarget_10/N_sim*100; % percentage, so*100
     apogee.accuracy_50 = N_ApogeeWithinTarget_50/N_sim*100; % percentage, so*100
 
     % save landing speed
@@ -287,7 +288,13 @@ for alg_index = 4
         landing_mu(i) = mean(landing.distance_to_target(1:i));
         landing_sigma(i) = std(landing.distance_to_target(1:i));
     end
-    
+    % gaussian 10m    
+    p_10 = normcdf([settings.z_final-10, settings.z_final+10],apogee.altitude_mean,apogee.altitude_std);
+    apogee.accuracy_gaussian_10 =( p_10(2) - p_10(1) )*100;
+    % gaussian 50m
+    p_50 = normcdf([settings.z_final-50, settings.z_final+50],apogee.altitude_mean,apogee.altitude_std);
+    apogee.accuracy_gaussian_50 =( p_50(2) - p_50(1) )*100;
+
     
     %% PLOTS
 
@@ -325,35 +332,9 @@ for alg_index = 4
             if ~exist(folder(i),"dir")
                 mkdir(folder(i))
             end
-            saveas(save_plot_histogram,folder(i)+"\histogramPlot")
-            saveas(save_plotControl,folder(i)+"\controlPlot")
-            saveas(save_plotApogee,folder(i)+"\apogeelPlot")
-            saveas(save_plotTrajectory,folder(i)+"\TrajectoryPlot")
-            saveas(save_thrust_apogee_probability,folder(i)+"\ApogeeProbabilityPlot")
-            saveas(save_montecarlo_apogee_params,folder(i)+"\ApogeeMontecarloAnalysisPlot")
-            saveas(save_t_shutdown_histogram,folder(i)+"\t_shutdownPlot")
-            saveas(save_landing_ellipses,folder(i)+"\landingPositions")
-
-            if exist('save_arb_deploy_histogram','var')
-                saveas(save_arb_deploy_histogram,folder(i)+"\ARBdeployTimeHistogram")
-            end
-            if exist(' save_predicted_apogee','var')
-                saveas( save_predicted_apogee,folder(i)+"\PredictedApogee")
-            end
-            saveas(save_apogee_histogram,folder(i)+"\ApogeeTimeHistogram")
-            if ~settings.wind.model && ~settings.wind.input
-                saveas(save_apogee_3D,folder(i)+"\ApogeeWindThrust")
-            end
-            saveas(save_dynamic_pressure_and_forces,folder(i)+"\dynamicPressureAndForces")
-           
-%             for j = 1:N_sim
-%                 save_thrust{j} = rmfield(save_thrust{j},'Y'); % remove ode data to save space. EDIT: no... no I don't think I will 
-%             end
+            save(folder(i)+"\montecarloFigures",'montFigures')
+            
             save(folder(i)+"\saveThrust.mat","save_thrust","apogee","N_sim","settings","thrust_percentage") % add "save_thrust", > 2GB for 1000 sim
-% 
-%            exportStandardizedFigure(save_plot_histogram,'report_images\mc_Histogram',0.9)
-%            exportStandardizedFigure(save_plotApogee,'report_images\mc_Apogees,0.9)
-%            exportStandardizedFigure(save_apogee_3D,'report_images\apogee_wind,0.9)
 
             % Save results.txt
             fid = fopen( folder(i)+"\"+contSettings.algorithm+"Results"+saveDate+".txt", 'wt' );  % CAMBIA IL NOME
@@ -418,7 +399,8 @@ for alg_index = 4
                 fprintf(fid,'PID integral gain %s \n',contSettings.payload.Ki);
                 fprintf(fid,'Opening altitude %s \n',settings.para(1).z_cut);
             end
-            
+            fprintf(fid,'MASS: \n\n');
+            fprintf(fid,'Interval : +-%d at 3sigma \n',3*sigma_m );
             %%%%%%%%%%%%%%%%%%%%%%%%%%%
             if settings.scenario ~= "descent"
                 fprintf(fid,'RESULTS APOGEE\n\n');

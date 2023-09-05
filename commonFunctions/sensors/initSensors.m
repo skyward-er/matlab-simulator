@@ -167,7 +167,7 @@ sensorTot.gps.time                  =   0;
 sensorTot.pitot.time                =   0;
 sensorTot.nas.time                  =   0;
 sensorTot.ada.time                  =   0;
-
+sensorTot.mea.time                  =   0;
 
 
 % initialization of the indexes

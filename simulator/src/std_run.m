@@ -59,6 +59,7 @@ if nargin > 2
     end
    
     settings.State.xcgTime = settings_mont.State.xcgTime;
+    settings.mass_offset = settings_mont.mass_offset;
 end
 
 if settings.electronics % global variables slow down a bit the comunication over thread, we don't need these for montecarlo analysis
@@ -88,18 +89,6 @@ end
 ap0 = 0;                                                                        % Control servo angle initial condition
 deltaA0 = 0;                                                                    % Control action for the PARAFOIL initial condition
 
-%%% TEMPORANEO i dati non sono standardizzati a causa del motore ibrido
-%%% rispetto agli anni precedenti
-if contains(settings.mission,'_2023')
-    settings.Ixxf = settings.Ixx(1);
-    settings.Iyyf = settings.Iyy(1);
-    settings.Izzf = settings.Izz(1);
-    settings.Ixxe = settings.Ixx(end);
-    settings.Iyye = settings.Iyy(end);
-    settings.Izze = settings.Izz(end);
-end
-%%%
-
 % initialCond = [X0; V0; W0; Q0; settings.Ixxf; settings.Iyyf; settings.Izzf; ap0; deltaA0];
 initialCond = [X0; V0; W0; Q0; ap0; deltaA0];
 Y0 = initialCond';
@@ -111,6 +100,9 @@ settings.wind.Mag = Mag;
 settings.wind.El = El;
 settings.wind.Az = Az;
 
+%% stochastic parameter settings:
+settings.ms = settings.ms + settings.mass_offset;
+settings.mTotalTime = settings.mTotalTime + settings.mass_offset;
 
 %% INTEGRATION
 std_setInitialParams;
@@ -255,15 +247,21 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         end
         Tf = [t0, t1]';
         Yf = [initialCond'; initialCond']; % check how to fix this
+        if flagPara2
+            parout = RecallOdeFcn(@descentParafoil, Tf, Yf, settings,contSettings, Yf(:,14),t_change_ref_PRF,tLaunch,'apVec');
+        else
+            parout = RecallOdeFcn(@ascentControl, Tf, Yf, settings,[], Yf(:,14), t_change_ref_ABK,tLaunch,'apVec');
+        end
         para = NaN;
     end
-    if flagFlight
+    
     % recall some useful parameters
-        settings.parout.partial_time = Tf;
-        settings.parout.wind_NED = parout.wind.NED_wind';
-        settings.parout.wind_body = parout.wind.body_wind';
-        settings.parout.acc = parout.accelerometer.body_acc';
-    end
+    settings.parout.partial_time = Tf;
+    settings.parout.wind_NED = parout.wind.NED_wind';
+    settings.parout.wind_body = parout.wind.body_wind';
+    settings.parout.acc = parout.accelerometer.body_acc';
+    settings.parout.m   = parout.interp.mass;
+
 
     ext = extension_From_Angle(Yf(end,14),settings); % bug fix, check why this happens because sometimes happens that the integration returns a value slightly larger than the max value of extension for airbrakes and this mess things up
     if ext > settings.arb.maxExt
@@ -357,16 +355,14 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     [n, ~] = size(Yf);
     Yf_tot(n_old:n_old+n-1, :)   =  Yf(1:end, :);
     Tf_tot(n_old:n_old+n-1, 1)   =  Tf(1:end, 1);
-    deltaAcmd_tot(n_old:n_old+n-1) = deltaA_ref(end) * ones(n,1);
-    deltaAcmd_time_tot(n_old:n_old+n-1) =  t1* ones(n,1);
-    ap_ref_tot(n_old:n_old+n-1) = ap_ref(2)* ones(n,1);
-    ap_ref_time_tot(n_old:n_old+n-1) = t1* ones(n,1);
-    barometer_measure{1}(iTimes) = sensorData.barometer_sens{1}.measures(end);
-    barometer_measure{2}(iTimes) = sensorData.barometer_sens{2}.measures(end);
-    barometer_measure{3}(iTimes) = sensorData.barometer_sens{3}.measures(end);
+    deltaAcmd_tot(iTimes,1) = deltaA_ref(end);
+    deltaAcmd_time_tot(iTimes,1) =  t1;
+    ap_ref_tot(iTimes,1) = ap_ref(2);
+    ap_ref_time_tot(iTimes,1) = t1;
     sensorTot.sfd.time(iTimes) = t1;
     sensorTot.sfd.pressure(iTimes) = sensorData.barometer.measures(end);
-    sensorTot.sfd.faults(n_old:n_old+n-1,:) = ones(n,1) * settings.faulty_sensors;
+    sensorTot.sfd.faults(iTimes,:) = settings.faulty_sensors;
+    dataRecall.true_mass(n_old:n_old+n-1, 1) = settings.parout.m';
     n_old = n_old + n -1;
 
 
@@ -422,14 +418,14 @@ end
 t_ada    = settings.ada.t_ada;
 settings.flagMatr = settings.flagMatr(1:n_old, :);
 
-%% RETRIVE PARAMETERS FROM THE ODE (RECALL ODE)
+%% RETRIVE PARAMETERS FROM THE ODE (RECALL ODE) 
 
-if ~settings.electronics && ~settings.montecarlo && not(settings.scenario == "descent")
-    settings.wind.output_time = Tf;
-    dataAscent = recallOdeFcn2(@ascentControl, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, Yf(:,14), settings.servo.delay,tLaunch,'apVec');
-else
-    dataAscent = [];
-end
+% if ~settings.electronics && ~settings.montecarlo && not(settings.scenario == "descent")
+%     settings.wind.output_time = Tf;
+%     dataAscent = recallOdeFcn2(@ascentControl, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, Yf(:,14), settings.servo.delay,tLaunch,'apVec');
+% else
+%     dataAscent = [];
+% end
 
 %% extract parameters:
 [~, idx_apo] = max(-Yf_tot(:,3));
@@ -446,6 +442,10 @@ struct_out.wind.Vel = [uw, vw, ww];
 
 % sensors (ADA, NAS, MEA, SFD, and all sensor data are stored here)
 struct_out.sensors = sensorTot;
+struct_out.sensors.ada.t_apogee = settings.ada.t_ada;
+struct_out.sensors.nas.t_apogee = settings.nas.t_nas;
+struct_out.sensors.mea.mass_offset = settings.mass_offset;
+struct_out.sensors.mea.true_mass_at_shutdown = dataRecall.true_mass(lastAscentIndex-10);
 % apogee
 struct_out.apogee.time = Tf(idx_apo);
 struct_out.apogee.time_ada = t_ada;
@@ -454,9 +454,9 @@ struct_out.apogee.idx = idx_apo;
 struct_out.apogee.coordinates = [Yf_tot(idx_apo,1),Yf_tot(idx_apo,2),-Yf_tot(idx_apo,3)];
 struct_out.apogee.speed = [Yf_tot(idx_apo,4),Yf_tot(idx_apo,5),-Yf_tot(idx_apo,6)];
 struct_out.apogee.radius = norm(struct_out.apogee.coordinates(1:2));
-% recall
-struct_out.recall = dataAscent;
 
+% recall
+struct_out.recall = dataRecall;
 struct_out.contSettings = contSettings;
 
 if exist('t_airbrakes','var')
@@ -477,7 +477,8 @@ end
 % parafoil 
 if settings.scenario == "descent" || settings.scenario == "full flight"
     
-    struct_out.PRF.deltaAcmd = deltaAcmd_tot;
+    struct_out.PRF.cmddeltaA = deltaAcmd_tot;
+    struct_out.PRF.cmdTime = deltaAcmd_time_tot;
     % events
     struct_out.events.drogueIndex = lastAscentIndex+1;
     struct_out.events.mainChuteIndex = lastDrogueIndex+1;
@@ -492,6 +493,7 @@ if settings.scenario == "descent" || settings.scenario == "full flight"
 else
     
     struct_out.PRF.deltaAcmd = NaN;
+    struct_out.PRF.cmdTime = NaN;
     struct_out.events.drogueIndex = NaN;
     struct_out.events.mainChuteIndex = NaN;
     struct_out.PRF.landing_position =NaN;
@@ -503,3 +505,55 @@ else
 end
 % settings for payload
 struct_out.payload = contSettings.payload;
+
+% resize structure to save space
+if settings.montecarlo
+t_vec = linspace(min(struct_out.t),max(struct_out.t),1000);
+t_vec = t_vec';
+
+% simulation states
+struct_out.Y = interp1(struct_out.t,struct_out.Y,t_vec);
+
+% sensors - ADA
+struct_out.sensors.ada = rmfield(struct_out.sensors.ada,{'time','n_old','xp','xv'});
+
+
+% sensors - NAS
+struct_out.sensors.nas.states = interp1(struct_out.sensors.nas.time',struct_out.sensors.nas.states,t_vec);
+struct_out.sensors.nas.time = t_vec;
+
+% sensors - MEA already good
+
+
+% sensors - SFD
+struct_out.sensors.sfd.pressure = interp1(struct_out.sensors.sfd.time',struct_out.sensors.sfd.pressure',t_vec);
+struct_out.sensors.sfd = rmfield(struct_out.sensors.sfd,'faults');
+struct_out.sensors.sfd.time = t_vec;
+
+% sensors - remove unwanted fields
+struct_out.sensors = rmfield(struct_out.sensors,{'barometer_sens','barometer','comb_chamber','imu','gps','pitot','wes'});
+
+% air brakes (ARB)
+struct_out.ARB.cmdPosition = interp1(struct_out.ARB.cmdTime,struct_out.ARB.cmdPosition,t_vec);
+struct_out.ARB.cmdTime = t_vec;
+struct_out.ARB = rmfield(struct_out.ARB, 'allowanceIdx');
+
+% parafoil (PRF)
+struct_out.PRF.deltaAcmd = interp1(struct_out.PRF.cmdTime,struct_out.PRF.cmddeltaA,t_vec);
+struct_out.PRF.cmdTime = t_vec;
+
+% recall
+struct_out.recall.true_mass = interp1(struct_out.t,struct_out.recall.true_mass,t_vec); 
+
+% remove the rest
+struct_out = rmfield(struct_out,{'events'});
+
+% overwrite the time vector
+struct_out.t = t_vec;
+end
+
+
+
+
+
+end

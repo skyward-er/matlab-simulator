@@ -40,7 +40,8 @@ settings.frequencies.barometerFrequency         =   20;                    % [hz
 settings.frequencies.chamberPressureFrequency   =   50;                    % [hz] sensor frequency
 settings.frequencies.pitotFrequency             =   20;                    % [hz] sensor frequency
 settings.frequencies.NASFrequency               =   50;                    % [hz] sensor frequency
-settings.frequencies.ADAFrequency               =   50;                    % [hz] sensor frequency % al momento non so quanto sia
+settings.frequencies.ADAFrequency               =   20;                    % [hz] sensor frequency
+settings.frequencies.MEAFrequency               =   50;                    % [hz] sensor frequency
 
 % Servo (MARK STAR - HBL 3850)
 settings.servo.tau = 0.0374588;                                                % Servo motor time constant 
@@ -142,3 +143,6 @@ settings.ada.flag_apo    =   false;                                        % Tru
 
 
 %% MEA TUNING PARAMETERS
+
+
+

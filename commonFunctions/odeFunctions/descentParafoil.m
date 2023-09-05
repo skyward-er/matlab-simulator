@@ -39,7 +39,7 @@ local = settings.Local;
 b = settings.payload.b;                         % [m] wingspan
 c = settings.payload.c;                         % [m] mean aero chord
 S = settings.payload.S;                         % [m^2] payload surface
-mass = settings.payload.mass;                   % [kg]
+m = settings.payload.mass;                   % [kg]
 inertia = settings.payload.inertia;             % 3x3 inertia matrix
 inverseInertia = settings.payload.inverseInertia; % 3x3 inertia matrix
 
@@ -143,7 +143,7 @@ DRAG = qFactor * (CD0 + alpha^2 * CDAlpha2 + deltaANormalized * CDDeltaA) * [ur;
 F_AERO = (LIFT - DRAG)*S;
 
 % Inertial to body gravity force (in body frame):
-Fg = dcm*[0; 0; mass*g];        % [N] force due to the gravity in body frame
+Fg = dcm*[0; 0; m*g];        % [N] force due to the gravity in body frame
 
 % total force assembly
 F = Fg + F_AERO;             % [N] total forces vector
@@ -160,7 +160,7 @@ M = M_AERO; % no inertia considerations in this model
 omega = [p;q;r];
 
 % acceleration
-bodyAcc = F/mass - cross(omega,[u;v;w]);
+bodyAcc = F/m - cross(omega,[u;v;w]);
  
 %% angular velocity - as msa does
 OM = [ 0 -p -q -r  ;
@@ -217,16 +217,18 @@ dY = dY';
 
 
 %% parout
+if nargout == 2
+    parout.interp.mass = m;
+    parout.wind.NED_wind = [uw, vw, ww];
+    parout.wind.body_wind = wind_body;
+    
+    
+    parout.air.qdyn = 0.5*rho*V_norm^2;
+    parout.accelerations.body_acc = bodyAcc;%[du, dv, dw];
+    
+    parout.accelerometer.body_acc = F_AERO/m;
 
-parout.wind.NED_wind = [uw, vw, ww];
-parout.wind.body_wind = wind_body;
-
-
-parout.air.qdyn = 0.5*rho*V_norm^2;
-parout.accelerations.body_acc = bodyAcc;%[du, dv, dw];
-
-parout.accelerometer.body_acc = F_AERO/mass;
-
+end
 
 
 
