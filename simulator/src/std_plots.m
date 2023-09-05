@@ -25,9 +25,9 @@ end
 % parafoil
 if settings.parafoil && (settings.scenario == "descent" || settings.scenario == "full flight")
     figures.parafoil_servo_action = figure('Name', 'Parafoil deltaA','ToolBar','auto','Position',[100,100,600,400]);
-    plot(structIn.t,structIn.Y(:,15),'DisplayName','\Delta_A');
+    plot(structIn.t,structIn.Y(:,15),'DisplayName','\delta_A');
     hold on;
-    stairs(structIn.t,structIn.PRF.deltaAcmd,'DisplayName','\Delta_A cmd');
+    stairs(structIn.t,structIn.PRF.deltaAcmd,'DisplayName','\delta_A cmd');
     xline(structIn.t(structIn.events.mainChuteIndex),'--','DisplayName','Parafoil deployment')
     legend
     title('Parafoil control action')
@@ -188,7 +188,7 @@ if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'co
     subplot(2,1,2)
     plot(structIn.sensors.mea.time, structIn.sensors.mea.mass   ,'DisplayName','Mass');
     legend
-    xline(structIn.t_shutdown,'r--')
+    xline(structIn.sensors.mea.t_shutdown,'r--')
     xlabel('Time t [s]');
     ylabel('Altitude AGL [m]');
     title('Predicted vs Real apogee');
