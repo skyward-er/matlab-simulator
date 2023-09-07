@@ -89,7 +89,7 @@ clearvars   msaToolkitURL Itot
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%CONFIG%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 settings_mont_init = struct('x',[]);
-
+mass_flow_rate = 1.006; % [kg/s]
 
 %% start simulation
 for alg_index = 4
@@ -116,6 +116,11 @@ for alg_index = 4
         settings_mont.tb = max( stoch.expThrust(i,stoch.expThrust(i,:)<=settings.tb) );     % initialize the burning time of the current simulation (parfor purposes)
         settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
         settings_mont.mass_offset = stoch.mass_offset(i);
+        
+        real_tb = (settings_mont.mass_offset +  settings.motor.mOx)/ mass_flow_rate
+        if real_tb < settings_mont.tb
+            settings_mont.tb = real_tb;
+        end
 
         % Define coeffs matrix for the i-th simulation
         settings_mont.Coeffs = settings.Coeffs* (1+stoch.aer_percentage(i));
@@ -334,7 +339,7 @@ for alg_index = 4
             end
             save(folder(i)+"\montecarloFigures",'montFigures')
             
-            save(folder(i)+"\saveThrust.mat","save_thrust","apogee","N_sim","settings","thrust_percentage") % add "save_thrust", > 2GB for 1000 sim
+            save(folder(i)+"\saveThrust.mat","save_thrust","apogee","N_sim","settings","thrust_percentage","stoch") % add "save_thrust", > 2GB for 1000 sim
 
             % Save results.txt
             fid = fopen( folder(i)+"\"+contSettings.algorithm+"Results"+saveDate+".txt", 'wt' );  % CAMBIA IL NOME

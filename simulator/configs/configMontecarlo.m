@@ -14,7 +14,7 @@ if settings.montecarlo
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % how many simulations
-N_sim = 1000; % set to at least 500
+N_sim = 2000; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
 
@@ -71,7 +71,7 @@ displayIter = true; % set to false if you don't want to see the iteration number
             end
 
             %%% mass offset distribution
-            sigma_m = 1.5/3; % 1.5 [kg] of offset (uncertainty on refueling mass)
+            sigma_m = 2/3; % 1.5 [kg] of offset (uncertainty on refueling mass)
             mu_m = 0;
             stoch.mass_offset = normrnd(mu_m,sigma_m,N_sim,1);
 
@@ -99,6 +99,11 @@ displayIter = true; % set to false if you don't want to see the iteration number
 
 else
 
-    settings.mass_offset = rand(1); % initialise to 0 the value of the mass offset, in order to not consider its uncertainty on the nominal simulations
+    settings.mass_offset = 2*(-0.5+rand(1)); % initialise to 0 the value of the mass offset, in order to not consider its uncertainty on the nominal simulations
+    mass_flow_rate = 1.006; % [kg/s]
+    real_tb = (settings.mass_offset +  settings.motor.mOx)/ mass_flow_rate;
+    if real_tb < settings.tb
+        settings.tb = real_tb;
+    end
 
 end

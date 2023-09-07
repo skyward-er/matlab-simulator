@@ -25,7 +25,7 @@ end
 % parafoil
 if settings.parafoil && (settings.scenario == "descent" || settings.scenario == "full flight")
     figures.parafoil_servo_action = figure('Name', 'Parafoil deltaA','ToolBar','auto','Position',[100,100,600,400]);
-    plot(structIn.t,structIn.Y(:,15),'DisplayName','\Delta_A');
+    plot(structIn.t,structIn.Y(:,15),'DisplayName','\delta_A');
     hold on;
     stairs(structIn.PRF.cmdTime,structIn.PRF.cmddeltaA,'DisplayName','\Delta_A cmd');
     xline(structIn.t(structIn.events.mainChuteIndex),'--','DisplayName','Parafoil deployment')

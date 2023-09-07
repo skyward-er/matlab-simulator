@@ -139,7 +139,7 @@ end
 
 %% NAS initial conditions (Navigation and Attitude System)
 
-if settings.flagNAS
+if settings.flagNAS || settings.electronics
     % initialize states of the NAS 
     sensorData.nas.states = [X0; V0; Q0(2:4); Q0(1);0;0;0]';
     if settings.scenario ~="descent"

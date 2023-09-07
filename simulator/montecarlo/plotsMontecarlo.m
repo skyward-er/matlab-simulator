@@ -124,37 +124,29 @@ ylabel('Servo angle \alpha (rad)')
 legend(contSettings.algorithm);
 
 %% PLOT APOGEE wrt THRUST
-montFigures.apogee_wrt_thrust = figure('units','pixels','position',[0 0 800 600]);
- hold on; grid on;
-for i = 1:N_sim
-    plot(thrust_percentage(i),apogee.altitude(i),'.','color',[0, 0.447, 0.741])
-   
-end
+montFigures.apogee_wrt_thrust = figure;
+hold on; grid on;
+scatter(thrust_percentage,apogee.altitude,'.')  
 yline(settings.z_final-10,'r--')
 yline(settings.z_final+10,'r--')
 sgtitle('Apogee w.r.t. thrust')
 xlabel('Thrust percentage w.r.t. nominal (%)')
 ylabel('Apogee (m)')
-xlim([0.85 1.15])
-ylim([2900 3100])
-text(1, 3080,"target apogee: "+num2str(settings.z_final))
+xlim([min(thrust_percentage)-0.05 max(thrust_percentage)+0.05])
+ylim([min(apogee.altitude)-20 max(apogee.altitude)+20])
 legend(contSettings.algorithm);
 
-%% PLOT APOGEE wrt 
-montFigures.apogee_wrt_thrust = figure('units','pixels','position',[0 0 800 600]);
- hold on; grid on;
-for i = 1:N_sim
-    plot(thrust_percentage(i),apogee.altitude(i),'.','color',[0, 0.447, 0.741])
-   
-end
+%% PLOT APOGEE wrt MASS OFFSET
+montFigures.apogee_wrt_mass_offset = figure;
+hold on; grid on;
+scatter(stoch.mass_offset,apogee.altitude,'.')
 yline(settings.z_final-10,'r--')
 yline(settings.z_final+10,'r--')
 sgtitle('Apogee w.r.t. thrust')
 xlabel('Thrust percentage w.r.t. nominal (%)')
 ylabel('Apogee (m)')
-xlim([0.85 1.15])
-ylim([2900 3100])
-text(1, 3080,"target apogee: "+num2str(settings.z_final))
+xlim([min(stoch.mass_offset)-0.05 max(stoch.mass_offset)+0.05])
+ylim([min(apogee.altitude)-20 max(apogee.altitude)+20])
 legend(contSettings.algorithm);
 
 
@@ -210,6 +202,7 @@ if settings.scenario~= "descent"
 
    
 end
+
 
 %% PLOT TRAJECTORY
 % 
