@@ -11,7 +11,7 @@ histogram(apogee.altitude,N_histCol,'DisplayName','Apogee altitude')
 xlim([min(apogee.altitude)-10 , max(apogee.altitude)+10])
 xlabel('Apogee value [m]')
 ylabel('Number of apogees in the same interval')
-sgtitle('Reached apogee distribution')
+title('Reached apogee distribution')
 legend
 
 montFigures.apogee_histogram_cumulative = figure;
@@ -44,7 +44,7 @@ montFigures.arb_deploy_histogram_pdf = figure;
     xline(arb_deploy_time_MODE,'g--')
     xlabel('Airbrakes deployment time [s]')
     ylabel('Number of occurrences in the same interval')
-    sgtitle("Airbrakes deployment time's distribution")
+    title("Airbrakes deployment time's distribution")
     legend('Airbrakes time deploy','Mean', 'Median')
 
 montFigures.arb_deploy_histogram_cumulative = figure;
@@ -54,7 +54,7 @@ montFigures.arb_deploy_histogram_cumulative = figure;
     xline(arb_deploy_time_MODE,'g--')
     xlabel('Airbrakes deployment time [s]')
     ylabel('Number of occurrences in the same interval')
-    sgtitle("Cumulative airbrakes deployment time")
+    title("Cumulative airbrakes deployment time")
     legend('Airbrakes time deploy','Mean', 'Median')
 
 end
@@ -74,7 +74,7 @@ xline(apogee_time_MEAN,'r--','DisplayName','Average')
 xline(apogee_time_MODE,'g--','DisplayName','Mode')
 xlabel('Apogee value (m)')
 ylabel('Number of apogees in the same interval')
-sgtitle('Apogee time distribution')
+title('Apogee time distribution')
 legend
 
 montFigures.apogee_time_histogram_cumulative = figure;
@@ -84,7 +84,7 @@ xline(apogee_time_MEAN,'r--','DisplayName','Average')
 xline(apogee_time_MODE,'g--','DisplayName','Mode')
 xlabel('Apogee value (m)')
 ylabel('Number of apogees in the same interval')
-sgtitle('Cumulative apogee time')
+title('Cumulative apogee time')
 legend
 %% PLOT APOGEE MONTECARLO STATISTICS
 if settings.scenario ~= "descent"
@@ -118,7 +118,7 @@ for i = floor(linspace(1,N_sim,5))
     plot(save_thrust{i}.t,save_thrust{i}.Y(:,14))
     hold on; grid on;
 end
-sgtitle('Control action')
+title('Control action')
 xlabel('Time (s)')
 ylabel('Servo angle \alpha (rad)')
 legend(contSettings.algorithm);
@@ -129,7 +129,7 @@ hold on; grid on;
 scatter(thrust_percentage,apogee.altitude,'.')  
 yline(settings.z_final-10,'r--')
 yline(settings.z_final+10,'r--')
-sgtitle('Apogee w.r.t. thrust')
+title('Apogee w.r.t. thrust')
 xlabel('Thrust percentage w.r.t. nominal (%)')
 ylabel('Apogee (m)')
 xlim([min(thrust_percentage)-0.05 max(thrust_percentage)+0.05])
@@ -142,7 +142,7 @@ hold on; grid on;
 scatter(stoch.mass_offset,apogee.altitude,'.')
 yline(settings.z_final-10,'r--')
 yline(settings.z_final+10,'r--')
-sgtitle('Apogee w.r.t. thrust')
+title('Apogee w.r.t. thrust')
 xlabel('Thrust percentage w.r.t. nominal (%)')
 ylabel('Apogee (m)')
 xlim([min(stoch.mass_offset)-0.05 max(stoch.mass_offset)+0.05])
@@ -158,13 +158,13 @@ if settings.scenario~= "descent"
     histogram(t_shutdown.value,N_histCol)
     xlabel('Shutdown time (s)')
     ylabel('Number of shutdowns in the same time interval')
-    sgtitle('Engine shutdown time distribution')
+    title('Engine shutdown time distribution')
     
     montFigures.t_shutdown_histogram_cumulative = figure;
     histogram(t_shutdown.value,N_histCol,'Normalization','cdf')
     xlabel('Shutdown time (s)')
     ylabel('Shutdown time cdf')
-    sgtitle('Engine shutdown time cumulative distribution')
+    title('Engine shutdown time cumulative distribution')
  %%% t_shutdown wrt wind
     montFigures.tShutdown_wind = figure;
     subplot(1,3,1)
@@ -216,7 +216,7 @@ end
 %     drawCircle(settings.payload.target,50,'+-50 meters','r')
 %     drawCircle(settings.payload.target,150,'+-150 meters','b')
 % end
-% sgtitle('Trajectories')
+% title('Trajectories')
 % xlabel('x [m]')
 % ylabel('y [m]')
 % zlabel('z [m]')
@@ -229,7 +229,7 @@ if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'co
     scatter(apogee.prediction_last_time,apogee.prediction,'k','DisplayName','Prediction');
     hold on;  grid on;
     scatter(apogee.prediction_last_time,apogee.altitude,'r','DisplayName','Simulated');
-    sgtitle('Predicted vs real apogee')
+    title('Predicted vs real apogee')
     xlabel('time [s]')
     ylabel('Predicted Apogee [m]')
     legend
@@ -291,7 +291,7 @@ end
 %% PLOT PROBABILITY FUNCTION
 % 
 % if N_sim>1
-%     save_thrust_apogee_probability = figure;
+%     figures.apogee_probability = figure;
 %     pd = fitdist(apogee.altitude','Normal');    % create normal distribution object to compute mu and sigma
 %     % probability to reach an apogee between 2990 and 3010
 %     x_values = linspace(settings.z_final-500,settings.z_final+500,1000);   % possible apogees
@@ -325,14 +325,12 @@ montFigures.dynamic_pressure_and_forces = figure;
 subplot(2,1,1)
 histogram(qdyn_max,N_histCol)
 title('Max Dynamic Pressure')
-% xlabel('Time (s)')
 ylabel('Simulations')
 xlabel('Max(q) (Pa)')
 %%%%%%%%%%% max aerodynamic load (kg)
 subplot(2,1,2)
 histogram(max_force_kg,N_histCol)
 title('Aerodynamic Load')
-% xlabel('Time [s]')
 ylabel('Simulations')
 xlabel('Max Load on ABK (kg)')
 
@@ -347,31 +345,34 @@ montFigures.estimated_mass_histogram_pdf = figure;
 histogram(est_mass,N_histCol)
 hold on;
 histogram(true_mass,N_histCol,'DisplayName','Simulated')
+legend
 xlabel('Mass [kg]')
 ylabel('Number of simulations')
-sgtitle('Estimated final mass')
+title('Estimated final mass')
 
 montFigures.estimated_mass_histogram_cumulative = figure;
 histogram(est_mass,N_histCol,'DisplayName','Estimated','Normalization','cdf')
 hold on;
 histogram(true_mass,N_histCol,'DisplayName','Simulated','Normalization','cdf')
+legend
 xlabel('Mass [kg]')
 ylabel('Apogee time cdf')
-sgtitle('Estimated final mass')
+title('Estimated final mass')
 
 %% parafoil
 %%%%%%%%%%%%%%%% landing position w.r.t. target
 montFigures.landing_ellipses = figure;
-scatter3(landing.position(:,1),landing.position(:,2),zeros(size(landing.position(:,3))),'k.','DisplayName','Landings')
+scatter(landing.position(:,1),landing.position(:,2),'k.','DisplayName','Landings')
 hold on;
-plot3(settings.payload.target(1),settings.payload.target(2),settings.payload.target(3),'go','DisplayName','Target')
-drawCircle(settings.payload.target,50,'+-50 meters','r')
-drawCircle(settings.payload.target,150,'+-150 meters','b')
+scatter(settings.payload.target(1),settings.payload.target(2),'DisplayName','Target')
+drawCircle(settings.payload.target([2,1]),50,'+-50 meters','r')
+drawCircle(settings.payload.target([2,1]),150,'+-150 meters','b')
 xlabel('North [m]')
 ylabel('East [m]')
 zlabel('Down [m]')
 axis equal
-sgtitle('Landing positions')
+title('Landing positions')
+view([90,-90])
 legend
 
 

@@ -25,11 +25,11 @@ settings.payload.Cmq       = -1.49;
 settings.payload.CLDeltaA  = -0.0035;
 settings.payload.Cnr       = -0.27;
 settings.payload.CnDeltaA  =  0.0115;
-settings.payload.deltaSMax =  0.1;
 settings.payload.CDDeltaA  = 0.01;
 settings.payload.Clp       = -0.84;
 settings.payload.ClPhi     = -0.1;
 settings.payload.ClDeltaA  = 0.01;
+settings.payload.deltaSMax =  0.1;
 
 % %% Enviornment
 % % Gravity
@@ -77,8 +77,8 @@ payload.simParam.wind_sub = 1;            % Set as 1 for subtracting and 0 other
 % payload.simParam.WES0 = environment.wind; % Windspeed considered in the subtraction
 
 % P and PI controller
-contSettings.payload.Kp = 0.1;
-contSettings.payload.Ki = 0;
+contSettings.payload.Kp = 0.4;
+contSettings.payload.Ki = 0.08;
 contSettings.payload.uMax = 0.1;
 contSettings.payload.uMin = -0.1;
 contSettings.payload.deltaA_tau = 0.4; % [s], absolutely arbitrary value

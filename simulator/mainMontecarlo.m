@@ -99,10 +99,6 @@ for alg_index = 4
     %save arrays
     save_thrust = cell(size(stoch.thrust,1),1);
     apogee.altitude = [];
-    N_ApogeeWithinTarget_10 = 0;
-    N_ApogeeWithinTarget_50 = 0;
-    N_landings_within50m = 0;
-    N_landings_within150m = 0;
     wind_Mag = zeros(N_sim,1);
     wind_el = zeros(N_sim,1);
     wind_az = zeros(N_sim,1);
@@ -154,6 +150,11 @@ for alg_index = 4
 
     %% RETRIEVE INTERESING PARAMETERS:
 
+    N_ApogeeWithinTarget_10 = 0;
+    N_ApogeeWithinTarget_50 = 0;
+    N_landings_within50m = 0;
+    N_landings_within150m = 0;
+    
     for i = 1:N_sim
 
         % apogee
@@ -330,6 +331,9 @@ for alg_index = 4
         if computer == "Marco" || computer == "marco"
             folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\AIR BRAKES\MONTECARLO E TUNING\"+settings.mission+"\"+conf.scenario+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"_"+simulationType_thrust+"_"+saveDate]; % online
         end
+        if computer == "Max" || computer == "max"
+            folder = [folder ; "C:\Users\Max\OneDrive - Politecnico di Milano\SKYWARD\AIR BRAKES\MONTECARLO E TUNING\"+settings.mission+"\"+conf.scenario+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"_"+simulationType_thrust+"_"+saveDate]; % online
+        end
     end
 
     if flagSaveOffline == "yes" || flagSaveOnline == "yes" || flagSaveOffline == "y" || flagSaveOnline == "y"
@@ -441,6 +445,9 @@ for alg_index = 4
             
             
             fclose(fid);
+            fprintf('\nsaved\n\n')
         end
     end
+
+    %%
 end
