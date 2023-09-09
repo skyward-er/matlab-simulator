@@ -112,6 +112,9 @@ for alg_index = 4
         settings_mont.tb = max( stoch.expThrust(i,stoch.expThrust(i,:)<=settings.tb) );     % initialize the burning time of the current simulation (parfor purposes)
         settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
         settings_mont.mass_offset = stoch.mass_offset(i);
+        settings_mont.OMEGA = stoch.OMEGA_rail(i);
+        settings_mont.PHI = stoch.PHI_rail(i);
+        
         
         real_tb = (settings_mont.mass_offset +  settings.motor.mOx)/ mass_flow_rate;
         if real_tb < settings_mont.tb

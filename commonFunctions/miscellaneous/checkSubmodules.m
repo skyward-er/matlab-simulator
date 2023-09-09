@@ -1,7 +1,8 @@
+system('git fetch')
+system('git pull')
+
 msaToolkitURL = 'https://git.skywarder.eu/afd/msa/msa-toolkit';
 localRepoPath_msaToolkit = '../data/msa-toolkit';
-% status = checkLastCommit(msaToolkitURL, localRepoPath, pwd);
-% submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
 if ~exist('../data/msa-toolkit/data',"dir")
     answer = input('WARNING! You don''have the msa toolkit installed. Do you want to install it? (mandatory) (y/n)','s');
     if answer == "y" || answer == "yes"

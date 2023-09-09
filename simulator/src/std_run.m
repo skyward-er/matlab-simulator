@@ -60,6 +60,8 @@ if nargin > 2
    
     settings.State.xcgTime = settings_mont.State.xcgTime;
     settings.mass_offset = settings_mont.mass_offset;
+    settings.OMEGA = settings_mont.OMEGA;
+    settings.PHI = settings_mont.PHI;
 end
 
 if settings.electronics % global variables slow down a bit the comunication over thread, we don't need these for montecarlo analysis
@@ -494,7 +496,7 @@ if settings.scenario == "descent" || settings.scenario == "full flight"
     struct_out.PRF.deploy_velocity = Yf(lastDrogueIndex+1,4:6); 
 else
     
-    struct_out.PRF.deltaAcmd = NaN;
+    struct_out.PRF.cmddeltaA = NaN;
     struct_out.PRF.cmdTime = NaN;
     struct_out.events.drogueIndex = NaN;
     struct_out.events.mainChuteIndex = NaN;
@@ -543,9 +545,10 @@ struct_out.ARB.cmdTime = t_vec;
 struct_out.ARB = rmfield(struct_out.ARB, 'allowanceIdx');
 
 % parafoil (PRF)
+if ~isnan(struct_out.PRF.cmddeltaA)
 struct_out.PRF.deltaAcmd = interp1(struct_out.PRF.cmdTime,struct_out.PRF.cmddeltaA,t_vec);
 struct_out.PRF.cmdTime = t_vec;
-
+end
 % recall
 struct_out.recall.true_mass = interp1(struct_out.t,struct_out.recall.true_mass,t_vec); 
 
