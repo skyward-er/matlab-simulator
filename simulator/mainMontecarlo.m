@@ -117,7 +117,7 @@ for alg_index = 4
         settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
         settings_mont.mass_offset = stoch.mass_offset(i);
         
-        real_tb = (settings_mont.mass_offset +  settings.motor.mOx)/ mass_flow_rate
+        real_tb = (settings_mont.mass_offset +  settings.motor.mOx)/ mass_flow_rate;
         if real_tb < settings_mont.tb
             settings_mont.tb = real_tb;
         end

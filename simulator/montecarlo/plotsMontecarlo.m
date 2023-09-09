@@ -361,7 +361,7 @@ sgtitle('Estimated final mass')
 
 %% parafoil
 %%%%%%%%%%%%%%%% landing position w.r.t. target
-save_landing_ellipses = figure;
+montFigures.landing_ellipses = figure;
 scatter3(landing.position(:,1),landing.position(:,2),zeros(size(landing.position(:,3))),'k.','DisplayName','Landings')
 hold on;
 plot3(settings.payload.target(1),settings.payload.target(2),settings.payload.target(3),'go','DisplayName','Target')

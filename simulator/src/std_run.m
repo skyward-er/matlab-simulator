@@ -533,8 +533,10 @@ struct_out.sensors.sfd = rmfield(struct_out.sensors.sfd,'faults');
 struct_out.sensors.sfd.time = t_vec;
 
 % sensors - remove unwanted fields
-struct_out.sensors = rmfield(struct_out.sensors,{'barometer_sens','barometer','comb_chamber','imu','gps','pitot','wes'});
-
+struct_out.sensors = rmfield(struct_out.sensors,{'barometer_sens','barometer','comb_chamber','imu','gps','pitot'});
+if isfield(struct_out.sensors,'wes')
+    struct_out.sensors = rmfield(struct_out.sensors,'wes');
+end
 % air brakes (ARB)
 struct_out.ARB.cmdPosition = interp1(struct_out.ARB.cmdTime,struct_out.ARB.cmdPosition,t_vec);
 struct_out.ARB.cmdTime = t_vec;

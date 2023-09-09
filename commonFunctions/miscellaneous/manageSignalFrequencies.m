@@ -251,7 +251,8 @@ else
     end
 end
 % remove fields so that don't overwrite in the next sensors
-clearvars z Q
+z = [];
+Q = [];
 %% gps
 if freq.gpsFrequency > freq.controlFrequency
     dt = 1/freq.gpsFrequency;
@@ -379,7 +380,8 @@ else
     end
 end
 % remove fields so that don't overwrite in the next sensors
-clearvars Q V
+Q = [];
+V = [];
 
 %% barometer
 for i_baro = 1:length(sensorData.barometer_sens)
