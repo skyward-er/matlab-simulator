@@ -60,6 +60,8 @@ if nargin > 2
    
     settings.State.xcgTime = settings_mont.State.xcgTime;
     settings.mass_offset = settings_mont.mass_offset;
+    settings.OMEGA = settings_mont.OMEGA;
+    settings.PHI = settings_mont.PHI;
 end
 
 if settings.electronics % global variables slow down a bit the comunication over thread, we don't need these for montecarlo analysis
@@ -494,7 +496,7 @@ if settings.scenario == "descent" || settings.scenario == "full flight"
     struct_out.PRF.deploy_velocity = Yf(lastDrogueIndex+1,4:6); 
 else
     
-    struct_out.PRF.deltaAcmd = NaN;
+    struct_out.PRF.cmddeltaA = NaN;
     struct_out.PRF.cmdTime = NaN;
     struct_out.events.drogueIndex = NaN;
     struct_out.events.mainChuteIndex = NaN;
@@ -533,17 +535,20 @@ struct_out.sensors.sfd = rmfield(struct_out.sensors.sfd,'faults');
 struct_out.sensors.sfd.time = t_vec;
 
 % sensors - remove unwanted fields
-struct_out.sensors = rmfield(struct_out.sensors,{'barometer_sens','barometer','comb_chamber','imu','gps','pitot','wes'});
-
+struct_out.sensors = rmfield(struct_out.sensors,{'barometer_sens','barometer','comb_chamber','imu','gps','pitot'});
+if isfield(struct_out.sensors,'wes')
+    struct_out.sensors = rmfield(struct_out.sensors,'wes');
+end
 % air brakes (ARB)
 struct_out.ARB.cmdPosition = interp1(struct_out.ARB.cmdTime,struct_out.ARB.cmdPosition,t_vec);
 struct_out.ARB.cmdTime = t_vec;
 struct_out.ARB = rmfield(struct_out.ARB, 'allowanceIdx');
 
 % parafoil (PRF)
+if ~isnan(struct_out.PRF.cmddeltaA)
 struct_out.PRF.deltaAcmd = interp1(struct_out.PRF.cmdTime,struct_out.PRF.cmddeltaA,t_vec);
 struct_out.PRF.cmdTime = t_vec;
-
+end
 % recall
 struct_out.recall.true_mass = interp1(struct_out.t,struct_out.recall.true_mass,t_vec); 
 
