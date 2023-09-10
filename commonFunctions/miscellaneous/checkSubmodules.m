@@ -3,16 +3,19 @@ localRepoPath_msaToolkit = '../data/msa-toolkit';
 % status = checkLastCommit(msaToolkitURL, localRepoPath, pwd);
 % submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
 if ~exist('../data/msa-toolkit/data',"dir")
-    answer = input('WARNING! You don''have the msa toolkit installed. Do you want to install it? (mandatory) (y/n)','s');
+    answer = input(['WARNING! You don''have the msa toolkit installed.\n' ...
+        'Do you want to install it now? ~2Gb of data. (y/n)\n' ...
+        'Keep in mind that it is necessary to run the simulator\n' ...
+        'BUT a good internet connection is strongly recommended\n'],'s');
     if answer == "y" || answer == "yes"
-        cloneType = input('Which type of clone do you want to use? (SSH/HTTP) ','s');
-        branchName = input('Which branch do you want to checkout? ','s');
+        cloneType = input('Which type of clone do you want to use? (SSH/HTTP)\n','s');
+        branchName = input('Which branch do you want to checkout?\n','s');
         if cloneType =="SSH" || cloneType == "ssh"
             system(['git clone "git@git.skywarder.eu:afd/msa/msa-toolkit.git" ',localRepoPath_msaToolkit])
         elseif cloneType == "HTTP" || cloneType == "http"
             system(['git clone "https://git.skywarder.eu/afd/msa/msa-toolkit.git" ',localRepoPath_msaToolkit])
         else
-            fprintf('\n WARNING! Input not valid: aborting')
+            fprintf('\n WARNING! Input not valid: aborting\n')
         return
         end
         cd(localRepoPath_msaToolkit)

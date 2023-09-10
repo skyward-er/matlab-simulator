@@ -22,7 +22,6 @@ settings.HREmot = true;
 %% TRAJECTORY GENERATION PARAMETERS
 settings.Vz_final = 0;
 settings.z_final  = 3000;
-settings.z_final_MTR  = 3100;
 settings.Vx_final = 0;
 settings.x_final  = 600;
 settings.Vy_final = 0;
@@ -142,7 +141,7 @@ settings.ada.t_ada       =   -1;                                           % Apo
 settings.ada.flag_apo    =   false;                                        % True when the apogee is detected
 
 
-%% MEA TUNING PARAMETERS
-
+%% MEA TUNING PARAMETERS / MOTOR SHUT DOWN TUNING PARAMETERS
+settings.z_final_MTR  = 3100;
 
 

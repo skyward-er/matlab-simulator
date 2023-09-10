@@ -21,20 +21,26 @@ settings.HREmot = true;
 
 %% TRAJECTORY GENERATION PARAMETERS
 settings.Vz_final = 0;
-settings.z_final  = 800;
-settings.Vx_final = 20;
+settings.z_final  = 1000;
+settings.Vx_final = 0;
 settings.x_final  = 500;
 settings.Vy_final = 0;
 settings.y_final  = 0;
 
 %% CONTROL AND SENSOR FREQUENCIES
-settings.frequencies.controlFrequency           =   10;                    % [hz] control action frequency 
+settings.frequencies.controlFrequency           =   50;                    % [hz] control action frequency
 settings.frequencies.arbFrequency               =   10;                    % [hz] air brakes control frequency
-settings.frequencies.accelerometerFrequency     =   100;                   % [hz] control action frequency 
-settings.frequencies.gyroFrequency              =   100;                   % [hz] control action frequency 
-settings.frequencies.magnetometerFrequency      =   100;                   % [hz] control action frequency 
-settings.frequencies.gpsFrequency               =   10;                    % [hz] control action frequency 
-settings.frequencies.barometerFrequency         =   20;                    % [hz] control action frequency 
+settings.frequencies.prfFrequency               =   1;                    % [hz] parafoil control frequency
+settings.frequencies.accelerometerFrequency     =   100;                   % [hz] sensor frequency
+settings.frequencies.gyroFrequency              =   100;                   % [hz] sensor frequency
+settings.frequencies.magnetometerFrequency      =   100;                   % [hz] sensor frequency
+settings.frequencies.gpsFrequency               =   10;                    % [hz] sensor frequency
+settings.frequencies.barometerFrequency         =   20;                    % [hz] sensor frequency
+settings.frequencies.chamberPressureFrequency   =   50;                    % [hz] sensor frequency
+settings.frequencies.pitotFrequency             =   20;                    % [hz] sensor frequency
+settings.frequencies.NASFrequency               =   50;                    % [hz] sensor frequency
+settings.frequencies.ADAFrequency               =   20;                    % [hz] sensor frequency
+settings.frequencies.MEAFrequency               =   50;                    % [hz] sensor frequency
 
 % Servo (MARK STAR - HBL 3850)
 settings.servo.tau = 0.0461;                                                % Servo motor time constant 
@@ -44,15 +50,15 @@ settings.servo.maxSpeed = deg2rad(300);                     %[rad/s]        % ma
 settings.servo.minAngle = 0;                                                % min servo angle
 settings.servo.maxTorque = 51*9.81/100;                                     % max torque guaranteed (given as 51 kg-cm)
 
-% Servo angle to extension of the air brakes (PYXIS)
-settings.arb.extPol(1) = -0.009216;
-settings.arb.extPol(2) = 0.02492;
-settings.arb.extPol(3) = -0.01627;
-settings.arb.extPol(4) = 0.03191;
+% Servo angle to extension of the air brakes (GEMINI)
+settings.arb.extPol(1) = -0.009083;                                         % coefficient for extension - alpha^4
+settings.arb.extPol(2) = 0.02473;                                           % coefficient for extension - alpha^3
+settings.arb.extPol(3) = -0.01677;                                          % coefficient for extension - alpha^2
+settings.arb.extPol(4) = 0.03129;                                           % coefficient for extension - alpha
 settings.arb.maxExt = settings.hprot(end);
 
-% servo angle to exposed surface of the airbrakes (PYXIS)
-settings.arb.surfPol = 0.009564;                                            % coefficient for surface - alpha
+% servo angle to exposed surface of the airbrakes (GEMINI)
+settings.arb.surfPol = 0.00932857142857;                                    % coefficient for surface - alpha
 
 % servo angle to guide angle (PYXIS)
 settings.arb.guidePol(1) = -9.4265;                                         % coefficient for guide - sin(alpha...)
@@ -127,3 +133,7 @@ settings.ada.counter     =   0;
 
 settings.ada.t_ada       =   -1;                                           % Apogee detection timestamp
 settings.ada.flag_apo    =   false;                                        % True when the apogee is detected
+
+
+%% MEA TUNING PARAMETERS / MOTOR SHUT DOWN TUNING PARAMETERS
+settings.z_final_MTR  = 1000;

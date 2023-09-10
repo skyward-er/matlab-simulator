@@ -20,7 +20,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
 %}
 
 
-clearvars; close all; clc;
+if ~exist('flagSubmodulesUpdated','var') % every first time you use the simulator checks for updates, then stops doing it (note: if you clear all vars it starts doing it)
+    close all; clear; clc;
+else
+    close all; clc;
+    clearvars -except flagSubmodulesUpdated
+end
 
 filePath = fileparts(mfilename('fullpath'));
 currentPath = pwd;
@@ -45,6 +50,7 @@ localRepoPath = '../data/msa-toolkit';
 
 % %% LOAD DATA
 conf.script = "trajectory generation"; % this defines which configuration script to run
+settings.montecarlo = false;
 config;
 
 %% AIRBRAKES RADIAL EXTENSION
@@ -59,19 +65,15 @@ delta_alpha_values  = linspace(settings.servo.minAngle,settings.servo.maxAngle,2
 
 Vz_final =  settings.Vz_final;
 z_final  =  settings.z_final;
-z_final_MTR  =  settings.z_final_MTR;
-Vx_final = 0;% settings.Vx_final;   
-x_final  =  settings.x_final;  
-Vy_final = 0; %  settings.Vy_final;  
-y_final  =  settings.y_final;  
+Vx_final = 0;% settings.Vx_final;
+x_final  =  settings.x_final;
+Vy_final = 0; %  settings.Vy_final;
+y_final  =  settings.y_final;
 
 %% INITIAL VELOCITY
-% Calculate vertical velocity at which the back propagation must end
-settings.OMEGA = settings.OMEGA;
-settings.PHI = settings.PHI;
 
 %%% Attitude
-Q0 = angleToQuat(settings.PHI, settings.OMEGA, 0*pi/180)';
+Q0 = angleToQuat(settings.PHI, settings.OMEGA, 0*pi/180)'; % set initial quaternion to ramp angles
 
 %%% State
 X0 = [0 0 0]';
@@ -99,7 +101,7 @@ Ntraj_ARB = length(deltaX_values);
 mass = contSettings.masses_vec;                     % set in config control params
 N_mass = length(mass);                              % number of different Mass values
 
-
+% initialise air brakes extension
 deltaX = 0;
 
 
@@ -110,51 +112,32 @@ trajectories_MTR = cell(N_mass,1);
 trajectories_saving_MTR = cell(N_mass,1);
 
 for j = 1:N_mass
-  m = mass(j);
-for index = 1:Ntraj_ARB
-%%% composing initial conditions for ode
-I_index = 1+floor(length(settings.Ixx)/(N_mass-1))*(j-1)
-Y0 = [X0; V0; W0; Q0; settings.Ixx(I_index); settings.Iyy(I_index); settings.Izz(I_index)];
-deltaX = deltaX_values(index);
+    m = mass(j);
+    for index = 1:Ntraj_ARB
+        %%% composing initial conditions for ode
+        I_index = 1+floor(length(settings.Ixx)/(N_mass-1))*(j-1)
+        Y0 = [X0; V0; W0; Q0; settings.Ixx(I_index); settings.Iyy(I_index); settings.Izz(I_index)];
+        deltaX = deltaX_values(index);
 
-% Start simulink simulation
-z_final = settings.z_final;
-generation = sim('Trajectory_generation');
+        % Start simulink simulation
+        z_final = settings.z_final;
+        generation = sim('Trajectory_generation');
 
-% Get the output of the simulation
-t_ref   = flip(30 - generation.tout); % (30seconds - time) In this way a plot the trajectories in a clearer way
-Z_ref   = flip(generation.z_simul); 
-VZ_ref  = flip(generation.Vz_simul);
-X_ref   = flip(generation.x_simul); 
-VX_ref  = flip(generation.Vx_simul);
-Y_ref   = flip(generation.y_simul); 
-VY_ref  = flip(generation.Vy_simul);
-cd      = flip(generation.cd);
+        % Get the output of the simulation
+        t_ref   = flip(30 - generation.tout); % (30seconds - time) In this way a plot the trajectories in a clearer way
+        Z_ref   = flip(generation.z_simul);
+        VZ_ref  = flip(generation.Vz_simul);
+        X_ref   = flip(generation.x_simul);
+        VX_ref  = flip(generation.Vx_simul);
+        Y_ref   = flip(generation.y_simul);
+        VY_ref  = flip(generation.Vy_simul);
+        cd      = flip(generation.cd);
 
-% Save the trajectories in a struct. Easier to plot
-trajectories{index,j}        = struct('t_ref', t_ref,  'Z_ref',  Z_ref, 'VZ_ref', VZ_ref,  'X_ref',  X_ref, 'VX_ref', VX_ref,  'Y_ref',  Y_ref, 'VY_ref', VY_ref);
-trajectories_saving{index,j} = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref',  X_ref, 'VX_ref', VX_ref,  'Y_ref',  Y_ref, 'VY_ref', VY_ref);
+        % Save the trajectories in a struct. Easier to plot
+        trajectories{index,j}        = struct('t_ref', t_ref,  'Z_ref',  Z_ref, 'VZ_ref', VZ_ref,  'X_ref',  X_ref, 'VX_ref', VX_ref,  'Y_ref',  Y_ref, 'VY_ref', VY_ref);
+        trajectories_saving{index,j} = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref',  X_ref, 'VX_ref', VX_ref,  'Y_ref',  Y_ref, 'VY_ref', VY_ref);
 
-end
-
-deltaX = 0;
-z_final = z_final_MTR;
-generation = sim('Trajectory_generation');
-
-% Get the output of the simulation
-t_ref   = flip(30 - generation.tout); % (30seconds - time) In this way a plot the trajectories in a clearer way
-Z_ref   = flip(generation.z_simul); 
-VZ_ref  = flip(generation.Vz_simul);
-X_ref   = flip(generation.x_simul); 
-VX_ref  = flip(generation.Vx_simul);
-Y_ref   = flip(generation.y_simul); 
-VY_ref  = flip(generation.Vy_simul);
-cd      = flip(generation.cd);
-
-% Save the trajectories in a struct. Easier to plot
-trajectories_MTR{j}        = struct('t_ref', t_ref,  'Z_ref',  Z_ref, 'VZ_ref', VZ_ref,  'X_ref',  X_ref, 'VX_ref', VX_ref,  'Y_ref',  Y_ref, 'VY_ref', VY_ref);
-trajectories_saving_MTR{j} = struct('Z_ref', Z_ref, 'VZ_ref', VZ_ref,  'X_ref',  X_ref, 'VX_ref', VX_ref,  'Y_ref',  Y_ref, 'VY_ref', VY_ref);
-
+    end
 
 end
 %% SAVING
@@ -197,7 +180,7 @@ elseif settings.CD_correction_ref == 0.75
     datcom_25_open = trajectories_saving{2,end};
     save plot25 datcom_25_closed datcom_25_open
 end
-%% 
+%%
 clearvars; close all; clc;
 
 load plot0

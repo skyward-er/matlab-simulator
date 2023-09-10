@@ -74,12 +74,3 @@ plot(trajectories{i,j}.Z_ref, trajectories{i,j}.VZ_ref);
 end
 end
 xlabel('Altitude [m]'); ylabel('V_{z} [m/s]'); title('Vertical velocity vs Altitude for ARB')
-
-% Vz(z)_MTR
-figure('Name','Vertical velocity vs Altitude','NumberTitle','off');
-for j = 1:N_mass
-plot(trajectories_MTR{j}.Z_ref, trajectories_MTR{j}.VZ_ref);
-    grid on; hold on;
-end
-
-xlabel('Altitude [m]'); ylabel('$V_{z}$ [m/s]'); title('Vertical velocity vs Altitude for MTR')
