@@ -194,14 +194,9 @@ if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'co
     xlabel('Time t [s]');
     ylabel('Altitude AGL [m]');
     title('Predicted vs Real apogee');
-    
-
-    
-
     if settings.flagExportPLOTS == true
         exportStandardizedFigure(figures.MEA,'predicted_apogee.pdf',0.9)
     end
-
 end
 
 %% reference

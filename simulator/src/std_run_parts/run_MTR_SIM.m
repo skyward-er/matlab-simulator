@@ -3,7 +3,6 @@ function [t_shutdown,settings,contSettings,sensorData] = run_MTR_SIM (contSettin
 
 
 % mass estimation
-freq_ratio = settings.frequencies.MEAFrequency/settings.frequencies.controlFrequency;
 A = contSettings.Engine_model_A1;
 B = contSettings.Engine_model_B1;
 C = contSettings.Engine_model_C1;
@@ -15,12 +14,12 @@ if Tf(end) >= settings.timeEngineCut
 else
     u = 1;
 end
-for i = 1:1/freq_ratio
-    sensorData.mea.x = A*sensorData.mea.x + B*u;
-    sensorData.mea.P = A*sensorData.mea.P*A' + contSettings.R;
-end
+
+sensorData.mea.x = A*sensorData.mea.x + B*u;
+sensorData.mea.P = A*sensorData.mea.P*A' + contSettings.mea.R;
+
 % correction
-S = C*sensorData.mea.P*C' + contSettings.Q;
+S = C*sensorData.mea.P*C' + contSettings.mea.Q;
 if ~det(S)<1e-3
     K = sensorData.mea.P*C'*inv(S);
     sensorData.mea.P = (eye(3)-K*C)*sensorData.mea.P;
@@ -42,32 +41,26 @@ predicted_apogee = -sensorData.kalman.z-settings.z0 + 1/(2*( 0.5*rho * CD * sett
 t_shutdown = Inf;
 if predicted_apogee >= settings.z_final_MTR
     if ~settings.shutdown
-        settings.expShutdown = 1;
-        settings.shutdown = true;
-        if contSettings.MTR_fault 
-            if contSettings.valve_pos
-                settings.shutdown = 0;
-                settings.expTimeEngineCut = Tf(end);
-            end
-        else 
+        if ~settings.expShutdown
+            settings.expShutdown = true;
             t_shutdown = Tf(end);
             settings.timeEngineCut = t_shutdown + 0.3;
             settings.expTimeEngineCut = t_shutdown;
-            settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, Tf(end));
-            m_true_in_3_dseconds = settings.parout.m(end)+mean(diff(settings.parout.m))/mean(diff(Tf))*0.3; % mass that we will have in 0.3 seconds from the shutdown time (circa)
-            settings.expMengineCut = m_true_in_3_dseconds - settings.ms;
-            if Tf(end) > settings.timeEngineCut
-                settings.shutdown = 1;
-                settings = settingsEngineCut(settings);
-                settings.quatCut = [sensorTot.nas.x(end, 10) sensorTot.nas.x(end, 7:9)];
-                [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
-            end
+        end
+        settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, Tf(end));
+        settings.expMengineCut = settings.parout.m(end) - settings.ms;
+        if Tf(end) > settings.timeEngineCut
+            settings.shutdown = true;
+            settings = settingsEngineCut(settings);
+            settings.quatCut = [sensorTot.nas.states(end, 10) sensorTot.nas.states(end, 7:9)];
+            [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
         end
         contSettings.valve_pos = 0;
     else
-        t_shutdown = inf;
+        t_shutdown = nan;
     end
 end
+
 sensorData.mea.predicted_apogee = predicted_apogee(end);
 sensorData.mea.estimated_mass = estimated_mass(end);
 sensorData.mea.estimated_pressure = estimated_pressure(end);

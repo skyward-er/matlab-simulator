@@ -552,6 +552,7 @@ if isfield(freq, 'pitotFrequency')
                 m = (Y1 - Y0)./(T1 - T0);
                 Q = m * (iTimePitot-T0)+Y0;
                 sensorData.pitot.t0 = iTimePitot;
+                
                 [Temp, a, P, ~] = atmosisa(z_pit + settings.z0);
                 wind_ned = [uw, vw, ww];
                 wind_body = quatrotate(Q,wind_ned);
@@ -559,11 +560,11 @@ if isfield(freq, 'pitotFrequency')
                 sensorData.pitot.temperature = Temp;
                 sensorData.pitot.pTotMeasures = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
                 sensorData.pitot.pStatmeasures = P;
+                sensorData.pitot.time = iTimePitot;
             elseif  T(i) - sensorData.pitot.t0 == 1/freq.pitotFrequency
                 iTimePitot = sensorData.pitot.t0 + 1/freq.pitotFrequency;
                 z_pit = -Y(i, 3);
                 sensorData.pitot.t0 = iTimePitot;
-                sensorData.pitot.time = iTimePitot;
                 vx = Y(end, 4);
                 Q = Y(end,10:13);
                 [Temp, a, P, ~] = atmosisa(z_pit + settings.z0);
@@ -573,6 +574,7 @@ if isfield(freq, 'pitotFrequency')
                 sensorData.pitot.temperature = Temp;
                 sensorData.pitot.pTotMeasures = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
                 sensorData.pitot.pStatMeasures = P;
+                sensorData.pitot.time = iTimePitot;
             end
 
         end

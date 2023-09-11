@@ -1,5 +1,7 @@
+cd('../')
 system('git fetch')
 system('git pull')
+cd(currentPath)
 
 msaToolkitURL = 'https://git.skywarder.eu/afd/msa/msa-toolkit';
 localRepoPath_msaToolkit = '../data/msa-toolkit';

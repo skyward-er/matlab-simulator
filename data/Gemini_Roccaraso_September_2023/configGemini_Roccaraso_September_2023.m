@@ -136,4 +136,4 @@ settings.ada.flag_apo    =   false;                                        % Tru
 
 
 %% MEA TUNING PARAMETERS / MOTOR SHUT DOWN TUNING PARAMETERS
-settings.z_final_MTR  = 1000;
+settings.z_final_MTR  = 1100;
