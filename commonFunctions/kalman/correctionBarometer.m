@@ -59,7 +59,12 @@ S              =   H*P_pred*H'+R;                %Matrix necessary for the corre
        x       =   x_pred;
        P       =   P_pred;
    end
-   
+    
+   % check we are above ground
+   if -x(3) < 0
+       x(3) = 0;
+       warning('Altitude below zero')
+   end
    
 z_corr         =   x(3);                          %Corrected output expectation
 

@@ -160,3 +160,4 @@ para = 1;
 %% MEA PARAMETERS (mass estimation algorithm) 
 sensorData.mea.x = [0,0,settings.m0]';     % initial state estimate
 sensorData.mea.P = zeros(3);          % initial value for P
+settings.t_shutdown = Inf;

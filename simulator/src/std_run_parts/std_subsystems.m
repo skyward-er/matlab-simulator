@@ -82,33 +82,31 @@ end
 
 %% Engine Control algorithm
 if contains(settings.mission,'_2023')
-    if Tf(end) <= settings.tb+0.5 &&...
-            (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
+    if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
 
         if isnan(sensorTot.comb_chamber.measures(end))
             sensorTot.comb_chamber.measures(end) = 0;
         end
         if ~settings.shutdown
-            [t_shutdown,settings,contSettings,sensorData] =run_MTR_SIM (contSettings,sensorData,settings,sensorTot,Tf);
-            % m = sensorData.mea.estimated_mass(end);
+            [settings,contSettings,sensorData] =run_MTR_SIM (contSettings,sensorData,settings,sensorTot,Tf);
             sensorTot.mea.pressure(iTimes) = sensorData.mea.estimated_pressure;
             sensorTot.mea.mass(iTimes) = sensorData.mea.estimated_mass;
             sensorTot.mea.prediction(iTimes) = sensorData.mea.predicted_apogee;
-            sensorTot.mea.t_shutdown = t_shutdown;
+            sensorTot.mea.t_shutdown = settings.t_shutdown;
             sensorTot.mea.time(iTimes) = t1;
         end
 
         if ~settings.shutdown && Tf(end) >= settings.tb
             settings.expShutdown = true;
             settings.shutdown = true; 
-            t_shutdown = settings.tb;
-            settings.timeEngineCut = t_shutdown;
-            settings.expTimeEngineCut = t_shutdown;
+            settings.t_shutdown = settings.tb;
+            settings.timeEngineCut = settings.t_shutdown;
+            settings.expTimeEngineCut = settings.t_shutdown;
             % settings.expMengineCut = settings.parout.m(end) - settings.ms;
             % settings = settingsEngineCut(settings);
             settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
             [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
-            sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
+            sensorTot.mea.t_shutdown = settings.t_shutdown; % to pass the value out of the std_run to the structOut
         end
     elseif ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')) && Tf(end) > settings.tb
         settings.shutdown = 1;

@@ -166,10 +166,10 @@ for i=2:length(tv)
 
     % reintroduce pitot
     % pitot    
-    % if settings.flagAscent && ~settings.flagStopPitotCorrection
-    %     index_pit   =  find(tv(i) >= t_pittemp,1,"last");
-    %     [x_lin(i,:),P_lin(4:6,4:6,i),~] = correctionPitot(x_lin(i,:),P_lin(4:6,4:6,i),sensorTot.pitot.total_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot,xq(i,1:4),nas.Mach_max);
-    % end 
+    if settings.flagAscent && ~settings.flagStopPitotCorrection
+        index_pit   =  find(tv(i) >= t_pittemp,1,"last");
+        [x_lin(i,:),P_lin(4:6,4:6,i),~] = correctionPitot(x_lin(i,:),P_lin(4:6,4:6,i),sensorTot.pitot.total_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot,xq(i,1:4),nas.Mach_max);
+    end 
 
     x(i,:) = [x_lin(i,:),xq(i,:)];
     P_c(1:6,1:6,i)   = P_lin(:,:,i);

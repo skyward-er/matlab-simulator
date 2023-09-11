@@ -44,9 +44,11 @@ gamma = 1.4;
 
 % compute mach number squared and 
 M2 = 2/(gamma-1) * ( (p0/p)^(( gamma-1 )/gamma) -1 );
-
+if M2 < 0 
+    M2 = 0;
+end
 % compute covariance
-R              =   sqrt(2*sigma_p/rho);
+R           =   sqrt(2*sigma_p/rho);
 
 v_pitot = sqrt(M2) * a;
 

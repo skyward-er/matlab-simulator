@@ -1,4 +1,4 @@
-function [t_shutdown,settings,contSettings,sensorData] = run_MTR_SIM (contSettings,sensorData,settings,sensorTot,Tf)
+function [settings,contSettings,sensorData] = run_MTR_SIM (contSettings,sensorData,settings,sensorTot,Tf)
 
 
 
@@ -38,14 +38,14 @@ CD = settings.CD_correction_ref*getDrag(norm([sensorData.kalman.vx,sensorData.ka
 
 predicted_apogee = -sensorData.kalman.z-settings.z0 + 1/(2*( 0.5*rho * CD * settings.S / m_est))...
     * log(1 + (sensorData.kalman.vz^2 * (0.5 * rho * CD * settings.S) / m_est) / 9.81 );
-t_shutdown = Inf;
+
 if predicted_apogee >= settings.z_final_MTR
     if ~settings.shutdown
         if ~settings.expShutdown
             settings.expShutdown = true;
-            t_shutdown = Tf(end);
-            settings.timeEngineCut = t_shutdown + 0.3;
-            settings.expTimeEngineCut = t_shutdown;
+            settings.t_shutdown = Tf(end);
+            settings.timeEngineCut =settings. t_shutdown + 0.3;
+            settings.expTimeEngineCut = settings.t_shutdown;
         end
         settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, Tf(end));
         settings.expMengineCut = settings.parout.m(end) - settings.ms;
@@ -57,7 +57,7 @@ if predicted_apogee >= settings.z_final_MTR
         end
         contSettings.valve_pos = 0;
     else
-        t_shutdown = nan;
+        settings.t_shutdown = nan;
     end
 end
 

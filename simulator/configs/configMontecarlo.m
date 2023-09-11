@@ -110,10 +110,10 @@ displayIter = true; % set to false if you don't want to see the iteration number
 else
 
     settings.mass_offset = 0;%2*(-0.5+rand(1)); % initialise to 0 the value of the mass offset, in order to not consider its uncertainty on the nominal simulations
-    mass_flow_rate = 1.006; % [kg/s]
-    real_tb = (settings.mass_offset +  settings.motor.mOx)/ mass_flow_rate;
-    if real_tb < settings.tb
-        settings.tb = real_tb;
-    end
+    % mass_flow_rate = diff(settings.motor.expM([end,1]))/settings.tb; % [kg/s]
+    % real_tb = (settings.mass_offset +  settings.motor.mOx)/ mass_flow_rate;
+    % if real_tb < settings.tb
+    %     settings.tb = real_tb;
+    % end
 
 end

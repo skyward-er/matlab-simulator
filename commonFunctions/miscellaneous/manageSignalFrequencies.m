@@ -491,7 +491,7 @@ if isfield(freq, 'pitotFrequency')
                 m = (Y1 - Y0)./(T1 - T0);
                 z_pit(i) = m * (iTimePitot-T0)+Y0;
                 % quaternions
-                Y1 = Y(index1, 10:13);  % lo vuole scalar last?
+                Y1 = Y(index1, 10:13);  % lo vuole scalar first
                 Y0 = Y(index0, 10:13);
                 m = (Y1 - Y0)./(T1 - T0);
                 Q(i,:) = m * (iTimePitot-T0)+Y0;
@@ -541,8 +541,8 @@ if isfield(freq, 'pitotFrequency')
                 m = (Y1 - Y0)./(T1 - T0);
                 vx = m * (iTimePitot-T0)+Y0;
                 % linear interpolation between altitude
-                Y1 = Y(i, 3);
-                Y0 = Y(i-1, 3);
+                Y1 = -Y(i, 3);
+                Y0 = -Y(i-1, 3);
                 m = (Y1 - Y0)./(T1 - T0);
                 z_pit = m * (iTimePitot-T0)+Y0;
                 % linear interpolation between quaternions (this is very
@@ -551,22 +551,21 @@ if isfield(freq, 'pitotFrequency')
                 Y0 = Y(i-1, 10:13);
                 m = (Y1 - Y0)./(T1 - T0);
                 Q = m * (iTimePitot-T0)+Y0;
-                sensorData.pitot.t0 = iTimePitot;
-                
+                sensorData.pitot.t0 = iTimePitot;                
                 [Temp, a, P, ~] = atmosisa(z_pit + settings.z0);
                 wind_ned = [uw, vw, ww];
                 wind_body = quatrotate(Q,wind_ned);
                 v = (vx + wind_body(1))';
                 sensorData.pitot.temperature = Temp;
                 sensorData.pitot.pTotMeasures = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
-                sensorData.pitot.pStatmeasures = P;
+                sensorData.pitot.pStatMeasures = P;
                 sensorData.pitot.time = iTimePitot;
             elseif  T(i) - sensorData.pitot.t0 == 1/freq.pitotFrequency
                 iTimePitot = sensorData.pitot.t0 + 1/freq.pitotFrequency;
                 z_pit = -Y(i, 3);
                 sensorData.pitot.t0 = iTimePitot;
-                vx = Y(end, 4);
-                Q = Y(end,10:13);
+                vx = Y(i, 4);
+                Q = Y(i,10:13);
                 [Temp, a, P, ~] = atmosisa(z_pit + settings.z0);
                 wind_ned = [uw, vw, ww];
                 wind_body = quatrotate(Q,wind_ned);

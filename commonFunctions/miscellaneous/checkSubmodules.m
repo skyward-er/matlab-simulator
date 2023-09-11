@@ -1,7 +1,10 @@
-cd('../')
-system('git fetch')
-system('git pull')
-cd(currentPath)
+answer_pull = input('Do you want to pull from the repository? (y/n)','s');
+if answer_pull == "yes" || answer_pull == "y"
+    cd('../')
+    system('git fetch')
+    system('git pull')
+    cd(currentPath)
+end
 
 msaToolkitURL = 'https://git.skywarder.eu/afd/msa/msa-toolkit';
 localRepoPath_msaToolkit = '../data/msa-toolkit';

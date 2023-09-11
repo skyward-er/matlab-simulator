@@ -98,7 +98,7 @@ if isfield(sensorData.gps,'time')
             - sensorData.gps.positionMeasures(ii,3),...
             14.8500);
 
-        [sensorData.gps.positionMeasures(ii,1),sensorData.gps.positionMeasures(ii,2),sensorData.gps.positionMeasures(ii,3)]    = ned2geodetic(sensorData.gps.positionMeasures(ii,1),sensorData.gps.positionMeasures(ii,2),sensorData.gps.positionMeasures(ii,3),sensorSettings.lat0, sensorSettings.lon0, sensorSettings.z0,sensorSettings.spheroid ,'degrees');
+        % [sensorData.gps.positionMeasures(ii,1),sensorData.gps.positionMeasures(ii,2),sensorData.gps.positionMeasures(ii,3)]    = ned2geodetic(sensorData.gps.positionMeasures(ii,1),sensorData.gps.positionMeasures(ii,2),sensorData.gps.positionMeasures(ii,3),sensorSettings.lat0, sensorSettings.lon0, sensorSettings.z0,sensorSettings.spheroid ,'degrees');
 
         [sensorData.gps.velocityMeasures(ii,1),sensorData.gps.velocityMeasures(ii,2),sensorData.gps.velocityMeasures(ii,3)] =           ...
             sensorSettings.GPS_NEOM9N.sens( ...
@@ -107,7 +107,7 @@ if isfield(sensorData.gps,'time')
             - sensorData.gps.velocityMeasures(ii,3),...
             14.8500);
 
-        [sensorData.gps.positionMeasures(ii,1),sensorData.gps.positionMeasures(ii,2),sensorData.gps.positionMeasures(ii,3)]  = geodetic2ned(sensorData.gps.positionMeasures(ii,1), sensorData.gps.positionMeasures(ii,2), sensorData.gps.positionMeasures(ii,3), sensorSettings.lat0, sensorSettings.lon0, sensorSettings.z0, sensorSettings.spheroid, 'degrees');
+        % [sensorData.gps.positionMeasures(ii,1),sensorData.gps.positionMeasures(ii,2),sensorData.gps.positionMeasures(ii,3)]  = geodetic2ned(sensorData.gps.positionMeasures(ii,1), sensorData.gps.positionMeasures(ii,2), sensorData.gps.positionMeasures(ii,3), sensorSettings.lat0, sensorSettings.lon0, sensorSettings.z0, sensorSettings.spheroid, 'degrees');
 
     end
     sensorTot.gps.position_measures(sensorTot.gps.n_old:sensorTot.gps.n_old + size(sensorData.gps.positionMeasures,1) - 1,:)   =  sensorData.gps.positionMeasures(1:end,:) ;
@@ -128,7 +128,12 @@ if isfield(sensorData.pitot,'time')
     sensorTot.pitot.total_pressure(sensorTot.pitot.n_old:sensorTot.pitot.n_old + size(sensorData.pitot.pTotMeasures,1) - 1,1)    = sensorData.pitot.pTotMeasures;
     sensorTot.pitot.static_pressure(sensorTot.pitot.n_old:sensorTot.pitot.n_old + size(sensorData.pitot.pStatMeasures,1) - 1,1)    = sensorData.pitot.pStatMeasures;
     sensorTot.pitot.time(sensorTot.pitot.n_old:sensorTot.pitot.n_old + size(sensorData.pitot.pTotMeasures,1) - 1)    =  sensorData.pitot.time';
+    gamma = 1.4;
+    p0pit = sensorData.pitot.pTotMeasures;
+    ppit = sensorData.pitot.pStatMeasures;
+    sensorTot.pitot.Mach(sensorTot.pitot.n_old:sensorTot.pitot.n_old + size(sensorData.pitot.pTotMeasures,1) - 1)  = sqrt(2/(gamma-1) * ( (p0pit./ppit).^(( gamma-1 )/gamma) -1 ));
     sensorTot.pitot.n_old = sensorTot.pitot.n_old + size(sensorData.pitot.pTotMeasures,2);
+    
 end
 
 %% Chamber Pressure acquisition loop

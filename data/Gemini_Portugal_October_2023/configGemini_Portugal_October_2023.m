@@ -86,7 +86,7 @@ settings.nas.sigma_mag     =   10;                                       % [mgau
 settings.nas.sigma_GPS     =   5;                                       % [mg^2]     estimated GPS variance
 settings.nas.sigma_w       =   10;                                       % [rad^2/s^2]   estimated gyroscope variance;
 settings.nas.sigma_beta    =   1e-4;                                    % [rad/s^2]   estimated gyroscope bias variance;
-settings.nas.sigma_pitot   =  10;    %DA CAMBIARE
+settings.nas.sigma_pitot   =  10;%20000^2;    %DA CAMBIARE
 
 settings.nas.Mach_max = 0.9; % max mach number expected for the mission (for nas with pitot update purposes)
 
