@@ -30,7 +30,7 @@ end
 
 %% Prepare data to be sent to and read from obsw
 
-flagsArray = [flagFlight, settings.flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2];
+flagsArray = [isLaunch, settings.flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2];
 
 % Add gravity acceleration only when still on ramp
 if ~flagFlight
@@ -47,7 +47,8 @@ else
     [hilData] = run_PAY_HIL(sensorData, sensorSettings, freq, flagsArray);
 end
 
-flagFlight = hilData.flagsArray(1);
+settings.lastLaunchFlag = launchFlag;
+launchFlag = hilData.flagsArray(1);
 settings.flagAscent = hilData.flagsArray(2);
 flagBurning = hilData.flagsArray(3);
 flagAeroBrakes = hilData.flagsArray(4);
