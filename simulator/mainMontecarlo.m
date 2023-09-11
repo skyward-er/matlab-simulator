@@ -168,8 +168,10 @@ for alg_index = 4
 
         % horizontal speed at apogee
         idx_apo = save_thrust{i}.apogee.idx;
-        apogee.horizontalSpeed(i) = norm(save_thrust{i}.apogee.speed); % this is in body frame, but as the last point is the apogee we should have only  horizontal velocity, so all the components must be taken
-
+        apogee.horizontalSpeed(i) = norm(save_thrust{i}.velocity_ned(1:2)); % this is in body frame, but as the last point is the apogee we should have only  horizontal velocity, so all the components must be taken
+        apogee.horizontalSpeedX(i) = norm(save_thrust{i}.velocity_ned(1));
+        apogee.horizontalSpeedY(i) = norm(save_thrust{i}.velocity_ned(2));
+        
         % time of engine shutdown
         t_shutdown.value(i) = save_thrust{i}.sensors.mea.t_shutdown;
 

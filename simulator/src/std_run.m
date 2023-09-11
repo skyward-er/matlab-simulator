@@ -430,7 +430,7 @@ settings.flagMatr = settings.flagMatr(1:n_old, :);
 % end
 
 %% extract parameters:
-[~, idx_apo] = max(-Yf_tot(:,3));
+[~, idx_apo] = max(-Yf(:,3));
 
 %% output
 % simulation states
@@ -455,9 +455,11 @@ struct_out.apogee.time = Tf(idx_apo);
 struct_out.apogee.time_ada = t_ada;
 struct_out.apogee.time_nas = t_nas;
 struct_out.apogee.idx = idx_apo;
-struct_out.apogee.coordinates = [Yf_tot(idx_apo,1),Yf_tot(idx_apo,2),-Yf_tot(idx_apo,3)];
-struct_out.apogee.speed = [Yf_tot(idx_apo,4),Yf_tot(idx_apo,5),-Yf_tot(idx_apo,6)];
-struct_out.apogee.radius = norm(struct_out.apogee.coordinates(1:2));
+struct_out.apogee.position = Yf(idx_apo,1:3);
+struct_out.apogee.velocity_body = Yf(idx_apo,4:6);
+struct_out.apogee.quaternion = Yf(idx_apo,10:13);
+struct_out.apogee.velocity_ned = quatrotate(quatconj(struct_out.apogee.quaternion),struct_out.apogee.velocity_body);
+struct_out.apogee.radius = norm(struct_out.apogee.position(1:2));
 
 % recall
 struct_out.recall = dataRecall;
