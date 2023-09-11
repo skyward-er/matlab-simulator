@@ -556,7 +556,7 @@ if isfield(freq, 'pitotFrequency')
                 v = (vx + wind_body(1))';
                 sensorData.pitot.temperature = Temp;
                 sensorData.pitot.pTotMeasures = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
-                sensorData.pitot.pStatmeasures = P;
+                sensorData.pitot.pStatMeasures = P;
             elseif  T(i) - sensorData.pitot.t0 == 1/freq.pitotFrequency
                 iTimePitot = sensorData.pitot.t0 + 1/freq.pitotFrequency;
                 z_pit = -Y(i, 3);
