@@ -50,7 +50,12 @@ INPUTS:
         dataToBeSent.barometer_sens(i, :) = sensorData.barometer_sens{i}.measures(1:num_data_baro);
     end
 
-    dataToBeSent.chamberPressure = sensorData.chamberPressure.measures(1:num_data_chPress);
+    % control nan
+    if isnan(sensorData.chamberPressure.measures(end)) || not(flags(1))
+        dataToBeSent.chamberPressure = zeros(1,num_data_chPress);
+    else
+        dataToBeSent.chamberPressure = sensorData.chamberPressure.measures(1:num_data_chPress);
+    end
 
     dataToBeSent.pitot.dp = sensorData.pitot.pTotMeasures(1:num_data_pitot) - sensorData.pitot.pStatMeasures(1:num_data_pitot);
 
