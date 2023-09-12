@@ -65,9 +65,9 @@ delta_alpha_values  = linspace(settings.servo.minAngle,settings.servo.maxAngle,2
 
 Vz_final =  settings.Vz_final;
 z_final  =  settings.z_final;
-Vx_final = 0;% settings.Vx_final;
+Vx_final = 17; % settings.Vx_final; % the value 17 comes from a previous montecarlo simulation
 x_final  =  settings.x_final;
-Vy_final = 0; %  settings.Vy_final;
+Vy_final = 17; %  settings.Vy_final;
 y_final  =  settings.y_final;
 
 %% INITIAL VELOCITY

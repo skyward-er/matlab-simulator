@@ -14,7 +14,7 @@ if settings.montecarlo
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % how many simulations
-N_sim = 1000; % set to at least 500
+N_sim = 100; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
 
@@ -85,8 +85,8 @@ displayIter = true; % set to false if you don't want to see the iteration number
             sigma_phi = 2/3 *pi/180; % 2 [deg]of offset (uncertainty on ramp azimuth angle)
             mu_phi = settings.PHI;
             stoch.PHI_rail = normrnd(mu_phi,sigma_phi,N_sim,1);
-        case "extreme"
 
+        case "extreme"
 
             thrust_percentage = [0.9;1.1]; % this is overwritten in the next step, but it sets the values to retrieve in the parameter generation
 

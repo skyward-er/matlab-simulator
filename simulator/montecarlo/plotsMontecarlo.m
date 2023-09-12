@@ -142,14 +142,25 @@ hold on; grid on;
 scatter(stoch.mass_offset,apogee.altitude,'.')
 yline(settings.z_final-10,'r--')
 yline(settings.z_final+10,'r--')
-title('Apogee w.r.t. thrust')
-xlabel('Thrust percentage w.r.t. nominal (%)')
+title('Apogee w.r.t. mass')
+xlabel('Mass offset [kg]')
 ylabel('Apogee (m)')
 xlim([min(stoch.mass_offset)-0.05 max(stoch.mass_offset)+0.05])
 ylim([min(apogee.altitude)-20 max(apogee.altitude)+20])
 legend(contSettings.algorithm);
 
-
+%% PLOT APOGEE wrt RAIL OMEGA
+montFigures.apogee_wrt_rail_OMEGA= figure;
+hold on; grid on;
+scatter(rad2deg(stoch.OMEGA_rail),apogee.altitude,'.')
+yline(settings.z_final-10,'r--')
+yline(settings.z_final+10,'r--')
+title('Apogee w.r.t. rail elevation')
+xlabel('Rail elevation [deg]')
+ylabel('Apogee [m]')
+xlim([min(rad2deg(stoch.OMEGA_rail))-0.05 max(rad2deg(stoch.OMEGA_rail))+0.05])
+ylim([min(apogee.altitude)-20 max(apogee.altitude)+20])
+legend(contSettings.algorithm);
 
 %% PLOT SHUTDOWN TIME 2D
 %%% t_shutdown histogram
@@ -326,13 +337,13 @@ subplot(2,1,1)
 histogram(qdyn_max,N_histCol)
 title('Max Dynamic Pressure')
 ylabel('Simulations')
-xlabel('Max(q) (Pa)')
+xlabel('Max(q) [Pa]')
 %%%%%%%%%%% max aerodynamic load (kg)
 subplot(2,1,2)
 histogram(max_force_kg,N_histCol)
 title('Aerodynamic Load')
 ylabel('Simulations')
-xlabel('Max Load on ABK (kg)')
+xlabel('Max Load on ABK [kg]')
 
 %% PLOT ESTIMATED FINAL MASS
 est_mass = zeros(size(save_thrust));
@@ -375,7 +386,23 @@ title('Landing positions')
 view([90,-90])
 legend
 
-
+%% apogee velocity
+montFigures.apogee_velocity = figure;
+subplot(3,1,1)
+title('vn')
+plot(apogee.horizontalSpeedX)
+hold on;
+yline(mean(apogee.horizontalSpeedX),'--',['Mean = ',num2str(mean(apogee.horizontalSpeedX))])
+subplot(3,1,2)
+title('ve')
+plot(apogee.horizontalSpeedX)
+hold on;
+yline(mean(apogee.horizontalSpeedX),'--',['Mean = ',num2str(mean(apogee.horizontalSpeedY))])
+subplot(3,1,3)
+title('vnorm')
+plot(apogee.horizontalSpeed)
+hold on;
+yline(mean(apogee.horizontalSpeedX),'--',['Mean = ',num2str(mean(apogee.horizontalSpeed))])
 
 %% functions
 function drawCircle(center,radius,name,varargin)

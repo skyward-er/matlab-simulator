@@ -44,7 +44,7 @@ plot3(structIn.sensors.nas.states(1:end-10, 2), structIn.sensors.nas.states(1:en
 if not(settings.scenario == "descent")
     plot3(structIn.ARB.openingPosition(2),structIn.ARB.openingPosition(1),structIn.ARB.openingPosition(3),'ko','DisplayName','Airbrake deployment')
 end
-plot3(structIn.apogee.coordinates(2),structIn.apogee.coordinates(1),structIn.apogee.coordinates(3),'ro','DisplayName','Apogee')
+plot3(structIn.apogee.position(2),structIn.apogee.position(1),-structIn.apogee.position(3),'ro','DisplayName','Apogee')
 
 if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
     plot3(structIn.Y(structIn.events.mainChuteIndex, 2), structIn.Y(structIn.events.mainChuteIndex, 1), -structIn.Y(structIn.events.mainChuteIndex, 3),'d','DisplayName','Main chute opening');
