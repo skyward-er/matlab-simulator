@@ -35,20 +35,8 @@ sensorTot.barometer.time(sensorTot.barometer.n_old:sensorTot.barometer.n_old + s
 sensorTot.barometer.n_old = sensorTot.barometer.n_old + size(sensorData.barometer.measures,1);
 
 %% ADA
-if iTimes>3
-    if settings.flagADA
-        ada_prev  =   sensorTot.ada.xp(end,:);
-        Pada_prev =   sensorData.ada.P(:,:,end);
-    end
-
-    if  settings.flagNAS
-        x_prev    =   sensorData.nas.states(end,:);
-        P_prev    =   sensorData.nas.P(:,:,end);
-    end
-end
-
 if settings.flagADA && settings.dataNoise && sensorData.barometer.time(1) >= settings.baro_old
-    [sensorData.ada.xp, sensorData.ada.xv, sensorData.ada.P, settings.ada]   =  run_ADA(ada_prev, Pada_prev, sensorData.barometer.measures, sensorData.barometer.time, settings);
+    [sensorData, settings.ada]   =  run_ADA(sensorData, settings);
 
     sensorTot.ada.xp(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1) -1,:)  = sensorData.ada.xp(1:end,:);
     sensorTot.ada.xv(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xv(:,1),1)-1,:)  = sensorData.ada.xv(1:end,:);
@@ -57,18 +45,15 @@ if settings.flagADA && settings.dataNoise && sensorData.barometer.time(1) >= set
     settings.baro_old = sensorData.barometer.time(end);
 end
 
-%% Navigation system
-
+%% Navigation system (NAS)
 if settings.flagNAS && settings.dataNoise
-    
     [sensorData, settings.nas]   =  run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings);
     if abs(sensorData.nas.states(1,3)) >settings.stopPitotAltitude+ settings.z0
         settings.flagStopPitotCorrection = true;
     end
-    sensorData.nas.time =  sensorData.nas.time(end):1/settings.frequencies.NASFrequency:Tf(end);
     sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2,:)  = sensorData.nas.states(2:end,:); % NAS output
     sensorTot.nas.time(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.time(2:end); % NAS time output
-    sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1) -1;
+    sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1)-1;
 
 
     %%%%%%%%%%%%%%%%%% DA RIVEDERE L'UTILIZZO DI QUESTE VARIABILI ASSOLUTAMENTE %%%%%%%%%%%%%%%%%%%%%%%%
@@ -88,26 +73,29 @@ if contains(settings.mission,'_2023')
             sensorTot.comb_chamber.measures(end) = 0;
         end
         if ~settings.shutdown
-            [settings,contSettings,sensorData] =run_MTR_SIM (contSettings,sensorData,settings,sensorTot,Tf);
-            sensorTot.mea.pressure(iTimes) = sensorData.mea.estimated_pressure;
-            sensorTot.mea.mass(iTimes) = sensorData.mea.estimated_mass;
-            sensorTot.mea.prediction(iTimes) = sensorData.mea.predicted_apogee;
+            [settings,contSettings,sensorData] =run_MTR_SIM (contSettings,sensorData,settings,sensorTot,t1);
+            sensorTot.mea.pressure(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-1) = sensorData.mea.estimated_pressure;
+            sensorTot.mea.mass(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-1) = sensorData.mea.estimated_mass;
+            sensorTot.mea.prediction(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-1) = sensorData.mea.predicted_apogee;
             sensorTot.mea.t_shutdown = settings.t_shutdown;
-            sensorTot.mea.time(iTimes) = t1;
+            sensorTot.mea.time(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-1) = sensorData.mea.time;
+            sensorTot.mea.n_old = sensorTot.mea.n_old + size(sensorData.mea.x,1) -1;
+
+            if  Tf(end) >= settings.tb
+                settings.expShutdown = true;
+                settings.shutdown = true; 
+                settings.t_shutdown = settings.tb;
+                settings.timeEngineCut = settings.t_shutdown;
+                settings.expTimeEngineCut = settings.t_shutdown;
+                % settings.expMengineCut = settings.parout.m(end) - settings.ms;
+                % settings = settingsEngineCut(settings);
+                settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
+                [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
+                sensorTot.mea.t_shutdown = settings.t_shutdown; % to pass the value out of the std_run to the structOut
+            end
         end
 
-        if ~settings.shutdown && Tf(end) >= settings.tb
-            settings.expShutdown = true;
-            settings.shutdown = true; 
-            settings.t_shutdown = settings.tb;
-            settings.timeEngineCut = settings.t_shutdown;
-            settings.expTimeEngineCut = settings.t_shutdown;
-            % settings.expMengineCut = settings.parout.m(end) - settings.ms;
-            % settings = settingsEngineCut(settings);
-            settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
-            [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
-            sensorTot.mea.t_shutdown = settings.t_shutdown; % to pass the value out of the std_run to the structOut
-        end
+
     elseif ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')) && Tf(end) > settings.tb
         settings.shutdown = 1;
         settings.expShutdown = 1;

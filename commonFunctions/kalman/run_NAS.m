@@ -99,18 +99,17 @@ For more information check the navigation system report
 %}
 nas = settings.nas;
 
-% tv          =   sensorData.accelerometer.time(1):1/settings.frequencies.NASFrequency:sensorData.accelerometer.time(end);
-tv          =   sensorTot.nas.time(end):1/settings.frequencies.NASFrequency:Tf;
+t_nas       =   sensorTot.nas.time(end):1/settings.frequencies.NASFrequency:Tf;
 [fix, nsat] =   gpsFix(sensorData.accelerometer.measures);
 
-dt_k        =   tv(2)-tv(1);                 % Time step of the kalman
-x_lin       =   zeros(length(tv),6);         % Pre-allocation of corrected estimation
-xq          =   zeros(length(tv),7);         % Pre-allocation of quaternions and biases
-x           =   zeros(length(tv),13);
+dt_k        =   t_nas(2)-t_nas(1);                 % Time step of the kalman
+x_lin       =   zeros(length(t_nas),6);         % Pre-allocation of corrected estimation
+xq          =   zeros(length(t_nas),7);         % Pre-allocation of quaternions and biases
+x           =   zeros(length(t_nas),13);
 
-P_c         =   zeros(12,12,length(tv));
-P_lin       =   zeros(6,6,length(tv));       % Pre-allocation of the covariance matrix
-P_q         =   zeros(6,6,length(tv));
+P_c         =   zeros(12,12,length(t_nas));
+P_lin       =   zeros(6,6,length(t_nas));       % Pre-allocation of the covariance matrix
+P_q         =   zeros(6,6,length(t_nas));
 
 % x_lin(1,:)  =   x_prev(1:6);                 % Allocation of the initial value
 x_lin(1,:)  =   sensorData.nas.states(end,1:6);                 % Allocation of the initial value
@@ -141,10 +140,10 @@ t_imutemp  = [sensorTot.imu.time];
 t_pittemp  = [sensorTot.pitot.time];
 
 
-for i=2:length(tv)
+for i=2:length(t_nas)
     %% Prediction part
 
-    index_imu   =  find(tv(i) >= t_imutemp,1,"last");
+    index_imu   =  find(t_nas(i) >= t_imutemp,1,"last");
     [x_lin(i,:),~,P_lin(:,:,i)] = predictorLinear2(x_lin(i-1,:),P_lin(:,:,i-1),...
         dt_k,sensorTot.imu.accelerometer_measures(index_imu,:),xq(i-1,1:4),nas.QLinear);
     
@@ -153,12 +152,12 @@ for i=2:length(tv)
 
     %% Corrections
     %gps
-    index_GPS   =  find(tv(i) >= t_gpstemp,1,"last");
+    index_GPS   =  find(t_nas(i) >= t_gpstemp,1,"last");
     [x_lin(i,:),P_lin(:,:,i),~]     = correctionGPS(x_lin(i,:),P_lin(:,:,i),sensorTot.gps.position_measures(index_GPS,1:2),...
                                                     sensorTot.gps.velocity_measures(index_GPS,1:2),nas.sigma_GPS,nsat,fix);
 
     % barometer
-    index_bar   =  find(tv(i) >= t_barotemp,1,"last");
+    index_bar   =  find(t_nas(i) >= t_barotemp,1,"last");
     [x_lin(i,:),P_lin(:,:,i),~]     = correctionBarometer(x_lin(i,:),P_lin(:,:,i),sensorTot.barometer.altitude(index_bar),nas.sigma_baro);
 
     % magnetometer
@@ -167,7 +166,7 @@ for i=2:length(tv)
     % reintroduce pitot
     % pitot    
     if settings.flagAscent && ~settings.flagStopPitotCorrection
-        index_pit   =  find(tv(i) >= t_pittemp,1,"last");
+        index_pit   =  find(t_nas(i) >= t_pittemp,1,"last");
         [x_lin(i,:),P_lin(4:6,4:6,i),~] = correctionPitot(x_lin(i,:),P_lin(4:6,4:6,i),sensorTot.pitot.total_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot,xq(i,1:4),nas.Mach_max);
     end 
 
@@ -182,11 +181,12 @@ for i=2:length(tv)
             nas.counter = 0;
         end
         if nas.counter >= nas.count_thr
-            nas.t_nas = tv(i);
+            nas.t_nas = t_nas(i);
             nas.flag_apo = true;
         end
     end
 end
 sensorData.nas.states= x;
 sensorData.nas.P = P_c;
+sensorData.nas.time = t_nas;
 end

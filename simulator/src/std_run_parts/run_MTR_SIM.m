@@ -1,4 +1,4 @@
-function [settings,contSettings,sensorData] = run_MTR_SIM (contSettings,sensorData,settings,sensorTot,Tf)
+function [settings,contSettings,sensorData] = run_MTR_SIM (contSettings,sensorData,settings,sensorTot,T1)
 
 
 
@@ -9,47 +9,68 @@ C = contSettings.Engine_model_C1;
 
 % prediction
 
-if Tf(end) >= settings.timeEngineCut
-    u = 0;
-else
+if T1 < settings.timeEngineCut
     u = 1;
+else
+    u = 0;
 end
 
-sensorData.mea.x = A*sensorData.mea.x + B*u;
-sensorData.mea.P = A*sensorData.mea.P*A' + contSettings.mea.R;
+% define time array for mea algorithm
+t_mea = sensorTot.mea.time(end):1/settings.frequencies.NASFrequency:T1;
+% define time array for sensors
+t_chambPress = sensorTot.comb_chamber.time;
+t_nas = sensorTot.nas.time; % we need also nas to estimate cd etc
 
-% correction
-S = C*sensorData.mea.P*C' + contSettings.mea.Q;
-if ~det(S)<1e-3
-    K = sensorData.mea.P*C'*inv(S);
-    sensorData.mea.P = (eye(3)-K*C)*sensorData.mea.P;
+% initialise state update
+x(1,:) = sensorData.mea.x(end,:);
+P(:,:,1) = sensorData.mea.P(:,:,end);
+predicted_apogee(1) = sensorData.mea.predicted_apogee(end);
+estimated_mass(1) = sensorData.mea.estimated_mass(end);
+estimated_pressure(1) = sensorData.mea.estimated_pressure(end);
+
+for ii = 2:length(t_mea)
+
+    % prediction
+    x(ii,:) = (A*x(ii-1,:)' + B*u)'; % x is a row but to apply matrix product we need it column, therefore the transpositions
+    P(:,:,ii) = A*P(:,:,ii-1)*A' + contSettings.mea.R;
+
+    % correction
+    index_chambPress = find(t_mea(ii) >= t_chambPress,1,"last");
+    S = C*P(:,:,ii)*C' + contSettings.mea.Q;
+    if ~det(S)<1e-3
+        K = P(:,:,ii)*C'*inv(S);
+        P(:,:,ii) = (eye(3)-K*C)*P(:,:,ii);
+    end
+    estimated_pressure(ii) = C * x(ii,:)';
+    x(ii,:) = x(ii,:)' + K* ((sensorTot.comb_chamber.measures(index_chambPress)-1950)/1000 - estimated_pressure(ii));
+
+    % update mass estimation
+    estimated_mass(ii) = x(ii,3);
+    
+    % retrieve NAS data
+    index_NAS = find(t_mea(ii) >= t_nas,1,"last");
+    z_nas = sensorTot.nas.states(index_NAS,3);
+    vnorm_nas = norm(sensorTot.nas.states(index_NAS,4:6));
+    vz_nas = sensorTot.nas.states(index_NAS,6);
+
+    % compute CD
+    CD = settings.CD_correction_ref*getDrag(vnorm_nas, -z_nas, 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
+    [~,~,~,rho] = atmosisa(-z_nas);
+
+    predicted_apogee(ii) = -z_nas-settings.z0 + 1/(2*( 0.5*rho * CD * settings.S / estimated_mass(ii)))...
+        * log(1 + (vz_nas^2 * (0.5 * rho * CD * settings.S) / estimated_mass(ii)) / 9.81 );
 end
-estimated_pressure = C * sensorData.mea.x;
-sensorData.mea.x = sensorData.mea.x + K* ((sensorTot.comb_chamber.measures(end)-1950)/1000 - estimated_pressure);
-
-estimated_mass = sensorData.mea.x(3);
-m_est = estimated_mass;
-
-% magic formula seguire traiettorie è meglio?
-CD = settings.CD_correction_ref*getDrag(norm([sensorData.kalman.vx,sensorData.kalman.vy,-sensorData.kalman.vz]), -sensorData.kalman.z, 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
-[~,~,~,rho] = atmosisa(-sensorData.kalman.z);
-
-%% TEST WITH MASS ESTIMATION THAT DOESN'T WORK
-
-predicted_apogee = -sensorData.kalman.z-settings.z0 + 1/(2*( 0.5*rho * CD * settings.S / m_est))...
-    * log(1 + (sensorData.kalman.vz^2 * (0.5 * rho * CD * settings.S) / m_est) / 9.81 );
-
-if predicted_apogee >= settings.z_final_MTR
+if predicted_apogee(end) >= settings.z_final_MTR
     if ~settings.shutdown
         if ~settings.expShutdown
             settings.expShutdown = true;
-            settings.t_shutdown = Tf(end);
+            settings.t_shutdown = T1;
             settings.timeEngineCut =settings. t_shutdown + 0.3;
             settings.expTimeEngineCut = settings.t_shutdown;
         end
-        settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, Tf(end));
+        settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, T1);
         settings.expMengineCut = settings.parout.m(end) - settings.ms;
-        if Tf(end) > settings.timeEngineCut
+        if T1 > settings.timeEngineCut
             settings.shutdown = true;
             settings = settingsEngineCut(settings);
             settings.quatCut = [sensorTot.nas.states(end, 10) sensorTot.nas.states(end, 7:9)];
@@ -61,8 +82,11 @@ if predicted_apogee >= settings.z_final_MTR
     end
 end
 
-sensorData.mea.predicted_apogee = predicted_apogee(end);
-sensorData.mea.estimated_mass = estimated_mass(end);
-sensorData.mea.estimated_pressure = estimated_pressure(end);
+sensorData.mea.time = t_mea;
+sensorData.mea.x = x;
+sensorData.mea.P = P;
+sensorData.mea.predicted_apogee = predicted_apogee;
+sensorData.mea.estimated_mass = estimated_mass;
+sensorData.mea.estimated_pressure = estimated_pressure;
 
 

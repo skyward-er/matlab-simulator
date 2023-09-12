@@ -132,10 +132,13 @@ sfd_mean_p = [];
 
 if settings.flagADA
     sensorData.ada.xp = settings.ada.x0;
-    ada_prev  =   settings.ada.x0;
-    Pada_prev =   settings.ada.P0;
-    sensorData.ada.time = 0;
+    sensorData.ada.xv = [0 0];
+    sensorData.ada.P = settings.ada.P0;
+    sensorData.ada.time = 0;   
 end
+% ada_prev  =   settings.ada.x0; % erano dentro all'if, son qui perché
+% vorrei eliminarli concettualmente (oggi: 12/09/23)
+% Pada_prev =   settings.ada.P0;
 
 %% NAS initial conditions (Navigation and Attitude System)
 
@@ -153,11 +156,17 @@ sensorData.nas.time = 0;
 % stop correction with pitot
 settings.flagStopPitotCorrection = false;
 
+%% MEA PARAMETERS (mass estimation algorithm) 
+sensorData.mea.x = [0,0,settings.m0];     % initial state estimate
+sensorData.mea.P = zeros(3);          % initial value for P
+sensorData.mea.time = 0;
+sensorData.mea.estimated_mass = settings.m0;
+sensorData.mea.estimated_pressure = 0;
+sensorData.mea.predicted_apogee = 0;
+sensorData.mea.time = 0;
+settings.t_shutdown = Inf;
+
 %% parafoil
 deltaA = contSettings.payload.deltaA_0;
 para = 1;
 
-%% MEA PARAMETERS (mass estimation algorithm) 
-sensorData.mea.x = [0,0,settings.m0]';     % initial state estimate
-sensorData.mea.P = zeros(3);          % initial value for P
-settings.t_shutdown = Inf;

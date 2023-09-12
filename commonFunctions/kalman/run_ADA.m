@@ -1,11 +1,11 @@
-function [xp, xv, Pout, ada]   =  run_ADA(xin, Pin, p_baro, t_baro, settings)
+function [sensorData, ada]   =  run_ADA(sensorData, settings)
 
 % Author: Alessandro Del Duca
 % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@skywarder.eu
 % email: alessandro.delduca@skywarder.eu
 % Release date: 01/03/2021
 
-%{ 
+%{
 -----------DESCRIPTION OF FUNCTION:------------------
 This function simulate the Apogee Detection Algorithm (ADA), the
 algorithm is a 3rd order linear kalman filter with this states:
@@ -61,54 +61,63 @@ INPUTS:
 
 -----------------------------------------------------------------------
 %}
+x_prec = sensorData.ada.xp(end,:);
+P_prec = sensorData.ada.P(:,:,end);
+p_baro = sensorData.barometer.measures;
+t_baro = sensorData.barometer.time;
+
 ada = settings.ada;
 
-    dt = 1/settings.frequencies.barometerFrequency;
-    
-    x  = xin';
-    
-    At = [ 1       dt    0.5*dt^2;
-           0       1         dt;
-           0       0         1;];
+dt = 1/settings.frequencies.barometerFrequency;
 
-    Ct = [ 1     0     0 ];
-    
-    xp = zeros(length(t_baro),3);
-    xv = zeros(length(t_baro),2);
-    
-    for ii = 1:length(t_baro)
-    
-        % Prediction step:
-        x      =   At * x;
-    
-        % Prediction variance propagation:
-        P      =   ada.Q + At * Pin * At';
-    
-        % Correction step:
-        S      =   Ct * P * Ct' + ada.R;
-        K      =   P * Ct' /S;
-        x      =   x + K*(p_baro(ii) - Ct*x);
-        Pout   =  (eye(3) - K*Ct) * P;
+x  = x_prec';
 
-        xp(ii,:)  =   x';
-        
-        xv(ii,1)  =   getaltitude(xp(ii,1),ada.temp_ref, ada.p_ref);
-        xv(ii,2)  =   getvelocity(xp(ii,1),xp(ii,2),ada.temp_ref, ada.p_ref);
-        
-        if ada.flag_apo  == false
-            if xv(ii,2) < ada.v_thr && xv(ii,1) > 100 + settings.z0
-                ada.counter = ada.counter + 1;
-            else
-                ada.counter = 0;
-            end
-            if ada.counter >= ada.count_thr
-            	ada.t_ada = t_baro(ii);
-                ada.flag_apo = true;
-            end
+At = [ 1       dt    0.5*dt^2;
+    0       1         dt;
+    0       0         1;];
+
+Ct = [ 1     0     0 ];
+
+xp = zeros(length(t_baro),3);
+xv = zeros(length(t_baro),2);
+
+for ii = 1:length(t_baro)
+
+    % Prediction step:
+    x      =   At * x;
+
+    % Prediction variance propagation:
+    P      =   ada.Q + At * P_prec * At';
+
+    % Correction step:
+    S      =   Ct * P * Ct' + ada.R;
+    K      =   P * Ct' /S;
+    x      =   x + K*(p_baro(ii) - Ct*x);
+    Pout   =  (eye(3) - K*Ct) * P;
+
+    xp(ii,:)  =   x';
+
+    xv(ii,1)  =   getaltitude(xp(ii,1),ada.temp_ref, ada.p_ref);
+    xv(ii,2)  =   getvelocity(xp(ii,1),xp(ii,2),ada.temp_ref, ada.p_ref);
+
+    if ada.flag_apo  == false
+        if xv(ii,2) < ada.v_thr && xv(ii,1) > 100 + settings.z0
+            ada.counter = ada.counter + 1;
+        else
+            ada.counter = 0;
+        end
+        if ada.counter >= ada.count_thr
+            ada.t_ada = t_baro(ii);
+            ada.flag_apo = true;
         end
     end
-    
 end
+
+sensorData.ada.xp = xp;
+sensorData.ada.xv = xv;
+sensorData.ada.P = Pout;
+end
+
 
 function h = getaltitude(p, temp_ref, p_ref)
 a  = 0.0065;
@@ -124,4 +133,3 @@ n  = 9.807/(287.05*a);
 v  = -(temp_ref * dpdt * (p / p_ref)^ (1/n)) / (a * n * p);
 end
 
-        
