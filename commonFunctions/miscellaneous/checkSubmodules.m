@@ -1,4 +1,4 @@
-answer_pull = input('Do you want to pull from the repository? (y/n)','s');
+answer_pull = input('Do you want to pull the matlab simulator? (y/n)','s');
 if answer_pull == "yes" || answer_pull == "y"
     cd('../')
     system('git fetch')
@@ -31,10 +31,13 @@ if ~exist('../data/msa-toolkit/data',"dir")
     end
     fprintf('\n msa-toolkit installed.\nCurrent branch: %s',branchName)
 else
-    cd(localRepoPath_msaToolkit)
-    system('git fetch')
-    system('git pull')
-    cd(currentPath)
+    answer_pull = input('Do you want to pull the msa-toolkit? (y/n)','s');
+    if answer_pull == "yes" || answer_pull == "y"
+        cd(localRepoPath_msaToolkit)
+        system('git fetch')
+        system('git pull')
+        cd(currentPath)
+    end
 end
 
 localRepoPath_generalUtilities = '..\commonFunctions\graphics\general-utilities\';
@@ -56,9 +59,11 @@ if ~exist([localRepoPath_generalUtilities,'exportStandardizedFigure'],'file')
         end
     end
 else 
-    % update (pull)
-    cd(localRepoPath_generalUtilities)
-    system('git fetch')
-    system('git pull')
-    cd(currentPath)
+    answer_pull = input('Do you want to pull the graphics? (y/n)','s');
+    if answer_pull == "yes" || answer_pull == "y"
+        cd(localRepoPath_generalUtilities)
+        system('git fetch')
+        system('git pull')
+        cd(currentPath)
+    end
 end
