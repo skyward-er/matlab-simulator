@@ -54,7 +54,7 @@ INPUTS:
     if isnan(sensorData.chamberPressure.measures(end)) || not(flags(1))
         dataToBeSent.chamberPressure = zeros(1,num_data_chPress);
     else
-        dataToBeSent.chamberPressure = sensorData.chamberPressure.measures(1:num_data_chPress);
+        dataToBeSent.chamberPressure = sensorData.chamberPressure.measures(1:num_data_chPress) / 1000; % transforming from mBar to Bar
     end
 
     dataToBeSent.pitot.dp = sensorData.pitot.pTotMeasures(1:num_data_pitot) - sensorData.pitot.pStatMeasures(1:num_data_pitot);
