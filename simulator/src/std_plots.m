@@ -1,18 +1,24 @@
-function std_plots(structIn, settings,contSettings)
+function std_plots(simOutput, settings,contSettings)
 
 if ~exist("report_images\"+settings.mission,"dir")
     mkdir("report_images\"+settings.mission)
 end
 
+%% post process data
+eul = quat2eul(simOutput.Y(:,10:13));
+eul = flip(eul,2);
+eul = unwrap(eul);
+eul = rad2deg(eul);
+
 %% Control variable: servo angle + reference values
 % air brakes
 if not(settings.scenario == "descent")
     figures.servo_angle = figure('Name', 'Servo angle after burning phase','ToolBar','auto','Position',[100,100,600,400]);
-    plot(structIn.t, structIn.Y(:,14));
+    plot(simOutput.t, simOutput.Y(:,14));
     hold on; grid on;
-    stairs(structIn.ARB.cmdTime,structIn.ARB.cmdPosition,'r');
-    xline(structIn.ARB.allowanceTime,'k--')
-    xline(structIn.apogee.time,'r--')
+    stairs(simOutput.ARB.cmdTime,simOutput.ARB.cmdPosition,'r');
+    xline(simOutput.ARB.allowanceTime,'k--')
+    xline(simOutput.apogee.time,'r--')
     xlabel('Time [s]');
     ylabel('$\alpha$ [rad]');
     title('Servo angle');
@@ -25,10 +31,10 @@ end
 % parafoil
 if settings.parafoil && (settings.scenario == "descent" || settings.scenario == "full flight")
     figures.parafoil_servo_action = figure('Name', 'Parafoil deltaA','ToolBar','auto','Position',[100,100,600,400]);
-    plot(structIn.t,structIn.Y(:,15),'DisplayName','\delta_A');
+    plot(simOutput.t,simOutput.Y(:,15),'DisplayName','\delta_A');
     hold on;
-    stairs(structIn.PRF.cmdTime,structIn.PRF.cmddeltaA,'DisplayName','\Delta_A cmd');
-    xline(structIn.t(structIn.events.mainChuteIndex),'--','DisplayName','Parafoil deployment')
+    stairs(simOutput.PRF.cmdTime,simOutput.PRF.cmddeltaA,'DisplayName','\Delta_A cmd');
+    xline(simOutput.t(simOutput.events.mainChuteIndex),'--','DisplayName','Parafoil deployment')
     legend
     title('Parafoil control action')
     xlabel('Time (s)')
@@ -37,22 +43,22 @@ end
 
 %% Trajectory
 figures.trajectory = figure('Name', 'Trajectory','ToolBar','auto','Position',[100,100,600,400]);
-plot3(structIn.Y(1:end-10, 2), structIn.Y(1:end-10, 1), -structIn.Y(1:end-10, 3),'DisplayName','True trajectory');
+plot3(simOutput.Y(1:end-10, 2), simOutput.Y(1:end-10, 1), -simOutput.Y(1:end-10, 3),'DisplayName','True trajectory');
 hold on; grid on;
-plot3(structIn.sensors.nas.states(1:end-10, 2), structIn.sensors.nas.states(1:end-10, 1), -structIn.sensors.nas.states(1:end-10, 3)-settings.z0,'DisplayName','NAS trajectory');
+plot3(simOutput.sensors.nas.states(1:end-10, 2), simOutput.sensors.nas.states(1:end-10, 1), -simOutput.sensors.nas.states(1:end-10, 3)-settings.z0,'DisplayName','NAS trajectory');
 
 if not(settings.scenario == "descent")
-    plot3(structIn.ARB.openingPosition(2),structIn.ARB.openingPosition(1),structIn.ARB.openingPosition(3),'ko','DisplayName','Airbrake deployment')
+    plot3(simOutput.ARB.openingPosition(2),simOutput.ARB.openingPosition(1),simOutput.ARB.openingPosition(3),'ko','DisplayName','Airbrake deployment')
 end
-plot3(structIn.apogee.position(2),structIn.apogee.position(1),-structIn.apogee.position(3),'ro','DisplayName','Apogee')
+plot3(simOutput.apogee.position(2),simOutput.apogee.position(1),-simOutput.apogee.position(3),'ro','DisplayName','Apogee')
 
 if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    plot3(structIn.Y(structIn.events.mainChuteIndex, 2), structIn.Y(structIn.events.mainChuteIndex, 1), -structIn.Y(structIn.events.mainChuteIndex, 3),'d','DisplayName','Main chute opening');
+    plot3(simOutput.Y(simOutput.events.mainChuteIndex, 2), simOutput.Y(simOutput.events.mainChuteIndex, 1), -simOutput.Y(simOutput.events.mainChuteIndex, 3),'d','DisplayName','Main chute opening');
     plot3(settings.payload.target(2),settings.payload.target(1),settings.payload.target(3),'go','DisplayName','Payload Target')
     if contSettings.payload.guidance_alg == "t-approach"
-        makeCone(structIn.payload.EMC([2,1]),15,-structIn.Y(structIn.events.mainChuteIndex,3),'EMC')
-        makeCone(structIn.payload.M1([2,1]),15,-structIn.Y(structIn.events.mainChuteIndex,3),'M1')
-        makeCone(structIn.payload.M2([2,1]),15,-structIn.Y(structIn.events.mainChuteIndex,3),'M2')
+        makeCone(simOutput.payload.EMC([2,1]),15,-simOutput.Y(simOutput.events.mainChuteIndex,3),'EMC')
+        makeCone(simOutput.payload.M1([2,1]),15,-simOutput.Y(simOutput.events.mainChuteIndex,3),'M1')
+        makeCone(simOutput.payload.M2([2,1]),15,-simOutput.Y(simOutput.events.mainChuteIndex,3),'M2')
     end
 end
 xlabel('E [m]');
@@ -67,48 +73,48 @@ if settings.flagExportPLOTS == true
 end
 
 %% Velocities BODY w.r.t. time against NAS
-V_NAS_BODY = quatrotate(structIn.sensors.nas.states(:,[10,7:9]), structIn.sensors.nas.states(:, 4:6));
+V_NAS_BODY = quatrotate(simOutput.sensors.nas.states(:,[10,7:9]), simOutput.sensors.nas.states(:, 4:6));
 figures.velocities_BODY = figure('Name', 'Velocities BODY','ToolBar','auto','Position',[100,100,600,400]);
 %
 subplot(3,1,1)
-plot(structIn.t, structIn.Y(:, 4),'DisplayName','Vx')
+plot(simOutput.t, simOutput.Y(:, 4),'DisplayName','Vx')
 hold on; grid on;
-plot(structIn.sensors.nas.time, V_NAS_BODY(:, 1),'DisplayName','Vx est')
+plot(simOutput.sensors.nas.time, V_NAS_BODY(:, 1),'DisplayName','Vx est')
 if not(settings.scenario == "descent")
-    xline(structIn.ARB.allowanceTime,'k--')
+    xline(simOutput.ARB.allowanceTime,'k--')
 end
 if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
-xline(structIn.apogee.time,'r--','DisplayName','Apogee')
+xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
 ylabel('V_x [m/s]');
 legend
 %
 subplot(3,1,2)
-plot(structIn.t, structIn.Y(:, 5),'DisplayName','Vy')
+plot(simOutput.t, simOutput.Y(:, 5),'DisplayName','Vy')
 hold on; 
-plot(structIn.sensors.nas.time, V_NAS_BODY(:, 2),'DisplayName','Vy est')
+plot(simOutput.sensors.nas.time, V_NAS_BODY(:, 2),'DisplayName','Vy est')
 if not(settings.scenario == "descent")
-    xline(structIn.ARB.allowanceTime,'k--')
+    xline(simOutput.ARB.allowanceTime,'k--')
 end
 if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
-xline(structIn.apogee.time,'r--','DisplayName','Apogee')
+xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
 ylabel('V_y [m/s]');
 legend
 %
 subplot(3,1,3)
-plot(structIn.t, structIn.Y(:, 6),'DisplayName','Vz')
+plot(simOutput.t, simOutput.Y(:, 6),'DisplayName','Vz')
 hold on;
-plot(structIn.sensors.nas.time, V_NAS_BODY(:, 3),'DisplayName','Vz est')
+plot(simOutput.sensors.nas.time, V_NAS_BODY(:, 3),'DisplayName','Vz est')
 if not(settings.scenario == "descent")
-    xline(structIn.ARB.allowanceTime,'k--','DisplayName','Air brakes opening')
+    xline(simOutput.ARB.allowanceTime,'k--','DisplayName','Air brakes opening')
 end
 if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
-xline(structIn.apogee.time,'r--','DisplayName','Apogee')
+xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
 xlabel('Time [s]');
 ylabel('V_z [m/s]');
 sgtitle('Velocities BODY');
@@ -118,37 +124,37 @@ if settings.flagExportPLOTS == true
 end
 
 %% Velocities NED w.r.t. time against NAS
-V_SIM_NED = quatrotate(quatconj(structIn.Y(:,10:13)), structIn.Y(:, 4:6));
+V_SIM_NED = quatrotate(quatconj(simOutput.Y(:,10:13)), simOutput.Y(:, 4:6));
 figures.velocities_NED = figure('Name', 'Velocities NED','ToolBar','auto','Position',[100,100,600,400]);
 %
 subplot(3,1,1)
-plot(structIn.t, V_SIM_NED(:, 1),'DisplayName','Vn')
+plot(simOutput.t, V_SIM_NED(:, 1),'DisplayName','Vn')
 hold on; grid on;
-plot(structIn.sensors.nas.time, structIn.sensors.nas.states(:, 4),'DisplayName','Vn est')
+plot(simOutput.sensors.nas.time, simOutput.sensors.nas.states(:, 4),'DisplayName','Vn est')
 if not(settings.scenario == "descent")
-    xline(structIn.ARB.allowanceTime,'k--')
+    xline(simOutput.ARB.allowanceTime,'k--')
 end
 ylabel('V_x [m/s]');
 legend
 %
 subplot(3,1,2)
-plot(structIn.t, V_SIM_NED(:, 2),'DisplayName','Ve')
+plot(simOutput.t, V_SIM_NED(:, 2),'DisplayName','Ve')
 hold on; 
-plot(structIn.sensors.nas.time,structIn.sensors.nas.states(:, 5) ,'DisplayName','Ve est')
+plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:, 5) ,'DisplayName','Ve est')
 if not(settings.scenario == "descent")
-    xline(structIn.ARB.allowanceTime,'k--')
+    xline(simOutput.ARB.allowanceTime,'k--')
 end
 ylabel('V_y [m/s]');
 legend
 %
 subplot(3,1,3)
-plot(structIn.t, V_SIM_NED(:, 3),'DisplayName','Vd')
+plot(simOutput.t, V_SIM_NED(:, 3),'DisplayName','Vd')
 hold on;
-plot(structIn.sensors.nas.time, structIn.sensors.nas.states(:, 6),'DisplayName','Vd est')
+plot(simOutput.sensors.nas.time, simOutput.sensors.nas.states(:, 6),'DisplayName','Vd est')
 if not(settings.scenario == "descent")
-    xline(structIn.ARB.allowanceTime,'k--','DisplayName','Air brakes opening')
+    xline(simOutput.ARB.allowanceTime,'k--','DisplayName','Air brakes opening')
 end
-    xline(structIn.apogee.time,'r--','DisplayName','Apogee')
+    xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
 xlabel('Time [s]');
 ylabel('V_z [m/s]');
 sgtitle('Velocities NED');
@@ -181,16 +187,16 @@ end
 if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
     figures.MEA = figure('Name', 'Predicted apogee','ToolBar','auto');
     subplot(2,1,1)
-    plot(structIn.t, -structIn.Y(:, 3),'DisplayName','Altitude');
+    plot(simOutput.t, -simOutput.Y(:, 3),'DisplayName','Altitude');
     hold on; grid on;
-    plot(structIn.sensors.mea.time, structIn.sensors.mea.prediction,'DisplayName','Prediction');
+    plot(simOutput.sensors.mea.time, simOutput.sensors.mea.prediction,'DisplayName','Prediction');
     legend
     subplot(2,1,2)
-    plot(structIn.sensors.mea.time, structIn.sensors.mea.mass   ,'DisplayName','Est mass');
+    plot(simOutput.sensors.mea.time, simOutput.sensors.mea.mass   ,'DisplayName','Est mass');
     hold on;
-    plot(structIn.t, structIn.recall.true_mass   ,'DisplayName','True mass');
+    plot(simOutput.t, simOutput.recall.true_mass   ,'DisplayName','True mass');
     legend
-    xline(structIn.sensors.mea.t_shutdown,'r--')
+    xline(simOutput.sensors.mea.t_shutdown,'r--')
     xlabel('Time t [s]');
     ylabel('Altitude AGL [m]');
     title('Predicted vs Real apogee');
@@ -204,76 +210,76 @@ figure('Position',[100,100,600,400])
 yyaxis left
 hold on
 if ~settings.electronics
-    contSettings = structIn.contSettings; % because the trajectory are chosen during the simulation, not a priori
+    contSettings = simOutput.contSettings; % because the trajectory are chosen during the simulation, not a priori
     if not(settings.scenario == "descent")
         plot(contSettings.reference.Z, contSettings.reference.Vz(:,1),'r','DisplayName','ref min')
         plot(contSettings.reference.Z, contSettings.reference.Vz(:,2),'k','DisplayName','ref max')
     end
 end
-v_ned = quatrotate(quatconj(structIn.Y(:, 10:13)), structIn.Y(:, 4:6));
-plot( -structIn.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
-plot( -structIn.sensors.nas.states(:,3)-settings.z0,  -structIn.sensors.nas.states(:,6),'m--','DisplayName','NAS')
+v_ned = quatrotate(quatconj(simOutput.Y(:, 10:13)), simOutput.Y(:, 4:6));
+plot( -simOutput.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
+plot( -simOutput.sensors.nas.states(:,3)-settings.z0,  -simOutput.sensors.nas.states(:,6),'m--','DisplayName','NAS')
 % plot( structIn.ADA(:,4),  structIn.ADA(:,5),'b','DisplayName','ADA z')
 yyaxis right
-plot( -structIn.Y(:, 3), structIn.Y(:, 14),'g','DisplayName','arb')
+plot( -simOutput.Y(:, 3), simOutput.Y(:, 14),'g','DisplayName','arb')
 
 legend
 
 
 %% ada
 figures.ada = figure('Position',[100,100,600,400]);
-plot( structIn.sensors.ada.time,  structIn.sensors.ada.xv(:,1),'DisplayName','$ADA_{z}$')
+plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xv(:,1),'DisplayName','$ADA_{z}$')
 hold on
-plot( structIn.sensors.ada.time,  structIn.sensors.ada.xv(:,2),'DisplayName','$ADA_{vz}$')
-plot( structIn.t,  -structIn.Y(:,3),'DisplayName','True z')
-plot( structIn.t,  -structIn.Y(:,6),'DisplayName','True Vz')
+plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xv(:,2),'DisplayName','$ADA_{vz}$')
+plot( simOutput.t,  -simOutput.Y(:,3),'DisplayName','True z')
+plot( simOutput.t,  -simOutput.Y(:,6),'DisplayName','True Vz')
 legend;
 title('ADA vs trajectory')
 
 figure('Position',[100,100,600,400])
 hold on
-plot( structIn.sensors.ada.time,  structIn.sensors.ada.xp(:,2),'DisplayName','ADA dp')
+plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xp(:,2),'DisplayName','ADA dp')
 title('ADA pressure derivative')
 
 %% quaternions
 figures.EulerAngles = figure('Name','Euler angles','Position',[100,100,600,400]);
 %
 subplot(2,2,1)
-plot(structIn.t,structIn.Y(:,10),'k','DisplayName','q_w');
+plot(simOutput.t,simOutput.Y(:,10),'k','DisplayName','q_w');
 hold on;
-plot(structIn.sensors.nas.time,structIn.sensors.nas.states(:,10),'r','DisplayName','q_w est');
+plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:,10),'r','DisplayName','q_w est');
 if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
 legend
 ylabel('q_w')
 %
 subplot(2,2,2)
-plot(structIn.t,structIn.Y(:,11),'k','DisplayName','q_x');
+plot(simOutput.t,simOutput.Y(:,11),'k','DisplayName','q_x');
 hold on;
-plot(structIn.sensors.nas.time,structIn.sensors.nas.states(:,7),'r','DisplayName','q_x est');
+plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:,7),'r','DisplayName','q_x est');
 if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
 legend
 ylabel('q_x')
 %
 subplot(2,2,3)
-plot(structIn.t,structIn.Y(:,12),'k','DisplayName','q_y');
+plot(simOutput.t,simOutput.Y(:,12),'k','DisplayName','q_y');
 hold on;
-plot(structIn.sensors.nas.time,structIn.sensors.nas.states(:,8),'r','DisplayName','q_y est');
+plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:,8),'r','DisplayName','q_y est');
 if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
 legend
 ylabel('q_y')
 %
 subplot(2,2,4)
-plot(structIn.t,structIn.Y(:,13),'k','DisplayName','q_z');
+plot(simOutput.t,simOutput.Y(:,13),'k','DisplayName','q_z');
 hold on;
-plot(structIn.sensors.nas.time,structIn.sensors.nas.states(:,9),'r','DisplayName','q_z est');
+plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:,9),'r','DisplayName','q_z est');
 if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
 legend
 ylabel('q_z')
@@ -283,42 +289,38 @@ sgtitle('Euler angles')
 xlabel('Time (s)')
 
 %% euler angles
-eul = quat2eul(structIn.Y(:,10:13));
-eul = flip(eul,2);
-eul = unwrap(eul);
-eul = rad2deg(eul);
-eul_NAS = quat2eul(structIn.sensors.nas.states(:,[10,7:9]));
+eul_NAS = quat2eul(simOutput.sensors.nas.states(:,[10,7:9]));
 eul_NAS = flip(eul_NAS,2);
 eul_NAS = unwrap(eul_NAS);
 eul_NAS = rad2deg(eul_NAS);
 figures.EulerAngles = figure('Name','Euler angles','Position',[100,100,600,400]);
 %
 subplot(3,1,1)
-plot(structIn.t,eul(:,1),'DisplayName','\phi');
+plot(simOutput.t,eul(:,1),'DisplayName','\phi');
 hold on;
-plot(structIn.sensors.nas.time,eul_NAS(:,1),'DisplayName','\phi est');
+plot(simOutput.sensors.nas.time,eul_NAS(:,1),'DisplayName','\phi est');
 if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
 legend
 ylabel('Roll (°)')
 %
 subplot(3,1,2)
-plot(structIn.t,eul(:,2),'DisplayName','\theta');
+plot(simOutput.t,eul(:,2),'DisplayName','\theta');
 hold on;
-plot(structIn.sensors.nas.time,eul_NAS(:,2),'DisplayName','\theta est');
+plot(simOutput.sensors.nas.time,eul_NAS(:,2),'DisplayName','\theta est');
 if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
 legend
 ylabel('Pitch (°)')
 %
 subplot(3,1,3)
-plot(structIn.t,eul(:,3),'DisplayName','\psi');
+plot(simOutput.t,eul(:,3),'DisplayName','\psi');
 hold on;
-plot(structIn.sensors.nas.time,eul_NAS(:,3),'DisplayName','\psi est');
+plot(simOutput.sensors.nas.time,eul_NAS(:,3),'DisplayName','\psi est');
 if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
 ylabel('Yaw (°)')
 legend
@@ -330,41 +332,41 @@ xlabel('Time (s)')
 figures.velocities = figure('Name', 'Angular rotations BODY','ToolBar','auto','Position',[100,100,600,400]);
 %
 subplot(3,1,1)
-plot(structIn.t, structIn.Y(:, 7),'DisplayName','p')
+plot(simOutput.t, simOutput.Y(:, 7),'DisplayName','p')
 hold on; grid on;
 if not(settings.scenario == "descent")
-    xline(structIn.ARB.allowanceTime,'k--')
+    xline(simOutput.ARB.allowanceTime,'k--')
 end
 if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
-xline(structIn.apogee.time,'r--','DisplayName','Apogee')
+xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
 ylabel('p [rad/s]');
 legend
 %
 subplot(3,1,2)
-plot(structIn.t, structIn.Y(:, 8),'DisplayName','q')
+plot(simOutput.t, simOutput.Y(:, 8),'DisplayName','q')
 hold on; 
 if not(settings.scenario == "descent")
-    xline(structIn.ARB.allowanceTime,'k--')
+    xline(simOutput.ARB.allowanceTime,'k--')
 end
 if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
-xline(structIn.apogee.time,'r--','DisplayName','Apogee')
+xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
 ylabel('q [rad/s]');
 legend
 %
 subplot(3,1,3)
-plot(structIn.t, structIn.Y(:, 9),'DisplayName','r')
+plot(simOutput.t, simOutput.Y(:, 9),'DisplayName','r')
 hold on;
 if not(settings.scenario == "descent")
-    xline(structIn.ARB.allowanceTime,'k--','DisplayName','Air brakes opening')
+    xline(simOutput.ARB.allowanceTime,'k--','DisplayName','Air brakes opening')
 end
 if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
-xline(structIn.apogee.time,'r--','DisplayName','Apogee')
+xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
 xlabel('Time [s]');
 ylabel('r [rad/s]');
 sgtitle('Angular rotations BODY');
@@ -373,5 +375,17 @@ if settings.flagExportPLOTS == true
     exportStandardizedFigure(figures.velocities,"report_images\"+settings.mission+"\src_Angular_rotations_BODY.pdf",0.9)
 end
 
+
+%% euler angles vs altitude
+figure
+
+plot(-simOutput.Y(:,3),eul(:,1),'DisplayName','\phi')
+hold on;
+plot(-simOutput.Y(:,3),eul(:,2),'DisplayName','\theta')
+plot(-simOutput.Y(:,3),eul(:,3),'DisplayName','\psi')
+legend
+title('Euler angles wrt altitude')
+xlabel('Altitude [m]')
+ylabel('Angle [deg]')
 end
    

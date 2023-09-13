@@ -91,9 +91,10 @@ switch settings.mission
         contSettings.filterMaxAltitude = 3000;
         % set altitude at which open to max
         contSettings.criticalAltitude = 2990;
-        settings.stopPitotAltitude = 2800;
+        settings.stopPitotAltitude = 1800;
 
         settings.CD_correction = 0.75; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
+        settings.z_final_MTR  = 3000;
 
     case 'Gemini_Roccaraso_September_2023' 
      

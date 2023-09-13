@@ -262,7 +262,7 @@ if freq.gpsFrequency > freq.controlFrequency
     if settings.ballisticFligth || (not(settings.ballisticFligth) && flagAscent)
         for i = 1:N
             iTimegps = sensorData.gps.time(i);
-            if all(iTimegps ~= T)
+            if all(abs(iTimegps - T)>1e-6)
                 [index0] = find(iTimegps < T);
                 index1 = index0(1);
                 index0 = index1 - 1;
@@ -276,9 +276,9 @@ if freq.gpsFrequency > freq.controlFrequency
                 sensorData.gps.positionMeasures(i, :) = Yinterp(1:3);
                 sensorData.gps.velocityMeasures(i, :) = quatrotate(quatconj(Yinterp(7:10)), Yinterp(4:6));
             else
-                Q = Y(iTimegps == T, 10:13);
-                V = Y(iTimegps == T, 4:6);
-                sensorData.gps.positionMeasures(i, :) = Y(iTimegps == T, 1:3);
+                Q = Y(abs(iTimegps - T)<1e-6, 10:13);
+                V = Y(abs(iTimegps - T)<1e-6, 4:6);
+                sensorData.gps.positionMeasures(i, :) = Y(abs(iTimegps - T)<1e-6, 1:3);
                 sensorData.gps.velocityMeasures(i, :) = quatrotate(quatconj(Q), V);
             end
         end
@@ -300,8 +300,8 @@ if freq.gpsFrequency > freq.controlFrequency
                 sensorData.gps.positionMeasures(i, :) = Yinterp(1:3);
                 sensorData.gps.velocityMeasures(i, :) = Yinterp(4:6);
             else
-                sensorData.gps.positionMeasures(i, :) = Y(iTimegps == T, 1:3);
-                sensorData.gps.velocityMeasures(i, :) = Y(iTimegps == T, 4:6);
+                sensorData.gps.positionMeasures(i, :) = Y(abs(iTimegps - T)<1e-6, 1:3);
+                sensorData.gps.velocityMeasures(i, :) = Y(abs(iTimegps - T)<1e-6, 4:6);
             end
         end
 
@@ -341,7 +341,7 @@ else
                 iTimegps = sensorData.gps.t0 + 1/freq.gpsFrequency;
                 Q = Y(i, 10:13);
                 V = Y(i, 4:6);
-                sensorData.gps.positionMeasures = Y(iTimegps == T, 1:3);
+                sensorData.gps.positionMeasures = Y(abs(iTimegps - T)<1e-6, 1:3);
                 sensorData.gps.velocityMeasures = quatrotate(quatconj(Q), V);% (i, :)
                 sensorData.gps.t0 = iTimegps;
                 sensorData.gps.time = iTimegps;
@@ -393,7 +393,7 @@ for i_baro = 1:length(sensorData.barometer_sens)
         sensorData.barometer_sens{i_baro}.time =  sensorData.barometer_sens{i_baro}.time';
         for i = 1:N
             iTimeBarometer = sensorData.barometer_sens{i_baro}.time(i);
-            if all(iTimeBarometer ~= T)
+            if all(abs(iTimeBarometer - T)>1e-6)
                 [index0] = find(iTimeBarometer < T);
                 index1 = index0(1);
                 index0 = index1 - 1;
@@ -405,7 +405,7 @@ for i_baro = 1:length(sensorData.barometer_sens)
                 m = (Y1 - Y0)./(T1 - T0);
                 z(i) = m * (iTimeBarometer-T0)+Y0;
             else
-                z(i) = -Y(iTimeBarometer == T, 3);
+                z(i) = -Y(abs(iTimeBarometer - T)<1e-6, 3);
             end
             sensorData.barometer_sens{i_baro}.z(i) = z(i);
             [Temp, ~, P, ~] = atmosisa(sensorData.barometer_sens{i_baro}.z(i)+settings.z0);
@@ -473,7 +473,7 @@ if isfield(freq, 'pitotFrequency')
         z_pit = zeros(N, 1);
         for i = 1:N
             iTimePitot = sensorData.pitot.time(i);
-            if all(iTimePitot ~= T)
+            if all(abs(iTimePitot - T)>1e-6)
                 % define indexes and time steps
                 [index0] = find(iTimePitot < T);
                 index1 = index0(1);
@@ -499,13 +499,13 @@ if isfield(freq, 'pitotFrequency')
                 wind_ned = [uw, vw, ww];
                 wind_body = quatrotate(Q(i,:),wind_ned);
                 v = (vx(i) + wind_body(1))';
-                sensorData.pitot.temperature(i) = Temp;
-                sensorData.pitot.pTotMeasures(i) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
-                sensorData.pitot.pStatMeasures(i) = P;
+                sensorData.pitot.temperature(i,1) = Temp;
+                sensorData.pitot.pTotMeasures(i,1) = P*(1+(gamma-1)/2*(v/a)^2)^(gamma/(gamma-1)); % dynamic pressure
+                sensorData.pitot.pStatMeasures(i,1) = P;
             else
-                vx(i) = Y(iTimePitot == T, 4);
-                z_pit(i) = -Y(iTimePitot == T, 3);
-                Q(i,:) = [Y(iTimePitot == T, 10:13)];
+                vx(i) = Y(abs(iTimePitot - T)<1e-6, 4);
+                z_pit(i) = -Y(abs(iTimePitot - T)<1e-6, 3);
+                Q(i,:) = [Y(abs(iTimePitot - T)<1e-6, 10:13)];
                 [Temp, a, P, ~] = atmosisa(z_pit(i) + settings.z0);
                 wind_ned = [uw, vw, ww];
                 wind_body = quatrotate(Q(i,:),wind_ned);

@@ -194,7 +194,6 @@ plot(datcom_0_closed.Z_ref,datcom_0_closed.VZ_ref,'k',"HandleVisibility","off")
 
 plot(datcom_25_open.Z_ref,datcom_25_open.VZ_ref,'b','DisplayName','datcom-25')
 plot(datcom_25_closed.Z_ref,datcom_25_closed.VZ_ref,'b',"HandleVisibility","off")
-
 legend
 
 

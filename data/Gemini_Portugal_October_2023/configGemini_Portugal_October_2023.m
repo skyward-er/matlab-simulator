@@ -28,7 +28,7 @@ settings.Vy_final = 0;
 settings.y_final  = 0;
 
 %% CONTROL AND SENSOR FREQUENCIES
-settings.frequencies.controlFrequency           =   50;                    % [hz] control action frequency
+settings.frequencies.controlFrequency           =   10;                    % [hz] control action frequency
 settings.frequencies.arbFrequency               =   10;                    % [hz] air brakes control frequency
 settings.frequencies.prfFrequency               =   1;                     % [hz] parafoil control frequency
 settings.frequencies.accelerometerFrequency     =   100;                   % [hz] sensor frequency
@@ -141,7 +141,5 @@ settings.ada.t_ada       =   -1;                                           % Apo
 settings.ada.flag_apo    =   false;                                        % True when the apogee is detected
 
 
-%% MEA TUNING PARAMETERS / MOTOR SHUT DOWN TUNING PARAMETERS
-settings.z_final_MTR  = 3100;
 
 

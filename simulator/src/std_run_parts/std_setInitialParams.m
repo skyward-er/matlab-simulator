@@ -165,6 +165,8 @@ sensorData.mea.estimated_pressure = 0;
 sensorData.mea.predicted_apogee = 0;
 sensorData.mea.time = 0;
 settings.t_shutdown = Inf;
+settings.counter_shutdown = 0;
+
 
 %% parafoil
 deltaA = contSettings.payload.deltaA_0;

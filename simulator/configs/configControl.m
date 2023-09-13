@@ -118,3 +118,5 @@ contSettings.WES.N = 0;
 % it?
 contSettings.WES.state = 1;
  
+%% MEA and shutdown
+contSettings.N_prediction_threshold = 5;

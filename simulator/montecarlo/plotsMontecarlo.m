@@ -269,7 +269,7 @@ legend(contSettings.algorithm);
 subplot(2,2,2)
 hold on; grid on;
 plot3(rad2deg(wind_az),thrust_percentage*100,apogee.altitude','.')
-xlabel('Wind azimuth [°]')
+xlabel('Wind azimuth [deg]')
 ylabel('Thrust percentage')
 zlabel('Apogee')
 % zlim([settings.z_final-200,settings.z_final+200])
@@ -279,7 +279,7 @@ legend(contSettings.algorithm);
 subplot(2,2,3)
 hold on; grid on;
 plot3(rad2deg(wind_el),thrust_percentage*100,apogee.altitude','.')
-xlabel('Wind elevation [°]')
+xlabel('Wind elevation [deg]')
 ylabel('Thrust percentage [%]')
 zlabel('Apogee')
 % zlim([settings.z_final-200,settings.z_final+200])
@@ -288,9 +288,9 @@ legend(contSettings.algorithm);
 %%%%%
 subplot(2,2,4)
 hold on; grid on;
-plot3(wind_el,wind_az,apogee.altitude','.')
-xlabel('Wind elevation [°]')
-ylabel('Wind azimuth [°]')
+plot3(rad2deg(wind_el),rad2deg(wind_az),apogee.altitude','.')
+xlabel('Wind elevation [deg]')
+ylabel('Wind azimuth [deg]')
 zlabel('Apogee')
 % zlim([settings.z_final-200,settings.z_final+200])
 view(30,20)

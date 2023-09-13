@@ -11,3 +11,8 @@ for i = 1:size(CD_coefficients,2)
 end
 CD_coeff_table.Properties.VariableNames = varNames;
 writetable(CD_coeff_table,ConDataPath+"/HIL_CPP_files_ABK/MTR_CDcoeffShutDown_"+settings.mission+".csv")
+
+% passare anche la massa iniziale (valori di inizializzazione) - discutere
+% anche delle shadowmode - 
+% aggiungere che deve beccare 5 volte consecutive l'apogeo predetto sopra
+% al target

@@ -16,7 +16,7 @@ else
 end
 
 % define time array for mea algorithm
-t_mea = sensorTot.mea.time(end):1/settings.frequencies.NASFrequency:T1;
+t_mea = sensorTot.mea.time(end):1/settings.frequencies.MEAFrequency:T1;
 % define time array for sensors
 t_chambPress = sensorTot.comb_chamber.time;
 t_nas = sensorTot.nas.time; % we need also nas to estimate cd etc
@@ -61,11 +61,12 @@ for ii = 2:length(t_mea)
         * log(1 + (vz_nas^2 * (0.5 * rho * CD * settings.S) / estimated_mass(ii)) / 9.81 );
 end
 if predicted_apogee(end) >= settings.z_final_MTR
+    settings.counter_shutdown = settings.counter_shutdown + 1*floor(settings.frequencies.MEAFrequency/settings.frequencies.controlFrequency); % the last multiplication is to take into account the frequency difference
     if ~settings.shutdown
-        if ~settings.expShutdown
+        if ~settings.expShutdown && settings.counter_shutdown > contSettings.N_prediction_threshold % threshold set in configControl
             settings.expShutdown = true;
             settings.t_shutdown = T1;
-            settings.timeEngineCut =settings. t_shutdown + 0.3;
+            settings.timeEngineCut =settings.t_shutdown + 0.3;
             settings.expTimeEngineCut = settings.t_shutdown;
         end
         settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, T1);
@@ -80,6 +81,8 @@ if predicted_apogee(end) >= settings.z_final_MTR
     else
         settings.t_shutdown = nan;
     end
+else
+    settings.counter_shutdown = 0;
 end
 
 sensorData.mea.time = t_mea;
