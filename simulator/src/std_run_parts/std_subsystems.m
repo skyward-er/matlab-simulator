@@ -65,13 +65,8 @@ if contains(settings.mission,'_2023')
             sensorTot.comb_chamber.measures(end) = 0;
         end
         if ~settings.shutdown
-            [settings,contSettings,sensorData] =run_MTR_SIM (contSettings,sensorData,settings,sensorTot,t1);
-            sensorTot.mea.pressure(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-2) = sensorData.mea.estimated_pressure(2:end);
-            sensorTot.mea.mass(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-2) = sensorData.mea.estimated_mass(2:end);
-            sensorTot.mea.prediction(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-2) = sensorData.mea.predicted_apogee(2:end);
+            [sensorData,sensorTot,settings,contSettings] =run_MTR_SIM (sensorData,sensorTot,settings,contSettings,t1);
             sensorTot.mea.t_shutdown = settings.t_shutdown;
-            sensorTot.mea.time(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-2) = sensorData.mea.time(2:end);
-            sensorTot.mea.n_old = sensorTot.mea.n_old + size(sensorData.mea.x,1) -1;
 
             if  Tf(end) >= settings.tb
                 settings.expShutdown = true;

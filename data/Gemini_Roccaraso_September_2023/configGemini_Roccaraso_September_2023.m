@@ -79,7 +79,7 @@ settings.servo.maxAngle = fzero(fun, deg2rad(50));
 settings.servo.maxAngle = fix(settings.servo.maxAngle*1e9)/1e9; % to avoid computational error propagation (truncates the angle to the ninth decimal)
 
 %% NAS TUNING PARAMETERS
-settings.nas.dt_k          =   0.01;                                    % [s]        nas time step
+settings.nas.dt_k          =   0.02;                                    % [s]        nas time step
 settings.nas.sigma_baro    =   5;                                       % [m/2]   estimated barometer variance    
 settings.nas.sigma_mag     =   1;                                       % [mgauss^2] estimated magnetometer variance    
 settings.nas.sigma_GPS     =   5;                                       % [mg^2]     estimated GPS variance
@@ -141,4 +141,14 @@ settings.ada.flag_apo    =   false;                                        % Tru
 
 
 %% MEA TUNING PARAMETERS / MOTOR SHUT DOWN TUNING PARAMETERS
-settings.z_final_MTR  = 1000;
+% motor model for kalman filter prediction/correction scheme
+settings.mea.engine_model_A1 = [1.435871191228868,-0.469001276508780,0;1,0,0;-0.002045309260755,0.001867496708935,1];
+settings.mea.engine_model_B1 = [4;0;0];
+settings.mea.engine_model_C1 = [1.780138883879285,-1.625379384370081,0];
+% covariance matrices
+settings.mea.Q=1e-1*diag([1,1,1]);      % model noise covariance matrix    
+settings.mea.R=0.36; 
+% shut down prediction altitude
+settings.mea.z_shutdown  = 700;
+settings.mea.t_lower_shadowmode = 0; % minimunm burning time
+settings.mea.t_higher_shadowmode = 10; % maximum burning time % have to be to tuned (14/09/23)

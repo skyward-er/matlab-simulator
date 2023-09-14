@@ -9,7 +9,7 @@
 
 switch settings.mission
    
-    case "Gemini_Portugal_October_2023"
+    case {"Gemini_Portugal_October_2023", "Gemini_Roccaraso_September_2023"}
         if ~exist(ConDataPath+"/HIL_CPP_files_ABK","dir")
             mkdir(ConDataPath+"/HIL_CPP_files_ABK")
         end

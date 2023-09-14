@@ -92,9 +92,11 @@ switch settings.mission
         % set altitude at which open to max
         contSettings.criticalAltitude = 2990;
         
+        % interpolation algorithm 
+        contSettings.N_forward = 1; % how many steps in advance have to check on speed to interpolate
 
         settings.CD_correction = 1; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
-        settings.z_final_MTR  = 3000;
+        
 
     case 'Gemini_Roccaraso_September_2023' 
      
@@ -119,11 +121,14 @@ switch settings.mission
         
         % linear filter with altitude
         contSettings.filter_coeff0 = 0.9; % starting value, then linear decrease until max Altitude
-        contSettings.filterMinAltitude = 600;
+        contSettings.filterMinAltitude = 400;
         contSettings.filterMaxAltitude = 1000;
         % set altitude at which open to max
         contSettings.criticalAltitude = 990;
        
+        % interpolation algorithm 
+        contSettings.N_forward = 0; % how many steps in advance have to check on speed to interpolate
+
         settings.CD_correction = 1; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
     
 end
