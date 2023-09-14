@@ -1,4 +1,4 @@
-function [] = sendDataOverSerial(sensorData, z0, flags)
+function [] = sendDataOverSerial(sensorData, sensorSettings, frequencies, flags)
 
 %{
 -----------DESCRIPTION OF FUNCTION:------------------
@@ -6,8 +6,9 @@ Use the serial communication to send flight phases flags and simulated
 sensors data to the microcontroller running the obsw
 
 INPUTS:
-    - sensorData:           struct containing all the simulated sensors data 
-    - z0:                   launchpad altitude
+    - sensorData:           struct containing all the simulated sensors data
+    - sensorSettings:       struct containing all sensor config data
+    - frequencies           struct containing the frequencies of all sensors and algorithms
     - flagsArray:           array with all the flags that need to be sent to obsw
 %}
 
@@ -21,32 +22,46 @@ INPUTS:
     % email: pierfrancesco.bachini@skywarder.eu
     % Revision date: 27/08/2023
 
-    % For a replication in the timestamps we take all the values but the last one
-    dataToBeSent.accelerometer = sensorData.accelerometer.measures(1:end - 1, :);
-    dataToBeSent.gyro = sensorData.gyro.measures(1:end - 1, :);
-    dataToBeSent.magnetometer = sensorData.magnetometer.measures(1:end - 1, :);
+    % Calculate how many values should be sent to obsw based on frequencies
+    simulationPeriod = 1/frequencies.controlFrequency;
+    num_data_acc = ceil(frequencies.accelerometerFrequency * simulationPeriod);
+    num_data_gyro = ceil(frequencies.gyroFrequency * simulationPeriod);
+    num_data_magn = ceil(frequencies.magnetometerFrequency * simulationPeriod);
+    num_data_gps = ceil(frequencies.gpsFrequency* simulationPeriod);
+    num_data_baro = ceil(frequencies.barometerFrequency * simulationPeriod);
+    num_data_chPress = ceil(frequencies.chamberPressureFrequency * simulationPeriod);
+    num_data_pitot = ceil(frequencies.pitotFrequency* simulationPeriod);
 
-    dataToBeSent.gps.positionMeasures = [sensorData.gps.positionMeasures(:, 1:2), - (sensorData.gps.positionMeasures(:, 3) - z0)];
-    dataToBeSent.gps.velocityMeasures = sensorData.gps.velocityMeasures;
+    
+    % Send the exact number of values the obsw expects 
+    dataToBeSent.accelerometer = sensorData.accelerometer.measures(1:num_data_acc, :);
+    dataToBeSent.gyro = sensorData.gyro.measures(1:num_data_gyro, :);
+    dataToBeSent.magnetometer = sensorData.magnetometer.measures(1:num_data_magn, :);
+
+    [dataToBeSent.gps.positionMeasures(:,1),dataToBeSent.gps.positionMeasures(:,2), ...
+        dataToBeSent.gps.positionMeasures(:,3)] = ned2geodetic(sensorData.gps.positionMeasures(1:num_data_gps,1),sensorData.gps.positionMeasures(1:num_data_gps,2), ...
+        sensorData.gps.positionMeasures(1:num_data_gps,3),sensorSettings.lat0, sensorSettings.lon0, sensorSettings.z0,sensorSettings.spheroid ,'degrees');
+
+    dataToBeSent.gps.velocityMeasures = sensorData.gps.velocityMeasures(1:num_data_gps, :);
     dataToBeSent.gps.fix = sensorData.gps.fix;
     dataToBeSent.gps.nsat = sensorData.gps.nsat;
 
     for i = 1:size(sensorData.barometer_sens, 2)
-        dataToBeSent.barometer_sens(i, :) = sensorData.barometer_sens{i}.measures;
-
-        if isempty(dataToBeSent.barometer_sens(i, :))
-            dataToBeSent.barometer_sens(i, :) = reshape(sensorData.barometer_sens{i}.measures(1:end-1), 1, []);
-        end
-
+        dataToBeSent.barometer_sens(i, :) = sensorData.barometer_sens{i}.measures(1:num_data_baro);
     end
 
-    dataToBeSent.chamberPressure = sensorData.chamberPressure.measures(1:end-1);
+    % control nan
+    if isnan(sensorData.chamberPressure.measures(end)) || not(flags(1))
+        dataToBeSent.chamberPressure = zeros(1,num_data_chPress);
+    else
+        dataToBeSent.chamberPressure = sensorData.chamberPressure.measures(1:num_data_chPress) / 1000; % transforming from mBar to Bar
+    end
 
-    dataToBeSent.pitot.dp = sensorData.pitot.pTotMeasures(1:end-1) - sensorData.pitot.pStatMeasures(1:end-1);
+    dataToBeSent.pitot.dp = sensorData.pitot.pTotMeasures(1:num_data_pitot) - sensorData.pitot.pStatMeasures(1:num_data_pitot);
 
-    dataToBeSent.pitot.p0 = sensorData.pitot.pTotMeasures(1:end-1);
+    dataToBeSent.pitot.p0 = sensorData.pitot.pTotMeasures(1:num_data_pitot);
 
-    dataToBeSent.temperature = sensorData.barometer_sens{1}.temperature(end);
+    dataToBeSent.temperature = sensorData.barometer_sens{1}.temperature(1);
 
     dataToBeSent.flags.flagFligth = cast(flags(1), "double");
     dataToBeSent.flags.flagAscent = cast(flags(2), "double");

@@ -1,8 +1,8 @@
-function [hilData] = run_MAIN_HIL(sensorData, sensorSettings, frequencies, flagsArray)
+function [hilData] = run_PAY_HIL(sensorData, sensorSettings, frequencies, flagsArray)
 
 %{
 -----------DESCRIPTION OF FUNCTION:------------------
-This function handles the communication between matlab simulator and obsw main HIL,
+This function handles the communication between matlab simulator and obsw payload HIL,
 adding necessary data to sensor struct, formatting received data and
 checking if liftoff command was sent by obsw.
 
@@ -35,7 +35,7 @@ OUTPUTS:
     sendDataOverSerial(sensorData, sensorSettings, frequencies, flagsArray);
 
     % waiting for the response of the obsw
-    actuatorData = readControlOutputFromSerial("main");
+    actuatorData = readControlOutputFromSerial("payload");
 
     % if the obsw sets flagFlight to true while the flag isLaunch is still
     % false, triggers the liftoff

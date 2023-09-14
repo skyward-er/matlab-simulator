@@ -134,6 +134,10 @@ end
 contSettings.indice_test = 1; % serve?
 
 while settings.flagStopIntegration && n_old < nmax                          % Starts CHRONO
+    if settings.launchWindow && ~launchFlag
+        pause(1e-5);
+    end
+
     iTimes = iTimes + 1;                                                    % Advance the steps
 
     lastFlagAscent = settings.flagAscent;                                   % Saves the last value of the flagAscent to recall it later
@@ -372,15 +376,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     t0 = t0 + dt;
     t1 = t1 + dt;
 
-    %% flags
-    if settings.launchWindow
-        settings.lastLaunchFlag = launchFlag;
-        pause(1e-6);
-        if(isLaunch)
-            launchFlag = true;
-        end
-    end
-
+    % Update the stop integration flag
     if settings.ascentOnly
         settings.flagStopIntegration = settings.flagAscent || not(settings.lastLaunchFlag);
     else
