@@ -35,25 +35,17 @@ sensorTot.barometer.time(sensorTot.barometer.n_old:sensorTot.barometer.n_old + s
 sensorTot.barometer.n_old = sensorTot.barometer.n_old + size(sensorData.barometer.measures,1);
 
 %% ADA
-if settings.flagADA && settings.dataNoise && sensorData.barometer.time(1) >= settings.baro_old
-    [sensorData, settings.ada]   =  run_ADA(sensorData, settings);
+if settings.flagADA && settings.dataNoise
 
-    sensorTot.ada.xp(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1) -1,:)  = sensorData.ada.xp(1:end,:);
-    sensorTot.ada.xv(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xv(:,1),1)-1,:)  = sensorData.ada.xv(1:end,:);
-    sensorTot.ada.time(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1)-1)     = sensorData.barometer.time;
-    sensorTot.ada.n_old = sensorTot.ada.n_old + size(sensorData.ada.xp,1);
-    settings.baro_old = sensorData.barometer.time(end);
+    [sensorData, sensorTot, settings.ada]   =  run_ADA(sensorData, sensorTot, settings,t1);
+
+    
 end
 
 %% Navigation system (NAS)
 if settings.flagNAS && settings.dataNoise
-    [sensorData, settings.nas]   =  run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings);
-    if abs(sensorData.nas.states(1,3)) >settings.stopPitotAltitude+ settings.z0
-        settings.flagStopPitotCorrection = true;
-    end
-    sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2,:)  = sensorData.nas.states(2:end,:); % NAS output
-    sensorTot.nas.time(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.time(2:end); % NAS time output
-    sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1)-1;
+    [sensorData, sensorTot, settings.nas]   =  run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings);
+    
 
 
     %%%%%%%%%%%%%%%%%% DA RIVEDERE L'UTILIZZO DI QUESTE VARIABILI ASSOLUTAMENTE %%%%%%%%%%%%%%%%%%%%%%%%
@@ -74,11 +66,11 @@ if contains(settings.mission,'_2023')
         end
         if ~settings.shutdown
             [settings,contSettings,sensorData] =run_MTR_SIM (contSettings,sensorData,settings,sensorTot,t1);
-            sensorTot.mea.pressure(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-1) = sensorData.mea.estimated_pressure;
-            sensorTot.mea.mass(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-1) = sensorData.mea.estimated_mass;
-            sensorTot.mea.prediction(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-1) = sensorData.mea.predicted_apogee;
+            sensorTot.mea.pressure(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-2) = sensorData.mea.estimated_pressure(2:end);
+            sensorTot.mea.mass(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-2) = sensorData.mea.estimated_mass(2:end);
+            sensorTot.mea.prediction(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-2) = sensorData.mea.predicted_apogee(2:end);
             sensorTot.mea.t_shutdown = settings.t_shutdown;
-            sensorTot.mea.time(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-1) = sensorData.mea.time;
+            sensorTot.mea.time(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-2) = sensorData.mea.time(2:end);
             sensorTot.mea.n_old = sensorTot.mea.n_old + size(sensorData.mea.x,1) -1;
 
             if  Tf(end) >= settings.tb

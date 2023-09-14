@@ -1,4 +1,4 @@
-function [dY,parout] = descentParafoil(t,Y,settings,contSettings,deltaA_ref_vec,t_change_ref,tlaunch,varargin)
+function [dY,parout] = descentParafoil(t,Y,settings,contSettings,deltaA_ref_vec,t_change_ref,tLaunch,varargin)
 
 %% recall states
 % x = Y(1);
@@ -17,7 +17,7 @@ q3 = Y(13);
 deltaA = Y(14);
 
 
-t = t-tlaunch;
+t = t-tLaunch;
 % saturation on servo angle, needed if the actuation is faster than the
 % integration step 
 if deltaA > contSettings.payload.uMax

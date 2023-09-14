@@ -1,4 +1,4 @@
-function [sensorData,nas] = run_NAS(Tf, mag_NED,sensorData,sensorTot,settings)
+function [sensorData,sensorTot,nas] = run_NAS(Tf, mag_NED,sensorData,sensorTot,settings)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
@@ -97,12 +97,13 @@ For more information check the navigation system report
                  INSTANTS. [12x12x10]
 -----------------------------------------------------------------------
 %}
+% recall nas settings
 nas = settings.nas;
 
+% recall nas time
 t_nas       =   sensorTot.nas.time(end):1/settings.frequencies.NASFrequency:Tf;
-[fix, nsat] =   gpsFix(sensorData.accelerometer.measures);
 
-dt_k        =   t_nas(2)-t_nas(1);                 % Time step of the kalman
+% initialize update
 x_lin       =   zeros(length(t_nas),6);         % Pre-allocation of corrected estimation
 xq          =   zeros(length(t_nas),7);         % Pre-allocation of quaternions and biases
 x           =   zeros(length(t_nas),13);
@@ -111,82 +112,92 @@ P_c         =   zeros(12,12,length(t_nas));
 P_lin       =   zeros(6,6,length(t_nas));       % Pre-allocation of the covariance matrix
 P_q         =   zeros(6,6,length(t_nas));
 
-% x_lin(1,:)  =   x_prev(1:6);                 % Allocation of the initial value
+% initialize first update
 x_lin(1,:)  =   sensorData.nas.states(end,1:6);                 % Allocation of the initial value
-
-% xq(1,:)     =   x_prev(7:13);
 xq(1,:)     =   sensorData.nas.states(end,7:13);
-
 x(1,:)      =   [x_lin(1,:),xq(1,:)];
-
-% P_lin(:,:,1)=   P_prev(1:6,1:6);
-% P_q(:,:,1)  =   P_prev(7:12,7:12);
-% P_c(:,:,1)  =   P_prev;
 
 P_lin(:,:,1)=   sensorData.nas.P(1:6,1:6,end);
 P_q(:,:,1)  =   sensorData.nas.P(7:12,7:12,end);
 P_c(:,:,1)  =   sensorData.nas.P(:,:,end);
 
+% check gps fix
+[fix, nsat] =   gpsFix(sensorData.accelerometer.measures);
 
-index_GPS=1;
-index_bar=1;
-index_mag=1;
-index_pit=1;
+% compute dt and updates
 
-% Time vectors agumentation
-t_gpstemp  = [sensorTot.gps.time];
-t_barotemp = [sensorTot.barometer.time];
-t_imutemp  = [sensorTot.imu.time];
-t_pittemp  = [sensorTot.pitot.time];
+if length(t_nas) > 1
+    dt_k        =   t_nas(2)-t_nas(1);                 % Time step of the kalman
+
+    index_GPS=1;
+    index_bar=1;
+    index_mag=1;
+    index_pit=1;
+
+    % Time vectors agumentation
+    t_gpstemp  = [sensorTot.gps.time];
+    t_barotemp = [sensorTot.barometer.time];
+    t_imutemp  = [sensorTot.imu.time];
+    t_pittemp  = [sensorTot.pitot.time];
 
 
-for i=2:length(t_nas)
-    %% Prediction part
+    for ii=2:length(t_nas)
+        %% Prediction part
 
-    index_imu   =  find(t_nas(i) >= t_imutemp,1,"last");
-    [x_lin(i,:),~,P_lin(:,:,i)] = predictorLinear2(x_lin(i-1,:),P_lin(:,:,i-1),...
-        dt_k,sensorTot.imu.accelerometer_measures(index_imu,:),xq(i-1,1:4),nas.QLinear);
-    
-    [xq(i,:),P_q(:,:,i)]       = predictorQuat(xq(i-1,:),P_q(:,:,i-1),...
-        sensorTot.imu.gyro_measures(index_imu,:),dt_k,nas.Qq);
+        index_imu   =  sum(t_nas(ii) >= t_imutemp);
+        [x_lin(ii,:),~,P_lin(:,:,ii)] = predictorLinear2(x_lin(ii-1,:),P_lin(:,:,ii-1),...
+            dt_k,sensorTot.imu.accelerometer_measures(index_imu,:),xq(ii-1,1:4),nas.QLinear);
 
-    %% Corrections
-    %gps
-    index_GPS   =  find(t_nas(i) >= t_gpstemp,1,"last");
-    [x_lin(i,:),P_lin(:,:,i),~]     = correctionGPS(x_lin(i,:),P_lin(:,:,i),sensorTot.gps.position_measures(index_GPS,1:2),...
-                                                    sensorTot.gps.velocity_measures(index_GPS,1:2),nas.sigma_GPS,nsat,fix);
+        [xq(ii,:),P_q(:,:,ii)]       = predictorQuat(xq(ii-1,:),P_q(:,:,ii-1),...
+            sensorTot.imu.gyro_measures(index_imu,:),dt_k,nas.Qq);
 
-    % barometer
-    index_bar   =  find(t_nas(i) >= t_barotemp,1,"last");
-    [x_lin(i,:),P_lin(:,:,i),~]     = correctionBarometer(x_lin(i,:),P_lin(:,:,i),sensorTot.barometer.altitude(index_bar),nas.sigma_baro);
+        %% Corrections
+        %gps
+        index_GPS   =  sum(t_nas(ii) >= t_gpstemp);
+        [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionGPS(x_lin(ii,:),P_lin(:,:,ii),sensorTot.gps.position_measures(index_GPS,1:2),...
+            sensorTot.gps.velocity_measures(index_GPS,1:2),nas.sigma_GPS,nsat,fix);
 
-    % magnetometer
-    [xq(i,:),P_q(:,:,i),~,~]        = correctorQuat(xq(i,:),P_q(:,:,i),sensorTot.imu.magnetometer_measures(index_imu,:),nas.sigma_mag,mag_NED);
+        % barometer
+        index_bar   =  sum(t_nas(ii) >= t_barotemp);
+        [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometer(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.altitude(index_bar),nas.sigma_baro);
 
-    % reintroduce pitot
-    % pitot    
-    if settings.flagAscent && ~settings.flagStopPitotCorrection
-        index_pit   =  find(t_nas(i) >= t_pittemp,1,"last");
-        [x_lin(i,:),P_lin(4:6,4:6,i),~] = correctionPitot(x_lin(i,:),P_lin(4:6,4:6,i),sensorTot.pitot.total_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot,xq(i,1:4),nas.Mach_max);
-    end 
+        % magnetometer
+        [xq(ii,:),P_q(:,:,ii),~,~]        = correctorQuat(xq(ii,:),P_q(:,:,ii),sensorTot.imu.magnetometer_measures(index_imu,:),nas.sigma_mag,mag_NED);
 
-    x(i,:) = [x_lin(i,:),xq(i,:)];
-    P_c(1:6,1:6,i)   = P_lin(:,:,i);
-    P_c(7:12,7:12,i) = P_q(:,:,i);
-
-    if nas.flag_apo  == false
-        if -x(i,6) < nas.v_thr && -x(i,3) > 100 + settings.z0
-            nas.counter = nas.counter + 1;
-        else
-            nas.counter = 0;
+        % reintroduce pitot
+        % pitot
+        if settings.flagAscent && ~settings.flagStopPitotCorrection
+            index_pit   =  sum(t_nas(ii) >= t_pittemp);
+            [x_lin(ii,:),P_lin(4:6,4:6,ii),~] = correctionPitot(x_lin(ii,:),P_lin(4:6,4:6,ii),sensorTot.pitot.total_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot,xq(ii,1:4),nas.Mach_max);
         end
-        if nas.counter >= nas.count_thr
-            nas.t_nas = t_nas(i);
-            nas.flag_apo = true;
+
+        x(ii,:) = [x_lin(ii,:),xq(ii,:)];
+        P_c(1:6,1:6,ii)   = P_lin(:,:,ii);
+        P_c(7:12,7:12,ii) = P_q(:,:,ii);
+
+        if nas.flag_apo  == false
+            if -x(ii,6) < nas.v_thr && -x(ii,3) > 100 + settings.z0
+                nas.counter = nas.counter + 1;
+            else
+                nas.counter = 0;
+            end
+            if nas.counter >= nas.count_thr
+                nas.t_nas = t_nas(ii);
+                nas.flag_apo = true;
+            end
         end
     end
-end
+
 sensorData.nas.states= x;
 sensorData.nas.P = P_c;
 sensorData.nas.time = t_nas;
+
+if abs(sensorData.nas.states(1,3)) >settings.nas.stopPitotAltitude+ settings.z0
+    settings.nas.flagStopPitotCorrection = true;
+end
+sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2,:)  = sensorData.nas.states(2:end,:); % NAS output
+sensorTot.nas.time(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.time(2:end); % NAS time output
+sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1)-1;
+
+end
 end

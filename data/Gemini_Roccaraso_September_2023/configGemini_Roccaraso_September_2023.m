@@ -85,12 +85,17 @@ settings.nas.sigma_mag     =   1;                                       % [mgaus
 settings.nas.sigma_GPS     =   5;                                       % [mg^2]     estimated GPS variance
 settings.nas.sigma_w       =   1;                                       % [rad^2/s^2]   estimated gyroscope variance;
 settings.nas.sigma_beta    =   1e-4;                                    % [rad/s^2]   estimated gyroscope bias variance;
+settings.nas.sigma_pitot   =   20^2;    %DA CAMBIARE
+
+settings.nas.Mach_max = 0.4; % max mach number expected for the mission (for nas with pitot update purposes) - not currently used
 
 settings.nas.v_thr         =   2.5;                                     % Velocity threshold for the detected apogee
 settings.nas.count_thr     =   5;                                       % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.nas.counter       =   0;
 
-settings.nas.t_kalman      =   -1;                                      % Apogee detection timestamp
+settings.nas.stopPitotAltitude = 500;
+
+settings.nas.t_nas         =   -1;                                      % Apogee detection timestamp
 settings.nas.flag_apo      =   false;                                   % True when the apogee is detected
 
 settings.nas.lat0          = settings.lat0;
@@ -120,7 +125,7 @@ settings.ada.P0          =   [  0.1    0      0;                            % In
                                 0      0.1     0;                            % state covariance matrix 
                                 0      0      0.1;];
 [settings.ada.temp_ref, ~,...
- settings.ada.p_ref, ~]  =   atmosisa(0);                                  % Reference temperature in kelvin and pressure in Pa 
+ settings.ada.p_ref, ~]  =   atmosisa(settings.z0);                                  % Reference temperature in kelvin and pressure in Pa 
 
 settings.ada.v0          =   -10;                                         % Vertical velocity initial condition
 settings.ada.a0          =   -100;                                         % Acceleration velocity initial condition
@@ -136,4 +141,4 @@ settings.ada.flag_apo    =   false;                                        % Tru
 
 
 %% MEA TUNING PARAMETERS / MOTOR SHUT DOWN TUNING PARAMETERS
-settings.z_final_MTR  = 2000;
+settings.z_final_MTR  = 1000;

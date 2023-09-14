@@ -1,4 +1,4 @@
-function [sensorData, ada]   =  run_ADA(sensorData, settings)
+function [sensorData, sensorTot, ada]   =  run_ADA(sensorData, sensorTot, settings,tf)
 
 % Author: Alessandro Del Duca
 % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@skywarder.eu
@@ -61,61 +61,76 @@ INPUTS:
 
 -----------------------------------------------------------------------
 %}
-x_prec = sensorData.ada.xp(end,:);
-P_prec = sensorData.ada.P(:,:,end);
-p_baro = sensorData.barometer.measures;
-t_baro = sensorData.barometer.time;
 
 ada = settings.ada;
+t_ada = sensorTot.ada.time(end):1/settings.frequencies.ADAFrequency:tf;
 
-dt = 1/settings.frequencies.barometerFrequency;
 
-x  = x_prec';
+xp = zeros(length(t_ada),3);
+xv = zeros(length(t_ada),2);
 
-At = [ 1       dt    0.5*dt^2;
-    0       1         dt;
-    0       0         1;];
+xp(1,:)  = sensorData.ada.xp(end,:)';
+P(:,:,1) = sensorData.ada.P(:,:,end);
 
-Ct = [ 1     0     0 ];
+if length(t_ada)>1
+    % initialize dt
+    dt = diff(t_ada(1:2));
 
-xp = zeros(length(t_baro),3);
-xv = zeros(length(t_baro),2);
+    % retrieve sensor timestamps
+    t_baro = sensorTot.barometer.time;
 
-for ii = 1:length(t_baro)
+    % define state matrices
+    At = [  1      dt    0.5*dt^2;
+        0       1        dt;
+        0       0         1;];
 
-    % Prediction step:
-    x      =   At * x;
+    Ct = [ 1     0     0 ];
 
-    % Prediction variance propagation:
-    P      =   ada.Q + At * P_prec * At';
 
-    % Correction step:
-    S      =   Ct * P * Ct' + ada.R;
-    K      =   P * Ct' /S;
-    x      =   x + K*(p_baro(ii) - Ct*x);
-    Pout   =  (eye(3) - K*Ct) * P;
+    for ii = 2:length(t_ada)
 
-    xp(ii,:)  =   x';
+        % Prediction step:
+        xp(ii,:)      =   (At * xp(ii-1,:)')';
 
-    xv(ii,1)  =   getaltitude(xp(ii,1),ada.temp_ref, ada.p_ref);
-    xv(ii,2)  =   getvelocity(xp(ii,1),xp(ii,2),ada.temp_ref, ada.p_ref);
+        % Prediction variance propagation:
 
-    if ada.flag_apo  == false
-        if xv(ii,2) < ada.v_thr && xv(ii,1) > 100 + settings.z0
-            ada.counter = ada.counter + 1;
-        else
-            ada.counter = 0;
-        end
-        if ada.counter >= ada.count_thr
-            ada.t_ada = t_baro(ii);
-            ada.flag_apo = true;
+        P(:,:,ii)      =   ada.Q + At * P(:,:,ii-1) * At';
+
+        % Correction step:
+        S      =   Ct * P(:,:,ii) * Ct' + ada.R;
+        K      =   P(:,:,ii) * Ct' /S;
+        index_baro  =  sum(t_ada(ii) >= t_baro);
+        xp(ii,:)      =   (xp(ii,:)' + K*(sensorTot.barometer.pressure_measures(index_baro) - Ct*xp(ii,:)'))';
+        P(:,:,ii)   =  (eye(3) - K*Ct) * P(:,:,ii);
+
+        xv(ii,1)  =   getaltitude(xp(ii,1),ada.temp_ref, ada.p_ref);
+        xv(ii,2)  =   getvelocity(xp(ii,1),xp(ii,2),ada.temp_ref, ada.p_ref);
+
+        if ada.flag_apo  == false
+            if xv(ii,2) < ada.v_thr && xv(ii,1) > 100 + settings.z0
+                ada.counter = ada.counter + 1;
+            else
+                ada.counter = 0;
+            end
+            if ada.counter >= ada.count_thr
+                ada.t_ada = t_ada(ii);
+                ada.flag_apo = true;
+            end
         end
     end
-end
-
 sensorData.ada.xp = xp;
 sensorData.ada.xv = xv;
-sensorData.ada.P = Pout;
+sensorData.ada.P = P;
+sensorData.ada.time = t_ada;
+
+sensorTot.ada.xp(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1) -2,:) = sensorData.ada.xp(2:end,:);
+sensorTot.ada.xv(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xv(:,1),1)-2,:)  = sensorData.ada.xv(2:end,:);
+sensorTot.ada.time(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1)-2)  = sensorData.ada.time(2:end);
+sensorTot.ada.n_old = sensorTot.ada.n_old + size(sensorData.ada.xp,1)-1;
+
+end
+
+
 end
 
 

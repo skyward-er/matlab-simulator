@@ -33,9 +33,9 @@ threshold      =   10e-11;
 x = x_pred;
 
 % compute total pressure from pitot measurements
-dp = p0 - p;        % total pressure
-if dp < 0 
-    dp = 0;
+dp = p0 - p;        % dynamic pressure
+if dp <= 0 
+    dp = 0.001;
 end
 gamma = 1.4;
 
@@ -54,7 +54,7 @@ v_pitot = sqrt(M2) * a;
 
 H           = zeros(1, 3);                          %Update of the matrix H
 qdyn        = 0.5*rho*x_pred(6)^2/sqrt(1-(x_pred(6)/a)^2);
-H(1,3)      = qdyn/(dp)*(M2/Mach_max^2);
+H(1,3)      = qdyn/(dp);%*(M2/Mach_max^2);
 if any(isnan(H))
     H = zeros(1,3);
 end

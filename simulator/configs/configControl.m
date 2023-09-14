@@ -90,8 +90,8 @@ contSettings.Engine_model_C1 = [1.780138883879285,-1.625379384370081,0];
 
 if  (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
     contSettings.u = 1;                      % initial valve position ( 1 = open, 0 = closed )
-    contSettings.mea.R=1e-1*diag([1,1,1]);      % model noise covariance matrix    
-    contSettings.mea.Q=0.36; 
+    contSettings.mea.Q=1e-1*diag([1,1,1]);      % model noise covariance matrix    
+    contSettings.mea.R=0.36; 
     contSettings.MTR_fault = false;
 end 
 

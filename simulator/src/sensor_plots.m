@@ -1,13 +1,19 @@
 function sensor_plots(simOutput)
 
+%% static pitot vs static presure
 figure
 plot(simOutput.sensors.pitot.time,simOutput.sensors.pitot.static_pressure)
 hold on;
 plot(simOutput.sensors.barometer_sens{1}.time,simOutput.sensors.barometer_sens{1}.pressure_measures)
 
-
+%% mea pressure vs true pressure
+figure
+plot(simOutput.sensors.mea.time,simOutput.sensors.mea.pressure,'DisplayName','Estimated pressure')
+hold on;
+plot(simOutput.sensors.comb_chamber.time,simOutput.sensors.comb_chamber.measures,'DisplayName','Sensor')
 
 return
+
 figure('Position',[100,100,600,400])
 hold on;
 plot(simOutput.barometer.time,simOutput.sfd_mean_p,'DisplayName','SFD output')

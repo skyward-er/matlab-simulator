@@ -140,6 +140,7 @@ end
 if contains(settings.mission,'_2023')
     for ii=1:length(sensorData.chamberPressure.time)
         sensorData.chamberPressure.measures(ii) = sensorSettings.NAT825281.sens(sensorData.chamberPressure.measures(ii)*1000,50); % 50 temperature in °C (random)
+        sensorData.chamberPressure.measures(ii) = sensorData.chamberPressure.measures(ii)/1000;
     end
     sensorTot.comb_chamber.measures(sensorTot.comb_chamber.n_old:sensorTot.comb_chamber.n_old + size(sensorData.chamberPressure.measures,2) - 1,1)    = sensorData.chamberPressure.measures(1:end);
     sensorTot.comb_chamber.time(sensorTot.comb_chamber.n_old:sensorTot.comb_chamber.n_old + size(sensorData.chamberPressure.measures,2) - 1)    =  sensorData.chamberPressure.time;

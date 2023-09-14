@@ -86,7 +86,7 @@ settings.nas.sigma_mag     =   10;                                       % [mgau
 settings.nas.sigma_GPS     =   5;                                       % [mg^2]     estimated GPS variance
 settings.nas.sigma_w       =   10;                                       % [rad^2/s^2]   estimated gyroscope variance;
 settings.nas.sigma_beta    =   1e-4;                                    % [rad/s^2]   estimated gyroscope bias variance;
-settings.nas.sigma_pitot   =   200^2;    %DA CAMBIARE
+settings.nas.sigma_pitot   =   20^2;    %DA CAMBIARE
 
 settings.nas.Mach_max = 0.9; % max mach number expected for the mission (for nas with pitot update purposes)
 
@@ -94,6 +94,8 @@ settings.nas.Mach_max = 0.9; % max mach number expected for the mission (for nas
 settings.nas.v_thr         =   2.5;                                     % Velocity threshold for the detected apogee
 settings.nas.count_thr     =   5;                                       % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.nas.counter       =   0;
+
+settings.nas.stopPitotAltitude = 1800;
 
 settings.nas.t_nas      =   -1;                                      % Apogee detection timestamp
 settings.nas.flag_apo      =   false;                                   % True when the apogee is detected
