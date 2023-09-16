@@ -116,11 +116,7 @@ for alg_index = 4
         settings_mont.PHI = stoch.PHI_rail(i);
         
         
-        real_tb = (settings_mont.mass_offset +  settings.motor.mOx)/ mass_flow_rate;
-        if real_tb < settings_mont.tb
-            settings_mont.tb = real_tb;
-        end
-
+   
         % Define coeffs matrix for the i-th simulation
         settings_mont.Coeffs = settings.Coeffs* (1+stoch.aer_percentage(i));
 
@@ -329,6 +325,11 @@ for alg_index = 4
 
             case 'Pyxis_Roccaraso_September_2022'
                 folder = [folder ; "MontecarloResults\"+settings.mission+"\z_f_"+settings.z_final+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % offline
+        
+        
+            case 'Gemini_Roccaraso_September_2023'
+                folder = [folder ; "MontecarloResults\"+settings.mission+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % offline
+
         end
 
     end
@@ -370,7 +371,7 @@ for alg_index = 4
             fprintf(fid,'Initial Mach number at which the control algorithm starts: %.3f \n\n',settings.MachControl);
             fprintf(fid,'Other parameters specific of the simulation: \n');
             fprintf(fid,'Filter coefficient: %.3f \n', contSettings.filter_coeff);
-            fprintf(fid,'Target for shutdown: %d \n',settings.z_final_MTR );
+            fprintf(fid,'Target for shutdown: %d \n',settings.mea.z_shutdown);
             if contSettings.algorithm == "interp" || contSettings.algorithm == "complete" 
                 fprintf(fid,'N_forward: %d \n', contSettings.N_forward);
                 fprintf(fid,'Delta Z (reference): %d \n',contSettings.reference.deltaZ);

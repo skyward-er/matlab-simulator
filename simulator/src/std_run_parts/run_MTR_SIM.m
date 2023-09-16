@@ -36,7 +36,7 @@ if sensorTot.mea.prediction(end) >= settings.mea.z_shutdown
             settings.quatCut = [sensorTot.nas.states(end, 10) sensorTot.nas.states(end, 7:9)];
             [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
         end
-        
+
         contSettings.valve_pos = 0;
     else
         settings.t_shutdown = nan;
@@ -48,7 +48,11 @@ else
         settings.timeEngineCut = settings.t_shutdown + 0.3;
         settings.expTimeEngineCut = settings.t_shutdown;
     end
-    settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, T1);
+    if T1 < settings.tb
+        settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, T1);
+    else
+        settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, settings.tb);
+    end
     settings.expMengineCut = settings.parout.m(end) - settings.ms;
     if T1 > settings.timeEngineCut
         settings.shutdown = true;
