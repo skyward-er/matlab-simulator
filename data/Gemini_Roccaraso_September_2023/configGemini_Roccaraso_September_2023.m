@@ -21,7 +21,7 @@ settings.HREmot = true;
 
 %% TRAJECTORY GENERATION PARAMETERS
 settings.Vz_final = 0;
-settings.z_final  = 1000;
+settings.z_final  = 1050;
 settings.Vx_final = 0;
 settings.x_final  = 500;
 settings.Vy_final = 0;
@@ -139,7 +139,7 @@ settings.ada.counter     =   0;
 settings.ada.t_ada       =   -1;                                           % Apogee detection timestamp
 settings.ada.flag_apo    =   false;                                        % True when the apogee is detected
 
-settings.ada.shadowmode = 5;
+settings.ada.shadowmode = 10;
 
 %% MEA TUNING PARAMETERS / MOTOR SHUT DOWN TUNING PARAMETERS
 % motor model for kalman filter prediction/correction scheme
@@ -150,6 +150,6 @@ settings.mea.engine_model_C1 = [1.780138883879285,-1.625379384370081,0];
 settings.mea.Q=0.1*diag([1,1,1]);      % model noise covariance matrix    
 settings.mea.R=0.36; 
 % shut down prediction altitude
-settings.mea.z_shutdown  = 850;
-settings.mea.t_lower_shadowmode = 0; % minimunm burning time
-settings.mea.t_higher_shadowmode = 10; % maximum burning time % have to be to tuned (14/09/23)
+settings.mea.z_shutdown  = 1000;
+settings.mea.t_lower_shadowmode = 2.4; % minimunm burning time
+settings.mea.t_higher_shadowmode = 3.2; % maximum burning time % have to be to tuned (14/09/23)

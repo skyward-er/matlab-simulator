@@ -17,7 +17,7 @@ switch settings.mission
             configADA_export_table(1,i) = table(configValues(1,i));
         end
         configADA_export_table.Properties.VariableNames = configADAvarNames;
-        writetable(configADA_export_table,ConDataPath+"/"+folder+"/NAS_configNAS_"+settings.mission+".csv")
+        writetable(configADA_export_table,ConDataPath+"/"+folder+"/ADA_configADA_"+settings.mission+".csv")
 
 
 end

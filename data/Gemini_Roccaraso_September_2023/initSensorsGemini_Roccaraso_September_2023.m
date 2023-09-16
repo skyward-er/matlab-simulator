@@ -8,17 +8,17 @@
 sensorSettings.barometer1 = Sensor_no_offset(); % presure in mbar, temp should be in C°
 sensorSettings.barometer1.maxMeasurementRange  =   1000;                   % 1100, 1300 in mbar
 sensorSettings.barometer1.minMeasurementRange  =   0;                    % 300, 10 in mbar
-sensorSettings.barometer1.bit = 12; 
+sensorSettings.barometer1.bit = 24; % adc on rocket is 24 bits 
 sensorSettings.barometer1.resolution = (sensorSettings.barometer1.maxMeasurementRange -sensorSettings.barometer1.minMeasurementRange)/(2^sensorSettings.barometer1.bit);
-sensorSettings.barometer1.noiseVariance        =   4.6;                     % mbar^2
+sensorSettings.barometer1.noiseVariance        =   1;                     % mbar^2
 
 %% barometer1 - static measure (HSCMAND001BAAA5)
 sensorSettings.barometer2 = Sensor(); % presure in mbar, temp should be in C°
 sensorSettings.barometer2.maxMeasurementRange  =   1000;                   % 1100, 1300 in mbar
 sensorSettings.barometer2.minMeasurementRange  =   0;                    % 300, 10 in mbar
-sensorSettings.barometer2.bit = 12; 
+sensorSettings.barometer2.bit = 24; % adc on rocket is 24 bits 
 sensorSettings.barometer2.resolution = (sensorSettings.barometer2.maxMeasurementRange -sensorSettings.barometer2.minMeasurementRange)/(2^sensorSettings.barometer2.bit);
-sensorSettings.barometer2.noiseVariance        =   4.6;                     % mbar^2
+sensorSettings.barometer2.noiseVariance        =   1;                     % mbar^2
 
 %% barometer3 - digital measure (LPS28DFWTR)
 sensorSettings.barometer3 = Sensor_no_offset(); % presure in mbar, temp should be in C°
@@ -26,7 +26,7 @@ sensorSettings.barometer3.maxMeasurementRange  =   4060;                   % 110
 sensorSettings.barometer3.minMeasurementRange  =   260;                    % 300, 10 in mbar
 sensorSettings.barometer3.bit = 24; 
 sensorSettings.barometer3.resolution = (sensorSettings.barometer3.maxMeasurementRange -sensorSettings.barometer3.minMeasurementRange)/(2^sensorSettings.barometer3.bit);
-sensorSettings.barometer3.noiseVariance        =   0.043043;                      % guess in mbar
+sensorSettings.barometer3.noiseVariance        =   4.06;                      % guess in mbar
 
 
 

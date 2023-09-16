@@ -47,7 +47,7 @@ addpath(genpath(commonFunctionsPath));
 %% CONFIGs
 conf.script = "simulator";
 settings.montecarlo = true;
-config;
+configSimulator;
 
 %% MONTECARLO SETTINGS
 rng default

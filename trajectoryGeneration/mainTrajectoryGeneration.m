@@ -51,7 +51,7 @@ localRepoPath = '../data/msa-toolkit';
 % %% LOAD DATA
 conf.script = "trajectory generation"; % this defines which configuration script to run
 settings.montecarlo = false;
-config;
+configSimulator;
 
 %% AIRBRAKES RADIAL EXTENSION
 % Airbrakes extension vector

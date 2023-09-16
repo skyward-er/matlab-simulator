@@ -71,18 +71,18 @@ displayIter = true; % set to false if you don't want to see the iteration number
             end
 
             %%% mass offset distribution
-            sigma_m = 2/3; % 1.5 [kg] of offset (uncertainty on refueling mass)
+            sigma_m = 1/3; % 1.5 [kg] of offset (uncertainty on refueling mass)
             mu_m = 0;
             stoch.mass_offset = normrnd(mu_m,sigma_m,N_sim,1);
 
 
             % launch rail orientation
-            sigma_om = 2/3 *pi/180; % 2 [deg] of offset (uncertainty on ramp elevation angle)
+            sigma_om = 1/3 *pi/180; % 2 [deg] of offset (uncertainty on ramp elevation angle)
             mu_om = settings.OMEGA;
             stoch.OMEGA_rail = normrnd(mu_om,sigma_om,N_sim,1);
 
             % launch rail orientation
-            sigma_phi = 2/3 *pi/180; % 2 [deg]of offset (uncertainty on ramp azimuth angle)
+            sigma_phi = 5/3 *pi/180; % 2 [deg]of offset (uncertainty on ramp azimuth angle)
             mu_phi = settings.PHI;
             stoch.PHI_rail = normrnd(mu_phi,sigma_phi,N_sim,1);
 

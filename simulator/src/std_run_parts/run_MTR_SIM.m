@@ -24,7 +24,11 @@ if sensorTot.mea.prediction(end) >= settings.mea.z_shutdown
             settings.timeEngineCut = settings.t_shutdown + 0.3;
             settings.expTimeEngineCut = settings.t_shutdown;
         end
-        settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, T1);
+        if T1 < settings.tb
+            settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, T1);
+        else
+            settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, settings.tb);
+        end
         settings.expMengineCut = settings.parout.m(end) - settings.ms;
         if T1 > settings.timeEngineCut
             settings.shutdown = true;
