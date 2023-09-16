@@ -39,8 +39,8 @@ switch settings.mission
 
         % second file: configuration for the air brakes
         configABK_export_table = table;
-        configValues = [contSettings.reference.deltaZ, contSettings.filter_coeff0,contSettings.filterMinAltitude,contSettings.filterMaxAltitude,contSettings.criticalAltitude,contSettings.masses_vec(1),contSettings.dmass,simOutput.estimated_mass(end),contSettings.N_forward];
-        configABKvarNames = {'REFERENCE_DZ','STARTING_FILTER_VALUE','CHANGE_FILTER_MINIMUM_ALTITUDE','CHANGE_FILTER_MAXIMUM_ALTITUDE','ABK_CRITICAL_ALTITUDE','LOWEST_MASS','DELTA_MASS','ESTIMATED_MASS','N_FORWARD'};
+        configValues = [settings.frequencies.arbFrequency, contSettings.reference.deltaZ, contSettings.filter_coeff0,contSettings.filterMinAltitude,contSettings.filterMaxAltitude,contSettings.criticalAltitude,contSettings.masses_vec(1),contSettings.dmass,simOutput.estimated_mass(end),contSettings.N_forward,contSettings.ABK_shutdown_delay];
+        configABKvarNames = {'ABK_FREQUENCY','REFERENCE_DZ','STARTING_FILTER_VALUE','CHANGE_FILTER_MINIMUM_ALTITUDE','CHANGE_FILTER_MAXIMUM_ALTITUDE','ABK_CRITICAL_ALTITUDE','ABK_REFERENCE_LOWEST_MASS','DELTA_MASS','ESTIMATED_MASS','N_FORWARD','ABK_DELAY_FROM_SHUTDOWN'};
         for i = 1:size(configValues,2)
             configABK_export_table(1,i) = table(configValues(1,i));
         end

@@ -30,7 +30,7 @@ settings.y_final  = 0;
 %% CONTROL AND SENSOR FREQUENCIES
 settings.frequencies.controlFrequency           =   50;                    % [hz] control action frequency
 settings.frequencies.arbFrequency               =   10;                    % [hz] air brakes control frequency
-settings.frequencies.prfFrequency               =   1;                    % [hz] parafoil control frequency
+settings.frequencies.prfFrequency               =   1;                     % [hz] parafoil control frequency
 settings.frequencies.accelerometerFrequency     =   100;                   % [hz] sensor frequency
 settings.frequencies.gyroFrequency              =   100;                   % [hz] sensor frequency
 settings.frequencies.magnetometerFrequency      =   100;                   % [hz] sensor frequency
@@ -39,7 +39,7 @@ settings.frequencies.barometerFrequency         =   20;                    % [hz
 settings.frequencies.chamberPressureFrequency   =   50;                    % [hz] sensor frequency
 settings.frequencies.pitotFrequency             =   20;                    % [hz] sensor frequency
 settings.frequencies.NASFrequency               =   50;                    % [hz] sensor frequency
-settings.frequencies.ADAFrequency               =   20;                    % [hz] sensor frequency
+settings.frequencies.ADAFrequency               =   50;                    % [hz] sensor frequency
 settings.frequencies.MEAFrequency               =   50;                    % [hz] sensor frequency
 
 % Servo (MARK STAR - HBL 3850)
@@ -117,18 +117,18 @@ settings.nas.Qq              =   [(settings.nas.sigma_w^2*settings.nas.dt_k+(1/3
                                       0.5*settings.nas.sigma_beta^2*settings.nas.dt_k^2*eye(3)                                              settings.nas.sigma_beta^2*settings.nas.dt_k*eye(3)];
 %% ADA TUNING PARAMETER
 
-settings.ada.Q           =   [1     0       0;                             % Process noise covariance matrix
-                              0     1       0;
-                              0     0       1;];
-settings.ada.R           =   10;                                            % Measurement noise covariance matrix
+settings.ada.Q           =   [30     0       0;                             % Process noise covariance matrix
+                              0     10       0;
+                              0     0       2.5;];          % set from pyxis euroc launch
+settings.ada.R           =   4000;                                            % Measurement noise covariance matrix
 settings.ada.P0          =   [  0.1    0      0;                            % Initial condition fo the 
                                 0      0.1     0;                            % state covariance matrix 
                                 0      0      0.1;];
 [settings.ada.temp_ref, ~,...
  settings.ada.p_ref, ~]  =   atmosisa(settings.z0);                                  % Reference temperature in kelvin and pressure in Pa 
 
-settings.ada.v0          =   -10;                                         % Vertical velocity initial condition
-settings.ada.a0          =   -100;                                         % Acceleration velocity initial condition
+settings.ada.v0          =   -50;                                         % Vertical velocity initial condition
+settings.ada.a0          =   -250;                                         % Acceleration velocity initial condition
 settings.ada.x0          =  [settings.ada.p_ref, settings.ada.v0, settings.ada.a0];         
                                                                            % Ada initial condition
 
@@ -139,6 +139,7 @@ settings.ada.counter     =   0;
 settings.ada.t_ada       =   -1;                                           % Apogee detection timestamp
 settings.ada.flag_apo    =   false;                                        % True when the apogee is detected
 
+settings.ada.shadowmode = 5;
 
 %% MEA TUNING PARAMETERS / MOTOR SHUT DOWN TUNING PARAMETERS
 % motor model for kalman filter prediction/correction scheme

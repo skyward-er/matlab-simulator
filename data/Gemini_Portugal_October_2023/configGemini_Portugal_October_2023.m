@@ -39,7 +39,7 @@ settings.frequencies.barometerFrequency         =   20;                    % [hz
 settings.frequencies.chamberPressureFrequency   =   50;                    % [hz] sensor frequency
 settings.frequencies.pitotFrequency             =   20;                    % [hz] sensor frequency
 settings.frequencies.NASFrequency               =   50;                    % [hz] sensor frequency
-settings.frequencies.ADAFrequency               =   20;                    % [hz] sensor frequency
+settings.frequencies.ADAFrequency               =   50;                    % [hz] sensor frequency
 settings.frequencies.MEAFrequency               =   50;                    % [hz] sensor frequency
 
 % Servo (MARK STAR - HBL 3850)
@@ -120,10 +120,10 @@ settings.nas.Qq              =   [(settings.nas.sigma_w^2*settings.nas.dt_k+(1/3
                                       0.5*settings.nas.sigma_beta^2*settings.nas.dt_k^2*eye(3)                                              settings.nas.sigma_beta^2*settings.nas.dt_k*eye(3)];
 %% ADA TUNING PARAMETER
 
-settings.ada.Q           =   [1     0       0;                             % Process noise covariance matrix
-                              0     1       0;
-                              0     0       1;];
-settings.ada.R           =   10;                                            % Measurement noise covariance matrix
+settings.ada.Q           =   [30     0       0;                             % Process noise covariance matrix
+                              0     10       0;
+                              0     0       2.5;];          % set from pyxis euroc launch
+settings.ada.R           =   4000;                                            % Measurement noise covariance matrix
 settings.ada.P0          =   [  0.1    0      0;                            % Initial condition fo the 
                                 0      0.1     0;                            % state covariance matrix 
                                 0      0      0.1;];

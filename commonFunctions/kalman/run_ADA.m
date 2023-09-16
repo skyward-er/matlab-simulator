@@ -67,10 +67,12 @@ t_ada = sensorTot.ada.time(end):1/settings.frequencies.ADAFrequency:tf;
 
 
 xp = zeros(length(t_ada),3);
+P = zeros(3,3,length(t_ada));
 xv = zeros(length(t_ada),2);
 
-xp(1,:)  = sensorData.ada.xp(end,:)';
+xp(1,:)  = sensorData.ada.xp(end,:);
 P(:,:,1) = sensorData.ada.P(:,:,end);
+xv(1,:) = sensorData.ada.xv(end,:);
 
 if length(t_ada)>1
     % initialize dt
@@ -107,7 +109,7 @@ if length(t_ada)>1
         xv(ii,2)  =   getvelocity(xp(ii,1),xp(ii,2),ada.temp_ref, ada.p_ref);
 
         if ada.flag_apo  == false
-            if xv(ii,2) < ada.v_thr && xv(ii,1) > 100 + settings.z0
+            if xv(ii,2) < ada.v_thr && xv(ii,1) > 100
                 ada.counter = ada.counter + 1;
             else
                 ada.counter = 0;
@@ -118,6 +120,9 @@ if length(t_ada)>1
             end
         end
     end
+    
+
+    
 sensorData.ada.xp = xp;
 sensorData.ada.xv = xv;
 sensorData.ada.P = P;

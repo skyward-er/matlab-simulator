@@ -54,6 +54,9 @@ contSettings.rate_limiter      =    60/0.13;                                % da
 % Filtering
 contSettings.filter_coeff = 0.5;                                            % set this value to 1 to ignore filtering action
 
+% delay from motor shutdown to air brakes opening:
+contSettings.ABK_shutdown_delay = 0.5; % [s] time between engine shutdown command and ABK phase
+
 % flag initialization
 contSettings.flagFirstControlABK = true;                                       % if it is the first iter the control action is not filtered, then the filter acts
 contSettings.flagFirstControlPRF = true;
@@ -83,10 +86,6 @@ settings.motor.K = 92.0088;
 % contSettings.Engine_model_Kgain = [0.237322102194205;0.242208876758461;-0.000686466033197479];
 
 %% engine control initialization - Mass Estimation Algorithm
-
-% if  (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
-%     contSettings.u = 1;                      % initial valve position ( 1 = open, 0 = closed )
-% end 
 
 
 %% MAGNETIC MAP

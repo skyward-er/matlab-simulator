@@ -28,7 +28,7 @@ for i = 1:size(configValues,2)
     configMTR_export_table(1,i) = table(configValues(1,i));
 end
 configMTR_export_table.Properties.VariableNames = configMTRvarNames;
-writetable(configMTR_export_table,ConDataPath+"/HIL_CPP_files_ABK/ABK_configABK_"+settings.mission+".csv")
+writetable(configMTR_export_table,ConDataPath+"/HIL_CPP_files_MTR/MTR_configMTR_"+settings.mission+".csv")
 
 
 end

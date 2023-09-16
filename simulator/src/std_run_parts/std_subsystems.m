@@ -100,7 +100,7 @@ end
 if contains(settings.mission,'_2023')
     if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings.control...
             && ~(strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine') ) ...
-            && Tf(end) > settings.expTimeEngineCut + 0.5
+            && Tf(end) > settings.expTimeEngineCut + contSettings.ABK_shutdown_delay
     
         if str2double(settings.mission(end)) > 2 % only for mission after october 2022
             

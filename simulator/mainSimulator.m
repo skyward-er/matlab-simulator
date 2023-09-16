@@ -110,4 +110,5 @@ if settings.flagExportCSV % this is set in configFlags
     if settings.scenario == "descent" || settings.scenario == "full flight"
         export_HILdataPRF;
     end
+    export_HILdataADA;
 end

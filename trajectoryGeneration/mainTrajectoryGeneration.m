@@ -115,8 +115,8 @@ for j = 1:N_mass
     m = mass(j);
     for index = 1:Ntraj_ARB
         %%% composing initial conditions for ode
-        I_index = 1+floor(length(settings.Ixx)/(N_mass-1))*(j-1)
-        Y0 = [X0; V0; W0; Q0; settings.Ixx(I_index); settings.Iyy(I_index); settings.Izz(I_index)];
+        % I_index = 1+floor(length(settings.Ixx)/(N_mass-1))*(j-1)
+        Y0 = [X0; V0; W0; Q0];
         deltaX = deltaX_values(index);
 
         % Start simulink simulation
