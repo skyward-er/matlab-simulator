@@ -1,0 +1,112 @@
+% initialise sensors
+
+% author: Marco Marchesi - ipt GNC 2023
+% marco.marchesi@skywarder.eu 
+% release 16/09/2023
+
+%% barometer1 - static measure (HSCMAND001BAAA5)
+sensorSettings.barometer1 = Sensor_no_offset(); % presure in mbar, temp should be in C°
+sensorSettings.barometer1.maxMeasurementRange  =   1000;                   % 1100, 1300 in mbar
+sensorSettings.barometer1.minMeasurementRange  =   0;                    % 300, 10 in mbar
+sensorSettings.barometer1.bit = 12; 
+sensorSettings.barometer1.resolution = (sensorSettings.barometer1.maxMeasurementRange -sensorSettings.barometer1.minMeasurementRange)/(2^sensorSettings.barometer1.bit);
+sensorSettings.barometer1.noiseVariance        =   4.6;                     % mbar^2
+
+%% barometer1 - static measure (HSCMAND001BAAA5)
+sensorSettings.barometer2 = Sensor(); % presure in mbar, temp should be in C°
+sensorSettings.barometer2.maxMeasurementRange  =   1000;                   % 1100, 1300 in mbar
+sensorSettings.barometer2.minMeasurementRange  =   0;                    % 300, 10 in mbar
+sensorSettings.barometer2.bit = 12; 
+sensorSettings.barometer2.resolution = (sensorSettings.barometer2.maxMeasurementRange -sensorSettings.barometer2.minMeasurementRange)/(2^sensorSettings.barometer2.bit);
+sensorSettings.barometer2.noiseVariance        =   4.6;                     % mbar^2
+
+%% barometer3 - digital measure (LPS28DFWTR)
+sensorSettings.barometer3 = Sensor_no_offset(); % presure in mbar, temp should be in C°
+sensorSettings.barometer3.maxMeasurementRange  =   4060;                   % 1100, 1300 in mbar
+sensorSettings.barometer3.minMeasurementRange  =   260;                    % 300, 10 in mbar
+sensorSettings.barometer3.bit = 24; 
+sensorSettings.barometer3.resolution = (sensorSettings.barometer3.maxMeasurementRange -sensorSettings.barometer3.minMeasurementRange)/(2^sensorSettings.barometer3.bit);
+sensorSettings.barometer3.noiseVariance        =   0.043043;                      % guess in mbar
+
+
+
+%% accelerometer (6 dof imu - LSM6DSRXTR)
+sensorSettings.accelerometer = Sensor3D(); % acceleration in mg
+sensorSettings.accelerometer.maxMeasurementRange =   16000;                  % 2000, 4000, 8000, 16000 in mg
+sensorSettings.accelerometer.minMeasurementRange =  -16000;                  % -2000, -4000, -8000, -16000 in mg
+sensorSettings.accelerometer.bit = 16; 
+sensorSettings.accelerometer.resolution          =   (sensorSettings.accelerometer.maxMeasurementRange -sensorSettings.accelerometer.minMeasurementRange)/(2^sensorSettings.accelerometer.bit);
+sensorSettings.accelerometer.noiseVariance       =   10;                     % guess in mg 
+sensorSettings.accelerometer.offsetX             =   0;                      % +-90 in mg
+sensorSettings.accelerometer.offsetY             =   0;                      % +-90 in mg
+sensorSettings.accelerometer.offsetZ             =   0;                      % +-90 in mg
+sensorSettings.accelerometer.walkDiffusionCoef   =   0;                      % guess
+sensorSettings.accelerometer.dt                  =   0.01;                   % sampling time
+
+%% initial gyroscope sensor from LSM9DS1
+sensorSettings.gyroscope = Sensor3D(); % angular rate in mdps
+sensorSettings.gyroscope.maxMeasurementRange  =   245e3;                  % 245e3, 500e3, 2000e3 in mdps
+sensorSettings.gyroscope.minMeasurementRange  =  -245e3;                  % -245e3, -500e3, -2000e3 in mdps
+sensorSettings.gyroscope.bit = 16;
+sensorSettings.gyroscope.resolution           =   (sensorSettings.gyroscope.maxMeasurementRange -sensorSettings.gyroscope.minMeasurementRange)/(2^sensorSettings.gyroscope.bit);                   % 8.75, 17.5, 70 in mdps
+sensorSettings.gyroscope.noiseVariance        =   50;                      % guess in mdps    100 was original
+sensorSettings.gyroscope.offsetX              =   0;                      % +-30e3 in mdps
+sensorSettings.gyroscope.offsetY              =   0;                      % +-30e3 in mdps
+sensorSettings.gyroscope.offsetZ              =   0;                      % +-30e3 in mdps
+sensorSettings.gyroscope.walkDiffusionCoef    =   1;                      % guess
+sensorSettings.gyroscope.dt                   =   0.01;                   % sampling time
+sensorSettings.gyroscope.transMatrix          =   diag([1 1 1]);          % axis transformation
+
+%% initial megnetometer sensor from LSM9DS1
+sensorSettings.magnetometer=Sensor3D(); % magnetic field in mgauss
+sensorSettings.magnetometer.maxMeasurementRange  =   16000;                  % 4000, 8000, 12000, 16000 in mgauss
+sensorSettings.magnetometer.minMeasurementRange  =  -16000;                  % -4000, -8000, -12000, -16000 in mgauss
+sensorSettings.magnetometer.resolution           =   0.58;                   % 0.14, 0.29, 0.43, 0.58 in mgauss
+sensorSettings.magnetometer.noiseVariance        =   4;                      % guess in mgauss    original guess 2
+sensorSettings.magnetometer.offsetX              =   0;                      % +-1000 in mgauss
+sensorSettings.magnetometer.offsetY              =   0;                      % +-1000 in mgauss
+sensorSettings.magnetometer.offsetZ              =   0;                      % +-1000 in mgauss
+sensorSettings.magnetometer.walkDiffusionCoef    =   0;                      % guess
+sensorSettings.magnetometer.dt                   =   0.01;                   % sampling time
+sensorSettings.magnetometer.transMatrix          =   diag([1 1 1]);          % axis transformation
+
+%% initial GPS sensor from NEO-M9N
+sensorSettings.GPS = Sensor3D();                                      % lon, in degree lat in deree, alt in m
+sensorSettings.GPS.noiseVariance          =   2;                      % in m
+sensorSettings.GPS.transMatrix            =   diag([1 1 1]);          % axis transformation
+sensorSettings.lat0                       =   settings.lat0;
+sensorSettings.lon0                       =   settings.lon0;
+sensorSettings.z0                         =   settings.z0;
+sensorSettings.spheroid                   =   wgs84Ellipsoid;
+
+%% initial chamber pressure sensor NAT825281
+sensorSettings.comb_chamber = Sensor(); % presure in mbar, temp should be in C°
+sensorSettings.comb_chamber.maxMeasurementRange  =   40000;                   % 1100, 1300 in mbar
+sensorSettings.comb_chamber.minMeasurementRange  =   0;                    % 300, 10 in mbar
+sensorSettings.comb_chamber.noiseVariance        =   60000;                      %  mbar
+% sensorSettings.comb_chamber.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
+sensorSettings.comb_chamber.resolution           =   1;     % random value stolen from baro
+% check 2d offset for chamber pressure sensor
+
+%% pitot  
+% static pressure
+sensorSettings.pitot_static = Sensor();
+sensorSettings.pitot_static.maxMeasurementRange = 1034.21; % mbar ( 15psi)
+sensorSettings.pitot_static.minMeasurementRange = 0;
+sensorSettings.pitot_static.bit = 12; 
+sensorSettings.pitot_static.resolution = (sensorSettings.pitot_static.maxMeasurementRange -sensorSettings.pitot_static.minMeasurementRange)/(2^sensorSettings.pitot_static.bit);
+sensorSettings.pitot_static.noiseVariance = 0.043043; % from flight logs
+
+% total pressure
+sensorSettings.pitot_total = Sensor_no_offset();
+sensorSettings.pitot_total.maxMeasurementRange = 2*1034.21; % mbar ( 30psi)
+sensorSettings.pitot_total.minMeasurementRange = 0;
+sensorSettings.pitot_total.bit = 12; 
+sensorSettings.pitot_total.resolution = (sensorSettings.pitot_total.maxMeasurementRange -sensorSettings.pitot_total.minMeasurementRange)/(2^sensorSettings.pitot_total.bit);
+sensorSettings.pitot_total.noiseVariance = 2*0.043043; % from flight logs
+
+%% total sensor initialization 
+% 
+% now is in std_setInitialParams.m
+%
+%

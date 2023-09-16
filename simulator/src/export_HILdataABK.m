@@ -10,8 +10,9 @@
 switch settings.mission
    
     case {"Gemini_Portugal_October_2023", "Gemini_Roccaraso_September_2023"}
-        if ~exist(ConDataPath+"/HIL_CPP_files_ABK","dir")
-            mkdir(ConDataPath+"/HIL_CPP_files_ABK")
+        folder = "HIL_CPP_files_ABK";
+        if ~exist(ConDataPath+"/"+folder,"dir")
+            mkdir(ConDataPath+"/"+folder)
         end
         % first file: trajectories, set in the following way:
         % first column - heights;
@@ -35,32 +36,32 @@ switch settings.mission
             reference_export_table(:,i) = table(reference_export(:,i));
         end
         reference_export_table.Properties.VariableNames = varNames;
-        writetable(reference_export_table,ConDataPath+"/HIL_CPP_files_ABK/ABK_references_"+settings.mission+".csv")
+        writetable(reference_export_table,ConDataPath+"/"+folder+"/ABK_references_"+settings.mission+".csv")
 
         % second file: configuration for the air brakes
         configABK_export_table = table;
-        configValues = [settings.frequencies.arbFrequency, contSettings.reference.deltaZ, contSettings.filter_coeff0,contSettings.filterMinAltitude,contSettings.filterMaxAltitude,contSettings.criticalAltitude,contSettings.masses_vec(1),contSettings.dmass,simOutput.estimated_mass(end),contSettings.N_forward,contSettings.ABK_shutdown_delay];
+        configValues = [settings.frequencies.arbFrequency, contSettings.reference.deltaZ, contSettings.filter_coeff0,contSettings.filterMinAltitude,contSettings.filterMaxAltitude,contSettings.criticalAltitude,contSettings.masses_vec(1),contSettings.dmass,simOutput.sensors.mea.mass(end),contSettings.N_forward,contSettings.ABK_shutdown_delay];
         configABKvarNames = {'ABK_FREQUENCY','REFERENCE_DZ','STARTING_FILTER_VALUE','CHANGE_FILTER_MINIMUM_ALTITUDE','CHANGE_FILTER_MAXIMUM_ALTITUDE','ABK_CRITICAL_ALTITUDE','ABK_REFERENCE_LOWEST_MASS','DELTA_MASS','ESTIMATED_MASS','N_FORWARD','ABK_DELAY_FROM_SHUTDOWN'};
         for i = 1:size(configValues,2)
             configABK_export_table(1,i) = table(configValues(1,i));
         end
         configABK_export_table.Properties.VariableNames = configABKvarNames;
-        writetable(configABK_export_table,ConDataPath+"/HIL_CPP_files_ABK/ABK_configABK_"+settings.mission+".csv")
+        writetable(configABK_export_table,ConDataPath+"/"+folder+"/ABK_configABK_"+settings.mission+".csv")
 
         % third file: input extrapolation:
         % first column - timestamps of the NAS system
         % second column - data with vertical position of the NAS;
         % third column - data with vertical velocity of the NAS;
         trajectory_export_table = table;
-        trajectory = zeros(size(simOutput.t_nas'));
-        trajectory(:,1) = -simOutput.NAS(:,3)-settings.z0;
-        trajectory(:,2) = -simOutput.NAS(:,6);
+        trajectory = zeros(size(simOutput.sensors.nas.time'));
+        trajectory(:,1) = -simOutput.sensors.nas.states(:,3)-settings.z0;
+        trajectory(:,2) = -simOutput.sensors.nas.states(:,6);
         traj_varNames = {'Z','Vz'};
         for i = 1:size(trajectory,2)
             trajectory_export_table(:,i) = table(trajectory(:,i));
         end
         trajectory_export_table.Properties.VariableNames = traj_varNames;
-        writetable(trajectory_export_table,ConDataPath+"/HIL_CPP_files_ABK/ABK_trajectories_"+settings.mission+".csv")
+        writetable(trajectory_export_table,ConDataPath+"/"+folder+"/ABK_trajectories_"+settings.mission+".csv")
 
         % fourth file: input extrapolation:
         % first column - data with air brakes timestamps;
@@ -72,11 +73,11 @@ switch settings.mission
         configControl;
         configControlParams;
         configReferences;
-        contSettings = trajectoryChoice_mass(simOutput.estimated_mass(end),contSettings);
+        contSettings_choosemass = trajectoryChoice_mass(simOutput.sensors.mea.mass(end),contSettings);
         ABK_recall = zeros(length(trajectory(:,2)),1);
         ABK_recall_old = 0;
         for i = 1:length(trajectory(:,2))
-            [ABK_recall(i),contSettings] = control_Interp(trajectory(i,1),trajectory(i,2),settings,contSettings,ABK_recall_old);
+            [ABK_recall(i),contSettings_choosemass] = control_Interp(trajectory(i,1),trajectory(i,2),settings,contSettings_choosemass,ABK_recall_old);
             ABK_recall_old = ABK_recall(i);
         end
         ABK_recall = ABK_recall/settings.servo.maxAngle;
@@ -86,7 +87,7 @@ switch settings.mission
             outputABK_export_table(:,i) = table(ABK_recall(:,i));
         end
         outputABK_export_table.Properties.VariableNames = ABK_varNames;
-        writetable(outputABK_export_table,ConDataPath+"/HIL_CPP_files_ABK/ABK_outputABK_"+settings.mission+".csv")
+        writetable(outputABK_export_table,ConDataPath+"/"+folder+"/ABK_outputABK_"+settings.mission+".csv")
         
         
 end

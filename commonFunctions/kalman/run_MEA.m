@@ -30,7 +30,7 @@ for ii = 2:length(t_mea)
     P(:,:,ii) = A*P(:,:,ii-1)*A' + settings.mea.Q;
 
     % correction
-    index_chambPress = find(t_mea(ii) >= t_chambPress,1,"last");
+    index_chambPress = sum(t_mea(ii) >= t_chambPress);
     S = C*P(:,:,ii)*C' + settings.mea.R;
     if ~det(S)<1e-3
         K = P(:,:,ii)*C'*inv(S); % if you want to try with constant gain [0.267161;-0.10199;-0.000205604 ];

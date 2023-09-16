@@ -166,10 +166,10 @@ if length(t_nas) > 1
 
         % reintroduce pitot
         % pitot
-        if settings.flagAscent && ~settings.flagStopPitotCorrection
-            index_pit   =  sum(t_nas(ii) >= t_pittemp);
-            [x_lin(ii,:),P_lin(4:6,4:6,ii),~] = correctionPitot(x_lin(ii,:),P_lin(4:6,4:6,ii),sensorTot.pitot.total_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot,xq(ii,1:4),nas.Mach_max);
-        end
+        % if settings.flagAscent && ~settings.flagStopPitotCorrection
+        %     index_pit   =  sum(t_nas(ii) >= t_pittemp);
+        %     [x_lin(ii,:),P_lin(4:6,4:6,ii),~] = correctionPitot(x_lin(ii,:),P_lin(4:6,4:6,ii),sensorTot.pitot.total_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot,xq(ii,1:4),nas.Mach_max);
+        % end
 
         x(ii,:) = [x_lin(ii,:),xq(ii,:)];
         P_c(1:6,1:6,ii)   = P_lin(:,:,ii);

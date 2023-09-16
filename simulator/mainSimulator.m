@@ -60,7 +60,7 @@ end
 
 conf.script = "simulator"; % this defines which configuration scripts to run
 settings.montecarlo = false;
-config; 
+configSimulator; 
 
 %% ALGORITHM TUNING
 % basically if this is true sets the randomic value of the wind to the same
@@ -110,5 +110,6 @@ if settings.flagExportCSV % this is set in configFlags
     if settings.scenario == "descent" || settings.scenario == "full flight"
         export_HILdataPRF;
     end
-    export_HILdataADA;
+    export_HILdataADA
+    export_HILdataNAS
 end

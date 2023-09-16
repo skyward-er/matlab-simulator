@@ -93,7 +93,7 @@ end
 
 
 contSettings.reference.deltaZ = 10;
-heights = [0:contSettings.reference.deltaZ:settings.z_final]';
+heights = (0:contSettings.reference.deltaZ:settings.z_final)';
 
 if str2double(settings.mission(end)) > 2
 

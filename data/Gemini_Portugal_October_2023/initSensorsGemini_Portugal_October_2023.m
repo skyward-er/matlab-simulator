@@ -30,7 +30,7 @@ s.MS580301BA01.resolution           =   0.012;                  % 0.012, 0.018, 
 s.MS580301BA01.noiseVariance        =   0.043043;                      % guess in mbar
 s.MS580301BA01.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
 
-%% barometer Gemini sensors
+%% barometer Gemini sensors -> pitot
 % sensor 1
 s.HSCMRNN015PAAA5 = Sensor();
 s.HSCMRNN015PAAA5.maxMeasurementRange = 1034.21; % mbar ( 15psi)

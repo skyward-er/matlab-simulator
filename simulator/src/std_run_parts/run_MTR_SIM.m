@@ -10,9 +10,9 @@ end
 [sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1);
 
 if sensorTot.mea.prediction(end) >= settings.mea.z_shutdown
-    settings.counter_shutdown = settings.counter_shutdown + 1*floor(settings.frequencies.MEAFrequency/settings.frequencies.controlFrequency); % the last multiplication is to take into account the frequency difference
+    settings.mea.counter_shutdown = settings.mea.counter_shutdown + 1*floor(settings.frequencies.MEAFrequency/settings.frequencies.controlFrequency); % the last multiplication is to take into account the frequency difference
     if ~settings.shutdown
-        if ~settings.expShutdown && settings.counter_shutdown > contSettings.N_prediction_threshold && T1 > settings.mea.t_lower_shadowmode% threshold set in configControl
+        if ~settings.expShutdown && settings.mea.counter_shutdown > contSettings.N_prediction_threshold && T1 > settings.mea.t_lower_shadowmode% threshold set in configControl
             settings.expShutdown = true;
             settings.t_shutdown = T1;
             settings.timeEngineCut = settings.t_shutdown + 0.3;

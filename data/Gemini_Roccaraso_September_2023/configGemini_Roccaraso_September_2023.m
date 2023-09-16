@@ -127,8 +127,8 @@ settings.ada.P0          =   [  0.1    0      0;                            % In
 [settings.ada.temp_ref, ~,...
  settings.ada.p_ref, ~]  =   atmosisa(settings.z0);                                  % Reference temperature in kelvin and pressure in Pa 
 
-settings.ada.v0          =   -50;                                         % Vertical velocity initial condition
-settings.ada.a0          =   -250;                                         % Acceleration velocity initial condition
+settings.ada.v0          =   0;                                         % Vertical velocity initial condition
+settings.ada.a0          =   0;                                         % Acceleration velocity initial condition
 settings.ada.x0          =  [settings.ada.p_ref, settings.ada.v0, settings.ada.a0];         
                                                                            % Ada initial condition
 
@@ -147,9 +147,9 @@ settings.mea.engine_model_A1 = [1.435871191228868,-0.469001276508780,0;1,0,0;-0.
 settings.mea.engine_model_B1 = [4;0;0];
 settings.mea.engine_model_C1 = [1.780138883879285,-1.625379384370081,0];
 % covariance matrices
-settings.mea.Q=1e-1*diag([1,1,1]);      % model noise covariance matrix    
+settings.mea.Q=0.1*diag([1,1,1]);      % model noise covariance matrix    
 settings.mea.R=0.36; 
 % shut down prediction altitude
-settings.mea.z_shutdown  = 700;
+settings.mea.z_shutdown  = 850;
 settings.mea.t_lower_shadowmode = 0; % minimunm burning time
 settings.mea.t_higher_shadowmode = 10; % maximum burning time % have to be to tuned (14/09/23)

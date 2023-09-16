@@ -165,10 +165,64 @@ sensorData.mea.estimated_pressure = 0;
 sensorData.mea.predicted_apogee = 0;
 sensorData.mea.time = 0;
 settings.t_shutdown = Inf;
-settings.counter_shutdown = 0;
+settings.mea.counter_shutdown = 0;
 
 
 %% parafoil
 deltaA = contSettings.payload.deltaA_0;
 para = 1;
 
+
+
+%% total sensors initialization
+% total measurements
+[~,~,P0,~] = atmosisa(settings.z0);
+sensorTot.barometer_sens{1}.pressure_measures   =   P0;
+sensorTot.barometer_sens{2}.pressure_measures   =   P0;
+sensorTot.barometer_sens{3}.pressure_measures   =   P0;
+sensorTot.barometer_sens{1}.altitude            =   -settings.z0;
+sensorTot.barometer_sens{2}.altitude            =   -settings.z0;
+sensorTot.barometer_sens{3}.altitude            =   -settings.z0;
+sensorTot.barometer.pressure_measures           =   P0;
+sensorTot.barometer.altitude                    =   -settings.z0;
+sensorTot.comb_chamber.measures                 =   0;
+sensorTot.imu.accelerometer_measures            =   [0, 0, 0];
+sensorTot.imu.gyro_measures                     =   [0, 0, 0];
+sensorTot.imu.magnetometer_measures             =   [0, 0, 0];
+sensorTot.gps.position_measures                 =   [0, 0, 0];
+sensorTot.gps.velocity_measures                 =   [0, 0, 0];
+sensorTot.pitot.total_pressure                  =   P0;
+sensorTot.pitot.static_pressure                 =   P0;
+sensorTot.nas.states                            =   sensorData.nas.states;
+
+
+% inizializzare i tempi dei sensori a 0 e poi mettere tutti i n_old = 2
+sensorTot.barometer_sens{1}.time    =   0;
+sensorTot.barometer_sens{2}.time    =   0;
+sensorTot.barometer_sens{3}.time    =   0;
+sensorTot.barometer_sens{1}.time    =   0;
+sensorTot.barometer_sens{2}.time    =   0;
+sensorTot.barometer_sens{3}.time    =   0;
+sensorTot.barometer.time            =   0;
+sensorTot.comb_chamber.time         =   0;
+sensorTot.imu.time                  =   0;
+sensorTot.gps.time                  =   0;
+sensorTot.pitot.time                =   0;
+sensorTot.nas.time                  =   0;
+sensorTot.ada.time                  =   0;
+sensorTot.mea.time                  =   0;
+
+
+% initialization of the indexes
+sensorTot.barometer_sens{1}.n_old = 2;
+sensorTot.barometer_sens{2}.n_old = 2;
+sensorTot.barometer_sens{3}.n_old = 2;
+sensorTot.barometer.n_old = 2;
+sensorTot.imu.n_old = 2;
+sensorTot.gps.n_old = 2;
+sensorTot.pitot.n_old = 2;
+sensorTot.comb_chamber.n_old = 2;
+sensorTot.ada.n_old = 2;
+sensorTot.nas.n_old = 2;
+sensorTot.mea.n_old = 2;
+sensorTot.sfd.n_old = 2;
