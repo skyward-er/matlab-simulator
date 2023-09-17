@@ -42,7 +42,7 @@ if conf.script == "simulator"
             settings.wind.input = true;
             settings.wind.model = false;
             settings.wind.inputGround  = 6;                                         % [m/s] Wind magnitude at the ground
-            settings.wind.inputAlt     = linspace(0, 2000, 100);        % [m] Altitude vector
+            settings.wind.inputAlt     = 2*linspace(0, 2000, 100);        % [m] Altitude vector
             % settings.wind.inputMult    = [0 1 2 3 4 4.5 5 5.5 6]*50;                 % [-] Percentage of increasing magnitude at each altitude
             % settings.wind.inputAzimut  = 200*pi/180*ones(1,9);                       % [deg] Wind azimut angle at each altitude (toward wind incoming direction)
             % settings.wind.input_uncertainty = [0,0];

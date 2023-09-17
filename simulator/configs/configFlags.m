@@ -51,7 +51,7 @@ settings.identification = false;
 settings.flagExportPLOTS = false;
 
 % export csv files for CPP implementation?
-settings.flagExportCSV = true;
+settings.flagExportCSV = false;
 
 
 

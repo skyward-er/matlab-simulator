@@ -1,4 +1,4 @@
-function std_plots(simOutput, settings,contSettings)
+function std_plots_FAST(simOutput, settings,contSettings)
 
 if ~exist("report_images\"+settings.mission,"dir")
     mkdir("report_images\"+settings.mission)
@@ -34,39 +34,6 @@ if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'co
 end
 
 
-%% ada
-figures.ada = figure('Position',[100,100,600,400]);
-plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xv(:,1),'DisplayName','$ADA_{z}$')
-hold on
-plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xv(:,2),'DisplayName','$ADA_{vz}$')
-plot( simOutput.t,  -simOutput.Y(:,3),'DisplayName','True z')
-plot( simOutput.t,  -v_ned(:,3),'DisplayName','True Vz')
-legend;
-title('ADA vs trajectory')
-
-figure('Position',[100,100,600,400])
-hold on
-plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xp(:,2),'DisplayName','ADA dp')
-title('ADA pressure derivative')
-
-%% reference
-figure('Position',[100,100,600,400])
-yyaxis left
-hold on
-if ~settings.electronics
-    contSettings = simOutput.contSettings; % because the trajectory are chosen during the simulation, not a priori
-    if not(settings.scenario == "descent")
-        plot(contSettings.reference.Z, contSettings.reference.Vz(:,1),'r','DisplayName','ref min')
-        plot(contSettings.reference.Z, contSettings.reference.Vz(:,2),'k','DisplayName','ref max')
-    end
-end
-plot( -simOutput.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
-plot( -simOutput.sensors.nas.states(:,3)-settings.z0,  -simOutput.sensors.nas.states(:,6),'m--','DisplayName','NAS')
-% plot( structIn.ADA(:,4),  structIn.ADA(:,5),'b','DisplayName','ADA z')
-yyaxis right
-plot( -simOutput.Y(:, 3), simOutput.Y(:, 14),'g','DisplayName','arb')
-
-legend
 
 
 
