@@ -281,7 +281,7 @@ fprintf('\n')
 fprintf('MIN shutdown time = %.3f\n',max(t_shutdown.value))
 fprintf('MAX shutdown time = %.3f\n',min(t_shutdown.value))
 fprintf('MEAN shutdown time = %.3f\n',t_shutdown.mean)
-fprintf('Computation time %.3f', toc)
+fprintf('Computation time %.3f\n', toc)
 
 
 %% Save results.txt
