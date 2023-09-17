@@ -47,7 +47,7 @@ if conf.script == "simulator"
             % settings.wind.inputAzimut  = 200*pi/180*ones(1,9);                       % [deg] Wind azimut angle at each altitude (toward wind incoming direction)
             % settings.wind.input_uncertainty = [0,0];
         settings.wind.inputMagnitude = [2 * ones(1, 15), 4 * ones(1, 5), 5 * ones(1, 10), 7*ones(1, 15), 8*ones(1, 20),  9 * ones(1, 35)];
-        settings.wind.inputAzimut = [0 * ones(1, 15), 300 * ones(1, 85)];   % wind azimut angle at each altitude (toward wind incoming direction) [deg]
+        settings.wind.inputAzimut = [180 * ones(1, 15), 300 * ones(1, 85)];   % wind azimut angle at each altitude (toward wind incoming direction) [deg]
         settings.wind.input_uncertainty = [50, 30];
         settings.wind.inputMult = (settings.wind.inputMagnitude./settings.wind.inputGround - 1) * 100;
             % settings.wind.input_uncertainty = [a,b];      wind uncertanties:

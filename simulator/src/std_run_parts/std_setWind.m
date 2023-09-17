@@ -25,7 +25,7 @@ switch settings.windModel
     case "multiplicative"
        
         Mag  = settings.wind.inputGround;
-        Az = settings.wind.inputAzimut(1);
+        Az = pi+settings.wind.inputAzimut(1);
         R = Mag*angle2dcm(Az, 0, 0, 'ZYX');
         uw = R(1,1);
         vw = R(1,2);
