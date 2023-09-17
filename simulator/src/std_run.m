@@ -416,15 +416,6 @@ end
 t_ada    = settings.ada.t_ada;
 settings.flagMatr = settings.flagMatr(1:n_old, :);
 
-%% RETRIVE PARAMETERS FROM THE ODE (RECALL ODE) 
-
-% if ~settings.electronics && ~settings.montecarlo && not(settings.scenario == "descent")
-%     settings.wind.output_time = Tf;
-%     dataAscent = recallOdeFcn2(@ascentControl, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, Yf(:,14), settings.servo.delay,tLaunch,'apVec');
-% else
-%     dataAscent = [];
-% end
-
 %% extract parameters:
 [~, idx_apo] = max(-Yf(:,3));
 
@@ -446,6 +437,7 @@ struct_out.sensors.ada.t_apogee = settings.ada.t_ada;
 struct_out.sensors.nas.t_apogee = settings.nas.t_nas;
 struct_out.sensors.mea.mass_offset = settings.mass_offset;
 struct_out.sensors.mea.true_mass_at_shutdown = dataRecall.true_mass(lastAscentIndex-10);
+
 % apogee
 struct_out.apogee.time = Tf(idx_apo);
 struct_out.apogee.time_ada = t_ada;

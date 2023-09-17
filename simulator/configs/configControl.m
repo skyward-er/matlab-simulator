@@ -56,7 +56,7 @@ contSettings.filter_coeff = 0.5;                                            % se
 
 % delay from motor shutdown to air brakes opening:
 contSettings.ABK_shutdown_delay = 0.5; % [s] time between engine shutdown command and ABK phase
-contSettings.ABK_shadowmode = 3.8; % [s]
+contSettings.ABK_shadowmode = 4.5; % [s]
 
 % flag initialization
 contSettings.flagFirstControlABK = true;                                       % if it is the first iter the control action is not filtered, then the filter acts
