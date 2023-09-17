@@ -40,8 +40,7 @@ configWind;
 %% 8) PLOTS?
 configPlots;
 
-%% 9) MONTECARLO?
-configMontecarlo;
+
 
 %% 10) CONTROL
 configControl;

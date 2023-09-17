@@ -28,12 +28,19 @@ xlabel('Time (s)')
 ylabel('Servo angle \alpha (rad)')
 legend(contSettings.algorithm);
 
-%% t_shutdown
+%% t_shutdown % I am adding 0.3 seconds because we do not consider it in simulation, while in reality there is a delay between the command and the actuation
 subplot(1,3,3)
-histogram(t_shutdown.value,N_histCol,'Normalization','cdf')
+histogram(t_shutdown.value+0.3,N_histCol,'Normalization','cdf')
 xlabel('Shutdown time (s)')
 ylabel('Shutdown time cdf')
 title('Engine shutdown time cumulative distribution')
+
+
+return
+
+
+
+
 
 %%
 figure
@@ -47,8 +54,6 @@ ylabel('Number of apogees in the same interval')
 title('Reached apogee distribution')
 legend
 
-
-return
 %%
 
 

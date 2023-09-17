@@ -49,6 +49,22 @@ conf.script = "simulator";
 settings.montecarlo = true;
 configSimulator;
 
+%% set real time parameters
+I_TOT = 4718.86; 
+BURNING_TIME = 2.90897; 
+%%% -----------------------------
+BURNING_TIME = BURNING_TIME + settings.tIGN + settings.tCO;
+timeNew = settings.motor.expTime * BURNING_TIME/settings.tb; 
+Itemp = trapz(timeNew, settings.motor.expThrust); 
+ThrustNew = settings.motor.expThrust * I_TOT/Itemp; 
+settings.State.xcgTime = settings.State.xcgTime * timeNew(end)/settings.tb; 
+settings.tb = timeNew(end); 
+settings.motor.expTime = timeNew; 
+settings.motor.expThrust = ThrustNew;
+
+%% montecarlo settings
+configMontecarlo;
+
 %% MONTECARLO SETTINGS
 rng default
 matlab_graphics;
@@ -66,7 +82,7 @@ settings_mont_init = struct('x',[]);
 
 %% start simulation
 
-contSettings.algorithm = 'interp';
+contSettings.algorithm = 'complete';
 
 %save arrays
 save_thrust = cell(size(stoch.thrust,1),1);
@@ -76,7 +92,7 @@ wind_el = zeros(N_sim,1);
 wind_az = zeros(N_sim,1);
 t_shutdown.value = zeros(N_sim,1);
 
-parfor i = 1:N_sim
+for i = 1:N_sim
     settings_mont = settings_mont_init;
 
     settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
@@ -286,7 +302,12 @@ fprintf('MEAN shutdown time = %d',t_shutdown.mean)
 
 
 %% Save results.txt
-fid = fopen( folder(i)+"\"+contSettings.algorithm+"Results"+saveDate+".txt", 'wt' );  % CAMBIA IL NOME
+folder = "Preflight_results";
+if ~exist(folder,"dir")
+    mkdir(folder)
+end
+
+fid = fopen( folder+"/Results_preflight.txt", 'wt' );  % CAMBIA IL NOME
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 fprintf(fid,'SIMULATION \n\n');
 fprintf(fid,'Number of simulations: %d \n \n',N_sim); % Cambia n_sim
@@ -349,10 +370,6 @@ if settings.scenario ~= "descent"
     fprintf(fid,'Min apogee: %.2f m\n',min(apogee.altitude));
     fprintf(fid,'Mean apogee: %.2f m\n',apogee.altitude_mean);
     fprintf(fid,'Apogee standard deviation 3sigma: %.4f \n',3*apogee.altitude_std);
-    fprintf(fid,'Apogees within +-10m from target (gaussian): %.2f %% \n',apogee.accuracy_gaussian_10);
-    fprintf(fid,'Apogees within +-10m from target (ratio): %.2f %% \n\n',apogee.accuracy_10);
-    fprintf(fid,'Apogees within +-50m from target (gaussian): %.2f %% \n',apogee.accuracy_gaussian_50);
-    fprintf(fid,'Apogees within +-50m from target (ratio): %.2f %% \n\n',apogee.accuracy_50);
     fprintf(fid,'Apogees horizontal distance from origin mean : %.2f [m] \n',apogee.radius_mean);
     fprintf(fid,'Apogees horizontal distance from origin std : %.2f [m] \n\n',apogee.radius_std);
     fprintf(fid,'Apogees horizontal speed mean : %.2f [m/s] \n',apogee.horizontalSpeed_mean);

@@ -14,7 +14,7 @@ if settings.montecarlo
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % how many simulations
-N_sim = 10; % set to at least 500
+N_sim = 2; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
 
