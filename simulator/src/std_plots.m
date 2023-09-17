@@ -229,122 +229,122 @@ plot( structIn.t_ada_tot,  structIn.ADA(:,2),'DisplayName','ADA dp')
 title('ADA pressure derivative')
 
 %% quaternions
-figures.EulerAngles = figure('Name','Euler angles','Position',[100,100,600,400]);
-%
-subplot(2,2,1)
-plot(structIn.t,structIn.Y(:,10),'k','DisplayName','q_w');
-hold on;
-plot(structIn.t_nas,structIn.NAS(:,10),'r','DisplayName','q_w est');
-xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
-legend
-ylabel('q_w')
-%
-subplot(2,2,2)
-plot(structIn.t,structIn.Y(:,11),'k','DisplayName','q_x');
-hold on;
-plot(structIn.t_nas,structIn.NAS(:,7),'r','DisplayName','q_x est');
-xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
-legend
-ylabel('q_x')
-%
-subplot(2,2,3)
-plot(structIn.t,structIn.Y(:,12),'k','DisplayName','q_y');
-hold on;
-plot(structIn.t_nas,structIn.NAS(:,8),'r','DisplayName','q_y est');
-xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
-legend
-ylabel('q_y')
-%
-subplot(2,2,4)
-plot(structIn.t,structIn.Y(:,13),'k','DisplayName','q_z');
-hold on;
-plot(structIn.t_nas,structIn.NAS(:,9),'r','DisplayName','q_z est');
-xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
-legend
-ylabel('q_z')
-
-legend
-sgtitle('Euler angles')
-xlabel('Time (s)')
+% figures.EulerAngles = figure('Name','Euler angles','Position',[100,100,600,400]);
+% %
+% subplot(2,2,1)
+% plot(structIn.t,structIn.Y(:,10),'k','DisplayName','q_w');
+% hold on;
+% plot(structIn.t_nas,structIn.NAS(:,10),'r','DisplayName','q_w est');
+% xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+% legend
+% ylabel('q_w')
+% %
+% subplot(2,2,2)
+% plot(structIn.t,structIn.Y(:,11),'k','DisplayName','q_x');
+% hold on;
+% plot(structIn.t_nas,structIn.NAS(:,7),'r','DisplayName','q_x est');
+% xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+% legend
+% ylabel('q_x')
+% %
+% subplot(2,2,3)
+% plot(structIn.t,structIn.Y(:,12),'k','DisplayName','q_y');
+% hold on;
+% plot(structIn.t_nas,structIn.NAS(:,8),'r','DisplayName','q_y est');
+% xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+% legend
+% ylabel('q_y')
+% %
+% subplot(2,2,4)
+% plot(structIn.t,structIn.Y(:,13),'k','DisplayName','q_z');
+% hold on;
+% plot(structIn.t_nas,structIn.NAS(:,9),'r','DisplayName','q_z est');
+% xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+% legend
+% ylabel('q_z')
+% 
+% legend
+% sgtitle('Euler angles')
+% xlabel('Time (s)')
 
 %% euler angles
-eul = quat2eul(structIn.Y(:,10:13));
-eul = flip(eul,2);
-eul = unwrap(eul);
-eul = rad2deg(eul);
-eul_NAS = quat2eul(structIn.NAS(:,[10,7:9]));
-eul_NAS = flip(eul_NAS,2);
-eul_NAS = unwrap(eul_NAS);
-eul_NAS = rad2deg(eul_NAS);
-figures.EulerAngles = figure('Name','Euler angles','Position',[100,100,600,400]);
-%
-subplot(3,1,1)
-plot(structIn.t,eul(:,1),'DisplayName','\phi');
-hold on;
-plot(structIn.t_nas,eul_NAS(:,1),'DisplayName','\phi est');
-xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
-legend
-ylabel('Roll (°)')
-%
-subplot(3,1,2)
-plot(structIn.t,eul(:,2),'DisplayName','\theta');
-hold on;
-plot(structIn.t_nas,eul_NAS(:,2),'DisplayName','\theta est');
-xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
-legend
-ylabel('Pitch (°)')
-%
-subplot(3,1,3)
-plot(structIn.t,eul(:,3),'DisplayName','\psi');
-hold on;
-plot(structIn.t_nas,eul_NAS(:,3),'DisplayName','\psi est');
-xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
-ylabel('Yaw (°)')
-legend
-sgtitle('Euler angles')
-xlabel('Time (s)')
-
+% eul = quat2eul(structIn.Y(:,10:13));
+% eul = flip(eul,2);
+% eul = unwrap(eul);
+% eul = rad2deg(eul);
+% eul_NAS = quat2eul(structIn.NAS(:,[10,7:9]));
+% eul_NAS = flip(eul_NAS,2);
+% eul_NAS = unwrap(eul_NAS);
+% eul_NAS = rad2deg(eul_NAS);
+% figures.EulerAngles = figure('Name','Euler angles','Position',[100,100,600,400]);
+% %
+% subplot(3,1,1)
+% plot(structIn.t,eul(:,1),'DisplayName','\phi');
+% hold on;
+% plot(structIn.t_nas,eul_NAS(:,1),'DisplayName','\phi est');
+% xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+% legend
+% ylabel('Roll (°)')
+% %
+% subplot(3,1,2)
+% plot(structIn.t,eul(:,2),'DisplayName','\theta');
+% hold on;
+% plot(structIn.t_nas,eul_NAS(:,2),'DisplayName','\theta est');
+% xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+% legend
+% ylabel('Pitch (°)')
+% %
+% subplot(3,1,3)
+% plot(structIn.t,eul(:,3),'DisplayName','\psi');
+% hold on;
+% plot(structIn.t_nas,eul_NAS(:,3),'DisplayName','\psi est');
+% xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+% ylabel('Yaw (°)')
+% legend
+% sgtitle('Euler angles')
+% xlabel('Time (s)')
+% 
 
 %% angular rotations
-figures.velocities = figure('Name', 'Angular rotations BODY','ToolBar','auto','Position',[100,100,600,400]);
-%
-subplot(3,1,1)
-plot(structIn.t, structIn.Y(:, 7),'DisplayName','p')
-hold on; grid on;
-if not(settings.scenario == "descent")
-    xline(structIn.ARB_allowanceTime,'k--')
-end
-xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
-xline(structIn.apogee_time,'r--','DisplayName','Apogee')
-ylabel('p [rad/s]');
-legend
-%
-subplot(3,1,2)
-plot(structIn.t, structIn.Y(:, 8),'DisplayName','q')
-hold on; 
-if not(settings.scenario == "descent")
-    xline(structIn.ARB_allowanceTime,'k--')
-end
-xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
-xline(structIn.apogee_time,'r--','DisplayName','Apogee')
-ylabel('q [rad/s]');
-legend
-%
-subplot(3,1,3)
-plot(structIn.t, structIn.Y(:, 9),'DisplayName','r')
-hold on;
-if not(settings.scenario == "descent")
-    xline(structIn.ARB_allowanceTime,'k--','DisplayName','Air brakes opening')
-end
-xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
-xline(structIn.apogee_time,'r--','DisplayName','Apogee')
-xlabel('Time [s]');
-ylabel('r [rad/s]');
-sgtitle('Angular rotations BODY');
-legend
-if settings.flagExportPLOTS == true
-    exportStandardizedFigure(figures.velocities,"report_images\"+settings.mission+"\src_Angular_rotations_BODY.pdf",0.9)
-end
+% figures.velocities = figure('Name', 'Angular rotations BODY','ToolBar','auto','Position',[100,100,600,400]);
+% %
+% subplot(3,1,1)
+% plot(structIn.t, structIn.Y(:, 7),'DisplayName','p')
+% hold on; grid on;
+% if not(settings.scenario == "descent")
+%     xline(structIn.ARB_allowanceTime,'k--')
+% end
+% xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+% xline(structIn.apogee_time,'r--','DisplayName','Apogee')
+% ylabel('p [rad/s]');
+% legend
+% %
+% subplot(3,1,2)
+% plot(structIn.t, structIn.Y(:, 8),'DisplayName','q')
+% hold on; 
+% if not(settings.scenario == "descent")
+%     xline(structIn.ARB_allowanceTime,'k--')
+% end
+% xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+% xline(structIn.apogee_time,'r--','DisplayName','Apogee')
+% ylabel('q [rad/s]');
+% legend
+% %
+% subplot(3,1,3)
+% plot(structIn.t, structIn.Y(:, 9),'DisplayName','r')
+% hold on;
+% if not(settings.scenario == "descent")
+%     xline(structIn.ARB_allowanceTime,'k--','DisplayName','Air brakes opening')
+% end
+% xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+% xline(structIn.apogee_time,'r--','DisplayName','Apogee')
+% xlabel('Time [s]');
+% ylabel('r [rad/s]');
+% sgtitle('Angular rotations BODY');
+% legend
+% if settings.flagExportPLOTS == true
+%     exportStandardizedFigure(figures.velocities,"report_images\"+settings.mission+"\src_Angular_rotations_BODY.pdf",0.9)
+% end
 
 end
     

@@ -135,7 +135,9 @@ faults = [];
 barometer_measure = cell(1,3);
 barometer_time = [];
 sfd_mean_p = [];
-
+weight_log_W1 = [];
+weight_log_W2 = [];
+sfd_mean_p_before_filter = [];
 %% ADA initial conditions
 
 if settings.flagADA

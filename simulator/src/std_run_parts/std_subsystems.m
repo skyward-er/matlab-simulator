@@ -11,8 +11,7 @@ This function runs all subsystems in a simulated environment
 
 
 [sensorData,sp, settings] = run_SensorFaultDetection_SVM(settings, iTimes, sensorData,sp,t0);
-
-
+prev_filter_baro_data = sp.pn_unfiltered;
 %% ADA
 if iTimes>3
     if settings.flagADA

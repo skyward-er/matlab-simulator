@@ -31,17 +31,35 @@ max_degradation = 1300; %Pa
 min_degradation = 200; %Pa
 
 
-offset_value = round((max_offset-min_offset)*rand() + min_offset);
+setting.offset_value_1 = round((max_offset-min_offset)*rand() + min_offset);
+setting.offset_value_2 = round((max_offset-min_offset)*rand() + min_offset);
+setting.offset_value_3 = round((max_offset-min_offset)*rand() + min_offset);
 
-switch degradation_type
 
-    case "offset"
+setting.degradation_value_1 = round((max_offset-min_offset)*rand() + min_offset);
+setting.degradation_value_2 = round((max_degradation-min_degradation)*rand() + min_degradation);
+setting.degradation_value_3 = round((max_degradation-min_degradation)*rand() + min_degradation);
 
-    case "degradation"
-
-    case "freezing"
-
-end
+% for i = 1:3
+%         rand_fault = randi(3);
+%     switch rand_fault
+%         case 1
+%             setting.fault_type(i) = "offset";
+%         case 2
+%             setting.fault_type(i) = "degradation";
+%         case 3
+%             setting.fault_type(i) = "freezing";
+%     end
+% end
+% switch fault_type
+% 
+%     case "offset"
+% 
+%     case "degradation"
+% 
+%     case "freezing"
+% 
+% end
 
 
 %% SENSOR FAULT DETECTION PARAMETERS

@@ -377,6 +377,9 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     barometer_time = [barometer_time t1];
     sfd_mean_p = [sfd_mean_p sp.pn(end)];
     faults = [faults; settings.faulty_sensors];
+    weight_log_W1 = [weight_log_W1, settings.sfd.W1];
+    weight_log_W2 = [weight_log_W2, settings.sfd.W2];
+    sfd_mean_p_before_filter = [sfd_mean_p_before_filter prev_filter_baro_data(end)];
     n_old = n_old + n -1;
 
 
@@ -494,6 +497,10 @@ struct_out.barometer_measures = barometer_measure;
 struct_out.barometer_times = barometer_time;
 struct_out.sfd_mean_p = sfd_mean_p;
 struct_out.faults = faults;
+struct_out.weight_log_W1 = weight_log_W1;
+struct_out.weight_log_W2 = weight_log_W2;
+struct_out.sfd_mean_p_before_filter = sfd_mean_p_before_filter;
+
 if exist('t_airbrakes','var')
     struct_out.ARB_allowanceTime = t_airbrakes;
     struct_out.ARB_allowanceIdx = idx_airbrakes;
