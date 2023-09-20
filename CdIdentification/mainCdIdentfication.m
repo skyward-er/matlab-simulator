@@ -42,7 +42,8 @@ end
 
 conf.script = "simulator"; % this defines which configuration scripts to run
 cd("../simulator/")
-config;
+settings.montecarlo = false;
+configSimulator;
 cd(currentPath)
 % set that we are in the identification phase, so you can recall deltaA in
 % the ode
@@ -58,7 +59,7 @@ else
     flagOverwrite  =false;
 end
 
-saveFileName  = "estimatedCorrectionFactor";
+saveFileName  = "flightData\"+settings.mission+"estimatedCorrectionFactor";
 
 %% generate guess
 x0(1)     =  1;   % multiplicative factor for drag coefficient in the 
@@ -77,27 +78,25 @@ b = [b1;b2];
 R = eye(6);
 R_m = inv(R);
 %% extract data from simulation
-user = "Max";
+
+fileNAS = "flightData\"+settings.mission+"\Boardcore_NASState";
+fileOutputABK = "flightData\"+settings.mission+"\Boardcore_ServoData";
+
 
 switch settings.mission
-
     case 'Pyxis_Portugal_October_2022'
-        fileNAS = "C:\Users\"+user+"\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\flights\euroc 2022\2022-10-13-pyxis-euroc\SRAD_main\Boardcore_NASState";
-        fileOutputABK = "C:\Users\"+user+"\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\flights\euroc 2022\2022-10-13-pyxis-euroc\SRAD_main\Boardcore_ServoData";
-    
         t_start =3338; 
         t_end = 3350;
-
     case 'Pyxis_Roccaraso_September_2022'
-        fileNAS = "C:\Users\"+user+"\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\flights\2022-09-17-pyxis-roccaraso\logs\SRAD_main\normalized\Boardcore_NASState";
-        fileOutputABK = "C:\Users\"+user+"\OneDrive - Politecnico di Milano\SKYWARD\TEST SPERIMENTALI\flights\2022-09-17-pyxis-roccaraso\logs\SRAD_main\normalized\Boardcore_ServoData";
-        
-        t_start =3338; 
-        t_end = 3350;
-
+          error('We do not have the logs of the air brakes unfortunately for this flight.\n')
+    
+    case 'Gemini_Roccaraso_September_2023'
+        t_start = 8536 + settings.tb; 
+        t_end = 8553;       
 end
+
 % extraction
-log_NAS     = csvDataLogExtractor(fileNAS,"sec");
+log_NAS  = csvDataLogExtractor(fileNAS,"sec");
 log_ABK  = csvDataLogExtractor(fileOutputABK,"sec");
 
 % plot to see where you want to trim the struct
@@ -196,6 +195,7 @@ ABK_perc = [ABK_time,ABK_value];
 % % % settings.wind.ElMax     =   0*pi/180;                 % [rad] Maximum Elevation, user input in degrees (ex. 0) (Max == 90 Deg)
 % % % settings.wind.AzMin     =   mean(wind_angle);              % [rad] Minimum Azimuth, user input in degrees (ex. 90)
 % % % settings.wind.AzMax     =   mean(wind_angle);              % [rad] Maximum Azimuth, user input in degrees (ex. 90)
+
 [uw, vw, ww, Az , El, Mag] = std_setWind(settings);
 settings.constWind = [uw, vw, ww];
 
@@ -295,8 +295,6 @@ plot(ABK_perc(:,1),ABK_perc(:,2),'DisplayName','Measured')
 hold on;
 plot(t_sim,y_sim(:,14),'DisplayName','Simulated')
 
-% load('gong')
-% sound(0.2*y,Fs)
 
 return
 %% test on the actual simulator with a target
