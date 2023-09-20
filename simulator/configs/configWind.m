@@ -43,17 +43,11 @@ if conf.script == "simulator"
             settings.wind.model = false;
             settings.wind.inputGround  = 7;                                         % [m/s] Wind magnitude at the ground
             settings.wind.inputAlt     = linspace(0, 2000, 100);        % [m] Altitude vector
-            % settings.wind.inputMult    = [0 1 2 3 4 4.5 5 5.5 6]*50;                 % [-] Percentage of increasing magnitude at each altitude
-            % settings.wind.inputAzimut  = 200*pi/180*ones(1,9);                       % [deg] Wind azimut angle at each altitude (toward wind incoming direction)
-            % settings.wind.input_uncertainty = [0,0];
-        settings.wind.inputMagnitude = [7 * ones(1, 15), 8 * ones(1, 5), 8 * ones(1, 10), 11*ones(1, 15), 13*ones(1, 20),  15 * ones(1, 35)];
-        settings.wind.inputAzimut = [(177+180) * ones(1, 15), 270 * ones(1, 85)];   % wind azimut angle at each altitude (toward wind incoming direction) [deg]
-        settings.wind.input_uncertainty = [10, 20];
-        settings.wind.inputMult = (settings.wind.inputMagnitude./settings.wind.inputGround - 1) * 100;
-            % settings.wind.input_uncertainty = [a,b];      wind uncertanties:
-            % - a, wind magnitude percentage uncertanty: magn = magn *(1 +- a)
-            % - b, wind direction band uncertanty: dir = dir 1 +- b
-            
+            settings.wind.inputMagnitude = [7 * ones(1, 15), 8 * ones(1, 5), 8 * ones(1, 10), 11*ones(1, 15), 13*ones(1, 20),  15 * ones(1, 35)];
+            settings.wind.inputAzimut = [(177+180) * ones(1, 15), 270 * ones(1, 85)];   % wind azimut angle at each altitude (toward wind incoming direction) [deg]
+            settings.wind.input_uncertainty = [10, 20];
+            settings.wind.inputMult = (settings.wind.inputMagnitude./settings.wind.inputGround - 1) * 100;
+                
 
 
         case "constant"
