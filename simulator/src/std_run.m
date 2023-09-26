@@ -434,10 +434,9 @@ settings.flagMatr = settings.flagMatr(1:n_old, :);
 
 %% output
 % simulation states
-struct_out.t = Tf(1:end-2);
-struct_out.Y = Yf(1:end-2,:);
-dataRecall.true_mass = dataRecall.true_mass(1:end-2);
-
+struct_out.t = Tf;
+struct_out.Y = Yf;
+struct_out.flags = settings.flagMatr;
 % wind
 struct_out.wind.Mag = settings.wind.Mag;
 struct_out.wind.Az = settings.wind.Az;
