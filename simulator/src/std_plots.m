@@ -316,7 +316,113 @@ legend
 %     exportStandardizedFigure(figures.Mach_number,"report_images\"+settings.mission+"src_src_Mach_number.pdf",0.9)
 % end
 
+%% MASS ESTIMATION ALGORITHM
+if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
+    figures.MEA = figure('Name', 'Predicted apogee','ToolBar','auto');
+    subplot(2,1,1)
+    plot(structIn.t, -structIn.Y(:, 3),'DisplayName','Altitude');
+    hold on; grid on;
+    plot(structIn.sensors.mea.time, structIn.sensors.mea.prediction,'DisplayName','Prediction');
+    legend
+    subplot(2,1,2)
+    plot(structIn.sensors.mea.time, structIn.sensors.mea.mass   ,'DisplayName','Mass');
+    legend
+    xline(structIn.sensors.mea.t_shutdown,'r--')
+    xlabel('Time t [s]');
+    ylabel('Altitude AGL [m]');
+    title('Predicted vs Real apogee');
+    
 
+    
+
+    if settings.flagExportPLOTS == true
+        exportStandardizedFigure(figures.MEA,'predicted_apogee.pdf',0.9)
+    end
+
+end
+
+%% reference
+figure('Position',[100,100,600,400])
+yyaxis left
+hold on
+if ~settings.electronics
+    contSettings = structIn.contSettings; % because the trajectory are chosen during the simulation, not a priori
+    if not(settings.scenario == "descent")
+        plot(contSettings.reference.Z, contSettings.reference.Vz(:,1),'r','DisplayName','ref min')
+        plot(contSettings.reference.Z, contSettings.reference.Vz(:,2),'k','DisplayName','ref max')
+    end
+end
+v_ned = quatrotate(quatconj(structIn.Y(:, 10:13)), structIn.Y(:, 4:6));
+plot( -structIn.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
+plot( -structIn.sensors.nas.states(:,3),  -structIn.sensors.nas.states(:,6),'m--','DisplayName','NAS')
+% plot( structIn.ADA(:,4),  structIn.ADA(:,5),'b','DisplayName','ADA z')
+yyaxis right
+plot( -structIn.Y(:, 3), structIn.Y(:, 14),'g','DisplayName','arb')
+
+legend
+
+
+% % ada
+% figures.ada = figure('Position',[100,100,600,400]);
+% plot( structIn.sensors.ada.time,  structIn.sensors.ada.xv(:,1),'DisplayName','$ADA_{z}$')
+% hold on
+% plot( structIn.sensors.ada.time,  structIn.sensors.ada.xv(:,2),'DisplayName','$ADA_{vz}$')
+% plot( structIn.t,  -structIn.Y(:,3),'DisplayName','True z')
+% plot( structIn.t,  -structIn.Y(:,6),'DisplayName','True Vz')
+% legend;
+% title('ADA vs trajectory')
+% 
+% figure('Position',[100,100,600,400])
+% hold on
+% plot( structIn.sensors.ada.time,  structIn.sensors.ada.xp(:,2),'DisplayName','ADA dp')
+% title('ADA pressure derivative')
+
+%% quaternions
+figures.EulerAngles = figure('Name','Euler angles','Position',[100,100,600,400]);
+%
+subplot(2,2,1)
+plot(structIn.t,structIn.Y(:,10),'k','DisplayName','q_w');
+hold on;
+plot(structIn.sensors.nas.time,structIn.sensors.nas.states(:,10),'r','DisplayName','q_w est');
+if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
+    xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+end
+legend
+ylabel('q_w')
+%
+subplot(2,2,2)
+plot(structIn.t,structIn.Y(:,11),'k','DisplayName','q_x');
+hold on;
+plot(structIn.sensors.nas.time,structIn.sensors.nas.states(:,7),'r','DisplayName','q_x est');
+if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
+    xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+end
+legend
+ylabel('q_x')
+%
+subplot(2,2,3)
+plot(structIn.t,structIn.Y(:,12),'k','DisplayName','q_y');
+hold on;
+plot(structIn.sensors.nas.time,structIn.sensors.nas.states(:,8),'r','DisplayName','q_y est');
+if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
+    xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+end
+legend
+ylabel('q_y')
+%
+subplot(2,2,4)
+plot(structIn.t,structIn.Y(:,13),'k','DisplayName','q_z');
+hold on;
+plot(structIn.sensors.nas.time,structIn.sensors.nas.states(:,9),'r','DisplayName','q_z est');
+if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
+    xline(structIn.t(structIn.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+end
+legend
+ylabel('q_z')
+
+legend
+sgtitle('Euler angles')
+xlabel('Time (s)')
 
 %% euler angles
 eul_NAS = quat2eul(simOutput.sensors.nas.states(:,[10,7:9]));
