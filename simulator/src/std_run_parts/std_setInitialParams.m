@@ -154,7 +154,7 @@ if settings.flagNAS || settings.electronics
 end
 sensorData.nas.time = 0;
 % stop correction with pitot
-settings.flagStopPitotCorrection = false;
+settings.nas.flagStopPitotCorrection = false;
 
 %% MEA PARAMETERS (mass estimation algorithm) 
 sensorData.mea.x = [0,0,settings.m0];     % initial state estimate

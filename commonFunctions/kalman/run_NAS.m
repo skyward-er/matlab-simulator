@@ -166,10 +166,11 @@ if length(t_nas) > 1
 
         % reintroduce pitot
         % pitot
-        % if settings.flagAscent && ~settings.flagStopPitotCorrection
-        %     index_pit   =  sum(t_nas(ii) >= t_pittemp);
-        %     [x_lin(ii,:),P_lin(4:6,4:6,ii),~] = correctionPitot(x_lin(ii,:),P_lin(4:6,4:6,ii),sensorTot.pitot.total_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot,xq(ii,1:4),nas.Mach_max);
-        % end
+        if settings.flagAscent && ~settings.nas.flagStopPitotCorrection
+            index_pit   =  sum(t_nas(ii) >= t_pittemp);
+            % [x_lin(ii,:),P_lin(4:6,4:6,ii),~] = correctionPitot_pressures(x_lin(ii,:),P_lin(4:6,4:6,ii),sensorTot.pitot.total_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot,xq(ii,1:4),nas.Mach_max);
+            [x_lin(ii,:),P_lin(4:6,4:6,ii),~] = correctionPitot_airspeed(x_lin(ii,:),P_lin(4:6,4:6,ii),sensorTot.pitot.airspeed(index_pit,:),nas.sigma_pitot2,settings.OMEGA);
+        end
 
         x(ii,:) = [x_lin(ii,:),xq(ii,:)];
         P_c(1:6,1:6,ii)   = P_lin(:,:,ii);
@@ -192,8 +193,8 @@ sensorData.nas.states= x;
 sensorData.nas.P = P_c;
 sensorData.nas.time = t_nas;
 
-if abs(sensorData.nas.states(1,3)) >settings.nas.stopPitotAltitude+ settings.z0
-    settings.nas.flagStopPitotCorrection = true;
+if abs(sensorData.nas.states(1,3)) >nas.stopPitotAltitude+ settings.z0
+    nas.flagStopPitotCorrection = true;
 end
 sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2,:)  = sensorData.nas.states(2:end,:); % NAS output
 sensorTot.nas.time(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.time(2:end); % NAS time output

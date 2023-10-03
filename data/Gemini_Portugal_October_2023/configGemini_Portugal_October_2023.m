@@ -86,7 +86,8 @@ settings.nas.sigma_mag     =   10;                                       % [mgau
 settings.nas.sigma_GPS     =   5;                                       % [mg^2]     estimated GPS variance
 settings.nas.sigma_w       =   10;                                       % [rad^2/s^2]   estimated gyroscope variance;
 settings.nas.sigma_beta    =   1e-4;                                    % [rad/s^2]   estimated gyroscope bias variance;
-settings.nas.sigma_pitot   =   20^2;    %DA CAMBIARE
+settings.nas.sigma_pitot   =   20^2;    
+settings.nas.sigma_pitot2  =   100;    
 
 settings.nas.Mach_max = 0.9; % max mach number expected for the mission (for nas with pitot update purposes)
 
@@ -95,7 +96,7 @@ settings.nas.v_thr         =   2.5;                                     % Veloci
 settings.nas.count_thr     =   5;                                       % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.nas.counter       =   0;
 
-settings.nas.stopPitotAltitude = 1800;
+settings.nas.stopPitotAltitude = 700;
 
 settings.nas.t_nas      =   -1;                                      % Apogee detection timestamp
 settings.nas.flag_apo      =   false;                                   % True when the apogee is detected
@@ -141,7 +142,7 @@ settings.ada.counter     =   0;
 
 settings.ada.t_ada       =   -1;                                           % Apogee detection timestamp
 settings.ada.flag_apo    =   false;                                        % True when the apogee is detected
-
+settings.ada.shadowmode = 18;
 %% MEA TUNING PARAMETERS / MOTOR SHUT DOWN TUNING PARAMETERS
 % motor model for kalman filter prediction/correction scheme
 settings.mea.engine_model_A1 = [1.435871191228868,-0.469001276508780,0;1,0,0;-0.002045309260755,0.001867496708935,1];
@@ -151,6 +152,6 @@ settings.mea.engine_model_C1 = [1.780138883879285,-1.625379384370081,0];
 settings.mea.Q=1e-1*diag([1,1,1]);      % model noise covariance matrix    
 settings.mea.R=0.36; 
 % shut down prediction altitude
-settings.mea.z_shutdown  = 3000; % [m] target apogee prediction for shutdown
+settings.mea.z_shutdown  = 3100; % [m] target apogee prediction for shutdown
 settings.mea.t_lower_shadowmode = 0; % minimunm burning time
 settings.mea.t_higher_shadowmode = 10; % maximum burning time

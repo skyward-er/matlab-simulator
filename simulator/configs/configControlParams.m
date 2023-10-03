@@ -93,9 +93,9 @@ switch settings.mission
         contSettings.criticalAltitude = 2990;
         
         % interpolation algorithm 
-        contSettings.N_forward = 1; % how many steps in advance have to check on speed to interpolate
+        contSettings.N_forward = 0; % how many steps in advance have to check on speed to interpolate
 
-        settings.CD_correction = 1; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
+        settings.CD_correction = 0.8; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
         
 
     case 'Gemini_Roccaraso_September_2023' 

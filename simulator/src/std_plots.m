@@ -14,20 +14,23 @@ v_ned = quatrotate(quatconj(simOutput.Y(:, 10:13)), simOutput.Y(:, 4:6));
 %% MASS ESTIMATION ALGORITHM
 if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
     figures.MEA = figure('Name', 'Predicted apogee','ToolBar','auto');
+    sgtitle('MEA')
     subplot(2,1,1)
+
     plot(simOutput.t, -simOutput.Y(:, 3),'DisplayName','Altitude');
+    title('Predicted vs Real apogee');
     hold on; grid on;
     plot(simOutput.sensors.mea.time, simOutput.sensors.mea.prediction,'DisplayName','Prediction');
     legend
     subplot(2,1,2)
     plot(simOutput.sensors.mea.time, simOutput.sensors.mea.mass   ,'DisplayName','Est mass');
+    title('Estimated vs real mass');
     hold on;
     plot(simOutput.t, simOutput.recall.true_mass   ,'DisplayName','True mass');
     legend
     xline(simOutput.sensors.mea.t_shutdown,'r--')
     xlabel('Time t [s]');
     ylabel('Altitude AGL [m]');
-    title('Predicted vs Real apogee');
     if settings.flagExportPLOTS == true
         exportStandardizedFigure(figures.MEA,'predicted_apogee.pdf',0.9)
     end
@@ -68,6 +71,54 @@ plot( -simOutput.Y(:, 3), simOutput.Y(:, 14),'g','DisplayName','arb')
 
 legend
 
+
+%% quaternions
+figures.EulerAngles = figure('Name','Euler angles','Position',[100,100,600,400]);
+%
+subplot(2,2,1)
+plot(simOutput.t,simOutput.Y(:,10),'k','DisplayName','q_w');
+hold on;
+plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:,10),'r','DisplayName','q_w est');
+if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
+    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+end
+legend
+ylabel('q_w')
+%
+subplot(2,2,2)
+plot(simOutput.t,simOutput.Y(:,11),'k','DisplayName','q_x');
+hold on;
+plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:,7),'r','DisplayName','q_x est');
+if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
+    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+end
+legend
+ylabel('q_x')
+%
+subplot(2,2,3)
+plot(simOutput.t,simOutput.Y(:,12),'k','DisplayName','q_y');
+hold on;
+plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:,8),'r','DisplayName','q_y est');
+if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
+    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+end
+legend
+ylabel('q_y')
+%
+subplot(2,2,4)
+plot(simOutput.t,simOutput.Y(:,13),'k','DisplayName','q_z');
+hold on;
+plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:,9),'r','DisplayName','q_z est');
+if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
+    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+end
+legend
+ylabel('q_z')
+
+legend
+sgtitle('Euler angles')
+xlabel('Time (s)')
+
 return
 
 %% Control variable: servo angle + reference values
@@ -83,7 +134,7 @@ if not(settings.scenario == "descent")
     ylabel('$\alpha$ [rad]');
     title('Servo angle');
     legend('simulated','reference values','Airbrakes deployment','Apogee')
-    
+
     if settings.flagExportPLOTS == true
         exportStandardizedFigure(figures.servo_angle,"report_images\"+settings.mission+"\src_servo_angle.pdf",0.9)
     end
@@ -152,7 +203,7 @@ legend
 %
 subplot(3,1,2)
 plot(simOutput.t, simOutput.Y(:, 5),'DisplayName','Vy')
-hold on; 
+hold on;
 plot(simOutput.sensors.nas.time, V_NAS_BODY(:, 2),'DisplayName','Vy est')
 if not(settings.scenario == "descent")
     xline(simOutput.ARB.allowanceTime,'k--')
@@ -199,7 +250,7 @@ legend
 %
 subplot(3,1,2)
 plot(simOutput.t, V_SIM_NED(:, 2),'DisplayName','Ve')
-hold on; 
+hold on;
 plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:, 5) ,'DisplayName','Ve est')
 if not(settings.scenario == "descent")
     xline(simOutput.ARB.allowanceTime,'k--')
@@ -214,7 +265,7 @@ plot(simOutput.sensors.nas.time, simOutput.sensors.nas.states(:, 6),'DisplayName
 if not(settings.scenario == "descent")
     xline(simOutput.ARB.allowanceTime,'k--','DisplayName','Air brakes opening')
 end
-    xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
+xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
 xlabel('Time [s]');
 ylabel('V_z [m/s]');
 sgtitle('Velocities NED');
@@ -223,9 +274,31 @@ if settings.flagExportPLOTS == true
     exportStandardizedFigure(figures.velocities_NED,"report_images\"+settings.mission+"\src_velocities_NED.pdf",0.9)
 end
 
+%% check consistency of NAS:
+
+altitude = simOutput.sensors.nas.states(:,3)+settings.z0;
+v_int_NAS = 0;
+v_int_simulation = 0;
+for i = 2:length(simOutput.sensors.nas.states(:,6))
+    v_int_NAS(i) = v_int_NAS(i-1) + sum(simOutput.sensors.nas.states([i-1,i],6))/settings.frequencies.NASFrequency/2;
+end
+
+for i = 2:length(simOutput.Y(:,6))
+    v_int_simulation(i) = v_int_simulation(i-1) + sum(V_SIM_NED([i-1,i],3)*0.01)/2;
+end
+
+figure
+plot(simOutput.sensors.nas.time,altitude,'DisplayName','Altitude NAS')
+hold on;
+plot(simOutput.sensors.nas.time,v_int_NAS,'DisplayName','Velocity NAS integrated')
+plot(simOutput.t,simOutput.Y(:,3),'DisplayName','Altitude Simulation')
+plot(simOutput.t,v_int_simulation,'DisplayName','Velocity simulation integrated')
+legend
+
+
 %% Mach w.r.t. time
 % figures.Mach_number = figure('Name', 'Velocities','ToolBar','auto','Position',[100,100,600,400]);
-% [~, a, ~, ~] = atmosisa(structIn.Y(:, 3));% 
+% [~, a, ~, ~] = atmosisa(structIn.Y(:, 3));%
 % v_norm_vec = vecnorm(structIn.Y(:, 4:6),2,2);
 %
 % plot(structIn.t, v_norm_vec ./ a)
@@ -238,58 +311,12 @@ end
 % ylabel('Mach M(t) [-]');
 % title('Velocities');
 % legend('Mach','Airbrakes deployment','Apogee')
-% 
+%
 % if settings.flagExportPLOTS == true
 %     exportStandardizedFigure(figures.Mach_number,"report_images\"+settings.mission+"src_src_Mach_number.pdf",0.9)
 % end
 
 
-%% quaternions
-figures.EulerAngles = figure('Name','Euler angles','Position',[100,100,600,400]);
-%
-subplot(2,2,1)
-plot(simOutput.t,simOutput.Y(:,10),'k','DisplayName','q_w');
-hold on;
-plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:,10),'r','DisplayName','q_w est');
-if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
-end
-legend
-ylabel('q_w')
-%
-subplot(2,2,2)
-plot(simOutput.t,simOutput.Y(:,11),'k','DisplayName','q_x');
-hold on;
-plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:,7),'r','DisplayName','q_x est');
-if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
-end
-legend
-ylabel('q_x')
-%
-subplot(2,2,3)
-plot(simOutput.t,simOutput.Y(:,12),'k','DisplayName','q_y');
-hold on;
-plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:,8),'r','DisplayName','q_y est');
-if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
-end
-legend
-ylabel('q_y')
-%
-subplot(2,2,4)
-plot(simOutput.t,simOutput.Y(:,13),'k','DisplayName','q_z');
-hold on;
-plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:,9),'r','DisplayName','q_z est');
-if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
-end
-legend
-ylabel('q_z')
-
-legend
-sgtitle('Euler angles')
-xlabel('Time (s)')
 
 %% euler angles
 eul_NAS = quat2eul(simOutput.sensors.nas.states(:,[10,7:9]));
@@ -349,7 +376,7 @@ legend
 %
 subplot(3,1,2)
 plot(simOutput.t, simOutput.Y(:, 8),'DisplayName','q')
-hold on; 
+hold on;
 if not(settings.scenario == "descent")
     xline(simOutput.ARB.allowanceTime,'k--')
 end
@@ -391,4 +418,4 @@ title('Euler angles wrt altitude')
 xlabel('Altitude [m]')
 ylabel('Angle [deg]')
 end
-   
+
