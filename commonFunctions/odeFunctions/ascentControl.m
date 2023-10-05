@@ -169,9 +169,11 @@ if t < tb
         T = interpLinear(settings.motor.expTime, settings.motor.expThrust, t);
         Pe = interpLinear(settings.motor.expTime, settings.motor.Pe, t);
         T = T + settings.motor.Ae*(Pe - P);
+        dm = interpLinear(settings.motor.expTime, settings.mDotTotalTime, t); 
     else
         m = settings.expMengineCut + settings.ms;
         T = 0;
+        dm = 0; 
     end
 
 else     % for t >= tb the fligth condition is the empty one(no interpolation needed)
@@ -181,7 +183,7 @@ else     % for t >= tb the fligth condition is the empty one(no interpolation ne
     else
         m = settings.ms + settings.motor.expM(end);
     end
-
+    dm = 0; 
     T = 0;
 end
 
@@ -322,7 +324,7 @@ else
     Y = qdyn*S*CY;                      % [N] y-body component of the aerodynamics force
     Z = qdyn*S*CN;                      % [N] z-body component of the aerodynamics force
     Fg = dcm*[0; 0; m*g];               % [N] force due to the gravity in body frame
-    F = Fg + [-X+T, Y, -Z]';             % [N] total forces vector
+    F = Fg + [-X+T, Y, -Z]' - dm * [u v w]';             % [N] total forces vector
 
     %-----------------------------------------------------
     %F = Fg + [-X+T*cos(chi), Y+T*sin(chi), -Z]';             % [N] total forces vector

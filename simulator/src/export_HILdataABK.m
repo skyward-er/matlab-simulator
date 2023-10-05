@@ -53,9 +53,9 @@ switch settings.mission
         % second column - data with vertical position of the NAS;
         % third column - data with vertical velocity of the NAS;
         trajectory_export_table = table;
-        trajectory = zeros(size(simOutput.sensors.nas.time'));
-        trajectory(:,1) = -simOutput.sensors.nas.states(:,3)-settings.z0;
-        trajectory(:,2) = -simOutput.sensors.nas.states(:,6);
+        trajectory = zeros(size(simOutput.sensors.nas.time(300:end)'));
+        trajectory(:,1) = -simOutput.sensors.nas.states(300:end,3);
+        trajectory(:,2) = -simOutput.sensors.nas.states(300:end,6);
         traj_varNames = {'Z','Vz'};
         for i = 1:size(trajectory,2)
             trajectory_export_table(:,i) = table(trajectory(:,i));

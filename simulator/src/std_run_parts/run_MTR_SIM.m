@@ -21,7 +21,7 @@ if sensorTot.mea.prediction(end) >= settings.mea.z_shutdown
         if ~settings.expShutdown && T1 >= settings.mea.t_higher_shadowmode
             settings.expShutdown = true;
             settings.t_shutdown = T1;
-            settings.timeEngineCut = settings.t_shutdown + 0.3;
+            settings.timeEngineCut = settings.t_shutdown + settings.shutdownValveDelay;
             settings.expTimeEngineCut = settings.t_shutdown;
         end
         if T1 < settings.tb

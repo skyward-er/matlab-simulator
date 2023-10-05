@@ -68,7 +68,8 @@ u       = quatProd(r',x_pred(1:4)')';      %The correction of the quaternion
                                            %filter gets its name)
                                           
 % Assigment of the new quaternion to the state vector
-x_c(1:4)= u/norm(u);                       %Re-normalisation of the quaternion 
+noise = 0;%0.1*rand(1,4);
+x_c(1:4)= (u+noise)/norm(u+noise);                       %Re-normalisation of the quaternion 
                                            %to avoid issues
 x_c(5:7)= x_pred(5:7)+delta_x(4:6);        %Correction of the bias only with a sum
 

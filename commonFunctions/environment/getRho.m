@@ -9,9 +9,6 @@ function rho = getRho(h)
 % OUTPUT: 
 % rho: air density at altitude h
 
-% rho0  =  1.225; % density at sea level
-% HTS  =  11000; % height of troposphere
-% rho   =  rho0*exp(-h/HTS); % isa model formula
 g = 9.81;
 T0 = 288.15;
 rho0 = 1.225;

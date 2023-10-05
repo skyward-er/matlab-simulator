@@ -62,11 +62,7 @@ sensorData.barometer.t0 = sensorData.barometer_sens{1}.t0;
 sensorData.barometer.time = [];
 sensorData.barometer.z = [];
 
-
-
 settings.baro_old = 0;
-
-
 
 %% while cycle max iterations
 nmax        =       settings.nmax;                                                 % Max iteration number - stops the integration if reached

@@ -109,7 +109,11 @@ settings.mTotalTime = settings.mTotalTime + settings.mass_offset;
 %% INTEGRATION
 std_setInitialParams;
 dt_ode = 0.01;
-
+if settings.addThrustMassDerivative
+    settings.mDotTotalTime = [diff(settings.motor.expM)./diff(settings.motor.expTime) 0];
+else
+    settings.mDotTotalTime = zeros(size(settings.mDotTotalTime));
+end
 %% SENSORS INIT
 run(strcat('initSensors', settings.mission));
 
@@ -278,6 +282,9 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     %% simulate sensors
 
     [sensorData] = manageSignalFrequencies(magneticFieldApprox, settings.flagAscent, settings,sensorData, Yf, Tf, uw, vw, ww);
+    % wind = [uw, vw, ww];
+    % [sensorData] = generateSensorMeasurements(magneticFieldApprox, Yf, Tf, sensorData,sensorTot, settings);
+    
     % simulate sensor acquisition
     if settings.dataNoise
         [sensorData, sensorTot] = acquisition_Sys(sensorData, sensorSettings, sensorTot, settings);
