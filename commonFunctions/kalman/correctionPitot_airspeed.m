@@ -38,21 +38,21 @@ x = x_pred;
 % airspeed    = mach*a;   %poi modificare in acquisition system
 
 R           = sigma_p;
-H           = zeros(1, 3);                        %Update of the matrix H
+H           = zeros(1, 3);                        % Update of the matrix H
 H(1,3)      = -x_pred(6)/(airspeed*sin(launchRailEl));
 if any(isnan(H))
     H = zeros(1,3);
 end
-S           =   H*P_pred*H'+R;                      %Matrix necessary for the correction factor
+S           =   H*P_pred*H'+R;                      % Matrix necessary for the correction factor
 
 if cond(S) > threshold
 
     e       =  -airspeed*sin(launchRailEl) - x_pred(6);
-    K       =   P_pred*H'/S;                        %Kalman correction factor % K must be non dimensional
+    K       =   P_pred*H'/S;                        % Kalman correction factor % K must be non dimensional
 
     x(4:6)       =   x_pred(4:6) + (K*e)';
 
-    P       =   (eye(3) - K*H)*P_pred;              %Corrector step of the state covariance
+    P       =   (eye(3) - K*H)*P_pred;              % Corrector step of the state covariance
 else
     x       =   x_pred;
     P       =   P_pred;

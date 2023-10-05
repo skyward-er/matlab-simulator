@@ -96,7 +96,7 @@ settings.nas.v_thr         =   2.5;                                     % Veloci
 settings.nas.count_thr     =   5;                                       % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.nas.counter       =   0;
 
-settings.nas.stopPitotAltitude = 700;
+settings.nas.stopPitotAltitude = 800;
 
 settings.nas.t_nas      =   -1;                                      % Apogee detection timestamp
 settings.nas.flag_apo      =   false;                                   % True when the apogee is detected
