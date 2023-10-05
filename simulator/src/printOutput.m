@@ -30,6 +30,8 @@ abs_V = vecnorm(V');
 [max_dist, imax_dist] = max(abs_X);
 [max_v, imax_v] = max(abs_V);
 
+Points = @(AA) 175 * ((-1*cos(AA*pi/3000)+1)/2)^10;
+
 
 
 % DATA RECORD (display)
@@ -70,3 +72,5 @@ end
 
 fprintf('apogee: %.2f [m] \n', max_z);
 fprintf('@time: %g [sec] \n\n', T_apo)
+
+fprintf('Euroc points: %.2f/175 \n', Points(max_z));
