@@ -4,13 +4,11 @@ function [sensorData] = generateSensorMeasurements(magneticFieldApprox, Y, Tf, w
  
 HELP:
 
-generateSensorMeasurements
+generateSensorMeasurements - This function interpolates the rocket State to
+                          output the measures at the frequencies of the
+                          sensors on board
 
-manageSignalFrequencies - This function interpolates the rocket State to
-                          output the measures at different frequencies
-
-
-INTPUTS:
+INPUTS:
             - freq, acquisition frequencies of the sensors;
             - Y, State Matrix containing the rocket states specified in     
                  ascent.m @ time step given in T
@@ -20,7 +18,7 @@ OUTPUTS:
             - sensorData, struct containing the interpolated sensor data
 
 Author: Marco Marchesi
-Skyward Experimental Rocketry | ELC-SCS Dept
+Skyward Experimental Rocketry  | AVN Dept | GNC IPT
 email: marco.marchesi@skywarder.eu
 Release date: 05/10/2023
 %}
@@ -45,8 +43,8 @@ end
 
 %% magnetometer
 sensorData.magnetometer.time = (sensorTot.imu.time(end):1/freq.magnetometerFrequency:Tf(end))';
-sensorData.magnetometer.measures = zeros(size(sensorData.magnetometer.time,1),3);
-sensorData.magnetometer.measures(1,:) = sensorTot.imu.magnetometer_measures(end,:);
+sensorData.magnetometer.measures = zeros(size(sensorData.magnetometer.time,1),3)*100;
+sensorData.magnetometer.measures(1,:) = sensorTot.imu.magnetometer_measures(end,:)*100;
 if length(sensorData.magnetometer.time)>1
     z = -interp1(Tf,Y(:,3),sensorData.magnetometer.time(2:end)) + settings.z0;
     Q = interp1(Tf,Y(:,10:13),sensorData.magnetometer.time(2:end));
