@@ -47,11 +47,12 @@ plot( simOutput.t,  -v_ned(:,3),'DisplayName','True Vz')
 legend;
 title('ADA vs trajectory')
 
-figure('Position',[100,100,600,400])
-hold on
-plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xp(:,2),'DisplayName','ADA dp')
-title('ADA pressure derivative')
-
+if ~settings.electronics
+    figure('Position',[100,100,600,400])
+    hold on
+    plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xp(:,2),'DisplayName','ADA dp')
+    title('ADA pressure derivative')
+end
 %% reference
 figure('Position',[100,100,600,400])
 yyaxis left
@@ -64,7 +65,7 @@ if ~settings.electronics
     end
 end
 plot( -simOutput.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
-plot( -simOutput.sensors.nas.states(:,3)-settings.z0,  -simOutput.sensors.nas.states(:,6),'m--','DisplayName','NAS')
+plot( -simOutput.sensors.nas.states(:,3),  -simOutput.sensors.nas.states(:,6),'m--','DisplayName','NAS')
 % plot( structIn.ADA(:,4),  structIn.ADA(:,5),'b','DisplayName','ADA z')
 yyaxis right
 plot( -simOutput.Y(:, 3), simOutput.Y(:, 14),'g','DisplayName','arb')

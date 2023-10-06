@@ -253,20 +253,24 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         end
         Tf = [t0, t1]';
         Yf = [initialCond'; initialCond']; % check how to fix this
-        if flagPara2
-            parout = RecallOdeFcn(@descentParafoil, Tf, Yf, settings,contSettings, Yf(:,14),t_change_ref_PRF,tLaunch,'apVec');
-        else
-            parout = RecallOdeFcn(@ascentControl, Tf, Yf, settings,[], Yf(:,14), t_change_ref_ABK,tLaunch,'apVec');
+        if ~settings.electronics || launchFlag
+            if flagPara2
+                parout = RecallOdeFcn(@descentParafoil, Tf, Yf, settings,contSettings, Yf(:,14),t_change_ref_PRF,tLaunch,'apVec');
+            else
+                parout = RecallOdeFcn(@ascentControl, Tf, Yf, settings,[], Yf(:,14), t_change_ref_ABK,tLaunch,'apVec');
+            end
         end
         para = NaN;
     end
     
-    % recall some useful parameters
-    settings.parout.partial_time = Tf;
-    settings.parout.wind_NED = parout.wind.NED_wind';
-    settings.parout.wind_body = parout.wind.body_wind';
-    settings.parout.acc = parout.accelerometer.body_acc';
-    settings.parout.m   = parout.interp.mass;
+    if exist("parout", 'var')
+        % recall some useful parameters
+        settings.parout.partial_time = Tf;
+        settings.parout.wind_NED = parout.wind.NED_wind';
+        settings.parout.wind_body = parout.wind.body_wind';
+        settings.parout.acc = parout.accelerometer.body_acc';
+        settings.parout.m   = parout.interp.mass;
+    end
 
 
     ext = extension_From_Angle(Yf(end,14),settings); % bug fix, check why this happens because sometimes happens that the integration returns a value slightly larger than the max value of extension for airbrakes and this mess things up
@@ -368,7 +372,9 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     sensorTot.sfd.time(iTimes) = t1;
     sensorTot.sfd.pressure(iTimes) = sensorData.barometer.measures(end);
     sensorTot.sfd.faults(iTimes,:) = settings.faulty_sensors;
-    dataRecall.true_mass(n_old:n_old+n-1, 1) = settings.parout.m'; % if you want to save other parameters, remember to go down and remove the last two values                                                                                            
+    if exist("parout", 'var')
+        dataRecall.true_mass(n_old:n_old+n-1, 1) = settings.parout.m'; % if you want to save other parameters, remember to go down and remove the last two values                                                                                            
+    end
     n_old = n_old + n -1;
 
 

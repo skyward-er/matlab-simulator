@@ -26,7 +26,6 @@ switch board
     case "main"
         % Receive data from serial comunication
         obswVals = serialbridge("Read", 31);
-
         actuatorData.ada.mslAltitude = obswVals(1);
         actuatorData.ada.aglAltitude = obswVals(2);
         actuatorData.ada.verticalSpeed = obswVals(3);
@@ -58,6 +57,7 @@ switch board
         actuatorData.flags.flag_airbrakes = logical(obswVals(29));
         actuatorData.flags.flag_para1 = logical(obswVals(30));
         actuatorData.flags.flag_para2 = logical(obswVals(31));
+        disp(actuatorData.actuators);
 
     case "payload"
         % Receive data from serial comunication
