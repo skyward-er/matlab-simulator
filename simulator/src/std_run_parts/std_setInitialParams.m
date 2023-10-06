@@ -162,12 +162,9 @@ sensorData.mea.predicted_apogee = 0;
 settings.t_shutdown = Inf;
 settings.mea.counter_shutdown = 0;
 
-
 %% parafoil
 deltaA = contSettings.payload.deltaA_0;
 para = 1;
-
-
 
 %% total sensors initialization
 % total measurements
@@ -209,7 +206,6 @@ sensorTot.pitot.time                =   0;
 sensorTot.nas.time                  =   0;
 sensorTot.ada.time                  =   0;
 sensorTot.mea.time                  =   0;
-
 
 % initialization of the indexes
 sensorTot.barometer_sens{1}.n_old = 2;

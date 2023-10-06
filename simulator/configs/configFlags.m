@@ -34,7 +34,6 @@ conf.HIL = false;
 % WIP flags
 settings.machControlActive  = false; % Switch on the mach control in ascentControl.m
 settings.HRE                = false; % Switch on if the rocket is mounting a Hybrid Engine, which allows the possibility to shut down the engine
-settings.addThrustMassDerivative = true;
 
 % std_run integration flags
 settings.nmax = 100000; % max iterations of the while cycle

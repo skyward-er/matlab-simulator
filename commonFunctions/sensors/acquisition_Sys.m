@@ -29,7 +29,6 @@ OUTPUT:
 for i_baro = 1:3
     if i_baro == 1
         if isfield(sensorData.barometer_sens{i_baro},'time')
-
             for ii=1:length(sensorData.barometer_sens{i_baro}.time)
                 sensorData.barometer_sens{i_baro}.measures(ii)        =      sensorSettings.barometer1.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,...
                     sensorData.barometer_sens{i_baro}.temperature(ii) - 273.15);
@@ -37,10 +36,8 @@ for i_baro = 1:3
                 sensorData.barometer_sens{i_baro}.z(ii)    =     -atmospalt(sensorData.barometer_sens{i_baro}.measures(ii),'None');
             end
         end
-
     elseif i_baro == 2
         if isfield(sensorData.barometer_sens{3},'time')
-
             for ii=1:length(sensorData.barometer_sens{i_baro}.time)
                 sensorData.barometer_sens{i_baro}.measures(ii)        =      sensorSettings.barometer2.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,...
                     sensorData.barometer_sens{i_baro}.temperature(ii) - 273.15);
@@ -50,7 +47,6 @@ for i_baro = 1:3
         end
     elseif i_baro == 3
         if isfield(sensorData.barometer_sens{3},'time')
-
             for ii=1:length(sensorData.barometer_sens{i_baro}.time)
                 sensorData.barometer_sens{i_baro}.measures(ii)        =      sensorSettings.barometer3.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,...
                     sensorData.barometer_sens{i_baro}.temperature(ii) - 273.15);
@@ -59,13 +55,11 @@ for i_baro = 1:3
             end
         end
     end
-    sensorTot.barometer_sens{i_baro}.pressure_measures(sensorTot.barometer_sens{i_baro}.n_old:sensorTot.barometer_sens{i_baro}.n_old + size(sensorData.barometer_sens{i_baro}.measures' ,1) - 1,:)    = sensorData.barometer_sens{i_baro}.measures';
-    sensorTot.barometer_sens{i_baro}.altitude(sensorTot.barometer_sens{i_baro}.n_old:sensorTot.barometer_sens{i_baro}.n_old + size(sensorData.barometer_sens{i_baro}.measures',1) - 1,:)    = sensorData.barometer_sens{i_baro}.z';
-    sensorTot.barometer_sens{i_baro}.time(sensorTot.barometer_sens{i_baro}.n_old:sensorTot.barometer_sens{i_baro}.n_old + size(sensorData.barometer_sens{i_baro}.measures',1) - 1)    =  sensorData.barometer_sens{i_baro}.time;
+    sensorTot.barometer_sens{i_baro}.pressure_measures(sensorTot.barometer_sens{i_baro}.n_old:sensorTot.barometer_sens{i_baro}.n_old + size(sensorData.barometer_sens{i_baro}.measures ,1) - 1,:)    = sensorData.barometer_sens{i_baro}.measures;
+    sensorTot.barometer_sens{i_baro}.altitude(sensorTot.barometer_sens{i_baro}.n_old:sensorTot.barometer_sens{i_baro}.n_old + size(sensorData.barometer_sens{i_baro}.measures,1) - 1,:)    = sensorData.barometer_sens{i_baro}.z;
+    sensorTot.barometer_sens{i_baro}.time(sensorTot.barometer_sens{i_baro}.n_old:sensorTot.barometer_sens{i_baro}.n_old + size(sensorData.barometer_sens{i_baro}.measures,1) - 1)    =  sensorData.barometer_sens{i_baro}.time;
     sensorTot.barometer_sens{i_baro}.n_old = sensorTot.barometer_sens{i_baro}.n_old + size(sensorData.barometer_sens{i_baro}.measures,1);
 end
-
-
 
 %% IMU Acquisition loop
 if isfield(sensorData.accelerometer,'time')
@@ -107,20 +101,19 @@ if isfield(sensorData.gps,'time')
             sensorData.gps.positionMeasures(ii,2),...
             - sensorData.gps.positionMeasures(ii,3),...
             14.8500);
-
         [sensorData.gps.velocityMeasures(ii,1),sensorData.gps.velocityMeasures(ii,2),sensorData.gps.velocityMeasures(ii,3)] =           ...
             sensorSettings.GPS.sens( ...
             sensorData.gps.velocityMeasures(ii,1),...
             sensorData.gps.velocityMeasures(ii,2),...
             - sensorData.gps.velocityMeasures(ii,3),...
             14.8500);
-
     end
     sensorTot.gps.position_measures(sensorTot.gps.n_old:sensorTot.gps.n_old + size(sensorData.gps.positionMeasures,1) - 1,:)   =  sensorData.gps.positionMeasures(1:end,:) ;
     sensorTot.gps.velocity_measures(sensorTot.gps.n_old:sensorTot.gps.n_old + size(sensorData.gps.velocityMeasures,1) - 1,:) =  sensorData.gps.velocityMeasures(1:end,:) ;
     sensorTot.gps.time(sensorTot.gps.n_old:sensorTot.gps.n_old + size(sensorData.gps.velocityMeasures,1) - 1)   =  sensorData.gps.time;
     sensorTot.gps.n_old = sensorTot.gps.n_old + size(sensorData.gps.positionMeasures,1);
 end
+
 %% Pitot acquisition loop
 if isfield(sensorData.pitot,'time')
     for ii=1:length(sensorData.pitot.time)
@@ -134,10 +127,8 @@ if isfield(sensorData.pitot,'time')
         R = 287.05;
         T_ref = 288.15; % reference temperature
         a = sqrt(gamma*R*T_ref);
-
         if sensorData.pitot.pTotMeasures(ii)>sensorData.pitot.pStatMeasures(ii)
             M2(ii,1) = 2/(gamma-1) * ( (sensorData.pitot.pTotMeasures(ii)/sensorData.pitot.pStatMeasures(ii))^(( gamma-1 )/gamma) -1 );
-            % [~,a,~,~] = atmosisa(atmospalt(sensorData.pitot.pStatMeasures(ii)));
             sensorData.pitot.airspeed(ii,1) = sqrt(M2(ii)) * a;
         else
             M2(ii,1) = 0;
@@ -149,7 +140,7 @@ if isfield(sensorData.pitot,'time')
     sensorTot.pitot.time(sensorTot.pitot.n_old:sensorTot.pitot.n_old + size(sensorData.pitot.pTotMeasures,1) - 1)                   = sensorData.pitot.time';
     sensorTot.pitot.Mach(sensorTot.pitot.n_old:sensorTot.pitot.n_old + size(sensorData.pitot.pTotMeasures,1) - 1,1)                 = sqrt(M2);
     sensorTot.pitot.airspeed(sensorTot.pitot.n_old:sensorTot.pitot.n_old + size(sensorData.pitot.pTotMeasures,1) - 1,1)             = sensorData.pitot.airspeed;
-    sensorTot.pitot.n_old = sensorTot.pitot.n_old + size(sensorData.pitot.pTotMeasures,2);
+    sensorTot.pitot.n_old = sensorTot.pitot.n_old + size(sensorData.pitot.pTotMeasures,1);
     
 end
 
@@ -159,8 +150,8 @@ if contains(settings.mission,'_2023')
         sensorData.chamberPressure.measures(ii) = sensorSettings.comb_chamber.sens(sensorData.chamberPressure.measures(ii)*1000,50); % 50 temperature in °C (random)
         sensorData.chamberPressure.measures(ii) = sensorData.chamberPressure.measures(ii)/1000;
     end
-    sensorTot.comb_chamber.measures(sensorTot.comb_chamber.n_old:sensorTot.comb_chamber.n_old + size(sensorData.chamberPressure.measures,2) - 1,1)    = sensorData.chamberPressure.measures(1:end);
-    sensorTot.comb_chamber.time(sensorTot.comb_chamber.n_old:sensorTot.comb_chamber.n_old + size(sensorData.chamberPressure.measures,2) - 1)    =  sensorData.chamberPressure.time;
-    sensorTot.comb_chamber.n_old = sensorTot.comb_chamber.n_old + size(sensorData.chamberPressure.measures,2);
+    sensorTot.comb_chamber.measures(sensorTot.comb_chamber.n_old:sensorTot.comb_chamber.n_old + size(sensorData.chamberPressure.measures,1) - 1,1)    = sensorData.chamberPressure.measures(1:end);
+    sensorTot.comb_chamber.time(sensorTot.comb_chamber.n_old:sensorTot.comb_chamber.n_old + size(sensorData.chamberPressure.measures,1) - 1)    =  sensorData.chamberPressure.time;
+    sensorTot.comb_chamber.n_old = sensorTot.comb_chamber.n_old + size(sensorData.chamberPressure.measures,1);
 end
 end
