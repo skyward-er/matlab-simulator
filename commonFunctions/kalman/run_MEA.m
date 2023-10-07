@@ -1,4 +1,4 @@
-function [sensorData,sensorTot,mea] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1)
+function [sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1)
 
 
 % mass estimation
@@ -16,9 +16,12 @@ t_nas = sensorTot.nas.time; % we need also nas to estimate cd etc
 % initialise state update
 x(1,:) = sensorData.mea.x(end,:);
 P(:,:,1) = sensorData.mea.P(:,:,end);
-predicted_apogee(1) = sensorData.mea.predicted_apogee(end);
-estimated_mass(1) = sensorData.mea.estimated_mass(end);
-estimated_pressure(1) = sensorData.mea.estimated_pressure(end);
+% predicted_apogee(1) = sensorData.mea.predicted_apogee(end);
+% estimated_mass(1) = sensorData.mea.estimated_mass(end);
+% estimated_pressure(1) = sensorData.mea.estimated_pressure(end);
+z_nas = zeros(length(t_mea), 1);
+vnorm_nas = zeros(length(t_mea), 1);
+vz_nas = zeros(length(t_mea), 1);
 z_nas(1) = sensorData.nas.states(end,3);
 vnorm_nas(1) = norm(sensorData.nas.states(end,4:6));
 vz_nas(1) = sensorData.nas.states(end,6);
@@ -33,7 +36,7 @@ for ii = 2:length(t_mea)
     index_chambPress = sum(t_mea(ii) >= t_chambPress);
     S = C*P(:,:,ii)*C' + settings.mea.R;
     if ~det(S)<1e-3
-        K = P(:,:,ii)*C'*inv(S); % if you want to try with constant gain [0.267161;-0.10199;-0.000205604 ];
+        K = P(:,:,ii)*C' / S; % if you want to try with constant gain [0.267161;-0.10199;-0.000205604 ];
         P(:,:,ii) = (eye(3)-K*C)*P(:,:,ii);
     end
 

@@ -45,10 +45,8 @@ classdef Sensor_no_offset < handle
             %  outputArg sensor data with nois,
             %  offsets, etc.
             
-%             inputArg=obj.add2DOffset(inputArg,temp);
             inputArg=obj.whiteNoise(inputArg);
             inputArg=obj.addOffset(inputArg);
-%             inputArg=obj.addTempOffset(inputArg,temp);
             inputArg=obj.quantization(inputArg);
             inputArg=obj.saturation(inputArg); 
             outputArg = inputArg;
@@ -142,49 +140,6 @@ classdef Sensor_no_offset < handle
             
             if (~isempty(obj.offset))
                 inputArg=inputArg+ones(size(inputArg)).*obj.offset;
-            end
-            outputArg = inputArg;
-        end
-        
-        
-        function outputArg = addTempOffset(obj,inputArg,temp)
-            %ADD_Temp_OFFSET Adds an temperature dependen offset to the signal
-            %   adds the propertie tempOffset multiplied by the temperature input temp to the input signal
-            %
-            %  Necessary properties:
-            %  tempOffset: Coefficent for temperature depending offset
-            %
-            %  Inputs:
-            %  inputArg: sensor data
-            %  temp: temperature of the sensor
-            %  
-            %  Outputs:
-            %  outputArg: sensor data plus temerature depending offset
-            
-            if (~isempty(obj.tempOffset))
-                inputArg=inputArg+ones(size(inputArg)).*temp*obj.tempOffset;
-            end
-            outputArg = inputArg;
-        end
-        
-        
-        function outputArg = add2DOffset(obj,inputArg,temp)
-            %ADD_2D_OFFSET Adds a offset that depends on the inputArg and temp
-            %  The offset is linear interpolated with the data in matrice error2dOffset
-            %
-            %  Necessary properties:
-            %  error2dOffset: data for offset with first column: inputArg, second column: relativeArg, third column: error
-            %
-            %  Inputs:
-            %  inputArg: sensor data
-            %  temp: temperature of the sensor
-            %  
-            %  Outputs:
-            %  outputArg: sensor data plus 2D depending offset
-            
-            if (~isempty(obj.error2dOffset))
-                inputArg=inputArg+...
-                    griddata(obj.error2dOffset(:,1),obj.error2dOffset(:,2),obj.error2dOffset(:,3),inputArg,temp);
             end
             outputArg = inputArg;
         end

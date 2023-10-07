@@ -116,6 +116,7 @@ end
 
 %% Pitot acquisition loop
 if isfield(sensorData.pitot,'time')
+    M2 = zeros(length(sensorData.pitot.time),1);
     for ii=1:length(sensorData.pitot.time)
         sensorData.pitot.pTotMeasures(ii)        =      sensorSettings.pitot_total.sens(sensorData.pitot.pTotMeasures(ii)/100,...
             sensorData.pitot.temperature(ii) - 273.15);

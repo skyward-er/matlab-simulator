@@ -1,4 +1,4 @@
-function [s, sensorTot]  = initSensors(settings,sensorData)
+function [s, sensorTot]  = initSensorsPyxis_Portugal_October_2022(settings,sensorData)
 % Initialize all sensors
     
 % Author: Jan Hammelman

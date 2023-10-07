@@ -191,7 +191,7 @@ if nargout == 2
 %     
     parout.accelerations.body_acc = acc;
 %     parout.accelerations.ang_acc = [dp, dq, dr];
-    parout.accelerometer.body_acc = [F_acc/m]';
+    parout.accelerometer.body_acc = (F_acc/m)';
 
 %     parout.coeff.CA = CA;
 %     parout.coeff.CYB = CYB;

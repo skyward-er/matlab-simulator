@@ -39,7 +39,7 @@ else
         y = 0.5*(norm(vel_est)^2 - WES.V2_mean);
         Ep = y - phi*WES.wind_est;
         beta = WES.fFactor + phi*WES.Funv*phi';
-        WES.Funv = (1/WES.fFactor)*(WES.Funv - (1/beta)*WES.Funv*phi'*phi*WES.Funv); % check consistency of the    ./     in     1./ beta
+        WES.Funv = (1/WES.fFactor)*(WES.Funv - (1/beta)*WES.Funv*(phi'*phi)*WES.Funv); % check consistency of the    ./     in     1./ beta
         K = WES.Funv*phi';
         WES.Funv = 0.5*(WES.Funv + WES.Funv');
         WES.wind_est = WES.wind_est + K*Ep;

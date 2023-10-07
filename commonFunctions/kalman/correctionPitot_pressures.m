@@ -1,4 +1,4 @@
-function [x,P,y_res] = correctionPitot(x_pred,P_pred,p0,p,sigma_p,q,Mach_max)
+function [x,P,y_res] = correctionPitot_pressures(x_pred,P_pred,p0,p,sigma_p,q,Mach_max)
 
 
 %-----------DESCRIPTION OF FUNCTION:------------------
