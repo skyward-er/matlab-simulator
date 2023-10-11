@@ -42,7 +42,7 @@ displayIter = true; % set to false if you don't want to see the iteration number
             %%% settato al'interno di simulationData.m -> possibili errori per
             %%% le simulazioni con exp_thrust aumentato se si vuole fare
             %%% spegnimento dell'ibrido
-            impulse_uncertainty = normrnd(1,0.02/3,N_sim,1);
+            impulse_uncertainty = normrnd(1,0.05/3,N_sim,1);
             stoch.expThrust = diag(impulse_uncertainty)*((1./thrust_percentage) * settings.motor.expTime);          % burning time - same notation as thrust here
             %%%
             for i =1:N_sim
@@ -52,16 +52,16 @@ displayIter = true; % set to false if you don't want to see the iteration number
             %%% Aero coefficients uncertainty
 
             sigma_aer = (0.1)/3;             % aero coeffs error standard deviation
-            mu_aer = 0;                      % aero coeffs error mean value
+            mu_aer = -0.05;                      % aero coeffs error mean value
             stoch.aer_percentage = normrnd(mu_aer,sigma_aer,N_sim,1);
 
             %%% wind parameters
-            settings.wind.MagMin = 0;                                                % [m/s] Minimum Wind Magnitude
-            settings.wind.MagMax = 10;                                               % [m/s] Maximum Wind Magnitude
+            settings.wind.MagMin = 2.7;                                                % [m/s] Minimum Wind Magnitude
+            settings.wind.MagMax = 3.3;                                               % [m/s] Maximum Wind Magnitude
             settings.wind.ElMin  = - deg2rad(5);
             settings.wind.ElMax  = + deg2rad(5);
-            settings.wind.AzMin  = - deg2rad(180);
-            settings.wind.AzMax  = + deg2rad(180);
+            settings.wind.AzMin  = + deg2rad(170);
+            settings.wind.AzMax  = + deg2rad(210);
 
             switch settings.windModel
                 case "constant"
@@ -77,7 +77,7 @@ displayIter = true; % set to false if you don't want to see the iteration number
 
 
             % launch rail orientation
-            sigma_om = 1/3 *pi/180; % 2 [deg] of offset (uncertainty on ramp elevation angle)
+            sigma_om = 2/3 *pi/180; % 2 [deg] of offset (uncertainty on ramp elevation angle)
             mu_om = settings.OMEGA;
             stoch.OMEGA_rail = normrnd(mu_om,sigma_om,N_sim,1);
 
