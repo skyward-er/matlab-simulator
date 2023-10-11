@@ -79,9 +79,10 @@ R = eye(6);
 R_m = inv(R);
 %% extract data from simulation
 
-fileNAS = "flightData\"+settings.mission+"\Boardcore_NASState";
-fileOutputABK = "flightData\"+settings.mission+"\Boardcore_ServoData";
-
+% fileNAS = "flightData\"+settings.mission+"\Boardcore_NASState";
+% fileOutputABK = "flightData\"+settings.mission+"\Boardcore_ServoData";
+fileNAS = "flightData\"+settings.mission+"\NASData_corrected";
+fileOutputABK = "flightData\"+settings.mission+"\ABKData_corrected";
 
 switch settings.mission
     case 'Pyxis_Portugal_October_2022'
@@ -91,12 +92,14 @@ switch settings.mission
           error('We do not have the logs of the air brakes unfortunately for this flight.\n')
     
     case 'Gemini_Roccaraso_September_2023'
-        t_start = 8536 + settings.tb; 
-        t_end = 8553;       
+        % t_start = 8536 + settings.tb; 
+        % t_end = 8553; 
+        t_start = 1 + settings.tb; 
+        t_end = 18; 
 end
 
 % extraction
-log_NAS  = csvDataLogExtractor(fileNAS,"sec");
+log_NAS  = csvDataLogExtractor(fileNAS,"sec",{''});
 log_ABK  = csvDataLogExtractor(fileOutputABK,"sec");
 
 % plot to see where you want to trim the struct

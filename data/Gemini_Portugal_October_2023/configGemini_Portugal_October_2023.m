@@ -152,7 +152,7 @@ settings.mea.engine_model_C1 = [1.780138883879285,-1.625379384370081,0];
 settings.mea.Q=1e-1*diag([1,1,1]);      % model noise covariance matrix    
 settings.mea.R=0.36; 
 % shut down prediction altitude
-settings.mea.z_shutdown  = 3100; % [m] target apogee prediction for shutdown
+settings.mea.z_shutdown  = 3200; % [m] target apogee prediction for shutdown
 settings.mea.t_lower_shadowmode = 0; % minimunm burning time
 settings.mea.t_higher_shadowmode = 10; % maximum burning time
 settings.shutdownValveDelay = 0.6; % time from the shut down command to the actual valve closure
