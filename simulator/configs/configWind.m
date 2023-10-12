@@ -36,8 +36,6 @@ if conf.script == "simulator"
             settings.wind.HourMax = 4;                     % [h] Maximum Hour of the day
             settings.wind.ww = 0;                          % [m/s] Vertical wind speed
             
-            
-    
         case "multiplicative"
     
             settings.wind.input = true;

@@ -49,21 +49,6 @@ conf.script = "simulator";
 settings.montecarlo = true;
 configSimulator;
 
-%% set real time parameters
-I_TOT = 4718.86; 
-BURNING_TIME = 2.90897; 
-%%% -----------------------------
-BURNING_TIME = BURNING_TIME + settings.tIGN + settings.tCO;
-timeNew = settings.motor.expTime * BURNING_TIME/settings.tb; 
-Itemp = trapz(timeNew, settings.motor.expThrust); 
-ThrustNew = settings.motor.expThrust * I_TOT/Itemp; 
-settings.State.xcgTime = settings.State.xcgTime * timeNew(end)/settings.tb; 
-settings.tb = timeNew(end); 
-settings.motor.expTime = timeNew; 
-settings.motor.expThrust = ThrustNew;
-
-%% montecarlo settings
-configMontecarlo;
 
 %% MONTECARLO SETTINGS
 rng default

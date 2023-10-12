@@ -6,7 +6,7 @@ sim_per_interval = N_sim/N_histCol;
 % HISTOGRAM APOGEE
 figure('Units','normalized','Position',[0.01,0.01,0.98,0.85]);
 
-subplot(1,3,1)
+subplot(2,2,1)
 hold on; grid on;
 xline(settings.z_final-10, 'r--', 'LineWidth', 1,'DisplayName','-10m from target')
 xline(settings.z_final+10, 'r--', 'LineWidth', 1,'DisplayName','+10m from target')
@@ -14,27 +14,52 @@ histogram(apogee.altitude,N_histCol,'Normalization','cdf','DisplayName','Apogee 
 xlim([min(apogee.altitude)-10 , max(apogee.altitude)+10])
 xlabel('Apogee value [m]')
 ylabel('Normalized cdf')
-title(['Apogee cdf (',num2str(sim_per_interval),' sim/column)'])
+title('Apogee cdf')
 legend
 
 % PLOT CONTROL
-subplot(1,3,2)
+subplot(2,2,2)
 for i = floor(linspace(1,N_sim,10))
     plot(save_thrust{i}.t,save_thrust{i}.Y(:,14))
     hold on; grid on;
 end
 title('Control action')
-xlabel('Time (s)')
-ylabel('Servo angle \alpha (rad)')
+xlabel('Time [s]')
+ylabel('Servo angle \alpha [rad]')
 legend(contSettings.algorithm);
 
 %% t_shutdown % I am adding 0.3 seconds because we do not consider it in simulation, while in reality there is a delay between the command and the actuation
-subplot(1,3,3)
+subplot(2,2,3)
 histogram(t_shutdown.value+0.3,N_histCol,'Normalization','cdf')
-xlabel('Shutdown time (s)')
+xlabel('Shutdown time [s]')
 ylabel('Shutdown time cdf')
 title('Engine shutdown time cumulative distribution')
 
+
+%% t_shutdown vs apogee
+subplot(2,2,4)
+scatter(t_shutdown.value+0.3,apogee.altitude')
+xlabel('Shutdown time [s]')
+ylabel('Apogee [m]')
+title('Apogee vs shut down time')
+
+
+
+%% parafoil
+%%%%%%%%%%%%%%%% landing position w.r.t. target
+montFigures.landing_ellipses = figure;
+scatter(landing.position(:,1),landing.position(:,2),'k.','DisplayName','Landings')
+hold on;
+scatter(settings.payload.target(1),settings.payload.target(2),'DisplayName','Target')
+drawCircle(settings.payload.target([2,1]),50,'+-50 meters','r')
+drawCircle(settings.payload.target([2,1]),150,'+-150 meters','b')
+xlabel('North [m]')
+ylabel('East [m]')
+zlabel('Down [m]')
+axis equal
+title('Landing positions')
+view([90,-90])
+legend
 
 return
 
@@ -389,21 +414,6 @@ xlabel('Mass [kg]')
 ylabel('Apogee time cdf')
 title('Estimated final mass')
 
-%% parafoil
-%%%%%%%%%%%%%%%% landing position w.r.t. target
-montFigures.landing_ellipses = figure;
-scatter(landing.position(:,1),landing.position(:,2),'k.','DisplayName','Landings')
-hold on;
-scatter(settings.payload.target(1),settings.payload.target(2),'DisplayName','Target')
-drawCircle(settings.payload.target([2,1]),50,'+-50 meters','r')
-drawCircle(settings.payload.target([2,1]),150,'+-150 meters','b')
-xlabel('North [m]')
-ylabel('East [m]')
-zlabel('Down [m]')
-axis equal
-title('Landing positions')
-view([90,-90])
-legend
 
 %% apogee velocity
 montFigures.apogee_velocity = figure;
