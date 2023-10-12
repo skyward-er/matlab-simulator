@@ -2,8 +2,41 @@
 N_histCol = min(N_sim,25); % best looking if we don't go higher than 200, but if N_sim is less than 200 it gives error if we set it to 200
 sim_per_interval = N_sim/N_histCol;
 
-%% PLOT HISTOGRAM
-montFigures.apogee_histogram_pdf = figure;
+%% PLOT preflight GO/NOGO
+% HISTOGRAM APOGEE
+figure('Units','normalized','Position',[0.01,0.01,0.98,0.85]);
+
+subplot(1,3,1)
+hold on; grid on;
+xline(settings.z_final-10, 'r--', 'LineWidth', 1,'DisplayName','-10m from target')
+xline(settings.z_final+10, 'r--', 'LineWidth', 1,'DisplayName','+10m from target')
+histogram(apogee.altitude,N_histCol,'Normalization','cdf','DisplayName','Apogee altitude')
+xlim([min(apogee.altitude)-10 , max(apogee.altitude)+10])
+xlabel('Apogee value [m]')
+ylabel('Normalized cdf')
+title(['Apogee cdf (',num2str(sim_per_interval),' sim/column)'])
+legend
+
+% PLOT CONTROL
+subplot(1,3,2)
+for i = floor(linspace(1,N_sim,10))
+    plot(save_thrust{i}.t,save_thrust{i}.Y(:,14))
+    hold on; grid on;
+end
+title('Control action')
+xlabel('Time (s)')
+ylabel('Servo angle \alpha (rad)')
+legend(contSettings.algorithm);
+
+%% t_shutdown
+subplot(1,3,3)
+histogram(t_shutdown.value,N_histCol,'Normalization','cdf')
+xlabel('Shutdown time (s)')
+ylabel('Shutdown time cdf')
+title('Engine shutdown time cumulative distribution')
+
+%%
+figure
 hold on; grid on;
 xline(settings.z_final-10, 'r--', 'LineWidth', 1,'DisplayName','-10m from target')
 xline(settings.z_final+10, 'r--', 'LineWidth', 1,'DisplayName','+10m from target')
@@ -14,16 +47,9 @@ ylabel('Number of apogees in the same interval')
 title('Reached apogee distribution')
 legend
 
-montFigures.apogee_histogram_cumulative = figure;
-hold on; grid on;
-xline(settings.z_final-10, 'r--', 'LineWidth', 1,'DisplayName','-10m from target')
-xline(settings.z_final+10, 'r--', 'LineWidth', 1,'DisplayName','+10m from target')
-histogram(apogee.altitude,N_histCol,'Normalization','cdf','DisplayName','Apogee altitude')
-xlim([min(apogee.altitude)-10 , max(apogee.altitude)+10])
-xlabel('Apogee value [m]')
-ylabel('Normalized cdf')
-title(['Apogee cdf (',num2str(sim_per_interval),' sim/column)'])
-legend
+
+return
+%%
 
 
 %% AIRBRAKE DEPLOY TIME HISTOGRAM - this plot is particularly useful for the shadowmodes, never erase it
@@ -112,16 +138,7 @@ montFigures.montecarlo_landing_statistics = figure;
     sgtitle('Montecarlo statistics for parafoil landing distance to target')
 end
 
-%% PLOT CONTROL
-montFigures.control_action = figure;
-for i = floor(linspace(1,N_sim,5))
-    plot(save_thrust{i}.t,save_thrust{i}.Y(:,14))
-    hold on; grid on;
-end
-title('Control action')
-xlabel('Time (s)')
-ylabel('Servo angle \alpha (rad)')
-legend(contSettings.algorithm);
+
 
 %% PLOT APOGEE wrt THRUST
 montFigures.apogee_wrt_thrust = figure;
@@ -133,7 +150,7 @@ title('Apogee w.r.t. thrust')
 xlabel('Thrust percentage w.r.t. nominal (%)')
 ylabel('Apogee (m)')
 xlim([min(thrust_percentage)-0.05 max(thrust_percentage)+0.05])
-ylim([min(apogee.altitude)-20 max(apogee.altitude)+20])
+ylim([min(apogee.altitude)-20, max(apogee.altitude)+20])
 legend(contSettings.algorithm);
 
 %% PLOT APOGEE wrt MASS OFFSET
@@ -146,7 +163,7 @@ title('Apogee w.r.t. mass')
 xlabel('Mass offset [kg]')
 ylabel('Apogee (m)')
 xlim([min(stoch.mass_offset)-0.05 max(stoch.mass_offset)+0.05])
-ylim([min(apogee.altitude)-20 max(apogee.altitude)+20])
+ylim([min(apogee.altitude)-20, max(apogee.altitude)+20])
 legend(contSettings.algorithm);
 
 %% PLOT APOGEE wrt RAIL OMEGA
@@ -171,12 +188,9 @@ if settings.scenario~= "descent"
     ylabel('Number of shutdowns in the same time interval')
     title('Engine shutdown time distribution')
     
-    montFigures.t_shutdown_histogram_cumulative = figure;
-    histogram(t_shutdown.value,N_histCol,'Normalization','cdf')
-    xlabel('Shutdown time (s)')
-    ylabel('Shutdown time cdf')
-    title('Engine shutdown time cumulative distribution')
- %%% t_shutdown wrt wind
+
+ 
+%% t_shutdown wrt wind
     montFigures.tShutdown_wind = figure;
     subplot(1,3,1)
     for i = 1:N_sim

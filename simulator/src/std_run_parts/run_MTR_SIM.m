@@ -15,6 +15,7 @@ if sensorTot.mea.prediction(end) >= settings.mea.z_shutdown
         if ~settings.expShutdown && settings.mea.counter_shutdown > contSettings.N_prediction_threshold && T1 > settings.mea.t_lower_shadowmode% threshold set in configControl
             settings.expShutdown = true;
             settings.t_shutdown = T1;
+            sensorTot.mea.t_shutdown = T1;
             settings.timeEngineCut = settings.t_shutdown + 0.3;
             settings.expTimeEngineCut = settings.t_shutdown;
         end
@@ -40,6 +41,7 @@ if sensorTot.mea.prediction(end) >= settings.mea.z_shutdown
         contSettings.valve_pos = 0;
     else
         settings.t_shutdown = nan;
+        sensorTot.mea.t_shutdown = nan;
     end
 else
     if ~settings.expShutdown && T1 >= settings.mea.t_higher_shadowmode
