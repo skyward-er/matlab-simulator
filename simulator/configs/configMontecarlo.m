@@ -90,7 +90,7 @@ displayIter = true; % set to false if you don't want to see the iteration number
             stoch.OMEGA_rail = normrnd(mu_om,sigma_om,N_sim,1);
 
             % launch rail orientation
-            sigma_phi = 5/3 *pi/180; % 2 [deg]of offset (uncertainty on ramp azimuth angle)
+            sigma_phi = 2/3 *pi/180; % 2 [deg]of offset (uncertainty on ramp azimuth angle)
             mu_phi = settings.PHI;
             stoch.PHI_rail = normrnd(mu_phi,sigma_phi,N_sim,1);
 

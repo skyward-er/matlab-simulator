@@ -44,7 +44,7 @@ ylabel('Apogee [m]')
 title('Apogee vs shut down time')
 
 
-
+return
 %% parafoil
 %%%%%%%%%%%%%%%% landing position w.r.t. target
 montFigures.landing_ellipses = figure;
