@@ -40,18 +40,20 @@ if conf.script == "simulator"
     
         case "multiplicative"
     
-            % Wind is generated for every altitude interpolating with the coefficient defined below
-            settings.wind.inputGround = 3;                                                                    % wind magnitude at the ground [m/s]
-            settings.wind.inputAlt = 0:100:4500 ;                                                 % altitude vector [m]
-            settings.wind.inputMagnitude = [settings.wind.inputGround * ones(1, 7), 4 * ones(1, 16), 3 * ones(1, 5), 2 * ones(1, 8), 3 * ones(1, 5), 5 *ones(1, 5) ];
-            settings.wind.inputAzimut = [180 * ones(1, 8), 190 * ones(1, 23), 200 * ones(1, 5), 210 * ones(1, 10)];   % wind azimut angle at each altitude (toward wind incoming direction) [deg]
-            settings.wind.inputMult = (settings.wind.inputMagnitude./settings.wind.inputGround - 1) * 100;
-            settings.wind.input_uncertainty = [10, 10];
+            settings.wind.input = true;
+    % Wind is generated for every altitude interpolating with the coefficient defined below
+    settings.wind.inputGround = 3;                                                                    % wind magnitude at the ground [m/s]
+    settings.wind.inputAlt = 0:100:4500 ;                                                 % altitude vector [m]
+    settings.wind.inputMagnitude = [3 * ones(1, 5), 4 * ones(1 , 4), 5 * ones(1, 10), 4 * ones(1, 12), 5 * ones(1, 15)]; 
+    settings.wind.inputAzimut    = [220 * ones(1, 2), 200 * ones(1, 44)]; 
+    settings.wind.inputMult = (settings.wind.inputMagnitude./settings.wind.inputGround - 1) * 100;
+    settings.wind.input_uncertainty = [10, 10];
             % settings.wind.input_uncertainty = [a,b];      wind uncertanties:
             % - a, wind magnitude percentage uncertanty: magn = magn *(1 +- a)
             % - b, wind direction band uncertanty: dir = dir 1 +- b
             settings.wind.input = true;
             settings.wind.model = false;
+
         case "constant"
     
             % Wind is generated randomly from the minimum to the maximum parameters which defines the wind.

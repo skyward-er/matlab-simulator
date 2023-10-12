@@ -209,6 +209,16 @@ for alg_index = 4
             if landing.distance_to_target(i) <= 150
                 N_landings_within150m = N_landings_within150m +1; % save how many apogees sit in the +-50 m from target
             end
+        elseif conf.scenario == "ballistic"
+
+            landing.position(i,:) = save_thrust{i}.Y(end,[2,1,3]);
+            landing.velocities_BODY(i,:) = save_thrust{i}.Y(end,4:6);
+            landing.velocities_NED(i,:) = quatrotate(quatconj(save_thrust{i}.Y(end,10:13)),save_thrust{i}.Y(end,4:6));
+            landing.distance_to_target(i) = NaN;
+    
+            N_landings_within50m = NaN; % save how many apogees sit in the +-50 m from target
+            N_landings_within150m = NaN; % save how many apogees sit in the +-50 m from target
+            
         else
             landing.position(i,:) = [NaN NaN NaN];
             landing.velocities_BODY(i,:) = [NaN NaN NaN];
@@ -458,3 +468,50 @@ for alg_index = 4
 
     %%
 end
+
+
+%% generate file for rocketpy (euroc 2023 prelaunch)
+for i = 1:N_sim
+    [apogee.coordinates(i,1),apogee.coordinates(i,2),apogee.coordinates(i,3)] = ned2geodetic(save_thrust{i}.apogee.position(1),save_thrust{i}.apogee.position(2),save_thrust{i}.apogee.position(3),settings.lat0,settings.lon0,settings.z0,wgs84Ellipsoid);
+    [landing.coordinates(i,1),landing.coordinates(i,2),landing.coordinates(i,3)] = ned2geodetic(save_thrust{i}.Y(end,1),save_thrust{i}.Y(end,2),save_thrust{i}.Y(end,3),settings.lat0,settings.lon0,settings.z0,wgs84Ellipsoid);
+end
+landing.coordinates = landing.coordinates(:,1:2);
+
+figure
+geoplot(landing.coordinates(:,1),landing.coordinates(:,2),'LineStyle','none','Marker','.','MarkerSize',10,'Color','blue','DisplayName','Landings')
+hold on;
+geoplot(apogee.coordinates(:,1),apogee.coordinates(:,2),'LineStyle','none','Marker','.','MarkerSize',10,'Color','red','DisplayName','Apogees')
+geobasemap satellite
+legend
+
+if conf.scenario == "ballistic"
+    save('ballistic_simulations','apogee','landing')
+else
+    save('parachute_simulations','apogee','landing')
+end
+
+return
+%% generate files
+load ballistic_simulations
+ball.apogee = apogee;
+ball.landing = landing;
+load parachute_simulations
+para.apogee = apogee;
+para.landing = landing;
+
+
+varNamesAsc = {'ApogeeLatitude', 'ApogeeLongitude', 'ApogeeAltitude'}; 
+varNamesDesc = {'ballLandingLatitude', 'ballLandingLongitude', 'paraLandingLatitude', 'paraLandingLongitude'}; 
+ascentTab = table; 
+descentTab = table; 
+ascentTab(:, 1) = table(ball.apogee.coordinates(:,1)); 
+ascentTab(:, 2) = table(ball.lapogee.coordinates(:,2)); 
+ascentTab(:, 3) = table(ball.apogee.altitude'); 
+ascentTab.Properties.VariableNames = varNamesAsc; 
+writetable(ascentTab, 'ascent_MC_simulations_CL.csv'); 
+descentTab(:, 1) = table(ball.landing.coordinates(:,1)); 
+descentTab(:, 2) = table(ball.landing.coordinates(:,2)); 
+descentTab(:, 3) = table(para.landing.coordinates(:,1)); 
+descentTab(:, 4) = table(para.landing.coordinates(:,2)); 
+descentTab.Properties.VariableNames = varNamesDesc; 
+writetable(descentTab, 'descent_MC_simulations_CL.csv');
