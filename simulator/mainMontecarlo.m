@@ -89,7 +89,6 @@ clearvars   msaToolkitURL Itot
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%CONFIG%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 settings_mont_init = struct('x',[]);
-mass_flow_rate = 1.006; % [kg/s]
 
 %% start simulation
 for alg_index = 4
@@ -132,6 +131,7 @@ for alg_index = 4
             case "multiplicative"
                 settings_mont.wind.Mag = stoch.wind.Mag(i);
                 settings_mont.wind.Az = stoch.wind.Az(i,:);
+                settings_mont.wind.unc = stoch.wind.unc(i,:);
         end
         
         if displayIter == true
@@ -154,6 +154,7 @@ for alg_index = 4
     N_landings_within50m = 0;
     N_landings_within150m = 0;
     
+   
     for i = 1:N_sim
 
         % apogee

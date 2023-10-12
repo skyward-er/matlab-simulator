@@ -55,7 +55,8 @@ if nargin > 2
             settings.wind.El = settings_mont.wind.El;
         case "multiplicative"
             settings.wind.inputGround = settings_mont.wind.Mag;
-            settings.wind.inputAzimut = settings_mont.wind.Az;
+            % settings.wind.inputAzimut = settings_mont.wind.Az;
+            settings.wind.input_uncertainty = settings_mont.wind.unc;
     end
    
     settings.State.xcgTime = settings_mont.State.xcgTime;

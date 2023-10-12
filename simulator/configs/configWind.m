@@ -51,7 +51,7 @@ if conf.script == "simulator"
             % - a, wind magnitude percentage uncertanty: magn = magn *(1 +- a)
             % - b, wind direction band uncertanty: dir = dir 1 +- b
             settings.wind.input = true;
-
+            settings.wind.model = false;
         case "constant"
     
             % Wind is generated randomly from the minimum to the maximum parameters which defines the wind.

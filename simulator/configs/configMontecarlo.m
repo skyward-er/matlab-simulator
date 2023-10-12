@@ -14,7 +14,7 @@ if settings.montecarlo
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % how many simulations
-N_sim = 100; % set to at least 500
+N_sim = 200; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
 
@@ -67,7 +67,7 @@ displayIter = true; % set to false if you don't want to see the iteration number
                 case "constant"
                     [stoch.wind.uw, stoch.wind.vw, stoch.wind.ww, stoch.wind.Az, stoch.wind.El ] = windConstGeneratorMontecarlo(settings.wind,N_sim,simulationType_thrust);
                 case "multiplicative"
-                    [stoch.wind.Mag,stoch.wind.Az] = windMultGeneratorMontecarlo(settings.wind,N_sim);
+                    [stoch.wind.Mag,stoch.wind.Az,stoch.wind.unc] = windMultGeneratorMontecarlo(settings.wind,N_sim);
             end
 
             %%% mass offset distribution
