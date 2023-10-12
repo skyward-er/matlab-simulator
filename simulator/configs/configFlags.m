@@ -27,7 +27,7 @@ scenarios explanation:
 
 
 % scenario configuration
-conf.scenario = "ballistic";
+conf.scenario = "full flight";
 conf.board = "main";            % Either "main" or "payload"
 conf.HIL = false;
 

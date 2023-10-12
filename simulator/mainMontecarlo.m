@@ -505,7 +505,7 @@ varNamesDesc = {'ballLandingLatitude', 'ballLandingLongitude', 'paraLandingLatit
 ascentTab = table; 
 descentTab = table; 
 ascentTab(:, 1) = table(ball.apogee.coordinates(:,1)); 
-ascentTab(:, 2) = table(ball.lapogee.coordinates(:,2)); 
+ascentTab(:, 2) = table(ball.apogee.coordinates(:,2)); 
 ascentTab(:, 3) = table(ball.apogee.altitude'); 
 ascentTab.Properties.VariableNames = varNamesAsc; 
 writetable(ascentTab, 'ascent_MC_simulations_CL.csv'); 
