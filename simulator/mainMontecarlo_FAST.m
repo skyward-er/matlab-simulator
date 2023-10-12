@@ -188,8 +188,31 @@ apogee.horizontalSpeed_min = min(apogee.horizontalSpeed);
 apogee.accuracy_10 = N_ApogeeWithinTarget_10/N_sim*100; % percentage, so*100
 apogee.accuracy_50 = N_ApogeeWithinTarget_50/N_sim*100; % percentage, so*100
 
+%% compute how many simulations open air brakes
+on = 0;
+on_max = 0;
+off = 0;
+for i = 1:N_sim       
+    if max(save_thrust{i}.ARB.cmdPosition) > 0
+        on = on+1;
+        if max(save_thrust{i}.ARB.cmdPosition) >= settings.servo.maxAngle-1e-3
+            on_max = on_max + 1;
+        end
+    else
+        off = off+1;
+    end
+end
 
-
+meritParam = zeros(N_sim,1);
+for i = 1:N_sim
+    totalABKTime = save_thrust{i}.ARB.cmdTime(find(save_thrust{i}.ARB.cmdPosition>0,1,'last'))-save_thrust{i}.ARB.cmdTime(find(save_thrust{i}.ARB.cmdPosition>0,1,'first'));
+    totalABKPosition = mean(save_thrust{i}.ARB.cmdPosition)/settings.servo.maxAngle;
+    if ~isnan(totalABKPosition) && ~isempty(totalABKTime)
+        meritParam(i) = totalABKPosition*totalABKTime/(max(save_thrust{i}.t)-contSettings.ABK_shadowmode);
+    else 
+        meritParam(i) = 0;
+    end
+end
 
 %% PLOTS
 
@@ -197,9 +220,11 @@ plotsMontecarlo;
 
 %% print
 fprintf('\n')
-fprintf('MIN shutdown time = %.3f\n',max(t_shutdown.value))
-fprintf('MAX shutdown time = %.3f\n',min(t_shutdown.value))
-fprintf('MEAN shutdown time = %.3f\n',t_shutdown.mean)
+fprintf('MIN shutdown time = %.3f\n',min(t_shutdown.value))
+fprintf('MAX shutdown time = %.3f\n',max(t_shutdown.value))
+fprintf('MEAN shutdown time = %.3f\n\n',t_shutdown.mean)
+fprintf('%% simulations abk open = %.2f%%\n',100*on/N_sim)
+fprintf('%% simulations merit param above 0.1= %.2f%%\n\n',100*sum(meritParam>0.1)/N_sim)
 fprintf('Computation time %.3f\n', toc)
 
 
@@ -281,4 +306,8 @@ if settings.scenario ~= "descent"
 end
 
 fclose(fid);
+
+%% save file
+% saveas(gca,azwind+config"om"+num2str(settings.OMEGA))
+
 

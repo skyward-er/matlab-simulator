@@ -19,14 +19,21 @@ legend
 
 % PLOT CONTROL
 subplot(2,2,2)
-for i = floor(linspace(1,N_sim,10))
-    plot(save_thrust{i}.t,save_thrust{i}.Y(:,14))
-    hold on; grid on;
-end
-title('Control action')
-xlabel('Time [s]')
-ylabel('Servo angle \alpha [rad]')
-legend(contSettings.algorithm);
+scatter(1:N_sim,meritParam)
+hold on;
+yline(mean(meritParam),'r--',['Mean = ',num2str(mean(meritParam))])
+
+
+
+% for i = floor(linspace(1,N_sim,10))
+%     plot(save_thrust{i}.t,save_thrust{i}.Y(:,14))
+%     hold on; grid on;
+% end
+% title('Control action')
+% xlabel('Time [s]')
+% ylabel('Servo angle \alpha [rad]')
+% legend(contSettings.algorithm);
+
 
 %% t_shutdown % I am adding 0.3 seconds because we do not consider it in simulation, while in reality there is a delay between the command and the actuation
 subplot(2,2,3)

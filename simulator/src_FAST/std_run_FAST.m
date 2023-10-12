@@ -462,6 +462,9 @@ if settings.montecarlo
 
     % air brakes (ARB)
     struct_out.ARB.cmdPosition = interp1(struct_out.ARB.cmdTime,struct_out.ARB.cmdPosition,t_vec);
+    if any(isnan(struct_out.ARB.cmdPosition))
+        struct_out.ARB.cmdPosition(isnan(struct_out.ARB.cmdPosition)) = 0;
+    end
     struct_out.ARB.cmdTime = t_vec;
     struct_out.ARB = rmfield(struct_out.ARB, 'allowanceIdx');
 
