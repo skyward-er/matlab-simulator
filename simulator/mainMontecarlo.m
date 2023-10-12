@@ -49,6 +49,22 @@ conf.script = "simulator";
 settings.montecarlo = true;
 configSimulator;
 
+%% set real time parameters
+I_TOT = 4718.86; 
+BURNING_TIME = 2.90897; 
+%%% -----------------------------
+BURNING_TIME = BURNING_TIME + settings.tIGN + settings.tCO;
+timeNew = settings.motor.expTime * BURNING_TIME/settings.tb; 
+Itemp = trapz(timeNew, settings.motor.expThrust); 
+ThrustNew = settings.motor.expThrust * I_TOT/Itemp; 
+settings.State.xcgTime = settings.State.xcgTime * timeNew(end)/settings.tb; 
+settings.tb = timeNew(end); 
+settings.motor.expTime = timeNew; 
+settings.motor.expThrust = ThrustNew;
+
+%% montecarlo settings
+configMontecarlo;
+
 %% MONTECARLO SETTINGS
 rng default
 matlab_graphics;
@@ -66,7 +82,7 @@ settings_mont_init = struct('x',[]);
 
 %% start simulation
 
-contSettings.algorithm = 'interp';
+contSettings.algorithm = 'complete';
 
 %save arrays
 save_thrust = cell(size(stoch.thrust,1),1);
@@ -76,7 +92,7 @@ wind_el = zeros(N_sim,1);
 wind_az = zeros(N_sim,1);
 t_shutdown.value = zeros(N_sim,1);
 
-parfor i = 1:N_sim
+for i = 1:N_sim
     settings_mont = settings_mont_init;
 
     settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
