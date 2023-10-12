@@ -21,7 +21,7 @@ else
     close all; clc;
     clearvars -except flagSubmodulesUpdated
 end
-
+tic
 %% recall the first part of the MAIN script
 % adds folders to the path and retrieves rocket, mission, simulation, etc
 % data.
@@ -77,7 +77,7 @@ wind_el = zeros(N_sim,1);
 wind_az = zeros(N_sim,1);
 t_shutdown.value = zeros(N_sim,1);
 
-for i = 1:N_sim
+parfor i = 1:N_sim
     settings_mont = settings_mont_init;
 
     settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
