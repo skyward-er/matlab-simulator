@@ -499,6 +499,11 @@ load parachute_simulations
 para.apogee = apogee;
 para.landing = landing;
 
+figure 
+geoplot(ball.landing.coordinates(:,1),ball.landing.coordinates(:,2),'Marker','.','MarkerSize',10,'LineStyle','none')
+hold on
+geobasemap satellite
+
 
 varNamesAsc = {'ApogeeLatitude', 'ApogeeLongitude', 'ApogeeAltitude'}; 
 varNamesDesc = {'ballLandingLatitude', 'ballLandingLongitude', 'paraLandingLatitude', 'paraLandingLongitude'}; 
