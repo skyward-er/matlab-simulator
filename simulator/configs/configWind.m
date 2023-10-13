@@ -39,15 +39,18 @@ if conf.script == "simulator"
             
     
         case "multiplicative"
-    
-            settings.wind.input = true;
-    % Wind is generated for every altitude interpolating with the coefficient defined below
-    settings.wind.inputGround = 3;                                                                    % wind magnitude at the ground [m/s]
-    settings.wind.inputAlt = 0:100:4500 ;                                                 % altitude vector [m]
-    settings.wind.inputMagnitude = [3 * ones(1, 5), 4 * ones(1 , 4), 5 * ones(1, 10), 4 * ones(1, 12), 5 * ones(1, 15)]; 
-    settings.wind.inputAzimut    = [220 * ones(1, 2), 200 * ones(1, 44)]; 
-    settings.wind.inputMult = (settings.wind.inputMagnitude./settings.wind.inputGround - 1) * 100;
-    settings.wind.input_uncertainty = [10, 10];
+        %%%%% Input wind
+        settings.wind.input = true;
+        % Wind is generated for every altitude interpolating with the coefficient defined below
+        windAltInput = [ 0  300 420 520 620 720 820 920 1020 1100 1800 1900 2200 2300 2600 2700 2900 3200 3500 4000 4500]; 
+        windMagInput = [2   2    4   5    6  8   9   9   10   11    11   12  12   13   15   15   15   16   17   18   18]; 
+        windAzInput  = [180 200 220 220 220 220 220 220 220  220   220  220   220  220 220  220  220  220  220  220  220]; 
+        settings.wind.inputGround = 2;                                                                    % wind magnitude at the ground [m/s]
+        settings.wind.inputAlt = windAltInput;                                                 % altitude vector [m]
+        settings.wind.inputMagnitude = windMagInput; 
+        settings.wind.inputAzimut = windAzInput; 
+        settings.wind.inputMult = (settings.wind.inputMagnitude./settings.wind.inputGround - 1) * 100;
+        settings.wind.input_uncertainty = [10, 10];
             % settings.wind.input_uncertainty = [a,b];      wind uncertanties:
             % - a, wind magnitude percentage uncertanty: magn = magn *(1 +- a)
             % - b, wind direction band uncertanty: dir = dir 1 +- b
