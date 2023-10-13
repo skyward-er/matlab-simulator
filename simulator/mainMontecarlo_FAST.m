@@ -77,7 +77,7 @@ wind_el = zeros(N_sim,1);
 wind_az = zeros(N_sim,1);
 t_shutdown.value = zeros(N_sim,1);
 
-for i = 1:N_sim
+parfor i = 1:N_sim
     settings_mont = settings_mont_init;
 
     settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
@@ -310,4 +310,28 @@ fclose(fid);
 %% save file
 % saveas(gca,azwind+config"om"+num2str(settings.OMEGA))
 
+% for i = 1:N_sim
+%     [apogee.coordinates(i,1),apogee.coordinates(i,2),apogee.coordinates(i,3)] = ned2geodetic(save_thrust{i}.apogee.position(1),save_thrust{i}.apogee.position(2),save_thrust{i}.apogee.position(3),settings.lat0,settings.lon0,settings.z0,wgs84Ellipsoid);
+%     [landing.coordinates(i,1),landing.coordinates(i,2),landing.coordinates(i,3)] = ned2geodetic(save_thrust{i}.Y(end,1),save_thrust{i}.Y(end,2),save_thrust{i}.Y(end,3),settings.lat0,settings.lon0,settings.z0,wgs84Ellipsoid);
+% end
+% landing.coordinates = landing.coordinates(:,1:2);
 
+% figure
+% plot(landing.coordinates(:,1),landing.coordinates(:,2),'LineStyle','none','Marker','.','MarkerSize',10,'Color','blue','DisplayName','Landings')
+% hold on;
+% plot(apogee.coordinates(:,1),apogee.coordinates(:,2),'LineStyle','none','Marker','.','MarkerSize',10,'Color','red','DisplayName','Apogees')
+% geobasemap satellite
+% legend
+
+for i = 1:N_sim    
+    landing.North(i)   = save_thrust{i}.Y(end,2); 
+    landing.East(i)    = save_thrust{i}.Y(end,1);
+end
+figure
+scatter(-landing.East,-landing.North,'b.','DisplayName','Landings')
+hold on;
+scatter(-409,438,'ro','filled','DisplayName','GS')
+scatter(0,0,'go','filled','DisplayName','LaunchRail')
+xlabel('East [m]')
+ylabel('North [m]')
+legend
