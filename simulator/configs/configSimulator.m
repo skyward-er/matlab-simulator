@@ -40,18 +40,18 @@ configWind;
 %% 8) PLOTS?
 configPlots;
 
-%% set real time parameters
-I_TOT = 4861.46; 
-BURNING_TIME = 3.13561; 
-%%% -----------------------------
-BURNING_TIME = BURNING_TIME + settings.tIGN + settings.tCO;
-timeNew = settings.motor.expTime * BURNING_TIME/settings.tb; 
-Itemp = trapz(timeNew, settings.motor.expThrust); 
-ThrustNew = settings.motor.expThrust * I_TOT/Itemp; 
-settings.State.xcgTime = settings.State.xcgTime * timeNew(end)/settings.tb; 
-settings.tb = timeNew(end); 
-settings.motor.expTime = timeNew; 
-settings.motor.expThrust = ThrustNew;
+% %% set real time parameters
+% I_TOT = 4861.46; 
+% BURNING_TIME = 3.13561; 
+% %%% -----------------------------
+% BURNING_TIME = BURNING_TIME + settings.tIGN + settings.tCO;
+% timeNew = settings.motor.expTime * BURNING_TIME/settings.tb; 
+% Itemp = trapz(timeNew, settings.motor.expThrust); 
+% ThrustNew = settings.motor.expThrust * I_TOT/Itemp; 
+% settings.State.xcgTime = settings.State.xcgTime * timeNew(end)/settings.tb; 
+% settings.tb = timeNew(end); 
+% settings.motor.expTime = timeNew; 
+% settings.motor.expThrust = ThrustNew;
 
 %% montecarlo settings
 configMontecarlo;

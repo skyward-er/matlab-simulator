@@ -39,13 +39,16 @@ if conf.script == "simulator"
         case "multiplicative"
     
             settings.wind.input = true;
+            windAltInput = [0 100 200 300 400 600 700 1000 1500 1700 1900 2000 2300 2600 2700 3000 3200 3900 4500];
+            windMagInput = [1.4 4 5 5 7 9 10 11 12 13 14 15 16 17 18 19 18 18 17];
+            windAzInput  = [220 190 190 190 200 210 210 210 220 220 220 230 230 240 240 240 240 240 240];
     % Wind is generated for every altitude interpolating with the coefficient defined below
-    settings.wind.inputGround = 3;                                                                    % wind magnitude at the ground [m/s]
-    settings.wind.inputAlt = 0:100:4500 ;                                                 % altitude vector [m]
-    settings.wind.inputMagnitude = [3 * ones(1, 5), 4 * ones(1 , 4), 5 * ones(1, 10), 4 * ones(1, 12), 5 * ones(1, 15)]; 
-    settings.wind.inputAzimut    = [220 * ones(1, 2), 200 * ones(1, 44)]; 
-    settings.wind.inputMult = (settings.wind.inputMagnitude./settings.wind.inputGround - 1) * 100;
-    settings.wind.input_uncertainty = [10, 10];
+        settings.wind.inputGround = 3;                                                                    % wind magnitude at the ground [m/s]
+        settings.wind.inputAlt       = windAltInput;                                                 % altitude vector [m]
+        settings.wind.inputMagnitude = windMagInput;
+        settings.wind.inputAzimut    = windAzInput;
+        settings.wind.inputMult = (settings.wind.inputMagnitude./settings.wind.inputGround - 1) * 100;
+        settings.wind.input_uncertainty = [10, 10];
             % settings.wind.input_uncertainty = [a,b];      wind uncertanties:
             % - a, wind magnitude percentage uncertanty: magn = magn *(1 +- a)
             % - b, wind direction band uncertanty: dir = dir 1 +- b

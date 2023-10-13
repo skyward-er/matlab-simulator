@@ -77,7 +77,7 @@ wind_el = zeros(N_sim,1);
 wind_az = zeros(N_sim,1);
 t_shutdown.value = zeros(N_sim,1);
 
-parfor i = 1:N_sim
+for i = 1:N_sim
     settings_mont = settings_mont_init;
 
     settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
