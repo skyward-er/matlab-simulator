@@ -324,11 +324,12 @@ fclose(fid);
 % legend
 
 for i = 1:N_sim    
-    landing.North(i)   = save_thrust{i}.Y(end,2); 
-    landing.East(i)    = save_thrust{i}.Y(end,1);
+    landing.North(i)   = save_thrust{i}.Y(end,1); 
+    landing.East(i)    = save_thrust{i}.Y(end,2);
+    landing.altitude(i)= -save_thrust{i}.Y(end,3);
 end
 figure
-scatter(-landing.East,-landing.North,'b.','DisplayName','Landings')
+scatter(landing.East,landing.North,'b.','DisplayName','Landings')
 hold on;
 scatter(-409,438,'ro','filled','DisplayName','GS')
 scatter(0,0,'go','filled','DisplayName','LaunchRail')

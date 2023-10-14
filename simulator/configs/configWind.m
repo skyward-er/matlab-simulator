@@ -39,9 +39,9 @@ if conf.script == "simulator"
         case "multiplicative"
     
             settings.wind.input = true;
-            windAltInput = [0 100 200 300 400 600 700 1000 1500 1700 1900 2000 2300 2600 2700 3000 3200 3900 4500];
-            windMagInput = [2.4 4 5 5 7 9 10 11 12 13 14 15 16 17 18 19 18 18 17];
-            windAzInput  = [180 190 190 190 200 210 210 210 220 220 220 230 230 240 240 240 240 240 240];
+            windAltInput = [0   100 200 300 400 600 700 1000 1500 1700 1900 2000 2300 2600 2700 3000 3200 3900 4500];
+            windMagInput = [5   6   6   7   7   8   9   13   14   14   14   15   17   19   19   20   20   16   15];
+            windAzInput  = [210 210 210 210 210 210 210 210  220  220  230  230  230  240  240  240  240  250  250];
     % Wind is generated for every altitude interpolating with the coefficient defined below
         settings.wind.inputGround = 3;                                                                    % wind magnitude at the ground [m/s]
         settings.wind.inputAlt       = windAltInput;                                                 % altitude vector [m]
