@@ -51,7 +51,7 @@ if conf.script == "simulator"
             settings.wind.inputMagnitude = windMagInput; 
             settings.wind.inputAzimut = windAzInput; 
             settings.wind.inputMult = (settings.wind.inputMagnitude./settings.wind.inputGround - 1) * 100;
-            settings.wind.inputUncertainty = [10, 10];
+            settings.wind.input_uncertainty = [10, 10];
             % settings.wind.input_uncertainty = [a,b];      wind uncertanties:
             % - a, wind magnitude percentage uncertanty: magn = magn *(1 +- a)
             % - b, wind direction band uncertanty: dir = dir 1 +- b
