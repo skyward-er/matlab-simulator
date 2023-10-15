@@ -39,9 +39,9 @@ windData.inputMatr = [ (windData.inputGround * (1 + windData.inputMult/100))
 
 for i = 1:n_sim
 
-    Mag(i,:)            = (1 + windData.input_uncertainty(1)/100).*windData.inputMatr(1, :);
+    Mag(i,:)            = (1 + windData.inputUncertainty(1)/100).*windData.inputMatr(1, :);
     Az(i,:)             = windData.inputMatr(2, :);
-    varargout{1}(i,:)   = windData.input_uncertainty;
+    varargout{1}(i,:)   = windData.inputUncertainty;
     
 end
  

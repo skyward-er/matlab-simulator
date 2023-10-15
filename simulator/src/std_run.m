@@ -346,7 +346,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     %% wind update
     if settings.windModel == "multiplicative"
 
-        [uw, vw, ww] = windInputGenerator(settings, -Y0(3), settings.wind.input_uncertainty);
+        [uw, vw, ww] = windInputGenerator(settings, -Y0(3), settings.wind.inputUncertainty);
 
         settings.constWind = [uw, vw, ww];
 

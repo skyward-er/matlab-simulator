@@ -492,18 +492,20 @@ end
 
 return
 %% generate files
-load ballistic_simulations
+load ballistic_simulations_launchDay4.mat
 ball.apogee = apogee;
 ball.landing = landing;
-load parachute_simulations
+load parachute_simulations_launchDay4.mat
 para.apogee = apogee;
 para.landing = landing;
 
 figure 
-geoplot(ball.landing.coordinates(:,1),ball.landing.coordinates(:,2),'Marker','.','MarkerSize',10,'LineStyle','none')
+geoplot(ball.apogee.coordinates(:,1),ball.apogee.coordinates(:,2),'Marker','.','MarkerSize',10,'LineStyle','none')
 hold on
+geoplot(ball.landing.coordinates(:,1),ball.landing.coordinates(:,2),'Marker','.','MarkerSize',10,'LineStyle','none')
+geoplot(para.landing.coordinates(:,1),para.landing.coordinates(:,2),'Marker','.','MarkerSize',10,'LineStyle','none')
 geobasemap satellite
-
+legend
 
 varNamesAsc = {'ApogeeLatitude', 'ApogeeLongitude', 'ApogeeAltitude'}; 
 varNamesDesc = {'ballLandingLatitude', 'ballLandingLongitude', 'paraLandingLatitude', 'paraLandingLongitude'}; 
@@ -513,10 +515,10 @@ ascentTab(:, 1) = table(ball.apogee.coordinates(:,1));
 ascentTab(:, 2) = table(ball.apogee.coordinates(:,2)); 
 ascentTab(:, 3) = table(ball.apogee.altitude'); 
 ascentTab.Properties.VariableNames = varNamesAsc; 
-writetable(ascentTab, 'ascent_MC_simulations_CL.csv'); 
+writetable(ascentTab, 'ascent_MC_simulations_CL_launchDay4.csv'); 
 descentTab(:, 1) = table(ball.landing.coordinates(:,1)); 
 descentTab(:, 2) = table(ball.landing.coordinates(:,2)); 
 descentTab(:, 3) = table(para.landing.coordinates(:,1)); 
 descentTab(:, 4) = table(para.landing.coordinates(:,2)); 
 descentTab.Properties.VariableNames = varNamesDesc; 
-writetable(descentTab, 'descent_MC_simulations_CL.csv');
+writetable(descentTab, 'descent_MC_simulations_CL_launchDay4.csv');
