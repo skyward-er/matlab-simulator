@@ -83,7 +83,7 @@ switch settings.windModel
     [uw, vw, ww] = windMatlabGenerator(settings, z, t);
     
     case "multiplicative"
-    uncert = settings.wind.input_uncertainty;
+    uncert = settings.wind.inputUncertainty;
     [uw, vw, ww] = windInputGenerator(settings, z, uncert);
 
     case "constant"

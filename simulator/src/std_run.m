@@ -251,23 +251,22 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         if (settings.scenario == "descent" || settings.scenario == "full flight") && ~eventLanding && max(-Yf_tot(:,3))> 150 % this last condition is to prevent saving this value when on ramp
             idx_landing = n_old-1;
             eventLanding = true;
+            break;
         end
         Tf = [t0, t1]';
         Yf = [initialCond'; initialCond']; % check how to fix this
-        if flagPara2
-            parout = RecallOdeFcn(@descentParafoil, Tf, Yf, settings,contSettings, Yf(:,14),t_change_ref_PRF,tLaunch,'apVec');
-        else
-            parout = RecallOdeFcn(@ascentControl, Tf, Yf, settings,[], Yf(:,14), t_change_ref_ABK,tLaunch,'apVec');
-        end
         para = NaN;
     end
     
     % recall some useful parameters
     settings.parout.partial_time = Tf;
-    settings.parout.wind_NED = parout.wind.NED_wind';
-    settings.parout.wind_body = parout.wind.body_wind';
-    settings.parout.acc = parout.accelerometer.body_acc';
-    settings.parout.m   = parout.interp.mass;
+    if ~exist("parout", 'var')
+        settings.parout.acc = zeros(length(Tf), 3);
+        settings.parout.m = settings.mTotalTime(1)*ones(1,length(Tf));
+    else
+        settings.parout.acc = parout.accelerometer.body_acc';
+        settings.parout.m   = parout.interp.mass;
+    end
 
 
     ext = extension_From_Angle(Yf(end,14),settings); % bug fix, check why this happens because sometimes happens that the integration returns a value slightly larger than the max value of extension for airbrakes and this mess things up
