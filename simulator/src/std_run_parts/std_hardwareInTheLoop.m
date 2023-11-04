@@ -74,9 +74,9 @@ if ~settings.parafoil
     sensorData.ada.xv = hilData.ada.verticalSpeed;
     settings.ada.flag_apo = hilData.ada.apogeeDetected;
 
-    sensorTot.ada.xp(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1) -1,:)  = sensorData.ada.xp(1:end,:);
-    sensorTot.ada.xv(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xv(:,1),1)-1,:)  = sensorData.ada.xv(1:end,:);
-    sensorTot.ada.t(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1)-1)     = sensorData.barometer.time(end);
+    sensorTot.ada.xv(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1) -1,1)  = sensorData.ada.xp(1:end,:);
+    sensorTot.ada.xv(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xv(:,1),1)-1,2)  = sensorData.ada.xv(1:end,:);
+    sensorTot.ada.time(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1)-1)     = sensorData.barometer.time(end);
     sensorTot.ada.n_old = sensorTot.ada.n_old + size(sensorData.ada.xp,1);
     settings.baro_old = sensorData.barometer.time(end);
 else
