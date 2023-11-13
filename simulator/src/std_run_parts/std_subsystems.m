@@ -12,22 +12,12 @@ This function runs all subsystems in a simulated environment
 % simulation of the faults
 
 
-% sensor fault detection algorithm
-Nsensors = [1,2,3];
-goodSensors = Nsensors(not(settings.faulty_sensors));
-if settings.flagAscent
-    SVM_model= settings.SVM_1;
-else
-    SVM_model = settings.SVM_2;
-end
-for i = goodSensors
-    sensorData.chunk{i}(1,1:end-length(sensorData.barometer_sens{i}.measures)) = sensorData.chunk{i}(1+length(sensorData.barometer_sens{i}.measures):end);
-    sensorData.chunk{i}(1,end-length(sensorData.barometer_sens{i}.measures)+1:end) = sensorData.barometer_sens{i}.measures;
-    if length(sensorData.chunk{i})>SVM_model.N_sample
-        warning('chunk length is greater than %d samples',SVM_model.N_sample)
-    end
-end
-[sensorData,settings.faulty_sensors] = run_SensorFaultDetection_SVM(SVM_model,sensorData,settings.faulty_sensors,settings.flagAscent,t1);
+
+
+%PRENDO ULTIMO VALORE??
+sensorData.barometer.z = sensorData.barometer_sens{1}.z(1,end);
+sensorData.barometer.measures = sensorData.barometer_sens{1}.measures(1,end);
+sensorData.barometer.time = sensorData.barometer_sens{1}.time(1,end);
 
 sensorTot.barometer.pressure_measures(sensorTot.barometer.n_old:sensorTot.barometer.n_old + size(sensorData.barometer.measures' ,1) - 1,:)    = sensorData.barometer.measures';
 sensorTot.barometer.altitude(sensorTot.barometer.n_old:sensorTot.barometer.n_old + size(sensorData.barometer.measures',1) - 1,:)    = sensorData.barometer.z';

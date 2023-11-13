@@ -5,19 +5,13 @@
 % release 16/09/2023
 
 % fault parameters
-max_offset = 1300; %Pa
-min_offset = 200; %Pa
-max_degradation = 1300; %Pa
-min_degradation = 200; %Pa
+max_offset = 2000; %Pa
+min_offset = 1200; %Pa
+max_degradation = 2000; %Pa
+min_degradation = 1800; %Pa
 N_faulty_sensors = 2; % how many sensors to set which will have faults, faulty sensors will be selected at random
 
-offset_value_2 = round((max_offset-min_offset)*rand() + min_offset);
-offset_value_3 = round((max_offset-min_offset)*rand() + min_offset);
 
-
-
-degradation_value_2 = round((max_degradation-min_degradation)*rand() + min_degradation);
-degradation_value_3 = round((max_degradation-min_degradation)*rand() + min_degradation);
 selected_sensors = [];
 fault_type = ["no fault", "no fault", "no fault"];
 for i = 1:N_faulty_sensors
@@ -33,8 +27,9 @@ for i = 1:N_faulty_sensors
                 iterations_for_selection = 1;
             end
             for j = 1:iterations_for_selection
-                if isempty(selected_sensors) || isequal(rand_sensor, selected_sensors(j))
+                if isempty(selected_sensors) || ~isequal(rand_sensor, selected_sensors(j))
                     selected_sensors = [selected_sensors, rand_sensor];
+                else
                     continue_generate = true;
                 end
             end
@@ -122,11 +117,11 @@ switch fault_type(3)
     case "offset",
         offset_value_3 = round((max_offset-min_offset)*rand() + min_offset);
         sensorSettings.barometer3 = sensorSettings.barometer3.setOffset(offset_value_3); % i don't know the unit of measurment as of now
-        [sensorSettings.barometer3, fault_time_3] = sensorSettings.barometer1.setErrorTime(); % in seconds
+        [sensorSettings.barometer3, fault_time_3] = sensorSettings.barometer3.setErrorTime(); % in seconds
     case "degradation",
         degradation_value_3 = round((max_offset-min_offset)*rand() + min_offset);
         sensorSettings.barometer3 = sensorSettings.barometer3.setDegradation(degradation_value_3); % i don't know the unit of measurment as of now
-        [sensorSettings.barometer3, fault_time_3] = sensorSettings.barometer1.setErrorTime(); % in seconds
+        [sensorSettings.barometer3, fault_time_3] = sensorSettings.barometer3.setErrorTime(); % in seconds
     case "freezing",
         sensorSettings.barometer3.setFreezing;
         [sensorSettings.barometer3, fault_time_3] = sensorSettings.barometer3.setErrorTime(); % in seconds
@@ -201,7 +196,7 @@ sensorSettings.pitot_static.resolution = (sensorSettings.pitot_static.maxMeasure
 sensorSettings.pitot_static.noiseVariance = 0.043043; % from flight logs
 
 % total pressure
-sensorSettings.pitot_total = Sensor_no_offset();
+sensorSettings.pitot_total = Sensor();
 sensorSettings.pitot_total.maxMeasurementRange = 2*1034.21; % mbar ( 30psi)
 sensorSettings.pitot_total.minMeasurementRange = 0;
 sensorSettings.pitot_total.bit = 12; 
