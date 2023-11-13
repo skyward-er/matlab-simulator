@@ -1,4 +1,4 @@
-function [sensorData, sensorTot] = acquisition_Sys(sensorData, sensorSettings, sensorTot, settings)
+function [sensorData, sensorTot] = acquisition_Sys(sensorData, sensorSettings, sensorTot, settings, t)
 %{
 Routine to simulate the data acquisition from the sensors, that use the
 class sensors in: "skyward-matlab-control-simulator\sensors"
@@ -33,6 +33,7 @@ for i_baro = 1:3
                 sensorData.barometer_sens{i_baro}.measures(ii)        =      sensorSettings.barometer1.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,...
                     sensorData.barometer_sens{i_baro}.temperature(ii) - 273.15);
                 sensorData.barometer_sens{i_baro}.measures(ii)        =      sensorData.barometer_sens{i_baro}.measures(ii)*100;
+                [~, sensorData.barometer_sens{i_baro}.measures(ii)] = sensorSettings.barometer1.applyFailure(sensorData.barometer_sens{i_baro}.measures(ii), t);
                 sensorData.barometer_sens{i_baro}.z(ii)    =     -atmospalt(sensorData.barometer_sens{i_baro}.measures(ii),'None');
             end
         end
@@ -42,6 +43,7 @@ for i_baro = 1:3
                 sensorData.barometer_sens{i_baro}.measures(ii)        =      sensorSettings.barometer2.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,...
                     sensorData.barometer_sens{i_baro}.temperature(ii) - 273.15);
                 sensorData.barometer_sens{i_baro}.measures(ii)        =      sensorData.barometer_sens{i_baro}.measures(ii)*100;
+                [~, sensorData.barometer_sens{i_baro}.measures(ii)] = sensorSettings.barometer2.applyFailure(sensorData.barometer_sens{i_baro}.measures(ii), t);
                 sensorData.barometer_sens{i_baro}.z(ii)    =     -atmospalt(sensorData.barometer_sens{i_baro}.measures(ii),'None');
             end
         end
@@ -51,6 +53,7 @@ for i_baro = 1:3
                 sensorData.barometer_sens{i_baro}.measures(ii)        =      sensorSettings.barometer3.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,...
                     sensorData.barometer_sens{i_baro}.temperature(ii) - 273.15);
                 sensorData.barometer_sens{i_baro}.measures(ii)        =      sensorData.barometer_sens{i_baro}.measures(ii)*100;
+                [~, sensorData.barometer_sens{i_baro}.measures(ii)] = sensorSettings.barometer3.applyFailure(sensorData.barometer_sens{i_baro}.measures(ii), t);
                 sensorData.barometer_sens{i_baro}.z(ii)    =     -atmospalt(sensorData.barometer_sens{i_baro}.measures(ii),'None');
             end
         end
