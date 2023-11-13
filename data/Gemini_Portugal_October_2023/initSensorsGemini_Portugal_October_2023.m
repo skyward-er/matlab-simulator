@@ -4,45 +4,7 @@
 % marco.marchesi@skywarder.eu 
 % release 16/09/2023
 
-% fault parameters
-max_offset = 2000; %Pa
-min_offset = 1200; %Pa
-max_degradation = 2000; %Pa
-min_degradation = 1800; %Pa
-N_faulty_sensors = 2; % how many sensors to set which will have faults, faulty sensors will be selected at random
 
-
-selected_sensors = [];
-fault_type = ["no fault", "no fault", "no fault"];
-for i = 1:N_faulty_sensors
-        rand_fault = randi(3); 
-       
-        continue_generate = true;
-        while continue_generate
-            continue_generate = false;
-            rand_sensor = randi(3);
-            if length(selected_sensors) > 0
-                iterations_for_selection = length(selected_sensors);
-            else
-                iterations_for_selection = 1;
-            end
-            for j = 1:iterations_for_selection
-                if isempty(selected_sensors) || ~isequal(rand_sensor, selected_sensors(j))
-                    selected_sensors = [selected_sensors, rand_sensor];
-                else
-                    continue_generate = true;
-                end
-            end
-        end
-    switch rand_fault
-        case 1
-            fault_type(rand_sensor) = "offset";
-        case 2
-            fault_type(rand_sensor) = "degradation";
-        case 3
-            fault_type(rand_sensor) = "freezing";
-    end
-end
 
 %% barometer1 - static measure (HSCMAND001BAAA5)
 sensorSettings.barometer1 = Sensor_with_fault_sim(); % presure in mbar, temp should be in C°
@@ -52,18 +14,18 @@ sensorSettings.barometer1.bit = 24; % adc on rocket is 24 bits
 sensorSettings.barometer1.resolution = (sensorSettings.barometer1.maxMeasurementRange -sensorSettings.barometer1.minMeasurementRange)/(2^sensorSettings.barometer1.bit);
 sensorSettings.barometer1.noiseVariance        =   1;                     % mbar^2
 
-sensorSettings.barometer1.fault_time = -1; %if negative it will be generated at random between a max and a min value
+sensorSettings.barometer1.fault_time = 9; %if negative it will be generated at random between a max and a min value
 sensorSettings.barometer1.max_fault_time = 96; %max seconds to wait before possible fault
 sensorSettings.barometer1.min_fault_time = 6; %min seconds to wait before possible fault
 
 % fault generation
-switch fault_type(1)
+switch  settings.fault_sim.fault_type(1)
     case "offset",
-        offset_value_1 = round((max_offset-min_offset)*rand() + min_offset);
+        offset_value_1 = round((settings.fault_sim.max_offset-settings.fault_sim.min_offset)*rand() + settings.fault_sim.min_offset);
         sensorSettings.barometer1 = sensorSettings.barometer1.setOffset(offset_value_1); % i don't know the unit of measurment as of now
         [sensorSettings.barometer1, fault_time_1] = sensorSettings.barometer1.setErrorTime(); % in seconds
     case "degradation",
-        degradation_value_1 = round((max_offset-min_offset)*rand() + min_offset);
+        degradation_value_1 = round((settings.fault_sim.max_degradation-settings.fault_sim.min_degradation)*rand() + settings.fault_sim.min_degradation);
         sensorSettings.barometer1 = sensorSettings.barometer1.setDegradation(degradation_value_1); % i don't know the unit of measurment as of now
         [sensorSettings.barometer1, fault_time_1] = sensorSettings.barometer1.setErrorTime(); % in seconds
     case "freezing",
@@ -85,13 +47,13 @@ sensorSettings.barometer2.min_fault_time = 6; %min seconds to wait before possib
 
 % fault generation
 
-switch fault_type(2)
+switch  settings.fault_sim.fault_type(2)
     case "offset",
-        offset_value_2 = round((max_offset-min_offset)*rand() + min_offset);
+        offset_value_2 = round((settings.fault_sim.max_offset-settings.fault_sim.min_offset)*rand() + settings.fault_sim.min_offset);
         sensorSettings.barometer2 = sensorSettings.barometer2.setOffset(offset_value_2); % i don't know the unit of measurment as of now
         [sensorSettings.barometer2, fault_time_2] = sensorSettings.barometer2.setErrorTime(); % in seconds
     case "degradation",
-        degradation_value_2 = round((max_offset-min_offset)*rand() + min_offset);
+        degradation_value_2 = round((settings.fault_sim.max_degradation-settings.fault_sim.min_degradation)*rand() + settings.fault_sim.min_degradation);
         sensorSettings.barometer2 = sensorSettings.barometer2.setDegradation(degradation_value_2); % i don't know the unit of measurment as of now
         [sensorSettings.barometer2, fault_time_2] = sensorSettings.barometer2.setErrorTime(); % in seconds
     case "freezing",
@@ -113,13 +75,13 @@ sensorSettings.barometer3.min_fault_time = 6; %min seconds to wait before possib
 
 % fault generation
 
-switch fault_type(3)
+switch  settings.fault_sim.fault_type(3)
     case "offset",
-        offset_value_3 = round((max_offset-min_offset)*rand() + min_offset);
+        offset_value_3 = round((settings.fault_sim.max_offset-settings.fault_sim.min_offset)*rand() + settings.fault_sim.min_offset);
         sensorSettings.barometer3 = sensorSettings.barometer3.setOffset(offset_value_3); % i don't know the unit of measurment as of now
         [sensorSettings.barometer3, fault_time_3] = sensorSettings.barometer3.setErrorTime(); % in seconds
     case "degradation",
-        degradation_value_3 = round((max_offset-min_offset)*rand() + min_offset);
+        degradation_value_3 = round((settings.fault_sim.max_degradation-settings.fault_sim.min_degradation)*rand() + settings.fault_sim.min_degradation);
         sensorSettings.barometer3 = sensorSettings.barometer3.setDegradation(degradation_value_3); % i don't know the unit of measurment as of now
         [sensorSettings.barometer3, fault_time_3] = sensorSettings.barometer3.setErrorTime(); % in seconds
     case "freezing",

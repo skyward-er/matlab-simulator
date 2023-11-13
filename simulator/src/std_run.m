@@ -370,7 +370,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     ap_ref_time_tot(iTimes,1) = t1;
     sensorTot.sfd.time(iTimes) = t1;
     sensorTot.sfd.pressure(iTimes) = sensorData.barometer.measures(end);
-    sensorTot.sfd.faults(iTimes,:) = settings.faulty_sensors;
+    % sensorTot.sfd.faults(iTimes,:) = settings.faulty_sensors;
     dataRecall.true_mass(n_old:n_old+n-1, 1) = settings.parout.m'; % if you want to save other parameters, remember to go down and remove the last two values                                                                                            
     n_old = n_old + n -1;
 
