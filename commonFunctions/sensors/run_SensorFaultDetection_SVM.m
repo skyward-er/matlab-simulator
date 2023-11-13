@@ -78,43 +78,43 @@ release
     
 
     %WEIGHTED MEAN CALCULATION
-    [sp.h_baro, sfd.W1] = wt_mean_h(sfd, sfd.h_baro_prev,  h_baro, settings.faulty_sensors, sfd.W1, sfd.max_weight);
+    [sfd, sp.h_baro, sfd.W1] = wt_mean_h(sfd, sfd.h_baro_prev,  h_baro, settings.faulty_sensors, sfd.W1, sfd.max_weight);
     sfd.h_baro_prev = sp.h_baro(1,1);
-    [sp.pn, sfd.W2] = wt_mean_baro(sfd, sfd.pn_prev, pn, settings.faulty_sensors, sfd.W2, sfd.max_weight);
+    [sfd, sp.pn, sfd.W2] = wt_mean_baro(sfd, sfd.pn_prev, pn, settings.faulty_sensors, sfd.W2, sfd.max_weight);
     sfd.pn_prev = sp.pn(1,1);
-
-
+    sp.pn_unfiltered = sp.pn;
+    
 
     %FILTERS
 
-    if iTimes > 1
-        %THE FOLLOWING CODE IS AN IMPLEMENTATION OF A MEDIAN WINDOW FILTER (DEFAULT
-        %FILTER WINDOW IS 25)
-        for i = 1:sfd.filter_window - 1
-            sfd.filter_array_SFD(i) = sfd.filter_array_SFD(i + 1);
-        end
-        sfd.filter_array_SFD(sfd.filter_window) = sp.pn(1,1);
-        if iTimes > sfd.filter_window
-            median_filter_baro = medfilt1(sfd.filter_array_SFD, sfd.filter_window);
-            sp.pn = ones(1,2).*median_filter_baro(end); 
-        end
-
-
-        %THE FOLLOWING CODE IS AN IMPLEMENTATION OF A DISCRETE LOWPASS FILTER
-        sfd.lowpass_filter_baro = sfd.lambda_baro*sfd.lowpass_filter_baro + (sfd.lowpass_filter_gain/sfd.lowpass_filter_cutoff_freq)*(1-sfd.lambda_baro)*sfd.prev_sppn_input;
-        sfd.prev_sppn_input = sp.pn(1,1);
-        sp.pn = ones(1,2).*sfd.lowpass_filter_baro; 
-    else
-        %filters are only active when there is enough data for it running
-        sfd.lowpass_filter_baro = sp.pn(1, 1);
-        sfd.prev_sppn_input = sp.pn(1, 1);
-    end
+    % if iTimes > 1
+    %     %THE FOLLOWING CODE IS AN IMPLEMENTATION OF A MEDIAN WINDOW FILTER (DEFAULT
+    %     %FILTER WINDOW IS 25)
+    %     for i = 1:sfd.filter_window - 1
+    %         sfd.filter_array_SFD(i) = sfd.filter_array_SFD(i + 1);
+    %     end
+    %     sfd.filter_array_SFD(sfd.filter_window) = sp.pn(1,1);
+    %     if iTimes > sfd.filter_window
+    %         median_filter_baro = medfilt1(sfd.filter_array_SFD, sfd.filter_window);
+    %         sp.pn = ones(1,2).*median_filter_baro(end); 
+    %     end
+    % 
+    % 
+    %     %THE FOLLOWING CODE IS AN IMPLEMENTATION OF A DISCRETE LOWPASS FILTER
+    %     sfd.lowpass_filter_baro = sfd.lambda_baro*sfd.lowpass_filter_baro + (sfd.lowpass_filter_gain/sfd.lowpass_filter_cutoff_freq)*(1-sfd.lambda_baro)*sfd.prev_sppn_input;
+    %     sfd.prev_sppn_input = sp.pn(1,1);
+    %     sp.pn = ones(1,2).*sfd.lowpass_filter_baro; 
+    % else
+    %     %filters are only active when there is enough data for it running
+    %     sfd.lowpass_filter_baro = sp.pn(1, 1);
+    %     sfd.prev_sppn_input = sp.pn(1, 1);
+    % end
     settings.sfd = sfd;
 end
 
 
 
-function [weighted_transient_mean, W] = wt_mean_h(sfd, prev, V, F, W, max_weight)
+function [sfd, weighted_transient_mean, W] = wt_mean_h(sfd, prev, V, F, W, max_weight)
     %{
     HELP:
     In the scope of fault recovery, it provides a value of the mean between
@@ -151,28 +151,32 @@ function [weighted_transient_mean, W] = wt_mean_h(sfd, prev, V, F, W, max_weight
     elseif k> sfd.max_step + sfd.min_step
         k = sfd.max_step + sfd.min_step;
     end
-
+    sfd.k_height = [sfd.k_height; k];
     %weighted mean
     for j = 1:length(V(1,:))
         W = W_current;
-        sum_d = 0;
         sum_n = 0;
+        sum_d = 0;
         for i = 1:length(V(:, 1))
             if isequal(F(i), false) && W(i) + k(1) < max_weight % sensor to be progressively included
                 W(i) = W(i) + k(1);
+            elseif isequal(F(i), false)
+                W(i) = max_weight;
             end
             if isequal(F(i), true) && W(i) - k(1) > min_weight % sensor to be progressively excluded
                 W(i) = W(i) - k(1);
+            elseif isequal(F(i), true)
+                W(i) = min_weight;
             end
-            sum_d = sum_d + W(i)*V(i);
-            sum_n = sum_n + W(i);
+            sum_n = sum_n + W(i)*V(i, j);
+            sum_d = sum_d + W(i);
         end
-        weighted_transient_mean(j) = sum_d/sum_n;
+        weighted_transient_mean(j) = sum_n/sum_d;
     end
     
 end
 
-function [weighted_transient_mean, W] = wt_mean_baro(sfd, prev, V, F, W, max_weight)
+function [sfd, weighted_transient_mean, W] = wt_mean_baro(sfd, prev, V, F, W, max_weight)
     %{
     HELP:
     In the scope of fault recovery, it provides a value of the mean between
@@ -199,36 +203,39 @@ function [weighted_transient_mean, W] = wt_mean_baro(sfd, prev, V, F, W, max_wei
     %}
     W_current = W;
     min_weight = 0;
+    
 
-
-   
+    
     %weight change step (k) calculation
     k = sfd.max_step * (prev -  sfd.max_rough_press+100)/(sfd.press_ref - sfd.max_rough_press+100) + sfd.min_step;
-    
+   
      %k saturates k up to a max and a min value
     if k < sfd.min_step
         k = sfd.min_step;
     elseif k> sfd.max_step + sfd.min_step
         k = sfd.max_step + sfd.min_step;
     end
+    sfd.k_baro = [sfd.k_baro ; k];
 
 
-
-    %weighted mean
-    for j = 1:length(V(1,:))
+   for j = 1:length(V(1,:))
         W = W_current;
-        sum_d = 0;
         sum_n = 0;
+        sum_d = 0;
         for i = 1:length(V(:, 1))
-            if isequal(F(i), false) && W(i) + k(1) < max_weight % to be kept
+            if isequal(F(i), false) && W(i) + k(1) < max_weight % sensor to be progressively included
                 W(i) = W(i) + k(1);
+            elseif isequal(F(i), false)
+                W(i) = max_weight;
             end
-            if isequal(F(i), true) && W(i) - k(1) > min_weight % to be excluded
+            if isequal(F(i), true) && W(i) - k(1) > min_weight % sensor to be progressively excluded
                 W(i) = W(i) - k(1);
+            elseif isequal(F(i), true)
+                W(i) = min_weight;
             end
-            sum_d = sum_d + W(i)*V(i);
-            sum_n = sum_n + W(i);
+            sum_n = sum_n + W(i)*V(i, j);
+            sum_d = sum_d + W(i);
         end
-        weighted_transient_mean(j) = sum_d/sum_n;
+        weighted_transient_mean(j) = sum_n/sum_d;
     end
 end

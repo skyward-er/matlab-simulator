@@ -32,7 +32,7 @@ classdef Sensor_with_fault_sim < handle
 
     end
 
-    properties (Access = private) %attributes private
+    properties (Access = private) %attributes used for fault simulation
         failureType;
         fault_offset;
         lambda;
@@ -71,9 +71,13 @@ classdef Sensor_with_fault_sim < handle
             %  temp: temperature of the sensor
             %  
             %  Outputs:
-            %  outputArg sensor data with nois,
+            %  outputArg sensor data with noise,
             %  offsets, etc.
-            
+            % N.B. this offsets and saturations ecc... are inherent
+            % non-idealities of the simulated sensors, not FAULTS, with
+            % faults in this context we mean SUDDEN non-idealities, and not
+            % a characteristic of the transducer or sensor in question that
+            % we already know it's present. 
             inputArg=obj.add2DOffset(inputArg,temp);
             inputArg=obj.whiteNoise(inputArg);
             inputArg=obj.addOffset(inputArg);
@@ -82,7 +86,7 @@ classdef Sensor_with_fault_sim < handle
             inputArg=obj.saturation(inputArg); 
             outputArg = inputArg;
         end
-                function obj = setErrorTime(obj, startTimestamp)
+        function obj = setErrorTime(obj, startTimestamp) % to set when the fault occurs
             if startTimestamp >= 0
                 obj.tError = startTimestamp;
             else
@@ -90,7 +94,7 @@ classdef Sensor_with_fault_sim < handle
             end
         end
     
-        function [obj, sensorData] = applyFailure(obj, sensorData, timestamp)
+        function [obj, sensorData] = applyFailure(obj, sensorData, timestamp) %function necessary to set a fault at a certain timestamp of the simulation, the operation applied depends on the simulated fault
             for i = 1:length(timestamp)
                 if timestamp(i) >= obj.tError
                     if obj.settings.bias
@@ -103,9 +107,9 @@ classdef Sensor_with_fault_sim < handle
                         sensorData(i) = sensorData(i) - obj.sigmaDeg + 2*obj.sigmaDeg*rand;
                     end
                     if obj.settings.freezing
-                        if timestamp(i) == obj.tError
-                            obj.frozenValue = sensorData(i);
-                        end
+                        % if timestamp(i) == obj.tError
+                        %     obj.frozenValue = sensorData(i);
+                        % end
                         sensorData(i) = obj.frozenValue;
                     end
                     if obj.settings.calerr
@@ -133,6 +137,7 @@ classdef Sensor_with_fault_sim < handle
                 else
                     if obj.settings.freezing
                         obj.frozenValue = sensorData(i);
+                        %sensorData(i) = obj.frozenValue;
                     end
                 end
             end
@@ -290,54 +295,7 @@ classdef Sensor_with_fault_sim < handle
                 inputArg = inputArg + filteredNoise + Backgroundnoise_sensor;
             end
             outputArg = inputArg;
-        end
-
-        function outputArg = twoNoise(obj,inputArg)
-            %WHITE_NOISE Includes gaussian white noise to the sensor data
-            %   Adds gaussian white noise with variance noiseVariance
-            %
-            %  Necessary properties:
-            %  noiseVariance: Varianze for the gaussian white noise
-            %
-            %  Inputs:
-            %  inputArg: sensor data
-            %  
-            %  Outputs:
-            %  outputArg: sensor data with white noise
-
-            % ADDING NOISE TO MODIFIED SIGNAL (since they got filtered)
-            % Define the parameters for white noise
-            noiseAmplitude = 150; % Pa Amplitude of the white noise
-            lowerAmplitude = 10; % Pa
-            
-            % Generate white noise
-            noise2 = noiseAmplitude * randn(size(inputArg)); % Generate white noise with the same size as the sensor signal
-            %noise3 = noiseAmplitude * randn(size(inputArg)); % Generate white noise with the same size as the sensor signal
-            Backgroundnoise2 = lowerAmplitude * randn(size(inputArg)); % Generate white noise with the same size as the sensor signal
-            %Backgroundnoise3 = lowerAmplitude * randn(size(inputArg)); % Generate white noise with the same size as the sensor signal
-            
-            
-            Fs = 50; %Hz Change this to the appropriate value
-            % Apply low-pass filtering to the white noise
-            cutOffFrequency1 = 1; % Cut-off frequency of the low-pass filter for ascension
-            %cutOffFrequency2 = 3; % Cut-off frequency of the low-pass filter for desention
-            normalizedCutOffFrequency1 = cutOffFrequency1 / (0.5 * Fs); % Normalize the cut-off frequency
-            %normalizedCutOffFrequency2 = cutOffFrequency2 / (0.5 * Fs); % Normalize the cut-off frequency
-            [b1, a1] = butter(4, normalizedCutOffFrequency1, 'low'); % Butterworth low-pass filter coefficients
-            %[b2, a2] = butter(4, normalizedCutOffFrequency2, 'low'); % Butterworth low-pass filter coefficients
-            % filteredNoise2 = zeros(length(noise2),1);
-            % filteredNoise3 = zeros(length(noise3),1);
-            filteredNoise2(1:1087) = filter(b1, a1, noise2(1:1087)); % Apply the low-pass filter to the white noise
-            
-            
-            %filteredNoise3(1087:12640) = filter(b2, a2, noise3(1087:end)); % Apply the low-pass filter to the white noise
-            
-            
-            % Add white noise to the sensor signal
-            outputArg = inputArg + filteredNoise2 + Backgroundnoise2;
-            %pyxis_flight_roccaraso.sensor3 = pyxis_flight_roccaraso.sensor3 + filteredNoise3 + Backgroundnoise3;
-
-        end
+            endv
         
         
         function outputArg = addOffset(obj,inputArg)

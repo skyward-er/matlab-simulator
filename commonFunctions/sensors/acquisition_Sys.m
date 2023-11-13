@@ -24,20 +24,48 @@ OUTPUT:
 % Revision date: 18/03/2021
 
 %% Baro Acquisition loop
-for i_baro = 1:2
-    if isfield(sensorData.barometer_sens{i_baro},'time')
-        sp.pn_sens{i_baro}      = zeros(1,length(sensorData.barometer_sens{i_baro}.time));
-        sp.h_baro_sens{i_baro}  = zeros(1,length(sensorData.barometer_sens{i_baro}.time));
-        sp.t_baro_sens{i_baro}  = sensorData.barometer_sens{i_baro}.time';
-    
-        for ii=1:length(sensorData.barometer_sens{i_baro}.time)
-            s.MS580401BA01.secondPhase = settings.flagAscent;
-            sp.pn_sens{i_baro}(ii)        =      s.MS580301BA01.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,...
-                sensorData.barometer_sens{i_baro}.temperature(ii) - 273.15);
-            sp.pn_sens{i_baro}(ii)        =      sp.pn_sens{i_baro}(ii)*100;
-            [~, sp.pn_sens{i_baro}(ii)] = s.MS580301BA01.applyFailure(sp.pn_sens{i_baro}(ii), t);
-            sp.h_baro_sens{i_baro}(ii)    =     -atmospalt(sp.pn_sens{i_baro}(ii),'None');
-        end
+% for i_baro = 1:2
+%     if isfield(sensorData.barometer_sens{i_baro},'time')
+%         sp.pn_sens{i_baro}      = zeros(1,length(sensorData.barometer_sens{i_baro}.time));
+%         sp.h_baro_sens{i_baro}  = zeros(1,length(sensorData.barometer_sens{i_baro}.time));
+%         sp.t_baro_sens{i_baro}  = sensorData.barometer_sens{i_baro}.time';
+% 
+%         for ii=1:length(sensorData.barometer_sens{i_baro}.time)
+%             s.MS580401BA01.secondPhase = settings.flagAscent;
+%             sp.pn_sens{i_baro}(ii)        =      s.MS580301BA01.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,...
+%                 sensorData.barometer_sens{i_baro}.temperature(ii) - 273.15);
+%             sp.pn_sens{i_baro}(ii)        =      sp.pn_sens{i_baro}(ii)*100;
+%             [~, sp.pn_sens{i_baro}(ii)] = s.MS580301BA01.applyFailure(sp.pn_sens{i_baro}(ii), t);
+%             sp.h_baro_sens{i_baro}(ii)    =     -atmospalt(sp.pn_sens{i_baro}(ii),'None');
+%         end
+%     end
+% end
+if isfield(sensorData.barometer_sens{1},'time')
+    sp.pn_sens{1}      = zeros(1,length(sensorData.barometer_sens{1}.time));
+    sp.h_baro_sens{1}  = zeros(1,length(sensorData.barometer_sens{1}.time));
+    sp.t_baro_sens{1}  = sensorData.barometer_sens{1}.time';
+
+    for ii=1:length(sensorData.barometer_sens{1}.time)
+        s.MS580401BA01_1.secondPhase = settings.flagAscent;
+        sp.pn_sens{1}(ii)        =      s.MS580301BA01_1.sens(sensorData.barometer_sens{1}.measures(ii)/100,...
+            sensorData.barometer_sens{1}.temperature(ii) - 273.15);
+        sp.pn_sens{1}(ii)        =      sp.pn_sens{1}(ii)*100;
+        [~, sp.pn_sens{1}(ii)] = s.MS580301BA01_1.applyFailure(sp.pn_sens{1}(1), t);
+        sp.h_baro_sens{1}(ii)    =     -atmospalt(sp.pn_sens{1}(ii),'None');
+    end
+end
+if isfield(sensorData.barometer_sens{2},'time')
+    sp.pn_sens{2}      = zeros(1,length(sensorData.barometer_sens{2}.time));
+    sp.h_baro_sens{2}  = zeros(1,length(sensorData.barometer_sens{2}.time));
+    sp.t_baro_sens{2}  = sensorData.barometer_sens{2}.time';
+
+    for ii=1:length(sensorData.barometer_sens{2}.time)
+        s.MS580401BA01_2.secondPhase = settings.flagAscent;
+        sp.pn_sens{2}(ii)        =      s.MS580301BA01_2.sens(sensorData.barometer_sens{2}.measures(ii)/100,...
+            sensorData.barometer_sens{2}.temperature(ii) - 273.15);
+        sp.pn_sens{2}(ii)        =      sp.pn_sens{2}(ii)*100;
+        [~, sp.pn_sens{2}(ii)] = s.MS580301BA01_2.applyFailure(sp.pn_sens{2}(ii), t);
+        sp.h_baro_sens{2}(ii)    =     -atmospalt(sp.pn_sens{2}(ii),'None');
     end
 end
 if isfield(sensorData.barometer_sens{3},'time')

@@ -138,6 +138,8 @@ sfd_mean_p = [];
 weight_log_W1 = [];
 weight_log_W2 = [];
 sfd_mean_p_before_filter = [];
+settings.sfd.k_height = [];
+settings.sfd.k_baro = [];
 %% ADA initial conditions
 
 if settings.flagADA

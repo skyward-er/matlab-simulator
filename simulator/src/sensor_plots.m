@@ -2,11 +2,11 @@ function sensor_plots(structIn)
 
 figure('Position',[100,100,600,400])
 hold on;
-plot(structIn.barometer_times,structIn.sfd_mean_p,'DisplayName','SFD output after ADA')
+plot(structIn.barometer_times,structIn.sfd_mean_p,'DisplayName','SFD output after filters')
 plot(structIn.barometer_times,structIn.sfd_mean_p_before_filter,'DisplayName','SFD output before filtering')
-%plot(structIn.barometer_times,structIn.barometer_measures{1},'b','DisplayName','Baro 1')
+plot(structIn.barometer_times,structIn.barometer_measures{1},'b','DisplayName','Baro 1')
 stairs(structIn.barometer_times,structIn.faults(:,1)*100000,'b--','DisplayName','Fault 1')
-%plot(structIn.barometer_times,structIn.barometer_measures{2},'k','DisplayName','Baro 2')
+plot(structIn.barometer_times,structIn.barometer_measures{2},'k','DisplayName','Baro 2')
 stairs(structIn.barometer_times,structIn.faults(:,2)*100000,'k--','DisplayName','Fault 2')
 plot(structIn.barometer_times,structIn.barometer_measures{3},'r','DisplayName','Baro 3')
 stairs(structIn.barometer_times,structIn.faults(:,3)*100000,'r--','DisplayName','Fault 3')
@@ -44,6 +44,10 @@ delta_baro = structIn.sfd_mean_p - structIn.sfd_mean_p_before_filter;
 figure
 hold on;
 plot(structIn.barometer_times,delta_baro,'DisplayName','SFD filter induced delay in Pa')
-
-
-
+%% k log
+figure
+hold on;
+plot(structIn.barometer_times, structIn.k_height_log, 'DisplayName','Weight step for height')
+plot(structIn.barometer_times, structIn.k_baro_log, 'DisplayName','Weight step for baro')
+legend
+title('Weight step of sensors for weighted mean')

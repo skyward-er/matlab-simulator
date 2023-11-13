@@ -25,7 +25,7 @@ OUTPUT:
     score = -(((x/scale))*beta + bias);
     %labeling based on the sign of the score 
     if(score < 0 || isnan(score))
-        classification = true;
+        classification = true; %classifies as faulty
     else
         classification = false;
     end

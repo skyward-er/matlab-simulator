@@ -1,10 +1,79 @@
-function [s, sensorTot]  = initSensors(lat0, lon0, z0)
+function [s, sensorTot, settings]  = initSensors(settings, lat0, lon0, z0)
 % Initialize all sensors
     
 % Author: Jan Hammelman
 % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@skywarder.eu
 % email: jan.hammelmann@skywarder.eu,alessandro.delduca@skywarder.eu
 % Release date: 01/03/2021
+
+
+N_faulty_sensors = 2;
+
+% select which type of fault: "offset" "degradation" "freezing"
+%degradation_type = "offset";
+
+
+% select which sensors will be faulty
+% if N_faulty_sensors == 1
+% settings.which_sens = ceil(rand(1)*3);
+% elseif N_faulty_sensors ==2
+%     settings.which_sens = ceil(rand(2,1)*3);
+%     while settings.which_sens(1)==settings.which_sens(2)
+%         settings.which_sens = ceil(rand(1,2)*3);
+%     end
+% else 
+%     settings.which_sens = [1,2,3];
+% end
+
+% fault parameters
+max_offset = 1300; %Pa
+min_offset = 200; %Pa
+max_degradation = 1300; %Pa
+min_degradation = 200; %Pa
+
+
+offset_value_1 = round((max_offset-min_offset)*rand() + min_offset);
+offset_value_2 = round((max_offset-min_offset)*rand() + min_offset);
+offset_value_3 = round((max_offset-min_offset)*rand() + min_offset);
+
+
+degradation_value_1 = round((max_offset-min_offset)*rand() + min_offset);
+degradation_value_2 = round((max_degradation-min_degradation)*rand() + min_degradation);
+degradation_value_3 = round((max_degradation-min_degradation)*rand() + min_degradation);
+selected_sensors = [];
+fault_type = ["no fault", "no fault", "no fault"];
+for i = 1:N_faulty_sensors
+        rand_fault = randi(3); 
+       
+        continue_generate = true;
+        while continue_generate
+            continue_generate = false;
+            rand_sensor = randi(3);
+            if length(selected_sensors) > 0
+                iterations_for_selection = length(selected_sensors);
+            else
+                iterations_for_selection = 1;
+            end
+            for j = 1:iterations_for_selection
+                if isempty(selected_sensors) || isequal(rand_sensor, selected_sensors(j))
+                    selected_sensors = [selected_sensors, rand_sensor];
+                    continue_generate = true;
+                end
+            end
+        end
+    switch rand_fault
+        case 1
+            fault_type(rand_sensor) = "offset";
+        case 2
+            fault_type(rand_sensor) = "degradation";
+        case 3
+            fault_type(rand_sensor) = "freezing";
+    end
+end
+
+
+
+
 
 % initial barometer sensor MS580301BA01
 ep_p_0     =  csvread('ep_p_0.csv');
@@ -18,20 +87,57 @@ T       = [0*ones(size(ep_p_0(:,1)));25*ones(size(ep_p_25(:,1)));85*ones(size(ep
 ep_data = [p_table,T,ep];
 
 
-s.MS580301BA01 = Sensor_with_fault_sim(); % presure in mbar, temp should be in C°
-s.MS580301BA01.maxMeasurementRange  =   1100;                   % 1100, 1300 in mbar
-s.MS580301BA01.minMeasurementRange  =   300;                    % 300, 10 in mbar
-s.MS580301BA01.resolution           =   0.012;                  % 0.012, 0.018, 0.027, 0.042, 0.065 in mbar
-%s.MS580301BA01.resolution           =   0;                  % 0.012, 0.018, 0.027, 0.042, 0.065 in mbar
-s.MS580301BA01.noiseVariance        =   0.043043;                      % guess in mbar
-%s.MS580301BA01.noiseVariance        =   0;
-s.MS580301BA01.twoPhaseNoise        =   0;  
-s.MS580301BA01.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
+s.MS580301BA01_1 = Sensor_with_fault_sim(); % presure in mbar, temp should be in C°
+s.MS580301BA01_1.maxMeasurementRange  =   1100;                   % 1100, 1300 in mbar
+s.MS580301BA01_1.minMeasurementRange  =   300;                    % 300, 10 in mbar
+s.MS580301BA01_1.resolution           =   0.012;                  % 0.012, 0.018, 0.027, 0.042, 0.065 in mbar              % 0.012, 0.018, 0.027, 0.042, 0.065 in mbar
+s.MS580301BA01_1.noiseVariance        =   0.043043;                      % guess in mbar
+s.MS580301BA01_1.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
 % fault generation
-s.MS580301BA01 = s.MS580301BA01.setOffset(1000); % i don't know the unit of measurment as of now
-s.MS580301BA01.setErrorTime(10); % in seconds
+fault_time = randi(900)/10 + 6;
+switch fault_type(1)
+    case "offset",
+        s.MS580301BA01_1 = s.MS580301BA01_1.setOffset(offset_value_1); % i don't know the unit of measurment as of now
+        s.MS580301BA01_1.setErrorTime(fault_time); % in seconds
+    case "degradation",
+        fault_time = randi(150)/10 + 6;
+        s.MS580301BA01_1 = s.MS580301BA01_1.setDegradation(degradation_value_1); % i don't know the unit of measurment as of now
+        s.MS580301BA01_1.setErrorTime(fault_time); % in seconds
+    case "freezing",
+        s.MS580301BA01_1.setFreezing;
+        s.MS580301BA01_1.setErrorTime(fault_time); % in seconds
+    otherwise
+end
+
+%disp(degradation_type)
 
 
+s.MS580301BA01_2 = Sensor_with_fault_sim(); % presure in mbar, temp should be in C°
+s.MS580301BA01_2.maxMeasurementRange  =   1100;                   % 1100, 1300 in mbar
+s.MS580301BA01_2.minMeasurementRange  =   300;                    % 300, 10 in mbar
+s.MS580301BA01_2.resolution           =   0.012;                  % 0.012, 0.018, 0.027, 0.042, 0.065 in mbar                % 0.012, 0.018, 0.027, 0.042, 0.065 in mbar
+s.MS580301BA01_2.noiseVariance        =   0.043043;                      % guess in mbar 
+s.MS580301BA01_2.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
+
+% fault generation
+fault_time = randi(900)/10 + 6;
+switch fault_type(2)
+    case "offset",
+        s.MS580301BA01_2 = s.MS580301BA01_2.setOffset(offset_value_2); % i don't know the unit of measurment as of now
+        s.MS580301BA01_2.setErrorTime(fault_time); % in seconds
+    case "degradation",
+        fault_time = randi(150)/10 + 6;
+        s.MS580301BA01_2 = s.MS580301BA01_2.setDegradation(degradation_value_2); % i don't know the unit of measurment as of now
+        s.MS580301BA01_2.setErrorTime(fault_time); % in seconds
+    case "freezing",
+        s.MS580301BA01_2.setFreezing;
+        s.MS580301BA01_2.setErrorTime(fault_time); % in seconds
+    otherwise
+end
+% 
+% s.MS580301BA01_1 = s.MS580301BA01.setOffset(1000); % i don't know the unit of measurment as of now
+% s.MS580301BA01_1.setErrorTime(10); % in seconds
+% %disp(degradation_type)
 
 % barometer Gemini sensors
 % sensor 1
@@ -46,8 +152,21 @@ s.HSCMRNN015PAAA5.noiseVariance = 0.043043; % from flight logs
 s.HSCMRNN015PAAA5.twoPhaseNoise        =   0;  
 s.HSCMRNN015PAAA5.error2dOffset = ep_data; % I will leave this like this because I don't know how this works
 % fault generation
-%s.HSCMRNN015PAAA5 = s.HSCMRNN015PAAA5.setOffset(1000); % i don't know the unit of measurment as of now
-%s.HSCMRNN015PAAA5 = s.HSCMRNN015PAAA5.setErrorTime(11); % in seconds
+% fault generation
+fault_time = randi(900)/10 + 6;
+switch fault_type(3)
+    case "offset",
+        s.HSCMRNN015PAAA5 = s.HSCMRNN015PAAA5.setOffset(offset_value_3); % i don't know the unit of measurment as of now
+        s.HSCMRNN015PAAA5.setErrorTime(fault_time); % in seconds
+    case "degradation",
+          fault_time = randi(150)/10 + 6;
+        s.HSCMRNN015PAAA5 = s.HSCMRNN015PAAA5.setDegradation(degradation_value_3); % i don't know the unit of measurment as of now
+        s.HSCMRNN015PAAA5.setErrorTime(fault_time); % in seconds
+    case "freezing",
+        s.HSCMRNN015PAAA5.setFreezing;
+        s.HSCMRNN015PAAA5.setErrorTime(fault_time); % in seconds
+    otherwise
+end
 
 
 % sensor 1

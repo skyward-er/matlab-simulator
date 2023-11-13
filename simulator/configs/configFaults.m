@@ -6,40 +6,40 @@ sensor fault configuration script
 %}
 
 % how many faults do you want to simulate?
-N_faulty_sensors = 2;
-
-% select which type of fault: "offset" "degradation" "freezing"
-degradation_type = "offset";
-
-
-% select which sensors will be faulty
-if N_faulty_sensors == 1
-settings.which_sens = ceil(rand(1)*3);
-elseif N_faulty_sensors ==2
-    settings.which_sens = ceil(rand(2,1)*3);
-    while settings.which_sens(1)==settings.which_sens(2)
-        settings.which_sens = ceil(rand(1,2)*3);
-    end
-else 
-    settings.which_sens = [1,2,3];
-end
-
-% fault parameters
-max_offset = 1300; %Pa
-min_offset = 200; %Pa
-max_degradation = 1300; %Pa
-min_degradation = 200; %Pa
-
-
-setting.offset_value_1 = round((max_offset-min_offset)*rand() + min_offset);
-setting.offset_value_2 = round((max_offset-min_offset)*rand() + min_offset);
-setting.offset_value_3 = round((max_offset-min_offset)*rand() + min_offset);
-
-
-setting.degradation_value_1 = round((max_offset-min_offset)*rand() + min_offset);
-setting.degradation_value_2 = round((max_degradation-min_degradation)*rand() + min_degradation);
-setting.degradation_value_3 = round((max_degradation-min_degradation)*rand() + min_degradation);
-
+% N_faulty_sensors = 2;
+% 
+% % select which type of fault: "offset" "degradation" "freezing"
+% degradation_type = "offset";
+% 
+% 
+% % select which sensors will be faulty
+% if N_faulty_sensors == 1
+% settings.which_sens = ceil(rand(1)*3);
+% elseif N_faulty_sensors ==2
+%     settings.which_sens = ceil(rand(2,1)*3);
+%     while settings.which_sens(1)==settings.which_sens(2)
+%         settings.which_sens = ceil(rand(1,2)*3);
+%     end
+% else 
+%     settings.which_sens = [1,2,3];
+% end
+% 
+% % fault parameters
+% max_offset = 1300; %Pa
+% min_offset = 200; %Pa
+% max_degradation = 1300; %Pa
+% min_degradation = 200; %Pa
+% 
+% 
+% setting.offset_value_1 = round((max_offset-min_offset)*rand() + min_offset);
+% setting.offset_value_2 = round((max_offset-min_offset)*rand() + min_offset);
+% setting.offset_value_3 = round((max_offset-min_offset)*rand() + min_offset);
+% 
+% 
+% setting.degradation_value_1 = round((max_offset-min_offset)*rand() + min_offset);
+% setting.degradation_value_2 = round((max_degradation-min_degradation)*rand() + min_degradation);
+% setting.degradation_value_3 = round((max_degradation-min_degradation)*rand() + min_degradation);
+% 
 % for i = 1:3
 %         rand_fault = randi(3);
 %     switch rand_fault
@@ -51,15 +51,7 @@ setting.degradation_value_3 = round((max_degradation-min_degradation)*rand() + m
 %             setting.fault_type(i) = "freezing";
 %     end
 % end
-% switch fault_type
-% 
-%     case "offset"
-% 
-%     case "degradation"
-% 
-%     case "freezing"
-% 
-% end
+
 
 
 %% SENSOR FAULT DETECTION PARAMETERS

@@ -111,7 +111,7 @@ settings.wind.El = El;
 settings.wind.Az = Az;
 
 %% SENSORS INIT
-[s, c] = initSensors(settings.lat0, settings.lon0, settings.z0);
+[s, c, settings] = initSensors(settings, settings.lat0, settings.lon0, settings.z0);
 
 %% MAGNETIC FIELD MODEL
 std_magneticField;
@@ -380,6 +380,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     weight_log_W1 = [weight_log_W1, settings.sfd.W1];
     weight_log_W2 = [weight_log_W2, settings.sfd.W2];
     sfd_mean_p_before_filter = [sfd_mean_p_before_filter prev_filter_baro_data(end)];
+    
     n_old = n_old + n -1;
 
 
@@ -500,6 +501,8 @@ struct_out.faults = faults;
 struct_out.weight_log_W1 = weight_log_W1;
 struct_out.weight_log_W2 = weight_log_W2;
 struct_out.sfd_mean_p_before_filter = sfd_mean_p_before_filter;
+struct_out.k_height_log = settings.sfd.k_height;
+struct_out.k_baro_log = settings.sfd.k_baro;
 
 if exist('t_airbrakes','var')
     struct_out.ARB_allowanceTime = t_airbrakes;

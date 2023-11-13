@@ -89,7 +89,7 @@ end
 
 
 %% SENSORS INIT
-[s, c] = initSensors(settings.lat0, settings.lon0, settings.z0);
+[s, c, settings] = initSensors(settings, settings.lat0, settings.lon0, settings.z0);
 
 %% MAGNETIC FIELD MODEL
 hmax   =   settings.hmax;
