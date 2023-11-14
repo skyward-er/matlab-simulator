@@ -28,11 +28,8 @@ settings.Vy_final = 0;
 settings.y_final  = 0;
 
 %% CONTROL AND SENSOR FREQUENCIES
-if settings.electronics
-    settings.frequencies.controlFrequency           =   10;                    % [hz] control action frequency
-else
-    settings.frequencies.controlFrequency           =   50;
-end
+
+settings.frequencies.controlFrequency           =   10;                    % [hz] control action frequency
 settings.frequencies.arbFrequency               =   10;                    % [hz] air brakes control frequency
 settings.frequencies.prfFrequency               =   1;                     % [hz] parafoil control frequency
 settings.frequencies.accelerometerFrequency     =   100;                   % [hz] sensor frequency
@@ -84,12 +81,13 @@ settings.servo.maxAngle = fix(settings.servo.maxAngle*1e9)/1e9; % to avoid compu
 
 %% NAS TUNING PARAMETERS
 settings.nas.dt_k          =   0.02;                                    % [s]        nas time step
-settings.nas.sigma_baro    =   5;                                       % [m/2]   estimated barometer variance    
-settings.nas.sigma_mag     =   1;                                       % [mgauss^2] estimated magnetometer variance    
+settings.nas.sigma_baro    =   50;                                      % [2]   estimated barometer variance    
+settings.nas.sigma_mag     =   10;                                       % [mgauss^2] estimated magnetometer variance    
 settings.nas.sigma_GPS     =   5;                                       % [mg^2]     estimated GPS variance
-settings.nas.sigma_w       =   1;                                       % [rad^2/s^2]   estimated gyroscope variance;
+settings.nas.sigma_w       =   10;                                       % [rad^2/s^2]   estimated gyroscope variance;
 settings.nas.sigma_beta    =   1e-4;                                    % [rad/s^2]   estimated gyroscope bias variance;
-settings.nas.sigma_pitot   =   20^2;    %DA CAMBIARE
+settings.nas.sigma_pitot   =   20^2;    
+settings.nas.sigma_pitot2  =   100; 
 
 settings.nas.Mach_max = 0.4; % max mach number expected for the mission (for nas with pitot update purposes) - not currently used
 

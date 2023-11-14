@@ -20,19 +20,20 @@ sensorSettings.barometer1.min_fault_time = 6; %min seconds to wait before possib
 
 % fault generation
 switch  settings.fault_sim.fault_type(1)
-    case "offset",
+    case "offset"
         offset_value_1 = round((settings.fault_sim.max_offset-settings.fault_sim.min_offset)*rand() + settings.fault_sim.min_offset);
         sensorSettings.barometer1 = sensorSettings.barometer1.setOffset(offset_value_1); % i don't know the unit of measurment as of now
         [sensorSettings.barometer1, fault_time_1] = sensorSettings.barometer1.setErrorTime(); % in seconds
-    case "degradation",
+    case "degradation"
         degradation_value_1 = round((settings.fault_sim.max_degradation-settings.fault_sim.min_degradation)*rand() + settings.fault_sim.min_degradation);
         sensorSettings.barometer1 = sensorSettings.barometer1.setDegradation(degradation_value_1); % i don't know the unit of measurment as of now
         [sensorSettings.barometer1, fault_time_1] = sensorSettings.barometer1.setErrorTime(); % in seconds
-    case "freezing",
+    case "freezing"
         sensorSettings.barometer1.setFreezing;
         [sensorSettings.barometer1, fault_time_1] = sensorSettings.barometer1.setErrorTime(); % in seconds
     otherwise
 end
+
 %% barometer2 - static measure (HSCMAND001BAAA5)
 sensorSettings.barometer2 = Sensor_with_fault_sim(); % presure in mbar, temp should be in C°
 sensorSettings.barometer2.maxMeasurementRange  =   1000;                   % 1100, 1300 in mbar
@@ -48,19 +49,20 @@ sensorSettings.barometer2.min_fault_time = 6; %min seconds to wait before possib
 % fault generation
 
 switch  settings.fault_sim.fault_type(2)
-    case "offset",
+    case "offset"
         offset_value_2 = round((settings.fault_sim.max_offset-settings.fault_sim.min_offset)*rand() + settings.fault_sim.min_offset);
         sensorSettings.barometer2 = sensorSettings.barometer2.setOffset(offset_value_2); % i don't know the unit of measurment as of now
         [sensorSettings.barometer2, fault_time_2] = sensorSettings.barometer2.setErrorTime(); % in seconds
-    case "degradation",
+    case "degradation"
         degradation_value_2 = round((settings.fault_sim.max_degradation-settings.fault_sim.min_degradation)*rand() + settings.fault_sim.min_degradation);
         sensorSettings.barometer2 = sensorSettings.barometer2.setDegradation(degradation_value_2); % i don't know the unit of measurment as of now
         [sensorSettings.barometer2, fault_time_2] = sensorSettings.barometer2.setErrorTime(); % in seconds
-    case "freezing",
+    case "freezing"
         sensorSettings.barometer2.setFreezing;
         [sensorSettings.barometer2, fault_time_2] = sensorSettings.barometer2.setErrorTime(); % in seconds
     otherwise
 end
+
 %% barometer3 - digital measure (LPS28DFWTR)
 sensorSettings.barometer3 = Sensor_with_fault_sim(); % presure in mbar, temp should be in C°
 sensorSettings.barometer3.maxMeasurementRange  =   4060;                   % 1100, 1300 in mbar
@@ -76,15 +78,15 @@ sensorSettings.barometer3.min_fault_time = 6; %min seconds to wait before possib
 % fault generation
 
 switch  settings.fault_sim.fault_type(3)
-    case "offset",
+    case "offset"
         offset_value_3 = round((settings.fault_sim.max_offset-settings.fault_sim.min_offset)*rand() + settings.fault_sim.min_offset);
         sensorSettings.barometer3 = sensorSettings.barometer3.setOffset(offset_value_3); % i don't know the unit of measurment as of now
         [sensorSettings.barometer3, fault_time_3] = sensorSettings.barometer3.setErrorTime(); % in seconds
-    case "degradation",
+    case "degradation"
         degradation_value_3 = round((settings.fault_sim.max_degradation-settings.fault_sim.min_degradation)*rand() + settings.fault_sim.min_degradation);
         sensorSettings.barometer3 = sensorSettings.barometer3.setDegradation(degradation_value_3); % i don't know the unit of measurment as of now
         [sensorSettings.barometer3, fault_time_3] = sensorSettings.barometer3.setErrorTime(); % in seconds
-    case "freezing",
+    case "freezing"
         sensorSettings.barometer3.setFreezing;
         [sensorSettings.barometer3, fault_time_3] = sensorSettings.barometer3.setErrorTime(); % in seconds
     otherwise
