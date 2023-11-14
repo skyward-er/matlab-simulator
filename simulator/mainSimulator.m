@@ -68,7 +68,7 @@ configSimulator;
 % each time
 
 if settings.tuning
-  	%rng('default')
+  	rng('default');
 end 
 
 %% SET SPECIFIC PARAMETERS FOR A PRE LAUNCH SIMULATION
