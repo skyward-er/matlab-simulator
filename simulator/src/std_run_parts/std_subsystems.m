@@ -6,24 +6,6 @@ This function runs all subsystems in a simulated environment
 
 
 
-
-%% Sensor fault detection
-
-% simulation of the faults
-
-
-
-
-%PRENDO ULTIMO VALORE??
-sensorData.barometer.z = sensorData.barometer_sens{1}.z(1,end);
-sensorData.barometer.measures = sensorData.barometer_sens{1}.measures(1,end);
-sensorData.barometer.time = sensorData.barometer_sens{1}.time(1,end);
-
-sensorTot.barometer.pressure_measures(sensorTot.barometer.n_old:sensorTot.barometer.n_old + size(sensorData.barometer.measures' ,1) - 1,:)    = sensorData.barometer.measures';
-sensorTot.barometer.altitude(sensorTot.barometer.n_old:sensorTot.barometer.n_old + size(sensorData.barometer.measures',1) - 1,:)    = sensorData.barometer.z';
-sensorTot.barometer.time(sensorTot.barometer.n_old:sensorTot.barometer.n_old + size(sensorData.barometer.measures',1) - 1)    =  sensorData.barometer.time;
-sensorTot.barometer.n_old = sensorTot.barometer.n_old + size(sensorData.barometer.measures,1);
-
 %% ADA
 if settings.flagADA && settings.dataNoise
 

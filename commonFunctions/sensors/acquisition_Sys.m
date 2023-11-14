@@ -64,6 +64,17 @@ for i_baro = 1:3
     sensorTot.barometer_sens{i_baro}.n_old = sensorTot.barometer_sens{i_baro}.n_old + size(sensorData.barometer_sens{i_baro}.measures,1);
 end
 
+% As sfd is not yet implemented, the value of only one barometer is considered throughout the simulator:
+sensorData.barometer.z = sensorData.barometer_sens{1}.z(:)';
+sensorData.barometer.measures = sensorData.barometer_sens{1}.measures(:)';
+sensorData.barometer.time = sensorData.barometer_sens{1}.time(:);
+
+sensorTot.barometer.pressure_measures(sensorTot.barometer.n_old:sensorTot.barometer.n_old + size(sensorData.barometer.measures' ,1) - 1,:)    = sensorData.barometer.measures';
+sensorTot.barometer.altitude(sensorTot.barometer.n_old:sensorTot.barometer.n_old + size(sensorData.barometer.measures',1) - 1,:)    = sensorData.barometer.z';
+sensorTot.barometer.time(sensorTot.barometer.n_old:sensorTot.barometer.n_old + size(sensorData.barometer.measures',1) - 1)    =  sensorData.barometer.time;
+sensorTot.barometer.n_old = sensorTot.barometer.n_old + size(sensorData.barometer.measures,1);
+
+
 %% IMU Acquisition loop
 if isfield(sensorData.accelerometer,'time')
     for ii=1:length(sensorData.accelerometer.time)
