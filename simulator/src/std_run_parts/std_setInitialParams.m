@@ -185,11 +185,12 @@ sensorTot.gps.position_measures                 =   [0, 0, 0];
 sensorTot.gps.velocity_measures                 =   [0, 0, 0];
 sensorTot.pitot.total_pressure                  =   P0;
 sensorTot.pitot.static_pressure                 =   P0;
+sensorTot.pitot.temperature                     =   288.15;
 sensorTot.nas.states                            =   sensorData.nas.states;
-sensorTot.mea.pressure                          = [];
-sensorTot.mea.mass                              = [];
-sensorTot.mea.prediction                        = [];
-sensorTot.mea.time                              = [];
+sensorTot.mea.pressure                          = [101325];
+sensorTot.mea.mass                              = [0];
+sensorTot.mea.prediction                        = [0];
+sensorTot.mea.time                              = [0];
 
 % inizializzare i tempi dei sensori a 0 e poi mettere tutti i n_old = 2
 sensorTot.barometer_sens{1}.time    =   0;
