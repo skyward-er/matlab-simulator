@@ -4,30 +4,6 @@ hardware in the loop script
 
 %}
 
-%% Update Sensor fault data
-
-% NOTE: As sensor fault detection is not yet completely implemented on
-% obsw, the algorithm is currently run on the simulator.
-% This code is temporary and will be changed with the hil implementation
-% once it is completed.
-
-Nsensors = [1,2,3];
-goodSensors = Nsensors(not(settings.faulty_sensors));
-if settings.flagAscent
-    SVM_model= settings.SVM_1;
-else
-    SVM_model = settings.SVM_2;
-end
-for i = goodSensors
-    sensorData.chunk{i}(1,1:end-length(sensorData.barometer_sens{i}.measures)) = sensorData.chunk{i}(1+length(sensorData.barometer_sens{i}.measures):end);
-    sensorData.chunk{i}(1,end-length(sensorData.barometer_sens{i}.measures)+1:end) = sensorData.barometer_sens{i}.measures;
-    if length(sensorData.chunk{i})>SVM_model.N_sample
-        warning('chunk length is greater than %d samples',SVM_model.N_sample)
-    end
-end
-[sensorData,settings.faulty_sensors] = run_SensorFaultDetection_SVM(SVM_model,sensorData,settings.faulty_sensors,settings.flagAscent,t1);
-
-
 %% Prepare data to be sent to and read from obsw
 
 flagsArray = [isLaunch, settings.flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2];
