@@ -109,6 +109,7 @@ if isfield(freq, 'pitotFrequency')
     sensorData.pitot.pTotMeasures = zeros(size(sensorData.pitot.time,1),1);
     sensorData.pitot.pStatMeasures = zeros(size(sensorData.pitot.time,1),1);
     sensorData.pitot.temperature = zeros(size(sensorData.pitot.time,1),1);
+    sensorData.pitot.airspeed = zeros(size(sensorData.pitot.time,1),1);
     sensorData.pitot.pTotMeasures(1) = sensorTot.pitot.total_pressure(end);
     sensorData.pitot.pStatMeasures(1) = sensorTot.pitot.static_pressure(end);
     sensorData.pitot.temperature(1) = sensorTot.pitot.temperature(end);

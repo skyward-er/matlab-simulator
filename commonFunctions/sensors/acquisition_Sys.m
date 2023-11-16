@@ -155,10 +155,10 @@ if isfield(sensorData.pitot,'time')
         a = sqrt(gamma*R*T_ref);
         if sensorData.pitot.pTotMeasures(ii)>sensorData.pitot.pStatMeasures(ii)
             M2(ii,1) = 2/(gamma-1) * ( (sensorData.pitot.pTotMeasures(ii)/sensorData.pitot.pStatMeasures(ii))^(( gamma-1 )/gamma) -1 );
-            airspeed(ii,1) = sqrt(M2(ii)) * a;
+            sensorData.pitot.airspeed(ii,1) = sqrt(M2(ii)) * a;
         else
             M2(ii,1) = 0;
-            airspeed(ii,1) = 0;
+            sensorData.pitot.airspeed(ii,1) = 0;
         end
     end
     if length(sensorData.pitot.time)>1
