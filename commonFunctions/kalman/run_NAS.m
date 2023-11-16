@@ -140,8 +140,8 @@ if length(t_nas) > 1
     t_imutemp  = [sensorTot.imu.time];
     t_pittemp  = [sensorTot.pitot.time];
 
-
     for ii=2:length(t_nas)
+
         %% Prediction part
 
         index_imu   =  sum(t_nas(ii) >= t_imutemp);
@@ -156,8 +156,8 @@ if length(t_nas) > 1
         index_GPS   =  sum(t_nas(ii) >= t_gpstemp);
         [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionGPS(x_lin(ii,:),P_lin(:,:,ii),sensorTot.gps.position_measures(index_GPS,1:2),...
             sensorTot.gps.velocity_measures(index_GPS,1:2),nas.sigma_GPS,nsat,fix);
-
         % barometer
+        
         index_bar   =  sum(t_nas(ii) >= t_barotemp);
         [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometer(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.altitude(index_bar),nas.sigma_baro);
 
@@ -187,6 +187,7 @@ if length(t_nas) > 1
                 nas.flag_apo = true;
             end
         end
+
     end
 
 sensorData.nas.states= x;

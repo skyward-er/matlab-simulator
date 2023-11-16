@@ -4,10 +4,6 @@ integration initialization script- setting initial condition before control phas
 
 %}
 
-%% integration time
-dt          =       1/settings.frequencies.controlFrequency;                % Time step of the controller
-t0          =       0;                                                      % First time step - used in ode as initial time
-t1          =       t0 + dt;                                                % Second time step - used in ode as final time
 
 %% kalman initialization
 if not(settings.scenario == "descent")
@@ -186,11 +182,12 @@ sensorTot.gps.velocity_measures                 =   [0, 0, 0];
 sensorTot.pitot.total_pressure                  =   P0;
 sensorTot.pitot.static_pressure                 =   P0;
 sensorTot.pitot.temperature                     =   288.15;
+sensorTot.pitot.airspeed                        =   0;
 sensorTot.nas.states                            =   sensorData.nas.states;
-sensorTot.mea.pressure                          = [101325];
-sensorTot.mea.mass                              = [0];
-sensorTot.mea.prediction                        = [0];
-sensorTot.mea.time                              = [0];
+sensorTot.mea.pressure                          =   101325;
+sensorTot.mea.mass                              =   0;
+sensorTot.mea.prediction                        =   0;
+sensorTot.mea.time                              =   0;
 
 % inizializzare i tempi dei sensori a 0 e poi mettere tutti i n_old = 2
 sensorTot.barometer_sens{1}.time    =   0;
