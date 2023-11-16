@@ -21,4 +21,4 @@ hil_settings.serial_port = "COM1";
 % Windows, e.g. 256000
 % Linux, e.g. 115200
 % See serialib for supported baudrates
-hil_settings.baudrate = 256000;
+hil_settings.baudrate = 115200;
