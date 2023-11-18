@@ -158,6 +158,8 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         if not(settings.lastLaunchFlag) && launchFlag
             std_setInitialParams
             iTimes = 1;
+            t0 = 0;
+            t1 = dt;
             tLaunch = t0;
         end
     else
