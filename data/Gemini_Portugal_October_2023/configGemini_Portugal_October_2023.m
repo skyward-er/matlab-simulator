@@ -28,7 +28,11 @@ settings.Vy_final = 0;
 settings.y_final  = 0;
 
 %% CONTROL AND SENSOR FREQUENCIES
-settings.frequencies.controlFrequency           =   50;                    % [hz] control action frequency
+if settings.electronics
+    settings.frequencies.controlFrequency       =   10;                    % [hz] control action frequency
+else 
+    settings.frequencies.controlFrequency       =   50;
+end
 settings.frequencies.arbFrequency               =   10;                    % [hz] air brakes control frequency
 settings.frequencies.prfFrequency               =   1;                     % [hz] parafoil control frequency
 settings.frequencies.accelerometerFrequency     =   100;                   % [hz] sensor frequency
