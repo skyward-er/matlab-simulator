@@ -46,28 +46,28 @@ H(3)           =   1;                            %Update of the matrix H
 
 S              =   H*P_pred*H'+R;                %Matrix necessary for the correction factor
 
-   if cond(S) > threshold 
-       
-       e       =   h_sam - z;
-       K       =   P_pred*H'/S;                   %Kalman correction factor
-
-       x       =   x_pred + (K*e)';               %Corrector step of the state
-       
-
-       P       =   (eye(6) - K*H)*P_pred;        %Corrector step of the state covariance
-    else
-       x       =   x_pred;
-       P       =   P_pred;
-   end
-    
-   % check we are above ground
-   if -x(3) < 0
-       x(3) = 0;
-       warning('Altitude below zero')
-   end
+if cond(S) > threshold 
    
+   e       =   h_sam - z;
+   K       =   P_pred*H'/S;                   %Kalman correction factor
+
+   x       =   x_pred + (K*e)';               %Corrector step of the state
+   
+
+   P       =   (eye(6) - K*H)*P_pred;        %Corrector step of the state covariance
+else
+   x       =   x_pred;
+   P       =   P_pred;
+end
+
+% check we are above ground
+if -x(3) < 0
+   x(3) = 0;
+   warning('Altitude below zero')
+end
+
 z_corr         =   x(3);                          %Corrected output expectation
 
 y_res          =   h_sam - z_corr;
-   
-    end
+
+end

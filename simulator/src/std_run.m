@@ -108,8 +108,18 @@ settings.ms = settings.ms + settings.mass_offset;
 settings.mTotalTime = settings.mTotalTime + settings.mass_offset;
 
 %% INTEGRATION
+% integration time
+dt          =       1/settings.frequencies.controlFrequency;                % Time step of the controller
+dt_ode      =       0.01;                                                   % Integration time step
+t0          =       0;                                                      % First time step - used in ode as initial time
+t1          =       t0 + dt;                                                % Second time step - used in ode as final time
+
+% check consistency of frequency
+if mod(dt/dt_ode,1)~= 0
+    error('Control frequency and integration time step are not compatible')
+end
 std_setInitialParams;
-dt_ode = 0.01;
+
 
 %% SENSORS INIT
 run(strcat('initSensors', settings.mission));
@@ -148,6 +158,8 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         if not(settings.lastLaunchFlag) && launchFlag
             std_setInitialParams
             iTimes = 1;
+            t0 = 0;
+            t1 = dt;
             tLaunch = t0;
         end
     else
