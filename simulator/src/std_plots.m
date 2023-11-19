@@ -116,7 +116,7 @@ legend
 ylabel('q_z')
 
 legend
-sgtitle('Euler angles')
+sgtitle('Quaternions')
 xlabel('Time (s)')
 
 return

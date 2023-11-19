@@ -458,8 +458,10 @@ struct_out.wind.Vel = [uw, vw, ww];
 struct_out.sensors = sensorTot;
 struct_out.sensors.ada.t_apogee = settings.ada.t_ada;
 struct_out.sensors.nas.t_apogee = settings.nas.t_nas;
-struct_out.sensors.mea.mass_offset = settings.mass_offset;
-struct_out.sensors.mea.true_mass_at_shutdown = dataRecall.true_mass(lastAscentIndex-10);
+if settings.scenario ~= "descent"
+    struct_out.sensors.mea.mass_offset = settings.mass_offset;
+    struct_out.sensors.mea.true_mass_at_shutdown = dataRecall.true_mass(lastAscentIndex-10);
+end
 % apogee
 struct_out.apogee.time = Tf(idx_apo);
 struct_out.apogee.time_ada = t_ada;
@@ -485,14 +487,14 @@ if exist('t_airbrakes','var')
 else
     struct_out.ARB.allowanceTime = NaN;
     struct_out.ARB.allowanceIdx = NaN;
-    struct_out.ARB.cmdTime = NaN; 
-    struct_out.ARB.cmdPosition = NaN; 
+    struct_out.ARB.cmdTime = NaN;
+    struct_out.ARB.cmdPosition = NaN;
     struct_out.ARB.openingPosition = NaN;
     struct_out.ARB.openingVelocities = NaN;
 end
-% parafoil 
+% parafoil
 if settings.scenario == "descent" || settings.scenario == "full flight"
-    
+
     struct_out.PRF.cmddeltaA = deltaAcmd_tot;
     struct_out.PRF.cmdTime = deltaAcmd_time_tot;
     % events
@@ -505,9 +507,9 @@ if settings.scenario == "descent" || settings.scenario == "full flight"
     % deployment
     struct_out.PRF.deploy_altitude_set = settings.para(1).z_cut + settings.z0; % set altitude for deployment
     struct_out.PRF.deploy_position = Yf(lastDrogueIndex+1,1:3); % actual position of deployment
-    struct_out.PRF.deploy_velocity = Yf(lastDrogueIndex+1,4:6); 
+    struct_out.PRF.deploy_velocity = Yf(lastDrogueIndex+1,4:6);
 else
-    
+
     struct_out.PRF.cmddeltaA = NaN;
     struct_out.PRF.cmdTime = NaN;
     struct_out.events.drogueIndex = NaN;
@@ -524,51 +526,51 @@ struct_out.payload = contSettings.payload;
 
 % resize structure to save space
 if settings.montecarlo
-t_vec = linspace(min(struct_out.t),max(struct_out.t),1000);
-t_vec = t_vec';
+    t_vec = linspace(min(struct_out.t),max(struct_out.t),1000);
+    t_vec = t_vec';
 
-% simulation states
-struct_out.Y = interp1(struct_out.t,struct_out.Y,t_vec);
+    % simulation states
+    struct_out.Y = interp1(struct_out.t,struct_out.Y,t_vec);
 
-% sensors - ADA
-struct_out.sensors.ada = rmfield(struct_out.sensors.ada,{'time','n_old','xp','xv'});
-
-
-% sensors - NAS
-struct_out.sensors.nas.states = interp1(struct_out.sensors.nas.time',struct_out.sensors.nas.states,t_vec);
-struct_out.sensors.nas.time = t_vec;
-
-% sensors - MEA already good
+    % sensors - ADA
+    struct_out.sensors.ada = rmfield(struct_out.sensors.ada,{'time','n_old','xp','xv'});
 
 
-% sensors - SFD
-struct_out.sensors.sfd.pressure = interp1(struct_out.sensors.sfd.time',struct_out.sensors.sfd.pressure',t_vec);
-struct_out.sensors.sfd = rmfield(struct_out.sensors.sfd,'faults');
-struct_out.sensors.sfd.time = t_vec;
+    % sensors - NAS
+    struct_out.sensors.nas.states = interp1(struct_out.sensors.nas.time',struct_out.sensors.nas.states,t_vec);
+    struct_out.sensors.nas.time = t_vec;
 
-% sensors - remove unwanted fields
-struct_out.sensors = rmfield(struct_out.sensors,{'barometer_sens','barometer','comb_chamber','imu','gps','pitot'});
-if isfield(struct_out.sensors,'wes')
-    struct_out.sensors = rmfield(struct_out.sensors,'wes');
-end
-% air brakes (ARB)
-struct_out.ARB.cmdPosition = interp1(struct_out.ARB.cmdTime,struct_out.ARB.cmdPosition,t_vec);
-struct_out.ARB.cmdTime = t_vec;
-struct_out.ARB = rmfield(struct_out.ARB, 'allowanceIdx');
+    % sensors - MEA already good
 
-% parafoil (PRF)
-if ~isnan(struct_out.PRF.cmddeltaA)
-struct_out.PRF.deltaAcmd = interp1(struct_out.PRF.cmdTime,struct_out.PRF.cmddeltaA,t_vec);
-struct_out.PRF.cmdTime = t_vec;
-end
-% recall
-struct_out.recall.true_mass = interp1(struct_out.t,struct_out.recall.true_mass,t_vec); 
 
-% remove the rest
-struct_out = rmfield(struct_out,{'events'});
+    % sensors - SFD
+    struct_out.sensors.sfd.pressure = interp1(struct_out.sensors.sfd.time',struct_out.sensors.sfd.pressure',t_vec);
+    struct_out.sensors.sfd = rmfield(struct_out.sensors.sfd,'faults');
+    struct_out.sensors.sfd.time = t_vec;
 
-% overwrite the time vector
-struct_out.t = t_vec;
+    % sensors - remove unwanted fields
+    struct_out.sensors = rmfield(struct_out.sensors,{'barometer_sens','barometer','comb_chamber','imu','gps','pitot'});
+    if isfield(struct_out.sensors,'wes')
+        struct_out.sensors = rmfield(struct_out.sensors,'wes');
+    end
+    % air brakes (ARB)
+    struct_out.ARB.cmdPosition = interp1(struct_out.ARB.cmdTime,struct_out.ARB.cmdPosition,t_vec);
+    struct_out.ARB.cmdTime = t_vec;
+    struct_out.ARB = rmfield(struct_out.ARB, 'allowanceIdx');
+
+    % parafoil (PRF)
+    if ~isnan(struct_out.PRF.cmddeltaA)
+        struct_out.PRF.deltaAcmd = interp1(struct_out.PRF.cmdTime,struct_out.PRF.cmddeltaA,t_vec);
+        struct_out.PRF.cmdTime = t_vec;
+    end
+    % recall
+    struct_out.recall.true_mass = interp1(struct_out.t,struct_out.recall.true_mass,t_vec);
+
+    % remove the rest
+    struct_out = rmfield(struct_out,{'events'});
+
+    % overwrite the time vector
+    struct_out.t = t_vec;
 end
 
 
