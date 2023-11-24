@@ -102,7 +102,7 @@ if length(t_ada)>1
         S      =   Ct * P(:,:,ii) * Ct' + ada.R;
         K      =   P(:,:,ii) * Ct' /S;
         index_baro  =  sum(t_ada(ii) >= t_baro);
-        xp(ii,:)      =   (xp(ii,:)' + K*(sensorTot.barometer.pressure_measures(index_baro) - Ct*xp(ii,:)'))';
+        xp(ii,:)      =   (xp(ii,:)' + K*(sensorTot.barometer.pressure_measures(index_baro) - Ct*xp(ii,:)'))'; %EUREKA! DEVO MODIFICARE QUESTO
         P(:,:,ii)   =  (eye(3) - K*Ct) * P(:,:,ii);
 
         xv(ii,1)  =   getaltitude(xp(ii,1),ada.temp_ref, ada.p_ref);

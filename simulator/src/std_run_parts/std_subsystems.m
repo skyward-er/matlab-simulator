@@ -4,7 +4,8 @@ This function runs all subsystems in a simulated environment
 
 %}
 
-
+%% SFD harware redundancy
+[sensorData, sensorTot] = run_SFD_HR(SensorData, settings);
 
 %% ADA
 if settings.flagADA && settings.dataNoise

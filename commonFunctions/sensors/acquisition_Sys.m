@@ -68,9 +68,11 @@ end
 
 % As sfd is not yet implemented, the value of only one barometer is considered throughout the simulator:
 
+%HP: modify this for accessing all sensors
 sensorData.barometer.z = sensorData.barometer_sens{1}.z(:);
 sensorData.barometer.measures = sensorData.barometer_sens{1}.measures(:);
 sensorData.barometer.time = sensorData.barometer_sens{1}.time(:);
+
 if length(sensorData.barometer.time)>1
     sensorTot.barometer.pressure_measures(sensorTot.barometer.n_old:sensorTot.barometer.n_old + size(sensorData.barometer.measures,1) - 2,:)    = sensorData.barometer.measures(2:end);
     sensorTot.barometer.altitude(sensorTot.barometer.n_old:sensorTot.barometer.n_old + size(sensorData.barometer.measures,1) - 2,:)    = sensorData.barometer.z(2:end);

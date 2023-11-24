@@ -112,13 +112,14 @@ idx_apogee = NaN;
 idx_landing = NaN;
 
 %% sensor fault initial conditions
-sensorData.chunk{1} = zeros(1,50);
-sensorData.chunk{2} = zeros(1,50);
-sensorData.chunk{3} = zeros(1,50);
-faults = [];
-barometer_measure = cell(1,3);
-barometer_time = [];
-sfd_mean_p = [];
+%sensorData.chunk{1} = zeros(1,50);
+%sensorData.chunk{2} = zeros(1,50);
+%sensorData.chunk{3} = zeros(1,50);
+%faults = [];
+%barometer_measure = cell(1,3);
+%barometer_time = [];
+%sfd_mean_p = [];
+settings.SFD_HR.prev_SFD_HR_outputs = zeros(n, 1);
 
 %% ADA initial conditions (Apogee Detection Algorithm)
 
