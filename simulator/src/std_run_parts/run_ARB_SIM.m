@@ -114,6 +114,8 @@ switch true % set this value in configControl.m
             end
 
         end
+    case strcmp (contSettings.algorithm,'MRAC')
+        [ap_ref_new] = control_MRAC(-sensorData.kalman.z-settings.z0,-sensorData.kalman.vz,settings,contSettings);
 
 end
 

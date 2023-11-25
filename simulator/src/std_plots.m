@@ -139,6 +139,27 @@ if not(settings.scenario == "descent")
         exportStandardizedFigure(figures.servo_angle,"report_images\"+settings.mission+"\src_servo_angle.pdf",0.9)
     end
 end
+%%%%% MRAC
+figure()
+subplot(1,3,1)
+plot (contSettings.K_x)
+xlabel("Time")
+ylabel("Gain")
+title("Estimated K_x")
+subplot(1,3,2)
+plot (contSettings.K_r)
+xlabel("Time")
+ylabel("Gain")
+title("Estimated K_x")
+subplot(1,3,3)
+plot (contSettings.Theta)
+xlabel("Time")
+ylabel("Gain")
+title("Estimated Theta")
+
+
+
+
 % parafoil
 if settings.parafoil && (settings.scenario == "descent" || settings.scenario == "full flight")
     figures.parafoil_servo_action = figure('Name', 'Parafoil deltaA','ToolBar','auto','Position',[100,100,600,400]);

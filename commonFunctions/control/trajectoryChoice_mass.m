@@ -18,9 +18,10 @@ function contSettings = trajectoryChoice_mass(m,contSettings)
     contSettings.traj_choice=0;
     
     [~,index] = min( abs(m-contSettings.masses_vec) );
-    Vz_temp = zeros( length( contSettings.reference.Vz{1,1} ),2);
-    Vz_temp(:,1) = contSettings.reference.Vz{1,index};
-    Vz_temp(:,2) = contSettings.reference.Vz{2,index};
+    Vz_temp = zeros( length( contSettings.reference.Vz{1,1} ),size(contSettings.reference.Vz,1));
+    for i=1:size(contSettings.reference.Vz,1)
+    Vz_temp(:,i) = contSettings.reference.Vz{i,index};
+    end
     contSettings.reference.Vz = Vz_temp;
     
 end

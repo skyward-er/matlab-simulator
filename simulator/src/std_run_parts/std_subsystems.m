@@ -88,7 +88,7 @@ if contains(settings.mission,'_2023')
         end
     
         if contSettings.flagFirstControlABK % set in
-    
+            contSettings.x0 = [-sensorData.kalman.z-settings.z0;-sensorData.kalman.vz];
             t_airbrakes = t0;
             t_last_arb_control = t0;
             idx_airbrakes = n_old+1;
