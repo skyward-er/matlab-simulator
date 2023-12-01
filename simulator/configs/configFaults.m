@@ -10,8 +10,8 @@ settings.fault_sim.N_faulty_sensors = -1; % if set to -1 it will go to manual fa
 
 
 if settings.fault_sim.N_faulty_sensors == -1
-    settings.fault_sim.selected_sensors = [];
-    settings.fault_sim.fault_type = ["no fault", "no fault", "no fault"];
+    settings.fault_sim.selected_sensors = [2 3];
+    settings.fault_sim.fault_type = ["no fault", "offset", "offset"];
 end
 
 % fault parameters

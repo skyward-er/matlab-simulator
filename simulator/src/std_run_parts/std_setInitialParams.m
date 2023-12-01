@@ -119,7 +119,22 @@ idx_landing = NaN;
 %barometer_measure = cell(1,3);
 %barometer_time = [];
 %sfd_mean_p = [];
-settings.SFD_HR.prev_SFD_HR_outputs = zeros(n, 1);
+
+% settings.SFD_HR.prev_SFD_HR_outputs = zeros(n, 1);
+
+%% SFD Hardware Redundancy conditions
+
+sensorData.sfd_hr.freeze_counter = [0, 0, 0];
+
+sensorData.sfd_hr.ind = -1;
+
+sensorData.sfd_hr.distance = 0;
+
+sensorData.sfd_hr.prev_sfd_values = zeros( settings.sfd_hr.n_points + 1, 1);
+
+sensorData.sfd_hr.output.barometers = [0, 0, 0];
+sensorData.sfd_hr.output.faults = [0, 0, 0];
+sensorData.sfd_hr.output.trend = 0;
 
 %% ADA initial conditions (Apogee Detection Algorithm)
 
@@ -189,6 +204,8 @@ sensorTot.mea.pressure                          =   101325;
 sensorTot.mea.mass                              =   0;
 sensorTot.mea.prediction                        =   0;
 sensorTot.mea.time                              =   0;
+sensorTot.sfd_hr.pressure                       =   [P0];
+         
 
 % inizializzare i tempi dei sensori a 0 e poi mettere tutti i n_old = 2
 sensorTot.barometer_sens{1}.time    =   0;
@@ -219,3 +236,4 @@ sensorTot.ada.n_old = 2;
 sensorTot.nas.n_old = 2;
 sensorTot.mea.n_old = 2;
 sensorTot.sfd.n_old = 2;
+sensorTot.sfd_hr.follow_ind =  -1;  

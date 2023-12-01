@@ -4,6 +4,11 @@ hold on;
 plot(simOutput.sensors.barometer_sens{1, 1}.time,simOutput.sensors.barometer_sens{1, 1}.pressure_measures,'b','DisplayName','Baro 1')
 plot(simOutput.sensors.barometer_sens{1, 2}.time,simOutput.sensors.barometer_sens{1, 2}.pressure_measures,'k','DisplayName','Baro 2')
 plot(simOutput.sensors.barometer_sens{1, 3}.time,simOutput.sensors.barometer_sens{1, 3}.pressure_measures,'r','DisplayName','Baro 3')
+plot(simOutput.sensors.barometer_sens{1, 3}.time,simOutput.sensors.sfd_hr.pressure,'g','DisplayName','SFD HR pressure')
+if( simOutput.sensors.sfd_hr.follow_ind ~= -1 )
+    xline( [simOutput.sensors.barometer_sens{1, 3}.time( simOutput.sensors.sfd_hr.follow_ind )], 'LineWidth',2 );
+end
+
 legend
 title('Barometer measurements')
 %% static pitot vs static presure

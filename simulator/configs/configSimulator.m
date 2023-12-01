@@ -60,6 +60,9 @@ if conf.script ~= "trajectory generation"
     configReferences;
     %% 15) SPECIAL CONDITIONS?
 %     config_SpecialConditions;
+%% CONFIG SFD_HR
+config_sfd_hr
+
 end
 
 
