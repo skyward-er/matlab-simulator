@@ -47,9 +47,8 @@ addpath(genpath(commonFunctionsPath));
 %% CONFIGs
 conf.script = "simulator";
 settings.montecarlo = true;
+settings.montecarlo_only_fault_sim = true;%% MONTECARLO SETTINGS
 configSimulator;
-
-%% MONTECARLO SETTINGS
 rng default
 matlab_graphics;
 
@@ -103,22 +102,50 @@ for alg_index = 4
     wind_az = zeros(N_sim,1);
     t_shutdown.value = zeros(N_sim,1);
 
-    parfor i = 1:N_sim
+
+    if settings.montecarlo_only_fault_sim
         settings_mont = settings_mont_init;
 
-        settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
-        settings_mont.motor.expTime = stoch.expThrust(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
-        settings_mont.tb = max( stoch.expThrust(i,stoch.expThrust(i,:)<=settings.tb) );     % initialize the burning time of the current simulation (parfor purposes)
-        settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
-        settings_mont.mass_offset = stoch.mass_offset(i);
-        settings_mont.OMEGA = stoch.OMEGA_rail(i);
-        settings_mont.PHI = stoch.PHI_rail(i);
+        settings_mont.motor.expThrust = stoch.thrust(1,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
+        settings_mont.motor.expTime = stoch.expThrust(1,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
+        settings_mont.tb = max( stoch.expThrust(1,stoch.expThrust(1,:)<=settings.tb) );     % initialize the burning time of the current simulation (parfor purposes)
+        settings_mont.State.xcgTime = stoch.State.xcgTime(:,1);                 % initialize the baricenter position time vector
+        settings_mont.mass_offset = stoch.mass_offset(1);
+        settings_mont.OMEGA = stoch.OMEGA_rail(1);
+        settings_mont.PHI = stoch.PHI_rail(1);
         
         
    
         % Define coeffs matrix for the i-th simulation
-        settings_mont.Coeffs = settings.Coeffs* (1+stoch.aer_percentage(i));
+        settings_mont.Coeffs = settings.Coeffs* (1+stoch.aer_percentage(1));
+    end
 
+    parfor i = 1:N_sim
+        if settings.montecarlo_only_fault_sim
+            settings_mont = settings_mont_init;
+    
+            settings_mont.motor.expThrust = stoch.thrust(1,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
+            settings_mont.motor.expTime = stoch.expThrust(1,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
+            settings_mont.tb = max( stoch.expThrust(1,stoch.expThrust(1,:)<=settings.tb) );     % initialize the burning time of the current simulation (parfor purposes)
+            settings_mont.State.xcgTime = stoch.State.xcgTime(:,1);                 % initialize the baricenter position time vector
+            settings_mont.mass_offset = stoch.mass_offset(1);
+            settings_mont.OMEGA = stoch.OMEGA_rail(1);
+            settings_mont.PHI = stoch.PHI_rail(1);
+            % Define coeffs matrix for the i-th simulation
+            settings_mont.Coeffs = settings.Coeffs* (1+stoch.aer_percentage(1));
+        else 
+            settings_mont = settings_mont_init;
+
+            settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
+            settings_mont.motor.expTime = stoch.expThrust(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
+            settings_mont.tb = max( stoch.expThrust(i,stoch.expThrust(i,:)<=settings.tb) );     % initialize the burning time of the current simulation (parfor purposes)
+            settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
+            settings_mont.mass_offset = stoch.mass_offset(i);
+            settings_mont.OMEGA = stoch.OMEGA_rail(i);
+            settings_mont.PHI = stoch.PHI_rail(i);
+            % Define coeffs matrix for the i-th simulation
+            settings_mont.Coeffs = settings.Coeffs* (1+stoch.aer_percentage(i));
+        end
 
         % set the wind parameters
         switch settings.windModel

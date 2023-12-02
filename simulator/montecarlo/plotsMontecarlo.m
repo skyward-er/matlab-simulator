@@ -202,7 +202,11 @@ if settings.scenario~= "descent"
     %%%
     subplot(1,3,3)
     for i = 1:N_sim
-        plot(thrust_percentage(i),save_thrust{i}.sensors.mea.t_shutdown,'.')
+        if settings.montecarlo_only_fault_sim
+            plot(thrust_percentage(1),save_thrust{i}.sensors.mea.t_shutdown,'.')
+        else
+            plot(thrust_percentage(i),save_thrust{i}.sensors.mea.t_shutdown,'.')
+        end
         hold on;
         grid on;
     end
