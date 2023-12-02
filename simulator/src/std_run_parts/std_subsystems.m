@@ -88,10 +88,13 @@ if contains(settings.mission,'_2023')
         end
     
         if contSettings.flagFirstControlABK % set in
-            contSettings.x0 = [-sensorData.kalman.z-settings.z0;-sensorData.kalman.vz];
+            store.x0 = [-sensorData.kalman.z-settings.z0;-sensorData.kalman.vz];
             t_airbrakes = t0;
             t_last_arb_control = t0;
             idx_airbrakes = n_old+1;
+            store.K_x = 0.0001*[1 1]';
+            store.K_r = 0.0001;
+            store.Theta = 1.6667e-04;
     
         end
         if t1-t_last_arb_control >= 1/settings.frequencies.arbFrequency - 1e-5 || t_last_arb_control == t_airbrakes
@@ -99,10 +102,14 @@ if contains(settings.mission,'_2023')
             ap_ref_old = ap_ref_new;
             settings.quat = [sensorTot.nas.states(end, [10,7:9])];
             [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
-            [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
+            [ap_ref_new,contSettings,store] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old,store); % "simulated" airbrakes because otherwise are run by the HIL.
         end
     else
-        ap_ref_new = 0;
+         ap_ref_new = 0;
+            store.K_x = 0.001*[1 1]';
+            store.K_r = 0.001;
+            store.Theta= 1.6667e-04;
+            store.x0 = [0 0]';
     end
 else
     if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings.control
@@ -119,12 +126,16 @@ else
             ap_ref_old = ap_ref_new;
             settings.quat = [sensorTot.nas.states(end, [10,7:9])];
             [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
-            [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
+            [ap_ref_new,contSettings,store] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old,store); % "simulated" airbrakes because otherwise are run by the HIL.
     
         end
        
     else
         ap_ref_new = 0;
+        store.K_x = 0.001*[1 1]';
+        store.K_r =  0.001;
+        store.Theta= 1.6667e-04;
+        store.x0 = [0 0]';
     end
 end
 

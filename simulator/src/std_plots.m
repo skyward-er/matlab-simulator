@@ -59,8 +59,10 @@ hold on
 if ~settings.electronics
     contSettings = simOutput.contSettings; % because the trajectory are chosen during the simulation, not a priori
     if not(settings.scenario == "descent")
-        plot(contSettings.reference.Z, contSettings.reference.Vz(:,1),'r','DisplayName','ref min')
-        plot(contSettings.reference.Z, contSettings.reference.Vz(:,2),'k','DisplayName','ref max')
+        for i = 1:size(contSettings.reference.Vz,2)
+        plot(contSettings.reference.Z, contSettings.reference.Vz(:,i),'r','DisplayName','ref min')
+        end 
+
     end
 end
 plot( -simOutput.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
@@ -119,7 +121,7 @@ legend
 sgtitle('Quaternions')
 xlabel('Time (s)')
 
-return
+% return
 
 %% Control variable: servo angle + reference values
 % air brakes
@@ -140,25 +142,27 @@ if not(settings.scenario == "descent")
     end
 end
 %%%%% MRAC
-figure()
+figure(10)
 subplot(1,3,1)
-plot (contSettings.K_x)
+plot (simOutput.ARB.K_x(1,:))
+hold on 
+plot (simOutput.ARB.K_x(2,:))
 xlabel("Time")
 ylabel("Gain")
 title("Estimated K_x")
 subplot(1,3,2)
-plot (contSettings.K_r)
+plot (simOutput.ARB.K_r)
 xlabel("Time")
 ylabel("Gain")
-title("Estimated K_x")
+title("Estimated K_r")
 subplot(1,3,3)
-plot (contSettings.Theta)
+plot (simOutput.ARB.Theta)
 xlabel("Time")
 ylabel("Gain")
 title("Estimated Theta")
 
 
-
+return
 
 % parafoil
 if settings.parafoil && (settings.scenario == "descent" || settings.scenario == "full flight")

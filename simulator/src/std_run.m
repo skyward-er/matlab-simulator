@@ -314,6 +314,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
 
     % airbrakes reference update (for the ODE)
     ap_ref = [ ap_ref_old ap_ref_new ];
+   
     
     % parafoil control action update for the ODE
     deltaA_ref = [ deltaA_ref_old deltaA_ref_new ];
@@ -379,6 +380,10 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     deltaAcmd_tot(iTimes,1) = deltaA_ref(end);
     deltaAcmd_time_tot(iTimes,1) =  t1;
     ap_ref_tot(iTimes,1) = ap_ref(2);
+    K_x_tot(:,iTimes) = store.K_x;
+    K_r_tot(:,iTimes) = store.K_r;
+    Theta_tot(:,iTimes) = store.Theta;
+    x0_tot(:,iTimes) = store.x0;
     ap_ref_time_tot(iTimes,1) = t1;
     sensorTot.sfd.time(iTimes) = t1;
     sensorTot.sfd.pressure(iTimes) = sensorData.barometer.measures(end);
@@ -482,6 +487,11 @@ if exist('t_airbrakes','var')
     struct_out.ARB.allowanceIdx = idx_airbrakes;
     struct_out.ARB.cmdTime = ap_ref_time_tot; % for plots, in order to plot the stairs of the commanded value
     struct_out.ARB.cmdPosition = ap_ref_tot; % cmd  = commanded
+    struct_out.ARB.K_x = K_x_tot; % cmd  = commanded
+    struct_out.ARB.K_r = K_r_tot; % cmd  = commanded
+    struct_out.ARB.Theta = Theta_tot; % cmd  = commanded
+    struct_out.ARB.x0 = x0_tot;
+
     struct_out.ARB.openingPosition = [Yf_tot(idx_airbrakes,1),Yf_tot(idx_airbrakes,2),-Yf_tot(idx_airbrakes,3)];
     struct_out.ARB.openingVelocities = [Yf_tot(idx_airbrakes,4),Yf_tot(idx_airbrakes,5),-Yf_tot(idx_airbrakes,6)];
 else

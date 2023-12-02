@@ -1,4 +1,4 @@
-function [ap_ref_new,contSettings,varargout] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old)
+function [ap_ref_new,contSettings,store,varargout] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old,store)
 
 
 %% HELP:
@@ -31,8 +31,9 @@ switch true % set this value in configControl.m
     case strcmp(contSettings.algorithm,'interp') || strcmp(contSettings.algorithm,'complete')
         % help in the function
 
-        [ap_ref_new,contSettings] = control_Interp(-sensorData.kalman.z-settings.z0,-sensorData.kalman.vz,settings,contSettings,ap_ref_old); % cambiare nome alla funzione tra le altre cose
-      
+        % [ap_ref_new,contSettings] = control_Interp(-sensorData.kalman.z-settings.z0,-sensorData.kalman.vz,settings,contSettings,ap_ref_old); % cambiare nome alla funzione tra le altre cose
+          [ap_ref_new,store] = control_MRAC(-sensorData.kalman.z-settings.z0,-sensorData.kalman.vz,sensorData,contSettings,store);
+       
         
     case strcmp (contSettings.algorithm,'shooting')
         % shooting algorithm:
@@ -115,10 +116,10 @@ switch true % set this value in configControl.m
 
         end
     case strcmp (contSettings.algorithm,'MRAC')
-        [ap_ref_new] = control_MRAC(-sensorData.kalman.z-settings.z0,-sensorData.kalman.vz,settings,contSettings);
-
+         [ap_ref_new,store] = control_MRAC(-sensorData.kalman.z-settings.z0,-sensorData.kalman.vz,settings,contSettings,store);
+        % contSettings.K_x = store.K_x;
 end
-
+% contSettings.MRAC = [store.K_x,store.K_r,store.Theta];
 contSettings.flagFirstControlABK = false;
 
 

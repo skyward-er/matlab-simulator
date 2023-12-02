@@ -73,9 +73,9 @@ switch settings.mission
         contSettings.dmass = (mass_max-mass_min)/(N_mass-1);
         contSettings.masses_vec = mass_min:contSettings.dmass:mass_max; % masses vector for trajectory generation and choice
         
-        contSettings.K_x = 1;
-        contSettings.K_r = 1;
-        contSettings.Theta = 1;
+        contSettings.K_x = 0.001*[1,1]';
+        contSettings.K_r = 0.01;
+        contSettings.Theta = 1.6667e-04;
         contSettings.delta_S_available = (0.0:0.001/4:settings.arb.surfPol*settings.servo.maxAngle)'; 
         
         % filtering
