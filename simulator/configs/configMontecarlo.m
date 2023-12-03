@@ -14,10 +14,11 @@ if settings.montecarlo
 
     %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % how many simulations
-    N_sim = 12; % set to at least 500
+    N_sim = 500; % set to at least 500
     simulationType_thrust = "gaussian";  % "gaussian", "exterme"
     displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
-   
+    %note: added config. for simulating only faults in the mainMontecarlo
+    %file and not here, there's a flag "settings.montecarlo_only_fault_sim" that deals with this 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     %% %%%%%%%%%%%%%%%%% untouchable parameters (unless you know really well what you are doing) %%%%%%%%%%%%%%%
