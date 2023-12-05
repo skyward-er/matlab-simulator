@@ -91,7 +91,7 @@ end
 
 if  num_prec > n_points % if there are enough points
 
-    trend = previous_sfd_values(end) - ( previous_sfd_values(end) - previous_sfd_values( end - n_points) ) / n_points;
+    trend = previous_sfd_values(end) + ( previous_sfd_values(end) - previous_sfd_values( end - n_points) ) / n_points;
 
 else
 

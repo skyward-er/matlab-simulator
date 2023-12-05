@@ -12,9 +12,9 @@ sensorSettings.barometer1.maxMeasurementRange  =   1000;                   % 110
 sensorSettings.barometer1.minMeasurementRange  =   0;                    % 300, 10 in mbar
 sensorSettings.barometer1.bit = 24; % adc on rocket is 24 bits 
 sensorSettings.barometer1.resolution = (sensorSettings.barometer1.maxMeasurementRange -sensorSettings.barometer1.minMeasurementRange)/(2^sensorSettings.barometer1.bit);
-sensorSettings.barometer1.noiseVariance        =   1;                     % mbar^2
+sensorSettings.barometer1.noiseVariance        =   0.3;                     % mbar^2
 
-sensorSettings.barometer1.fault_time = 9; %if negative it will be generated at random between a max and a min value
+sensorSettings.barometer1.fault_time = -1; %if negative it will be generated at random between a max and a min value
 sensorSettings.barometer1.max_fault_time = 96; %max seconds to wait before possible fault
 sensorSettings.barometer1.min_fault_time = 6; %min seconds to wait before possible fault
 
@@ -31,6 +31,11 @@ switch  settings.fault_sim.fault_type(1)
     case "freezing"
         sensorSettings.barometer1.setFreezing;
         [sensorSettings.barometer1, fault_time_1] = sensorSettings.barometer1.setErrorTime(); % in seconds
+    case "drift"
+        drift_value_1 = round( settings.fault_sim.min_drift_value + rand()*settings.fault_sim.max_drift_value );
+        sensorSettings.barometer1.setDrift(200);
+        [sensorSettings.barometer1, fault_time_1] = sensorSettings.barometer1.setErrorTime(); % in seconds
+
     otherwise
 end
 
@@ -40,7 +45,7 @@ sensorSettings.barometer2.maxMeasurementRange  =   1000;                   % 110
 sensorSettings.barometer2.minMeasurementRange  =   0;                    % 300, 10 in mbar
 sensorSettings.barometer2.bit = 24; % adc on rocket is 24 bits 
 sensorSettings.barometer2.resolution = (sensorSettings.barometer2.maxMeasurementRange -sensorSettings.barometer2.minMeasurementRange)/(2^sensorSettings.barometer2.bit);
-sensorSettings.barometer2.noiseVariance        =   1;                     % mbar^2
+sensorSettings.barometer2.noiseVariance        =   0.3;                     % mbar^2
 
 sensorSettings.barometer2.fault_time = -1; %if negative it will be generated at random between a max and a min value
 sensorSettings.barometer2.max_fault_time = 16; %max seconds to wait before possible fault
@@ -60,6 +65,10 @@ switch  settings.fault_sim.fault_type(2)
     case "freezing"
         sensorSettings.barometer2.setFreezing;
         [sensorSettings.barometer2, fault_time_2] = sensorSettings.barometer2.setErrorTime(); % in seconds
+    case "drift"
+        drift_value_2 = round( settings.fault_sim.min_drift_value + rand()*settings.fault_sim.max_drift_value );
+        sensorSettings.barometer2.setDrift(drift_value_2);
+        [sensorSettings.barometer2, fault_time_2] = sensorSettings.barometer2.setErrorTime(); % in seconds
     otherwise
 end
 
@@ -69,7 +78,7 @@ sensorSettings.barometer3.maxMeasurementRange  =   4060;                   % 110
 sensorSettings.barometer3.minMeasurementRange  =   260;                    % 300, 10 in mbar
 sensorSettings.barometer3.bit = 24; 
 sensorSettings.barometer3.resolution = (sensorSettings.barometer3.maxMeasurementRange -sensorSettings.barometer3.minMeasurementRange)/(2^sensorSettings.barometer3.bit);
-sensorSettings.barometer3.noiseVariance        =   4.06;                      % guess in mbar
+sensorSettings.barometer3.noiseVariance        =   0.3;                      % guess in mbar
 
 sensorSettings.barometer3.fault_time = -1; %if negative it will be generated at random between a max and a min value
 sensorSettings.barometer3.max_fault_time = 16; %max seconds to wait before possible fault
@@ -88,6 +97,10 @@ switch  settings.fault_sim.fault_type(3)
         [sensorSettings.barometer3, fault_time_3] = sensorSettings.barometer3.setErrorTime(); % in seconds
     case "freezing"
         sensorSettings.barometer3.setFreezing;
+        [sensorSettings.barometer3, fault_time_3] = sensorSettings.barometer3.setErrorTime(); % in seconds
+    case "drift"
+        drift_value_3 = round( settings.fault_sim.min_drift_value + rand()*settings.fault_sim.max_drift_value  );
+        sensorSettings.barometer3.setDrift(drift_value_3);
         [sensorSettings.barometer3, fault_time_3] = sensorSettings.barometer3.setErrorTime(); % in seconds
     otherwise
 end
