@@ -93,8 +93,8 @@ end
 %% 
 % control action
  % alpha_rad =  K_x'*[z vz]' + K_r*r  - Theta*phi;
-K = 0.01*[5 0.5];
-alpha_rad = Theta * (K*e);
+K = 0.5*[10 0.5];
+alpha_rad = 1/Theta * (K*e);
  % u =  K_x'*[z vz]'   - Theta*phi;
 
 % translated in servo angle
