@@ -30,8 +30,8 @@ B_p = [0 1]';
 %% MRAC 
 Gamma_x = 0.0001;
 Gamma_r = 0.0001;
-Gamma_th = 1;
-Q = 0.000005*eye(2);
+Gamma_th = 0.001;
+Q = 0.5*eye(2);
 P = lyap(A_ref',Q);
 
 % function phi
@@ -69,7 +69,7 @@ for i = 1:N
    
     K_x = store.K_x(:,i) - Gamma_x*x_ref*e'*P*B_p*dt;
     K_r = store.K_r(:,i) - Gamma_r*r*e'*P*B_p*dt;
-    Theta = store.Theta(:,i) + Gamma_th*phi*e'*P*B_p*dt;
+    Theta = store.Theta(:,i) - Gamma_th*phi*e'*P*B_p*dt;
 
     store.K_x(:,i+1) = K_x ;
     store.K_r(:,i+1) = K_r ;
@@ -92,8 +92,10 @@ for i = 1:N
 end 
 %% 
 % control action
-u =  K_x'*[z vz]' + K_r*r  - Theta*phi;
-% u =  K_x'*[z vz]'   - Theta*phi;
+ % alpha_rad =  K_x'*[z vz]' + K_r*r  - Theta*phi;
+K = 0.01*[5 0.5];
+alpha_rad = Theta * (K*e);
+ % u =  K_x'*[z vz]'   - Theta*phi;
 
 % translated in servo angle
 
@@ -109,14 +111,14 @@ u =  K_x'*[z vz]' + K_r*r  - Theta*phi;
 % u = u/Theta;
 % alpha_rad = u;
 
-m = sensorData.mea.estimated_mass(end);
-[~,~,~,rho,~] = atmosisa(z);
-Cd = u/(0.5*rho*vz^2*(0.15/2)^2*pi); % this is estimated through another formula
-S = -Theta*2*m/(rho*Cd);
-S_nom = 0.15; % nominal surface
-delta_S = S - S_nom;
-alpha_rad = delta_S/0.009564;
-estension = getEstension(delta_S);
+% m = sensorData.mea.estimated_mass(end);
+% [~,~,~,rho,~] = atmosisa(z);
+% Cd = u/(0.5*rho*vz^2*(0.15/2)^2*pi); % this is estimated through another formula
+% S = -Theta*2*m/(rho*Cd);
+% S_nom = 0.15; % nominal surface
+% delta_S = S - S_nom;
+% alpha_rad = delta_S/0.009564;
+% estension = getEstension(delta_S);
 
 if alpha_rad > 1.1  && vz>10
     alpha_rad = 1.1;
