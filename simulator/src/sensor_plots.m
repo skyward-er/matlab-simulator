@@ -1,20 +1,23 @@
-function sensor_plots(simOutput)
+function sensor_plots(simOutput, settings)
 figure('Position',[100,100,600,400])
 hold on;
 plot(simOutput.sensors.barometer_sens{1, 1}.time,simOutput.sensors.barometer_sens{1, 1}.pressure_measures,'b','DisplayName','Baro 1')
 plot(simOutput.sensors.barometer_sens{1, 2}.time,simOutput.sensors.barometer_sens{1, 2}.pressure_measures,'k','DisplayName','Baro 2')
 plot(simOutput.sensors.barometer_sens{1, 3}.time,simOutput.sensors.barometer_sens{1, 3}.pressure_measures,'r','DisplayName','Baro 3')
-plot(simOutput.sensors.barometer_sens{1, 3}.time,simOutput.sensors.sfd_hr.pressure,'g','DisplayName','SFD HR pressure')
-legend
 
-if( simOutput.sensors.sfd_hr.follow_ind ~= -1 ) % when the SFD_HR start following one sensor
-     xline( [simOutput.sensors.barometer_sens{1, 3}.time( simOutput.sensors.sfd_hr.follow_ind + 1 )], '-', {'follow one barometer'}, 'HandleVisibility','off');
+if settings.flagSFD_HR
+    plot(simOutput.sensors.barometer_sens{1, 3}.time,simOutput.sensors.sfd_hr.pressure,'g','DisplayName','SFD HR pressure')
+
+    if( simOutput.sensors.sfd_hr.follow_ind ~= -1 ) % when the SFD_HR start following one sensor
+         xline( [simOutput.sensors.barometer_sens{1, 3}.time( simOutput.sensors.sfd_hr.follow_ind + 1 )], '-', {'follow one barometer'}, 'HandleVisibility','off');
+    end
 end
 
 % apogee detections
 xline( [simOutput.sensors.ada.t_apogee], '-', {'ADA apogee detection'}, 'HandleVisibility','off' );
 xline( [simOutput.apogee.time], '-', {'SIMULATION apogee time'}, 'HandleVisibility','off' );
 
+legend
 title('Barometer measurements')
 
 %% static pitot vs static presure

@@ -146,6 +146,24 @@ if settings.montecarlo
     
                 % launch rail orientation
                 stoch.PHI_rail = settings.PHI;
+
+                % fault parameters generation
+                n_baro = 3;
+                t_min = 6;      % [s]
+                t_max = 18;     % [s]
+                amp_min = 200;  % [Pa]
+                amp_max = 1300; % [Pa]
+
+                fault.time = randi([t_min t_max], N_sim, n_baro);
+                fault.amp = amp_min + ( amp_max - amp_min ) * rand(N_sim,n_baro);
+                fault.type = randi([0 4], N_sim, n_baro);
+                fault.type(:,1) = zeros(N_sim,1);       % at the moment, no fault on baro1 or the NAS explodes
+
+                settings_mont.fault.time = fault.time(1,:);
+                settings_mont.fault.amp = fault.amp(1,:);
+                settings_mont.fault.type = fault.type(1,:);
+            
+
         end
     end
     %% save arrays
