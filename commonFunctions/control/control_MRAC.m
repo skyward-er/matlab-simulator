@@ -1,4 +1,4 @@
-function  [alpha_rad,store] = control_MRAC(z,vz,sensorData,contSettings,store)
+function  [alpha_rad,store,Theta] = control_MRAC(z,vz,sensorData,contSettings,store)
 %{
 -sensorData.kalman.z-settings.z0 = z
 -sensorData.kalman.vz = v
@@ -31,11 +31,11 @@ B_p = [0 1]';
 Gamma_x = 0.0001;
 Gamma_r = 0.0001;
 Gamma_th = 0.001;
-Q = 0.5*eye(2);
+Q = 5*eye(2);
 P = lyap(A_ref',Q);
 
 % function phi
-phi = 0.5 * vz^2  ;
+phi = -0.5 * vz^2  ;
 % phi =  vz  ;
 
 
@@ -54,14 +54,27 @@ for i = 2:N
 end
 x_ref= x_ref(:,i);
 
+% N = 200;
+% f = @(x) A_ref*x+B_ref*u_ref;
+% t = linspace(0,dt,N);
+% states = length(store.x0);
+% h = dt/N;
+% x = zeros(states,N);
+% x(:,1) = store.x0;
+%     for i = 1:length(t)-1
+%         xp1 = x(:,i) + h/2*f(x(:,i));
+%         xp2 = x(:,i) + h/2*f(xp1);
+%         xp3 = x(:,i) + h*f(xp2);
+%         x(:,i+1) = x(:,i) + h*(1/6*f(x(:,i)) + 1/3*f(xp1) + 1/3*f(xp2) + 1/6*f(xp3) );
+%     end
+% 
+% x_ref = x(:,end)
+
 
 % error
 e = ([z;vz]-x_ref);
-% e = z-x_ref(1);
-% Projection operator
-% Gamma = Gamma_th;
-% eps_proj = 0.002;
-% theta_M = 1e-3;
+
+
 
 
 % Forward euler
@@ -69,8 +82,11 @@ for i = 1:N
    
     K_x = store.K_x(:,i) - Gamma_x*x_ref*e'*P*B_p*dt;
     K_r = store.K_r(:,i) - Gamma_r*r*e'*P*B_p*dt;
-    Theta = store.Theta(:,i) - Gamma_th*phi*e'*P*B_p*dt;
+    Theta = store.Theta(:,i) + Gamma_th*phi*e'*P*B_p*dt;
 
+if Theta > 800
+    Theta = 800;
+end 
     store.K_x(:,i+1) = K_x ;
     store.K_r(:,i+1) = K_r ;
     store.Theta(:,i+1) = Theta;
@@ -92,9 +108,10 @@ for i = 1:N
 end 
 %% 
 % control action
- % alpha_rad =  K_x'*[z vz]' + K_r*r  - Theta*phi;
-K = 0.5*[10 0.5];
-alpha_rad = 1/Theta * (K*e);
+ % alpha_rad =  Theta*(K_x'*[z vz]' + K_r*r)  ;
+ K = 0.8*[10 0];
+% K = K_x';
+alpha_rad = 1/Theta* (K*e);
  % u =  K_x'*[z vz]'   - Theta*phi;
 
 % translated in servo angle
@@ -119,9 +136,9 @@ alpha_rad = 1/Theta * (K*e);
 % delta_S = S - S_nom;
 % alpha_rad = delta_S/0.009564;
 % estension = getEstension(delta_S);
-
-if alpha_rad > 1.1  && vz>10
-    alpha_rad = 1.1;
+% settings.servo.maxAngle
+if alpha_rad > 1.17  && vz>10 % mettere settings ------------------------------------------------- CAMBIAREEEEEEEEEEEEEEEEEEEE
+    alpha_rad = 1.17;
 elseif alpha_rad < 0 || vz<10
     alpha_rad = 0;
 end 

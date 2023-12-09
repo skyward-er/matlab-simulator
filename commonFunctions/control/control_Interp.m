@@ -1,4 +1,4 @@
-function [alpha0,contSettings] = control_Interp(z,Vz,settings,contSettings,alpha0_old)
+function [alpha0,contSettings] = control_Interp(z,Vz,settings,contSettings,alpha0_old,Theta)
 
 % HELP
 %
@@ -67,6 +67,15 @@ alpha0_base = settings.servo.minAngle* (1-percentage) + settings.servo.maxAngle 
 if z>settings.z_final
     alpha0_base = settings.servo.maxAngle;
 end
+
+% alpha0_base = alpha0_base*1/Theta;
+% 
+% if alpha0_base<0
+%     alpha0_base = 0;
+% end
+% if alpha0_base>settings.servo.maxAngle
+%     alpha0_base = settings.servo.maxAngle;
+% end
 
 % filter control action
 if contSettings.flagFirstControlABK == false % the first reference is given the fastest possible (unfiltered), then filter

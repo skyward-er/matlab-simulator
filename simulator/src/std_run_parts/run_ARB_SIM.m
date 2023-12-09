@@ -30,10 +30,10 @@ switch true % set this value in configControl.m
 
     case strcmp(contSettings.algorithm,'interp') || strcmp(contSettings.algorithm,'complete')
         % help in the function
-
-        % [ap_ref_new,contSettings] = control_Interp(-sensorData.kalman.z-settings.z0,-sensorData.kalman.vz,settings,contSettings,ap_ref_old); % cambiare nome alla funzione tra le altre cose
-          [ap_ref_new,store] = control_MRAC(-sensorData.kalman.z-settings.z0,-sensorData.kalman.vz,sensorData,contSettings,store);
-       
+[ap_ref_new,store,Theta] = control_MRAC(-sensorData.kalman.z-settings.z0,-sensorData.kalman.vz,sensorData,contSettings,store);
+          
+          [~,contSettings] = control_Interp(-sensorData.kalman.z-settings.z0,-sensorData.kalman.vz,settings,contSettings,ap_ref_old,Theta); % cambiare nome alla funzione tra le altre cose
+          
         
     case strcmp (contSettings.algorithm,'shooting')
         % shooting algorithm:

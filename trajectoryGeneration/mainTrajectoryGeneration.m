@@ -55,10 +55,10 @@ configSimulator;
 
 %% AIRBRAKES RADIAL EXTENSION
 % Airbrakes extension vector
-delta_alpha_values  = linspace(settings.servo.minAngle,settings.servo.maxAngle,2);
+delta_alpha_values  = linspace(settings.servo.minAngle,settings.servo.maxAngle,10);
 [deltaX_values] = extension_From_Angle(delta_alpha_values, settings);
 %%%%% MRAC 
-delta_alpha  = (delta_alpha_values(2) + delta_alpha_values(1))/2;
+delta_alpha  = delta_alpha_values(5) ;
 [deltaX_values] = extension_From_Angle(delta_alpha, settings);
 %%%%%
 % I exclude the limits for robustness

@@ -161,6 +161,20 @@ xlabel("Time")
 ylabel("Gain")
 title("Estimated Theta")
 
+figure()
+plot(simOutput.ARB.x0(1,:))
+hold on
+xlabel("Time")
+ylabel("height")
+yyaxis right
+plot(simOutput.ARB.x0(2,:))
+ylabel("height")
+title("Reference state")
+
+
+
+
+
 
 return
 
@@ -381,6 +395,9 @@ v_ned = quatrotate(quatconj(structIn.Y(:, 10:13)), structIn.Y(:, 4:6));
 plot( -structIn.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
 plot( -structIn.sensors.nas.states(:,3),  -structIn.sensors.nas.states(:,6),'m--','DisplayName','NAS')
 % plot( structIn.ADA(:,4),  structIn.ADA(:,5),'b','DisplayName','ADA z')
+plot(simOutput.ARB.x0(1,:),'DisplayName','z_ref')
+plot(simOutput.ARB.x0(2,:),'DisplayName','vz_ref')
+
 yyaxis right
 plot( -structIn.Y(:, 3), structIn.Y(:, 14),'g','DisplayName','arb')
 

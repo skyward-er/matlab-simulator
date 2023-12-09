@@ -159,4 +159,4 @@ settings.mea.R                   = 0.36;
 settings.mea.z_shutdown          = 3200;                                    % [m] target apogee prediction for shutdown
 settings.mea.t_lower_shadowmode  = 0;                                       % minimunm burning time
 settings.mea.t_higher_shadowmode = 10;                                      % maximum burning time
-settings.shutdownValveDelay      = 0.6;                                     % time from the shut down command to the actual valve closure
+settings.shutdownValveDelay      = 0.3;                                     % time from the shut down command to the actual valve closure
