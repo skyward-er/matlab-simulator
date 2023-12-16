@@ -1,4 +1,4 @@
-function [] = sendDataOverSerial(sensorData, sensorSettings, frequencies, flags)
+function [] = sendDataOverSerial(sensorData, sensorSettings, frequencies, flags, board)
 
 %{
 -----------DESCRIPTION OF FUNCTION:------------------
@@ -56,6 +56,13 @@ INPUTS:
     else
         dataToBeSent.chamberPressure = sensorData.chamberPressure.measures(1:num_data_chPress); % transforming from mBar to Bar
     end
+
+   if board == "payload" 
+        dataToBeSent.pitot.dynamic = sensorData.pitot.pTotMeasures(1:num_data_pitot);
+        
+        dataToBeSent.pitot.static = sensorData.pitot.pStatMeasures(1:num_data_pitot);
+   end
+
 
     dataToBeSent.pitot.dp = sensorData.pitot.pTotMeasures(1:num_data_pitot) - sensorData.pitot.pStatMeasures(1:num_data_pitot);
 

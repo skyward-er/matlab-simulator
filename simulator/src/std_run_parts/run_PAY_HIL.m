@@ -32,7 +32,7 @@ OUTPUTS:
     sensorData.gps.nsat = 16;
 
     % sending sensor data over the serial port
-    sendDataOverSerial(sensorData, sensorSettings, frequencies, flagsArray);
+    sendDataOverSerial(sensorData, sensorSettings, frequencies, flagsArray,"payload");
 
     % waiting for the response of the obsw
     actuatorData = readControlOutputFromSerial("payload");
