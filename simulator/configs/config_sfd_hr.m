@@ -1,6 +1,6 @@
 
 %% settings parameters for SFD_HR algorithm
-settings.flagSFD_HR = true;
+settings.flagSFD_HR = false;
 
 % number of consecutive constant values after which a sensor is labled frozen
 settings.sfd_hr.n_freeze = 5;

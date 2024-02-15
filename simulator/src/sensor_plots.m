@@ -18,7 +18,8 @@ xline( [simOutput.sensors.ada.t_apogee], '-', {'ADA apogee detection'}, 'HandleV
 xline( [simOutput.apogee.time], '-', {'SIMULATION apogee time'}, 'HandleVisibility','off' );
 
 legend
-title('Barometer measurements')
+xlabel('Time (s)')
+ylabel('Pressure (Pa)')
 
 %% static pitot vs static presure
 figure

@@ -59,6 +59,8 @@ else % fault generation is done randomly between a set of parameters in configfa
                 settings.fault_sim.fault_type(rand_sensor) = "freezing";
             case 4
                 settings.fault_sim.fault_type(rand_sensor) = "drift";
+            case 5
+                settings.fault_sim.fault_type(rand_sensor) = "sSpike";
         end
     end
 end

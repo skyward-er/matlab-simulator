@@ -16,7 +16,7 @@ sensorSettings.barometer1.noiseVariance        =   0.1;                     % mb
 
 if settings.montecarlo && settings.montecarlo_only_fault_sim
 
-    sensorSettings.barometer2.fault_time = settings_mont.fault.time(1);
+    sensorSettings.barometer1.fault_time = settings_mont.fault.time(1);
     
     switch  settings_mont.fault.type(1)
         case 1
@@ -30,15 +30,14 @@ if settings.montecarlo && settings.montecarlo_only_fault_sim
             [sensorSettings.barometer1, fault_time_1] = sensorSettings.barometer1.setErrorTime(); % in seconds
         case 4
             sensorSettings.barometer1.setDrift( settings_mont.fault.amp(1) );
-            [sensorSettings.barometer1, fault_time_1] = sensorSettings.barometer1.setErrorTime(); % in seconds
-    
+            [sensorSettings.barometer1, fault_time_1] = sensorSettings.barometer1.setErrorTime(); % in seconds            
         otherwise
     end
 
 else
 
     sensorSettings.barometer1.fault_time = -1; %if negative it will be generated at random between a max and a min value
-    sensorSettings.barometer1.max_fault_time = 96; %max seconds to wait before possible fault
+    sensorSettings.barometer1.max_fault_time = 16; %max seconds to wait before possible fault
     sensorSettings.barometer1.min_fault_time = 6; %min seconds to wait before possible fault
     
     % fault generation
@@ -58,7 +57,10 @@ else
             drift_value_1 = round( settings.fault_sim.min_drift_value + rand()*settings.fault_sim.max_drift_value );
             sensorSettings.barometer1.setDrift(drift_value_1);
             [sensorSettings.barometer1, fault_time_1] = sensorSettings.barometer1.setErrorTime(); % in seconds
-    
+        case "sSpike"
+            value_1 = 1e5;
+            sensorSettings.barometer1.setSingleSpike(value_1);
+            [sensorSettings.barometer1, fault_time_1] = sensorSettings.barometer1.setErrorTime(); % in seconds
         otherwise
     end
 
@@ -115,6 +117,10 @@ else
         case "drift"
             drift_value_2 = round( settings.fault_sim.min_drift_value + rand()*settings.fault_sim.max_drift_value );
             sensorSettings.barometer2.setDrift(drift_value_2);
+            [sensorSettings.barometer2, fault_time_2] = sensorSettings.barometer2.setErrorTime(); % in seconds
+        case "sSpike"
+            value_2 = 1e5;
+            sensorSettings.barometer2.setSingleSpike(value_2);
             [sensorSettings.barometer2, fault_time_2] = sensorSettings.barometer2.setErrorTime(); % in seconds
         otherwise
     end
@@ -175,6 +181,10 @@ else
         case "drift"
             drift_value_3 = round( settings.fault_sim.min_drift_value + rand()*settings.fault_sim.max_drift_value  );
             sensorSettings.barometer3.setDrift(drift_value_3);
+            [sensorSettings.barometer3, fault_time_3] = sensorSettings.barometer3.setErrorTime(); % in seconds
+        case "sSpike"
+            value_3 = 1e5;
+            sensorSettings.barometer3.setSingleSpike(value_3);
             [sensorSettings.barometer3, fault_time_3] = sensorSettings.barometer3.setErrorTime(); % in seconds
         otherwise
     end

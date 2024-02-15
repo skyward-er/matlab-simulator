@@ -129,6 +129,13 @@ classdef Sensor_with_fault_sim < handle
                     if obj.settings.calerr
                         sensorData(i) = sensorData(i)*obj.gain;
                     end
+                    if obj.settings.ss
+                        if sensorData(i) == obj.value
+                            obj.settings.ss = false;
+                        else
+                            sensorData(i) = obj.value;
+                        end
+                    end
                     if obj.settings.fs
                         if rand > (1 - obj.likelihoodFS)
                             sensorData(i) = obj.value;
@@ -185,7 +192,12 @@ classdef Sensor_with_fault_sim < handle
             obj.gain = gain;
             obj.settings.calerr = true;
         end
-    
+        
+        function obj = setSingleSpike(obj, value)
+            obj.value = value;
+            obj.settings.ss = true;
+        end
+        
         function obj = setFixedSpiking(obj, value, likelihood)
             if (likelihood > 0 && likelihood  < 1)
                 obj.value = value;
@@ -380,6 +392,7 @@ classdef Sensor_with_fault_sim < handle
                 obj.settings.degradation = false;
                 obj.settings.freezing = false;
                 obj.settings.calerr = false;
+                obj.settings.ss = false;
                 obj.settings.fs = false;
                 obj.settings.is = false;
     
