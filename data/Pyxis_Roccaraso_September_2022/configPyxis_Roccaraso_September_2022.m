@@ -16,7 +16,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 
-settings.launchDate = [2021 9 18];
+settings.launchDate = [2022 9 18];
 settings.HREmot = false;
 
 %% TRAJECTORY GENERATION PARAMETERS
@@ -28,7 +28,11 @@ settings.Vy_final = 0;
 settings.y_final  = 0;
 
 %% CONTROL AND SENSOR FREQUENCIES
-settings.frequencies.controlFrequency           =   10;                    % [hz] control action frequency 
+if settings.electronics
+    settings.frequencies.controlFrequency       =   10;                    % [hz] control action frequency
+else 
+    settings.frequencies.controlFrequency       =   50;
+end
 settings.frequencies.arbFrequency               =   10;                    % [hz] air brakes control frequency
 settings.frequencies.prfFrequency               =   10;                    % [hz] parafoil control frequency
 settings.frequencies.accelerometerFrequency     =   100;                   % [hz] control action frequency 
@@ -37,6 +41,8 @@ settings.frequencies.magnetometerFrequency      =   100;                   % [hz
 settings.frequencies.gpsFrequency               =   10;                    % [hz] control action frequency 
 settings.frequencies.barometerFrequency         =   20;                    % [hz] control action frequency 
 settings.frequencies.pitotFrequency             =   20;                    % [hz] sensor frequency
+settings.frequencies.NASFrequency               =   50;                    % [hz] sensor frequency
+settings.frequencies.ADAFrequency               =   50;                    % [hz] sensor frequency
 
 % Servo (MARK STAR - HBL 3850)
 settings.servo.tau = 0.0461;                                                % Servo motor time constant 
@@ -82,11 +88,14 @@ settings.nas.sigma_GPS     =   5;                                       % [mg^2]
 settings.nas.sigma_w       =   1;                                       % [rad^2/s^2]   estimated gyroscope variance;
 settings.nas.sigma_beta    =   1e-4;                                    % [rad/s^2]   estimated gyroscope bias variance;
 settings.nas.sigma_pitot   =  10;
+settings.nas.sigma_pitot2  =   100; 
 
 settings.nas.Mach_max = 0.5;  % max value for nas 
 settings.nas.v_thr         =   2.5;                                     % Velocity threshold for the detected apogee
 settings.nas.count_thr     =   5;                                       % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.nas.counter       =   0;
+
+settings.nas.stopPitotAltitude = 500;
 
 settings.nas.t_kalman      =   -1;                                      % Apogee detection timestamp
 settings.nas.flag_apo      =   false;                                   % True when the apogee is detected
@@ -118,7 +127,7 @@ settings.ada.P0          =   [  0.1    0      0;                            % In
                                 0      0.1     0;                            % state covariance matrix 
                                 0      0      0.1;];
 [settings.ada.temp_ref, ~,...
- settings.ada.p_ref, ~]  =   atmosisa(0);                                  % Reference temperature in kelvin and pressure in Pa 
+ settings.ada.p_ref, ~]  =   atmosisa(settings.z0);                                  % Reference temperature in kelvin and pressure in Pa 
 
 settings.ada.v0          =   -10;                                         % Vertical velocity initial condition
 settings.ada.a0          =   -100;                                         % Acceleration velocity initial condition

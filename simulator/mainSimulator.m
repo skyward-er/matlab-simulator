@@ -38,6 +38,7 @@ end
 
 %% path loading
 
+restoredefaultpath;
 filePath = fileparts(mfilename('fullpath'));
 currentPath = pwd;
 if not(strcmp(filePath, currentPath))

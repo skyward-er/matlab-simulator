@@ -26,6 +26,12 @@ OUTPUT:
 % update: Marco Marchesi, Pier Francesco Bachini, 31/08/2023
 
 %% Baro Acquisition loop
+
+if ~contains(settings.mission, '_2023')
+    sensorSettings.barometer2 = sensorSettings.barometer1;
+    sensorSettings.barometer3 = sensorSettings.barometer1;
+end
+
 for i_baro = 1:3
     if i_baro == 1
         if isfield(sensorData.barometer_sens{i_baro},'time')

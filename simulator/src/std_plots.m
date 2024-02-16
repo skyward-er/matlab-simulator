@@ -12,27 +12,29 @@ eul = rad2deg(eul);
 v_ned = quatrotate(quatconj(simOutput.Y(:, 10:13)), simOutput.Y(:, 4:6));
 
 %% MASS ESTIMATION ALGORITHM
-if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
-    figures.MEA = figure('Name', 'Predicted apogee','ToolBar','auto');
-    sgtitle('MEA')
-    subplot(2,1,1)
+if contains(settings.mission, '_2023')
+    if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
+        figures.MEA = figure('Name', 'Predicted apogee','ToolBar','auto');
+        sgtitle('MEA')
+        subplot(2,1,1)
 
-    plot(simOutput.t, -simOutput.Y(:, 3),'DisplayName','Altitude');
-    title('Predicted vs Real apogee');
-    hold on; grid on;
-    plot(simOutput.sensors.mea.time, simOutput.sensors.mea.prediction,'DisplayName','Prediction');
-    legend
-    subplot(2,1,2)
-    plot(simOutput.sensors.mea.time, simOutput.sensors.mea.mass   ,'DisplayName','Est mass');
-    title('Estimated vs real mass');
-    hold on;
-    plot(simOutput.t, simOutput.recall.true_mass   ,'DisplayName','True mass');
-    legend
-    xline(simOutput.sensors.mea.t_shutdown,'r--')
-    xlabel('Time t [s]');
-    ylabel('Altitude AGL [m]');
-    if settings.flagExportPLOTS == true
-        exportStandardizedFigure(figures.MEA,'predicted_apogee.pdf',0.9)
+        plot(simOutput.t, -simOutput.Y(:, 3),'DisplayName','Altitude');
+        title('Predicted vs Real apogee');
+        hold on; grid on;
+        plot(simOutput.sensors.mea.time, simOutput.sensors.mea.prediction,'DisplayName','Prediction');
+        legend
+        subplot(2,1,2)
+        plot(simOutput.sensors.mea.time, simOutput.sensors.mea.mass   ,'DisplayName','Est mass');
+        title('Estimated vs real mass');
+        hold on;
+        plot(simOutput.t, simOutput.recall.true_mass   ,'DisplayName','True mass');
+        legend
+        xline(simOutput.sensors.mea.t_shutdown,'r--')
+        xlabel('Time t [s]');
+        ylabel('Altitude AGL [m]');
+        if settings.flagExportPLOTS == true
+            exportStandardizedFigure(figures.MEA,'predicted_apogee.pdf',0.9)
+        end
     end
 end
 

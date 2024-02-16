@@ -30,7 +30,11 @@ function [alpha0,contSettings] = control_Interp(z,Vz,settings,contSettings,alpha
 deltaZ = contSettings.reference.deltaZ;
 z_ref = contSettings.reference.Z;
 V_ref = contSettings.reference.Vz;
-N_forward = contSettings.N_forward;
+if isfield(contSettings, 'N_forward')
+    N_forward = contSettings.N_forward;
+else
+    N_forward = 0;
+end
 
 % find reference altitude index
 index_z = floor(z/deltaZ) + N_forward + 1; % +1 because we are 1-based on matlab, on CPP the formula is just """  floor(z/deltaZ) + N_forward """  (0-based), pay attention!

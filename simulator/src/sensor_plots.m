@@ -13,10 +13,12 @@ hold on;
 plot(simOutput.sensors.barometer_sens{1}.time,simOutput.sensors.barometer_sens{1}.pressure_measures)
 
 %% mea pressure vs true pressure
-figure
-plot(simOutput.sensors.mea.time,simOutput.sensors.mea.pressure,'DisplayName','Estimated pressure')
-hold on;
-plot(simOutput.sensors.comb_chamber.time,simOutput.sensors.comb_chamber.measures,'DisplayName','Sensor')
+if length(simOutput.sensors.mea.time) > 1
+    figure
+    plot(simOutput.sensors.mea.time,simOutput.sensors.mea.pressure,'DisplayName','Estimated pressure')
+    hold on;
+    plot(simOutput.sensors.comb_chamber.time,simOutput.sensors.comb_chamber.measures,'DisplayName','Sensor')
+end
 
 return
 
