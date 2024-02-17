@@ -112,5 +112,5 @@ if settings.flagExportCSV % this is set in configFlags
         export_HILdataPRF;
     end
     export_HILdataADA
-    export_HILdataNAS
+    generate_NAS_catch_file(simOutput, settings, ConDataPath);
 end

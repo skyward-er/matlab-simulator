@@ -43,7 +43,7 @@ alt = -x_pred(3);
 [temp, ~, y_hat] = atmosisa(alt);
 
 threshold      =   10e-11;
-H              =   sparse(1,6);                %Pre-allocation of gradient 
+H              =   zeros(1,6);                %Pre-allocation of gradient 
                                                 %of the output function
 R              =   sigma_h^2;
 

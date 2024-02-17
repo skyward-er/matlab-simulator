@@ -117,13 +117,7 @@ settings.nas.spheroid      = wgs84Ellipsoid;
 
 
 % Process noise covariance matrix for the linear dynamics
-settings.nas.QLinear       =   0.005*...
-                                 [4       0       0        0        0       0;
-                                  0       4       0        0        0       0;
-                                  0       0       400      0        0       0;
-                                  0       0       0        2        0       0;
-                                  0       0       0        0        2       0;
-                                  0       0       0        0        0       200];
+settings.nas.QLinear       =   [10 * eye(3) zeros(3); zeros(3) 10 * eye(3)];
 
 % Process noise covariance matrix for the quaternion dynamics
 settings.nas.Qq              =   [(settings.nas.sigma_w^2*settings.nas.dt_k+(1/3)*settings.nas.sigma_beta^2*settings.nas.dt_k^3)*eye(3)          0.5*settings.nas.sigma_beta^2*settings.nas.dt_k^2*eye(3);
