@@ -49,7 +49,7 @@ x(4:6)  =  x_prev(4:6) + dt*a';
 x(1:3)  =  x_prev(1:3) + dt*x_prev(4:6);
 vels    =  ( A*x(4:6)')'; % NED to body
 %-------------------- Jacobianv -----------------------------------------------
-F              =   sparse(6,6);                %Pre-allocation of gradient 
+F              =   zeros(6,6);                %Pre-allocation of gradient 
                                                 %of the derivative of the state
                                                 
 F(1,4)         =   1;                          
