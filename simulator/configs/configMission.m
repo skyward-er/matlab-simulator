@@ -15,9 +15,11 @@ switch conf.year
             
             case "roccaraso"
                 settings.mission = 'Lynx_Roccaraso_September_2021';
+                settings.missionMSA = '2021_Lynx_Roccaraso_September';
 
             case "pds"
                 settings.mission = 'Lynx_Portugal_October_2021';
+                settings.missionMSA = '2021_Lynx_Portugal_October';
         end
 
     case 2022
@@ -26,9 +28,11 @@ switch conf.year
 
             case "roccaraso"
                 settings.mission = 'Pyxis_Roccaraso_September_2022';
+                settings.missionMSA = '2022_Pyxis_Roccaraso_September';
 
             case "pds"
                 settings.mission = 'Pyxis_Portugal_October_2022';
+                settings.missionMSA = '2022_Pyxis_Portugal_October';
                 
         end
 
@@ -38,9 +42,11 @@ switch conf.year
             
             case "roccaraso"
                 settings.mission = 'Gemini_Roccaraso_September_2023';
+                settings.missionMSA = '2023_Gemini_Roccaraso_September';
             
             case "pds"
                 settings.mission = 'Gemini_Portugal_October_2023';
+                settings.missionMSA = '2023_Gemini_Portugal_October';
 
         end
 end

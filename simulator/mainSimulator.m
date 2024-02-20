@@ -51,10 +51,10 @@ addpath(genpath(currentPath));
 addpath(genpath(commonFunctionsPath));
 
 %% CHECK SUBMODULES UPDATES
-if ~exist('flagSubmodulesUpdated','var')
-    checkSubmodules;
-    flagSubmodulesUpdated = true;
-end
+% if ~exist('flagSubmodulesUpdated','var')
+%     checkSubmodules;
+%     flagSubmodulesUpdated = true;
+% end
 
 %% CONFIGs
 
