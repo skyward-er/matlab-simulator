@@ -139,6 +139,9 @@ if contains(settings.mission,'_2023')
     if length(sensorData.chamberPressure.time) >1
         sensorData.chamberPressure.measures(2:end)= interp1(settings.motor.expTime, settings.motor.expThrust,sensorData.chamberPressure.time(2:end))/settings.motor.K;
     end
+else 
+    sensorData.chamberPressure.time = (sensorTot.comb_chamber.time(end):1/freq.chamberPressureFrequency:Tf(end))';
+    sensorData.chamberPressure.measures = zeros(size(sensorData.chamberPressure.time,1),1);
 end
 %     % check for nan -> this particular sensor is not a problem if becomes
 %     nan

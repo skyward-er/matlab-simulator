@@ -39,6 +39,7 @@ settings.frequencies.accelerometerFrequency     =   100;                   % [hz
 settings.frequencies.gyroFrequency              =   100;                   % [hz] control action frequency 
 settings.frequencies.magnetometerFrequency      =   100;                   % [hz] control action frequency 
 settings.frequencies.gpsFrequency               =   10;                    % [hz] control action frequency 
+settings.frequencies.chamberPressureFrequency   =   50;                    % [hz] sensor frequency
 settings.frequencies.barometerFrequency         =   20;                    % [hz] control action frequency 
 settings.frequencies.pitotFrequency             =   20;                    % [hz] sensor frequency
 settings.frequencies.NASFrequency               =   50;                    % [hz] sensor frequency
@@ -97,7 +98,7 @@ settings.nas.counter       =   0;
 
 settings.nas.stopPitotAltitude = 500;
 
-settings.nas.t_kalman      =   -1;                                      % Apogee detection timestamp
+settings.nas.t_nas      =   -1;                                      % Apogee detection timestamp
 settings.nas.flag_apo      =   false;                                   % True when the apogee is detected
 
 settings.nas.lat0          = settings.lat0;

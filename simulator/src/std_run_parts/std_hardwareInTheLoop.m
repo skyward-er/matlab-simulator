@@ -102,44 +102,50 @@ end
 
 %% Update Mass estimation data
 if ~settings.parafoil
-    lastShutdown = settings.shutdown;
-    settings.shutdown = not(flagBurning);
+    if contains(settings.mission,'_2023')
+        lastShutdown = settings.shutdown;
+        settings.shutdown = not(flagBurning);
 
-    if ~settings.shutdown
-        sensorData.mea.estimated_mass = hilData.mea.estimatedMass;
-        sensorData.mea.estimated_pressure = hilData.mea.correctedPressure;
-        sensorData.mea.predicted_apogee = hilData.mea.estimatedApogee;
+        if ~settings.shutdown
+            sensorData.mea.estimated_mass = hilData.mea.estimatedMass;
+            sensorData.mea.estimated_pressure = hilData.mea.correctedPressure;
+            sensorData.mea.predicted_apogee = hilData.mea.estimatedApogee;
 
-        m = sensorData.mea.estimated_mass(end);
+            m = sensorData.mea.estimated_mass(end);
 
-        sensorTot.mea.pressure(iTimes) = sensorData.mea.estimated_pressure;
-        sensorTot.mea.mass(iTimes) = sensorData.mea.estimated_mass;
-        sensorTot.mea.prediction(iTimes) = sensorData.mea.predicted_apogee;
-        sensorTot.mea.time(iTimes) = t1;
-    end
+            sensorTot.mea.pressure(iTimes) = sensorData.mea.estimated_pressure;
+            sensorTot.mea.mass(iTimes) = sensorData.mea.estimated_mass;
+            sensorTot.mea.prediction(iTimes) = sensorData.mea.predicted_apogee;
+            sensorTot.mea.time(iTimes) = t1;
+        end
 
-    if settings.shutdown && not(lastShutdown) && flagFlight     % Need to check if this happens only once or the condition can be met multiple times
-        t_shutdown = Tf(end);
-        settings.expShutdown = 1;
-        settings.timeEngineCut = t_shutdown;
-        settings.expTimeEngineCut = t_shutdown;
-        settings.expMengineCut = m - settings.ms;
-        settings.shutdown = 1;
-        settings = settingsEngineCut(settings);
-        settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
-        [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
-        sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
-    elseif ~settings.shutdown && Tf(end) >= settings.tb
-        t_shutdown = settings.tb;
-        settings.expShutdown = 1;
-        settings.timeEngineCut = t_shutdown;
-        settings.expTimeEngineCut = t_shutdown;
-        settings.expMengineCut = m - settings.ms;
-        settings.shutdown = 1;
-        settings = settingsEngineCut(settings);
-        settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
-        [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
-        sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
+        if settings.shutdown && not(lastShutdown) && flagFlight     % Need to check if this happens only once or the condition can be met multiple times
+            t_shutdown = Tf(end);
+            settings.expShutdown = 1;
+            settings.timeEngineCut = t_shutdown;
+            settings.expTimeEngineCut = t_shutdown;
+            settings.expMengineCut = m - settings.ms;
+            settings.shutdown = 1;
+            settings = settingsEngineCut(settings);
+            settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
+            [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
+            sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
+        elseif ~settings.shutdown && Tf(end) >= settings.tb
+            t_shutdown = settings.tb;
+            settings.expShutdown = 1;
+            settings.timeEngineCut = t_shutdown;
+            settings.expTimeEngineCut = t_shutdown;
+            settings.expMengineCut = m - settings.ms;
+            settings.shutdown = 1;
+            settings = settingsEngineCut(settings);
+            settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
+            [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
+            sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
+        end
+    else
+        if t0 > settings.motor.expTime(end)
+            settings.expShutdown = 1;
+        end
     end
 else
     if contains(settings.mission,'_2023')
