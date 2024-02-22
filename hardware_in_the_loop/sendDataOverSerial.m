@@ -67,6 +67,6 @@ INPUTS:
     % dataToBeSent.flags.flagPara2 = cast(flags(6), "double");
 
     arrayToBeSent = structToSingles(dataToBeSent);
-
-    serialbridge("Write", arrayToBeSent);
+    arrayToBeSent = single(vertcat(arrayToBeSent));
+    serialbridge('Write','main', arrayToBeSent);
 end
