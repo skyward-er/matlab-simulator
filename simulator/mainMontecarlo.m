@@ -337,10 +337,15 @@ for alg_index = 4
             case 'Pyxis_Roccaraso_September_2022'
                 folder = [folder ; "MontecarloResults\"+settings.mission+"\z_f_"+settings.z_final+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % offline
         
-        
             case 'Gemini_Roccaraso_September_2023'
                 folder = [folder ; "MontecarloResults\"+settings.mission+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % offline
 
+            case 'Lyra_Portugal_October_2024'
+                folder = [folder ; "MontecarloResults\"+settings.mission+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % offline
+
+            case 'Lyra_Roccaraso_September_2024'
+                folder = [folder ; "MontecarloResults\"+settings.mission+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % offline
+    
         end
 
     end
@@ -465,60 +470,58 @@ for alg_index = 4
             fprintf('\nsaved\n\n')
         end
     end
-
-    %%
 end
 
 
 %% generate file for rocketpy (euroc 2023 prelaunch)
-for i = 1:N_sim
-    [apogee.coordinates(i,1),apogee.coordinates(i,2),apogee.coordinates(i,3)] = ned2geodetic(save_thrust{i}.apogee.position(1),save_thrust{i}.apogee.position(2),save_thrust{i}.apogee.position(3),settings.lat0,settings.lon0,settings.z0,wgs84Ellipsoid);
-    [landing.coordinates(i,1),landing.coordinates(i,2),landing.coordinates(i,3)] = ned2geodetic(save_thrust{i}.Y(end,1),save_thrust{i}.Y(end,2),save_thrust{i}.Y(end,3),settings.lat0,settings.lon0,settings.z0,wgs84Ellipsoid);
-end
-landing.coordinates = landing.coordinates(:,1:2);
-
-figure
-geoplot(landing.coordinates(:,1),landing.coordinates(:,2),'LineStyle','none','Marker','.','MarkerSize',10,'Color','blue','DisplayName','Landings')
-hold on;
-geoplot(apogee.coordinates(:,1),apogee.coordinates(:,2),'LineStyle','none','Marker','.','MarkerSize',10,'Color','red','DisplayName','Apogees')
-geobasemap satellite
-legend
-
-if conf.scenario == "ballistic"
-    save('ballistic_simulations','apogee','landing')
-else
-    save('parachute_simulations','apogee','landing')
-end
-
-return
-%% generate files
-load ballistic_simulations_launchDay4.mat
-ball.apogee = apogee;
-ball.landing = landing;
-load parachute_simulations_launchDay4.mat
-para.apogee = apogee;
-para.landing = landing;
-
-figure 
-geoplot(ball.apogee.coordinates(:,1),ball.apogee.coordinates(:,2),'Marker','.','MarkerSize',10,'LineStyle','none')
-hold on
-geoplot(ball.landing.coordinates(:,1),ball.landing.coordinates(:,2),'Marker','.','MarkerSize',10,'LineStyle','none')
-geoplot(para.landing.coordinates(:,1),para.landing.coordinates(:,2),'Marker','.','MarkerSize',10,'LineStyle','none')
-geobasemap satellite
-legend
-
-varNamesAsc = {'ApogeeLatitude', 'ApogeeLongitude', 'ApogeeAltitude'}; 
-varNamesDesc = {'ballLandingLatitude', 'ballLandingLongitude', 'paraLandingLatitude', 'paraLandingLongitude'}; 
-ascentTab = table; 
-descentTab = table; 
-ascentTab(:, 1) = table(ball.apogee.coordinates(:,1)); 
-ascentTab(:, 2) = table(ball.apogee.coordinates(:,2)); 
-ascentTab(:, 3) = table(ball.apogee.altitude'); 
-ascentTab.Properties.VariableNames = varNamesAsc; 
-writetable(ascentTab, 'ascent_MC_simulations_CL_launchDay4.csv'); 
-descentTab(:, 1) = table(ball.landing.coordinates(:,1)); 
-descentTab(:, 2) = table(ball.landing.coordinates(:,2)); 
-descentTab(:, 3) = table(para.landing.coordinates(:,1)); 
-descentTab(:, 4) = table(para.landing.coordinates(:,2)); 
-descentTab.Properties.VariableNames = varNamesDesc; 
-writetable(descentTab, 'descent_MC_simulations_CL_launchDay4.csv');
+% for i = 1:N_sim
+%     [apogee.coordinates(i,1),apogee.coordinates(i,2),apogee.coordinates(i,3)] = ned2geodetic(save_thrust{i}.apogee.position(1),save_thrust{i}.apogee.position(2),save_thrust{i}.apogee.position(3),settings.lat0,settings.lon0,settings.z0,wgs84Ellipsoid);
+%     [landing.coordinates(i,1),landing.coordinates(i,2),landing.coordinates(i,3)] = ned2geodetic(save_thrust{i}.Y(end,1),save_thrust{i}.Y(end,2),save_thrust{i}.Y(end,3),settings.lat0,settings.lon0,settings.z0,wgs84Ellipsoid);
+% end
+% landing.coordinates = landing.coordinates(:,1:2);
+% 
+% figure
+% geoplot(landing.coordinates(:,1),landing.coordinates(:,2),'LineStyle','none','Marker','.','MarkerSize',10,'Color','blue','DisplayName','Landings')
+% hold on;
+% geoplot(apogee.coordinates(:,1),apogee.coordinates(:,2),'LineStyle','none','Marker','.','MarkerSize',10,'Color','red','DisplayName','Apogees')
+% geobasemap satellite
+% legend
+% 
+% if conf.scenario == "ballistic"
+%     save('ballistic_simulations','apogee','landing')
+% else
+%     save('parachute_simulations','apogee','landing')
+% end
+% 
+% return
+% %% generate files
+% load ballistic_simulations_launchDay4.mat
+% ball.apogee = apogee;
+% ball.landing = landing;
+% load parachute_simulations_launchDay4.mat
+% para.apogee = apogee;
+% para.landing = landing;
+% 
+% figure 
+% geoplot(ball.apogee.coordinates(:,1),ball.apogee.coordinates(:,2),'Marker','.','MarkerSize',10,'LineStyle','none')
+% hold on
+% geoplot(ball.landing.coordinates(:,1),ball.landing.coordinates(:,2),'Marker','.','MarkerSize',10,'LineStyle','none')
+% geoplot(para.landing.coordinates(:,1),para.landing.coordinates(:,2),'Marker','.','MarkerSize',10,'LineStyle','none')
+% geobasemap satellite
+% legend
+% 
+% varNamesAsc = {'ApogeeLatitude', 'ApogeeLongitude', 'ApogeeAltitude'}; 
+% varNamesDesc = {'ballLandingLatitude', 'ballLandingLongitude', 'paraLandingLatitude', 'paraLandingLongitude'}; 
+% ascentTab = table; 
+% descentTab = table; 
+% ascentTab(:, 1) = table(ball.apogee.coordinates(:,1)); 
+% ascentTab(:, 2) = table(ball.apogee.coordinates(:,2)); 
+% ascentTab(:, 3) = table(ball.apogee.altitude'); 
+% ascentTab.Properties.VariableNames = varNamesAsc; 
+% writetable(ascentTab, 'ascent_MC_simulations_CL_launchDay4.csv'); 
+% descentTab(:, 1) = table(ball.landing.coordinates(:,1)); 
+% descentTab(:, 2) = table(ball.landing.coordinates(:,2)); 
+% descentTab(:, 3) = table(para.landing.coordinates(:,1)); 
+% descentTab(:, 4) = table(para.landing.coordinates(:,2)); 
+% descentTab.Properties.VariableNames = varNamesDesc; 
+% writetable(descentTab, 'descent_MC_simulations_CL_launchDay4.csv');

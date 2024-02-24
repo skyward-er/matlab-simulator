@@ -7,6 +7,17 @@ function [x,varargout] = extension_From_Angle(alpha, settings)
 % settings: a struct containing everything basically
 
 switch settings.mission
+    
+    case 'Lyra_Roccaraso_September_2024'
+        x = settings.arb.extPol(1)*alpha.^4 + settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + settings.arb.extPol(4).*alpha;
+        deltaS = alpha * settings.arb.surfPol;
+        varargout{1} = deltaS;
+
+    case 'Lyra_Portugal_October_2024' % to be modified when updated data are available
+        
+        x = settings.arb.extPol(1)*alpha.^4 + settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + settings.arb.extPol(4).*alpha;
+        deltaS = alpha * settings.arb.surfPol;
+        varargout{1} = deltaS;
 
     case 'Gemini_Roccaraso_September_2023'
         x = settings.arb.extPol(1)*alpha.^4 + settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + settings.arb.extPol(4).*alpha;

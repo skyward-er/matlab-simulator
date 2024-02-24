@@ -30,7 +30,7 @@ if settings.flagNAS && settings.dataNoise
 end
 
 %% Engine Control algorithm
-if contains(settings.mission,'_2023')
+if contains(settings.mission,'_2023') || contains(settings.mission,'_2024')
     if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
 
         if isnan(sensorTot.comb_chamber.measures(end))
@@ -69,7 +69,7 @@ end
 
 
 %% ARB Control algorithm
-if contains(settings.mission,'_2023')
+if contains(settings.mission,'_2023') || contains(settings.mission,'_2024')
     if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings.control...
             && ~(strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine') ) ...
             && Tf(end) > contSettings.ABK_shadowmode 

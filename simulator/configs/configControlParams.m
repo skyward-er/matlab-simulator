@@ -131,6 +131,72 @@ switch settings.mission
 
         settings.CD_correction = 0.80; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
     
+    case 'Lyra_Portugal_October_2024' 
+
+        contSettings.traj_choice = 1; % if 1 performs trajectory choice, if zero it doesn't
+        N_mass = 11;     % number of references to generate
+        mass_min = 26;   % [kg] min mass for trajectory choice
+        mass_max = 30;   % [kg] max mass for trajectory choice
+        contSettings.dmass = (mass_max-mass_min)/(N_mass-1);
+        contSettings.masses_vec = mass_min:contSettings.dmass:mass_max; % masses vector for trajectory generation and choice
+        
+
+        contSettings.delta_S_available = (0.0:0.001/4:settings.arb.surfPol*settings.servo.maxAngle)'; 
+        
+        % filtering
+        contSettings.filterRatio = 2;
+
+        contSettings.Zfilter = 2400; % starting point from which the coefficient is diminished.
+        contSettings.deltaZfilter = 300; % every deltaZfilter the filter coefficient is diminished by a ratio of filterRatio
+        
+        contSettings.Tfilter = 13; % starting time from which the coefficient is diminished.
+        contSettings.deltaTfilter = 3; % every deltaTfilter [s] the filter coefficient is diminished by a ratio of filterRatio
+        
+        % linear filter with altitude
+        contSettings.filter_coeff0 = 0.9; % starting value, then linear decrease until max Altitude
+        contSettings.filterMinAltitude = 1000;
+        contSettings.filterMaxAltitude = 3000;
+        % set altitude at which open to max
+        contSettings.criticalAltitude = 2990;
+        
+        % interpolation algorithm 
+        contSettings.N_forward = 0; % how many steps in advance have to check on speed to interpolate
+
+        settings.CD_correction = 1; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
+        
+
+    case 'Lyra_Roccaraso_September_2024' 
+     
+        contSettings.traj_choice = 1; % if 1 performs trajectory choice, if zero it doesn't
+        N_mass = 11;     % number of references to generate
+        mass_min = 26;   % [kg] min mass for trajectory choice
+        mass_max = 27;   % [kg] max mass for trajectory choice
+        contSettings.dmass = (mass_max-mass_min)/(N_mass-1);
+        contSettings.masses_vec = mass_min:contSettings.dmass:mass_max; % masses vector for trajectory generation and choice
+        
+
+        contSettings.delta_S_available = (0.0:0.001/4:settings.arb.surfPol*settings.servo.maxAngle)'; 
+        
+        % filtering
+        contSettings.filterRatio = 2;
+
+        contSettings.Zfilter = 2400; % starting point from which the coefficient is diminished.
+        contSettings.deltaZfilter = 300; % every deltaZfilter the filter coefficient is diminished by a ratio of filterRatio
+        
+        contSettings.Tfilter = 13; % starting time from which the coefficient is diminished.
+        contSettings.deltaTfilter = 3; % every deltaTfilter [s] the filter coefficient is diminished by a ratio of filterRatio
+        
+        % linear filter with altitude
+        contSettings.filter_coeff0 = 0.75; % starting value, then linear decrease until max Altitude
+        contSettings.filterMinAltitude = 400;
+        contSettings.filterMaxAltitude = 1000;
+        % set altitude at which open to max
+        contSettings.criticalAltitude = 970;
+       
+        % interpolation algorithm 
+        contSettings.N_forward = 0; % how many steps in advance have to check on speed to interpolate
+
+        settings.CD_correction = 0.80; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
 end
 
 % quantities independent from mission
