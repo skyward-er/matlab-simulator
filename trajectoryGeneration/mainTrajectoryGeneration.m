@@ -43,8 +43,8 @@ addpath(genpath(commonFunctionsPath));
 addpath('../simulator/configs/');
 
 %% CHECK IF MSA-TOOLKIT IS UPDATED
-msaToolkitURL = 'https://github.com/skyward-er/msa-toolkit';
-localRepoPath = '../data/msa-toolkit';
+% msaToolkitURL = 'https://github.com/skyward-er/msa-toolkit';
+% localRepoPath = '../data/msa-toolkit';
 % status = checkLastCommit(msaToolkitURL, localRepoPath, pwd);
 % submoduleAdvice(status, msaToolkitURL, localRepoPath, pwd);
 
