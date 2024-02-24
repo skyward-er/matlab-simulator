@@ -554,10 +554,11 @@ if settings.montecarlo
         struct_out.sensors = rmfield(struct_out.sensors,'wes');
     end
     % air brakes (ARB)
-    struct_out.ARB.cmdPosition = interp1(struct_out.ARB.cmdTime,struct_out.ARB.cmdPosition,t_vec);
-    struct_out.ARB.cmdTime = t_vec;
-    struct_out.ARB = rmfield(struct_out.ARB, 'allowanceIdx');
-
+    if strcmp(contSettings.algorithm,'complete') || strcmp(contSettings.algorithm,'interp')
+        struct_out.ARB.cmdPosition = interp1(struct_out.ARB.cmdTime,struct_out.ARB.cmdPosition,t_vec);
+        struct_out.ARB.cmdTime = t_vec;
+        struct_out.ARB = rmfield(struct_out.ARB, 'allowanceIdx');
+    end
     % parafoil (PRF)
     if ~isnan(struct_out.PRF.cmddeltaA)
         struct_out.PRF.deltaAcmd = interp1(struct_out.PRF.cmdTime,struct_out.PRF.cmddeltaA,t_vec);

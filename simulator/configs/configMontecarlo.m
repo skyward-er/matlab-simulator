@@ -14,7 +14,7 @@ if settings.montecarlo
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % how many simulations
-N_sim = 500; % set to at least 500
+N_sim = 1000; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
 
@@ -56,12 +56,12 @@ displayIter = true; % set to false if you don't want to see the iteration number
             stoch.aer_percentage = normrnd(mu_aer,sigma_aer,N_sim,1);
 
             %%% wind parameters
-            settings.wind.MagMin = 2.7;                                                % [m/s] Minimum Wind Magnitude
-            settings.wind.MagMax = 3.3;                                               % [m/s] Maximum Wind Magnitude
+            settings.wind.MagMin = 0;                                                % [m/s] Minimum Wind Magnitude
+            settings.wind.MagMax = 10;                                               % [m/s] Maximum Wind Magnitude
             settings.wind.ElMin  = - deg2rad(5);
             settings.wind.ElMax  = + deg2rad(5);
-            settings.wind.AzMin  = + deg2rad(170);
-            settings.wind.AzMax  = + deg2rad(210);
+            settings.wind.AzMin  = + deg2rad(0);
+            settings.wind.AzMax  = + deg2rad(360);
 
             switch settings.windModel
                 case "constant"
@@ -71,7 +71,7 @@ displayIter = true; % set to false if you don't want to see the iteration number
             end
 
             %%% mass offset distribution
-            sigma_m = 1/3; % 1.5 [kg] of offset (uncertainty on refueling mass)
+            sigma_m = 1/3; % 1 [kg] of offset (uncertainty on refueling mass)
             mu_m = 0;
             stoch.mass_offset = normrnd(mu_m,sigma_m,N_sim,1);
 
@@ -109,7 +109,7 @@ displayIter = true; % set to false if you don't want to see the iteration number
 
 else
 
-    settings.mass_offset = -1;%2*(-0.5+rand(1)); % initialise to 0 the value of the mass offset, in order to not consider its uncertainty on the nominal simulations
+    settings.mass_offset = 0;%2*(-0.5+rand(1)); % initialise to 0 the value of the mass offset, in order to not consider its uncertainty on the nominal simulations
     % mass_flow_rate = diff(settings.motor.expM([end,1]))/settings.tb; % [kg/s]
     % real_tb = (settings.mass_offset +  settings.motor.mOx)/ mass_flow_rate;
     % if real_tb < settings.tb
