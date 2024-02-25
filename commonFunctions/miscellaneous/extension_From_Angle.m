@@ -24,7 +24,7 @@ switch settings.mission
         deltaS = alpha * settings.arb.surfPol;
         varargout{1} = deltaS;
 
-    case 'Gemini_Portugal_October_2023' % to be modified when updated data are available
+    case '2023_Gemini_Portugal_October' % to be modified when updated data are available
         
         x = settings.arb.extPol(1)*alpha.^4 + settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + settings.arb.extPol(4).*alpha;
         deltaS = alpha * settings.arb.surfPol;

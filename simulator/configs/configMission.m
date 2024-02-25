@@ -4,7 +4,7 @@ mission configuration script
 
 %}
 
-conf.year = 2024; % choose between: 2021, 2022, 2023, 2024
+conf.year = 2023; % choose between: 2021, 2022, 2023, 2024
 conf.flight = "pds"; % choose between: "roccaraso", "pds" ( ponte de sor ) , " "
 
 switch conf.year
@@ -45,8 +45,7 @@ switch conf.year
                 settings.missionMSA = '2023_Gemini_Roccaraso_September';
             
             case "pds"
-                settings.mission = 'Gemini_Portugal_October_2023';
-                settings.missionMSA = '2023_Gemini_Portugal_October';
+                settings.mission = '2023_Gemini_Portugal_October';
 
         end
         

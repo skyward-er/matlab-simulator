@@ -122,7 +122,7 @@ std_setInitialParams;
 
 
 %% SENSORS INIT
-run(strcat('initSensors', settings.mission));
+sensorSettings = initSensors(settings);
 
 %% MAGNETIC FIELD MODEL
 std_magneticField;

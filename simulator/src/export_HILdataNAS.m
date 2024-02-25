@@ -3,7 +3,7 @@ export configuration files for NAS algorithm (for our friends of software develo
 %}
 switch settings.mission
 
-    case {"Gemini_Portugal_October_2023", "Gemini_Roccaraso_September_2023"}
+    case {"2023_Gemini_Portugal_October", "Gemini_Roccaraso_September_2023"}
         folder = "HIL_CPP_files_NAS";
         if ~exist(ConDataPath+"/"+folder,"dir")
             mkdir(ConDataPath+"/"+folder)

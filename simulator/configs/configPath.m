@@ -5,7 +5,7 @@ folder path configuration script
 %}
 
 % Retrieve MSA-Toolkit rocket data
-dataPath = strcat('../common/missions/', settings.missionMSA);
+dataPath = strcat('../common/missions/', settings.mission);
 addpath(dataPath);
 run([dataPath,'/simulationsData.m']); 
 
@@ -13,9 +13,9 @@ commonFunctionsPath = '../common/functions/';
 addpath(genpath(commonFunctionsPath))
 
 % Retrieve Control rocket data
-ConDataPath = strcat('../data/', settings.mission);
+ConDataPath = strcat('../common/missions/', settings.mission);
 addpath(ConDataPath);
- run(strcat('config', settings.mission));
+settings = configMissionData(settings);
 
 % Control common functions
 commonFunctionsPath = '../commonFunctions';

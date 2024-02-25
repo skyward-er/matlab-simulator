@@ -59,7 +59,7 @@ switch settings.mission
                 reference.Vnorm_ref{i,1}(j) = norm([reference.vz_ref{i,1}(j) reference.vx_ref{i,1}(j) reference.vy_ref{i,1}(j)]);
             end
         end
-    case 'Gemini_Portugal_October_2023'
+    case '2023_Gemini_Portugal_October'
 
         load("Trajectories.mat")
         for i = 1:size(trajectories_saving,1)
