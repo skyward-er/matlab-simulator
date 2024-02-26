@@ -41,7 +41,7 @@ switch settings.mission
         deltaS = alpha * settings.arb.surfPol;
         varargout{1} = deltaS;
     
-    case 'Lynx_Portugal_October_2021'
+    case '2021_Lynx_Portugal_October'
 
         % Obtain delta_S given the servomotor angle
         a = -9.43386/1000;
@@ -56,7 +56,7 @@ switch settings.mission
         x = (-b + sqrt(b^2 + 4*a*deltaS)) / (2*a);
         % A [m^2] = -1.04034 * x^2 + 0.30548 * x, with x in [m] from 0 to 0.03866 m;
     
-    case 'Lynx_Roccaraso_September_2021'
+    case '2021_Lynx_Roccaraso_September'
 
         % Obtain delta_S given the servomotor angle
         a = -9.43386/1000;

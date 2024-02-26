@@ -19,7 +19,7 @@ contSettings.data_trajectories = struct_trajectories.trajectories_saving;
 % select the trajectories for the rocket used in the simulation
 switch settings.mission
 
-    case 'Lynx_Portugal_October_2021'
+    case '2021_Lynx_Portugal_October'
 
         load("reference_gdtozero.mat")
         for i = 1:size(all_Vz,2)
