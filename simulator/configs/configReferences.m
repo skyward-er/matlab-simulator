@@ -74,7 +74,7 @@ switch settings.mission
                 end
             end
         end
-    case 'Gemini_Roccaraso_September_2023'
+    case '2023_Gemini_Roccaraso_September'
 
         load("Trajectories.mat")
         for i = 1:size(trajectories_saving,1)

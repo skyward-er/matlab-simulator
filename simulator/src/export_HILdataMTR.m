@@ -4,7 +4,7 @@
 
 
 switch settings.mission
-    case  {"2023_Gemini_Portugal_October", "Gemini_Roccaraso_September_2023"}
+    case  {"2023_Gemini_Portugal_October", "2023_Gemini_Roccaraso_September"}
         folder_MTR = "HIL_CPP_files_MTR";
         if ~exist(ConDataPath+"/"+folder_MTR,"dir")
             mkdir(ConDataPath+"/"+folder_MTR)

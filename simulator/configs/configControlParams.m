@@ -98,7 +98,7 @@ switch settings.mission
         settings.CD_correction = 1; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
         
 
-    case 'Gemini_Roccaraso_September_2023' 
+    case '2023_Gemini_Roccaraso_September' 
      
         contSettings.traj_choice = 1; % if 1 performs trajectory choice, if zero it doesn't
         N_mass = 11;     % number of references to generate
