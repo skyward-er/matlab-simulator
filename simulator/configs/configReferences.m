@@ -89,7 +89,7 @@ switch settings.mission
                 end
             end
         end
-    case 'Lyra_Portugal_October_2024'
+    case '2024_Lyra_Portugal_October'
 
         load("Trajectories.mat")
         for i = 1:size(trajectories_saving,1)
@@ -104,7 +104,7 @@ switch settings.mission
                 end
             end
         end
-    case 'Lyra_Roccaraso_September_2024'
+    case '2024_Lyra_Roccaraso_September'
 
         load("Trajectories.mat")
         for i = 1:size(trajectories_saving,1)
