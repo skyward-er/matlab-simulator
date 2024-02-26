@@ -47,7 +47,7 @@ switch settings.mission
         reference.z_min = 466.738;
         reference.z_max = 1307.4;
 
-    case 'Pyxis_Roccaraso_September_2022'
+    case '2022_Pyxis_Roccaraso_September'
         load('Trajectories.mat');
         for i = 1:size(trajectories_saving,1)
             reference.vz_ref{i,1} = trajectories_saving{i}.VZ_ref;

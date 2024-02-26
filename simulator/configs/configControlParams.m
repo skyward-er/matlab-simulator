@@ -41,7 +41,7 @@ switch settings.mission
         settings.stopPitotAltitude = 2800;
         settings.CD_correction = 1; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
 
-    case 'Pyxis_Roccaraso_September_2022'
+    case '2022_Pyxis_Roccaraso_September'
     
         contSettings.delta_S_available = (0.0:0.001/4:settings.arb.surfPol*settings.servo.maxAngle)'; 
         
