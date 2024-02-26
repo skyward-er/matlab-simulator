@@ -29,7 +29,7 @@ switch settings.mission
         reference.z_min = 466.738;
         reference.z_max = 1307.4;
 
-    case 'Pyxis_Portugal_October_2022'
+    case '2022_Pyxis_Portugal_October'
 
         load("Trajectories.mat")
         for i = 1:size(trajectories_saving,1)

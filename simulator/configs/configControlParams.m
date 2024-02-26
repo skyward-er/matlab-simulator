@@ -23,7 +23,7 @@ switch settings.mission
 
         contSettings.delta_S_available = (0.0:0.001/4:0.01017)';
     
-    case 'Pyxis_Portugal_October_2022'
+    case '2022_Pyxis_Portugal_October'
         % only for PID 
         contSettings.delta_S_available = (0.0:0.001/4:settings.arb.surfPol*settings.servo.maxAngle)'; 
         
