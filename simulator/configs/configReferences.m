@@ -124,7 +124,7 @@ end
 contSettings.reference.deltaZ = 10;
 heights = (0:contSettings.reference.deltaZ:settings.z_final)';
 
-if str2double(settings.mission(end)) > 2
+if str2double(settings.mission(4)) > 2
 
     V_rescale = cell( size(reference.altitude_ref,1),size(reference.altitude_ref,2) );
     for j = 1 : size(reference.altitude_ref,2)

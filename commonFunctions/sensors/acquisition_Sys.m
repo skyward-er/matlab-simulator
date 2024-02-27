@@ -27,7 +27,7 @@ OUTPUT:
 
 %% Baro Acquisition loop
 
-if ~contains(settings.mission, '_2023')
+if ~contains(settings.mission, '2023')
     sensorSettings.barometer2 = sensorSettings.barometer1;
     sensorSettings.barometer3 = sensorSettings.barometer1;
 end
@@ -179,7 +179,7 @@ if isfield(sensorData.pitot,'time')
 end
 
 %% Chamber Pressure acquisition loop
-if contains(settings.mission,'_2023') || contains(settings.mission,'_2024')
+if contains(settings.mission,'2023') || contains(settings.mission,'2024')
     for ii=1:length(sensorData.chamberPressure.time)
         sensorData.chamberPressure.measures(ii) = sensorSettings.comb_chamber.sens(sensorData.chamberPressure.measures(ii)*1000,50); % 50 temperature in °C (random)
         sensorData.chamberPressure.measures(ii) = sensorData.chamberPressure.measures(ii)/1000;

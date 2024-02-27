@@ -4,7 +4,7 @@ mission configuration script
 
 %}
 
-conf.year = 2024; % choose between: 2021, 2022, 2023, 2024
+conf.year = 2023; % choose between: 2021, 2022, 2023, 2024
 conf.flight = "pds"; % choose between: "roccaraso", "pds" ( ponte de sor ) , " "
 
 switch conf.year

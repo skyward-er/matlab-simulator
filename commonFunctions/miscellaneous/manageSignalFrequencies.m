@@ -583,7 +583,7 @@ if isfield(freq, 'pitotFrequency')
 end
 
 %% chamber pressure sensor
-if contains(settings.mission,'_2023')
+if contains(settings.mission,'2023')
     if freq.chamberPressureFrequency > freq.controlFrequency
         dt = 1/freq.chamberPressureFrequency;
         sensorData.chamberPressure.time = sensorData.chamberPressure.t0+dt:dt:T(end);

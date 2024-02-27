@@ -102,7 +102,7 @@ end
 
 %% Update Mass estimation data
 if ~settings.parafoil
-    if contains(settings.mission,'_2023')
+    if contains(settings.mission,'2023')
         lastShutdown = settings.shutdown;
         settings.shutdown = not(flagBurning);
 
@@ -148,7 +148,7 @@ if ~settings.parafoil
         end
     end
 else
-    if contains(settings.mission,'_2023')
+    if contains(settings.mission,'2023')
         if Tf(end) <= settings.tb+0.5 &&...
                 (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
 
@@ -210,12 +210,12 @@ if ~settings.parafoil
 
     ap_ref_new = hilData.abk.airbrakes_opening * settings.servo.maxAngle;  % alpha_aperture:
 else
-    if contains(settings.mission,'_2023')
+    if contains(settings.mission,'2023')
         if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings.control...
                 && ~(strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine') ) ...
                 && Tf(end) > settings.expTimeEngineCut + 0.5
 
-            if str2double(settings.mission(end)) > 2 % only for mission after october 2022
+            if str2double(settings.mission(4)) > 2 % only for mission after october 2022
 
                 if contSettings.traj_choice == 1 && settings.expShutdown
                     if ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
