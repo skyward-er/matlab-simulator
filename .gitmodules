@@ -2,5 +2,5 @@
 	path = common
 	url = https://git.skywarder.eu/skyward/matlab-dependencies/common.git
 [submodule "commonFunctions/graphics/general-utilities"]
-	path = commonFunctions/graphics/general-utilities
+	path = general-utilities
 	url = https://git.skywarder.eu/skyward/general-utilities.git
