@@ -83,7 +83,8 @@ function generate_NAS_catch_file(simOutput, settings, ConDataPath)
         if isempty(algorithms) || any(ismember(algorithms, {'correct_gps', 'complete'}))
             index_gps = sum(t_nas(ii) >= gps_data(:,1));
             [x_lin, P_lin, ~] = correctionGPS(x_lin, P_lin, gps_data(index_gps, 2:3), gps_data(index_gps, 5:6), nas_struct.sigma_GPS, 16, 1);
-            input_data{ii, 6} = gps_data(index_gps, 2:end);
+            [gps_coord(1), gps_coord(2), gps_coord(3)] = ned2geodetic(gps_data(index_gps, 2), gps_data(index_gps, 3), gps_data(index_gps, 4), settings.lat0, settings.lon0, settings.z0, wgs84Ellipsoid);
+            input_data{ii, 6} = [gps_coord gps_data(index_gps, 5:end)];
         end
 
         % Correct barometer
@@ -133,7 +134,7 @@ function generate_NAS_catch_file(simOutput, settings, ConDataPath)
     end
 
     if isempty(algorithms) || any(ismember(algorithms, {'correct_gps', 'complete'}))
-        writecell({'fake timestamp', 'gps_x','gps_y','gps_z', 'gps_vx', 'gps_vy', 'gps_vz'},ConDataPath+"/"+folder+"/NAS_GPSData_"+settings.mission+".csv", 'WriteMode', 'overwrite');
+        writecell({'fake timestamp', 'gps_lat','gps_lon','gps_z', 'gps_vx', 'gps_vy', 'gps_vz'},ConDataPath+"/"+folder+"/NAS_GPSData_"+settings.mission+".csv", 'WriteMode', 'overwrite');
         writecell(input_data(2:end, [1 6]),ConDataPath+"/"+folder+"/NAS_GPSData_"+settings.mission+".csv", 'WriteMode', 'append');
     end
     
@@ -152,7 +153,7 @@ function generate_NAS_catch_file(simOutput, settings, ConDataPath)
         writecell(input_data(2:end, [1 9]),ConDataPath+"/"+folder+"/NAS_PitotData_"+settings.mission+".csv", 'WriteMode', 'append');
     end
 
-    writecell({'fake timestamp', 'x', 'y', 'z', 'vx', 'vy', 'vz', 'qx','qy','qz','qw','bx','by','bz'},ConDataPath+"/"+folder+"/NAS_OutputData_"+settings.mission+".csv", 'WriteMode', 'overwrite');
+    writecell({'fake timestamp', 'x', 'y', 'z', 'vx', 'vy', 'vz', 'qx','qy','qz','qw','bx','by','bz'},ConDataPath+"/"+folder+"/NAS_Output_StateData_"+settings.mission+".csv", 'WriteMode', 'overwrite');
     writecell(output_data(2:end, 1:2),ConDataPath+"/"+folder+"/NAS_Output_StateData_"+settings.mission+".csv", 'WriteMode', 'append');
 
 end
