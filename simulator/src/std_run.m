@@ -545,7 +545,7 @@ if settings.montecarlo
 
     % sensors - SFD
     struct_out.sensors.sfd.pressure = interp1(struct_out.sensors.sfd.time',struct_out.sensors.sfd.pressure',t_vec);
-    struct_out.sensors.sfd = rmfield(struct_out.sensors.sfd,'faults');
+    % struct_out.sensors.sfd = rmfield(struct_out.sensors.sfd,'faults');
     struct_out.sensors.sfd.time = t_vec;
 
     % sensors - remove unwanted fields
