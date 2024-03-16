@@ -193,7 +193,7 @@ end
 
 %% Update Airbrakes data
 if ~settings.parafoil
-    if flagAeroBrakes && mach < settings.MachControl
+    if flagAeroBrakes
         if contSettings.flagFirstControlABK % set in
             t_airbrakes = t0;
             t_last_arb_control = t0;
@@ -207,67 +207,34 @@ if ~settings.parafoil
             [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
         end
     end
-
-    ap_ref_new = hilData.abk.airbrakes_opening * settings.servo.maxAngle;  % alpha_aperture:
+    ap_ref_new = hilData.abk.airbrakes_opening * settings.servo.maxAngle;
 else
-    if contains(settings.mission,'_2023')
-        if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings.control...
-                && ~(strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine') ) ...
-                && Tf(end) > settings.expTimeEngineCut + 0.5
+    if flagAeroBrakes && settings.flagNAS && settings.control && ...
+            ~( strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine') )
 
-            if str2double(settings.mission(end)) > 2 % only for mission after october 2022
-
-                if contSettings.traj_choice == 1 && settings.expShutdown
-                    if ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
-                        m = settings.ms;
-                    else
-                        m = sensorData.mea.estimated_mass(end);
-                    end
-                    contSettings = trajectoryChoice_mass(m,contSettings);
-                end
+        if (contains(settings.mission,'_2023') || contains(settings.mission,'_2024')) && contSettings.traj_choice == 1 && settings.expShutdown
+            if ~strcmp(contSettings.algorithm,'complete')
+                m = settings.ms;
+            else
+                m = sensorData.mea.estimated_mass(end);
             end
-
-            if contSettings.flagFirstControlABK % set in
-
-                t_airbrakes = t0;
-                t_last_arb_control = t0;
-                idx_airbrakes = n_old+1;
-
-            end
-            if t1-t_last_arb_control >= 1/settings.frequencies.arbFrequency - 1e-5 || t_last_arb_control == t_airbrakes
-                t_last_arb_control = Tf(end);
-                ap_ref_old = ap_ref_new;
-                settings.quat = [sensorTot.nas.states(end, [10,7:9])];
-                [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
-                [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
-            end
-        else
-            ap_ref_new = 0;
+            contSettings = trajectoryChoice_mass(m,contSettings);
+        end
+        if contSettings.flagFirstControlABK
+            t_airbrakes = t0;
+            t_last_arb_control = t0;
+            idx_airbrakes = n_old+1;
+        end
+        if t1-t_last_arb_control >= 1/settings.frequencies.arbFrequency - 1e-6 || t_last_arb_control == t_airbrakes
+            t_last_arb_control = t1(end);
+            ap_ref_old = ap_ref_new;
+            settings.quat = [sensorTot.nas.states(end, [10,7:9])];
+            [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
+            [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
         end
     else
-        if flagAeroBrakes && mach < settings.MachControl && settings.flagNAS && settings.control
-
-            if contSettings.flagFirstControlABK
-
-                t_airbrakes = t0;
-                t_last_arb_control = t0;
-                idx_airbrakes = n_old+1;
-
-            end
-            if t1-t_last_arb_control >= 1/settings.frequencies.arbFrequency - 1e-6 || t_last_arb_control == t_airbrakes
-                t_last_arb_control = t1(end);
-                ap_ref_old = ap_ref_new;
-                settings.quat = [sensorTot.nas.states(end, [10,7:9])];
-                [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
-                [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
-
-            end
-
-        else
-            ap_ref_new = 0;
-        end
+        ap_ref_new = 0;
     end
-    ap_ref_new = 1.1717;
 end
 
 %% PARAFOIL

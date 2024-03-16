@@ -172,7 +172,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         flagBurning = false;                                                % Motor ends thrust
     end
 
-    if settings.flagAscent && settings.expShutdown && mach <= settings.MachControl
+    if settings.flagAscent && settings.expShutdown && mach <= settings.MachControl  && Tf(end) > contSettings.ABK_shadowmode
         flagAeroBrakes = true;                                              % Allows airbrakes to open
     else
         flagAeroBrakes = false;
