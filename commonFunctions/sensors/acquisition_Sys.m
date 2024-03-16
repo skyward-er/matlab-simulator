@@ -173,7 +173,7 @@ if isfield(sensorData.pitot,'time')
         sensorTot.pitot.static_pressure(sensorTot.pitot.n_old:sensorTot.pitot.n_old + size(sensorData.pitot.pStatMeasures,1) - 2,1)     = sensorData.pitot.pStatMeasures(2:end);
         sensorTot.pitot.temperature(sensorTot.pitot.n_old:sensorTot.pitot.n_old + size(sensorData.pitot.pTotMeasures,1) - 2)            = sensorData.pitot.temperature(2:end);
         sensorTot.pitot.Mach(sensorTot.pitot.n_old:sensorTot.pitot.n_old + size(sensorData.pitot.pTotMeasures,1) - 2,1)                 = sqrt(M2(2:end));
-        sensorTot.pitot.airspeed(sensorTot.pitot.n_old:sensorTot.pitot.n_old + size(sensorData.pitot.pTotMeasures,1) - 2,1)             = airspeed(2:end);
+        sensorTot.pitot.airspeed(sensorTot.pitot.n_old:sensorTot.pitot.n_old + size(sensorData.pitot.pTotMeasures,1) - 2,1)             = sensorData.pitot.airspeed(2:end);
         sensorTot.pitot.n_old = sensorTot.pitot.n_old + size(sensorData.pitot.pTotMeasures,1)-1;
     end
 end
