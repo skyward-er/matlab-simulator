@@ -28,7 +28,7 @@ scenarios explanation:
 
 % scenario configuration
 conf.scenario = "controlled ascent";
-conf.board = "main";            % Either "main" or "payload"
+conf.board = "main";            % Either "main" or "payload" or "full_hil"
 conf.HIL = false;
 
 % WIP flags
@@ -168,6 +168,10 @@ switch conf.board
     case "main"
         settings.parafoil = false;
     case "payload"
+        settings.parafoil = true;
+    case "motor"
+        settings.parafoil = false;
+    case "full_hil"
         settings.parafoil = true;
 end
 

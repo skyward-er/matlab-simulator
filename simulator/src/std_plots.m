@@ -41,9 +41,9 @@ end
 
 %% ada
 figures.ada = figure('Position',[100,100,600,400]);
-plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xv(:,1),'DisplayName','$ADA_{z}$')
+%plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xv(:,1),'DisplayName','$ADA_{z}$')
 hold on
-plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xv(:,2),'DisplayName','$ADA_{vz}$')
+%plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xv(:,2),'DisplayName','$ADA_{vz}$')
 plot( simOutput.t,  -simOutput.Y(:,3),'DisplayName','True z')
 plot( simOutput.t,  -v_ned(:,3),'DisplayName','True Vz')
 legend;
@@ -51,7 +51,7 @@ title('ADA vs trajectory')
 
 figure('Position',[100,100,600,400])
 hold on
-plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xp(:,2),'DisplayName','ADA dp')
+%plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xp(:,2),'DisplayName','ADA dp')
 title('ADA pressure derivative')
 
 %% reference

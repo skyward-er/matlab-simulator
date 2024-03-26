@@ -94,4 +94,14 @@ switch board
         actuatorData.flags.flag_airbrakes = logical(obswVals(28));
         actuatorData.flags.flag_para1 = logical(obswVals(29));
         actuatorData.flags.flag_para2 = logical(obswVals(30));
+   
+    case "motor"
+        % Receive data from serial comunication
+        obswVals = serialbridge('Read','motor', 2);
+        
+        actuatorData.main = obswVals(1);
+        actuatorData.venting = obswVals(2);     
+        
 end
+
+    

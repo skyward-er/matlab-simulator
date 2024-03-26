@@ -68,5 +68,16 @@ INPUTS:
 
     arrayToBeSent = structToSingles(dataToBeSent);
     arrayToBeSent = single(vertcat(arrayToBeSent));
-    serialbridge('Write','main', arrayToBeSent);
+    
+    if strcmp(conf.board,"main")
+        serialbridge('Write','main', arrayToBeSent);
+    else if strcmp(conf.board,"payload")
+        serialbridge('Write','payload', arrayToBeSent);
+    else if strcmp(conf.board,"motor")
+        serialbridge('Write','motor', arrayToBeSent);
+    else
+        serialbridge('Write','main', arrayToBeSent);
+        serialbridge('Write','payload', arrayToBeSent);
+        serialbridge('Write','motor', arrayToBeSent);   
+    end
 end
