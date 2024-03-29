@@ -127,6 +127,21 @@ run(strcat('initSensors', settings.mission));
 %% MAGNETIC FIELD MODEL
 std_magneticField;
 
+%% STATE MACHINE INITIALIZATION
+availableStates.on_ground = 0;
+availableStates.powered_ascent = 1;
+availableStates.unpowered_ascent = 2;
+availableStates.drogue_descent = 3;
+availableStates.parachute_descent = 4;
+availableStates.landed = 5;
+trans_time = zeros(2, 5);
+
+if ~strcmp(settings.scenario, 'descent')
+    currentState = availableStates.on_ground;
+else
+    currentState = availableStates.drogue_descent;
+end
+
 %% FLAG INITIALIZATION FOR HIL
 if settings.launchWindow
     launchWindow;
@@ -166,47 +181,71 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         tLaunch = 0;
     end
 
-    if launchFlag && ~settings.shutdown
-        flagBurning = true;                                                 % Powered ascent
-    else
-        flagBurning = false;                                                % Motor ends thrust
-    end
+    %% State machine
 
-    if settings.flagAscent && settings.expShutdown && mach <= settings.MachControl  && Tf(end) > contSettings.ABK_shadowmode
-        flagAeroBrakes = true;                                              % Allows airbrakes to open
-    else
-        flagAeroBrakes = false;
-    end
+    switch currentState
+        case availableStates.on_ground
+            flagFlight = false;
+            flagAeroBrakes = false;
+            
+            if launchFlag
+                currentState = availableStates.powered_ascent;
+                disp("Transition to powered ascent");
+                trans_time(1,1) = t0;
+            end
+        case availableStates.powered_ascent
+            if ~flagFlight
+                flagFlight = true;
+            end
 
-    if -Y0(end,3) < -1 || not(launchFlag)
-        flagFlight = false;
-    else
-        flagFlight = true;
-    end
+            if settings.shutdown
+                flagBurning = false;
+                currentState = availableStates.unpowered_ascent;
+                disp("Transition to unpowered ascent");
+                trans_time(1,2) = t0;
+            end
+        case availableStates.unpowered_ascent
 
-    if flagFlight
-        if vz(end) >= -1 && launchFlag && not(settings.scenario == "descent") && ~eventExpulsion
-            settings.flagAscent = true;                                         % Ascent
-            lastAscentIndex = n_old-1;
-        else
-            settings.flagAscent = false;                                        % Descent
-            eventExpulsion = true;
-        end
-    end
+            flagAeroBrakes = true;
 
-    if not(settings.flagAscent) && launchFlag
-        if -sensorData.kalman.z >= settings.para(1).z_cut + settings.z0 && ~eventExpulsion2 % settings.para(1).z_cut + settings.z0 
-            flagPara1 = true;
-            flagPara2 = false;                                              % parafoil drogue
+            if flagApogee
+                flagAeroBrakes = false;
+                currentState = availableStates.drogue_descent;
+                disp("Transition to drogue descent");
+                trans_time(1,3) = t0;
+            end
+        case availableStates.drogue_descent
+
             lastDrogueIndex = n_old-1;
-        else
-            flagPara1 = false;
-            flagPara2 = true;                                               % parafoil main
-            eventExpulsion2 = true;
-        end
+
+            if flagOpenPara
+                eventExpulsion2 = true;
+                currentState = availableStates.parachute_descent;
+                disp("Transition to parachute descent");
+                trans_time(1,4) = t0;
+            end
+        case availableStates.parachute_descent
+
+            if -Y0(end,3) < -1
+                currentState = availableStates.landed;
+                disp("Transition to landed");
+                trans_time(1,5) = t0;
+            end
+        case availableStates.landed
+            flagFlight = false;
+
+            idx_landing = n_old-1;
+            currentState = availableStates.landed;
+            break;
+        otherwise
+            warning("Invalid state requested");
+    end
+
+    if currentState == availableStates.powered_ascent || currentState == availableStates.unpowered_ascent
+        settings.flagAscent = true;
+        lastAscentIndex = n_old-1;
     else
-        flagPara1 = false;
-        flagPara2 = false;                                                  % no parafoil during ascent
+        settings.flagAscent = false;
     end
     
     %% dynamics (ODE) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -231,15 +270,14 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                 para = NaN;
             else
 
-                if flagPara1
+                if currentState == availableStates.drogue_descent
                     para = 1;
                     Y0_ode = Y0(:,1:6);
                     [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode, settings, uw, vw, ww, para, Y0(end,10:13),tLaunch); % ..., para, uncert);
                     parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para, Y0(end,10:13),tLaunch);
                     [nd, ~] = size(Yd);
                     Yf = [Yd, zeros(nd, 3), ones(nd,1).*Y0(end,10:13), zeros(nd,2)];
-                end
-                if flagPara2
+                elseif currentState == availableStates.parachute_descent
                     if ~settings.parafoil
                         para = 2;
                         Y0_ode = Y0(:,1:6);
@@ -260,11 +298,6 @@ while settings.flagStopIntegration && n_old < nmax                          % St
             end
         end
     else
-        if (settings.scenario == "descent" || settings.scenario == "full flight") && ~eventLanding && max(-Yf_tot(:,3))> 150 % this last condition is to prevent saving this value when on ramp
-            idx_landing = n_old-1;
-            eventLanding = true;
-            break;
-        end
         Tf = [t0, t1]';
         Yf = [initialCond'; initialCond']; % check how to fix this
         para = NaN;
@@ -320,7 +353,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     
 
     %% vertical velocity for update of the state machine
-    if  settings.flagAscent || (not(settings.flagAscent) && settings.ballisticFligth) || flagPara2
+    if  settings.flagAscent || (not(settings.flagAscent) && settings.ballisticFligth) || currentState == availableStates.parachute_descent
         Q    =   Yf(end, 10:13);
         vels =   quatrotate(quatconj(Q), Yf(end, 4:6));
         vz = -vels(3);   % up (there is a -)
@@ -393,19 +426,21 @@ while settings.flagStopIntegration && n_old < nmax                          % St
 
     % Update the stop integration flag
     if settings.ascentOnly
-        settings.flagStopIntegration = settings.flagAscent || not(settings.lastLaunchFlag);
+        % settings.flagStopIntegration = settings.flagAscent || not(settings.lastLaunchFlag);
+        settings.flagStopIntegration = ~flagApogee || currentState ~= availableStates.drogue_descent;
     else
-        settings.flagStopIntegration = flagFlight || not(settings.lastLaunchFlag);
+        % settings.flagStopIntegration = flagFlight || not(settings.lastLaunchFlag);
+        settings.flagStopIntegration = (flagFlight && currentState ~= availableStates.landed) || currentState ~= availableStates.on_ground;
     end
 
-    settings.flagMatr(n_old:n_old+n-1, :) = repmat([flagFlight, settings.flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2], n, 1);
+    % settings.flagMatr(n_old:n_old+n-1, :) = repmat([flagFlight, settings.flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2], n, 1);
 
     %% display step state
 
     if not(settings.montecarlo)
         if settings.flagAscent
             disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + -sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,14)); %  + ", quatNorm: "+ vecnorm(Yf(end,10:13))
-        elseif flagPara2
+        elseif currentState == availableStates.parachute_descent
             disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + -sensorData.kalman.z + ", deltaA_ref: " + deltaA_ref_new + ", deltaA_ode: " + Yf(end,15)); % +", quatNorm: "+ vecnorm(Yf(end,10:13))
         else
             disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + -sensorData.kalman.z);
@@ -447,7 +482,8 @@ settings.flagMatr = settings.flagMatr(1:n_old, :);
 % simulation states
 struct_out.t = Tf;
 struct_out.Y = Yf;
-struct_out.flags = settings.flagMatr;
+% struct_out.flags = settings.flagMatr;
+struct_out.transition_times = trans_time;
 % wind
 struct_out.wind.Mag = settings.wind.Mag;
 struct_out.wind.Az = settings.wind.Az;

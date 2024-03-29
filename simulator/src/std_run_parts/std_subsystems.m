@@ -8,10 +8,7 @@ This function runs all subsystems in a simulated environment
 
 %% ADA
 if settings.flagADA && settings.dataNoise
-
-    [sensorData, sensorTot, settings.ada]   =  run_ADA(sensorData, sensorTot, settings,t1);
-
-    
+    [sensorData, sensorTot, settings.ada, flagApogee, flagOpenPara]   =  run_ADA(sensorData, sensorTot, settings,t1);
 end
 
 %% Navigation system (NAS)

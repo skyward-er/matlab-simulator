@@ -140,6 +140,7 @@ settings.ada.x0          =  [settings.ada.p_ref, settings.ada.v0, settings.ada.a
 settings.ada.v_thr       =   2.5;                                          % Velocity threshold for the detected apogee
 settings.ada.count_thr   =   5;                                            % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.ada.counter     =   0;
+settings.ada.altitude_confidence_thr = 5;                                   % If the ada recognizes altitude_confidence_thr samples under parachute cutting altitude, it sends the command
 
 settings.ada.t_ada       =   -1;                                           % Apogee detection timestamp
 settings.ada.flag_apo    =   false;                                        % True when the apogee is detected

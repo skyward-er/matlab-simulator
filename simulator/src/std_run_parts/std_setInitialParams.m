@@ -15,6 +15,15 @@ else
 end    
     % Altitude
 
+%% ADA Initialization
+
+settings.ada.counter     =   0;
+settings.ada.paraCounter =   0;
+
+settings.ada.t_ada       =   -1;                    % Apogee detection timestamp
+settings.ada.flag_apo    =   false;                 % True when the apogee is detected
+settings.ada.flagOpenPara =  false;                 % True when the main parachute should be opened
+
 %% Initialization of sensor measurement time
 control_freq = settings.frequencies.controlFrequency;
 
