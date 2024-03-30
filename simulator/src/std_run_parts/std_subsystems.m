@@ -34,10 +34,10 @@ if (contains(settings.mission,'_2023') || contains(settings.mission,'_2024')) &&
             sensorTot.comb_chamber.measures(end) = 0;
         end
         if ~settings.shutdown
-            [sensorData,sensorTot,settings,contSettings] =run_MTR_SIM (sensorData,sensorTot,settings,contSettings,t1);
+            [sensorData,sensorTot,settings,contSettings] =run_MTR_SIM (sensorData,sensorTot,settings,contSettings,t1, engineT0);
             sensorTot.mea.t_shutdown = settings.t_shutdown;
 
-            if  Tf(end) >= settings.tb
+            if  Tf(end)-engineT0 >= settings.tb
                 settings.expShutdown = true;
                 settings.shutdown = true; 
                 settings.t_shutdown = settings.tb;
@@ -52,15 +52,14 @@ if (contains(settings.mission,'_2023') || contains(settings.mission,'_2024')) &&
         end
 
 
-    elseif ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')) && Tf(end) > settings.tb
+    elseif ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')) && Tf(end)-engineT0 > settings.tb
         settings.shutdown = 1;
         settings.expShutdown = 1;
         settings.timeEngineCut = settings.tb;
         settings.expTimeEngineCut = settings.tb;
     end
 else
-    if t0 > settings.motor.expTime(end)
-        settings.shutdown = 1;
+    if t0-engineT0 > settings.motor.expTime(end)
         settings.expShutdown = 1;
         settings.expTimeEngineCut = settings.motor.expTime(end);
     end
@@ -70,7 +69,7 @@ end
 %% ARB Control algorithm
 
 if flagAeroBrakes && settings.flagNAS && settings.control && ...
-    ~( strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine') ) 
+    ~( strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine')) 
 
     if Tf(end) >= settings.expTimeEngineCut + contSettings.ABK_shutdown_delay && mach <= settings.MachControl
         if (contains(settings.mission,'_2023') || contains(settings.mission,'_2024'))

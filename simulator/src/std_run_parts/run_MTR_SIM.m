@@ -1,4 +1,4 @@
-function [sensorData,sensorTot,settings,contSettings] = run_MTR_SIM (sensorData,sensorTot,settings,contSettings,T1)
+function [sensorData,sensorTot,settings,contSettings] = run_MTR_SIM (sensorData,sensorTot,settings,contSettings,T1, engineT0)
 
 % impose valve position
 if T1 < settings.timeEngineCut
@@ -24,13 +24,13 @@ if sensorTot.mea.prediction(end) >= settings.mea.z_shutdown
             settings.timeEngineCut = settings.t_shutdown + settings.shutdownValveDelay;
             settings.expTimeEngineCut = settings.t_shutdown;
         end
-        if T1 < settings.tb
-            settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, T1);
+        if T1-engineT0 < settings.tb
+            settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, T1-engineT0);
         else
             settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, settings.tb);
         end
         settings.expMengineCut = settings.parout.m(end) - settings.ms;
-        if T1 > settings.timeEngineCut
+        if T1-engineT0 > settings.timeEngineCut
             settings.shutdown = true;
             settings = settingsEngineCut(settings);
             settings.quatCut = [sensorTot.nas.states(end, 10) sensorTot.nas.states(end, 7:9)];
@@ -42,19 +42,19 @@ if sensorTot.mea.prediction(end) >= settings.mea.z_shutdown
         settings.t_shutdown = nan;
     end
 else
-    if ~settings.expShutdown && T1 >= settings.mea.t_higher_shadowmode
+    if ~settings.expShutdown && T1-engineT0 >= settings.mea.t_higher_shadowmode
         settings.expShutdown = true;
         settings.t_shutdown = T1;
         settings.timeEngineCut = settings.t_shutdown + 0.3;
         settings.expTimeEngineCut = settings.t_shutdown;
     end
-    if T1 < settings.tb
-        settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, T1);
+    if T1-engineT0 < settings.tb
+        settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, T1-engineT0);
     else
         settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, settings.tb);
     end
     settings.expMengineCut = settings.parout.m(end) - settings.ms;
-    if T1 > settings.timeEngineCut
+    if T1-engineT0 > settings.timeEngineCut
         settings.shutdown = true;
         settings = settingsEngineCut(settings);
         settings.quatCut = [sensorTot.nas.states(end, 10) sensorTot.nas.states(end, 7:9)];

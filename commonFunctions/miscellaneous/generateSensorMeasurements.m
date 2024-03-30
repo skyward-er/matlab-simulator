@@ -1,4 +1,4 @@
-function [sensorData] = generateSensorMeasurements(magneticFieldApprox, Y, Tf, wind, sensorData,sensorTot, settings)
+function [sensorData] = generateSensorMeasurements(magneticFieldApprox, Y, Tf, wind, sensorData,sensorTot, settings, engineT0, currentState, availableStates)
 
 %{
  
@@ -133,12 +133,12 @@ if isfield(freq, 'pitotFrequency')
 end
 
 %% chamber pressure sensor
-if contains(settings.mission,'_2023') || contains(settings.mission,'_2024')
+if (contains(settings.mission,'_2023') || contains(settings.mission,'_2024')) && currentState ~= availableStates.on_ground
     sensorData.chamberPressure.time = (sensorTot.comb_chamber.time(end):1/freq.chamberPressureFrequency:Tf(end))';
     sensorData.chamberPressure.measures = zeros(size(sensorData.chamberPressure.time,1),1);
     sensorData.chamberPressure.measures(1) = sensorTot.comb_chamber.measures(end);
     if length(sensorData.chamberPressure.time) >1
-        sensorData.chamberPressure.measures(2:end)= interp1(settings.motor.expTime, settings.motor.expThrust,sensorData.chamberPressure.time(2:end))/settings.motor.K;
+        sensorData.chamberPressure.measures(2:end)= interp1(settings.motor.expTime, settings.motor.expThrust,sensorData.chamberPressure.time(2:end)-engineT0)/settings.motor.K;
     end
 else 
     sensorData.chamberPressure.time = (sensorTot.comb_chamber.time(end):1/freq.chamberPressureFrequency:Tf(end))';

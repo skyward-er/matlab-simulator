@@ -120,6 +120,7 @@ lastDrogueIndex = 0;
 idx_apogee = NaN;
 idx_landing = NaN;
 
+engineT0 = 0;       % Initial time for engine time computations
 %% sensor fault initial conditions
 sensorData.chunk{1} = zeros(1,50);
 sensorData.chunk{2} = zeros(1,50);

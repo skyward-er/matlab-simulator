@@ -358,7 +358,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
 
     % [sensorData] = manageSignalFrequencies(magneticFieldApprox, settings.flagAscent, settings,sensorData, Yf, Tf, uw, vw, ww);
     wind = [uw, vw, ww];
-    [sensorData] = generateSensorMeasurements(magneticFieldApprox, Yf, Tf, wind, sensorData,sensorTot, settings);
+    [sensorData] = generateSensorMeasurements(magneticFieldApprox, Yf, Tf, wind, sensorData,sensorTot, settings, engineT0, currentState, availableStates);
     
     % simulate sensor acquisition
     if settings.dataNoise
