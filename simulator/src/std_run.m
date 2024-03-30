@@ -127,18 +127,23 @@ run(strcat('initSensors', settings.mission));
 %% MAGNETIC FIELD MODEL
 std_magneticField;
 
-%% STATE MACHINE INITIALIZATION
+%% STATE MACHINES INITIALIZATION
+
+% Simulator state machine
 availableStates.on_ground = 0;
 availableStates.powered_ascent = 1;
 availableStates.unpowered_ascent = 2;
 availableStates.drogue_descent = 3;
 availableStates.parachute_descent = 4;
 availableStates.landed = 5;
-trans_time = zeros(2, 5);
+trans_time = zeros(1, 5);   % Vector to hold the time at which each state transition occurs (length is num of states - 1)
+transition = false;         % Set to true whenever a transition between two states is requested by the state machine.
 
 if ~strcmp(settings.scenario, 'descent')
     currentState = availableStates.on_ground;
 else
+    % If the selected senario does not include the ascent phase then the
+    % state machine must start from the descent state
     currentState = availableStates.drogue_descent;
 end
 
@@ -183,53 +188,86 @@ while settings.flagStopIntegration && n_old < nmax                          % St
 
     %% State machine
 
+    if transition
+        currentState = currentState+1;  
+        % NOTE: This could be done more explicitely with a switch statement instead of abusing the fact that the states are defined as numeric values 
+
+        trans_time(currentState) = t0;
+        if currentState > availableStates.landed
+            error("Requested transition to non exising state");
+        end
+        transition = false;
+    end
+
     switch currentState
         case availableStates.on_ground
             flagFlight = false;
             flagAeroBrakes = false;
+            settings.flagAscent = false;
             
             if launchFlag
-                currentState = availableStates.powered_ascent;
-                disp("Transition to powered ascent");
-                trans_time(1,1) = t0;
+                transition = true;
+                if ~settings.montecarlo
+                    disp("Requested transition to powered ascent")
+                end
             end
         case availableStates.powered_ascent
-            if ~flagFlight
+            % NOTE: This check is considered as entry condition and used to setup time variables 
+            % that require to be offset depending on when the liftoff actually happens, 
+            % i.e. all the engine time variables that otherwise require the simulation time t0 to be reset to 0
+            if ~flagFlight   
                 flagFlight = true;
+                engineT0 = t0;
             end
 
+            settings.flagAscent = true;
+            lastAscentIndex = n_old-1;
+
             if settings.shutdown
-                flagBurning = false;
-                currentState = availableStates.unpowered_ascent;
-                disp("Transition to unpowered ascent");
-                trans_time(1,2) = t0;
+                transition = true;
+                if ~settings.montecarlo
+                    disp("Requested transition to unpowered ascent");
+                end
             end
         case availableStates.unpowered_ascent
 
             flagAeroBrakes = true;
+            settings.flagAscent = true;
+            lastAscentIndex = n_old-1;
 
             if flagApogee
-                flagAeroBrakes = false;
-                currentState = availableStates.drogue_descent;
-                disp("Transition to drogue descent");
-                trans_time(1,3) = t0;
+                if settings.ascentOnly      % If the simulation doesn't need to include the descent phase, exit from the simulation loop
+                    break;
+                else
+                    transition = true;
+                    if ~settings.montecarlo
+                        disp("Requested transition to drogue descent");
+                    end
+                end
             end
         case availableStates.drogue_descent
+            if flagAeroBrakes
+                flagAeroBrakes = false;
+            end
 
             lastDrogueIndex = n_old-1;
 
             if flagOpenPara
-                eventExpulsion2 = true;
-                currentState = availableStates.parachute_descent;
-                disp("Transition to parachute descent");
-                trans_time(1,4) = t0;
+                transition = true;
+                if ~settings.montecarlo
+                    disp("Requested transition to parachute descent");
+                end
             end
         case availableStates.parachute_descent
+            if ~eventExpulsion2
+                eventExpulsion2 = true;
+            end
 
             if -Y0(end,3) < -1
-                currentState = availableStates.landed;
-                disp("Transition to landed");
-                trans_time(1,5) = t0;
+                transition = true;
+                if ~settings.montecarlo
+                    disp("Requested transition to landed");
+                end
             end
         case availableStates.landed
             flagFlight = false;
@@ -238,46 +276,38 @@ while settings.flagStopIntegration && n_old < nmax                          % St
             currentState = availableStates.landed;
             break;
         otherwise
-            warning("Invalid state requested");
-    end
-
-    if currentState == availableStates.powered_ascent || currentState == availableStates.unpowered_ascent
-        settings.flagAscent = true;
-        lastAscentIndex = n_old-1;
-    else
-        settings.flagAscent = false;
+            error("Invalid state requested");
     end
     
     %% dynamics (ODE) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     tspan = t0:dt_ode:t1;
 
     if flagFlight
-    
+
         if settings.ballisticFligth
             Y0_ode = Y0(1:14);
-            [Tf, Yd] = ode4(@ascentControl, tspan, Y0_ode, settings,[], ap_ref, t_change_ref_ABK, tLaunch);
-            parout = RecallOdeFcn(@ascentControl, Tf, Yd, settings,[], Yd(:,14), t_change_ref_ABK,tLaunch,'apVec');
+            [Tf, Yd] = ode4(@ascentControl, tspan, Y0_ode, settings,[], ap_ref, t_change_ref_ABK, engineT0);
+            parout = RecallOdeFcn(@ascentControl, Tf, Yd, settings,[], Yd(:,14), t_change_ref_ABK,engineT0,'apVec');
             [nd, ~] = size(Yd);
             Yf = [Yd, ones(nd,1)*Y0(end,15)];
             para = NaN;
         else
-            if settings.flagAscent
-                Y0_ode = Y0(1:14);
-                [Tf, Yd] = ode4(@ascentControl, tspan, Y0_ode, settings,[],  ap_ref, t_change_ref_ABK, tLaunch);
-                parout = RecallOdeFcn(@ascentControl, Tf, Yd, settings,[], Yd(:,14), t_change_ref_ABK,tLaunch,'apVec');
-                [nd, ~] = size(Yd);
-                Yf = [Yd, ones(nd,1)*Y0(end,15)];
-                para = NaN;
-            else
-
-                if currentState == availableStates.drogue_descent
+            switch currentState
+                case {availableStates.powered_ascent, availableStates.unpowered_ascent}
+                    Y0_ode = Y0(1:14);
+                    [Tf, Yd] = ode4(@ascentControl, tspan, Y0_ode, settings,[],  ap_ref, t_change_ref_ABK, engineT0);
+                    parout = RecallOdeFcn(@ascentControl, Tf, Yd, settings,[], Yd(:,14), t_change_ref_ABK,engineT0,'apVec');
+                    [nd, ~] = size(Yd);
+                    Yf = [Yd, ones(nd,1)*Y0(end,15)];
+                    para = NaN;
+                case availableStates.drogue_descent
                     para = 1;
                     Y0_ode = Y0(:,1:6);
                     [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode, settings, uw, vw, ww, para, Y0(end,10:13),tLaunch); % ..., para, uncert);
                     parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para, Y0(end,10:13),tLaunch);
                     [nd, ~] = size(Yd);
                     Yf = [Yd, zeros(nd, 3), ones(nd,1).*Y0(end,10:13), zeros(nd,2)];
-                elseif currentState == availableStates.parachute_descent
+                case availableStates.parachute_descent
                     if ~settings.parafoil
                         para = 2;
                         Y0_ode = Y0(:,1:6);
@@ -285,7 +315,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                         parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para, Y0(end,10:13));
                         [nd, ~] = size(Yd);
                         Yf = [Yd, zeros(nd, 3), ones(nd,1).*Y0(end,10:13), zeros(nd,2)];
-                       
+
                     else
                         Y0_ode = Y0(:,[1:13,15]);
                         [Tf, Yd] = ode4(@descentParafoil, tspan, Y0_ode, settings,contSettings, deltaA_ref, t_change_ref_PRF,tLaunch);
@@ -294,7 +324,6 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                         Yf = [Yd(:,1:13), zeros(nd,1),Yd(:,14)];
                     end
 
-                end
             end
         end
     else
@@ -305,8 +334,13 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     
     % recall some useful parameters
     settings.parout.partial_time = Tf;
-    if ~exist("parout", 'var')
-        settings.parout.acc = zeros(length(Tf), 3);
+    if currentState == availableStates.on_ground || currentState == availableStates.landed
+        % If the rocket is on groud or landed, the accelerometer should
+        % meaasure the gravity acceleration.
+        % NOTE: For the on_ground state, the gravity direction should probably be rotated depending on
+        % the launch rail angles. For now this is not done as the error is
+        % low enough to not impact the nas estimation
+        settings.parout.acc = [9.81*ones(length(Tf), 1) zeros(length(Tf), 2) ];
         settings.parout.m = settings.mTotalTime(1)*ones(1,length(Tf));
     else
         settings.parout.acc = parout.accelerometer.body_acc';
@@ -424,14 +458,19 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     t0 = t0 + dt;
     t1 = t1 + dt;
 
-    % Update the stop integration flag
-    if settings.ascentOnly
-        % settings.flagStopIntegration = settings.flagAscent || not(settings.lastLaunchFlag);
-        settings.flagStopIntegration = ~flagApogee || currentState ~= availableStates.drogue_descent;
-    else
-        % settings.flagStopIntegration = flagFlight || not(settings.lastLaunchFlag);
-        settings.flagStopIntegration = (flagFlight && currentState ~= availableStates.landed) || currentState ~= availableStates.on_ground;
-    end
+    % Update the stop integration flag - 
+    % This as been moved to the state machine 
+    % (NOTE: Still kept for now as "backup", will soon be removed)
+
+    % if settings.ascentOnly
+    %     % settings.flagStopIntegration = settings.flagAscent || not(settings.lastLaunchFlag);
+    %     settings.flagStopIntegration = ~flagApogee || currentState ~= availableStates.drogue_descent; 
+    %     % This is a problem for free ascent case as apogee is not triggered because ADA does not run
+    % else
+    %     % settings.flagStopIntegration = flagFlight || not(settings.lastLaunchFlag);
+    %     settings.flagStopIntegration = (flagFlight && currentState ~= availableStates.landed) || currentState == availableStates.on_ground;
+    %     % This is for sure not the best solution, could be probabily rewritten 
+    % end
 
     % settings.flagMatr(n_old:n_old+n-1, :) = repmat([flagFlight, settings.flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2], n, 1);
 

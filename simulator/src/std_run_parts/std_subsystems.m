@@ -27,7 +27,7 @@ if settings.flagNAS && settings.dataNoise
 end
 
 %% Engine Control algorithm
-if contains(settings.mission,'_2023') || contains(settings.mission,'_2024')
+if (contains(settings.mission,'_2023') || contains(settings.mission,'_2024')) && currentState ~= availableStates.on_ground
     if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
 
         if isnan(sensorTot.comb_chamber.measures(end))
