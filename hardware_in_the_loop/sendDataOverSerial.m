@@ -38,10 +38,6 @@ INPUTS:
     dataToBeSent.gyro = sensorData.gyro.measures(1:num_data_gyro, :);
     dataToBeSent.magnetometer = sensorData.magnetometer.measures(1:num_data_magn, :);
 
-    [dataToBeSent.gps.positionMeasures(:,1),dataToBeSent.gps.positionMeasures(:,2), ...
-        dataToBeSent.gps.positionMeasures(:,3)] = ned2geodetic(sensorData.gps.positionMeasures(1:num_data_gps,1),sensorData.gps.positionMeasures(1:num_data_gps,2), ...
-        sensorData.gps.positionMeasures(1:num_data_gps,3),sensorSettings.lat0, sensorSettings.lon0, sensorSettings.z0,sensorSettings.spheroid ,'degrees');
-
     dataToBeSent.gps.velocityMeasures = sensorData.gps.velocityMeasures(1:num_data_gps, :);
     dataToBeSent.gps.fix = sensorData.gps.fix;
     dataToBeSent.gps.nsat = sensorData.gps.nsat;
