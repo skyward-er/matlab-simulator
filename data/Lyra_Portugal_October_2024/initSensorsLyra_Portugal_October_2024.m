@@ -132,12 +132,12 @@ sensorSettings.magnetometer.walkDiffusionCoef    =   0;                      % g
 sensorSettings.magnetometer.dt                   =   0.01;                   % sampling time
 sensorSettings.magnetometer.transMatrix          =   diag([1 1 1]);          % axis transformation
 
-%% initial GPS sensor from NEO-M9N
-sensorSettings.GPS = Sensor3D();                                      % lon, in degree lat in deree, alt in m
-sensorSettings.GPS.noiseVariance          =   2;                      % in m
-sensorSettings.GPS.transMatrix            =   diag([1 1 1]);          % axis transformation
-sensorSettings.lat0                       =   settings.lat0;
-sensorSettings.lon0                       =   settings.lon0;
+%% initial GPS sensor from NEO-M9N   
+sensorSettings.GPS = GPS();                                                        % lon, in degree lat in deree, alt in m
+sensorSettings.GPS.noiseVariance          =   [2e-9*ones(2,1);5;0.0011*ones(3,1)]; % [deg; deg; m; m/s; m/s; m/s]^2
+sensorSettings.GPS.transMatrix            =   diag([1 1 1]);                       % axis transformation
+sensorSettings.lat0                   =   settings.lat0;
+sensorSettings.lon0                   =   settings.lon0;
 sensorSettings.z0                         =   settings.z0;
 sensorSettings.spheroid                   =   wgs84Ellipsoid;
 

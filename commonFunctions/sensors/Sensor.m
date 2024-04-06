@@ -124,7 +124,7 @@ classdef Sensor < handle
             
             if (~isempty(obj.noiseVariance))
 %                 inputArg=inputArg+ones(size(inputArg)).*sqrt(obj.noiseVariance).*randn(1,1);,
-                inputArg=inputArg+sqrt(obj.noiseVariance).*randn(size(inputArg));
+                inputArg=inputArg+sqrt(obj.noiseVariance).*randn(length(inputArg),1);
             end
             outputArg = inputArg;
         end

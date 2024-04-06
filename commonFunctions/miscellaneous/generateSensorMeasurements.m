@@ -71,7 +71,8 @@ sensorData.gps.velocityMeasures(1,:) = sensorTot.gps.velocity_measures(end,:);
 
 if length(sensorData.gps.time)>1
     TfGPS =  round(Tf*1e4)/1e4;                                             % as the GPS is usually very slow, this helps to stabilize truncation error
-    sensorData.gps.positionMeasures(2:end, :) = interp1(TfGPS,Y(:,1:3),sensorData.gps.time(2:end));
+    sensorData.gps.positionMeasures(2:end, :) = ...
+        interp1(TfGPS,[Y(:,1:2),-Y(:,3)+settings.z0],sensorData.gps.time(2:end));
     vel = interp1(TfGPS,Y(:,4:6),sensorData.gps.time(2:end));
     quat = interp1(TfGPS,Y(:,10:13),sensorData.gps.time(2:end));
     sensorData.gps.velocityMeasures(2:end, :) = quatrotate(quatconj(quat),vel);
