@@ -4,6 +4,7 @@ hardware in the loop script
 
 %}
 
+
 %% Prepare data to be sent to and read from obsw
 
 flagsArray = [isLaunch, settings.flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2];
@@ -17,12 +18,15 @@ end
 freq = settings.frequencies;
 
 % Execute serial communication with obsw
-if ~settings.parafoil
+if strcmp(conf.board,"main")
     [hilData] = run_MAIN_HIL(sensorData, sensorSettings, freq, flagsArray);
-else
+else if strcmp(conf.board,"payload")
     [hilData] = run_PAY_HIL(sensorData, sensorSettings, freq, flagsArray);
+else 
+    [hilData] = run_FULL_HIL(sensorData, sensorSettings, freq, flagsArray);
 end
 
+%% Remapping flags
 settings.lastLaunchFlag = launchFlag;
 launchFlag = hilData.flagsArray(1);
 settings.flagAscent = hilData.flagsArray(2);
@@ -45,16 +49,15 @@ disp("HIL flight: " + hilData.flagsArray(1) + ", ascent: " + hilData.flagsArray(
     ", para1: " + hilData.flagsArray(5) + ", para2: " + hilData.flagsArray(6));
 
 %% Update ADA data
-if ~settings.parafoil
+if isfield(hilData, "ada")
     sensorData.ada.xp = hilData.ada.mslAltitude;
-    sensorData.ada.xv = hilData.ada.verticalSpeed;
+    sensorData.ada.xv = [hilData.ada.aglAltitude hilData.ada.verticalSpeed];
     settings.ada.flag_apo = hilData.ada.apogeeDetected;
 
     sensorTot.ada.xp(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1) -2,:) = sensorData.ada.xp(2:end,:);
     sensorTot.ada.xv(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xv(:,1),1)-2,:)  = sensorData.ada.xv(2:end,:);
     sensorTot.ada.time(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1)-2)  = sensorData.ada.time(2:end);
     sensorTot.ada.n_old = sensorTot.ada.n_old + size(sensorData.ada.xp,1)-1;
-    settings.baro_old = sensorData.barometer.time(end);
 else
     if settings.flagADA && settings.dataNoise
         [sensorData, sensorTot, settings.ada]   =  run_ADA(sensorData, sensorTot, settings,t1);
@@ -62,12 +65,11 @@ else
 end
 
 %% Update NAS data
-
-sensorData.nas.time(iTimes) = Tf(end);
+sensorData.nas.time = Tf(end);
 sensorData.nas.states = hilData.nas.x_est;
 
-sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-1,:)  = sensorData.nas.states(:,:); % NAS output
-sensorTot.nas.time(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-1)    = sensorData.accelerometer.time(end); % NAS time output
+sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-1,:)  = sensorData.nas.states(1:end,:); % NAS output
+sensorTot.nas.time(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-1)    = sensorData.nas.time(1:end); % NAS time output
 sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1);
 
 if ~flagFlight
@@ -88,52 +90,45 @@ else
 end
 
 %% Update Mass estimation data
-if ~settings.parafoil
-    if contains(mission.name,'_2023') ||  contains(mission.name,'_2024')
-        lastShutdown = settings.shutdown;
-        settings.shutdown = not(flagBurning);
+if isfield(hilData, "mea")
+    lastShutdown = settings.shutdown;
+    settings.shutdown = not(flagBurning);
 
-        if ~settings.shutdown
-            sensorData.mea.estimated_mass = hilData.mea.estimatedMass;
-            sensorData.mea.estimated_pressure = hilData.mea.correctedPressure;
-            sensorData.mea.predicted_apogee = hilData.mea.estimatedApogee;
+    if ~settings.shutdown
+        sensorData.mea.estimated_mass = hilData.mea.estimatedMass;
+        sensorData.mea.estimated_pressure = hilData.mea.correctedPressure;
+        sensorData.mea.predicted_apogee = hilData.mea.estimatedApogee;
 
-            m = sensorData.mea.estimated_mass(end);
+        m = sensorData.mea.estimated_mass(end);
 
-            sensorTot.mea.pressure(iTimes) = sensorData.mea.estimated_pressure;
-            sensorTot.mea.mass(iTimes) = sensorData.mea.estimated_mass;
-            sensorTot.mea.prediction(iTimes) = sensorData.mea.predicted_apogee;
-            sensorTot.mea.time(iTimes) = t1;
-        end
+        sensorTot.mea.pressure(iTimes) = sensorData.mea.estimated_pressure;
+        sensorTot.mea.mass(iTimes) = sensorData.mea.estimated_mass;
+        sensorTot.mea.prediction(iTimes) = sensorData.mea.predicted_apogee;
+        sensorTot.mea.time(iTimes) = t1;
+    end
 
-        if settings.shutdown && not(lastShutdown) && flagFlight     % Need to check if this happens only once or the condition can be met multiple times
-            t_shutdown = Tf(end);
-            settings.expShutdown = 1;
-            settings.shutdown = 1;
-            rocket.motor.cutoffTime = t_shutdown;
-            settings.expTimeEngineCut = t_shutdown;
-            settings.expMengineCut = m - settings.ms;
-            settings.shutdown = 1;
-            settings = settingsEngineCut(settings);
-            settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
-            [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
-            sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
-        elseif ~settings.shutdown && Tf(end)-engineT0 >= rocket.motor.time(end)
-            settings.expShutdown = true;
-            settings.shutdown = true;
-            settings.t_shutdown = rocket.motor.time(end);
-            rocket.motor.cutoffTime = settings.t_shutdown;
-            settings.expTimeEngineCut = settings.t_shutdown;
-            % settings.expMengineCut = settings.parout.m(end) - settings.ms;
-            % settings = settingsEngineCut(settings);
-            settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
-            [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
-            sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
-        end
-    else
-        if t0 > rocket.motor.time(end)
-            settings.expShutdown = 1;
-        end
+    if settings.shutdown && not(lastShutdown) && flagFlight     % Need to check if this happens only once or the condition can be met multiple times
+        t_shutdown = Tf(end);
+        settings.expShutdown = 1;
+        settings.timeEngineCut = t_shutdown;
+        settings.expTimeEngineCut = t_shutdown;
+        settings.expMengineCut = m - settings.ms;
+        settings.shutdown = 1;
+        settings = settingsEngineCut(settings);
+        settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
+        [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
+        sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
+    elseif ~settings.shutdown && Tf(end) >= settings.tb
+        t_shutdown = settings.tb;
+        settings.expShutdown = 1;
+        settings.timeEngineCut = t_shutdown;
+        settings.expTimeEngineCut = t_shutdown;
+        settings.expMengineCut = m - settings.ms;
+        settings.shutdown = 1;
+        settings = settingsEngineCut(settings);
+        settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
+        [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
+        sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
     end
 else
     if (contains(mission.name,'_2023') || contains(mission.name,'_2024')) && currentState ~= availableStates.on_ground
@@ -177,8 +172,8 @@ else
 end
 
 %% Update Airbrakes data
-if ~settings.parafoil
-    if flagAeroBrakes
+if isfield(hilData, "abk")
+    if flagAeroBrakes && mach < settings.MachControl
         if contSettings.flagFirstControlABK % set in
             t_airbrakes = t0;
             t_last_arb_control = t0;
@@ -223,7 +218,7 @@ else
 end
 
 %% PARAFOIL
-if ~settings.flagAscent && settings.parafoil 
+if ~settings.flagAscent && isfield(hilData, "wes") && isfield(hilData, "gnc")
     if flagPara2
         if contSettings.flagFirstControlPRF % set in
                 t_parafoil = t1;

@@ -29,8 +29,6 @@ if conf.HIL
         serialbridge('Open','main', hil_settings.serial_port_main, hil_settings.baudrate);
     else if strcmp(conf.board,"payload")
         serialbridge('Open','payload', hil_settings.serial_port_payload, hil_settings.baudrate);
-    else if strcmp(conf.board,"motor")
-        serialbridge('Open','motor', hil_settings.serial_port_motor, hil_settings.baudrate);
     else
         serialbridge('Open','main', hil_settings.serial_port_main, hil_settings.baudrate); 
         serialbridge('Open','payload', hil_settings.serial_port_payload, hil_settings.baudrate);

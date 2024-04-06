@@ -169,8 +169,6 @@ switch conf.board
         settings.parafoil = false;
     case "payload"
         settings.parafoil = true;
-    case "motor"
-        settings.parafoil = false;
     case "full_hil"
         settings.parafoil = true;
 end
