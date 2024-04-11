@@ -11,8 +11,8 @@ C = settings.mea.engine_model_C1;
 % define time array for mea algorithm
 t_mea = sensorTot.mea.time(end):1/settings.frequencies.MEAFrequency:T1;
 % define time array for sensors
-t_chambPress = sensorTot.comb_chamber.time;
-t_nas = sensorTot.nas.time; % we need also nas to estimate cd etc
+t_chambPress = sensorTot.comb_chamber.time;%(sensorTot.comb_chamber.time >= T1);
+t_nas = sensorTot.nas.time;%(sensorTot.nas.time>= T1); % we need also nas to estimate cd etc
 % initialise state update
 x(1,:) = sensorData.mea.x(end,:);
 P(:,:,1) = sensorData.mea.P(:,:,end);
@@ -27,30 +27,30 @@ vnorm_nas(1) = norm(sensorData.nas.states(end,4:6));
 vz_nas(1) = sensorData.nas.states(end,6);
 
 for ii = 2:length(t_mea)
-
-    % prediction
-    x(ii,:) = (A*x(ii-1,:)' + B*u)'; % x is a row but to apply matrix product we need it column, therefore the transpositions
-    P(:,:,ii) = A*P(:,:,ii-1)*A' + settings.mea.Q;
-
-    % correction
     index_chambPress = sum(t_mea(ii) >= t_chambPress);
-    S = C*P(:,:,ii)*C' + settings.mea.R;
-    if ~det(S)<1e-3
-        K = P(:,:,ii)*C' / S; % if you want to try with constant gain [0.267161;-0.10199;-0.000205604 ];
-        P(:,:,ii) = (eye(3)-K*C)*P(:,:,ii);
+    if sensorTot.comb_chamber.measures(index_chambPress)  > 1
+        % prediction
+        x(ii,:) = (A*x(ii-1,:)' + B*u)'; % x is a row but to apply matrix product we need it column, therefore the transpositions
+        P(:,:,ii) = A*P(:,:,ii-1)*A' + settings.mea.Q;
+
+        % correction
+        S = C*P(:,:,ii)*C' + settings.mea.R;
+        if ~det(S)<1e-3
+            K = P(:,:,ii)*C' / S; % if you want to try with constant gain [0.267161;-0.10199;-0.000205604 ];
+            P(:,:,ii) = (eye(3)-K*C)*P(:,:,ii);
+        end
+
+        x(ii,:) = x(ii,:)' + K* (sensorTot.comb_chamber.measures(index_chambPress) -  C * x(ii,:)'); % /1000 to have the measure in bar
+
+        % retrieve NAS data
+        index_NAS = sum(t_mea(ii) >= t_nas);
+        z_nas(ii,1) = sensorTot.nas.states(index_NAS,3);
+        vnorm_nas(ii,1) = norm(sensorTot.nas.states(index_NAS,4:6));
+        vz_nas(ii,1) = sensorTot.nas.states(index_NAS,6);
+
+    else
+        x(ii,:) = x(ii-1,:); 
     end
-
-    x(ii,:) = x(ii,:)' + K* (sensorTot.comb_chamber.measures(index_chambPress) -  C * x(ii,:)'); % /1000 to have the measure in bar
-
-    
-
-    % retrieve NAS data
-    index_NAS = sum(t_mea(ii) >= t_nas);
-    z_nas(ii,1) = sensorTot.nas.states(index_NAS,3);
-    vnorm_nas(ii,1) = norm(sensorTot.nas.states(index_NAS,4:6));
-    vz_nas(ii,1) = sensorTot.nas.states(index_NAS,6);
-
-    
 end
 % pressure estimation
 estimated_pressure = C*x';
@@ -63,7 +63,7 @@ CD = settings.CD_correction_shutDown*getDrag(vnorm_nas, -z_nas, 0, contSettings.
 [~,~,~,rho] = atmosisa(-z_nas);
 
 predicted_apogee = -z_nas-settings.z0 + 1./(2.*( 0.5.*rho .* CD * settings.S ./ estimated_mass))...
-        .* log(1 + (vz_nas.^2 .* (0.5 .* rho .* CD .* settings.S) ./ estimated_mass) ./ 9.81 );
+    .* log(1 + (vz_nas.^2 .* (0.5 .* rho .* CD .* settings.S) ./ estimated_mass) ./ 9.81 );
 
 % update local state
 sensorData.mea.time = t_mea;

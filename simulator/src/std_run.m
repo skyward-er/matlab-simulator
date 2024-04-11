@@ -204,7 +204,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
             settings.flagAscent = false;
             
             % Transition to powered_ascent
-            if launchFlag 
+            if launchFlag &&  t0>10
                 state_lastTime(currentState) = t0;
                 
                 % Exit condition of on_ground / Entry contion of powered_ascent:

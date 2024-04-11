@@ -51,7 +51,7 @@ sensorData.barometer_sens{3}.t0 = initSensorT0...
 sensorData.pitot.t0 = initSensorT0...
     (control_freq,settings.frequencies.pitotFrequency);
 
-if contains(settings.mission,'_2023')
+if contains(settings.mission,'_2023')  || contains(settings.mission,'_2024')
 sensorData.chamberPressure.t0 = initSensorT0...
     (control_freq,settings.frequencies.chamberPressureFrequency);
 end
@@ -176,7 +176,7 @@ sensorData.mea.estimated_pressure = 0;
 sensorData.mea.predicted_apogee = 0;
 settings.t_shutdown = Inf;
 settings.mea.counter_shutdown = 0;
-
+settings.flagMEAInit = false;
 %% parafoil
 deltaA = contSettings.payload.deltaA_0;
 para = 1;

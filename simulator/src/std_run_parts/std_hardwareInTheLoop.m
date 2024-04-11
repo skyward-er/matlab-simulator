@@ -89,7 +89,7 @@ end
 
 %% Update Mass estimation data
 if ~settings.parafoil
-    if contains(settings.mission,'_2023')
+    if contains(settings.mission,'_2023') ||  contains(settings.mission,'_2024')
         lastShutdown = settings.shutdown;
         settings.shutdown = not(flagBurning);
 
@@ -135,7 +135,7 @@ if ~settings.parafoil
         end
     end
 else
-    if contains(settings.mission,'_2023')
+    if contains(settings.mission,'_2023') ||  contains(settings.mission,'_2024')
         if Tf(end) <= settings.tb+0.5 &&...
                 (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
 
