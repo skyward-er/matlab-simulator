@@ -18,9 +18,9 @@ end
 freq = settings.frequencies;
 
 % Execute serial communication with obsw
-if strcmp(conf.board,"main")
+if strcmp(settings.board,"main")
     [hilData] = run_MAIN_HIL(sensorData, sensorSettings, freq, flagsArray);
-else if strcmp(conf.board,"payload")
+elseif strcmp(settings.board,"payload")
     [hilData] = run_PAY_HIL(sensorData, sensorSettings, freq, flagsArray);
 else 
     [hilData] = run_FULL_HIL(sensorData, sensorSettings, freq, flagsArray);
