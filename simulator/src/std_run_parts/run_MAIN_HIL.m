@@ -56,7 +56,7 @@ OUTPUTS:
     end
 
     % control nan
-    if isnan(sensorData.chamberPressure.measures(end)) || not(flags(1))
+    if isnan(sensorData.chamberPressure.measures(end)) || not(flagsArray(1))
         dataToBeSent.chamberPressure = zeros(1,num_data_chPress);
     else
         dataToBeSent.chamberPressure = sensorData.chamberPressure.measures(1:num_data_chPress); % transforming from mBar to Bar
