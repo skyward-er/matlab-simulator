@@ -28,7 +28,7 @@ scenarios explanation:
 
 % scenario configuration
 conf.scenario = "full flight";
-conf.board = "payload";            % Either "main" or "payload" or "full_hil"
+settings.board = "main";            % Either "main" or "payload" or "full_hil"
 conf.HIL = true;
 
 % WIP flags
@@ -163,7 +163,7 @@ elseif conf.HIL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 end %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-switch conf.board
+switch settings.board
     case "main"
         settings.parafoil = false;
     case "payload"
