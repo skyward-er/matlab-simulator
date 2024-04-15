@@ -38,18 +38,33 @@ function generate_NAS_catch_file(simOutput, settings, ConDataPath)
     state_in = single(nasData);
     P_in = single(0.01*eye(12));
 
+    % Add gravity acceleration only when still on ramp
+    if ~flagFlight
+        simOutput.sensors.barometer.pressure_measures = simOutput.sensors.barometer.pressure_measures + (quat2dcm(Yf(:,10:13)) * [0;0;-9.81])';
+    end
+
     %% Generate input files
 
     acc_data = single([simOutput.sensors.imu.time simOutput.sensors.imu.accelerometer_measures]);
     gyro_data = single([simOutput.sensors.imu.time simOutput.sensors.imu.gyro_measures]);
     mag_data = single([simOutput.sensors.imu.time simOutput.sensors.imu.magnetometer_measures]);
     baro_data = single([simOutput.sensors.barometer.time simOutput.sensors.barometer.altitude]);
+    pressure_data = single([simOutput.sensors.barometer.time simOutput.sensors.barometer.pressure_measures]);
     gps_data = single([simOutput.sensors.gps.time simOutput.sensors.gps.position_measures simOutput.sensors.gps.velocity_measures]);
     pitot_data = single([simOutput.sensors.pitot.time simOutput.sensors.pitot.airspeed]);
 
     t_nas = single(simOutput.sensors.nas.time);
     input_data = cell(length(t_nas)-1, 9);
     output_data = cell(length(t_nas)-1, 3);
+
+    Input_StateData_File = ConDataPath+"/"+folder+"/NAS_Input_StateData_"+settings.mission+".csv";
+    AccData_File = ConDataPath+"/"+folder+"/NAS_AccData_"+settings.mission+".csv";
+    GyroData_File = ConDataPath+"/"+folder+"/NAS_GyroData_"+settings.mission+".csv";
+    GPSData_File = ConDataPath+"/"+folder+"/NAS_GPSData_"+settings.mission+".csv";
+    BaroData_File = ConDataPath+"/"+folder+"/NAS_BaroData_"+settings.mission+".csv";
+    MagData_File = ConDataPath+"/"+folder+"/NAS_MagData_"+settings.mission+".csv";
+    PitotData_File = ConDataPath+"/"+folder+"/NAS_PitotData_"+settings.mission+".csv";
+    Output_StateData_File = ConDataPath+"/"+folder+"/NAS_Output_StateData_"+settings.mission+".csv";
 
     %% Run NAS functions
 
@@ -61,7 +76,7 @@ function generate_NAS_catch_file(simOutput, settings, ConDataPath)
         P_lin = P_in(1:6, 1:6);
         P_quat = P_in(7:12, 7:12);
 
-        input_data{ii, 1} = 0;
+        input_data{ii, 1} = ii;
         input_data{ii, 2} = state_in;
         input_data{ii, 3} = P_in;
 
@@ -84,14 +99,14 @@ function generate_NAS_catch_file(simOutput, settings, ConDataPath)
             index_gps = sum(t_nas(ii) >= gps_data(:,1));
             [x_lin, P_lin, ~] = correctionGPS(x_lin, P_lin, gps_data(index_gps, 2:3), gps_data(index_gps, 5:6), nas_struct.sigma_GPS, 16, 1);
             [gps_coord(1), gps_coord(2), gps_coord(3)] = ned2geodetic(gps_data(index_gps, 2), gps_data(index_gps, 3), gps_data(index_gps, 4), settings.lat0, settings.lon0, settings.z0, wgs84Ellipsoid);
-            input_data{ii, 6} = [gps_coord gps_data(index_gps, 5:end)];
+            input_data{ii, 6} = [gps_coord gps_data(index_gps, 5:end) 0 0 0 16 3];
         end
 
         % Correct barometer
         if isempty(algorithms) || any(ismember(algorithms, {'correct_baro', 'complete'}))
             index_baro = sum(t_nas(ii) >= baro_data(:,1));
             [x_lin, P_lin, ~] = correctionBarometer(x_lin, P_lin, baro_data(index_baro, 2), nas_struct.sigma_baro);
-            input_data{ii, 7} = baro_data(index_baro, 2);
+            input_data{ii, 7} = pressure_data(index_baro, 2);
         end
 
         % Correct magnetometer
@@ -118,42 +133,97 @@ function generate_NAS_catch_file(simOutput, settings, ConDataPath)
         P_in(7:12, 7:12) = P_quat;
     end
 
-    %% Generate output files
+    % NAS INPUT
+    disp("NAS INPUT");
+    writelines("NASState nasInputs[] = {",Input_StateData_File, 'WriteMode', 'append');
+    for ii = 2:length(t_nas)
+        writelines("{" + ii + ",{", Input_StateData_File, 'WriteMode', 'append');
+        writecell(input_data(ii, 2), Input_StateData_File, 'WriteMode', 'append');
+        writelines("}},", Input_StateData_File, 'WriteMode', 'append');
+    end
+    writelines("};", Input_StateData_File, 'WriteMode', 'append');
 
-    writecell({'fake timestamp', 'x', 'y', 'z', 'vx', 'vy', 'vz', 'qx','qy','qz','qw','bx','by','bz'},ConDataPath+"/"+folder+"/NAS_Input_StateData_"+settings.mission+".csv", 'WriteMode', 'overwrite');
-    writecell(input_data(2:end, 1:2),ConDataPath+"/"+folder+"/NAS_Input_StateData_"+settings.mission+".csv", 'WriteMode', 'append');
-
+    % ACCELEROMETER
+    disp("ACCELEROMETER");
+    disp(input_data(1:5, [1 4]));
     if isempty(algorithms) || any(ismember(algorithms, {'predict_acc', 'complete'}))
-        writecell({'fake timestamp', 'acc_x','acc_y','acc_z'},ConDataPath+"/"+folder+"/NAS_AccData_"+settings.mission+".csv", 'WriteMode', 'overwrite');
-        writecell(input_data(2:end, [1 4]),ConDataPath+"/"+folder+"/NAS_AccData_"+settings.mission+".csv", 'WriteMode', 'append');
+        writelines("AccelerometerData acc[] = {", AccData_File, 'WriteMode', 'append');
+        for ii = 2:length(t_nas)
+            writelines("{", AccData_File, 'WriteMode', 'append');
+            writecell(input_data(ii, [1 4]), AccData_File, 'WriteMode', 'append');
+            writelines("},", AccData_File, 'WriteMode', 'append');
+        end
+        writelines("};", AccData_File, 'WriteMode', 'append');
     end
     
+    % GYROSCOPE
+    disp("GYROSCOPE");
     if isempty(algorithms) || any(ismember(algorithms, {'predict_gyro', 'complete'}))
-        writecell({'fake timestamp', 'gyro_x','gyro_y','gyro_z'},ConDataPath+"/"+folder+"/NAS_GyroData_"+settings.mission+".csv", 'WriteMode', 'overwrite');
-        writecell(input_data(2:end, [1 5]),ConDataPath+"/"+folder+"/NAS_GyroData_"+settings.mission+".csv", 'WriteMode', 'append');
+        writelines("GyroscopeData gyro[] = {", GyroData_File, 'WriteMode', 'overwrite');
+        for ii = 2:length(t_nas)
+            writelines("{", GyroData_File, 'WriteMode', 'append');
+            writecell(input_data(ii, [1 5]), GyroData_File, 'WriteMode', 'append');
+            writelines("},", GyroData_File, 'WriteMode', 'append');
+        end
+        writelines("};", GyroData_File, 'WriteMode', 'append');
     end
 
+    % GPS
+    disp("GPS");
     if isempty(algorithms) || any(ismember(algorithms, {'correct_gps', 'complete'}))
-        writecell({'fake timestamp', 'gps_lat','gps_lon','gps_z', 'gps_vx', 'gps_vy', 'gps_vz'},ConDataPath+"/"+folder+"/NAS_GPSData_"+settings.mission+".csv", 'WriteMode', 'overwrite');
-        writecell(input_data(2:end, [1 6]),ConDataPath+"/"+folder+"/NAS_GPSData_"+settings.mission+".csv", 'WriteMode', 'append');
+        writelines("GPSData gps[] = {", GPSData_File, 'WriteMode', 'overwrite');
+        for ii = 2:length(t_nas)
+            writelines("{", GPSData_File, 'WriteMode', 'append');
+            writecell(input_data(ii, [1 6]), GPSData_File, 'WriteMode', 'append');
+            writelines("},", GPSData_File, 'WriteMode', 'append');
+        end
+        writelines("};", GPSData_File, 'WriteMode', 'append');
     end
     
+    % BAROMETER
+    disp("BAROMETER");
     if isempty(algorithms) || any(ismember(algorithms, {'correct_baro', 'complete'}))
-        writecell({'fake timestamp', 'barometer_altitude'},ConDataPath+"/"+folder+"/NAS_BaroData_"+settings.mission+".csv", 'WriteMode', 'overwrite');
-        writecell(input_data(2:end, [1 7]),ConDataPath+"/"+folder+"/NAS_BaroData_"+settings.mission+".csv", 'WriteMode', 'append');
+        writelines("PressureData baro[] = {", BaroData_File, 'WriteMode', 'overwrite');
+        for ii = 2:length(t_nas)
+            writelines("{", BaroData_File, 'WriteMode', 'append');
+            writecell(input_data(ii, [1 7]), BaroData_File, 'WriteMode', 'append');
+            writelines("},", BaroData_File, 'WriteMode', 'append');
+        end
+        writelines("};", BaroData_File, 'WriteMode', 'append');
     end
+    disp(input_data(10, [1 7]));
 
+    % MAGNETOMETER
+    disp("MAGNETOMETER");
     if isempty(algorithms) || any(ismember(algorithms, {'correct_mag', 'complete'}))
-        writecell({'fake timestamp', 'mag_x','mag_y','mag_z'},ConDataPath+"/"+folder+"/NAS_MagData_"+settings.mission+".csv", 'WriteMode', 'overwrite');
-        writecell(input_data(2:end, [1 8]),ConDataPath+"/"+folder+"/NAS_MagData_"+settings.mission+".csv", 'WriteMode', 'append');
+        writelines("MagnetometerData mag[]  = {", MagData_File, 'WriteMode', 'overwrite');
+        for ii = 2:length(t_nas)
+            writelines("{", MagData_File, 'WriteMode', 'append');
+            writecell(input_data(ii, [1 8]), MagData_File, 'WriteMode', 'append');
+            writelines("},", MagData_File, 'WriteMode', 'append');
+        end
+        writelines("};", MagData_File, 'WriteMode', 'append');
     end
     
+    % PITOT
+    disp("PITOT");
     if isempty(algorithms) || any(ismember(algorithms, {'correct_pitot', 'complete'}))
-        writecell({'fake timestamp', 'pitot_airspeed'},ConDataPath+"/"+folder+"/NAS_PitotData_"+settings.mission+".csv", 'WriteMode', 'overwrite');
-        writecell(input_data(2:end, [1 9]),ConDataPath+"/"+folder+"/NAS_PitotData_"+settings.mission+".csv", 'WriteMode', 'append');
+        writelines("PitotData pitot[] = {", PitotData_File, 'WriteMode', 'overwrite');
+        for ii = 2:length(t_nas)
+            writelines("{", PitotData_File, 'WriteMode', 'append');
+            writecell(input_data(ii, [1 9]), PitotData_File, 'WriteMode', 'append');
+            writelines("},", PitotData_File, 'WriteMode', 'append');
+        end
+        writelines("};", PitotData_File, 'WriteMode', 'append');
     end
-
-    writecell({'fake timestamp', 'x', 'y', 'z', 'vx', 'vy', 'vz', 'qx','qy','qz','qw','bx','by','bz'},ConDataPath+"/"+folder+"/NAS_Output_StateData_"+settings.mission+".csv", 'WriteMode', 'overwrite');
-    writecell(output_data(2:end, 1:2),ConDataPath+"/"+folder+"/NAS_Output_StateData_"+settings.mission+".csv", 'WriteMode', 'append');
-
+    
+    % NAS OUTPUT
+    disp("NAS OUTPUT");
+    writelines("NASState nasOutputs[] = {",Output_StateData_File, 'WriteMode', 'append');
+    for ii = 2:length(t_nas)
+        writelines("{" + ii + ",{", Output_StateData_File, 'WriteMode', 'append');
+        writecell(output_data(end, 2), Output_StateData_File, 'WriteMode', 'append');
+        writelines("}},", Output_StateData_File, 'WriteMode', 'append');
+    end
+    writelines("};", Output_StateData_File, 'WriteMode', 'append');
 end
