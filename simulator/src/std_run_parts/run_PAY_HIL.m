@@ -34,7 +34,6 @@ OUTPUTS:
     num_data_magn = ceil(frequencies.magnetometerFrequency * simulationPeriod);
     num_data_gps = ceil(frequencies.gpsFrequency* simulationPeriod);
     num_data_baro = ceil(frequencies.barometerFrequency * simulationPeriod);
-    num_data_chPress = ceil(frequencies.chamberPressureFrequency * simulationPeriod);
     num_data_pitot = ceil(frequencies.pitotFrequency* simulationPeriod);
 
     
@@ -55,9 +54,8 @@ OUTPUTS:
         dataToBeSent.barometer_sens(i, :) = sensorData.barometer_sens{i}.measures(1:num_data_baro);
     end
 
-    dataToBeSent.pitot.dp = sensorData.pitot.pTotMeasures(1:num_data_pitot) - sensorData.pitot.pStatMeasures(1:num_data_pitot);
-
-    dataToBeSent.pitot.pStatic =  sensorData.pitot.pStatMeasures(1:num_data_pitot);
+    dataToBeSent.staticPressure = sensorData.pitot.pStatMeasures(1:num_data_pitot);
+    dataToBeSent.dynamicPressure = sensorData.pitot.pTotMeasures(1:num_data_pitot);
 
     dataToBeSent.temperature = sensorData.barometer_sens{1}.temperature(1);
 
