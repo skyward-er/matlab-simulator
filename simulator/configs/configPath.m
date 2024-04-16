@@ -25,6 +25,8 @@ if conf.HIL
     addpath('../hardware_in_the_loop/');
     addpath('../hardware_in_the_loop/serialbridge');
     run('HILconfig.m');
+    
+    serialbridge('CloseAll');
     if strcmp(settings.board,"main")
         serialbridge('Open','main', hil_settings.serial_port_main, hil_settings.baudrate);
     elseif strcmp(settings.board,"payload")
