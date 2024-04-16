@@ -164,13 +164,18 @@ elseif conf.HIL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 end %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-switch settings.board
-    case "main"
-        settings.parafoil = false;
-    case "payload"
-        settings.parafoil = true;
-    case "full_hil"
-        settings.parafoil = true;
+if(conf.HIL)
+    switch settings.board
+        case "main"
+            settings.parafoil = false;
+            settings.flagADA = false;
+        case "payload"
+            settings.parafoil = true;
+            settings.flagADA = true;
+        case "full_hil"
+            settings.parafoil = true;
+            settings.flagADA = false;
+    end
 end
 
 if not(settings.ballisticFligth) && settings.ascentOnly
