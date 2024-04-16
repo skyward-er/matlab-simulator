@@ -138,6 +138,13 @@ else
                 sensorTot.comb_chamber.measures(end) = 0;
             end
             if ~settings.shutdown
+                [sensorData,sensorTot,settings,contSettings] =run_MTR_SIM (sensorData,sensorTot,settings,contSettings,t1);
+                m = sensorData.mea.estimated_mass(end);
+                sensorTot.mea.pressure(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.estimated_pressure,1)-1,:) = sensorData.mea.estimated_pressure;
+                sensorTot.mea.mass(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.estimated_mass',1)-1,:) = sensorData.mea.estimated_mass';
+                sensorTot.mea.prediction(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.predicted_apogee',1)-1,:) = sensorData.mea.predicted_apogee';
+                sensorTot.mea.time(sensorTot.mea.n_old:sensorTot.mea.n_old + size(t1,1)-1,:) = t1;
+            end
 
                 [sensorData,sensorTot,settings,contSettings] =run_MTR_SIM (sensorData,sensorTot,settings,contSettings,t1, engineT0,dt_ode);
                 sensorTot.mea.t_shutdown = settings.t_shutdown;
