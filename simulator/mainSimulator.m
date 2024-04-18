@@ -29,14 +29,15 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 
-if ~exist('flagSubmodulesUpdated','var') % every first time you use the simulator checks for updates, then stops doing it (note: if you clear all vars it starts doing it)
-    close all; clear; clc;
-else
-    close all; clc;
-    clearvars -except flagSubmodulesUpdated
-end
+% Whether to run the simulator in minimal mode(data generation only) or not
+minimal = exist('minimal','var') && minimal == true;
+% Whether to check if the submodules are updated or not
+flagSubmodulesUpdated = exist('flagSubmodulesUpdated','var') && flagSubmodulesUpdated == true;
 
-%% path loading
+close all; clc;
+clearvars -except minimal flagSubmodulesUpdated;
+
+%% Setup paths
 
 restoredefaultpath;
 filePath = fileparts(mfilename('fullpath'));
@@ -51,19 +52,19 @@ addpath(genpath(currentPath));
 % Common Functions path
 addpath(genpath(commonFunctionsPath));
 
-%% CHECK SUBMODULES UPDATES
-% if ~exist('flagSubmodulesUpdated','var')
-%     checkSubmodules;
-%     flagSubmodulesUpdated = true;
-% end
+%% Check submodules status
+if ~flagSubmodulesUpdated && ~minimal
+    checkSubmodules;
+    flagSubmodulesUpdated = true;
+end
 
-%% CONFIGs
+%% Configs
 
 conf.script = "simulator"; % this defines which configuration scripts to run
 settings.montecarlo = false;
-configSimulator; 
+configSimulator;
 
-%% ALGORITHM TUNING
+%% Algorithm tuning
 % basically if this is true sets the randomic value of the wind to the same
 % values for each simulation, so it has the same atmospheric conditions
 % each time
@@ -72,45 +73,17 @@ if settings.tuning
   	rng('default');
 end 
 
-%% SET SPECIFIC PARAMETERS FOR A PRE LAUNCH SIMULATION
-
-%  config_SpecialConditions;
-
-%% START THE SIMULATION
-% T = vector of time used by ODE, [s] also for Tf Ta
-% Y = State = ( x y z | u v w | p q r | q0 q1 q2 q3 | thetax thetay thetaz | ap_ref ) also for Ya,Yf corresponding to T
-
-%% simulation:
+%% Simulation
 [simOutput] = std_run(settings,contSettings);
 
-%% PLOTS
-if ~exist("../commonFunctions/graphics/general-utilities/","dir")
-    warning('To export file you need to download the repository, read the README file in the folder')
+%% Plots
+if ~minimal
+    if ~exist("../commonFunctions/graphics/general-utilities/","dir")
+        warning('To export file you need to download the repository, read the README file in the folder')
+    end
+    std_plots(simOutput,settings,contSettings)
+    sensor_plots(simOutput)
 end
-std_plots(simOutput,settings,contSettings)
-sensor_plots(simOutput)
-% report_plots(simOutput,settings,contSettings)
-
-%% state visualiser
-% animateOrientation(simOutput.Y(:,11),simOutput.Y(:,12),simOutput.Y(:,13),simOutput.Y(:,10),simOutput.t)
-% animateOrientation(simOutput.NAS(:,7),simOutput.NAS(:,8),simOutput.NAS(:,9),simOutput.NAS(:,10),simOutput.t_nas)
 
 %% DATA-PRINTING
 printOutput(simOutput,settings);
-
-%% save data
-% save("Simulation_log.mat","Tf","Yf","data_flight")
-
-%% export data for HIL simulations /cpp usage: 
-% the files are stored in the folder 
-if settings.flagExportCSV % this is set in configFlags
-    % air brakes
-    export_HILdataMTR;
-    export_HILdataABK;
-    % parafoil
-    if settings.scenario == "descent" || settings.scenario == "full flight"
-        export_HILdataPRF;
-    end
-    export_HILdataADA
-    generate_NAS_catch_file(simOutput, settings, ConDataPath);
-end
