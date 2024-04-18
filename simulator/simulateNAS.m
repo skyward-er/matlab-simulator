@@ -43,12 +43,12 @@ function nas_result = simulateNAS(sim_output, settings)
     %% Actual data used by the NAS
     t_nas = single(sim_output.sensors.nas.time);
 
-    acc_data    = single(zeros(length(t_nas)-1, size(sim_acc_data   , 2)-1    ));
-    gyro_data   = single(zeros(length(t_nas)-1, size(sim_gyro_data  , 2)-1    ));
-    mag_data    = single(zeros(length(t_nas)-1, size(sim_mag_data   , 2)-1    ));
-    baro_data   = single(zeros(length(t_nas)-1, size(sim_baro_data  , 2)-1    ));
-    pitot_data  = single(zeros(length(t_nas)-1, size(sim_pitot_data , 2)-1    ));
-    gps_data    = single(zeros(length(t_nas)-1, size(sim_gps_data   , 2)-1 + 5));
+    acc_data    = single(zeros(length(t_nas)-1, size(sim_acc_data   , 2)    ));
+    gyro_data   = single(zeros(length(t_nas)-1, size(sim_gyro_data  , 2)    ));
+    mag_data    = single(zeros(length(t_nas)-1, size(sim_mag_data   , 2)    ));
+    baro_data   = single(zeros(length(t_nas)-1, size(sim_baro_data  , 2)    ));
+    pitot_data  = single(zeros(length(t_nas)-1, size(sim_pitot_data , 2)    ));
+    gps_data    = single(zeros(length(t_nas)-1, size(sim_gps_data   , 2) + 5));
 
     input_data  = cell(length(t_nas)-1, 3);
     output_data = cell(length(t_nas)-1, 3);
@@ -68,38 +68,38 @@ function nas_result = simulateNAS(sim_output, settings)
 
         % Predict acc
         index_imu = sum(t_nas(idx) >= sim_acc_data(:,1));            
-        acc_data(idx, :) = sim_acc_data(index_imu, 2:end);
+        acc_data(idx, :) = [t_nas(idx) sim_acc_data(index_imu, 2:end)];
         
         [x_lin, ~, P_lin] = predictorLinear2(x_lin, P_lin, dt_k, sim_acc_data(index_imu, 2:end), x_quat(1:4), nas_struct.QLinear);
 
         % Predict gyro
         index_imu = sum(t_nas(idx) >= sim_gyro_data(:,1));            
-        gyro_data(idx, :) = sim_gyro_data(index_imu, 2:end);
+        gyro_data(idx, :) = [t_nas(idx) sim_gyro_data(index_imu, 2:end)];
         
         [x_quat, P_quat] = predictorQuat(x_quat, P_quat, sim_gyro_data(index_imu, 2:end), dt_k, nas_struct.Qq);
         
         % Correct gps
         index_gps = sum(t_nas(idx) >= sim_gps_data(:,1));
         [gps_coord(1), gps_coord(2), gps_coord(3)] = ned2geodetic(sim_gps_data(index_gps, 2), sim_gps_data(index_gps, 3), sim_gps_data(index_gps, 4), settings.lat0, settings.lon0, settings.z0, wgs84Ellipsoid);
-        gps_data(idx, :) = [gps_coord sim_gps_data(index_gps, 5:end) 0 0 0 16 3];
+        gps_data(idx, :) = [t_nas(idx) [gps_coord sim_gps_data(index_gps, 5:end) 0 0 0 16 3]];
         
         [x_lin, P_lin, ~] = correctionGPS(x_lin, P_lin, sim_gps_data(index_gps, 2:3), sim_gps_data(index_gps, 5:6), nas_struct.sigma_GPS, 16, 1);
 
         % Correct barometer
         index_baro = sum(t_nas(idx) >= sim_baro_data(:,1));
-        baro_data(idx, :) = sim_pressure_data(index_baro, 2);
+        baro_data(idx, :) = [t_nas(idx) sim_pressure_data(index_baro, 2)];
         
         [x_lin, P_lin, ~] = correctionBarometer(x_lin, P_lin, sim_baro_data(index_baro, 2), nas_struct.sigma_baro);
 
         % Correct magnetometer
         index_imu = sum(t_nas(idx) >= sim_mag_data(:,1));
-        mag_data(idx, :) = sim_mag_data(index_imu, 2:end);
+        mag_data(idx, :) = [t_nas(idx) sim_mag_data(index_imu, 2:end)];
         
         [x_quat, P_quat, ~, ~] = correctorQuat(x_quat, P_quat, sim_mag_data(index_imu, 2:end), nas_struct.sigma_mag, XYZ0*0.01);
 
         % Correct Pitot
         index_pitot = sum(t_nas(idx) >= sim_pitot_data(:,1));
-        pitot_data(idx, :) = sim_pitot_data(index_pitot, 2);
+        pitot_data(idx, :) = [t_nas(idx) sim_pitot_data(index_pitot, 2)];
         
         [x_lin, P_lin(4:6,4:6), ~] = correctionPitot_airspeed(x_lin, P_lin(4:6,4:6), sim_pitot_data(index_pitot, 2:end), nas_struct.sigma_pitot2, settings.OMEGA);
 
