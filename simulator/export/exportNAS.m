@@ -168,23 +168,25 @@ function export_state(data, file, target, type, data_types)
             cpp_data_types = data_types('cpp');
             data_type      = cpp_data_types(type);
             write(data_type + " " + type + "[] = {", file);
+            content = "";
             for idx = 2:length(data)
                 timestamp = data(idx, 1);
                 state_input = cell2mat(data(idx, 2));
                 state_input_strs = arrayfun(@(x) num2str(x), state_input, 'UniformOutput', false);
                 concat_state_input = strjoin(state_input_strs, ", ");
-                write("    {",                                   file);
-                write("        " + timestamp + ",",              file);
-                write("        {",                               file);
-                write("            " + concat_state_input + ",", file);
-                write("        }",                               file);
-                write("    },",                                  file);
+                content = content + "    {"                                   + newline;
+                content = content + "        " + timestamp + ","              + newline;
+                content = content + "        {"                               + newline;
+                content = content + "            " + concat_state_input + " " + newline;
+                content = content + "        }"                               + newline;
+                content = content + "    },"                                  + newline;
 
                 if mod(idx, 100) == 0
                     disp("Exporting " + type + " to: " + file + " - " + idx + "/" + length(data));
                 end
             end
-            write("};", file);
+            write(content, file);
+            write("};",    file);
     end
     disp("Done exporting " + type + " to: " + file);
 end
@@ -203,20 +205,22 @@ function export_sensor_data(data, file, target, type, data_types)
             cpp_data_types = data_types('cpp');
             data_type      = cpp_data_types(type);
             write(data_type + " " + type + "[] = {", file);
+            content = "";
             for idx = 2:length(data)
                 sensor_input = data(idx, :);
                 sensor_input_strs = arrayfun(@(x) num2str(x), sensor_input, 'UniformOutput', false);
                 concat_sensor_input = strjoin(sensor_input_strs, ", ");
 
-                write("    {",                   file);
-                write(concat_sensor_input + ",", file);
-                write("    },",                  file);
+                content = content + "    {"                   + newline;
+                content = content + concat_sensor_input + "," + newline;
+                content = content + "    },"                  + newline;
 
                 if mod(idx, 100) == 0
                     disp("Exporting " + type + " to: " + file + " - " + idx + "/" + length(data));
                 end
             end
-            write("};", file);
+            write(content, file);
+            write("};",    file);
     end
     disp("Done exporting " + type + " to: " + file);
 end
@@ -280,6 +284,7 @@ function export_steps(data, file, target)
             write("};",                  file)
 
             write("NASPredictionSteps steps[] {", file);
+            content = "";
             for idx = 2:length(data)
                 steps     = data(idx);
                 acc_lin   = arrayfun(@(x) num2str(x), steps.acc_lin,   'UniformOutput', false);
@@ -291,16 +296,16 @@ function export_steps(data, file, target)
 
                 strs = strjoin([acc_lin gyro_quat gps_lin baro_lin mag_quat pitot_lin], ", ");
 
-                write("    {",    file);
-                write(strs + ",", file);
-                write("    },",   file);
-
+                content = content + "    {"    + newline;
+                content = content + strs + "," + newline;
+                content = content + "    },"   + newline;
                 
                 if mod(idx, 100) == 0
                     disp("Exporting steps to: " + file + " - " + idx + "/" + length(data));
                 end
             end
-            write("};", file);
+            write(content, file);
+            write("};",    file);
         end
     disp("Done exporting steps to: " + file + " - " + idx + "/" + length(data));
 end
