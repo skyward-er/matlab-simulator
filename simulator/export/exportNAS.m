@@ -103,17 +103,17 @@ function exportNAS(nas_data, settings, target)
 
     %% Export everything
 
-    % export_config(NAS_config_table, config_file, target);
+    export_config(NAS_config_table, config_file, target);
 
-    % export_state(nas_data.input,  input_state_file,  target, 'input' , data_types);
-    % export_state(nas_data.output, output_state_file, target, 'output', data_types);
+    export_state(nas_data.input,  input_state_file,  target, 'input' , data_types);
+    export_state(nas_data.output, output_state_file, target, 'output', data_types);
 
-    % export_sensor_data(nas_data.acc,   acc_file,   target, 'acc'  , data_types);
-    % export_sensor_data(nas_data.gyro,  gyro_file,  target, 'gyro' , data_types);
-    % export_sensor_data(nas_data.gps,   gps_file,   target, 'gps'  , data_types);
-    % export_sensor_data(nas_data.baro,  baro_file,  target, 'baro' , data_types);
-    % export_sensor_data(nas_data.mag,   mag_file,   target, 'mag'  , data_types);
-    % export_sensor_data(nas_data.pitot, pitot_file, target, 'pitot', data_types);
+    export_sensor_data(nas_data.acc,   acc_file,   target, 'acc'  , data_types);
+    export_sensor_data(nas_data.gyro,  gyro_file,  target, 'gyro' , data_types);
+    export_sensor_data(nas_data.gps,   gps_file,   target, 'gps'  , data_types);
+    export_sensor_data(nas_data.baro,  baro_file,  target, 'baro' , data_types);
+    export_sensor_data(nas_data.mag,   mag_file,   target, 'mag'  , data_types);
+    export_sensor_data(nas_data.pitot, pitot_file, target, 'pitot', data_types);
 
     export_steps(nas_data.steps, steps_file, target);
 end
