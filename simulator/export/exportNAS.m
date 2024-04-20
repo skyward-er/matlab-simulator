@@ -126,7 +126,7 @@ function export_config(data, file, target)
             file = file + ".h";
             clear_file(file);
             write_cpp_header(file);
-            write("NASConfig " + type + " {",                                        file);
+            write("NASConfig nasConfig {",                                           file);
             write("    "   + data.NAS_T            + ", ///< T",                     file);
             write("    "   + data.SIGMA_BETA       + ", ///< SIGMA_BETA",            file);
             write("    "   + data.SIGMA_W          + ", ///< SIGMA_W",               file);
@@ -166,11 +166,12 @@ function export_state(data, file, target, type, data_types)
             data_type      = cpp_data_types(type);
             write(data_type + " " + type + "[] = {", file);
             for idx = 2:length(data)
+                timestamp = data(idx, 1);
                 state_input = cell2mat(data(idx, 2));
                 state_input_strs = arrayfun(@(x) num2str(x), state_input, 'UniformOutput', false);
                 concat_state_input = strjoin(state_input_strs, ", ");
                 write("    {",                                   file);
-                write("        " + idx + ",",                    file);
+                write("        " + timestamp + ",",              file);
                 write("        {",                               file);
                 write("            " + concat_state_input + ",", file);
                 write("        }",                               file);
