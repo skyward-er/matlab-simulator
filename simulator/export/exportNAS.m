@@ -82,10 +82,11 @@ function exportNAS(nas_data, settings, target)
     baro_file         = out_path + "/baro";
     mag_file          = out_path + "/mag";
     pitot_file        = out_path + "/pitot";
+    steps_file        = out_path + "/steps";
 
     %% Data types
 
-    cpp_data_types = dictionary(                 ...
+    cpp_data_types = dictionary(       ...
         'input' , 'NASState',          ...
         'output', 'NASState',          ...
         'acc'   , 'AccelerometerData', ...
@@ -102,17 +103,19 @@ function exportNAS(nas_data, settings, target)
 
     %% Export everything
 
-    export_config(NAS_config_table, config_file, target);
+    % export_config(NAS_config_table, config_file, target);
 
-    export_state(nas_data.input,  input_state_file,  target, 'input' , data_types);
-    export_state(nas_data.output, output_state_file, target, 'output', data_types);
+    % export_state(nas_data.input,  input_state_file,  target, 'input' , data_types);
+    % export_state(nas_data.output, output_state_file, target, 'output', data_types);
 
-    export_sensor_data(nas_data.acc,   acc_file,   target, 'acc'  , data_types);
-    export_sensor_data(nas_data.gyro,  gyro_file,  target, 'gyro' , data_types);
-    export_sensor_data(nas_data.gps,   gps_file,   target, 'gps'  , data_types);
-    export_sensor_data(nas_data.baro,  baro_file,  target, 'baro' , data_types);
-    export_sensor_data(nas_data.mag,   mag_file,   target, 'mag'  , data_types);
-    export_sensor_data(nas_data.pitot, pitot_file, target, 'pitot', data_types);
+    % export_sensor_data(nas_data.acc,   acc_file,   target, 'acc'  , data_types);
+    % export_sensor_data(nas_data.gyro,  gyro_file,  target, 'gyro' , data_types);
+    % export_sensor_data(nas_data.gps,   gps_file,   target, 'gps'  , data_types);
+    % export_sensor_data(nas_data.baro,  baro_file,  target, 'baro' , data_types);
+    % export_sensor_data(nas_data.mag,   mag_file,   target, 'mag'  , data_types);
+    % export_sensor_data(nas_data.pitot, pitot_file, target, 'pitot', data_types);
+
+    export_steps(nas_data.steps, steps_file, target);
 end
 
 function export_config(data, file, target)
@@ -216,6 +219,90 @@ function export_sensor_data(data, file, target, type, data_types)
             write("};", file);
     end
     disp("Done exporting " + type + " to: " + file);
+end
+
+function export_steps(data, file, target)
+    disp("Exporting steps to: " + file + "...");
+    switch target
+        case 'csv'
+            file = file + ".csv";
+            clear_file(file);
+            writetable(cell2table(data), file);
+        case 'cpp'
+            file = file + ".h";
+            clear_file(file);
+            write_cpp_header(file);
+            write("struct NASPredictionSteps {", file);
+            % After acceleration prediction
+            write("float acc_x;",        file);
+            write("float acc_y;",        file);
+            write("float acc_z;",        file);
+            write("float acc_vx;",       file);
+            write("float acc_vy;",       file);
+            write("float acc_vz;",       file);
+            % After gyro prediction
+            write("float gyro_gx;",      file);
+            write("float gyro_gy;",      file);
+            write("float gyro_gz;",      file);
+            write("float gyro_gw;",      file);
+            write("float gyro_gbx;",     file);
+            write("float gyro_gby;",     file);
+            write("float gyro_gbz;",     file);
+            % After gps correction
+            write("float gps_x;",        file);
+            write("float gps_y;",        file);
+            write("float gps_z;",        file);
+            write("float gps_vx;",       file);
+            write("float gps_vy;",       file);
+            write("float gps_vz;",       file);
+            % After barometer correction
+            write("float baro_x;",       file);
+            write("float baro_y;",       file);
+            write("float baro_z;",       file);
+            write("float baro_vx;",      file);
+            write("float baro_vy;",      file);
+            write("float baro_vz;",      file);
+            % After magnetometer correction
+            write("float mag_gx;",       file);
+            write("float mag_gy;",       file);
+            write("float mag_gz;",       file);
+            write("float mag_gw;",       file);
+            write("float mag_gbx;",      file);
+            write("float mag_gby;",      file);
+            write("float mag_gbz;",      file);
+            % After pitot correction
+            write("float pitot_x;",      file);
+            write("float pitot_y;",      file);
+            write("float pitot_z;",      file);
+            write("float pitot_vx;",     file);
+            write("float pitot_vy;",     file);
+            write("float pitot_vz;",     file);
+            write("};",                  file)
+
+            write("NASPredictionSteps steps[] {", file);
+            for idx = 2:length(data)
+                steps     = data(idx);
+                acc_lin   = arrayfun(@(x) num2str(x), steps.acc_lin,   'UniformOutput', false);
+                gyro_quat = arrayfun(@(x) num2str(x), steps.gyro_quat, 'UniformOutput', false);
+                gps_lin   = arrayfun(@(x) num2str(x), steps.gps_lin,   'UniformOutput', false);
+                baro_lin  = arrayfun(@(x) num2str(x), steps.baro_lin,  'UniformOutput', false);
+                mag_quat  = arrayfun(@(x) num2str(x), steps.mag_quat,  'UniformOutput', false);
+                pitot_lin = arrayfun(@(x) num2str(x), steps.pitot_lin, 'UniformOutput', false);
+
+                strs = strjoin([acc_lin gyro_quat gps_lin baro_lin mag_quat pitot_lin], ", ");
+
+                write("    {",    file);
+                write(strs + ",", file);
+                write("    },",   file);
+
+                
+                if mod(idx, 100) == 0
+                    disp("Exporting steps to: " + file + " - " + idx + "/" + length(data));
+                end
+            end
+            write("};", file);
+        end
+    disp("Done exporting steps to: " + file + " - " + idx + "/" + length(data));
 end
 
 function write(text, file)
