@@ -126,7 +126,7 @@ function export_config(data, file, target)
             file = file + ".h";
             clear_file(file);
             write_cpp_header(file);
-            write("NASConfig nasConfig {",                                           file);
+            write("NASConfig " + type + " {",                                        file);
             write("    "   + data.NAS_T            + ", ///< T",                     file);
             write("    "   + data.SIGMA_BETA       + ", ///< SIGMA_BETA",            file);
             write("    "   + data.SIGMA_W          + ", ///< SIGMA_W",               file);
@@ -164,7 +164,7 @@ function export_state(data, file, target, type, data_types)
             write_cpp_header(file);
             cpp_data_types = data_types('cpp');
             data_type      = cpp_data_types(type);
-            write(data_type + " nasData[] = {", file);
+            write(data_type + " " + type + "[] = {", file);
             for idx = 2:length(data)
                 state_input = cell2mat(data(idx, 2));
                 state_input_strs = arrayfun(@(x) num2str(x), state_input, 'UniformOutput', false);
@@ -198,7 +198,7 @@ function export_sensor_data(data, file, target, type, data_types)
             write_cpp_header(file);
             cpp_data_types = data_types('cpp');
             data_type      = cpp_data_types(type);
-            write(data_type + " sensorData[] = {", file);
+            write(data_type + " " + type + "[] = {", file);
             for idx = 2:length(data)
                 sensor_input = data(idx, :);
                 sensor_input_strs = arrayfun(@(x) num2str(x), sensor_input, 'UniformOutput', false);
