@@ -154,6 +154,8 @@ else
     flagFlight = true;  % As on_ground state is skipped, this flag must be already set to true
 end
 
+time_on_ground = 5; % [s] - How much time the rockets stays on ramp before launch
+
 %% FLAG INITIALIZATION FOR HIL
 if settings.launchWindow
     launchWindow;
@@ -204,7 +206,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
             settings.flagAscent = false;
             
             % Transition to powered_ascent
-            if launchFlag &&  t0>10
+            if launchFlag &&  t0 > time_on_ground
                 state_lastTime(currentState) = t0;
                 
                 % Exit condition of on_ground / Entry contion of powered_ascent:
