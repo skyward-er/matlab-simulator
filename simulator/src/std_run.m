@@ -385,10 +385,8 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     if currentState == availableStates.on_ground || currentState == availableStates.landed
         % If the rocket is on groud or landed, the accelerometer should
         % meaasure the gravity acceleration.
-        % NOTE: For the on_ground state, the gravity direction should probably be rotated depending on
-        % the launch rail angles. For now this is not done as the error is
-        % low enough to not impact the nas estimation
-        settings.parout.acc = [9.81*ones(length(Tf), 1) zeros(length(Tf), 2) ];
+        Q_acc = quat2rotm(Q0');
+        settings.parout.acc = (Q_acc'*[zeros(length(Tf),2) -9.81*ones(length(Tf), 1)]')';
         settings.parout.m = settings.mTotalTime(1)*ones(1,length(Tf));
     else
         settings.parout.acc = parout.accelerometer.body_acc';
