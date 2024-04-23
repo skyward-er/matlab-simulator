@@ -137,7 +137,7 @@ availableStates.drogue_descent = 4;
 availableStates.parachute_descent = 5;
 availableStates.payload_descent = 6;
 availableStates.landed = 7;
-state_lastTime = zeros(1, 7);   % Vector to hold the last time each state was executed (length is num of states - 1)
+state_lastTime = zeros(1, 7);   % Vector to hold the last time each state was executed (1 x number of states)
 
 % Flags initial state
 flagAeroBrakes = false;
