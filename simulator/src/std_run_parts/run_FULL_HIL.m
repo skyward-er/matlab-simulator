@@ -90,7 +90,7 @@ OUTPUTS:
 
     % MOTOR
     % control nan
-    if isnan(sensorData.chamberPressure.measures(end)) || not(flags(1))
+    if isnan(sensorData.chamberPressure.measures(end)) || not(flagsArray(1))
         dataToBeSent.motor.chamberPressure = zeros(1,num_data_chPress);
     else
         dataToBeSent.motor.chamberPressure = sensorData.chamberPressure.measures(1:num_data_chPress); % transforming from mBar to Bar
@@ -115,17 +115,17 @@ OUTPUTS:
         actuatorData.ada.verticalSpeed = obswVals(3);
         actuatorData.ada.apogeeDetected = obswVals(4);
         actuatorData.ada.updating = obswVals(5);
-        // actuatorData.nas.n = obswVals(6);
-        // actuatorData.nas.e = obswVals(7);
-        // actuatorData.nas.d = obswVals(8);
-        // actuatorData.nas.vn = obswVals(9);
-        // actuatorData.nas.ve = obswVals(10);
-        // actuatorData.nas.vd = obswVals(11);
-        // actuatorData.nas.qx = obswVals(12);
-        // actuatorData.nas.qy = obswVals(13);
-        // actuatorData.nas.qz = obswVals(14);
-        // actuatorData.nas.qw = obswVals(15);
-        // actuatorData.nas.updating = obswVals(16);
+        % actuatorData.nas.n = obswVals(6);
+        % actuatorData.nas.e = obswVals(7);
+        % actuatorData.nas.d = obswVals(8);
+        % actuatorData.nas.vn = obswVals(9);
+        % actuatorData.nas.ve = obswVals(10);
+        % actuatorData.nas.vd = obswVals(11);
+        % actuatorData.nas.qx = obswVals(12);
+        % actuatorData.nas.qy = obswVals(13);
+        % actuatorData.nas.qz = obswVals(14);
+        % actuatorData.nas.qw = obswVals(15);
+        % actuatorData.nas.updating = obswVals(16);
         actuatorData.abk.updating = obswVals(17);
         actuatorData.mea.correctedPressure = obswVals(18);
         actuatorData.mea.estimatedMass = obswVals(19);
@@ -133,15 +133,15 @@ OUTPUTS:
         actuatorData.mea.updating = obswVals(21);
         actuatorData.actuators.airbrakesPercentage = obswVals(22);
         actuatorData.actuators.expulsionPercentage = obswVals(23);
-        // actuatorData.actuators.mainValvePercentage = obswVals(24);
-        // actuatorData.actuators.ventingValvePercentage = obswVals(25);
+        actuatorData.actuators.mainValvePercentage = obswVals(24);
+        actuatorData.actuators.ventingValvePercentage = obswVals(25);
         actuatorData.actuators.mainCutterState = obswVals(26);
         actuatorData.flags.flag_flight = logical(obswVals(27));
         actuatorData.flags.flag_ascent = logical(obswVals(28));
         actuatorData.flags.flag_burning = logical(obswVals(29));
         actuatorData.flags.flag_airbrakes = logical(obswVals(30));
         actuatorData.flags.flag_para1 = logical(obswVals(31));
-        // actuatorData.flags.flag_para2 = logical(obswVals(32));
+        % actuatorData.flags.flag_para2 = logical(obswVals(32));
 
     % Receive data from serial comunication for payload
         obswVals = serialbridge('Read','payload', 26);
@@ -166,18 +166,18 @@ OUTPUTS:
         actuatorData.guidance.deltaA = obswVals(18);
         actuatorData.guidance.currentTargetN = obswVals(19);
         actuatorData.guidance.currentTargetE = obswVals(20);
-        // actuatorData.flags.flag_flight = logical(obswVals(21));
-        // actuatorData.flags.flag_ascent = logical(obswVals(22));
-        // actuatorData.flags.flag_burning = logical(obswVals(23));
-        // actuatorData.flags.flag_airbrakes = logical(obswVals(24));
-        // actuatorData.flags.flag_para1 = logical(obswVals(25));
+        % actuatorData.flags.flag_flight = logical(obswVals(21));
+        % actuatorData.flags.flag_ascent = logical(obswVals(22));
+        % actuatorData.flags.flag_burning = logical(obswVals(23));
+        % actuatorData.flags.flag_airbrakes = logical(obswVals(24));
+        % actuatorData.flags.flag_para1 = logical(obswVals(25));
         actuatorData.flags.flag_para2 = logical(obswVals(26));
 
     % Receive data from serial comunication for motor
         obswVals = serialbridge('Read','motor', 2);
         
-        actuatorData.actuators.mainValvePercentage = obswVals(1);
-        actuatorData.actuators.ventingValvePercentage = obswVals(2);
+        % actuatorData.actuators.mainValvePercentage = obswVals(1);
+        % actuatorData.actuators.ventingValvePercentage = obswVals(2);
 
     
     % if the obsw sets flagFlight to true while the flag isLaunch is still
