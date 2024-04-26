@@ -247,7 +247,9 @@ while settings.flagStopIntegration && n_old < nmax                          % St
             lastAscentIndex = n_old-1;
 
             % Transitions out of unpowered_ascent: 
-            % drogue_descent if full_flight, stop simulation if ascent only
+            % drogue_descent if full_flight, 
+            % stop simulation if ascent only, 
+            % landed if apogee was never detected
             if flagApogee
                 state_lastTime(currentState) = t0;
 
@@ -262,6 +264,16 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                     if ~settings.montecarlo
                         disp("Requested transition to drogue descent");
                     end
+                end
+            elseif -Y0(end,3) < -1
+                % Exit condition of unpowered_ascent / Entry condition of landed:
+                flagAeroBrakes = false;
+                settings.flagAscent = false;
+                flagFlight = false;
+                idx_landing = n_old-1;
+                currentState = availableStates.landed;
+                if ~settings.montecarlo
+                    disp("Requested transition to landed");
                 end
             end
         case availableStates.drogue_descent
