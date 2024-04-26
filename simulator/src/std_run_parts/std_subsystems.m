@@ -99,7 +99,7 @@ end
 
 %% PARAFOIL
 if ~settings.flagAscent && settings.parafoil
-    if flagPara2
+    if flagOpenPara
         if contSettings.flagFirstControlPRF % set in
 
             t_parafoil = t1;

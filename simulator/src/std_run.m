@@ -142,7 +142,6 @@ state_lastTime = zeros(1, 7);   % Vector to hold the last time each state was ex
 % Flags initial state
 flagAeroBrakes = false;
 settings.flagAscent = false;
-flagPara2 = false;
 flagOpenPara = false; % Initial condition for parachute opening
 
 if ~strcmp(settings.scenario, 'descent')
@@ -290,7 +289,6 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                 eventExpulsion2 = true;
 
                 if settings.parafoil
-                    flagPara2 = true;
                     currentState = availableStates.payload_descent;
                     if ~settings.montecarlo
                         disp("Transition to payload descent");
