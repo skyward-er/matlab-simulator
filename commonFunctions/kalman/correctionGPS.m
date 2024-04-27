@@ -56,7 +56,7 @@ H              =  [  H11  H12  0  0  0  0;                                 %Pre-
                       0    0   0  1  0  0;
                       0    0   0  0  1  0;];                               %of the output function  
 
-R              =   (10^-6)*diag(sigma_GPS^2*ones(4,1)/sats);                       %VARIANCE MATRIX SCALED 
+R              =   sigma_GPS.*[1 1 max(1,vGPS)];                       %VARIANCE MATRIX SCALED 
                                                                            %TAKING INTO ACCOUNT
                                                                            %NUMBER OF SATELITES
                                                                            %AVAILABLE
