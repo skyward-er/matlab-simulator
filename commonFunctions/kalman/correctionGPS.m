@@ -1,4 +1,4 @@
-function [x,P,y_res] = correctionGPS(x_pred,P_pred,pGPS,vGPS,sigma_GPS,sats,fix, lat0, lon0)
+function [x,P,y_res] = correctionGPS(x_pred,P_pred,pGPS,vGPS,sigma_GPS,sats,fix, lat0, lon0, a, b)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
@@ -42,11 +42,6 @@ function [x,P,y_res] = correctionGPS(x_pred,P_pred,pGPS,vGPS,sigma_GPS,sats,fix,
 %---------------------------------------------------------------------------
 
 threshold      =   10e-11;
-
-% Model's coefficients
-
-a = 111132.95225;
-b = 111412.87733;
 
 % output of the system multiplied by 1000 to deal with magnitude of order
 % of covariance
