@@ -6,12 +6,13 @@ hardware in the loop script
 
 %% Prepare data to be sent to and read from obsw
 
-flagsArray = [isLaunch, settings.flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2];
+% flagsArray = [isLaunch, settings.flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2];
 
-% Add gravity acceleration only when still on ramp
-if ~flagFlight
-    sensorData.accelerometer.measures = sensorData.accelerometer.measures + (quat2dcm(Yf(end,10:13)) * [0;0;-9.81])';
-end
+% % Add gravity acceleration only when still on ramp - This is now
+% implemented for the on-ground condition
+% if ~flagFlight
+%     sensorData.accelerometer.measures = sensorData.accelerometer.measures + (quat2dcm(Yf(end,10:13)) * [0;0;-9.81])';
+% end
 
 % extract frequencies from settings struct
 freq = settings.frequencies;
@@ -23,26 +24,30 @@ else
     [hilData] = run_PAY_HIL(sensorData, sensorSettings, freq, flagsArray);
 end
 
-settings.lastLaunchFlag = launchFlag;
-launchFlag = hilData.flagsArray(1);
-settings.flagAscent = hilData.flagsArray(2);
-flagBurning = hilData.flagsArray(3);
-flagAeroBrakes = hilData.flagsArray(4);
-flagPara1 = hilData.flagsArray(5);
-flagPara2 = hilData.flagsArray(6);
+% settings.lastLaunchFlag = launchFlag;
+% launchFlag = hilData.flagsArray(1);
+% settings.flagAscent = hilData.flagsArray(2);
+% flagBurning = hilData.flagsArray(3);
+% flagAeroBrakes = hilData.flagsArray(4);
+% flagPara1 = hilData.flagsArray(5);
+% flagPara2 = hilData.flagsArray(6);
 
-if(flagPara1 >0)
-    eventExpulsion = true;
-end
+% if(flagPara1 >0)
+%     eventExpulsion = true;
+% end
+% 
+% if(flagPara2 >0)
+%     eventExpulsion2 = true;
+% end
 
-if(flagPara2 >0)
-    eventExpulsion2 = true;
-end
 
+% disp("HIL flight: " + hilData.flagsArray(1) + ", ascent: " + hilData.flagsArray(2) + ...
+%     ", burning: " + hilData.flagsArray(3) + ", airbrakes: " + hilData.flagsArray(4) + ...
+%     ", para1: " + hilData.flagsArray(5) + ", para2: " + hilData.flagsArray(6));
 
-disp("HIL flight: " + hilData.flagsArray(1) + ", ascent: " + hilData.flagsArray(2) + ...
-    ", burning: " + hilData.flagsArray(3) + ", airbrakes: " + hilData.flagsArray(4) + ...
-    ", para1: " + hilData.flagsArray(5) + ", para2: " + hilData.flagsArray(6));
+%% Update flags
+launchFlag = hilData.actuators.mainValvePercentage;
+flagApogee = hilData.actuators.expulsionPercentage;
 
 %% Update ADA data
 if ~settings.parafoil
@@ -55,10 +60,11 @@ if ~settings.parafoil
     sensorTot.ada.time(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1)-2)  = sensorData.ada.time(2:end);
     sensorTot.ada.n_old = sensorTot.ada.n_old + size(sensorData.ada.xp,1)-1;
 
+    flagOpenPara = hilData.actuators.cutterStatePercentage;
 else
     if settings.flagADA && settings.dataNoise
-        [sensorData, sensorTot, settings.ada]   =  run_ADA(sensorData, sensorTot, settings,t1);
-    end
+    [sensorData, sensorTot, settings.ada, flagApogee, flagOpenPara]   =  run_ADA(sensorData, sensorTot, settings,t1);
+end
 end
 
 %% Update NAS data
@@ -91,7 +97,7 @@ end
 if ~settings.parafoil
     if contains(settings.mission,'_2023') ||  contains(settings.mission,'_2024')
         lastShutdown = settings.shutdown;
-        settings.shutdown = not(flagBurning);
+        settings.shutdown = not(hilData.actuators.mainValvePercentage);
 
         if ~settings.shutdown
             sensorData.mea.estimated_mass = hilData.mea.estimatedMass;
@@ -109,25 +115,25 @@ if ~settings.parafoil
         if settings.shutdown && not(lastShutdown) && flagFlight     % Need to check if this happens only once or the condition can be met multiple times
             t_shutdown = Tf(end);
             settings.expShutdown = 1;
+            settings.shutdown = 1;
             settings.timeEngineCut = t_shutdown;
             settings.expTimeEngineCut = t_shutdown;
             settings.expMengineCut = m - settings.ms;
-            settings.shutdown = 1;
             settings = settingsEngineCut(settings);
             settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
             [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
             sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
-        elseif ~settings.shutdown && Tf(end) >= settings.tb
-            t_shutdown = settings.tb;
-            settings.expShutdown = 1;
-            settings.timeEngineCut = t_shutdown;
-            settings.expTimeEngineCut = t_shutdown;
-            settings.expMengineCut = m - settings.ms;
-            settings.shutdown = 1;
-            settings = settingsEngineCut(settings);
+        elseif ~settings.shutdown && Tf(end)-engineT0 >= settings.tb
+            settings.expShutdown = true;
+            settings.shutdown = true;
+            settings.t_shutdown = settings.tb;
+            settings.timeEngineCut = settings.t_shutdown;
+            settings.expTimeEngineCut = settings.t_shutdown;
+            % settings.expMengineCut = settings.parout.m(end) - settings.ms;
+            % settings = settingsEngineCut(settings);
             settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
             [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
-            sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
+            sensorTot.mea.t_shutdown = settings.t_shutdown; % to pass the value out of the std_run to the structOut
         end
     else
         if t0 > settings.motor.expTime(end)
@@ -135,47 +141,43 @@ if ~settings.parafoil
         end
     end
 else
-    if contains(settings.mission,'_2023') ||  contains(settings.mission,'_2024')
-        if Tf(end) <= settings.tb+0.5 &&...
-                (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
+    if (contains(settings.mission,'_2023') || contains(settings.mission,'_2024')) && currentState ~= availableStates.on_ground
+        if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
 
             if isnan(sensorTot.comb_chamber.measures(end))
                 sensorTot.comb_chamber.measures(end) = 0;
             end
             if ~settings.shutdown
-                [t_shutdown,settings,contSettings,sensorData] =run_MTR_SIM (contSettings,sensorData,settings,sensorTot,Tf);
-                m = sensorData.mea.estimated_mass(end);
-                sensorTot.mea.pressure(iTimes) = sensorData.mea.estimated_pressure;
-                sensorTot.mea.mass(iTimes) = sensorData.mea.estimated_mass;
-                sensorTot.mea.prediction(iTimes) = sensorData.mea.predicted_apogee;
-                sensorTot.mea.t_shutdown = t_shutdown;
-                sensorTot.mea.time(iTimes) = t1;
+
+                [sensorData,sensorTot,settings,contSettings] =run_MTR_SIM (sensorData,sensorTot,settings,contSettings,t1, engineT0,dt_ode);
+                sensorTot.mea.t_shutdown = settings.t_shutdown;
+
+                if  Tf(end)-engineT0 >= settings.tb
+                    settings.expShutdown = true;
+                    settings.shutdown = true;
+                    settings.t_shutdown = settings.tb;
+                    settings.timeEngineCut = settings.t_shutdown;
+                    settings.expTimeEngineCut = settings.t_shutdown;
+                    % settings.expMengineCut = settings.parout.m(end) - settings.ms;
+                    % settings = settingsEngineCut(settings);
+                    settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
+                    [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
+                    sensorTot.mea.t_shutdown = settings.t_shutdown; % to pass the value out of the std_run to the structOut
+                end
             end
 
-            if ~settings.shutdown && Tf(end) >= settings.tb
-                t_shutdown = settings.tb;
-                settings.expShutdown = 1;
-                settings.timeEngineCut = t_shutdown;
-                settings.expTimeEngineCut = t_shutdown;
-                settings.expMengineCut = m - settings.ms;
-                settings.shutdown = 1;
-                settings = settingsEngineCut(settings);
-                settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
-                [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
-                sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
-            end
-        elseif ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')) && Tf(end) > settings.tb
+
+        elseif ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')) && Tf(end)-engineT0 > settings.tb
             settings.shutdown = 1;
             settings.expShutdown = 1;
             settings.timeEngineCut = settings.tb;
             settings.expTimeEngineCut = settings.tb;
         end
     else
-        if t0 > settings.motor.expTime(end)
+        if t0-engineT0 > settings.motor.expTime(end)
             settings.expShutdown = 1;
         end
     end
-
 end
 
 %% Update Airbrakes data
@@ -226,7 +228,7 @@ end
 
 %% PARAFOIL
 if ~settings.flagAscent && settings.parafoil 
-    if flagPara2
+    if flagOpenPara
         if contSettings.flagFirstControlPRF % set in
                 t_parafoil = t1;
                 t_last_prf_control = t1;

@@ -65,10 +65,10 @@ if nargin > 2
     settings.PHI = settings_mont.PHI;
 end
 
-if settings.electronics % global variables slow down a bit the comunication over thread, we don't need these for montecarlo analysis
-    global isLaunch
-    isLaunch = false;
-end
+% if settings.electronics % global variables slow down a bit the comunication over thread, we don't need these for montecarlo analysis
+%     global isLaunch
+%     isLaunch = false;
+% end
 
 %% ode states initialization ( initial conditions )
             % Attitude initial condition

@@ -52,12 +52,13 @@ switch board
         actuatorData.actuators.expulsionPercentage = obswVals(23);
         actuatorData.actuators.mainValvePercentage = obswVals(24);
         actuatorData.actuators.ventingValvePercentage = obswVals(25);
-        actuatorData.flags.flag_flight = logical(obswVals(26));
-        actuatorData.flags.flag_ascent = logical(obswVals(27));
-        actuatorData.flags.flag_burning = logical(obswVals(28));
-        actuatorData.flags.flag_airbrakes = logical(obswVals(29));
-        actuatorData.flags.flag_para1 = logical(obswVals(30));
-        actuatorData.flags.flag_para2 = logical(obswVals(31));
+        actuatorData.actuators.cutterStatePercentage = obswVals(26);
+        % actuatorData.flags.flag_flight = logical(obswVals(26));
+        % actuatorData.flags.flag_ascent = logical(obswVals(27));
+        % actuatorData.flags.flag_burning = logical(obswVals(28));
+        % actuatorData.flags.flag_airbrakes = logical(obswVals(29));
+        % actuatorData.flags.flag_para1 = logical(obswVals(30));
+        % actuatorData.flags.flag_para2 = logical(obswVals(31));
 
         disp(actuatorData.actuators);
     case "payload"
@@ -80,18 +81,19 @@ switch board
         actuatorData.actuators.parafoilLeftPercentage = obswVals(14);
         actuatorData.actuators.parafoilRightPercentage = obswVals(15);
         actuatorData.actuators.mainValvePercentage = obswVals(16);
-        actuatorData.actuators.ventingValvePercentage = obswVals(17);
-        actuatorData.actuators.releaseValvePercentage = obswVals(18);
-        actuatorData.actuators.fillingValvePercentage = obswVals(19);
-        actuatorData.actuators.disconnectValvePercentage = obswVals(20);
-        actuatorData.wes.windX = obswVals(21);
-        actuatorData.wes.windY = obswVals(22);
-        actuatorData.guidance.psiRef = obswVals(23);
-        actuatorData.guidance.deltaA = obswVals(24);
-        actuatorData.flags.flag_flight = logical(obswVals(25));
-        actuatorData.flags.flag_ascent = logical(obswVals(26));
-        actuatorData.flags.flag_burning = logical(obswVals(27));
-        actuatorData.flags.flag_airbrakes = logical(obswVals(28));
-        actuatorData.flags.flag_para1 = logical(obswVals(29));
-        actuatorData.flags.flag_para2 = logical(obswVals(30));
+        actuatorData.actuators.cutterStatePercentage = obswVals(17);
+        actuatorData.actuators.ventingValvePercentage = obswVals(18);
+        actuatorData.actuators.releaseValvePercentage = obswVals(19);
+        actuatorData.actuators.fillingValvePercentage = obswVals(20);
+        actuatorData.actuators.disconnectValvePercentage = obswVals(21);
+        actuatorData.wes.windX = obswVals(22);
+        actuatorData.wes.windY = obswVals(23);
+        actuatorData.guidance.psiRef = obswVals(24);
+        actuatorData.guidance.deltaA = obswVals(25);
+        % actuatorData.flags.flag_flight = logical(obswVals(25));
+        % actuatorData.flags.flag_ascent = logical(obswVals(26));
+        % actuatorData.flags.flag_burning = logical(obswVals(27));
+        % actuatorData.flags.flag_airbrakes = logical(obswVals(28));
+        % actuatorData.flags.flag_para1 = logical(obswVals(29));
+        % actuatorData.flags.flag_para2 = logical(obswVals(30));
 end

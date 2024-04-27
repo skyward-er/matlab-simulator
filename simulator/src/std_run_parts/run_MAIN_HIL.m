@@ -25,24 +25,24 @@ OUTPUTS:
     % email: pierfrancesco.bachini@skywarder.eu
     % Revision date: 27/08/2023
 
-    global isLaunch
+    % global isLaunch
 
     % set gps fix and number of satellites
     sensorData.gps.fix = 3;
     sensorData.gps.nsat = 16;
 
     % sending sensor data over the serial port
-    sendDataOverSerial(sensorData, sensorSettings, frequencies, flagsArray);
+    sendDataOverSerial(sensorData, sensorSettings, frequencies);%, flagsArray);
 
     % waiting for the response of the obsw
     actuatorData = readControlOutputFromSerial("main");
 
     % if the obsw sets flagFlight to true while the flag isLaunch is still
     % false, triggers the liftoff
-    if (actuatorData.flags.flag_flight && not(isLaunch))
-        isLaunch = true;
-        disp("Liftoff (obsw signal)!");
-    end
+    % if (actuatorData.flags.flag_flight && not(isLaunch))
+    %     isLaunch = true;
+    %     disp("Liftoff (obsw signal)!");
+    % end
 
     hilData.abk.airbrakes_opening = actuatorData.actuators.airbrakesPercentage;
     hilData.abk.updating = actuatorData.abk.updating;
@@ -61,10 +61,10 @@ OUTPUTS:
     hilData.mea = actuatorData.mea;
     hilData.actuators = actuatorData.actuators;
     hilData.actuators = rmfield(hilData.actuators, "airbrakesPercentage"); % Remove abk field as is already saved in another part of hilData
-    hilData.flagsArray = [actuatorData.flags.flag_flight, ...
-                  actuatorData.flags.flag_ascent, ...
-                  actuatorData.flags.flag_burning, ...
-                  actuatorData.flags.flag_airbrakes, ...
-                  actuatorData.flags.flag_para1, ...
-                  actuatorData.flags.flag_para2];
+    % hilData.flagsArray = [actuatorData.flags.flag_flight, ...
+    %               actuatorData.flags.flag_ascent, ...
+    %               actuatorData.flags.flag_burning, ...
+    %               actuatorData.flags.flag_airbrakes, ...
+    %               actuatorData.flags.flag_para1, ...
+    %               actuatorData.flags.flag_para2];
 end
