@@ -1,4 +1,4 @@
-function [x,P,y_res] = correctionGPS(x_pred,P_pred,pGPS,vGPS,sigma_GPS,sats,fix)
+function [x,P,y_res] = correctionGPS(x_pred,P_pred,pGPS,vGPS,sigma_GPS,sats,fix, lat0, lon0)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
@@ -40,20 +40,44 @@ function [x,P,y_res] = correctionGPS(x_pred,P_pred,pGPS,vGPS,sigma_GPS,sats,fix)
 %                       OF THE OUTPUT AND THE MEASSURE; ONLY FOR CHECKING
 %                       --> 1x3
 %---------------------------------------------------------------------------
-threshold      =   10e-11;
-H              =   [ 1 0 0 0 0 0;                                          %Pre-allocation of gradient 
-                     0 1 0 0 0 0;
-                     0 0 0 1 0 0;
-                     0 0 0 0 1 0;];                                        %of the output function  
 
-R              =   diag(sigma_GPS^2*ones(4,1)/sats);                       %VARIANCE MATRIX SCALED 
+% N.B.: This correction must be included only when acceleration norm is
+% less than 3.5g!(how to implement it?)
+
+if pGPS(1) == 0 
+    pGPS = [lat0, lon0];
+end
+
+threshold      =   10e-11;
+
+% Model's coefficients
+
+a = 111132.95225;
+b = 111412.87733;
+
+% output of the system multiplied by 1000 to deal with magnitude of order
+% of covariance
+
+H11 = 1000/a;
+H12 = 0;
+H21 = (1000000*x_pred(2)*sind(1000*lat0 + (1000*x_pred(1))/a))/(a*b*cosd(1000*lat0 + (1000*x_pred(1))/a)^2);
+H22 = 1000/(b*cosd(1000*lat0 + (1000*x_pred(1))/a));
+
+H              =  [  H11  H12  0  0  0  0;                                 %Pre-allocation of gradient 
+                     H21  H22  0  0  0  0;
+                      0    0   0  1  0  0;
+                      0    0   0  0  1  0;];                               %of the output function  
+
+R              =   (10^-6)*diag(sigma_GPS^2*ones(4,1)/sats);                       %VARIANCE MATRIX SCALED 
                                                                            %TAKING INTO ACCOUNT
                                                                            %NUMBER OF SATELITES
                                                                            %AVAILABLE
 
-if fix==1
+if fix==1    
 
-z              =   H*x_pred';
+lat = x_pred(1)/a + lat0;
+lon = x_pred(2)/(b*cosd(lat)) + lon0;
+z = [lat, lon, x_pred(4), x_pred(5)]';
 
 e              =   [pGPS';vGPS'] - z;
 
@@ -64,7 +88,6 @@ S              =   H*P_pred*H'+R;                    %Matrix necessary for the c
         K              =   P_pred*H'/S;              %Kalman correction factor
 
         x              =   x_pred + (K*e)';          %Corrector step of the state
-        
 
         P              =   (eye(6) - K*H)*P_pred;   %Corrector step of the state covariance
     else
@@ -80,3 +103,5 @@ z_corr         =   [x(1);x(2);x(4);x(5)];                %Corrected output expec
 
 y_res          =    [pGPS';vGPS'] - z_corr;
 end
+
+

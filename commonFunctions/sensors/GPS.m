@@ -32,8 +32,8 @@ classdef GPS < Sensor3D
             %  outLat,outLon,outAlt: sensor data with nois,
             %  offsets, etc.
             
-            mLat= 1/111.32e3 * state(1) + lat0;
-            mLon= 1  / (40075e3*cosd(mLat)) * state(2) + lon0;
+            mLat= 1/111132.95225 * state(1) + lat0;
+            mLon= 1  / (111412.87733*cosd(mLat)) * state(2) + lon0;
             
             inputArg = [mLat; mLon; state(3:end)]; 
             [outMeas] = sens@Sensor(obj,inputArg,temp);

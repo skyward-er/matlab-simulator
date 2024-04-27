@@ -153,11 +153,18 @@ if length(t_nas) > 1
 
         %% Corrections
         %gps
-        index_GPS   =  sum(t_nas(ii) >= t_gpstemp);
-        [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionGPS(x_lin(ii,:),P_lin(:,:,ii),sensorTot.gps.position_measures(index_GPS,1:2),...
-            sensorTot.gps.velocity_measures(index_GPS,1:2),nas.sigma_GPS,nsat,fix);
+
+        if norm(sensorTot.imu.accelerometer_measures(index_imu,:)) < 34 % around 3.5g
+
+            index_GPS   =  sum(t_nas(ii) >= t_gpstemp);
+            [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionGPS(x_lin(ii,:),P_lin(:,:,ii),sensorTot.gps.position_measures(index_GPS,1:2),...
+                sensorTot.gps.velocity_measures(index_GPS,1:2),nas.sigma_GPS,nsat,fix, settings.lat0, settings.lon0);
+
+        end
+
+
         % barometer
-        
+
         index_bar   =  sum(t_nas(ii) >= t_barotemp);
         [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometer(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.altitude(index_bar),nas.sigma_baro);
 
@@ -190,16 +197,16 @@ if length(t_nas) > 1
 
     end
 
-sensorData.nas.states= x;
-sensorData.nas.P = P_c;
-sensorData.nas.time = t_nas;
+    sensorData.nas.states= x;
+    sensorData.nas.P = P_c;
+    sensorData.nas.time = t_nas;
 
-if abs(sensorData.nas.states(1,3)) >nas.stopPitotAltitude+ settings.z0
-    nas.flagStopPitotCorrection = true;
-end
-sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2,:)  = sensorData.nas.states(2:end,:); % NAS output
-sensorTot.nas.time(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.time(2:end); % NAS time output
-sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1)-1;
+    if abs(sensorData.nas.states(1,3)) >nas.stopPitotAltitude+ settings.z0
+        nas.flagStopPitotCorrection = true;
+    end
+    sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2,:)  = sensorData.nas.states(2:end,:); % NAS output
+    sensorTot.nas.time(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.time(2:end); % NAS time output
+    sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1)-1;
 
 end
 end
