@@ -85,13 +85,15 @@ settings.servo.maxAngle = fix(settings.servo.maxAngle*1e9)/1e9; % to avoid compu
 settings.nas.dt_k          =   0.01;                                    % [s]        nas time step
 settings.nas.sigma_baro    =   5;                                       % [m/2]   estimated barometer variance    
 settings.nas.sigma_mag     =   1;                                       % [mgauss^2] estimated magnetometer variance    
-settings.nas.sigma_GPS     =   5;                                       % [mg^2]     estimated GPS variance
+settings.nas.sigma_GPS     =   diag([0.002 0.002 0.01/30 0.01/30]);               % [millideg^2 m^2/s^2]     estimated GPS variance. position from test, velocity from datasheet
 settings.nas.sigma_w       =   1;                                       % [rad^2/s^2]   estimated gyroscope variance;
 settings.nas.sigma_beta    =   1e-4;                                    % [rad/s^2]   estimated gyroscope bias variance;
 settings.nas.sigma_pitot   =  10;
 settings.nas.sigma_pitot2  =   100; 
 
 settings.nas.Mach_max = 0.5;  % max value for nas 
+settings.nas.GPS.a = 111132.95225;
+settings.nas.GPS.b = 111412.87733;
 settings.nas.v_thr         =   2.5;                                     % Velocity threshold for the detected apogee
 settings.nas.count_thr     =   5;                                       % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.nas.counter       =   0;

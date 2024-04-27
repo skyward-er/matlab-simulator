@@ -93,7 +93,8 @@ settings.nas.sigma_pitot   =   20^2;
 settings.nas.sigma_pitot2  =   100; 
 
 settings.nas.Mach_max = 0.4; % max mach number expected for the mission (for nas with pitot update purposes) - not currently used
-
+settings.nas.GPS.a = 111132.95225;
+settings.nas.GPS.b = 111412.87733;
 settings.nas.v_thr         =   2.5;                                     % Velocity threshold for the detected apogee
 settings.nas.count_thr     =   5;                                       % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.nas.counter       =   0;
