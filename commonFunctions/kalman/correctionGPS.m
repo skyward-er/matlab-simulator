@@ -41,13 +41,6 @@ function [x,P,y_res] = correctionGPS(x_pred,P_pred,pGPS,vGPS,sigma_GPS,sats,fix,
 %                       --> 1x3
 %---------------------------------------------------------------------------
 
-% N.B.: This correction must be included only when acceleration norm is
-% less than 3.5g!(how to implement it?)
-
-if pGPS(1) == 0 
-    pGPS = [lat0, lon0];
-end
-
 threshold      =   10e-11;
 
 % Model's coefficients
