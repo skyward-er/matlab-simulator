@@ -23,4 +23,4 @@ hil_settings.serial_port_motor = 'COM5';
 % Windows, e.g. 256000
 % Linux, e.g. 115200
 % See serialib for supported baudrates
-hil_settings.baudrate = 460800;
+hil_settings.baudrate = 256000;
