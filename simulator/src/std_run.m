@@ -517,22 +517,6 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     t0 = t0 + dt;
     t1 = t1 + dt;
 
-    % Update the stop integration flag - 
-    % This as been moved to the state machine 
-    % (NOTE: Still kept for now as "backup", will soon be removed)
-
-    % if settings.ascentOnly
-    %     % settings.flagStopIntegration = settings.flagAscent || not(settings.lastLaunchFlag);
-    %     settings.flagStopIntegration = ~flagApogee || currentState ~= availableStates.drogue_descent; 
-    %     % This is a problem for free ascent case as apogee is not triggered because ADA does not run
-    % else
-    %     % settings.flagStopIntegration = flagFlight || not(settings.lastLaunchFlag);
-    %     settings.flagStopIntegration = (flagFlight && currentState ~= availableStates.landed) || currentState == availableStates.on_ground;
-    %     % This is for sure not the best solution, could be probabily rewritten 
-    % end
-
-    % settings.flagMatr(n_old:n_old+n-1, :) = repmat([flagFlight, settings.flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2], n, 1);
-
     %% display step state
 
     if not(settings.montecarlo)
