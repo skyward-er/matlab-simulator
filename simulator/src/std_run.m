@@ -248,22 +248,17 @@ while settings.flagStopIntegration && n_old < nmax                          % St
 
             % Transitions out of unpowered_ascent: 
             % drogue_descent if full_flight, 
-            % stop simulation if ascent only, 
             % landed if apogee was never detected
             if flagApogee
                 state_lastTime(currentState) = t0;
 
-                if settings.ascentOnly      % If the simulation doesn't need to include the descent phase, exit from the simulation loop
-                    break;
-                else
-                    % Exit condition of unpowered_ascent / Entry condition of drogue_descent:
-                    flagAeroBrakes = false;
-                    settings.flagAscent = false;
-                    currentState = availableStates.drogue_descent;
-                    lastDrogueIndex = n_old-1;
-                    if ~settings.montecarlo
-                        disp("Requested transition to drogue descent");
-                    end
+                % Exit condition of unpowered_ascent / Entry condition of drogue_descent:
+                flagAeroBrakes = false;
+                settings.flagAscent = false;
+                currentState = availableStates.drogue_descent;
+                lastDrogueIndex = n_old-1;
+                if ~settings.montecarlo
+                    disp("Requested transition to drogue descent");
                 end
             elseif -Y0(end,3) < -1
                 % Exit condition of unpowered_ascent / Entry condition of landed:
@@ -341,6 +336,11 @@ while settings.flagStopIntegration && n_old < nmax                          % St
             break;
         otherwise
             error("Invalid state requested");
+    end
+    
+    % For ascent only we stop the simulation once the ode apogee has been reached
+    if vz(end) < 0 && flagFlight && settings.ascentOnly
+        break;
     end
     
     %% dynamics (ODE) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
