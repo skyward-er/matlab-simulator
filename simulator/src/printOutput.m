@@ -30,7 +30,7 @@ abs_V = vecnorm(V');
 [max_dist, imax_dist] = max(abs_X);
 [max_v, imax_v] = max(abs_V);
 
-Points = @(AA) 175 * ((-1*cos(AA*pi/3000)+1)/2)^10;
+Points = @(AA) 175 * ((-1*cos(AA*pi/settings.z_final)+1)/2)^10;
 
 
 
