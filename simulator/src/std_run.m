@@ -208,7 +208,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
             if launchFlag &&  t0 > time_on_ground
                 state_lastTime(currentState) = t0;
                 
-                % Exit condition of on_ground / Entry contion of powered_ascent:
+                % Exit condition of on_ground / Entry condition of powered_ascent:
                 % Here are setup all the time variables 
                 % that require to be offset depending on when the liftoff actually happens, 
                 % i.e. all the engine time variables that otherwise require the simulation time t0 
@@ -224,7 +224,8 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                 end
             end
         case availableStates.powered_ascent
-
+            
+            flagFlight = true;
             settings.flagAscent = true;
             lastAscentIndex = n_old-1;
 
