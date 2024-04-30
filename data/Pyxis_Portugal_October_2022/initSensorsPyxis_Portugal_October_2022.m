@@ -101,7 +101,7 @@ sensorSettings.magnetometer.dt                   =   0.01;                   % s
 sensorSettings.magnetometer.transMatrix          =   diag([1 1 1]);          % axis transformation
 
 %% initial GPS sensor from NEO-M9N
-sensorSettings.GPS = Sensor3D();                                      % lon, in degree lat in deree, alt in m
+sensorSettings.GPS = GPS();                                      % lon, in degree lat in deree, alt in m
 sensorSettings.GPS.noiseVariance          =   [2e-9*ones(2,1);5;0.0011*ones(3,1)]; % [deg; deg; m; m/s; m/s; m/s]^2
 sensorSettings.GPS.transMatrix            =   diag([1 1 1]);          % axis transformation
 sensorSettings.lat0                              =   lat0;
