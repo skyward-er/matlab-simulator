@@ -159,4 +159,4 @@ settings.mea.R=0.36;
 settings.mea.z_shutdown  = 1000;
 settings.mea.t_lower_shadowmode = 2.4; % minimunm burning time
 settings.mea.t_higher_shadowmode = 2.5; % maximum burning time % have to be to tuned (14/09/23)
-settings.shutdownValveDelay      = 0.6; % time from the shut down command to the actual valve closure
+settings.shutdownValveDelay      = 0.3; % time from the shut down command to the actual valve closure
