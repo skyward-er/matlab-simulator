@@ -1,16 +1,23 @@
 function [sensorData,sensorTot,settings,contSettings] = run_MTR_SIM (sensorData,sensorTot,settings,contSettings,T1, engineT0,dt_ode)
 
-% impose valve position
-if T1 < settings.timeEngineCut
-    u = 1;
-else
-    u = 0;
-end
-if ~settings.flagMEAInit
-    sensorTot.mea.time = T1-dt_ode;
-    settings.flagMEAInit =  true;
-end
-    [sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1);
+    % impose valve position
+    if T1 < settings.timeEngineCut
+        u = 1;
+    else
+        u = 0;
+    end
+    if ~settings.flagMEAInit
+        sensorTot.mea.time = T1-dt_ode;
+        settings.flagMEAInit =  true;
+    end
+    if contains(settings.mission, '_2023')
+        [sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1);
+    elseif contains(settings.mission, '_2024')
+        [sensorData.mea, sensorTot.mea] = run_MEA_LY(settings.mea,sensorTot.mea, sensorData.mea, sensorTot.comb_chamber.time, ...
+            sensorTot.nas.time, sensorTot.imu.time, settings.frequencies.MEAFrequency, ...
+            sensorData.nas.states, settings.S, sensorTot.comb_chamber.measures, sensorTot.imu.accelerometer_measures, ...
+            contSetting, T1, settings.CD_correction_shutDown, settings.z0);
+    end
     if sensorTot.mea.prediction(end) >= settings.mea.z_shutdown
         settings.mea.counter_shutdown = settings.mea.counter_shutdown + 1*floor(settings.frequencies.MEAFrequency/settings.frequencies.controlFrequency); % the last multiplication is to take into account the frequency difference
         if ~settings.expShutdown
@@ -27,20 +34,20 @@ end
                 settings.expTimeEngineCut = settings.t_shutdown;
             end
         end
-            if T1-engineT0 < settings.tb
-                settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, T1-engineT0);
-            else
-                settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, settings.tb);
-            end
-            settings.expMengineCut = settings.parout.m(end) - settings.ms;
-            if T1 > settings.timeEngineCut
-                settings.shutdown = true;
-                settings = settingsEngineCut(settings, engineT0);
-                settings.quatCut = [sensorTot.nas.states(end, 10) sensorTot.nas.states(end, 7:9)];
-                [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
-            end
+        if T1-engineT0 < settings.tb
+            settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, T1-engineT0);
+        else
+            settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, settings.tb);
+        end
+        settings.expMengineCut = settings.parout.m(end) - settings.ms;
+        if T1 > settings.timeEngineCut
+            settings.shutdown = true;
+            settings = settingsEngineCut(settings, engineT0);
+            settings.quatCut = [sensorTot.nas.states(end, 10) sensorTot.nas.states(end, 7:9)];
+            [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
+        end
 
-            contSettings.valve_pos = 0;
+        contSettings.valve_pos = 0;
         % else
         %     settings.t_shutdown = nan;
         % end
