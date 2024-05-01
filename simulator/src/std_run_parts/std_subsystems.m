@@ -61,8 +61,9 @@ if (contains(settings.mission,'_2023') || contains(settings.mission,'_2024')) &&
     end
 else
     if t0-engineT0 > settings.motor.expTime(end)
+        settings.shutdown = 1;
         settings.expShutdown = 1;
-        settings.expTimeEngineCut = settings.motor.expTime(end);
+        settings.expTimeEngineCut = engineT0 + settings.tb;
     end
 end
 
@@ -70,7 +71,8 @@ end
 %% ARB Control algorithm
 
 if flagAeroBrakes && settings.flagNAS && settings.control && ...
-        ~( strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine'))
+        ~( strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine')) && ...
+        mach < settings.MachControl && Tf(end) > settings.expTimeEngineCut + contSettings.ABK_shutdown_delay
 
     if (contains(settings.mission,'_2023') || contains(settings.mission,'_2024')) && contSettings.traj_choice == 1 && settings.expShutdown
         if ~strcmp(contSettings.algorithm,'complete')
