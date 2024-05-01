@@ -4,13 +4,13 @@ function [sensorDataMEA, sensorTotMEA] = run_MEA_LY(settingsMEA, sensorTotMEA, .
 
 
 % mass estimation
-K_t = MEAsettings.K_t; %verify if it agrees with actual name 
-V_e = MEAsettings.V_e;
-R_min = MEAsettings.Rs(1);
-R_max = MEAsettings.Rs(2);
+K_t = settingsMEA.K_t; %verify if it agrees with actual name 
+V_e = settingsMEA.V_e;
+R_min = settingsMEA.Rs(1);
+R_max = settingsMEA.Rs(2);
 
 %define constants
-g = cosd(86)*9.81;
+g = 9.81;
 
 dt = 1/MEAFrequency;
 alpha = (R_max - R_min)/(100^2-30^2);
@@ -21,9 +21,9 @@ c = -alpha*30^2+R_min;
 % define time array for mea algorithm
 t_mea = sensorTotMEA.time(end):1/MEAFrequency:T1;
 % initialise state update
-m = zeros(t_mea, 1);
+m = zeros(length(t_mea), 1);
 m(1) = sensorDataMEA.x(end);
-P(:,:,1) = sensorDataMEA.P(:,:,end);
+P(1) = sensorDataMEA.P(end);
 
 
 z_nas = zeros(length(t_mea), 1);
@@ -34,6 +34,12 @@ vnorm_nas(1) = norm(NAS_states(end,4:6));
 vz_nas(1) = NAS_states(end,6);
 
 for ii = 2:length(t_mea)
+    % retrieve NAS data
+    index_NAS = sum(t_mea(ii) >= t_nas); 
+    z_nas(ii,1) = NAS_states(index_NAS,3);
+    vnorm_nas(ii,1) = norm(NAS_states(index_NAS,4:6));
+    vz_nas(ii,1) = NAS_states(index_NAS,6);
+
     %propagation
     index_chambPress = sum(t_mea(ii) >= t_chambPress); 
     m(ii) = m(ii-1) - combChambMeasures(index_chambPress)*K_t*dt/V_e;
@@ -42,33 +48,31 @@ for ii = 2:length(t_mea)
 
     %correction
     
-    cd = CD_correction_shutDown*getDrag(vecnorm_nas(ii), -z_nas(ii), 0, coeff_Cd); %add correction shut_down??
+    cd = CD_correction_shutDown*getDrag(vnorm_nas(ii), -z_nas(ii), 0, coeff_Cd); %add correction shut_down??
     [~,~,~, rho] = atmosisa(-z_nas(ii));
+  
    
-    q = 0.5*rho*vecnorm_nas(ii)^2; %dinamic pressure
-    F_a = q*S_ref*cd;        %aerodinamic force
+    q = 0.5*rho*vnorm_nas(ii)^2; %dynamic pressure
+    F_a = q*S_ref*cd;        %aerodynamic force
     
     %linearized model
-    C2 = K_t .* (combChambMeasures(index_chambPress) ./ m) - g - F_a./m;
-    H = -K_t .* combChambMeasures(index_chambPress)./m.^2 + F_a ./ m.^2;
+    C2 = K_t .* (combChambMeasures(index_chambPress) ./ m(ii)) - g - F_a./m(ii);
+    H = -K_t .* combChambMeasures(index_chambPress)./m(ii).^2 + F_a ./ m(ii).^2;
     
-    R2 = alpha*q + c; 
+    R2 = 0.000001*(alpha*q + c); 
     
     S = H.*P(ii).*H + R2;
-     if ~det(S)<1e-3
+     if ~S<1e-3
         K = P(ii).*H ./ S;
-        P(ii) = (eye(3)-K*C2)*P(ii);
+        P(ii) = (1-K*H)*P(ii);
      end
      index_imu  = sum(t_mea(ii) >= t_imu);
 
-     m(ii) = m(ii) + K.*(imuAccelerometer(index_imu, 3) - g- C2); %z acc on column 3(?)
+     m(ii) = m(ii) + K.*(imuAccelerometer(index_imu, 1) - g- C2); 
     
 
-    % retrieve NAS data
-    index_NAS = sum(t_mea(ii) >= t_nas); %??
-    z_nas(ii,1) = NAS_states(index_NAS,3);
-    vnorm_nas(ii,1) = norm(NAS_states(index_NAS,4:6));
-    vz_nas(ii,1) = NAS_states(index_NAS,6);
+   
+   
 
     
 end
@@ -89,8 +93,8 @@ sensorDataMEA.predicted_apogee = predicted_apogee;
 
 % update total state
 sensorTotMEA.mass(sensorTotMEA.n_old:sensorTotMEA.n_old + length(sensorDataMEA.x)-2) = sensorDataMEA.x(2:end);
-sensorTotMEA.prediction(sensorTotMEA.n_old:sensorTotMEA.n_old + lenght(sensorDataMEA.x)-2) = sensorDataMEA.predicted_apogee(2:end);
-sensorTotMEA.time(sensorTotMEA.n_old:sensorTotMEA.n_old + lenght(sensorDataMEA.x)-2) = sensorDataMEA.time(2:end);
+sensorTotMEA.prediction(sensorTotMEA.n_old:sensorTotMEA.n_old + length(sensorDataMEA.x)-2) = sensorDataMEA.predicted_apogee(2:end);
+sensorTotMEA.time(sensorTotMEA.n_old:sensorTotMEA.n_old + length(sensorDataMEA.x)-2) = sensorDataMEA.time(2:end);
 sensorTotMEA.n_old = sensorTotMEA.n_old + size(m,1) - 1;
 
 
