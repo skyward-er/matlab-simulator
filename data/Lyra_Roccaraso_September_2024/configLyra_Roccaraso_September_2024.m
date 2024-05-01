@@ -157,5 +157,6 @@ settings.mea.Q=0.1*diag([1,1,1]);      % model noise covariance matrix
 settings.mea.R=0.36; 
 % shut down prediction altitude
 settings.mea.z_shutdown  = 1000;
-settings.mea.t_lower_shadowmode = 2.4; % minimunm burning time
-settings.mea.t_higher_shadowmode = 2.5; % maximum burning time % have to be to tuned (14/09/23)
+settings.mea.t_lower_shadowmode  = 0;        % minimunm burning time
+settings.mea.t_higher_shadowmode = 10;       % maximum burning time
+settings.shutdownValveDelay      = 0.2;      % have to be to tuned
