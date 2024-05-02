@@ -56,6 +56,16 @@ OUTPUTS:
         dataToBeSent.main.barometer_sens(i, :) = sensorData.barometer_sens{i}.measures(1:num_data_baro);
     end
 
+    % control nan
+    if isnan(sensorData.chamberPressure.measures(end)) || not(flagsArray(1))
+        dataToBeSent.chamberPressure = zeros(1,num_data_chPress);
+    else
+        dataToBeSent.chamberPressure = sensorData.chamberPressure.measures(1:num_data_chPress); % transforming from mBar to Bar
+    end
+
+    dataToBeSent.pitot.dp = sensorData.pitot.pTotMeasures(1:num_data_pitot) - sensorData.pitot.pStatMeasures(1:num_data_pitot);
+    dataToBeSent.pitot.pStatic =  sensorData.pitot.pStatMeasures(1:num_data_pitot);
+
     dataToBeSent.main.temperature = sensorData.barometer_sens{1}.temperature(1);
 
     arrayToBeSent.main = structToSingles(dataToBeSent.main);
@@ -79,9 +89,9 @@ OUTPUTS:
         dataToBeSent.payload.barometer_sens(i, :) = sensorData.barometer_sens{i}.measures(1:num_data_baro);
     end
 
-    dataToBeSent.payload.pitot.dp = sensorData.pitot.pTotMeasures(1:num_data_pitot) - sensorData.pitot.pStatMeasures(1:num_data_pitot);
+    dataToBeSent.payload.pitot.staticPressure = sensorData.pitot.pStatMeasures(1:num_data_pitot);
 
-    dataToBeSent.payload.pitot.pStatic =  sensorData.pitot.pStatMeasures(1:num_data_pitot);
+    dataToBeSent.payload.pitot.dynamicPressure = sensorData.pitot.pTotMeasures(1:num_data_pitot);
 
     dataToBeSent.payload.temperature = sensorData.barometer_sens{1}.temperature(1);
 
