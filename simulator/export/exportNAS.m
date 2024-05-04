@@ -1,5 +1,5 @@
 
-function exportNAS(nas_data, settings, target)
+function exportNAS(nas_data, settings, algorithm, target)
     if strcmpi(settings.scenario, 'descent')
         error("Catch test data cannot be used in descent case!");
     end
@@ -12,7 +12,9 @@ function exportNAS(nas_data, settings, target)
                 "/" + root_folder_name + ...
                 "/" + nas_folder_name + ...
                 "/" + mission_folder_name + ...
-                "/" + target;
+                "/" + target + ...
+                "/" + algorithm;
+
 
     disp("Exporting data to: " + out_path);
 
@@ -31,7 +33,10 @@ function exportNAS(nas_data, settings, target)
         settings.nas.sigma_beta,             ... SIGMA_BETA
         settings.nas.sigma_w,                ... SIGMA_W
         settings.nas.sigma_mag,              ... SIGMA_MAG
-        settings.nas.sigma_GPS,              ... SIGMA_GPS
+        settings.nas.sigma_GPS(1,1)          ... SIGMA_GPS_X
+        settings.nas.sigma_GPS(2,2)          ... SIGMA_GPS_Y
+        settings.nas.sigma_GPS(3,3)          ... SIGMA_GPS_Z
+        settings.nas.sigma_GPS(4,4)          ... SIGMA_GPS_W
         settings.nas.sigma_baro,             ... SIGMA_BAR
         settings.nas.QLinear(1,1),           ... SIGMA_POS
         settings.nas.QLinear(end, end),      ... SIGMA_VEL
@@ -48,7 +53,10 @@ function exportNAS(nas_data, settings, target)
         'SIGMA_BETA',           ...
         'SIGMA_W',              ...
         'SIGMA_MAG',            ...
-        'SIGMA_GPS',            ...
+        'SIGMA_GPS_X',          ...
+        'SIGMA_GPS_Y',          ...
+        'SIGMA_GPS_Z',          ...
+        'SIGMA_GPS_W',          ...
         'SIGMA_BAR',            ...
         'SIGMA_POS',            ...
         'SIGMA_VEL',            ...
@@ -83,6 +91,7 @@ function exportNAS(nas_data, settings, target)
     mag_file          = out_path + "/mag";
     pitot_file        = out_path + "/pitot";
     steps_file        = out_path + "/steps";
+    include_file      = out_path + "/include";
 
     %% Data types
 
@@ -103,22 +112,27 @@ function exportNAS(nas_data, settings, target)
 
     %% Export everything
 
-    export_config(NAS_config_table, config_file, target);
+    export_config(NAS_config_table, config_file, target, algorithm);
 
-    export_state(nas_data.input,  input_state_file,  target, 'input' , data_types);
-    export_state(nas_data.output, output_state_file, target, 'output', data_types);
+    export_state(nas_data.input,  input_state_file,  target, 'input' , data_types, algorithm);
+    export_state(nas_data.output, output_state_file, target, 'output', data_types, algorithm);
 
-    export_sensor_data(nas_data.acc,   acc_file,   target, 'acc'  , data_types);
-    export_sensor_data(nas_data.gyro,  gyro_file,  target, 'gyro' , data_types);
-    export_sensor_data(nas_data.gps,   gps_file,   target, 'gps'  , data_types);
-    export_sensor_data(nas_data.baro,  baro_file,  target, 'baro' , data_types);
-    export_sensor_data(nas_data.mag,   mag_file,   target, 'mag'  , data_types);
-    export_sensor_data(nas_data.pitot, pitot_file, target, 'pitot', data_types);
+    export_sensor_data(nas_data.acc,   acc_file,   target, 'acc'  , data_types, algorithm);
+    export_sensor_data(nas_data.gyro,  gyro_file,  target, 'gyro' , data_types, algorithm);
+    export_sensor_data(nas_data.gps,   gps_file,   target, 'gps'  , data_types, algorithm);
+    export_sensor_data(nas_data.baro,  baro_file,  target, 'baro' , data_types, algorithm);
+    export_sensor_data(nas_data.mag,   mag_file,   target, 'mag'  , data_types, algorithm);
+    export_sensor_data(nas_data.pitot, pitot_file, target, 'pitot', data_types, algorithm);
 
-    export_steps(nas_data.steps, steps_file, target);
+    export_steps(nas_data.steps, steps_file, target, algorithm);
+
+    if strcmp(target, 'cpp')
+        includes = [cpp_data_types.keys' "steps" "config"];
+        generate_cpp_include_file(include_file, includes);
+    end
 end
 
-function export_config(data, file, target)
+function export_config(data, file, target, algorithm)
     disp("Exporting config to: " + file + "...");
     switch target
         case 'csv'
@@ -129,32 +143,35 @@ function export_config(data, file, target)
             file = file + ".h";
             clear_file(file);
             write_cpp_header(file);
-            write("NASConfig nasConfig {",                                           file);
-            write("    "   + data.NAS_T            + ", ///< T",                     file);
-            write("    "   + data.SIGMA_BETA       + ", ///< SIGMA_BETA",            file);
-            write("    "   + data.SIGMA_W          + ", ///< SIGMA_W",               file);
-            write("    "   + 10                    + ", ///< SIGMA_ACC [simulated]", file);
-            write("    "   + data.SIGMA_MAG        + ", ///< SIGMA_MAG",             file);
-            write("    "   + data.SIGMA_GPS        + ", ///< SIGMA_GPS",             file);
-            write("    "   + data.SIGMA_BAR        + ", ///< SIGMA_BAR",             file);
-            write("    "   + data.SIGMA_POS        + ", ///< SIGMA_POS",             file);
-            write("    "   + data.SIGMA_VEL        + ", ///< SIGMA_VEL",             file);
-            write("    "   + data.SIGMA_PITOT      + ", ///< SIGMA_PITOT",           file);
-            write("    "   + data.P_POS            + ", ///< P_POS",                 file);
-            write("    "   + data.P_POS_VERTICAL   + ", ///< P_POS_VERTICAL",        file);
-            write("    "   + data.P_VEL            + ", ///< P_VEL",                 file);
-            write("    "   + data.P_VEL_VERTICAL   + ", ///< P_VEL_VERTICAL",        file);
-            write("    "   + data.P_ATT            + ", ///< P_ATT",                 file);
-            write("    "   + data.P_BIAS           + ", ///< P_BIAS",                file);
-            write("    "   + 6                     + ", ///< SATS_NUM [simulated]",  file);
-            write("    { " + data.MAG_NED_X + ", " + ...
-                             data.MAG_NED_Y + ", " + ...
-                             data.MAG_NED_Z + " }" + ", ///< NED_MAG",               file);
-            write("};",                                                              file);
+            write("NASConfig " + algorithm + "_nas_config {",                          file);
+            write("    "   + data.NAS_T              + ", ///< T",                     file);
+            write("    "   + data.SIGMA_BETA         + ", ///< SIGMA_BETA",            file);
+            write("    "   + data.SIGMA_W            + ", ///< SIGMA_W",               file);
+            write("    "   + 10                      + ", ///< SIGMA_ACC [simulated]", file);
+            write("    "   + data.SIGMA_MAG          + ", ///< SIGMA_MAG",             file);
+            write("    { " + data.SIGMA_GPS_X + ", " + ...
+                             data.SIGMA_GPS_Y + ", " + ...
+                             data.SIGMA_GPS_Z + ", " + ...
+                             data.SIGMA_GPS_W + " }" + ", ///< SIGMA_GPS",             file);
+            write("    "   + data.SIGMA_BAR          + ", ///< SIGMA_BAR",             file);
+            write("    "   + data.SIGMA_POS          + ", ///< SIGMA_POS",             file);
+            write("    "   + data.SIGMA_VEL          + ", ///< SIGMA_VEL",             file);
+            write("    "   + data.SIGMA_PITOT        + ", ///< SIGMA_PITOT",           file);
+            write("    "   + data.P_POS              + ", ///< P_POS",                 file);
+            write("    "   + data.P_POS_VERTICAL     + ", ///< P_POS_VERTICAL",        file);
+            write("    "   + data.P_VEL              + ", ///< P_VEL",                 file);
+            write("    "   + data.P_VEL_VERTICAL     + ", ///< P_VEL_VERTICAL",        file);
+            write("    "   + data.P_ATT              + ", ///< P_ATT",                 file);
+            write("    "   + data.P_BIAS             + ", ///< P_BIAS",                file);
+            write("    "   + 6                       + ", ///< SATS_NUM [simulated]",  file);
+            write("    { " + data.MAG_NED_X + ", "   + ...
+                             data.MAG_NED_Y + ", "   + ...
+                             data.MAG_NED_Z + " }"   + ", ///< NED_MAG",               file);
+            write("};",                                                                file);
     end
 end
 
-function export_state(data, file, target, type, data_types)
+function export_state(data, file, target, type, data_types, algorithm)
     disp("Exporting " + type + " to: " + file + "...");
     switch target
         case 'csv'
@@ -167,7 +184,7 @@ function export_state(data, file, target, type, data_types)
             write_cpp_header(file);
             cpp_data_types = data_types('cpp');
             data_type      = cpp_data_types(type);
-            write(data_type + " " + type + "[] = {", file);
+            write(data_type + " " + algorithm + "_" + type + "[] = {", file);
             content = "";
             for idx = 2:length(data)
                 timestamp = data(idx, 1);
@@ -180,10 +197,6 @@ function export_state(data, file, target, type, data_types)
                 content = content + "            " + concat_state_input + " " + newline;
                 content = content + "        }"                               + newline;
                 content = content + "    },"                                  + newline;
-
-                if mod(idx, 100) == 0
-                    disp("Exporting " + type + " to: " + file + " - " + idx + "/" + length(data));
-                end
             end
             write(content, file);
             write("};",    file);
@@ -191,7 +204,7 @@ function export_state(data, file, target, type, data_types)
     disp("Done exporting " + type + " to: " + file);
 end
 
-function export_sensor_data(data, file, target, type, data_types)
+function export_sensor_data(data, file, target, type, data_types, algorithm)
     disp("Exporting " + type + " to: " + file + "...");
     switch target
         case 'csv'
@@ -204,7 +217,7 @@ function export_sensor_data(data, file, target, type, data_types)
             write_cpp_header(file);
             cpp_data_types = data_types('cpp');
             data_type      = cpp_data_types(type);
-            write(data_type + " " + type + "[] = {", file);
+            write(data_type + " " + algorithm + "_" + type + "[] = {", file);
             content = "";
             for idx = 2:length(data)
                 sensor_input = data(idx, :);
@@ -214,10 +227,6 @@ function export_sensor_data(data, file, target, type, data_types)
                 content = content + "    {"                   + newline;
                 content = content + concat_sensor_input + "," + newline;
                 content = content + "    },"                  + newline;
-
-                if mod(idx, 100) == 0
-                    disp("Exporting " + type + " to: " + file + " - " + idx + "/" + length(data));
-                end
             end
             write(content, file);
             write("};",    file);
@@ -225,7 +234,7 @@ function export_sensor_data(data, file, target, type, data_types)
     disp("Done exporting " + type + " to: " + file);
 end
 
-function export_steps(data, file, target)
+function export_steps(data, file, target, algorithm)
     disp("Exporting steps to: " + file + "...");
     switch target
         case 'csv'
@@ -236,54 +245,7 @@ function export_steps(data, file, target)
             file = file + ".h";
             clear_file(file);
             write_cpp_header(file);
-            write("struct NASPredictionSteps {", file);
-            % After acceleration prediction
-            write("float acc_x;",        file);
-            write("float acc_y;",        file);
-            write("float acc_z;",        file);
-            write("float acc_vx;",       file);
-            write("float acc_vy;",       file);
-            write("float acc_vz;",       file);
-            % After gyro prediction
-            write("float gyro_gx;",      file);
-            write("float gyro_gy;",      file);
-            write("float gyro_gz;",      file);
-            write("float gyro_gw;",      file);
-            write("float gyro_gbx;",     file);
-            write("float gyro_gby;",     file);
-            write("float gyro_gbz;",     file);
-            % After gps correction
-            write("float gps_x;",        file);
-            write("float gps_y;",        file);
-            write("float gps_z;",        file);
-            write("float gps_vx;",       file);
-            write("float gps_vy;",       file);
-            write("float gps_vz;",       file);
-            % After barometer correction
-            write("float baro_x;",       file);
-            write("float baro_y;",       file);
-            write("float baro_z;",       file);
-            write("float baro_vx;",      file);
-            write("float baro_vy;",      file);
-            write("float baro_vz;",      file);
-            % After magnetometer correction
-            write("float mag_gx;",       file);
-            write("float mag_gy;",       file);
-            write("float mag_gz;",       file);
-            write("float mag_gw;",       file);
-            write("float mag_gbx;",      file);
-            write("float mag_gby;",      file);
-            write("float mag_gbz;",      file);
-            % After pitot correction
-            write("float pitot_x;",      file);
-            write("float pitot_y;",      file);
-            write("float pitot_z;",      file);
-            write("float pitot_vx;",     file);
-            write("float pitot_vy;",     file);
-            write("float pitot_vz;",     file);
-            write("};",                  file)
-
-            write("NASPredictionSteps steps[] {", file);
+            write("NASPredictionSteps " + algorithm + "_steps[] {", file);
             content = "";
             for idx = 2:length(data)
                 steps     = data(idx);
@@ -299,15 +261,22 @@ function export_steps(data, file, target)
                 content = content + "    {"    + newline;
                 content = content + strs + "," + newline;
                 content = content + "    },"   + newline;
-                
-                if mod(idx, 100) == 0
-                    disp("Exporting steps to: " + file + " - " + idx + "/" + length(data));
-                end
             end
             write(content, file);
             write("};",    file);
         end
-    disp("Done exporting steps to: " + file + " - " + idx + "/" + length(data));
+    disp("Done exporting steps to: " + file);
+end
+
+function generate_cpp_include_file(file, includes)
+    file = file + ".h";
+    disp("Generating include file: " + file);
+    clear_file(file);
+    write_cpp_header(file);
+    for include=includes
+        write('#include "' + include + '.h"' , file);
+    end
+    disp("Done generating include file: " + file);
 end
 
 function write(text, file)
@@ -347,6 +316,7 @@ function write_cpp_header(file)
     write('                                                                                ', file);
     write('#include <algorithms/NAS/NASConfig.h>                                           ', file);
     write('#include <algorithms/NAS/NASState.h>                                            ', file);
+    write('#include <algorithms/NAS/NASPredictionSteps.h>                                  ', file);
     write('#include <sensors/SensorData.h>                                                 ', file);
     write('#include <sensors/analog/Pitot/PitotData.h>                                     ', file);
     write('                                                                                ', file);
