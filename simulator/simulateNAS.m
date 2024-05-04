@@ -1,9 +1,17 @@
-function nas_result = simulateNAS(sim_output, settings)
+function nas_result = simulateNAS(sim_output, settings, algorithm)
 %% simulateNAS: Run NAS against the simulation output
 %
 % Inputs:
 % - sim_output: the output of the simulation
 % - settings: the settings of the simulation
+% - algorithm: the algorithm to run. Can be one of the following:
+%   - "acc": only acceleration prediction
+%   - "gyro": only gyroscope prediction
+%   - "gps": only GPS correction
+%   - "baro": only barometer correction
+%   - "pitot": only pitot correction
+%   - "mag": only magnetometer correction
+%   - "complete": all algorithms
 %
 % Outputs:
 %
@@ -17,6 +25,11 @@ function nas_result = simulateNAS(sim_output, settings)
 % - pitot: pitot data
 % - gps: GPS data
 % - steps: Array of the different prediction made during every iteration.
+
+    algorithms = ["acc", "gyro", "gps", "baro", "pitot", "mag", "complete"];
+    if ~ismember(algorithm, algorithms)
+        error('Invalid algorithm. Must be one of: %s', strjoin(algorithms, ', '));
+    end
 
     nas_struct = settings.nas;
 
@@ -69,46 +82,64 @@ function nas_result = simulateNAS(sim_output, settings)
         input_data{idx, 3} = P_in;
 
         % Predict acc
-        index_imu = sum(t_nas(idx) >= sim_acc_data(:,1));            
-        acc_data(idx, :) = [timestamp sim_acc_data(index_imu, 2:end)];
+        index_acc = sum(t_nas(idx) >= sim_acc_data(:,1));
+        acc_data(idx, :) = [timestamp sim_acc_data(index_acc, 2:end)];
         
-        [x_lin, ~, P_lin] = predictorLinear2(x_lin, P_lin, dt_k, sim_acc_data(index_imu, 2:end), x_quat(1:4), nas_struct.QLinear);
+        if ismember(algorithm, ["acc", "complete"])
+            [x_lin, ~, P_lin] = predictorLinear2(x_lin, P_lin, dt_k, sim_acc_data(index_acc, 2:end), x_quat(1:4), nas_struct.QLinear);
+        end
         acc_lin = x_lin;
 
         % Predict gyro
-        index_imu = sum(t_nas(idx) >= sim_gyro_data(:,1));            
-        gyro_data(idx, :) = [timestamp sim_gyro_data(index_imu, 2:end)];
+        index_gyro = sum(t_nas(idx) >= sim_gyro_data(:,1));            
+        gyro_data(idx, :) = [timestamp sim_gyro_data(index_gyro, 2:end)];
         
-        [x_quat, P_quat] = predictorQuat(x_quat, P_quat, sim_gyro_data(index_imu, 2:end), dt_k, nas_struct.Qq);
+        if ismember(algorithm, ["gyro", "complete"])
+            [x_quat, P_quat] = predictorQuat(x_quat, P_quat, sim_gyro_data(index_gyro, 2:end), dt_k, nas_struct.Qq);
+        end
         gyro_quat = x_quat;
 
         % Correct gps
         index_gps = sum(t_nas(idx) >= sim_gps_data(:,1));
         [gps_coord(1), gps_coord(2), gps_coord(3)] = ned2geodetic(sim_gps_data(index_gps, 2), sim_gps_data(index_gps, 3), sim_gps_data(index_gps, 4), settings.lat0, settings.lon0, settings.z0, wgs84Ellipsoid);
         gps_data(idx, :) = [timestamp [gps_coord sim_gps_data(index_gps, 5:end) 0 0 0 16 3]];
-
-        [x_lin, P_lin, ~] = correctionGPS(x_lin, P_lin, sim_gps_data(index_gps, 2:3), sim_gps_data(index_gps, 5:6), nas_struct.sigma_GPS, 16, 1);
+        
+        if norm(sim_acc_data(index_acc,2:end)) < 34 % around 3.5g
+            if ismember(algorithm, ["gps", "complete"])
+                [x_lin, P_lin, ~] = correctionGPS(x_lin, ...
+                    P_lin, sim_gps_data(index_gps, 2:3), ...
+                    sim_gps_data(index_gps, 5:6), nas_struct.sigma_GPS, ...
+                    16, 1, settings.lat0, settings.lon0, nas_struct.GPS.a, nas_struct.GPS.b);
+            end
+        end
         gps_lin = x_lin;
+
 
         % Correct barometer
         index_baro = sum(t_nas(idx) >= sim_baro_data(:,1));
         baro_data(idx, :) = [timestamp sim_pressure_data(index_baro, 2)];
         
-        [x_lin, P_lin, ~] = correctionBarometer(x_lin, P_lin, sim_baro_data(index_baro, 2), nas_struct.sigma_baro);
+        if ismember(algorithm, ["baro", "complete"])
+            [x_lin, P_lin, ~] = correctionBarometer(x_lin, P_lin, sim_baro_data(index_baro, 2), nas_struct.sigma_baro);
+        end
         baro_lin = x_lin;
 
         % Correct magnetometer
-        index_imu = sum(t_nas(idx) >= sim_mag_data(:,1));
-        mag_data(idx, :) = [timestamp sim_mag_data(index_imu, 2:end)];
+        index_mag = sum(t_nas(idx) >= sim_mag_data(:,1));
+        mag_data(idx, :) = [timestamp sim_mag_data(index_mag, 2:end)];
         
-        [x_quat, P_quat, ~, ~] = correctorQuat(x_quat, P_quat, sim_mag_data(index_imu, 2:end), nas_struct.sigma_mag, XYZ0*0.01);
+        if ismember(algorithm, ["mag", "complete"])
+            [x_quat, P_quat, ~, ~] = correctorQuat(x_quat, P_quat, sim_mag_data(index_mag, 2:end), nas_struct.sigma_mag, XYZ0*0.01);
+        end
         mag_quat = x_quat;
 
         % Correct Pitot
         index_pitot = sum(t_nas(idx) >= sim_pitot_data(:,1));
         pitot_data(idx, :) = [timestamp sim_pitot_data(index_pitot, 2)];
         
-        [x_lin, P_lin(4:6,4:6), ~] = correctionPitot_airspeed(x_lin, P_lin(4:6,4:6), sim_pitot_data(index_pitot, 2:end), nas_struct.sigma_pitot2, settings.OMEGA);
+        if ismember(algorithm, ["pitot", "complete"])
+            [x_lin, P_lin(4:6,4:6), ~] = correctionPitot_airspeed(x_lin, P_lin(4:6,4:6), sim_pitot_data(index_pitot, 2:end), nas_struct.sigma_pitot2, settings.OMEGA);
+        end
         pitot_lin = x_lin;
 
         output_data{idx, 1} = timestamp;
