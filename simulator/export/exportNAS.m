@@ -16,7 +16,7 @@ function exportNAS(nas_data, settings, algorithm, target)
                 "/" + algorithm;
 
 
-    disp("Exporting data to: " + out_path);
+    disp(newline + "Exporting NAS data(" + algorithm + ") to: " + out_path);
 
     if ~exist(out_path, "dir")
         mkdir(out_path)
@@ -129,62 +129,87 @@ function exportNAS(nas_data, settings, algorithm, target)
     if strcmp(target, 'cpp')
         includes = [cpp_data_types.keys' "steps" "config"];
         generate_cpp_include_file(include_file, includes);
+
+        sbs_rel_path = "/src/tests/catch/nas/data";
+        disp("- Here are the cmake include paths for the generated libraries: ");
+        disp("  " + sbs_rel_path + "/" + algorithm + "/acc.cpp");
+        disp("  " + sbs_rel_path + "/" + algorithm + "/gyro.cpp");
+        disp("  " + sbs_rel_path + "/" + algorithm + "/gps.cpp");
+        disp("  " + sbs_rel_path + "/" + algorithm + "/baro.cpp");
+        disp("  " + sbs_rel_path + "/" + algorithm + "/mag.cpp");
+        disp("  " + sbs_rel_path + "/" + algorithm + "/pitot.cpp");
+        disp("  " + sbs_rel_path + "/" + algorithm + "/input.cpp");
+        disp("  " + sbs_rel_path + "/" + algorithm + "/output.cpp");
+        disp("  " + sbs_rel_path + "/" + algorithm + "/steps.cpp");
     end
 end
 
 function export_config(data, file, target, algorithm)
-    disp("Exporting config to: " + file + "...");
+    disp("- Exporting config to: " + file + "...");
     switch target
         case 'csv'
             file = file + ".csv";
             clear_file(file);
             writetable(data, file);
         case 'cpp'
-            file = file + ".h";
-            clear_file(file);
-            write_cpp_header(file);
-            write("Boardcore::NASConfig " + algorithm + "_nas_config {",               file);
-            write("    "   + data.NAS_T              + ", ///< T",                     file);
-            write("    "   + data.SIGMA_BETA         + ", ///< SIGMA_BETA",            file);
-            write("    "   + data.SIGMA_W            + ", ///< SIGMA_W",               file);
-            write("    "   + 10                      + ", ///< SIGMA_ACC [simulated]", file);
-            write("    "   + data.SIGMA_MAG          + ", ///< SIGMA_MAG",             file);
+            h_file = file + ".h";
+            clear_file(h_file);
+            write_h_header(h_file);
+            
+            write("Boardcore::NASConfig " + algorithm + "_nas_config {",               h_file);
+            write("    "   + data.NAS_T              + ", ///< T",                     h_file);
+            write("    "   + data.SIGMA_BETA         + ", ///< SIGMA_BETA",            h_file);
+            write("    "   + data.SIGMA_W            + ", ///< SIGMA_W",               h_file);
+            write("    "   + 10                      + ", ///< SIGMA_ACC [simulated]", h_file);
+            write("    "   + data.SIGMA_MAG          + ", ///< SIGMA_MAG",             h_file);
             write("    { " + data.SIGMA_GPS_X + ", " + ...
                              data.SIGMA_GPS_Y + ", " + ...
                              data.SIGMA_GPS_Z + ", " + ...
-                             data.SIGMA_GPS_W + " }" + ", ///< SIGMA_GPS",             file);
-            write("    "   + data.SIGMA_BAR          + ", ///< SIGMA_BAR",             file);
-            write("    "   + data.SIGMA_POS          + ", ///< SIGMA_POS",             file);
-            write("    "   + data.SIGMA_VEL          + ", ///< SIGMA_VEL",             file);
-            write("    "   + data.SIGMA_PITOT        + ", ///< SIGMA_PITOT",           file);
-            write("    "   + data.P_POS              + ", ///< P_POS",                 file);
-            write("    "   + data.P_POS_VERTICAL     + ", ///< P_POS_VERTICAL",        file);
-            write("    "   + data.P_VEL              + ", ///< P_VEL",                 file);
-            write("    "   + data.P_VEL_VERTICAL     + ", ///< P_VEL_VERTICAL",        file);
-            write("    "   + data.P_ATT              + ", ///< P_ATT",                 file);
-            write("    "   + data.P_BIAS             + ", ///< P_BIAS",                file);
-            write("    "   + 6                       + ", ///< SATS_NUM [simulated]",  file);
+                             data.SIGMA_GPS_W + " }" + ", ///< SIGMA_GPS",             h_file);
+            write("    "   + data.SIGMA_BAR          + ", ///< SIGMA_BAR",             h_file);
+            write("    "   + data.SIGMA_POS          + ", ///< SIGMA_POS",             h_file);
+            write("    "   + data.SIGMA_VEL          + ", ///< SIGMA_VEL",             h_file);
+            write("    "   + data.SIGMA_PITOT        + ", ///< SIGMA_PITOT",           h_file);
+            write("    "   + data.P_POS              + ", ///< P_POS",                 h_file);
+            write("    "   + data.P_POS_VERTICAL     + ", ///< P_POS_VERTICAL",        h_file);
+            write("    "   + data.P_VEL              + ", ///< P_VEL",                 h_file);
+            write("    "   + data.P_VEL_VERTICAL     + ", ///< P_VEL_VERTICAL",        h_file);
+            write("    "   + data.P_ATT              + ", ///< P_ATT",                 h_file);
+            write("    "   + data.P_BIAS             + ", ///< P_BIAS",                h_file);
+            write("    "   + 6                       + ", ///< SATS_NUM [simulated]",  h_file);
             write("    { " + data.MAG_NED_X + ", "   + ...
                              data.MAG_NED_Y + ", "   + ...
-                             data.MAG_NED_Z + " }"   + ", ///< NED_MAG",               file);
-            write("};",                                                                file);
+                             data.MAG_NED_Z + " }"   + ", ///< NED_MAG",               h_file);
+            write("};",                                                                h_file);
     end
+
+    disp("  Done exporting config to: " + file);
 end
 
 function export_state(data, file, target, type, data_types, algorithm)
-    disp("Exporting " + type + " to: " + file + "...");
+    disp("- Exporting " + type + " to: " + file + "...");
     switch target
         case 'csv'
             file = file + ".csv";
             clear_file(file);
             writetable(cell2table(data), file);
         case 'cpp'
-            file = file + ".h";
-            clear_file(file);
-            write_cpp_header(file);
+            h_file = file + ".h";
+            cpp_file = file + ".cpp";
+
+            clear_file(h_file);
+            clear_file(cpp_file);
+
+            write_h_header(h_file);
+            write_cpp_header(cpp_file, type + ".h");
+
             cpp_data_types = data_types('cpp');
             data_type      = cpp_data_types(type);
-            write(data_type + " " + algorithm + "_" + type + "[] = {", file);
+
+            write("extern " + data_type + " " + algorithm + "_" + type + ...
+                  "[" + num2str(length(data) - 1) + "];", h_file);
+
+            write(data_type + " " + algorithm + "_" + type + "[] = {", cpp_file);
             content = "";
             for idx = 2:length(data)
                 timestamp = data(idx, 1);
@@ -198,26 +223,36 @@ function export_state(data, file, target, type, data_types, algorithm)
                 content = content + "        }"                               + newline;
                 content = content + "    },"                                  + newline;
             end
-            write(content, file);
-            write("};",    file);
+            write(content, cpp_file);
+            write("};",    cpp_file);
     end
-    disp("Done exporting " + type + " to: " + file);
+    disp("  Done exporting " + type + " to: " + file);
 end
 
 function export_sensor_data(data, file, target, type, data_types, algorithm)
-    disp("Exporting " + type + " to: " + file + "...");
+    disp("- Exporting " + type + " to: " + file + "...");
     switch target
         case 'csv'
             file = file + ".csv";
             clear_file(file);
             writematrix(data, file);
         case 'cpp'
-            file = file + ".h";
-            clear_file(file);
-            write_cpp_header(file);
+            h_file = file + ".h";
+            cpp_file = file + ".cpp";
+
+            clear_file(h_file);
+            clear_file(cpp_file);
+
+            write_h_header(h_file);
+            write_cpp_header(cpp_file, type + ".h");
+
             cpp_data_types = data_types('cpp');
             data_type      = cpp_data_types(type);
-            write(data_type + " " + algorithm + "_" + type + "[] = {", file);
+
+            write("extern " + data_type + " " + algorithm + "_" + type + ... 
+                  "[" + num2str(length(data) - 1) + "];", h_file);
+
+            write(data_type + " " + algorithm + "_" + type + "[] = {", cpp_file);
             content = "";
             for idx = 2:length(data)
                 sensor_input = data(idx, :);
@@ -228,24 +263,33 @@ function export_sensor_data(data, file, target, type, data_types, algorithm)
                 content = content + concat_sensor_input + "," + newline;
                 content = content + "    },"                  + newline;
             end
-            write(content, file);
-            write("};",    file);
+            write(content, cpp_file);
+            write("};",    cpp_file);
     end
-    disp("Done exporting " + type + " to: " + file);
+    disp("  Done exporting " + type + " to: " + file);
 end
 
 function export_steps(data, file, target, algorithm)
-    disp("Exporting steps to: " + file + "...");
+    disp("- Exporting steps to: " + file + "...");
     switch target
         case 'csv'
             file = file + ".csv";
             clear_file(file);
             writetable(cell2table(data), file);
         case 'cpp'
-            file = file + ".h";
-            clear_file(file);
-            write_cpp_header(file);
-            write("Boardcore::NASPredictionSteps " + algorithm + "_steps[] {", file);
+            h_file = file + ".h";
+            cpp_file = file + ".cpp";
+            
+            clear_file(h_file);
+            clear_file(cpp_file);
+
+            write_h_header(h_file);
+            write_cpp_header(cpp_file, "steps.h");
+
+            write("extern Boardcore::NASPredictionSteps " + algorithm + ...
+                  "_steps[" + num2str(length(data) - 1) + "];", h_file);
+
+            write("Boardcore::NASPredictionSteps " + algorithm + "_steps[] {", cpp_file);
             content = "";
             for idx = 2:length(data)
                 steps     = data(idx);
@@ -262,21 +306,21 @@ function export_steps(data, file, target, algorithm)
                 content = content + strs + "," + newline;
                 content = content + "    },"   + newline;
             end
-            write(content, file);
-            write("};",    file);
+            write(content, cpp_file);
+            write("};",    cpp_file);
         end
-    disp("Done exporting steps to: " + file);
+    disp("  Done exporting steps to: " + file);
 end
 
 function generate_cpp_include_file(file, includes)
     file = file + ".h";
-    disp("Generating include file: " + file);
+    disp("- Generating include file: " + file);
     clear_file(file);
-    write_cpp_header(file);
+    write_copyright(file);
     for include=includes
         write('#include "' + include + '.h"' , file);
     end
-    disp("Done generating include file: " + file);
+    disp("  Done generating include file: " + file);
 end
 
 function write(text, file)
@@ -289,7 +333,7 @@ function clear_file(file)
     end
 end
 
-function write_cpp_header(file)
+function write_copyright(file)
     write('/* Copyright (c) 2024 Skyward Experimental Rocketry                             ', file);
     write(' * Author: Davide Basso                                                         ', file);
     write(' *                                                                              ', file);
@@ -314,11 +358,22 @@ function write_cpp_header(file)
     write('                                                                                ', file);
     write('/* This file was automatically generated, do not edit manually! */              ', file);
     write('                                                                                ', file);
+end
+
+function write_h_header(file)
+    write_copyright(file);
+    write('#pragma once                                                                    ', file);
     write('#include <algorithms/NAS/NASConfig.h>                                           ', file);
     write('#include <algorithms/NAS/NASState.h>                                            ', file);
     write('#include <algorithms/NAS/NASPredictionSteps.h>                                  ', file);
     write('#include <sensors/SensorData.h>                                                 ', file);
     write('#include <sensors/analog/Pitot/PitotData.h>                                     ', file);
     write('                                                                                ', file);
-    write('                                                                                ', file);
+end
+
+function write_cpp_header(file, h)
+    write_copyright(file);
+    if nargin > 1
+        write('#include "' + h + '"                                                        ', file);
+    end
 end
