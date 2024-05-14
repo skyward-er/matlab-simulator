@@ -67,7 +67,7 @@ function nas_result = simulateNAS(sim_output, settings, algorithm)
     input_data  = cell(length(t_nas)-1, 3);
     output_data = cell(length(t_nas)-1, 3);
 
-    disp('Running NAS...');
+    disp(newline + "Running NAS...");
 
     for idx = 2:length(t_nas)
         dt_k      = t_nas(idx) - t_nas(idx-1);
