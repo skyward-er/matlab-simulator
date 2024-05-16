@@ -157,9 +157,12 @@ settings.ada.shadowmode = 10;
 settings.mea.engine_model_A1 = [1.435871191228868,-0.469001276508780,0;1,0,0;-0.002045309260755,0.001867496708935,1];
 settings.mea.engine_model_B1 = [4;0;0];
 settings.mea.engine_model_C1 = [1.780138883879285,-1.625379384370081,0];
+settings.mea.K_t = 92;
+settings.mea.V_e = 2100;
+settings.mea.Rs = 1.0e+03 *[ 0.459044830815909   4.898695751098663];
 % covariance matrices
-settings.mea.Q=0.1*diag([1,1,1]);      % model noise covariance matrix    
-settings.mea.R=0.36; 
+settings.mea.Q = 0.36; %for old MEA 0.1*diag([1,1,1]); % model noise covariance matrix    
+settings.mea.R = 0.36; 
 % shut down prediction altitude
 settings.mea.z_shutdown  = 850;
 settings.mea.t_lower_shadowmode  = 0;        % minimunm burning time
