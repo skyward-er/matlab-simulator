@@ -37,11 +37,18 @@ displayIter = true; % set to false if you don't want to see the iteration number
             thrust_percentage = normrnd(mu_t,sigma_t,N_sim,1);       %generate normally distributed values ( [0.8 1.20] = 3sigma) % serve il toolbox
             stoch.thrust = thrust_percentage*settings.motor.expThrust;                  % thrust - the notation used creates a matrix where each row is the expThrust multiplied by one coefficient in the thrust percentage array
 
-
+            
             %%% in questo modo però il burning time rimane fissato perchè è
             %%% settato al'interno di simulationData.m -> possibili errori per
             %%% le simulazioni con exp_thrust aumentato se si vuole fare
             %%% spegnimento dell'ibrido
+
+            sigma_Kt = 5/3;  %thrust coefficient standard deviation
+            mu_Kt = 92;      %thrust coefficient mean value
+
+            Thrust_coefficient = normrnd(mu_Kt, sigma_Kt, N_sim, 1);
+            stoch.Kt = Thrust_coefficient;
+
             impulse_uncertainty = normrnd(1,0.05/3,N_sim,1);
             stoch.expThrust = diag(impulse_uncertainty)*((1./thrust_percentage) * settings.motor.expTime);          % burning time - same notation as thrust here
             %%%
