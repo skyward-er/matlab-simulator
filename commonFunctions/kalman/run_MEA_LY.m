@@ -4,7 +4,7 @@ function [sensorDataMEA, sensorTotMEA] = run_MEA_LY(settingsMEA, sensorTotMEA, .
 
 
 % mass estimation
-K_t = settingsMEA.K_t; %verify if it agrees with actual name 
+K_t = settingsMEA.K_t; 
 V_e = settingsMEA.V_e;
 R_min = settingsMEA.Rs(1);
 R_max = settingsMEA.Rs(2);
@@ -59,7 +59,7 @@ for ii = 2:length(t_mea)
     C2 = K_t .* (combChambMeasures(index_chambPress) ./ m(ii)) - g - F_a./m(ii);
     H = -K_t .* combChambMeasures(index_chambPress)./m(ii).^2 + F_a ./ m(ii).^2;
     
-    R2 = 0.000001*(alpha*q + c); 
+    R2 = (alpha*q + c); 
     
     S = H.*P(ii).*H + R2;
      if ~S<1e-3
@@ -68,7 +68,10 @@ for ii = 2:length(t_mea)
      end
      index_imu  = sum(t_mea(ii) >= t_imu);
 
-     m(ii) = m(ii) + K.*(imuAccelerometer(index_imu, 1) - g- C2); 
+     if norm(imuAccelerometer(index_imu, :)) > 30
+        m(ii) = m(ii) + K.*(imuAccelerometer(index_imu, 1) - g- C2); 
+     end
+
     
 
    
@@ -82,8 +85,12 @@ end
 CD = CD_correction_shutDown*getDrag(vnorm_nas, -z_nas, 0, coeff_Cd);
 [~,~,~,rho] = atmosisa(-z_nas);
 
-predicted_apogee = -z_nas-z0 + 1./(2.*( 0.5.*rho .* CD * S_ref ./ m))...
-        .* log(1 + (vz_nas.^2 .* (0.5 .* rho .* CD .* S_ref) ./ m) ./ 9.81 ); 
+[z_pred, vz_pred] = PredictFuture(-z_nas,-vz_nas,  K_t .* combChambMeasures(index_chambPress), ...
+    S_ref, CD, rho, m, dt, 5);
+
+
+predicted_apogee = z_pred-z0 + 1./(2.*( 0.5.*rho .* CD * S_ref ./ m))...
+        .* log(1 + (vz_pred.^2 .* (0.5 .* rho .* CD .* S_ref) ./ m) ./ 9.81 ); 
 
 % update local state
 sensorDataMEA.time = t_mea;
