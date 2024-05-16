@@ -150,12 +150,12 @@ settings.ada.t_ada       =   -1;                                            % Ap
 settings.ada.flag_apo    =   false;                                         % True when the apogee is detected
 settings.ada.shadowmode = 18;
 %% MEA TUNING PARAMETERS / MOTOR SHUT DOWN TUNING PARAMETERS
-% motor model for kalman filter prediction/correction scheme
-% settings.mea.engine_model_A1     = [1.435871191228868,-0.469001276508780,0;1,0,0;-0.002045309260755,0.001867496708935,1];
-% settings.mea.engine_model_B1     = [4;0;0];
-% settings.mea.engine_model_C1     = [1.780138883879285,-1.625379384370081,0];
-settings.mea.K_t = 106;
-settings.mea.V_e = 1600;
+%motor model for kalman filter prediction/correction scheme
+settings.mea.engine_model_A1     = [1.435871191228868,-0.469001276508780,0;1,0,0;-0.002045309260755,0.001867496708935,1];
+settings.mea.engine_model_B1     = [4;0;0];
+settings.mea.engine_model_C1     = [1.780138883879285,-1.625379384370081,0];
+settings.mea.K_t = 92;
+settings.mea.V_e = 1601.447;
 settings.mea.Rs = 1.0e+03 *[ 0.459044830815909   4.898695751098663];
 % covariance matrices
 settings.mea.Q                   = 0.36; % for old mea e-1*diag([1,1,1]);                      % model noise covariance matrix    
