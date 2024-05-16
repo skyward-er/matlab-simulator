@@ -105,9 +105,9 @@ for alg_index = 4
 
     parfor i = 1:N_sim
         settings_mont = settings_mont_init;
-
         settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
         settings_mont.motor.expTime = stoch.expThrust(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
+        settings_mont.motor.K = stoch.Kt(i,:);                  % 
         settings_mont.tb = max( stoch.expThrust(i,stoch.expThrust(i,:)<=settings.tb) );     % initialize the burning time of the current simulation (parfor purposes)
         settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
         settings_mont.mass_offset = stoch.mass_offset(i);
@@ -115,11 +115,12 @@ for alg_index = 4
         settings_mont.PHI = stoch.PHI_rail(i);
         
         
+
    
         % Define coeffs matrix for the i-th simulation
         settings_mont.Coeffs = settings.Coeffs* (1+stoch.aer_percentage(i));
 
-
+stoch;
         % set the wind parameters
         switch settings.windModel
             case "constant"
