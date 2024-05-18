@@ -86,7 +86,7 @@ CD = CD_correction_shutDown*getDrag(vnorm_nas, -z_nas, 0, coeff_Cd);
 [~,~,~,rho] = atmosisa(-z_nas);
 
 [z_pred, vz_pred] = PredictFuture(-z_nas,-vz_nas,  K_t .* combChambMeasures(index_chambPress), ...
-    S_ref, CD, rho, m, dt, 5);
+    S_ref, CD, rho, m, dt, 5-settingsMEA.counter_shutdown);
 
 
 predicted_apogee = z_pred-z0 + 1./(2.*( 0.5.*rho .* CD * S_ref ./ m))...
