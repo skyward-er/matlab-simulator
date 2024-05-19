@@ -97,6 +97,10 @@ settings.nas.v_thr         =   2.5;                                     % Veloci
 settings.nas.count_thr     =   5;                                       % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.nas.counter       =   0;
 
+settings.nas.baro.a = 0.0065;
+settings.nas.baro.n = 5.255933;
+[~,~,settings.nas.baro.refPressure] = atmosisa(settings.z0);
+
 settings.nas.stopPitotAltitude = 500;
 
 settings.nas.t_nas      =   -1;                                      % Apogee detection timestamp

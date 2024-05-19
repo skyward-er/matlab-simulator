@@ -1,4 +1,4 @@
-function [x,P,y_res] = correctionBarometer(x_pred,P_pred,p_meas,sigma_h, z0)
+function [x,P,y_res] = correctionBarometer(x_pred,P_pred,p_meas,sigma_h, params)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
@@ -35,10 +35,9 @@ function [x,P,y_res] = correctionBarometer(x_pred,P_pred,p_meas,sigma_h, z0)
 %                       --> 1x1
 %---------------------------------------------------------------------------
 
-[~, ~, refPressure] = atmosisa(z0);
-
-a = 0.0065; 
-n = 5.255933;
+refPressure =  params.refPressure;
+a = params.a;
+n = params.n;
 
 alt = -x_pred(3);
 [temp, ~, y_hat] = atmosisa(alt);
