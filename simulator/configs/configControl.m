@@ -56,7 +56,11 @@ contSettings.filter_coeff = 0.5;                                            % se
 
 % delay from motor shutdown to air brakes opening:
 contSettings.ABK_shutdown_delay = 0.5; % [s] time between engine shutdown command and ABK phase
-contSettings.ABK_shadowmode = 3.8; % [s]
+if contains(settings.mission, "Roccaraso")
+    contSettings.ABK_shadowmode = 1.5; % [s]
+else
+    contSettings.ABK_shadowmode = 3.8; % [s]
+end
 
 % flag initialization
 contSettings.flagFirstControlABK = true;                                       % if it is the first iter the control action is not filtered, then the filter acts

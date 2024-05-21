@@ -35,7 +35,7 @@ if (contains(settings.mission,'_2023') || contains(settings.mission,'_2024')) &&
         end
         if ~settings.shutdown
 
-            [sensorData,sensorTot,settings,contSettings] =run_MTR_SIM (sensorData,sensorTot,settings,contSettings,t1, engineT0,dt_ode);
+            [sensorData,sensorTot,settings,contSettings] = run_MTR_SIM (sensorData,sensorTot,settings,contSettings,t1, engineT0,dt_ode);
             sensorTot.mea.t_shutdown = settings.t_shutdown;
 
             if  Tf(end)-engineT0 >= settings.tb
@@ -60,7 +60,7 @@ if (contains(settings.mission,'_2023') || contains(settings.mission,'_2024')) &&
         settings.expTimeEngineCut = settings.tb;
     end
 else
-    if t0-engineT0 > settings.motor.expTime(end)
+    if t0-engineT0 > settings.motor.expTime(end) && currentState ~= availableStates.on_ground 
         settings.shutdown = 1;
         settings.expShutdown = 1;
         settings.expTimeEngineCut = engineT0 + settings.tb;

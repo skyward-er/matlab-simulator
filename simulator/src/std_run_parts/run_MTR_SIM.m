@@ -26,23 +26,24 @@ end
                 settings.timeEngineCut = settings.t_shutdown + settings.shutdownValveDelay;
                 settings.expTimeEngineCut = settings.t_shutdown;
             end
+        end
             if T1-engineT0 < settings.tb
                 settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, T1-engineT0);
             else
                 settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, settings.tb);
             end
             settings.expMengineCut = settings.parout.m(end) - settings.ms;
-            if T1-engineT0 > settings.timeEngineCut
+            if T1 > settings.timeEngineCut
                 settings.shutdown = true;
-                settings = settingsEngineCut(settings);
+                settings = settingsEngineCut(settings, engineT0);
                 settings.quatCut = [sensorTot.nas.states(end, 10) sensorTot.nas.states(end, 7:9)];
                 [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
             end
 
             contSettings.valve_pos = 0;
-        else
-            settings.t_shutdown = nan;
-        end
+        % else
+        %     settings.t_shutdown = nan;
+        % end
     else
         if ~settings.expShutdown && T1-engineT0 >= settings.mea.t_higher_shadowmode
             settings.expShutdown = true;
@@ -56,9 +57,9 @@ end
             settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, settings.tb);
         end
         settings.expMengineCut = settings.parout.m(end) - settings.ms;
-        if T1-engineT0 > settings.timeEngineCut
+        if T1 > settings.timeEngineCut
             settings.shutdown = true;
-            settings = settingsEngineCut(settings);
+            settings = settingsEngineCut(settings, engineT0);
             settings.quatCut = [sensorTot.nas.states(end, 10) sensorTot.nas.states(end, 7:9)];
             [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
         end

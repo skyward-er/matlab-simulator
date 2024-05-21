@@ -153,7 +153,11 @@ else
     flagFlight = true;  % As on_ground state is skipped, this flag must be already set to true
 end
 
-time_on_ground = 5; % [s] - How much time the rockets stays on ramp before launch
+if ~settings.montecarlo
+    time_on_ground = 5; % [s] - How much time the rockets stays on ramp before launch
+else
+    time_on_ground = 0; % [s] - If montecarlo the rocket starts immediately
+end
 
 %% FLAG INITIALIZATION FOR HIL
 if settings.launchWindow
@@ -214,7 +218,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                 % i.e. all the engine time variables that otherwise require the simulation time t0 
                 % to be reset to 0
                 flagFlight = true;
-                engineT0 = t0;
+                engineT0 = t0-dt;
                 settings.flagAscent = true;
                 lastAscentIndex = n_old-1;
                 currentState = availableStates.powered_ascent;
@@ -395,12 +399,15 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     
     % recall some useful parameters
     settings.parout.partial_time = Tf;
-    if currentState == availableStates.on_ground || currentState == availableStates.landed
-        % If the rocket is on groud or landed, the accelerometer should
-        % meaasure the gravity acceleration.
+    if currentState == availableStates.on_ground 
+        % If the rocket is on groud, the accelerometer should measure 
+        % the gravity acceleration on ramp.
         Q_acc = quat2rotm(Q0');
         settings.parout.acc = (Q_acc'*[zeros(length(Tf),2) -9.81*ones(length(Tf), 1)]')';
         settings.parout.m = settings.mTotalTime(1)*ones(1,length(Tf));
+    elseif currentState == availableStates.landed
+        settings.parout.acc = [zeros(length(Tf),2) -9.81*ones(length(Tf),1)];
+        settings.parout.m = ones(1,length(Tf))*settings.parout.m(end);
     else
         settings.parout.acc = parout.accelerometer.body_acc';
         settings.parout.m   = parout.interp.mass;
@@ -565,7 +572,7 @@ settings.flagMatr = settings.flagMatr(1:n_old, :);
 struct_out.t = Tf;
 struct_out.Y = Yf;
 % struct_out.flags = settings.flagMatr;
-% struct_out.transition_times = trans_time;
+struct_out.state_lastTimes = state_lastTime;
 % wind
 struct_out.wind.Mag = settings.wind.Mag;
 struct_out.wind.Az = settings.wind.Az;

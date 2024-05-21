@@ -120,7 +120,7 @@ lastDrogueIndex = 0;
 idx_apogee = NaN;
 idx_landing = NaN;
 
-engineT0 = -1;       % Initial time for engine time computations
+engineT0 = 0;       % Initial time for engine time computations
 %% sensor fault initial conditions
 sensorData.chunk{1} = zeros(1,50);
 sensorData.chunk{2} = zeros(1,50);
@@ -133,7 +133,7 @@ sfd_mean_p = [];
 %% ADA initial conditions (Apogee Detection Algorithm)
 
 if strcmp(settings.scenario, 'descent')
-    [~, ~, p_fin, ~]  =   atmosisa(settings.z_final);                         % Reference temperature in kelvin and pressure in Pa
+    [~, ~, p_fin, ~]  =   atmosisa(settings.z_final+settings.z0);               % Reference temperature in kelvin and pressure in Pa
 
     settings.ada.v0          =   -10;                                           % Vertical velocity initial condition
     settings.ada.a0          =   -100;                                          % Acceleration velocity initial condition

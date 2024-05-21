@@ -42,15 +42,15 @@ for ii = 2:length(t_mea)
 
         x(ii,:) = x(ii,:)' + K* (sensorTot.comb_chamber.measures(index_chambPress) -  C * x(ii,:)'); % /1000 to have the measure in bar
 
-        % retrieve NAS data
-        index_NAS = sum(t_mea(ii) >= t_nas);
-        z_nas(ii,1) = sensorTot.nas.states(index_NAS,3);
-        vnorm_nas(ii,1) = norm(sensorTot.nas.states(index_NAS,4:6));
-        vz_nas(ii,1) = sensorTot.nas.states(index_NAS,6);
-
     else
         x(ii,:) = x(ii-1,:); 
     end
+
+    % retrieve NAS data
+    index_NAS = sum(t_mea(ii) >= t_nas);
+    z_nas(ii,1) = sensorTot.nas.states(index_NAS,3);
+    vnorm_nas(ii,1) = norm(sensorTot.nas.states(index_NAS,4:6));
+    vz_nas(ii,1) = sensorTot.nas.states(index_NAS,6);
 end
 % pressure estimation
 estimated_pressure = C*x';
