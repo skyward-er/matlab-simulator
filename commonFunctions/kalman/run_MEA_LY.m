@@ -2,7 +2,7 @@ function [sensorDataMEA, sensorTotMEA] = run_MEA_LY(settingsMEA, sensorTotMEA, .
     sensorDataMEA, t_chambPress, t_nas, t_imu, MEAFrequency, NAS_states, S_ref, ...
     combChambMeasures, imuAccelerometer, coeff_Cd,T1, CD_correction_shutDown, z0)
 
-
+ign = 30;
 % mass estimation
 K_t = settingsMEA.K_t; 
 V_e = settingsMEA.V_e;
@@ -29,9 +29,12 @@ P(1) = sensorDataMEA.P(end);
 z_nas = zeros(length(t_mea), 1);
 vnorm_nas = zeros(length(t_mea), 1);
 vz_nas = zeros(length(t_mea), 1);
-z_nas(1) = NAS_states(end,3);
+z_nas(1) = NAS_states(end,3)  ;
 vnorm_nas(1) = norm(NAS_states(end,4:6));
 vz_nas(1) = NAS_states(end,6);
+
+index_chambPress = sum(t_mea(1) >= t_chambPress); 
+index_NAS = sum(t_mea(1) >= t_nas); 
 
 for ii = 2:length(t_mea)
     % retrieve NAS data
@@ -42,34 +45,38 @@ for ii = 2:length(t_mea)
 
     %propagation
     index_chambPress = sum(t_mea(ii) >= t_chambPress); 
-    m(ii) = m(ii-1) - combChambMeasures(index_chambPress)*K_t*dt/V_e;
+    index_imu  = sum(t_mea(ii) >= t_imu);
+    if combChambMeasures(index_chambPress) > 1
+        m(ii) = m(ii-1) - combChambMeasures(index_chambPress)*K_t*dt/V_e;
+    
 
-    P(ii) = P(ii-1) + settingsMEA.Q ;
-
-    %correction
+        P(ii) = P(ii-1) + settingsMEA.Q ;
     
-    cd = CD_correction_shutDown*getDrag(vnorm_nas(ii), -z_nas(ii), 0, coeff_Cd); %add correction shut_down??
-    [~,~,~, rho] = atmosisa(-z_nas(ii));
-  
-   
-    q = 0.5*rho*vnorm_nas(ii)^2; %dynamic pressure
-    F_a = q*S_ref*cd;        %aerodynamic force
-    
-    %linearized model
-    C2 = K_t .* (combChambMeasures(index_chambPress) ./ m(ii)) - g - F_a./m(ii);
-    H = -K_t .* combChambMeasures(index_chambPress)./m(ii).^2 + F_a ./ m(ii).^2;
-    
-    R2 = (alpha*q + c); 
-    
-    S = H.*P(ii).*H + R2;
-     if ~S<1e-3
-        K = P(ii).*H ./ S;
-        P(ii) = (1-K*H)*P(ii);
-     end
-     index_imu  = sum(t_mea(ii) >= t_imu);
-
-     if norm(imuAccelerometer(index_imu, :)) > 30
-        m(ii) = m(ii) + K.*(imuAccelerometer(index_imu, 1) - g- C2); 
+        %correction
+        
+        cd = CD_correction_shutDown*getDrag(vnorm_nas(ii), -z_nas(ii) + z0, 0, coeff_Cd); %add correction shut_down??
+        [~,~,~, rho] = atmosisa(-z_nas(ii) + z0);
+      
+       
+        q = 0.5*rho*vnorm_nas(ii)^2; %dynamic pressure
+        F_a = q*S_ref*cd;        %aerodynamic force
+        
+        %linearized model
+        C2 = K_t .* (combChambMeasures(index_chambPress) ./ m(ii)) - g - F_a./m(ii);
+        H = -K_t .* combChambMeasures(index_chambPress)./m(ii).^2 + F_a ./ m(ii).^2;
+        
+        R2 = (alpha*q + c); 
+        
+        S = H.*P(ii).*H + R2;
+        if ~S<1e-3
+            K = P(ii).*H ./ S;
+            P(ii) = (1-K*H)*P(ii);
+        end    
+         if norm(imuAccelerometer(index_imu, :)) > ign
+            m(ii) = m(ii) + K.*(imuAccelerometer(index_imu, 1) - g- C2); 
+         end
+     else 
+        m(ii) = m(ii-1);
      end
 
     
@@ -82,8 +89,8 @@ end
 
 
 % compute CD
-CD = CD_correction_shutDown*getDrag(vnorm_nas, -z_nas, 0, coeff_Cd);
-[~,~,~,rho] = atmosisa(-z_nas);
+CD = CD_correction_shutDown*getDrag(vnorm_nas, -z_nas + z0, 0, coeff_Cd);
+[~,~,~,rho] = atmosisa(-z_nas + z0);
 
 [z_pred, vz_pred] = PredictFuture(-z_nas,-vz_nas,  K_t .* combChambMeasures(index_chambPress), ...
     S_ref, CD, rho, m, dt, 5-settingsMEA.counter_shutdown);
