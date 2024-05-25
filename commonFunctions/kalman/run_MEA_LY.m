@@ -54,8 +54,8 @@ for ii = 2:length(t_mea)
 
         %correction
 
-        cd = CD_correction_shutDown*getDrag(vnorm_nas(ii), -z_nas(ii) + z0, 0, coeff_Cd); %add correction shut_down??
-        [~,~,~, rho] = atmosisa(-z_nas(ii) + z0);
+        cd = CD_correction_shutDown*getDrag(vnorm_nas(ii), -z_nas(ii), 0, coeff_Cd); %add correction shut_down??
+        [~,~,~, rho] = atmosisa(-z_nas(ii));
 
 
         q = 0.5*rho*vnorm_nas(ii)^2; %dynamic pressure
@@ -83,8 +83,8 @@ end
 
 
 % compute CD
-CD = CD_correction_shutDown*getDrag(vnorm_nas, -z_nas + z0, 0, coeff_Cd);
-[~,~,~,rho] = atmosisa(-z_nas + z0);
+CD = CD_correction_shutDown*getDrag(vnorm_nas, -z_nas, 0, coeff_Cd);
+[~,~,~,rho] = atmosisa(-z_nas);
 
 propagation_steps = N_prediction_threshold - settingsMEA.counter_shutdown;
 if propagation_steps >=1
