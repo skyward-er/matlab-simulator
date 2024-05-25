@@ -169,7 +169,7 @@ settings.nas.flagStopPitotCorrection = false;
 
 %% MEA PARAMETERS (mass estimation algorithm) 
 sensorData.mea.x = [0,0,settings.m0];     % initial state estimate
-sensorData.mea.P = zeros(3);          % initial value for P
+sensorData.mea.P = diag([0 0 0.36^2]);          % initial value for P
 sensorData.mea.time = 0;
 sensorData.mea.estimated_mass = settings.m0;
 sensorData.mea.estimated_pressure = 0;
