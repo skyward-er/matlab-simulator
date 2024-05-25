@@ -68,15 +68,15 @@ for ii = 2:length(t_mea)
         R2 = (alpha*q + c); 
         
         S = H.*P(ii).*H + R2;
-        if ~S<1e-3
+        
             K = P(ii).*H ./ S;
             P(ii) = (1-K*H)*P(ii);
-        end    
-         if norm(imuAccelerometer(index_imu, :)) > ign
-            m(ii) = m(ii) + K.*(imuAccelerometer(index_imu, 1) - g- C2); 
+           
+         if norm(imuAccelerometer(index_imu, :)) > ign && vnorm_nas(ii) > 40
+            m(ii) = m(ii) + K.*(imuAccelerometer(index_imu, 1) -g - C2); 
          end
      else 
-        m(ii) = m(ii-1);
+        m(ii) = m(ii);
      end
 
     
