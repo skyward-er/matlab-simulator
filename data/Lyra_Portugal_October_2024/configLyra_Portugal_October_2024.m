@@ -159,7 +159,8 @@ settings.mea.engine_model_B1     = [4;0;0];
 settings.mea.engine_model_C1     = [1.780138883879285,-1.625379384370081,0];
 settings.mea.K_t = 92;
 settings.mea.V_e = 1601.447;
-settings.mea.Rs = 1.0e+03 *[ 0.459044830815909   4.898695751098663];
+settings.mea.Rs = 1.0e+03*[0.4771    1.4391];%[ 0.459044830815909   4.898695751098663]
+
 % covariance matrices
 settings.mea.Q                   = 0.36; % for old mea e-1*diag([1,1,1]);                      % model noise covariance matrix    
 settings.mea.R                   = 0.36; 

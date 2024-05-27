@@ -6,6 +6,7 @@ K_t = settings.mea.K_t;
 V_e = settings.mea.V_e+200;
 R_min = settings.mea.Rs(1);
 R_max = settings.mea.Rs(2);
+[~,~,P_0] = atmosisa(200);
 
 %define constants
 g = 9.81;
@@ -30,6 +31,7 @@ vz_nas = zeros(length(t_mea), 1);
 z_nas(1) = sensorData.nas.states(end,3);
 vnorm_nas(1) = norm(sensorData.nas.states(end,4:6));
 vz_nas(1) = sensorData.nas.states(end,6);
+
 index_chambPress = 0;
 
 for ii = 2:length(t_mea)
@@ -49,12 +51,12 @@ for ii = 2:length(t_mea)
 
             % model
             cd = getDrag(vnorm_nas(ii), -z_nas(ii), 0, contSettings.coeff_Cd); %add correction shut_down??
-            [~,~,~, rho] = atmosisa(-z_nas(ii));
+            [~,~,P_e, rho] = atmosisa(-z_nas(ii));
             q = 0.5*rho*vnorm_nas(ii)^2; %dynamic pressure
             F_a = q*settings.S*cd;        %aerodynamic force
 
-            C2 = K_t * (sensorTot.comb_chamber.measures(index_chambPress)/x(ii)) - g - F_a/x(ii);
-            H = -K_t * sensorTot.comb_chamber.measures(index_chambPress)/x(ii)^2 + F_a/x(ii)^2;
+            C2 = (K_t * sensorTot.comb_chamber.measures(index_chambPress) +(P_0-P_e)*settings.motor.Ae)/x(ii) - g - F_a/x(ii);
+            H = -(K_t * sensorTot.comb_chamber.measures(index_chambPress)+(P_0-P_e)*settings.motor.Ae)/x(ii)^2 + F_a/x(ii)^2;
 
             %correction
             R2 = (alpha*q + c);
