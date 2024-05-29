@@ -55,8 +55,14 @@ for ii = 2:length(t_mea)
             q = 0.5*rho*vnorm_nas(ii)^2; %dynamic pressure
             F_a = q*settings.S*cd;        %aerodynamic force
 
-            C2 = (K_t * sensorTot.comb_chamber.measures(index_chambPress) +(P_0-P_e)*settings.motor.Ae)/x(ii) - g - F_a/x(ii);
-            H = -(K_t * sensorTot.comb_chamber.measures(index_chambPress)+(P_0-P_e)*settings.motor.Ae)/x(ii)^2 + F_a/x(ii)^2;
+            if  -z_nas(ii,1)> 800
+                F_s = (P_0-P_e)*settings.motor.Ae;
+            else 
+                F_s = 0;
+            end
+
+            C2 = (K_t * sensorTot.comb_chamber.measures(index_chambPress) + F_s)/x(ii) - g - F_a/x(ii);
+            H = -(K_t * sensorTot.comb_chamber.measures(index_chambPress)+ F_s)/x(ii)^2 + F_a/x(ii)^2;
 
             %correction
             R2 = (alpha*q + c);
@@ -65,7 +71,7 @@ for ii = 2:length(t_mea)
             if ~det(S)<1e-3
                 K = P(ii)*H' / S;
                 P(ii) = (1-K*H)*P(ii);
-                x(ii,:) = x(ii,:) + K.*(sensorTot.imu.accelerometer_measures(index_imu, 1) -g - C2);
+                x(ii,:) = x(ii,:) + K.*(sensorTot.imu.accelerometer_measures(index_imu, 1) - g - C2);
             end
 
         end
