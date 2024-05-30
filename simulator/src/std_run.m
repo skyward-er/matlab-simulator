@@ -393,7 +393,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         end
     else
         Tf = [t0, t1]';
-        Yf = [initialCond'; initialCond']; % check how to fix this
+        Yf = [Y0; Y0];
         para = NaN;
     end
     
