@@ -164,7 +164,7 @@ M_value = M;
 %% TIME-DEPENDENTS VARIABLES
 if t-engineT0 < tb
 
-    if t-engineT0 < settings.timeEngineCut
+    if t < settings.timeEngineCut
         m = interpLinear(settings.motor.expTime, settings.mTotalTime, t-engineT0);
         T = interpLinear(settings.motor.expTime, settings.motor.expThrust, t-engineT0);
         Pe = interpLinear(settings.motor.expTime, settings.motor.Pe, t-engineT0);
