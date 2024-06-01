@@ -22,5 +22,6 @@ data/Gemini_Roccaraso_september_2023/HIL_CPP_files_ADA/**
 **/*.mat
 **/*.fig
 **/*.avi
+**/*.csv
 data/msa-toolkit/*
 CdIdentification/estimatedCoefficients*
