@@ -30,7 +30,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 
-if t > settings.tb
+if t > rocket.motor.time(end)
     
     %% RECALL THE STATE
     z = -Y(3);
@@ -57,9 +57,9 @@ if t > settings.tb
     wr = w - wind(3);
 
     V_norm = norm([ur vr wr]);
-    Mach = getMach(V_norm, z + settings.z0);
+    Mach = getMach(V_norm, z + environment.z0);
     
-    value = Mach - settings.MachControl;
+    value = Mach - rocket.airbrakes.maxMach;
     
 else
     value = 1;

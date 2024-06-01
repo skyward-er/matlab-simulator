@@ -31,7 +31,7 @@ time = nas_state.time;
 z = nas_state.z;
 Vz = nas_state.vz;
 
-[z_setpoint, Vz_setpoint, csett] = set_Trajectory(time,z-settings.z0, Vz, csett);
+[z_setpoint, Vz_setpoint, csett] = set_Trajectory(time,z-environment.z0, Vz, csett);
 % [z_setpoint, Vz_setpoint, csett] = set_Trajectory(time,z, Vz, csett);
 
 %% PI ALGORITHM 
@@ -56,7 +56,7 @@ extMin = 0;
 %%%%%%%
 
 Cd_min = getDrag(V_mod,z,extMin, csett.coeff_Cd);
-Cd_max = getDrag(V_mod,z,extMax, csett.coeff_Cd); % coefficients for getDrag are set in configSimulator -> settings.mission
+Cd_max = getDrag(V_mod,z,extMax, csett.coeff_Cd); % coefficients for getDrag are set in configSimulator -> mission.name
 
 Umin = 0.5*ro*Cd_min*csett.S0*Vz*V_mod;     % min force
 Umax = 0.5*ro*Cd_max*csett.S0*Vz*V_mod;     % max force
@@ -93,7 +93,7 @@ N_points = size(csett.reference.Vz,2);
 
 
 
-switch settings.mission
+switch mission.name
     case 'Lynx_Roccaraso_September_2021'
         alpha_available = linspace(0,0.89,N_points);
         ext_available = zeros(1,N_points);
@@ -143,7 +143,7 @@ delta_S = delta_S_available(index_minimum);
 
 %% TRANSFORMATION FROM delta_S to SERVOMOTOR ANGLE DEGREES 
 
-switch settings.mission
+switch mission.name
     case 'Lynx_Roccaraso_September_2021'
         alpha_rad      = (-csett.b + sqrt(csett.b^2 + 4*csett.a*delta_S)) / (2*csett.a);
     case 'Lynx_Portugal_October_2021'

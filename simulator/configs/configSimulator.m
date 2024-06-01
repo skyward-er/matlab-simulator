@@ -14,28 +14,28 @@ SPDX-License-Identifier: GPL-3.0-or-later
 %}
 
 
-
-
-%% 1) MISSION FILE
-configMission;
-
 %% 2) SIMULATION SETTINGS
 
 configFlags;
 
 
+%% Mission parameters
+mission = Mission(true);
+rocket = Rocket(mission);
+environment = Environment(mission, rocket.motor);
+
 %% 3) LOAD DATAPATH
 configPath;
 
+%% CONFIG CONTROL
+run(strcat('config', mission.name));
+if conf.HIL
+    run('HILconfig.m');
+end
 %% 4) TRAJECTORY GENERATION SETUP
 if conf.script == "trajectory generation"
     config_TrajectoryGen;
 end
-%% 5) LAUNCH SETUP
-configLaunchRail;
-
-%% 6) WIND DETAILS
-configWind;
 
 %% 8) PLOTS?
 configPlots;
@@ -59,7 +59,7 @@ if conf.script ~= "trajectory generation"
     %% 14) REFERENCES
     configReferences;
     %% 15) SPECIAL CONDITIONS?
-%     config_SpecialConditions;
+    %     config_SpecialConditions;
 end
 
 

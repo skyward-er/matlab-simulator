@@ -33,7 +33,7 @@ ap =  Y(17);
 S = settings.S;                         % [m^2]   cross surface
 C = settings.C;                         % [m]     caliber
 g = settings.g0/(1 + (-z*1e-3/6371))^2; % [N/kg]  module of gravitational field
-tb = settings.tb;                       % [s]     Burning Time
+tb = rocket.motor.time(end);                       % [s]     Burning Time
 local = settings.Local;                 % vector containing inputs for atmosphereData
 
 
@@ -48,14 +48,14 @@ local = settings.Local;                 % vector containing inputs for atmospher
 %% INERTIAS
 if settings.HREmot
     if t < tb 
-        if t < settings.timeEngineCut
-            Ixx = interpLinear(settings.motor.expTime, settings.I(1,:), t);
-            Iyy = interpLinear(settings.motor.expTime, settings.I(2,:), t);
-            Izz = interpLinear(settings.motor.expTime, settings.I(3,:), t);
+        if t < rocket.motor.cutoffTime
+            Ixx = interpLinear(rocket.motor.time, settings.I(1,:), t);
+            Iyy = interpLinear(rocket.motor.time, settings.I(2,:), t);
+            Izz = interpLinear(rocket.motor.time, settings.I(3,:), t);
 
-            Ixxdot = interpLinear(settings.motor.expTime, settings.Idot(1,:), t);
-            Iyydot = interpLinear(settings.motor.expTime, settings.Idot(2,:), t);
-            Izzdot = interpLinear(settings.motor.expTime, settings.Idot(3,:), t);
+            Ixxdot = interpLinear(rocket.motor.time, settings.Idot(1,:), t);
+            Iyydot = interpLinear(rocket.motor.time, settings.Idot(2,:), t);
+            Izzdot = interpLinear(rocket.motor.time, settings.Idot(3,:), t);
         else
             I = settings.IengineCut;
             Idot = zeros(3, 1);
@@ -63,7 +63,7 @@ if settings.HREmot
             Ixxdot = Idot(1); Iyydot = Idot(2); Izzdot = Idot(3);
         end
     else
-        if settings.timeEngineCut < tb
+        if rocket.motor.cutoffTime < tb
             I = settings.IengineCut;
             Ixx = I(1); Iyy = I(2); Izz = I(3);
         else
@@ -104,7 +104,7 @@ if -z < 0     % z is directed as the gravity vector
     z = 0;
 end
 
-h = -z + settings.z0;
+h = -z + environment.z0;
 
 atmC = [9.80665, 1.4, 287.0531, 0.0065, 11000, 20000, ...
             1.225, 101325, 288.15]; % atmosisa constants:
@@ -134,10 +134,10 @@ M = V_norm/a;
 %% TIME-DEPENDENTS VARIABLES
 if t < tb
     if settings.HREmot
-        if t < settings.timeEngineCut
-            m = interpLinear(settings.motor.expTime, settings.mTotalTime, t);
-            T = interpLinear(settings.motor.expTime, settings.motor.expThrust, t);
-            Pe = interpLinear(settings.motor.expTime, settings.motor.Pe, t);
+        if t < rocket.motor.cutoffTime
+            m = interpLinear(rocket.motor.time, settings.mTotalTime, t);
+            T = interpLinear(rocket.motor.time, rocket.motor.thrust, t);
+            Pe = interpLinear(rocket.motor.time, settings.motor.Pe, t);
             T = T + settings.motor.Ae*(Pe - P);
         else
             m = settings.expMengineCut + settings.ms;
@@ -145,16 +145,16 @@ if t < tb
         end
     else
         dI = 1/tb*([Ixxf Iyyf Izzf]' - [Ixxe Iyye Izze]');
-        m = settings.ms + interpLinear(settings.motor.expTime, settings.motor.expM, t);
+        m = settings.ms + interpLinear(rocket.motor.time, settings.motor.expM, t);
         Ixxdot = -dI(1);
         Iyydot = -dI(2);
         Izzdot = -dI(3);
-        T = interpLinear(settings.motor.expTime, settings.motor.expThrust, t);
+        T = interpLinear(rocket.motor.time, rocket.motor.thrust, t);
     end
 
 else     % for t >= tb the fligth condition is the empty one(no interpolation needed)
     if settings.HREmot
-        if settings.timeEngineCut < tb
+        if rocket.motor.cutoffTime < tb
             m = settings.ms + settings.expMengineCut;
         else
             m = settings.ms + settings.motor.expM(end);

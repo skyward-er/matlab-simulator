@@ -177,7 +177,7 @@ settings.scenario = conf.scenario;
 
 %% %% uncomment when the MSA toolkit is updated
 
-% if settings.mission == 'NewRocket_2023' 
+% if mission.name == 'NewRocket_2023' 
 %     settings.HRE = true;
 % else
 %     settings.HRE = false;

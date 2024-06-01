@@ -7,7 +7,7 @@
 %
 % check also export_HILdataPRF for parafoil HIL and software testing 
 
-switch settings.mission
+switch mission.name
    
     case {"Gemini_Portugal_October_2023", "Gemini_Roccaraso_September_2023"}
         folder = "HIL_CPP_files_ABK";
@@ -36,7 +36,7 @@ switch settings.mission
             reference_export_table(:,i) = table(reference_export(:,i));
         end
         reference_export_table.Properties.VariableNames = varNames;
-        writetable(reference_export_table,ConDataPath+"/"+folder+"/ABK_references_"+settings.mission+".csv")
+        writetable(reference_export_table,ConDataPath+"/"+folder+"/ABK_references_"+mission.name+".csv")
 
         % second file: configuration for the air brakes
         configABK_export_table = table;
@@ -46,7 +46,7 @@ switch settings.mission
             configABK_export_table(1,i) = table(configValues(1,i));
         end
         configABK_export_table.Properties.VariableNames = configABKvarNames;
-        writetable(configABK_export_table,ConDataPath+"/"+folder+"/ABK_configABK_"+settings.mission+".csv")
+        writetable(configABK_export_table,ConDataPath+"/"+folder+"/ABK_configABK_"+mission.name+".csv")
 
         % third file: input extrapolation:
         % first column - timestamps of the NAS system
@@ -61,7 +61,7 @@ switch settings.mission
             trajectory_export_table(:,i) = table(trajectory(:,i));
         end
         trajectory_export_table.Properties.VariableNames = traj_varNames;
-        writetable(trajectory_export_table,ConDataPath+"/"+folder+"/ABK_trajectories_"+settings.mission+".csv")
+        writetable(trajectory_export_table,ConDataPath+"/"+folder+"/ABK_trajectories_"+mission.name+".csv")
 
         % fourth file: input extrapolation:
         % first column - data with air brakes timestamps;
@@ -87,7 +87,7 @@ switch settings.mission
             outputABK_export_table(:,i) = table(ABK_recall(:,i));
         end
         outputABK_export_table.Properties.VariableNames = ABK_varNames;
-        writetable(outputABK_export_table,ConDataPath+"/"+folder+"/ABK_outputABK_"+settings.mission+".csv")
+        writetable(outputABK_export_table,ConDataPath+"/"+folder+"/ABK_outputABK_"+mission.name+".csv")
         
         
 end

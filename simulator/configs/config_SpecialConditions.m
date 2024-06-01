@@ -13,7 +13,7 @@ conf.motor_Thrust_Factor = 1.; % default: = 1;
 conf.motor_Time_Factor = 1; % default: 
 
 % mach control
-conf.mach_control = 0.85; % default: = settings.MachControl;
+conf.mach_control = 0.85; % default: = rocket.airbrakes.maxMach;
 
 % steps in advance
 contSettings.N_forward = 2;
@@ -29,7 +29,7 @@ settings.wind.input = false;
 
 %% changed parameters
 
-settings.motor.expThrust = conf.motor_Thrust_Factor.* settings.motor.expThrust;
-settings.motor.expTime = conf.motor_Time_Factor .* settings.motor.expTime;
+rocket.motor.thrust = conf.motor_Thrust_Factor.* rocket.motor.thrust;
+rocket.motor.time = conf.motor_Time_Factor .* rocket.motor.time;
 
 settings.mach_control = conf.mach_control;

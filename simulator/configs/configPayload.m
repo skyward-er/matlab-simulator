@@ -4,46 +4,6 @@ x_target = -500;
 y_target = 500;
 z_target = 0;
 
-% Geometry
-settings.payload.mass = 4.2;                 % [kg]  mass 
-settings.payload.b    = 2.55/2;              % [m]   semiwingspan  - vela nuova: 2.55/2; - vela vecchia: 2.06/2;
-settings.payload.c    = 0.8;                 % [m]   mean aero chord
-settings.payload.S    = 2.04;                % [m^2] payload surface - vela nuova 2.04; - vela vecchia: 1.64;  
-settings.payload.inertia = [0.42, 0,   0.03;
-                            0,    0.4,    0; 
-                            0.03, 0, 0.053]; % [kg m^2] [3x3] inertia matrix payload+payload 
-settings.payload.inverseInertia = inv(settings.payload.inertia);
-
-% Aerodynamic constants
-settings.payload.CD0       =  0.25; 
-settings.payload.CDAlpha2  =  0.12;
-settings.payload.CL0       =  0.091;
-settings.payload.CLAlpha   =  0.9;
-settings.payload.Cm0       =  0.35; 
-settings.payload.CmAlpha   = -0.72;
-settings.payload.Cmq       = -1.49;
-settings.payload.CLDeltaA  = -0.0035;
-settings.payload.Cnr       = -0.27;
-settings.payload.CnDeltaA  =  0.0115;
-settings.payload.CDDeltaA  = 0.01;
-settings.payload.Clp       = -0.84;
-settings.payload.ClPhi     = -0.1;
-settings.payload.ClDeltaA  = 0.01;
-settings.payload.deltaSMax =  0.1;
-
-% %% Enviornment
-% % Gravity
-% const.g = 9.81;                     % [m/s^2] Gravity acceleration 
-% 
-% % Wind velocity
-% environment.wind = [1; 1; 0];      % [m/s] [3x1] Wind velocity vector 
-
-% %% Intial conditions
-% settings.payload.omega0   = [0;0;0];        % [rad/s] [3x1] Initial angular velocity
-% settings.payload.velBody0 = [7.3;0;0];      % [m/s] [3x1] Initial velocity
-% settings.payload.initPos  = [0;0;-400];     % [m] [3x1] Initial position
-% settings.payload.attitude = [0;0;0];        % [rad] [3x1] Initial attitude
-
 %% Target
 settings.payload.target = [x_target; y_target; z_target]; % [m] [3x1] target (IPI)
 

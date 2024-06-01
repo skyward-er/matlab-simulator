@@ -1,4 +1,4 @@
-function [sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1)
+function [sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1,environment,rocket)
 
 
 % mass estimation
@@ -62,8 +62,8 @@ estimated_mass = x(:,3);
 CD = settings.CD_correction_shutDown*getDrag(vnorm_nas, -z_nas, 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
 [~,~,~,rho] = atmosisa(-z_nas);
 
-predicted_apogee = -z_nas-settings.z0 + 1./(2.*( 0.5.*rho .* CD * settings.S ./ estimated_mass))...
-    .* log(1 + (vz_nas.^2 .* (0.5 .* rho .* CD .* settings.S) ./ estimated_mass) ./ 9.81 );
+predicted_apogee = -z_nas-environment.z0 + 1./(2.*( 0.5.*rho .* CD * rocket.crossSection ./ estimated_mass))...
+    .* log(1 + (vz_nas.^2 .* (0.5 .* rho .* CD .* rocket.crossSection) ./ estimated_mass) ./ 9.81 );
 
 % update local state
 sensorData.mea.time = t_mea;

@@ -1,4 +1,4 @@
-function [ap_ref_new,contSettings,varargout] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old)
+function [ap_ref_new,contSettings,varargout] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old,environment)
 
 
 %% HELP:
@@ -31,19 +31,19 @@ switch true % set this value in configControl.m
     case strcmp(contSettings.algorithm,'interp') || strcmp(contSettings.algorithm,'complete')
         % help in the function
 
-        [ap_ref_new,contSettings] = control_Interp(-sensorData.kalman.z-settings.z0,-sensorData.kalman.vz,settings,contSettings,ap_ref_old); % cambiare nome alla funzione tra le altre cose
+        [ap_ref_new,contSettings] = control_Interp(-sensorData.kalman.z-environment.z0,-sensorData.kalman.vz,settings,contSettings,ap_ref_old); % cambiare nome alla funzione tra le altre cose
       
         
     case strcmp (contSettings.algorithm,'shooting')
         % shooting algorithm:
 
-        [ap_ref_new] = control_Interp(-sensorData.kalman.z-settings.z0,-sensorData.kalman.vz,contSettings.reference.Z,contSettings.reference.Vz,'linear',contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
+        [ap_ref_new] = control_Interp(-sensorData.kalman.z-environment.z0,-sensorData.kalman.vz,contSettings.reference.Z,contSettings.reference.Vz,'linear',contSettings.N_forward,settings); % cambiare nome alla funzione tra le altre cose
         init.options = optimoptions("lsqnonlin","Display","off");
         
         if not(contSettings.flagFilter)
-            [ap_ref_new] = control_Shooting([-sensorData.kalman.z-settings.z0,-sensorData.kalman.vz],ap_ref_new,settings,contSettings.coeff_Cd,settings.arb,init);
+            [ap_ref_new] = control_Shooting([-sensorData.kalman.z-environment.z0,-sensorData.kalman.vz],ap_ref_new,settings,contSettings.coeff_Cd,settings.arb,init);
         else
-            [ap_base_filter] = control_Shooting([-sensorData.kalman.z-settings.z0,-sensorData.kalman.vz],ap_ref_new,settings,contSettings.coeff_Cd,settings.arb,init);
+            [ap_base_filter] = control_Shooting([-sensorData.kalman.z-environment.z0,-sensorData.kalman.vz],ap_ref_new,settings,contSettings.coeff_Cd,settings.arb,init);
 
             % filter control action
             if contSettings.flagFirstControlABK == false % the first reference is given the fastest possible (unfiltered), then filter

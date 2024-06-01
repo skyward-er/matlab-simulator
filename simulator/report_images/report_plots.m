@@ -6,7 +6,7 @@ function report_plots(structIn,settings,contSettings)
 % figures.trajectory = figure('Name', 'Trajectory','ToolBar','auto','Position',[100,100,600,400]);
 % plot3(structIn.Y(1:end-10, 2), structIn.Y(1:end-10, 1), -structIn.Y(1:end-10, 3),'DisplayName','True trajectory');
 % hold on; grid on;
-% % plot3(structIn.NAS(1:end-10, 2), structIn.NAS(1:end-10, 1), -structIn.NAS(1:end-10, 3)-settings.z0,'DisplayName','NAS trajectory');
+% % plot3(structIn.NAS(1:end-10, 2), structIn.NAS(1:end-10, 1), -structIn.NAS(1:end-10, 3)-environment.z0,'DisplayName','NAS trajectory');
 % 
 % if not(settings.scenario == "descent")
 %     plot3(structIn.ARB_openingPosition(2),structIn.ARB_openingPosition(1),structIn.ARB_openingPosition(3),'ko','DisplayName','Airbrake deployment')
@@ -30,13 +30,13 @@ function report_plots(structIn,settings,contSettings)
 % axis equal
 % view([0,90])
 % legend
-% exportStandardizedFigure(figures.trajectory,"report_images\"+settings.mission+"\src_trajectory.pdf",0.9,'forcedMarkers',10)
+% exportStandardizedFigure(figures.trajectory,"report_images\"+mission.name+"\src_trajectory.pdf",0.9,'forcedMarkers',10)
 % 
 % %% Trajectory
 % figures.trajectory = figure('Name', 'Trajectory','ToolBar','auto','Position',[100,100,600,400]);
 % plot(structIn.Y(1:end-10, 2), structIn.Y(1:end-10, 1),'DisplayName','Trajectory');
 % hold on; grid on;
-% % plot3(structIn.NAS(1:end-10, 2), structIn.NAS(1:end-10, 1), -structIn.NAS(1:end-10, 3)-settings.z0,'DisplayName','NAS trajectory');
+% % plot3(structIn.NAS(1:end-10, 2), structIn.NAS(1:end-10, 1), -structIn.NAS(1:end-10, 3)-environment.z0,'DisplayName','NAS trajectory');
 % 
 % if not(settings.scenario == "descent")
 %     plot(structIn.ARB_openingPosition(2),structIn.ARB_openingPosition(1),'ko','DisplayName','Airbrake deployment')
@@ -63,7 +63,7 @@ function report_plots(structIn,settings,contSettings)
 % title('Trajectory (ENU)');
 % axis equal
 % legend
-% exportStandardizedFigure(figures.trajectory,"report_images\"+settings.mission+"\src_trajectory.pdf",0.7,'forcedMarkers',10)
+% exportStandardizedFigure(figures.trajectory,"report_images\"+mission.name+"\src_trajectory.pdf",0.7,'forcedMarkers',10)
 % 
 % 
 % %% parafoil control action
@@ -77,7 +77,7 @@ function report_plots(structIn,settings,contSettings)
 % sgtitle('Parafoil control action')
 % xlabel('Time [s]')
 % ylabel('Normalized control action [-]')
-% exportStandardizedFigure(figures.parafoil_servo_action,"report_images\"+settings.mission+"\prf_control_action.pdf",0.7,'forcedMarkers',10)
+% exportStandardizedFigure(figures.parafoil_servo_action,"report_images\"+mission.name+"\prf_control_action.pdf",0.7,'forcedMarkers',10)
 
 %% Reference
 figures.ABK_wrt_referenceTrajectory = figure;

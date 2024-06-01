@@ -89,7 +89,7 @@ end
 
 %% Update Mass estimation data
 if ~settings.parafoil
-    if contains(settings.mission,'_2023') ||  contains(settings.mission,'_2024')
+    if contains(mission.name,'_2023') ||  contains(mission.name,'_2024')
         lastShutdown = settings.shutdown;
         settings.shutdown = not(flagBurning);
 
@@ -109,7 +109,8 @@ if ~settings.parafoil
         if settings.shutdown && not(lastShutdown) && flagFlight     % Need to check if this happens only once or the condition can be met multiple times
             t_shutdown = Tf(end);
             settings.expShutdown = 1;
-            settings.timeEngineCut = t_shutdown;
+            settings.shutdown = 1;
+            rocket.motor.cutoffTime = t_shutdown;
             settings.expTimeEngineCut = t_shutdown;
             settings.expMengineCut = m - settings.ms;
             settings.shutdown = 1;
@@ -117,61 +118,58 @@ if ~settings.parafoil
             settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
             [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
             sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
-        elseif ~settings.shutdown && Tf(end) >= settings.tb
-            t_shutdown = settings.tb;
-            settings.expShutdown = 1;
-            settings.timeEngineCut = t_shutdown;
-            settings.expTimeEngineCut = t_shutdown;
-            settings.expMengineCut = m - settings.ms;
-            settings.shutdown = 1;
-            settings = settingsEngineCut(settings);
+        elseif ~settings.shutdown && Tf(end)-engineT0 >= rocket.motor.time(end)
+            settings.expShutdown = true;
+            settings.shutdown = true;
+            settings.t_shutdown = rocket.motor.time(end);
+            rocket.motor.cutoffTime = settings.t_shutdown;
+            settings.expTimeEngineCut = settings.t_shutdown;
+            % settings.expMengineCut = settings.parout.m(end) - settings.ms;
+            % settings = settingsEngineCut(settings);
             settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
             [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
             sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
         end
     else
-        if t0 > settings.motor.expTime(end)
+        if t0 > rocket.motor.time(end)
             settings.expShutdown = 1;
         end
     end
 else
-    if contains(settings.mission,'_2023') ||  contains(settings.mission,'_2024')
-        if Tf(end) <= settings.tb+0.5 &&...
-                (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
+    if (contains(mission.name,'_2023') || contains(mission.name,'_2024')) && currentState ~= availableStates.on_ground
+        if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
 
             if isnan(sensorTot.comb_chamber.measures(end))
                 sensorTot.comb_chamber.measures(end) = 0;
             end
             if ~settings.shutdown
-                [t_shutdown,settings,contSettings,sensorData] =run_MTR_SIM (contSettings,sensorData,settings,sensorTot,Tf);
-                m = sensorData.mea.estimated_mass(end);
-                sensorTot.mea.pressure(iTimes) = sensorData.mea.estimated_pressure;
-                sensorTot.mea.mass(iTimes) = sensorData.mea.estimated_mass;
-                sensorTot.mea.prediction(iTimes) = sensorData.mea.predicted_apogee;
-                sensorTot.mea.t_shutdown = t_shutdown;
-                sensorTot.mea.time(iTimes) = t1;
+
+                [sensorData,sensorTot,settings,contSettings] =run_MTR_SIM (sensorData,sensorTot,settings,contSettings,t1, engineT0,dt_ode);
+                sensorTot.mea.t_shutdown = settings.t_shutdown;
+
+                if  Tf(end)-engineT0 >= rocket.motor.time(end)
+                    settings.expShutdown = true;
+                    settings.shutdown = true;
+                    settings.t_shutdown = rocket.motor.time(end);
+                    rocket.motor.cutoffTime = settings.t_shutdown;
+                    settings.expTimeEngineCut = settings.t_shutdown;
+                    % settings.expMengineCut = settings.parout.m(end) - settings.ms;
+                    % settings = settingsEngineCut(settings);
+                    settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
+                    [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
+                    sensorTot.mea.t_shutdown = settings.t_shutdown; % to pass the value out of the std_run to the structOut
+                end
             end
 
-            if ~settings.shutdown && Tf(end) >= settings.tb
-                t_shutdown = settings.tb;
-                settings.expShutdown = 1;
-                settings.timeEngineCut = t_shutdown;
-                settings.expTimeEngineCut = t_shutdown;
-                settings.expMengineCut = m - settings.ms;
-                settings.shutdown = 1;
-                settings = settingsEngineCut(settings);
-                settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
-                [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
-                sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
-            end
-        elseif ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')) && Tf(end) > settings.tb
+
+        elseif ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')) && Tf(end)-engineT0 > rocket.motor.time(end)
             settings.shutdown = 1;
             settings.expShutdown = 1;
-            settings.timeEngineCut = settings.tb;
-            settings.expTimeEngineCut = settings.tb;
+            rocket.motor.cutoffTime = rocket.motor.time(end);
+            settings.expTimeEngineCut = rocket.motor.time(end);
         end
     else
-        if t0 > settings.motor.expTime(end)
+        if t0-engineT0 > rocket.motor.time(end)
             settings.expShutdown = 1;
         end
     end
@@ -199,7 +197,7 @@ else
     if flagAeroBrakes && settings.flagNAS && settings.control && ...
             ~( strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine') )
 
-        if (contains(settings.mission,'_2023') || contains(settings.mission,'_2024')) && contSettings.traj_choice == 1 && settings.expShutdown
+        if (contains(mission.name,'_2023') || contains(mission.name,'_2024')) && contSettings.traj_choice == 1 && settings.expShutdown
             if ~strcmp(contSettings.algorithm,'complete')
                 m = settings.ms;
             else
@@ -234,7 +232,7 @@ if ~settings.flagAscent && settings.parafoil
                 contSettings.flagFirstControlPRF = false;
                 if contSettings.payload.guidance_alg == "t-approach"
                     pos_est = sensorData.nas.states(end,1:3);
-                    pos_est(3) = -pos_est(3)-settings.z0;
+                    pos_est(3) = -pos_est(3)-environment.z0;
                     [contSettings.payload.EMC,contSettings.payload.M1,contSettings.payload.M2] = setEMCpoints(pos_est,settings.payload.target,contSettings.payload);
                 end
         end
@@ -255,7 +253,7 @@ if ~settings.flagAscent && settings.parafoil
 %                 deltaA_ref_old = deltaA_ref_new;
 %                 t_last_prf_control = t1;
 %                 pos_est = sensorData.nas.states(end,1:3);
-%                 pos_est(3) = -pos_est(3)-settings.z0;
+%                 pos_est(3) = -pos_est(3)-environment.z0;
 %                 
 %                 [deltaA_ref_new,contSettings] = run_parafoilGuidance(pos_est, sensorData.nas.states(end,4:5), wind_est, settings.payload.target, contSettings);
 %         end

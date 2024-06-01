@@ -11,7 +11,7 @@ All the parameters are stored in the "contSetting" structure.
  %}
 
 %% LOAD CD COEFFICIENTS
-data = load(strcat(dataPath, '/CAinterpCoeffs'));
+data = load(strcat(mission.dataPath, '/CAinterpCoeffs'));
 contSettings.coeff_Cd = data.coeffs;
 
 %% CONTROL PARAMETERS
@@ -41,8 +41,8 @@ contSettings.alpha_degree_prec   =   0;
 contSettings.iteration_flag      =   1;
 contSettings.saturation          =   false;
 
-contSettings.g  = settings.g0;
-contSettings.D  = settings.C; 
+contSettings.g  = environment.g0;
+contSettings.D  = rocket.diameter; 
 contSettings.S0 = (pi*contSettings.D^2)/4; 
 
 % Parameters for the function get extension from angle
@@ -56,7 +56,7 @@ contSettings.filter_coeff = 0.5;                                            % se
 
 % delay from motor shutdown to air brakes opening:
 contSettings.ABK_shutdown_delay = 0.5; % [s] time between engine shutdown command and ABK phase
-if contains(settings.mission, "Roccaraso")
+if contains(mission.name, "Roccaraso")
     contSettings.ABK_shadowmode = 1.5; % [s]
 else
     contSettings.ABK_shadowmode = 3.8; % [s]

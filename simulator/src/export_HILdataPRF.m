@@ -7,7 +7,7 @@
 %
 % check also export_HILdataABK for air brakes HIL and software testing 
 
-switch settings.mission
+switch mission.name
    
     case "Gemini_Portugal_October_2023"
         if ~exist(ConDataPath+"/HIL_CPP_files_PRF","dir")
@@ -21,7 +21,7 @@ switch settings.mission
         PRFtrajectory = zeros(size(simOutput.t_nas(simOutput.events.mainChuteIndex:end)'));
         PRFtrajectory(:,1) = simOutput.NAS(simOutput.events.mainChuteIndex:end,1);
         PRFtrajectory(:,2) = simOutput.NAS(simOutput.events.mainChuteIndex:end,2);
-        PRFtrajectory(:,3) = simOutput.NAS(simOutput.events.mainChuteIndex:end,3)+settings.z0;
+        PRFtrajectory(:,3) = simOutput.NAS(simOutput.events.mainChuteIndex:end,3)+environment.z0;
         PRFtrajectory(:,4) = simOutput.NAS(simOutput.events.mainChuteIndex:end,4);
         PRFtrajectory(:,5) = simOutput.NAS(simOutput.events.mainChuteIndex:end,5);
         traj_varNames = {'N','E','D','Vn','Ve'};
@@ -29,7 +29,7 @@ switch settings.mission
             trajectory_export_table(:,i) = table(PRFtrajectory(:,i));
         end
         trajectory_export_table.Properties.VariableNames = traj_varNames;
-        writetable(trajectory_export_table,ConDataPath+"/HIL_CPP_files_PRF/PRF_trajectories_"+settings.mission+".csv")
+        writetable(trajectory_export_table,ConDataPath+"/HIL_CPP_files_PRF/PRF_trajectories_"+mission.name+".csv")
         
 
         % second file: WES output extrapolation:
@@ -49,7 +49,7 @@ switch settings.mission
             outputWES_export_table(:,i) = table(WES_output(:,i));
         end
         outputWES_export_table.Properties.VariableNames = WES_varNames;
-        writetable(outputWES_export_table,ConDataPath+"/HIL_CPP_files_PRF/PRF_outputWES_"+settings.mission+".csv")
+        writetable(outputWES_export_table,ConDataPath+"/HIL_CPP_files_PRF/PRF_outputWES_"+mission.name+".csv")
 
         % third file: configuration file for WES
         configPRF_export_table = table;
@@ -63,7 +63,7 @@ switch settings.mission
             configPRF_export_table(1,i) = table(configValues(1,i));
         end
         configPRF_export_table.Properties.VariableNames = configPRFvarNames;
-        writetable(configPRF_export_table,ConDataPath+"/HIL_CPP_files_PRF/PRF_configGuidance_"+settings.mission+".csv")
+        writetable(configPRF_export_table,ConDataPath+"/HIL_CPP_files_PRF/PRF_configGuidance_"+mission.name+".csv")
         
 
         % fourth file: guidance output
@@ -80,7 +80,7 @@ switch settings.mission
             outputGuidance_export_table(:,i) = table(guidance_output(:,i));
         end
         outputGuidance_export_table.Properties.VariableNames = WES_varNames;
-        writetable(outputGuidance_export_table,ConDataPath+"/HIL_CPP_files_PRF/PRF_outputGuidance_"+settings.mission+".csv")
+        writetable(outputGuidance_export_table,ConDataPath+"/HIL_CPP_files_PRF/PRF_outputGuidance_"+mission.name+".csv")
 
         % fifth file: control output
         % recall contSettings
@@ -121,7 +121,7 @@ switch settings.mission
             outputPRFcontrol_export_table(:,i) = table(PRFcontrol_output(:,i));
         end
         outputPRFcontrol_export_table.Properties.VariableNames = PRFcontrol_varNames;
-        writetable(outputPRFcontrol_export_table,ConDataPath+"/HIL_CPP_files_PRF/PRF_outputControl_"+settings.mission+".csv")
+        writetable(outputPRFcontrol_export_table,ConDataPath+"/HIL_CPP_files_PRF/PRF_outputControl_"+mission.name+".csv")
 
 
 end

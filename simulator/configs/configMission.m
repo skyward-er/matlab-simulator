@@ -14,12 +14,12 @@ switch conf.year
         switch conf.flight
             
             case "roccaraso"
-                settings.mission = 'Lynx_Roccaraso_September_2021';
-                settings.missionMSA = '2021_Lynx_Roccaraso_September';
+                mission.name = 'Lynx_Roccaraso_September_2021';
+                mission.nameMSA = '2021_Lynx_Roccaraso_September';
 
             case "pds"
-                settings.mission = 'Lynx_Portugal_October_2021';
-                settings.missionMSA = '2021_Lynx_Portugal_October';
+                mission.name = 'Lynx_Portugal_October_2021';
+                mission.nameMSA = '2021_Lynx_Portugal_October';
         end
 
     case 2022
@@ -27,12 +27,12 @@ switch conf.year
         switch conf.flight
 
             case "roccaraso"
-                settings.mission = 'Pyxis_Roccaraso_September_2022';
-                settings.missionMSA = '2022_Pyxis_Roccaraso_September';
+                mission.name = 'Pyxis_Roccaraso_September_2022';
+                mission.nameMSA = '2022_Pyxis_Roccaraso_September';
 
             case "pds"
-                settings.mission = 'Pyxis_Portugal_October_2022';
-                settings.missionMSA = '2022_Pyxis_Portugal_October';
+                mission.name = 'Pyxis_Portugal_October_2022';
+                mission.nameMSA = '2022_Pyxis_Portugal_October';
                 
         end
 
@@ -41,12 +41,12 @@ switch conf.year
         switch conf.flight
             
             case "roccaraso"
-                settings.mission = 'Gemini_Roccaraso_September_2023';
-                settings.missionMSA = '2023_Gemini_Roccaraso_September';
+                mission.name = 'Gemini_Roccaraso_September_2023';
+                mission.nameMSA = '2023_Gemini_Roccaraso_September';
             
             case "pds"
-                settings.mission = 'Gemini_Portugal_October_2023';
-                settings.missionMSA = '2023_Gemini_Portugal_October';
+                mission.name = 'Gemini_Portugal_October_2023';
+                mission.nameMSA = '2023_Gemini_Portugal_October';
 
         end
         
@@ -55,12 +55,12 @@ switch conf.year
         switch conf.flight
             
             case "roccaraso"
-                settings.mission = 'Lyra_Roccaraso_September_2024';
-                settings.missionMSA = '2024_Lyra_Roccaraso_September';
+                mission.name = 'Lyra_Roccaraso_September_2024';
+                mission.nameMSA = '2024_Lyra_Roccaraso_September';
             
             case "pds"
-                settings.mission = 'Lyra_Portugal_October_2024';
-                settings.missionMSA = '2024_Lyra_Portugal_October';
+                mission.name = 'Lyra_Portugal_October_2024';
+                mission.nameMSA = '2024_Lyra_Portugal_October';
 
         end
 end
