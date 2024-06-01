@@ -1,4 +1,4 @@
-function [sensorData,sensorTot,nas] = run_NAS(Tf, mag_NED,sensorData,sensorTot,settings)
+function [sensorData,sensorTot,nas] = run_NAS(Tf, mag_NED,sensorData,sensorTot,settings, environment)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
@@ -161,7 +161,7 @@ if length(t_nas) > 1
                 [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionGPS(x_lin(ii,:),...
                     P_lin(:,:,ii),sensorTot.gps.position_measures(index_GPS,1:2),...
                     sensorTot.gps.velocity_measures(index_GPS,1:2),nas.sigma_GPS,...
-                    fix, settings.lat0, settings.lon0,nas.GPS.a,nas.GPS.b);
+                    fix, environment.lat0, environment.lon0,nas.GPS.a,nas.GPS.b);
             end
             sensorTot.gps.lastindex = index_GPS;
         end
@@ -185,7 +185,7 @@ if length(t_nas) > 1
                     timestampPitotCorrection = t_nas;
                     % [x_lin(ii,:),P_lin(4:6,4:6,ii),~] = correctionPitot_pressures(x_lin(ii,:),P_lin(4:6,4:6,ii),sensorTot.pitot.total_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot,xq(ii,1:4),nas.Mach_max);
                     % [x_lin(ii,:),P_lin(4:6,4:6,ii),~] = correctionPitot_airspeed(x_lin(ii,:),P_lin(4:6,4:6,ii),sensorTot.pitot.airspeed(index_pit,:),nas.sigma_pitot2,settings.OMEGA);
-                    [x_lin(ii,:),P_lin(:,:,ii),~] = correctionPitot_pressureRatio(x_lin(ii,:), P_lin(1:6,1:6),sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot2,settings.OMEGA);
+                    [x_lin(ii,:),P_lin(:,:,ii),~] = correctionPitot_pressureRatio(x_lin(ii,:), P_lin(1:6,1:6),sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot2,environment.omega);
                 end
             end
             sensorTot.pitot.lastindex = index_pit;
@@ -197,7 +197,7 @@ if length(t_nas) > 1
         P_c(7:12,7:12,ii) = P_q(:,:,ii);
 
         if nas.flag_apo  == false
-            if -x(ii,6) < nas.v_thr && -x(ii,3) > 100 + settings.z0
+            if -x(ii,6) < nas.v_thr && -x(ii,3) > 100 + environment.z0
                 nas.counter = nas.counter + 1;
             else
                 nas.counter = 0;
@@ -214,7 +214,7 @@ if length(t_nas) > 1
     sensorData.nas.P = P_c;
     sensorData.nas.time = t_nas;
     sensorData.nas.timestampPitotCorrection = timestampPitotCorrection;
-    if abs(sensorData.nas.states(1,3)) >nas.stopPitotAltitude+ settings.z0
+    if abs(sensorData.nas.states(1,3)) >nas.stopPitotAltitude+ environment.z0
         nas.flagStopPitotCorrection = true;
     end
     sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2,:)  = sensorData.nas.states(2:end,:); % NAS output

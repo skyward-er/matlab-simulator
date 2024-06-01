@@ -1,7 +1,7 @@
 %{
 export configuration files for NAS algorithm (for our friends of software development)
 %}
-switch settings.mission
+switch mission.name
 
     case {"Gemini_Portugal_October_2023", "Gemini_Roccaraso_September_2023"}
         folder = "HIL_CPP_files_NAS";
@@ -17,7 +17,7 @@ switch settings.mission
             configNAS_export_table(1,i) = table(configValues(1,i));
         end
         configNAS_export_table.Properties.VariableNames = configNASvarNames;
-        writetable(configNAS_export_table,ConDataPath+"/"+folder+"/NAS_configNAS_"+settings.mission+".csv")
+        writetable(configNAS_export_table,ConDataPath+"/"+folder+"/NAS_configNAS_"+mission.name+".csv")
         
         
 end

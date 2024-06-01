@@ -1,4 +1,4 @@
-function [x,varargout] = extension_From_Angle(alpha, settings)
+function [x,varargout] = extension_From_Angle(alpha, settings, mission)
 % HELP
 % alpha must be already in radiants
 %
@@ -6,14 +6,14 @@ function [x,varargout] = extension_From_Angle(alpha, settings)
 % alpha: servo angle reference
 % settings: a struct containing everything basically
 
-switch settings.mission
+switch mission.name
     
-    case 'Lyra_Roccaraso_September_2024'
+    case '2024_Lyra_Roccaraso_September'
         x = settings.arb.extPol(1)*alpha.^4 + settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + settings.arb.extPol(4).*alpha;
         deltaS = alpha * settings.arb.surfPol;
         varargout{1} = deltaS;
 
-    case 'Lyra_Portugal_October_2024' % to be modified when updated data are available
+    case '2024_Lyra_Portugal_October' % to be modified when updated data are available
         
         x = settings.arb.extPol(1)*alpha.^4 + settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + settings.arb.extPol(4).*alpha;
         deltaS = alpha * settings.arb.surfPol;

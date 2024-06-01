@@ -13,7 +13,7 @@ end
 
 %% Navigation system (NAS)
 if settings.flagNAS && settings.dataNoise
-    [sensorData, sensorTot, settings.nas]   =  run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings);
+    [sensorData, sensorTot, settings.nas]   =  run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings, environment);
 
 
 
@@ -27,7 +27,7 @@ if settings.flagNAS && settings.dataNoise
 end
 
 %% Engine Control algorithm
-if (contains(settings.mission,'_2023') || contains(settings.mission,'_2024')) && currentState ~= availableStates.on_ground
+if (contains(mission.name,'2023') || contains(mission.name,'2024')) && currentState ~= availableStates.on_ground
     if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
 
         if isnan(sensorTot.comb_chamber.measures(end))
@@ -35,14 +35,15 @@ if (contains(settings.mission,'_2023') || contains(settings.mission,'_2024')) &&
         end
         if ~settings.shutdown
 
-            [sensorData,sensorTot,settings,contSettings] = run_MTR_SIM (sensorData,sensorTot,settings,contSettings,t1, engineT0,dt_ode);
+            [sensorData,sensorTot,settings,contSettings] = run_MTR_SIM ...
+                (sensorData,sensorTot,settings,contSettings,t1, engineT0,dt_ode,rocket,environment);
             sensorTot.mea.t_shutdown = settings.t_shutdown;
 
-            if  Tf(end)-engineT0 >= settings.tb
+            if  Tf(end)-engineT0 >= rocket.motor.time(end)
                 settings.expShutdown = true;
                 settings.shutdown = true;
-                settings.t_shutdown = settings.tb;
-                settings.timeEngineCut = settings.t_shutdown;
+                settings.t_shutdown = rocket.motor.time(end);
+                rocket.motor.cutoffTime = settings.t_shutdown;
                 settings.expTimeEngineCut = settings.t_shutdown;
                 % settings.expMengineCut = settings.parout.m(end) - settings.ms;
                 % settings = settingsEngineCut(settings);
@@ -53,17 +54,17 @@ if (contains(settings.mission,'_2023') || contains(settings.mission,'_2024')) &&
         end
 
 
-    elseif ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')) && Tf(end)-engineT0 > settings.tb
+    elseif ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')) && Tf(end)-engineT0 > rocket.motor.time(end)
         settings.shutdown = 1;
         settings.expShutdown = 1;
-        settings.timeEngineCut = settings.tb;
-        settings.expTimeEngineCut = settings.tb;
+        rocket.motor.cutoffTime = rocket.motor.time(end);
+        settings.expTimeEngineCut = rocket.motor.time(end);
     end
 else
-    if t0-engineT0 > settings.motor.expTime(end) && currentState ~= availableStates.on_ground 
+    if t0-engineT0 > rocket.motor.time(end) && currentState ~= availableStates.on_ground 
         settings.shutdown = 1;
         settings.expShutdown = 1;
-        settings.expTimeEngineCut = engineT0 + settings.tb;
+        settings.expTimeEngineCut = engineT0 + rocket.motor.time(end);
     end
 end
 
@@ -72,9 +73,9 @@ end
 
 if flagAeroBrakes && settings.flagNAS && settings.control && ...
         ~( strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine')) && ...
-        mach < settings.MachControl && Tf(end) > settings.expTimeEngineCut + contSettings.ABK_shutdown_delay
+        mach < rocket.airbrakes.maxMach && Tf(end) > settings.expTimeEngineCut + contSettings.ABK_shutdown_delay
 
-    if (contains(settings.mission,'_2023') || contains(settings.mission,'_2024')) && contSettings.traj_choice == 1 && settings.expShutdown
+    if (contains(mission.name,'2023') || contains(mission.name,'2024')) && contSettings.traj_choice == 1 && settings.expShutdown
         if ~strcmp(contSettings.algorithm,'complete')
             m = settings.ms;
         else
@@ -92,7 +93,7 @@ if flagAeroBrakes && settings.flagNAS && settings.control && ...
         ap_ref_old = ap_ref_new;
         settings.quat = [sensorTot.nas.states(end, [10,7:9])];
         [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
-        [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old); % "simulated" airbrakes because otherwise are run by the HIL.
+        [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old,environment); % "simulated" airbrakes because otherwise are run by the HIL.
     end
 else
     ap_ref_new = 0;
@@ -110,7 +111,7 @@ if ~settings.flagAscent && settings.parafoil
             contSettings.flagFirstControlPRF = false;
             if contSettings.payload.guidance_alg == "t-approach"
                 pos_est = sensorData.nas.states(end,1:3);
-                pos_est(3) = -pos_est(3)-settings.z0;
+                pos_est(3) = -pos_est(3)-environment.z0;
                 [contSettings.payload.EMC,contSettings.payload.M1,contSettings.payload.M2] = setEMCpoints(pos_est,settings.payload.target,contSettings.payload);
             end
         end
@@ -134,7 +135,7 @@ if ~settings.flagAscent && settings.parafoil
             deltaA_ref_old = deltaA_ref_new;
             t_last_prf_control = t1;
             pos_est = sensorData.nas.states(end,1:3);
-            pos_est(3) = -pos_est(3)-settings.z0;
+            pos_est(3) = -pos_est(3)-environment.z0;
 
             [deltaA_ref_new,contSettings] = run_parafoilGuidance(pos_est, sensorData.nas.states(end,4:5), wind_est, settings.payload.target, contSettings);
         end

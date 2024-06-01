@@ -108,8 +108,8 @@ for alg_index = 4
         settings_mont = settings_mont_init;
         settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
         settings_mont.motor.expTime = stoch.expThrust(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
+        settings_mont.tb = max( stoch.expThrust(i,stoch.expThrust(i,:)<=rocket.motor.time(end)) );     % initialize the burning time of the current simulation (parfor purposes)
         settings_mont.motor.K = motor_K + stoch.delta_Kt(i,:);                  % 
-        settings_mont.tb = max( stoch.expThrust(i,stoch.expThrust(i,:)<=settings.tb) );     % initialize the burning time of the current simulation (parfor purposes)
         settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
         settings_mont.mass_offset = stoch.mass_offset(i);
         settings_mont.OMEGA = stoch.OMEGA_rail(i);
@@ -328,35 +328,35 @@ stoch;
     folder = [];
 
     if flagSaveOffline == "yes" || flagSaveOffline == "y"
-        switch  settings.mission
+        switch  mission.name
 
             case 'Pyxis_Portugal_October_2022'
-                folder = [folder ; "MontecarloResults\"+settings.mission+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % offline
+                folder = [folder ; "MontecarloResults\"+mission.name+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*rocket.airbrakes.maxMach)+"_"+simulationType_thrust+"_"+saveDate]; % offline
 
             case 'Gemini_Portugal_October_2023'
-                folder = [folder ; "MontecarloResults\"+settings.mission+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % offline
+                folder = [folder ; "MontecarloResults\"+mission.name+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*rocket.airbrakes.maxMach)+"_"+simulationType_thrust+"_"+saveDate]; % offline
 
             case 'Pyxis_Roccaraso_September_2022'
-                folder = [folder ; "MontecarloResults\"+settings.mission+"\z_f_"+settings.z_final+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % offline
+                folder = [folder ; "MontecarloResults\"+mission.name+"\z_f_"+settings.z_final+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*rocket.airbrakes.maxMach)+"_"+simulationType_thrust+"_"+saveDate]; % offline
         
             case 'Gemini_Roccaraso_September_2023'
-                folder = [folder ; "MontecarloResults\"+settings.mission+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % offline
+                folder = [folder ; "MontecarloResults\"+mission.name+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*rocket.airbrakes.maxMach)+"_"+simulationType_thrust+"_"+saveDate]; % offline
 
             case 'Lyra_Portugal_October_2024'
-                folder = [folder ; "MontecarloResults\"+settings.mission+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % offline
+                folder = [folder ; "MontecarloResults\"+mission.name+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*rocket.airbrakes.maxMach)+"_"+simulationType_thrust+"_"+saveDate]; % offline
 
             case 'Lyra_Roccaraso_September_2024'
-                folder = [folder ; "MontecarloResults\"+settings.mission+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*settings.MachControl)+"_"+simulationType_thrust+"_"+saveDate]; % offline
+                folder = [folder ; "MontecarloResults\"+mission.name+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*rocket.airbrakes.maxMach)+"_"+simulationType_thrust+"_"+saveDate]; % offline
     
         end
 
     end
     if flagSaveOnline == "yes" || flagSaveOnline == "y"
         if computer == "Marco" || computer == "marco"
-            folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\AIR BRAKES\MONTECARLO E TUNING\"+settings.mission+"\"+conf.scenario+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"_"+simulationType_thrust+"_"+saveDate]; % online
+            folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\AIR BRAKES\MONTECARLO E TUNING\"+mission.name+"\"+conf.scenario+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"_"+simulationType_thrust+"_"+saveDate]; % online
         end
         if computer == "Max" || computer == "max"
-            folder = [folder ; "C:\Users\Max\OneDrive - Politecnico di Milano\SKYWARD\AIR BRAKES\MONTECARLO E TUNING\"+settings.mission+"\"+conf.scenario+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"_"+simulationType_thrust+"_"+saveDate]; % online
+            folder = [folder ; "C:\Users\Max\OneDrive - Politecnico di Milano\SKYWARD\AIR BRAKES\MONTECARLO E TUNING\"+mission.name+"\"+conf.scenario+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"_"+simulationType_thrust+"_"+saveDate]; % online
         end
     end
 
@@ -386,7 +386,7 @@ stoch;
             fprintf(fid,'Algorithm: %s \n',contSettings.algorithm );
             fprintf(fid,'Engine shut-down control frequency: %d Hz \n',settings.frequencies.controlFrequency);
             fprintf(fid,'Airbrakes control frequency: %d Hz \n',settings.frequencies.arbFrequency );
-            fprintf(fid,'Initial Mach number at which the control algorithm starts: %.3f \n\n',settings.MachControl);
+            fprintf(fid,'Initial Mach number at which the control algorithm starts: %.3f \n\n',rocket.airbrakes.maxMach);
             fprintf(fid,'Other parameters specific of the simulation: \n');
             fprintf(fid,'Filter coefficient: %.3f \n', contSettings.filter_coeff);
             fprintf(fid,'Target for shutdown: %d \n',settings.mea.z_shutdown);
@@ -477,8 +477,8 @@ end
 
 %% generate file for rocketpy (euroc 2023 prelaunch)
 % for i = 1:N_sim
-%     [apogee.coordinates(i,1),apogee.coordinates(i,2),apogee.coordinates(i,3)] = ned2geodetic(save_thrust{i}.apogee.position(1),save_thrust{i}.apogee.position(2),save_thrust{i}.apogee.position(3),settings.lat0,settings.lon0,settings.z0,wgs84Ellipsoid);
-%     [landing.coordinates(i,1),landing.coordinates(i,2),landing.coordinates(i,3)] = ned2geodetic(save_thrust{i}.Y(end,1),save_thrust{i}.Y(end,2),save_thrust{i}.Y(end,3),settings.lat0,settings.lon0,settings.z0,wgs84Ellipsoid);
+%     [apogee.coordinates(i,1),apogee.coordinates(i,2),apogee.coordinates(i,3)] = ned2geodetic(save_thrust{i}.apogee.position(1),save_thrust{i}.apogee.position(2),save_thrust{i}.apogee.position(3),environment.lat0,environment.lon0,environment.z0,wgs84Ellipsoid);
+%     [landing.coordinates(i,1),landing.coordinates(i,2),landing.coordinates(i,3)] = ned2geodetic(save_thrust{i}.Y(end,1),save_thrust{i}.Y(end,2),save_thrust{i}.Y(end,3),environment.lat0,environment.lon0,environment.z0,wgs84Ellipsoid);
 % end
 % landing.coordinates = landing.coordinates(:,1:2);
 % 

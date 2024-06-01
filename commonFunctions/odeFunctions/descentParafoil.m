@@ -114,7 +114,7 @@ if -z < 0     % z is directed as the gravity vector
     z = 0;
 end
 
-absoluteAltitude = -z + settings.z0;
+absoluteAltitude = -z + environment.z0;
 [~, ~, ~, rho] = atmosphereData(absoluteAltitude, g, local);
 
 %% AERODYNAMICS ANGLES

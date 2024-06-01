@@ -1,7 +1,8 @@
-function [sensorData,sensorTot,settings,contSettings] = run_MTR_SIM (sensorData,sensorTot,settings,contSettings,T1, engineT0,dt_ode)
+function [sensorData,sensorTot,settings,contSettings] = run_MTR_SIM...
+    (sensorData,sensorTot,settings,contSettings,T1, engineT0,dt_ode,rocket,environment)
 
     % impose valve position
-    if T1 < settings.timeEngineCut
+    if T1 < rocket.motor.cutoffTime
         u = 1;
     else
         u = 0;
@@ -10,37 +11,38 @@ function [sensorData,sensorTot,settings,contSettings] = run_MTR_SIM (sensorData,
         sensorTot.mea.time = T1-dt_ode;
         settings.flagMEAInit =  true;
     end
-    
-        [sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1);
- 
+    [sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1,environment,rocket);
     if sensorTot.mea.prediction(end) >= settings.mea.z_shutdown
         settings.mea.counter_shutdown = settings.mea.counter_shutdown + 1*floor(settings.frequencies.MEAFrequency/settings.frequencies.controlFrequency); % the last multiplication is to take into account the frequency difference
         if ~settings.expShutdown
             if  settings.mea.counter_shutdown > contSettings.N_prediction_threshold %&& T1 > settings.mea.t_lower_shadowmode% threshold set in configControl
                 settings.expShutdown = true;
                 settings.t_shutdown = T1;
-                settings.timeEngineCut = settings.t_shutdown + settings.shutdownValveDelay;
+                rocket.motor.cutoffTime  = settings.t_shutdown + settings.shutdownValveDelay;
                 settings.expTimeEngineCut = settings.t_shutdown;
             end
             if T1-engineT0 >= settings.mea.t_higher_shadowmode
                 settings.expShutdown = true;
                 settings.t_shutdown = T1;
-                settings.timeEngineCut = settings.t_shutdown + settings.shutdownValveDelay;
+                rocket.motor.cutoffTime = settings.t_shutdown + settings.shutdownValveDelay;
                 settings.expTimeEngineCut = settings.t_shutdown;
             end
         end
-        if T1-engineT0 < settings.tb
-            settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, T1-engineT0);
-        else
-            settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, settings.tb);
-        end
-        settings.expMengineCut = settings.parout.m(end) - settings.ms;
-        if T1 > settings.timeEngineCut
-            settings.shutdown = true;
-            settings = settingsEngineCut(settings, engineT0);
-            settings.quatCut = [sensorTot.nas.states(end, 10) sensorTot.nas.states(end, 7:9)];
-            [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
-        end
+            if T1-engineT0 < rocket.motor.time(end)
+                rocket.motor.cutoffTime = T1-engineT0;
+                % settings.IengineCut = interpLinear(rocket.motor.time, settings.I, T1-engineT0);
+            else
+                rocket.motor.cutoffTime = rocket.motor.time(end);
+                % settings.IengineCut = interpLinear(rocket.motor.time, settings.I, rocket.motor.time(end));
+            end
+            % settings.expMengineCut = settings.parout.m(end) - rocket.massNoMotor;
+            rocket.updateCutoff;
+            if T1 - engineT0> rocket.motor.cutoffTime 
+                settings.shutdown = true;
+                settings = settingsEngineCut(settings, engineT0, rocket);
+                settings.quatCut = [sensorTot.nas.states(end, 10) sensorTot.nas.states(end, 7:9)];
+                [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
+            end
 
         contSettings.valve_pos = 0;
         % else
@@ -50,18 +52,19 @@ function [sensorData,sensorTot,settings,contSettings] = run_MTR_SIM (sensorData,
         if ~settings.expShutdown && T1-engineT0 >= settings.mea.t_higher_shadowmode
             settings.expShutdown = true;
             settings.t_shutdown = T1;
-            settings.timeEngineCut = settings.t_shutdown + settings.shutdownValveDelay;
+            rocket.motor.cutoffTime  = settings.t_shutdown + settings.shutdownValveDelay;
+
             settings.expTimeEngineCut = settings.t_shutdown;
         end
-        if T1-engineT0 < settings.tb
-            settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, T1-engineT0);
+        if T1-engineT0 < rocket.motor.time(end)
+            settings.IengineCut = interpLinear(rocket.motor.time, rocket.inertia, T1-engineT0);
         else
-            settings.IengineCut = interpLinear(settings.motor.expTime, settings.I, settings.tb);
+            settings.IengineCut = interpLinear(rocket.motor.time, rocket.inertia, rocket.motor.time(end));
         end
-        settings.expMengineCut = settings.parout.m(end) - settings.ms;
-        if T1 > settings.timeEngineCut
+        settings.expMengineCut = settings.parout.m(end) - rocket.massNoMotor;
+        if T1 - engineT0 > rocket.motor.cutoffTime 
             settings.shutdown = true;
-            settings = settingsEngineCut(settings, engineT0);
+            [settings,rocket] = settingsEngineCut(settings, engineT0, rocket);
             settings.quatCut = [sensorTot.nas.states(end, 10) sensorTot.nas.states(end, 7:9)];
             [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
         end

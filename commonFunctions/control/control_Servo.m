@@ -33,7 +33,7 @@ CONTROL_ALGORITHM_SERVO_DEGREE  Finds trejectory (z-Vz) to follow and uses a PI 
 % Control variable limits
 
   
-switch settings.mission
+switch mission.name
     case 'Pyxis_Portugal_October_2022'
         alphaMax= 68; % degrees
     case 'Pyxis_Roccaraso_September_2022'

@@ -51,6 +51,10 @@ addpath(genpath(currentPath));
 % Common Functions path
 addpath(genpath(commonFunctionsPath));
 
+% add MSA data path
+dataPath = strcat('../common');
+addpath(genpath(dataPath));
+
 %% CHECK SUBMODULES UPDATES
 % if ~exist('flagSubmodulesUpdated','var')
 %     checkSubmodules;
@@ -81,13 +85,13 @@ end
 % Y = State = ( x y z | u v w | p q r | q0 q1 q2 q3 | thetax thetay thetaz | ap_ref ) also for Ya,Yf corresponding to T
 
 %% simulation:
-[simOutput] = std_run(settings,contSettings);
+[simOutput] = std_run(settings,contSettings,rocket,environment,mission);
 
 %% PLOTS
 if ~exist("../commonFunctions/graphics/general-utilities/","dir")
     warning('To export file you need to download the repository, read the README file in the folder')
 end
-std_plots(simOutput,settings,contSettings)
+std_plots(simOutput,settings,contSettings,mission,rocket,environment)
 sensor_plots(simOutput)
 % report_plots(simOutput,settings,contSettings)
 

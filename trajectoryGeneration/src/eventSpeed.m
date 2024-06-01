@@ -1,6 +1,6 @@
 function [value, isterminal, direction] = eventSpeed(t, Y,settings, varargin)
 
- Mach = getMach(norm(Y(4:6)), -Y(3) + settings.z0);
+ Mach = getMach(norm(Y(4:6)), -Y(3) + environment.z0);
     
 value = Mach - 0.8;
 

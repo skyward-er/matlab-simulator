@@ -1,4 +1,4 @@
-function [sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1)
+function [sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1,environment,rocket)
 
 
 % mass estimation

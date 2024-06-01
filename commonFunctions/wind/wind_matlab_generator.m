@@ -20,7 +20,7 @@ January 2016; Last revision: 17.I.2016
 
 %}
 
-h = -z + settings.z0;
+h = -z + environment.z0;
 if h < 0
     h = 0;
 end
@@ -36,7 +36,7 @@ Seconds = Hour*3600;
 
 %% HORIZONTAL WIND
 
-[uw,vw] = atmoshwm(settings.lat0,settings.lon0,h,'day',Day,...
+[uw,vw] = atmoshwm(environment.lat0,environment.lon0,h,'day',Day,...
     'seconds',Seconds+t,'model','quiet','version','14');    % NED reference
 ww = settings.wind.ww;
 

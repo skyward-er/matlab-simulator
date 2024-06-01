@@ -70,7 +70,7 @@ end
 S = settings.S;                         % [m^2]   cross surface
 C = settings.C;                         % [m]     caliber
 g = settings.g0/(1 + (-z*1e-3/6371))^2; % [N/kg]  module of gravitational field
-tb = settings.tb;                       % [s]     Burning Time
+tb = rocket.motor.time(end);                       % [s]     Burning Time
 local = settings.Local;                 % vector containing inputs for atmosphereData
 
 OMEGA = settings.OMEGA;
@@ -84,15 +84,15 @@ end
 %% INERTIAS
 
 if t-engineT0 < tb
-    if t-engineT0 < settings.timeEngineCut
-        I = interpLinear(settings.motor.expTime, settings.I, t-engineT0);
-        Idot = interpLinear(settings.motor.expTime, settings.Idot, t-engineT0);
+    if t-engineT0 < rocket.motor.cutoffTime
+        I = interpLinear(rocket.motor.time, settings.I, t-engineT0);
+        Idot = interpLinear(rocket.motor.time, settings.Idot, t-engineT0);
     else
         I = settings.IengineCut;
         Idot = zeros(3, 1);
     end
 else
-    if settings.timeEngineCut < tb
+    if rocket.motor.cutoffTime < tb
         I = settings.IengineCut;
     else
         I = settings.I(:, end);
@@ -155,7 +155,7 @@ if -z < 0     % z is directed as the gravity vector
     z = 0;
 end
 
-absoluteAltitude = -z + settings.z0;
+absoluteAltitude = -z + environment.z0;
 [~, a, P, rho] = atmosphereData(absoluteAltitude, g, local);
 
 M = V_norm/a;
@@ -164,10 +164,10 @@ M_value = M;
 %% TIME-DEPENDENTS VARIABLES
 if t-engineT0 < tb
 
-    if t < settings.timeEngineCut
-        m = interpLinear(settings.motor.expTime, settings.mTotalTime, t-engineT0);
-        T = interpLinear(settings.motor.expTime, settings.motor.expThrust, t-engineT0);
-        Pe = interpLinear(settings.motor.expTime, settings.motor.Pe, t-engineT0);
+    if t < rocket.motor.cutoffTime
+        m = interpLinear(rocket.motor.time, settings.mTotalTime, t-engineT0);
+        T = interpLinear(rocket.motor.time, rocket.motor.thrust, t-engineT0);
+        Pe = interpLinear(rocket.motor.time, settings.motor.Pe, t-engineT0);
         T = T + settings.motor.Ae*(Pe - P);
     else
         m = settings.expMengineCut + settings.ms;
@@ -176,7 +176,7 @@ if t-engineT0 < tb
 
 else     % for t >= tb the fligth condition is the empty one(no interpolation needed)
 
-    if settings.timeEngineCut < tb
+    if rocket.motor.cutoffTime < tb
         m = settings.ms + settings.expMengineCut;
     else
         m = settings.ms + settings.motor.expM(end);
@@ -201,7 +201,7 @@ beta_value = beta;
 %% CHOSING THE EMPTY CONDITION VALUE
 % interpolation of the coefficients with the value in the nearest condition of the Coeffs matrix
 
-if t-engineT0 >= settings.tControl && M <= settings.MachControl
+if t-engineT0 >= settings.tControl && M <= rocket.airbrakes.maxMach
     c = settings.control;
 else
     c = 1;
@@ -354,7 +354,7 @@ else
 
     if ~settings.identification
 
-        if (M_value < settings.MachControl) %|| ~settings.machControlActive
+        if (M_value < rocket.airbrakes.maxMach) %|| ~settings.machControlActive
             % set velocity of servo (air brakes)
             if length(ap_ref_vec)==2 % for the recallOdeFunction
                 if t < t_change_ref

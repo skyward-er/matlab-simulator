@@ -5,9 +5,9 @@
 %}
 
 % Possible range of values for the control variable
-switch settings.mission
+switch mission.name
 
-    case 'Lynx_Portugal_October_2021'
+    case '2021_Lynx_Portugal_October'
 
         contSettings.delta_S_available = (0.0:0.001/4:0.01017)';
         contSettings.filter_coeff0 = 0.9; % starting value, then linear decrease until max Altitude
@@ -19,11 +19,11 @@ switch settings.mission
         settings.stopPitotAltitude = 2800;
         settings.CD_correction = 1; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
 
-    case 'Lynx_Roccaraso_September_2021'
+    case '2021_Lynx_Roccaraso_September'
 
         contSettings.delta_S_available = (0.0:0.001/4:0.01017)';
     
-    case 'Pyxis_Portugal_October_2022'
+    case '2022_Pyxis_Portugal_October'
         % only for PID 
         contSettings.delta_S_available = (0.0:0.001/4:settings.arb.surfPol*settings.servo.maxAngle)'; 
         
@@ -41,7 +41,7 @@ switch settings.mission
         settings.stopPitotAltitude = 2800;
         settings.CD_correction = 1; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
 
-    case 'Pyxis_Roccaraso_September_2022'
+    case '2022_Pyxis_Roccaraso_September'
     
         contSettings.delta_S_available = (0.0:0.001/4:settings.arb.surfPol*settings.servo.maxAngle)'; 
         
@@ -64,7 +64,7 @@ switch settings.mission
         settings.stopPitotAltitude = 800;
         settings.CD_correction = 1; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
 
-    case 'Gemini_Portugal_October_2023' 
+    case '2023_Gemini_Portugal_October' 
      
         contSettings.traj_choice = 1; % if 1 performs trajectory choice, if zero it doesn't
         N_mass = 11;     % number of references to generate
@@ -98,7 +98,7 @@ switch settings.mission
         settings.CD_correction = 1; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
         
 
-    case 'Gemini_Roccaraso_September_2023' 
+    case '2023_Gemini_Roccaraso_September' 
      
         contSettings.traj_choice = 1; % if 1 performs trajectory choice, if zero it doesn't
         N_mass = 11;     % number of references to generate
@@ -131,7 +131,7 @@ switch settings.mission
 
         settings.CD_correction = 0.80; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
     
-    case 'Lyra_Portugal_October_2024' 
+    case '2024_Lyra_Portugal_October' 
 
         contSettings.traj_choice = 1; % if 1 performs trajectory choice, if zero it doesn't
         N_mass = 11;     % number of references to generate
@@ -165,7 +165,7 @@ switch settings.mission
         settings.CD_correction = 1; % set to 1 if you want to use CD from DATCOM in the simulation (and also in the accelerometer ascent), otherwise multiplies CD (only CD, not the others) for it
         
 
-    case 'Lyra_Roccaraso_September_2024' 
+    case '2024_Lyra_Roccaraso_September' 
      
         contSettings.traj_choice = 1; % if 1 performs trajectory choice, if zero it doesn't
         N_mass = 11;     % number of references to generate

@@ -1,4 +1,4 @@
-function settings = settingsEngineCut(settings, engineT0)
+function [settings, rocket] = settingsEngineCut(settings, engineT0, rocket)
 %{
     settingsEngineCut - This function computes specifc parameters at engine
                         cut event
@@ -23,39 +23,34 @@ function settings = settingsEngineCut(settings, engineT0)
     SPDX-License-Identifier: GPL-3.0-or-later
 %}
     
-    settings.timeEngineCut = settings.timeEngineCut - engineT0;
-
-    if (settings.timeEngineCut) > 0 && ( settings.timeEngineCut  <= (settings.tb - settings.tCO) )
+    rocket.motor.cutoffTime = rocket.motor.cutoffTime - engineT0;
+    rocket.updateCutoff;
+    if (rocket.motor.cutoffTime) > 0 && ( rocket.motor.cutoffTime  <= (rocket.motor.time(end) - rocket.motor.cutoffTransient) )
         
-        tEC = settings.timeEngineCut;           % controlled shutoff moment, 0.3 is the delay
-        tCO = settings.tCO;                     % cutoff transient duration
+        tEC = rocket.motor.cutoffTime;           % controlled shutoff moment, 0.3 is the delay
+        tCO = rocket.motor.cutoffTransient;                     % cutoff transient duration
 
-        for i = 1: length(settings.motor.expTime)
-            if settings.motor.expTime(i) >= settings.timeEngineCut
+        for i = 1: length(rocket.motor.time)
+            if rocket.motor.time(i) >= rocket.motor.cutoffTime
                 
-                settings.motor.expThrust(i) = settings.motor.expThrust(i) * (1 - (settings.motor.expTime(i) - tEC)/tCO ); 
+                rocket.motor.thrust(i) = rocket.motor.thrust(i) * (1 - (rocket.motor.time(i) - tEC)/tCO ); 
 
-                if settings.motor.expTime(i) > tEC + tCO || settings.motor.expThrust(i) < 0
-                    settings.motor.expThrust(i) = 0; 
+                if rocket.motor.time(i) > tEC + tCO || rocket.motor.thrust(i) < 0
+                    rocket.motor.thrust(i) = 0; 
                 end
 
             end
         end
         
-        settings.timeEngineCut = settings.timeEngineCut + settings.tCO;
-
-        settings.expMengineCut = interpLinear(settings.motor.expTime, settings.motor.expM, settings.timeEngineCut);
-        settings.IengineCut(1) = interpLinear(settings.motor.expTime,  settings.I(1,:), settings.timeEngineCut);
-        settings.IengineCut(2) = interpLinear(settings.motor.expTime,  settings.I(2,:), settings.timeEngineCut);
-        settings.IengineCut(3) = interpLinear(settings.motor.expTime,  settings.I(3,:), settings.timeEngineCut);
-
-    elseif settings.timeEngineCut >= (settings.tb - settings.tCO)
+        rocket.motor.cutoffTime = rocket.motor.cutoffTime + rocket.motor.cutoffTransient;
+        rocket.updateCutoff;
+        
+    elseif rocket.motor.cutoffTime >= (rocket.motor.time(end) - rocket.motor.cutoffTransient)
     
-        settings.timeEngineCut = inf;
+        rocket.motor.cutoffTime = inf;
     
-    elseif settings.timeEngineCut <= 0
-        error('settings.timeEngineCut must be grater than zero');
+    elseif rocket.motor.cutoffTime <= 0
+        error('rocket.motor.cutoffTime must be grater than zero');
     end
 
-    settings.timeEngineCut = settings.timeEngineCut + engineT0;
 end

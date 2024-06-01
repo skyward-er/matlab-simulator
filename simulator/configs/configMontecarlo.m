@@ -35,7 +35,7 @@ displayIter = true; % set to false if you don't want to see the iteration number
             mu_t = 1;                         % thrust_percentage mean value
 
             thrust_percentage = normrnd(mu_t,sigma_t,N_sim,1);       %generate normally distributed values ( [0.8 1.20] = 3sigma) % serve il toolbox
-            stoch.thrust = thrust_percentage*settings.motor.expThrust;                  % thrust - the notation used creates a matrix where each row is the expThrust multiplied by one coefficient in the thrust percentage array
+            stoch.thrust = thrust_percentage*rocket.motor.thrust;                  % thrust - the notation used creates a matrix where each row is the expThrust multiplied by one coefficient in the thrust percentage array
 
             
             %%% in questo modo però il burning time rimane fissato perchè è
@@ -49,10 +49,10 @@ displayIter = true; % set to false if you don't want to see the iteration number
             stoch.delta_Kt = normrnd(mu_Kt, sigma_Kt, N_sim, 1);
 
             impulse_uncertainty = normrnd(1,0.05/3,N_sim,1);
-            stoch.expThrust = diag(impulse_uncertainty)*((1./thrust_percentage) * settings.motor.expTime);          % burning time - same notation as thrust here
+            stoch.expThrust = diag(impulse_uncertainty)*((1./thrust_percentage) * rocket.motor.time);          % burning time - same notation as thrust here
             %%%
             for i =1:N_sim
-                stoch.State.xcgTime(:,i) =  settings.State.xcgTime/settings.tb .* stoch.expThrust(i,end);  % Xcg time
+                stoch.State.xcgTime(:,i) =  settings.State.xcgTime/rocket.motor.time(end) .* stoch.expThrust(i,end);  % Xcg time
             end
 
             %%% Aero coefficients uncertainty
@@ -99,9 +99,9 @@ displayIter = true; % set to false if you don't want to see the iteration number
             %%% wind parameters
             [stoch.wind.uw, stoch.wind.vw, stoch.wind.ww, stoch.wind.Az, stoch.wind.El ,thrust_percentage, N_sim] = windConstGeneratorMontecarlo(settings.wind,N_sim,simulationType_thrust,thrust_percentage);
 
-            stoch.thrust = thrust_percentage*settings.motor.expThrust;                  % thrust - the notation used creates a matrix where each row is the expThrust multiplied by one coefficient in the thrust percentage array
+            stoch.thrust = thrust_percentage*rocket.motor.thrust;                  % thrust - the notation used creates a matrix where each row is the expThrust multiplied by one coefficient in the thrust percentage array
             %%%
-            stoch.expThrust = (1./thrust_percentage) * settings.motor.expTime;          % burning time - same notation as thrust here
+            stoch.expThrust = (1./thrust_percentage) * rocket.motor.time;          % burning time - same notation as thrust here
     
             
     end
@@ -116,10 +116,10 @@ displayIter = true; % set to false if you don't want to see the iteration number
 else
 
     settings.mass_offset = 0;%2*(-0.5+rand(1)); % initialise to 0 the value of the mass offset, in order to not consider its uncertainty on the nominal simulations
-    % mass_flow_rate = diff(settings.motor.expM([end,1]))/settings.tb; % [kg/s]
+    % mass_flow_rate = diff(settings.motor.expM([end,1]))/rocket.motor.time(end); % [kg/s]
     % real_tb = (settings.mass_offset +  settings.motor.mOx)/ mass_flow_rate;
-    % if real_tb < settings.tb
-    %     settings.tb = real_tb;
+    % if real_tb < rocket.motor.time(end)
+    %     rocket.motor.time(end) = real_tb;
     % end
 
 end

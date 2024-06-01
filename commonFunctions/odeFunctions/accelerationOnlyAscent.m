@@ -52,7 +52,7 @@ if -z < 0     % z is directed as the gravity vector
     z = 0;
 end
 
-h = -z + settings.z0;
+h = -z + environment.z0;
 
 atmC = [9.80665, 1.4, 287.0531, 0.0065, 11000, 20000, ...
             1.225, 101325, 288.15]; % atmosisa constants:
@@ -82,7 +82,7 @@ S = settings.S;              % [m^2] cross surface
 CoeffsE = settings.CoeffsE;  % Empty Rocket Coefficients
 CoeffsF = settings.CoeffsF;  % Full Rocket Coefficients
 g = 9.80655;                 % [N/kg] module of gravitational field at zero
-tb = settings.tb;            % [s]     Burning Time
+tb = rocket.motor.time(end);            % [s]     Burning Time
 OMEGA = settings.OMEGA;      % [rad] Elevation Angle in the launch pad
 
 %% TIME-DEPENDENTS VARIABLES

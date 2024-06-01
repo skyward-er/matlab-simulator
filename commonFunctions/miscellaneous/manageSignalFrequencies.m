@@ -213,13 +213,13 @@ if freq.magnetometerFrequency > freq.controlFrequency
             Q(i, :) = Y(iTimeMagnetometer == T, 10:13);
         end
     end
-    magnFieldInertial = magneticFieldApprox(z + settings.z0)';
+    magnFieldInertial = magneticFieldApprox(z + environment.z0)';
     sensorData.magnetometer.measures = quatrotate(Q, magnFieldInertial);
 
 elseif freq.magnetometerFrequency == freq.controlFrequency
     z = -Y(end, 3);
     Q = Y(end, 10:13);
-    magnFieldInertial = magneticFieldApprox(z + settings.z0)';
+    magnFieldInertial = magneticFieldApprox(z + environment.z0)';
     sensorData.magnetometer.measures = quatrotate(Q, magnFieldInertial);
     sensorData.magnetometer.time = T(end);
 
@@ -236,14 +236,14 @@ else
             Yinterp = m  *(iTimeMagnetometer-T0)+Y0;
             z = - Yinterp(1);
             Q = Yinterp(2:end);
-            magnFieldInertial = magneticFieldApprox(z + settings.z0)';
+            magnFieldInertial = magneticFieldApprox(z + environment.z0)';
             sensorData.magnetometer.measures = quatrotate(Q, magnFieldInertial);
             sensorData.magnetometer.t0 = iTimeMagnetometer;
         elseif  abs(T(i) - sensorData.magnetometer.t0 - 1/freq.magnetometerFrequency) <1e-6 % for stability purposes this is not an ==
             iTimeMagnetometer = sensorData.magnetometer.t0 + 1/freq.magnetometerFrequency;
             z = - Y(i, 3);
             Q = Y(i, 10:13);
-            magnFieldInertial = magneticFieldApprox(z + settings.z0)';
+            magnFieldInertial = magneticFieldApprox(z + environment.z0)';
             sensorData.magnetometer.measures = quatrotate(Q, magnFieldInertial);
             sensorData.magnetometer.t0 = iTimeMagnetometer;
         end
@@ -408,7 +408,7 @@ for i_baro = 1:length(sensorData.barometer_sens)
                 z(i) = -Y(abs(iTimeBarometer - T)<1e-6, 3);
             end
             sensorData.barometer_sens{i_baro}.z(i) = z(i);
-            [Temp, ~, P, ~] = atmosisa(sensorData.barometer_sens{i_baro}.z(i)+settings.z0);
+            [Temp, ~, P, ~] = atmosisa(sensorData.barometer_sens{i_baro}.z(i)+environment.z0);
             sensorData.barometer_sens{i_baro}.measures(i) = P;
             sensorData.barometer_sens{i_baro}.temperature(i) = Temp;
 
@@ -419,7 +419,7 @@ for i_baro = 1:length(sensorData.barometer_sens)
         z = -Y(end, 3);
         sensorData.barometer_sens{i_baro}.z = z;
         sensorData.barometer_sens{i_baro}.t0 = T(end);
-        [Temp, ~, P, ~] = atmosisa(sensorData.barometer_sens{i_baro}.z+settings.z0);
+        [Temp, ~, P, ~] = atmosisa(sensorData.barometer_sens{i_baro}.z+environment.z0);
         sensorData.barometer_sens{i_baro}.measures = P;
         sensorData.barometer_sens{i_baro}.temperature = Temp;
 
@@ -437,7 +437,7 @@ for i_baro = 1:length(sensorData.barometer_sens)
                 sensorData.barometer_sens{i_baro}.z = z;
                 sensorData.barometer_sens{i_baro}.t0 = iTimeBarometer;
                 sensorData.barometer_sens{i_baro}.time = iTimeBarometer;
-                [Temp, ~, P, ~] = atmosisa(sensorData.barometer_sens{i_baro}.z+settings.z0);
+                [Temp, ~, P, ~] = atmosisa(sensorData.barometer_sens{i_baro}.z+environment.z0);
                 sensorData.barometer_sens{i_baro}.measures = P;
                 sensorData.barometer_sens{i_baro}.temperature = Temp;
 
@@ -447,7 +447,7 @@ for i_baro = 1:length(sensorData.barometer_sens)
                 sensorData.barometer_sens{i_baro}.t0 = iTimeBarometer;
                 sensorData.barometer_sens{i_baro}.time = iTimeBarometer;
                 sensorData.barometer_sens{i_baro}.z = z;
-                [Temp, ~, P, ~] = atmosisa(sensorData.barometer_sens{i_baro}.z+settings.z0);
+                [Temp, ~, P, ~] = atmosisa(sensorData.barometer_sens{i_baro}.z+environment.z0);
                 sensorData.barometer_sens{i_baro}.measures = P;
                 sensorData.barometer_sens{i_baro}.temperature = Temp;
             end
@@ -495,7 +495,7 @@ if isfield(freq, 'pitotFrequency')
                 Y0 = Y(index0, 10:13);
                 m = (Y1 - Y0)./(T1 - T0);
                 Q(i,:) = m * (iTimePitot-T0)+Y0;
-                [Temp, a, P, ~] = atmosisa(z_pit(i) + settings.z0);
+                [Temp, a, P, ~] = atmosisa(z_pit(i) + environment.z0);
                 wind_ned = [uw, vw, ww];
                 wind_body = quatrotate(Q(i,:),wind_ned);
                 v = (vx(i) + wind_body(1))';
@@ -506,7 +506,7 @@ if isfield(freq, 'pitotFrequency')
                 vx(i) = Y(abs(iTimePitot - T)<1e-6, 4);
                 z_pit(i) = -Y(abs(iTimePitot - T)<1e-6, 3);
                 Q(i,:) = [Y(abs(iTimePitot - T)<1e-6, 10:13)];
-                [Temp, a, P, ~] = atmosisa(z_pit(i) + settings.z0);
+                [Temp, a, P, ~] = atmosisa(z_pit(i) + environment.z0);
                 wind_ned = [uw, vw, ww];
                 wind_body = quatrotate(Q(i,:),wind_ned);
                 v = (vx(i) + wind_body(1))';
@@ -522,7 +522,7 @@ if isfield(freq, 'pitotFrequency')
         vx = Y(end, 4);
         z_pit  = -Y(end, 3);
         Q = Y(end, 10:13);
-        [Temp, a, P, ~] = atmosisa(z_pit + settings.z0);
+        [Temp, a, P, ~] = atmosisa(z_pit + environment.z0);
         wind_ned = [uw, vw, ww];
         wind_body = quatrotate(Q,wind_ned);
         v = (vx + wind_body(1))';
@@ -552,7 +552,7 @@ if isfield(freq, 'pitotFrequency')
                 m = (Y1 - Y0)./(T1 - T0);
                 Q = m * (iTimePitot-T0)+Y0;
                 sensorData.pitot.t0 = iTimePitot;                
-                [Temp, a, P, ~] = atmosisa(z_pit + settings.z0);
+                [Temp, a, P, ~] = atmosisa(z_pit + environment.z0);
                 wind_ned = [uw, vw, ww];
                 wind_body = quatrotate(Q,wind_ned);
                 v = (vx + wind_body(1))';
@@ -566,7 +566,7 @@ if isfield(freq, 'pitotFrequency')
                 sensorData.pitot.t0 = iTimePitot;
                 vx = Y(i, 4);
                 Q = Y(i,10:13);
-                [Temp, a, P, ~] = atmosisa(z_pit + settings.z0);
+                [Temp, a, P, ~] = atmosisa(z_pit + environment.z0);
                 wind_ned = [uw, vw, ww];
                 wind_body = quatrotate(Q,wind_ned);
                 v = (vx + wind_body(1))';
@@ -583,7 +583,7 @@ if isfield(freq, 'pitotFrequency')
 end
 
 %% chamber pressure sensor
-if contains(settings.mission,'_2023')
+if contains(mission.name,'_2023')
     if freq.chamberPressureFrequency > freq.controlFrequency
         dt = 1/freq.chamberPressureFrequency;
         sensorData.chamberPressure.time = sensorData.chamberPressure.t0+dt:dt:T(end);
@@ -592,27 +592,27 @@ if contains(settings.mission,'_2023')
 
         for i = 1:N
             iTimechamberPressure = sensorData.chamberPressure.time(i);
-            Thrust(i) = interp1(settings.motor.expTime, settings.motor.expThrust,iTimechamberPressure );
+            Thrust(i) = interp1(rocket.motor.time, rocket.motor.thrust,iTimechamberPressure );
         end
 
         sensorData.chamberPressure.measures = Thrust/settings.motor.K;
 
     elseif freq.chamberPressureFrequency == freq.controlFrequency
         sensorData.chamberPressure.time = T(end);
-        Thrust = interp1(settings.motor.expTime, settings.motor.expThrust,T(end));
+        Thrust = interp1(rocket.motor.time, rocket.motor.thrust,T(end));
         sensorData.chamberPressure.measures = Thrust/settings.motor.K;
 
     else
         for i = 1:length(T)
             if T(i) - sensorData.chamberPressure.t0 > 1/freq.chamberPressureFrequency
                 iTimechamberPressure = sensorData.chamberPressure.t0 + 1/freq.chamberPressureFrequency;
-                Thrust(i) = interp1(settings.motor.expTime, settings.motor.expThrust,iTimechamberPressure );
+                Thrust(i) = interp1(rocket.motor.time, rocket.motor.thrust,iTimechamberPressure );
                 sensorData.chamberPressure.measures(i) = Thrust(i)/settings.motor.K;
                 sensorData.chamberPressure.t0 = iTimechamberPressure ;
                 sensorData.chamberPressure.time = iTimechamberPressure;
             elseif  T(i) - sensorData.chamberPressure.t0 == 1/freq.chamberPressureFrequency
                 iTimechamberPressure = sensorData.chamberPressure.t0 + 1/freq.chamberPressureFrequency;
-                Thrust(i) = interp1(settings.motor.expTime, settings.motor.expThrust,iTimechamberPressure );
+                Thrust(i) = interp1(rocket.motor.time, rocket.motor.thrust,iTimechamberPressure );
                 sensorData.chamberPressure.measures(i) = Thrust(i)/settings.motor.K;
                 sensorData.chamberPressure.t0 = iTimechamberPressure;
                 sensorData.chamberPressure.time = iTimechamberPressure;

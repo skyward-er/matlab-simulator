@@ -1,4 +1,6 @@
-function [sensorData] = generateSensorMeasurements(magneticFieldApprox, Y, Tf, wind, sensorData,sensorTot, settings, engineT0, currentState, availableStates)
+function [sensorData] = generateSensorMeasurements(magneticFieldApprox, Y, Tf,...
+    wind, sensorData,sensorTot, settings, engineT0, currentState, availableStates,...
+    environment, mission, rocket)
 
 %{
  
@@ -52,7 +54,7 @@ sensorData.magnetometer.time = (sensorTot.imu.time(end):1/freq.magnetometerFrequ
 sensorData.magnetometer.measures = zeros(size(sensorData.magnetometer.time,1),3)*100;
 sensorData.magnetometer.measures(1,:) = sensorTot.imu.magnetometer_measures(end,:)*100;
 if length(sensorData.magnetometer.time)>1
-    z = -interp1(Tf,Y(:,3),sensorData.magnetometer.time(2:end)) + settings.z0;
+    z = -interp1(Tf,Y(:,3),sensorData.magnetometer.time(2:end)) + environment.z0;
     Q = interp1(Tf,Y(:,10:13),sensorData.magnetometer.time(2:end));
     magnFieldInertial = magneticFieldApprox(z);
     sensorData.magnetometer.measures(2:end,:) = quatrotate(Q, magnFieldInertial);
@@ -72,7 +74,7 @@ sensorData.gps.velocityMeasures(1,:) = sensorTot.gps.velocity_measures(end,:);
 if length(sensorData.gps.time)>1
     TfGPS =  round(Tf*1e4)/1e4;                                             % as the GPS is usually very slow, this helps to stabilize truncation error
     sensorData.gps.positionMeasures(2:end, :) = ...
-        interp1(TfGPS,[Y(:,1:2),-Y(:,3)+settings.z0],sensorData.gps.time(2:end));
+        interp1(TfGPS,[Y(:,1:2),-Y(:,3)+environment.z0],sensorData.gps.time(2:end));
     vel = interp1(TfGPS,Y(:,4:6),sensorData.gps.time(2:end));
     quat = interp1(TfGPS,Y(:,10:13),sensorData.gps.time(2:end));
     sensorData.gps.velocityMeasures(2:end, :) = quatrotate(quatconj(quat),vel);
@@ -90,9 +92,9 @@ for i_baro = 1:length(sensorData.barometer_sens)
     sensorData.barometer_sens{i_baro}.measures = zeros(size(sensorData.barometer_sens{i_baro}.time,1),1);
     sensorData.barometer_sens{i_baro}.z = zeros(size(sensorData.barometer_sens{i_baro}.time,1),1); % this initialization is needed in acquisition_system, do not delete it unless you know what you are doing. Needed in order to have arrays of the same size. Otherwise, if the new array is shorter (e.g. 2 instead of 3 elements) the last element is brought in the next sensorTot saving step and breaks the simulation
     sensorData.barometer_sens{i_baro}.measures(1) = sensorTot.barometer_sens{i_baro}.pressure_measures(end);
-    [sensorData.barometer_sens{i_baro}.temperature,~,~,~] = atmosisa(-interp1(Tf,Y(:,3),sensorData.barometer_sens{i_baro}.time) + settings.z0);
+    [sensorData.barometer_sens{i_baro}.temperature,~,~,~] = atmosisa(-interp1(Tf,Y(:,3),sensorData.barometer_sens{i_baro}.time) + environment.z0);
     if length(sensorData.barometer_sens{i_baro}.time)>1
-        z = -interp1(Tf,Y(:,3),sensorData.barometer_sens{i_baro}.time(2:end)) + settings.z0;
+        z = -interp1(Tf,Y(:,3),sensorData.barometer_sens{i_baro}.time(2:end)) + environment.z0;
         [~, ~, P, ~] = atmosisa(z);
         sensorData.barometer_sens{i_baro}.measures(2:end) = P;
     end
@@ -119,7 +121,7 @@ if isfield(freq, 'pitotFrequency')
     sensorData.pitot.temperature(1) = sensorTot.pitot.temperature(end);
     if length(sensorData.pitot.time)>1
         TfPitot =  round(Tf*1e4)/1e4;  
-        z = -interp1(TfPitot,Y(:,3),sensorData.pitot.time(2:end)) + settings.z0;
+        z = -interp1(TfPitot,Y(:,3),sensorData.pitot.time(2:end)) + environment.z0;
         v = interp1(TfPitot,Y(:,4),sensorData.pitot.time(2:end));
         Q = interp1(TfPitot,Y(:,10:13),sensorData.pitot.time(2:end));
         wind_body = quatrotate(Q,wind);
@@ -137,12 +139,12 @@ if isfield(freq, 'pitotFrequency')
 end
 
 %% chamber pressure sensor
-if (contains(settings.mission,'_2023') || contains(settings.mission,'_2024')) && currentState ~= availableStates.on_ground
+if (contains(mission.name,'2023') || contains(mission.name,'2024')) && currentState ~= availableStates.on_ground
     sensorData.chamberPressure.time = (sensorTot.comb_chamber.time(end):1/freq.chamberPressureFrequency:Tf(end))';
     sensorData.chamberPressure.measures = zeros(size(sensorData.chamberPressure.time,1),1);
     sensorData.chamberPressure.measures(1) = sensorTot.comb_chamber.measures(end);
     if length(sensorData.chamberPressure.time) >1
-        sensorData.chamberPressure.measures(2:end)= interp1(settings.motor.expTime, settings.motor.expThrust,sensorData.chamberPressure.time(2:end)-engineT0)/settings.motor.K;
+        sensorData.chamberPressure.measures(2:end)= interp1(rocket.motor.time, rocket.motor.thrust,sensorData.chamberPressure.time(2:end)-engineT0)/settings.motor.K;
     end
 else 
     sensorData.chamberPressure.time = (sensorTot.comb_chamber.time(end):1/freq.chamberPressureFrequency:Tf(end))';

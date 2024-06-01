@@ -1,7 +1,7 @@
-function std_plots(simOutput, settings,contSettings)
+function std_plots(simOutput, settings,contSettings,mission,rocket,environment)
 
-if ~exist("report_images\"+settings.mission,"dir")
-    mkdir("report_images\"+settings.mission)
+if ~exist("report_images\"+mission.name,"dir")
+    mkdir("report_images\"+mission.name)
 end
 
 %% post process data
@@ -12,7 +12,7 @@ eul = rad2deg(eul);
 v_ned = quatrotate(quatconj(simOutput.Y(:, 10:13)), simOutput.Y(:, 4:6));
 
 %% MASS ESTIMATION ALGORITHM
-if contains(settings.mission, '2023') || contains(settings.mission, '2024')
+if contains(mission.name, '2023') || contains(mission.name, '2024')
     if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
         figures.MEA = figure('Name', 'Predicted apogee','ToolBar','auto');
         sgtitle('MEA')
@@ -66,7 +66,7 @@ if ~settings.electronics
     end
 end
 plot( -simOutput.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
-plot( -simOutput.sensors.nas.states(:,3)-settings.z0,  -simOutput.sensors.nas.states(:,6),'m--','DisplayName','NAS')
+plot( -simOutput.sensors.nas.states(:,3)-environment.z0,  -simOutput.sensors.nas.states(:,6),'m--','DisplayName','NAS')
 % plot( structIn.ADA(:,4),  structIn.ADA(:,5),'b','DisplayName','ADA z')
 yyaxis right
 plot( -simOutput.Y(:, 3), simOutput.Y(:, 14),'g','DisplayName','arb')
@@ -136,7 +136,7 @@ if not(settings.scenario == "descent")
     legend('simulated','reference values','Airbrakes deployment','Apogee')
 
     if settings.flagExportPLOTS == true
-        exportStandardizedFigure(figures.servo_angle,"report_images\"+settings.mission+"\src_servo_angle.pdf",0.9)
+        exportStandardizedFigure(figures.servo_angle,"report_images\"+mission.name+"\src_servo_angle.pdf",0.9)
     end
 end
 % parafoil
@@ -156,7 +156,7 @@ end
 figures.trajectory = figure('Name', 'Trajectory','ToolBar','auto','Position',[100,100,600,400]);
 plot3(simOutput.Y(1:end-10, 2), simOutput.Y(1:end-10, 1), -simOutput.Y(1:end-10, 3),'DisplayName','True trajectory');
 hold on; grid on;
-plot3(simOutput.sensors.nas.states(1:end-10, 2), simOutput.sensors.nas.states(1:end-10, 1), -simOutput.sensors.nas.states(1:end-10, 3)-settings.z0,'DisplayName','NAS trajectory');
+plot3(simOutput.sensors.nas.states(1:end-10, 2), simOutput.sensors.nas.states(1:end-10, 1), -simOutput.sensors.nas.states(1:end-10, 3)-environment.z0,'DisplayName','NAS trajectory');
 
 if not(settings.scenario == "descent")
     plot3(simOutput.ARB.openingPosition(2),simOutput.ARB.openingPosition(1),simOutput.ARB.openingPosition(3),'ko','DisplayName','Airbrake deployment')
@@ -180,7 +180,7 @@ axis equal
 view([157,55])
 legend
 if settings.flagExportPLOTS == true
-    exportStandardizedFigure(figures.trajectory,"report_images\"+settings.mission+"\src_trajectory.pdf",0.49)
+    exportStandardizedFigure(figures.trajectory,"report_images\"+mission.name+"\src_trajectory.pdf",0.49)
 end
 
 %% Velocities BODY w.r.t. time against NAS
@@ -237,7 +237,7 @@ ylabel('V_z [m/s]');
 sgtitle('Velocities BODY');
 legend
 if settings.flagExportPLOTS == true
-    exportStandardizedFigure(figures.velocities_BODY,"report_images\"+settings.mission+"\src_velocities_BODY.pdf",0.9)
+    exportStandardizedFigure(figures.velocities_BODY,"report_images\"+mission.name+"\src_velocities_BODY.pdf",0.9)
 end
 
 %% Velocities NED w.r.t. time against NAS
@@ -277,12 +277,12 @@ ylabel('V_z [m/s]');
 sgtitle('Velocities NED');
 legend
 if settings.flagExportPLOTS == true
-    exportStandardizedFigure(figures.velocities_NED,"report_images\"+settings.mission+"\src_velocities_NED.pdf",0.9)
+    exportStandardizedFigure(figures.velocities_NED,"report_images\"+mission.name+"\src_velocities_NED.pdf",0.9)
 end
 
 %% check consistency of NAS:
 
-altitude = simOutput.sensors.nas.states(:,3)+settings.z0;
+altitude = simOutput.sensors.nas.states(:,3)+environment.z0;
 v_int_NAS = 0;
 v_int_simulation = 0;
 for i = 2:length(simOutput.sensors.nas.states(:,6))
@@ -388,7 +388,7 @@ ylabel('r [rad/s]');
 sgtitle('Angular rotations BODY');
 legend
 if settings.flagExportPLOTS == true
-    exportStandardizedFigure(figures.velocities,"report_images\"+settings.mission+"\src_Angular_rotations_BODY.pdf",0.9)
+    exportStandardizedFigure(figures.velocities,"report_images\"+mission.name+"\src_Angular_rotations_BODY.pdf",0.9)
 end
 
 

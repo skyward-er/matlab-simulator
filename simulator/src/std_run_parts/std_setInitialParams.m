@@ -8,7 +8,7 @@ integration initialization script- setting initial condition before control phas
 %% kalman initialization
 if not(settings.scenario == "descent")
     sensorData.kalman.vz = 0;                                                   % Vertical velocity
-    sensorData.kalman.z  = -settings.z0;
+    sensorData.kalman.z  = -environment.z0;
 else 
     sensorData.kalman.vz = -settings.Vz_final;                                                   % Vertical velocity
     sensorData.kalman.z  = -settings.z_final;
@@ -51,7 +51,7 @@ sensorData.barometer_sens{3}.t0 = initSensorT0...
 sensorData.pitot.t0 = initSensorT0...
     (control_freq,settings.frequencies.pitotFrequency);
 
-if contains(settings.mission,'_2023')  || contains(settings.mission,'_2024')
+if contains(mission.name,'2023')  || contains(mission.name,'2024')
 sensorData.chamberPressure.t0 = initSensorT0...
     (control_freq,settings.frequencies.chamberPressureFrequency);
 end
@@ -77,7 +77,7 @@ windMag = [];
 windAz = [];
 
 %% control angle (air brakes) initialization
-ap_ref_new = 0;                                                             % air brakes closed until Mach < settings.MachControl
+ap_ref_new = 0;                                                             % air brakes closed until Mach < rocket.airbrakes.maxMach
 ap_ref_old = 0;
 ap_ref = [ ap_ref_old ap_ref_new ];
 
@@ -133,7 +133,7 @@ sfd_mean_p = [];
 %% ADA initial conditions (Apogee Detection Algorithm)
 
 if strcmp(settings.scenario, 'descent')
-    [~, ~, p_fin, ~]  =   atmosisa(settings.z_final+settings.z0);               % Reference temperature in kelvin and pressure in Pa
+    [~, ~, p_fin, ~]  =   atmosisa(settings.z_final+environment.z0);               % Reference temperature in kelvin and pressure in Pa
 
     settings.ada.v0          =   -10;                                           % Vertical velocity initial condition
     settings.ada.a0          =   -100;                                          % Acceleration velocity initial condition
@@ -157,9 +157,9 @@ if settings.flagNAS || settings.electronics
     % initialize states of the NAS 
     sensorData.nas.states = [X0; V0; Q0(2:4); Q0(1);0;0;0]';
     if settings.scenario ~="descent"
-        sensorData.nas.states(3) = -settings.z0;
+        sensorData.nas.states(3) = -environment.z0;
     else
-        sensorData.nas.states(3) = -settings.z_final-settings.z0;
+        sensorData.nas.states(3) = -settings.z_final-environment.z0;
     end
     sensorData.nas.P = 0.01*eye(12);
 end
@@ -168,12 +168,12 @@ sensorData.nas.time = 0;
 settings.nas.flagStopPitotCorrection = false;
 
 %% MEA PARAMETERS (mass estimation algorithm) 
-sensorData.mea.x = [0,0,settings.m0];     % initial state estimate
-sensorData.mea.estimated_mass(1) = settings.m0;
+sensorData.mea.x = [0,0,rocket.mass(1)];     % initial state estimate
+sensorData.mea.estimated_mass(1) = rocket.mass(1);
 sensorData.mea.P = diag([0 0 0.36^2]);          % initial value for P
 sensorData.mea.P_acc = diag([0 0 0.36^2]);
 sensorData.mea.time = 0;
-sensorData.mea.estimated_mass = settings.m0;
+sensorData.mea.estimated_mass = rocket.mass(1);
 sensorData.mea.estimated_pressure = 0;
 sensorData.mea.predicted_apogee = 0;
 settings.t_shutdown = Inf;
@@ -185,20 +185,20 @@ para = 1;
 
 %% total sensors initialization
 % total measurements
-[~,~,P0,~] = atmosisa(settings.z0);
+[~,~,P0,~] = atmosisa(environment.z0);
 sensorTot.barometer_sens{1}.pressure_measures   =   P0;
 sensorTot.barometer_sens{2}.pressure_measures   =   P0;
 sensorTot.barometer_sens{3}.pressure_measures   =   P0;
-sensorTot.barometer_sens{1}.altitude            =   -settings.z0;
-sensorTot.barometer_sens{2}.altitude            =   -settings.z0;
-sensorTot.barometer_sens{3}.altitude            =   -settings.z0;
+sensorTot.barometer_sens{1}.altitude            =   -environment.z0;
+sensorTot.barometer_sens{2}.altitude            =   -environment.z0;
+sensorTot.barometer_sens{3}.altitude            =   -environment.z0;
 sensorTot.barometer.pressure_measures           =   P0;
-sensorTot.barometer.altitude                    =   -settings.z0;
+sensorTot.barometer.altitude                    =   -environment.z0;
 sensorTot.comb_chamber.measures                 =   0;
 sensorTot.imu.accelerometer_measures            =   [0, 0, 0];
 sensorTot.imu.gyro_measures                     =   [0, 0, 0];
 sensorTot.imu.magnetometer_measures             =   [0, 0, 0];
-sensorTot.gps.position_measures                 =   [settings.lat0, settings.lon0, settings.z0];
+sensorTot.gps.position_measures                 =   [environment.lat0, environment.lon0, environment.z0];
 sensorTot.gps.velocity_measures                 =   [0, 0, 0];
 sensorTot.pitot.total_pressure                  =   P0;
 sensorTot.pitot.static_pressure                 =   P0;

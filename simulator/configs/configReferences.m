@@ -17,9 +17,9 @@ contSettings.data_trajectories = struct_trajectories.trajectories_saving;
 
 %% LOAD REFERENCES
 % select the trajectories for the rocket used in the simulation
-switch settings.mission
+switch mission.name
 
-    case 'Lynx_Portugal_October_2021'
+    case '2021_Lynx_Portugal_October'
 
         load("reference_gdtozero.mat")
         for i = 1:size(all_Vz,2)
@@ -29,7 +29,7 @@ switch settings.mission
         reference.z_min = 466.738;
         reference.z_max = 1307.4;
 
-    case 'Pyxis_Portugal_October_2022'
+    case '2022_Pyxis_Portugal_October'
 
         load("Trajectories.mat")
         for i = 1:size(trajectories_saving,1)
@@ -47,7 +47,7 @@ switch settings.mission
         reference.z_min = 466.738;
         reference.z_max = 1307.4;
 
-    case 'Pyxis_Roccaraso_September_2022'
+    case '2022_Pyxis_Roccaraso_September'
         load('Trajectories.mat');
         for i = 1:size(trajectories_saving,1)
             reference.vz_ref{i,1} = trajectories_saving{i}.VZ_ref;
@@ -59,7 +59,7 @@ switch settings.mission
                 reference.Vnorm_ref{i,1}(j) = norm([reference.vz_ref{i,1}(j) reference.vx_ref{i,1}(j) reference.vy_ref{i,1}(j)]);
             end
         end
-    case 'Gemini_Portugal_October_2023'
+    case '2023_Gemini_Portugal_October'
 
         load("Trajectories.mat")
         for i = 1:size(trajectories_saving,1)
@@ -74,7 +74,7 @@ switch settings.mission
                 end
             end
         end
-    case 'Gemini_Roccaraso_September_2023'
+    case '2023_Gemini_Roccaraso_September'
 
         load("Trajectories.mat")
         for i = 1:size(trajectories_saving,1)
@@ -89,7 +89,7 @@ switch settings.mission
                 end
             end
         end
-    case 'Lyra_Portugal_October_2024'
+    case '2024_Lyra_Portugal_October'
 
         load("Trajectories.mat")
         for i = 1:size(trajectories_saving,1)
@@ -104,7 +104,7 @@ switch settings.mission
                 end
             end
         end
-    case 'Lyra_Roccaraso_September_2024'
+    case '2024_Lyra_Roccaraso_September'
 
         load("Trajectories.mat")
         for i = 1:size(trajectories_saving,1)
@@ -124,7 +124,7 @@ end
 contSettings.reference.deltaZ = 10;
 heights = (0:contSettings.reference.deltaZ:settings.z_final)';
 
-if str2double(settings.mission(end)) > 2
+if contains(mission.name,'2024') || contains(mission.name,'2023')
 
     V_rescale = cell( size(reference.altitude_ref,1),size(reference.altitude_ref,2) );
     for j = 1 : size(reference.altitude_ref,2)

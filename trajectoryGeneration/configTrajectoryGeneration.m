@@ -15,7 +15,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %% LOAD DATA
 % Retrieve MSA-Toolkit rocket data
-dataPath = strcat('../common/missions/', settings.missionMSA);
+dataPath = strcat('../common/missions/', mission.nameMSA);
 addpath(dataPath);
 simulationsData
 
@@ -23,9 +23,9 @@ commonFunctionsPath = '../common/functions';
 addpath(genpath(commonFunctionsPath))
 
 % Retrieve Control rocket data
-ConDataPath = strcat('../data/', settings.mission);
+ConDataPath = strcat('../data/', mission.name);
 addpath(ConDataPath);
-run(strcat('config', settings.mission));
+run(strcat('config', mission.name));
 
 % Control common functions
 commonFunctionsPath = '../commonFunctions';

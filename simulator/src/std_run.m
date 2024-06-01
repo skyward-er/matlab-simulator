@@ -1,4 +1,4 @@
-function [struct_out] = std_run(settings, contSettings, varargin)
+function [struct_out] = std_run(settings, contSettings, rocket, environment, mission, varargin)
 %{
 
 STD_RUN_BALLISTIC - This function runs a standard ballistic (non-stochastic) simulation
@@ -40,12 +40,15 @@ Revision date: 11/04/2022
 
 %}
 
-if nargin > 2
+% generate wind
+wind = WindCustom(mission);
+
+if nargin > 5
     settings_mont = varargin{1};
-    settings.motor.expThrust = settings_mont.motor.expThrust;
-    settings.motor.expTime = settings_mont.motor.expTime;
+    rocket.motor.thrust = settings_mont.motor.expThrust;
+    rocket.motor.time = settings_mont.motor.expTime;
+    rocket.motor.time(end) = settings_mont.tb;
     settings.motor.K = settings_mont.motor.K;
-    settings.tb = settings_mont.tb;
     settings.Coeffs = settings_mont.Coeffs;
     switch settings.windModel
         case "constant"
@@ -59,7 +62,7 @@ if nargin > 2
             % settings.wind.inputAzimut = settings_mont.wind.Az;
             settings.wind.input_uncertainty = settings_mont.wind.unc;
     end
-   
+
     settings.State.xcgTime = settings_mont.State.xcgTime;
     settings.mass_offset = settings_mont.mass_offset;
     settings.OMEGA = settings_mont.OMEGA;
@@ -72,20 +75,20 @@ if settings.electronics % global variables slow down a bit the comunication over
 end
 
 %% ode states initialization ( initial conditions )
-            % Attitude initial condition
+% Attitude initial condition
 
 
 if settings.scenario ~= "descent"
     % Attitude
-    Q0 = angle2quat(settings.PHI, settings.OMEGA, 0*pi/180, 'ZYX')';
+    Q0 = angle2quat(environment.phi, environment.omega, 0*pi/180, 'ZYX')';
     % State
     X0 = [0; 0; 0];                                                             % Position initial condition
     V0 = [0; 0; 0];                                                             % Velocity initial condition
     W0 = [0; 0; 0];                                                             % Angular speed initial condition
 else
     % Attitude
-    Q0 = angle2quat(settings.PHI, 0, 0, 'ZYX')';
-    % State   
+    Q0 = angle2quat(environment.phi, 0, 0, 'ZYX')';
+    % State
     X0 = [0; 0; -settings.z_final];                                              % Position initial condition -settings.z_final
     V0 = [0; 0; -settings.Vz_final];             % Velocity initial condition
     W0 = [0; 0; 0];                                                             % Angular speed initial condition
@@ -98,15 +101,13 @@ initialCond = [X0; V0; W0; Q0; ap0; deltaA0];
 Y0 = initialCond';
 
 %% WIND GENERATION
-[uw, vw, ww, Az , El, Mag] = std_setWind(settings);
-settings.constWind = [uw, vw, ww];
-settings.wind.Mag = Mag;
-settings.wind.El = El;
-settings.wind.Az = Az;
+% [uw, vw, ww, Az , El, Mag] = std_setWind(settings);
+% settings.constWind = [uw, vw, ww];
+% settings.wind.Mag = Mag;
+% settings.wind.El = El;
+% settings.wind.Az = Az;
 
 %% stochastic parameter settings:
-settings.ms = settings.ms + settings.mass_offset;
-settings.mTotalTime = settings.mTotalTime + settings.mass_offset;
 
 %% INTEGRATION
 % integration time
@@ -121,9 +122,11 @@ if mod(dt/dt_ode,1)~= 0
 end
 std_setInitialParams;
 
+rocket.massNoMotor = rocket.massNoMotor + settings.mass_offset;
+rocket.updateMass;
 
 %% SENSORS INIT
-run(strcat('initSensors', settings.mission));
+run(strcat('initSensors', mission.name));
 
 %% MAGNETIC FIELD MODEL
 std_magneticField;
@@ -186,7 +189,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
 
     lastFlagAscent = settings.flagAscent;                                   % Saves the last value of the flagAscent to recall it later
     lastFlagExpulsion2 = eventExpulsion2;                                   % saves the last value of the expulsion to recall the opening of the second chute later
-    
+
     if settings.launchWindow
         if not(settings.lastLaunchFlag) && launchFlag
             std_setInitialParams
@@ -208,15 +211,15 @@ while settings.flagStopIntegration && n_old < nmax                          % St
             flagFlight = false;
             flagAeroBrakes = false;
             settings.flagAscent = false;
-            
+
             % Transition to powered_ascent
             if launchFlag &&  t0 > time_on_ground
                 state_lastTime(currentState) = t0;
-                
+
                 % Exit condition of on_ground / Entry condition of powered_ascent:
-                % Here are setup all the time variables 
-                % that require to be offset depending on when the liftoff actually happens, 
-                % i.e. all the engine time variables that otherwise require the simulation time t0 
+                % Here are setup all the time variables
+                % that require to be offset depending on when the liftoff actually happens,
+                % i.e. all the engine time variables that otherwise require the simulation time t0
                 % to be reset to 0
                 flagFlight = true;
                 engineT0 = t0-dt;
@@ -229,7 +232,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                 end
             end
         case availableStates.powered_ascent
-            
+
             flagFlight = true;
             settings.flagAscent = true;
             lastAscentIndex = n_old-1;
@@ -251,8 +254,8 @@ while settings.flagStopIntegration && n_old < nmax                          % St
             settings.flagAscent = true;
             lastAscentIndex = n_old-1;
 
-            % Transitions out of unpowered_ascent: 
-            % drogue_descent if full_flight, 
+            % Transitions out of unpowered_ascent:
+            % drogue_descent if full_flight,
             % landed if apogee was never detected
             if flagApogee
                 state_lastTime(currentState) = t0;
@@ -281,7 +284,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
             flagAeroBrakes = false;
             lastDrogueIndex = n_old-1;
 
-            % Transition out of drogue_descent: 
+            % Transition out of drogue_descent:
             % parachute_descent if main parachute, payload_descent if parafoil
             if flagOpenPara
                 state_lastTime(currentState) = t0;
@@ -300,7 +303,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                         disp("Transition to parachute descent");
                     end
                 end
-                
+
             end
         case availableStates.parachute_descent
 
@@ -342,21 +345,24 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         otherwise
             error("Invalid state requested");
     end
-    
+
     % For ascent only we stop the simulation once the ode apogee has been reached
     if vz(end) < 0 && flagFlight && settings.ascentOnly
         break;
     end
-    
+
     %% dynamics (ODE) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     tspan = t0:dt_ode:t1;
 
+    control.angleRef = ap_ref;
+    control.timeChangeRef = t_change_ref_ABK;
     if flagFlight
 
         if settings.ballisticFligth
             Y0_ode = Y0(1:14);
-            [Tf, Yd] = ode4(@ascentControl, tspan, Y0_ode, settings,[], ap_ref, t_change_ref_ABK, engineT0);
-            parout = RecallOdeFcn(@ascentControl, Tf, Yd, settings,[], Yd(:,14), t_change_ref_ABK,engineT0,'apVec');
+            [Tf, Yd] = ode4(@ballistic, tspan, Y0_ode, rocket, environment, wind, control, engineT0);
+            control.angleRef = Yd(:,14);
+            parout = RecallOdeFcn(@ballistic, Tf, Yd, rocket, environment, wind, control, engineT0);
             [nd, ~] = size(Yd);
             Yf = [Yd, ones(nd,1)*Y0(end,15)];
             para = NaN;
@@ -364,8 +370,9 @@ while settings.flagStopIntegration && n_old < nmax                          % St
             switch currentState
                 case {availableStates.powered_ascent, availableStates.unpowered_ascent}
                     Y0_ode = Y0(1:14);
-                    [Tf, Yd] = ode4(@ascentControl, tspan, Y0_ode, settings,[],  ap_ref, t_change_ref_ABK, engineT0);
-                    parout = RecallOdeFcn(@ascentControl, Tf, Yd, settings,[], Yd(:,14), t_change_ref_ABK,engineT0,'apVec');
+                    [Tf, Yd] = ode4(@ballistic, tspan, Y0_ode, rocket, environment, wind, control, engineT0);
+                    control.angleRef = Yd(:,14);
+                    parout = RecallOdeFcn(@ballistic, Tf, Yd, rocket, environment, wind, control, engineT0);
                     [nd, ~] = size(Yd);
                     Yf = [Yd, ones(nd,1)*Y0(end,15)];
                     para = NaN;
@@ -397,15 +404,16 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         Yf = [Y0; Y0];
         para = NaN;
     end
-    
+
     % recall some useful parameters
     settings.parout.partial_time = Tf;
-    if currentState == availableStates.on_ground 
-        % If the rocket is on groud, the accelerometer should measure 
+    control.partialTime = Tf;
+    if currentState == availableStates.on_ground
+        % If the rocket is on groud, the accelerometer should measure
         % the gravity acceleration on ramp.
         Q_acc = quat2rotm(Q0');
         settings.parout.acc = (Q_acc'*[zeros(length(Tf),2) -9.81*ones(length(Tf), 1)]')';
-        settings.parout.m = settings.mTotalTime(1)*ones(1,length(Tf));
+        settings.parout.m = rocket.mass(1)*ones(1,length(Tf));
     elseif currentState == availableStates.landed
         settings.parout.acc = [zeros(length(Tf),2) -9.81*ones(length(Tf),1)];
         settings.parout.m = ones(1,length(Tf))*settings.parout.m(end);
@@ -414,8 +422,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         settings.parout.m   = parout.interp.mass;
     end
 
-
-    ext = extension_From_Angle(Yf(end,14),settings); % bug fix, check why this happens because sometimes happens that the integration returns a value slightly larger than the max value of extension for airbrakes and this mess things up
+    ext = extension_From_Angle(Yf(end,14),settings,mission); % bug fix, check why this happens because sometimes happens that the integration returns a value slightly larger than the max value of extension for airbrakes and this mess things up
     if ext > settings.arb.maxExt
         ext = settings.arb.maxExt;
         warning("the extension of the airbrakes exceeds the maximum value of "+num2str(settings.arb.maxExt)+": ext = "+num2str(ext))
@@ -424,14 +431,16 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     %% simulate sensors
 
     % [sensorData] = manageSignalFrequencies(magneticFieldApprox, settings.flagAscent, settings,sensorData, Yf, Tf, uw, vw, ww);
-    wind = [uw, vw, ww];
-    [sensorData] = generateSensorMeasurements(magneticFieldApprox, Yf, Tf, wind, sensorData,sensorTot, settings, engineT0, currentState, availableStates);
-    
+    % wind = [uw, vw, ww];
+    [uw, vw, ww] = wind.getVels(-Yf(:,end));
+    wind_vector = [uw, vw, ww];
+    [sensorData] = generateSensorMeasurements(magneticFieldApprox, Yf, Tf, wind_vector, sensorData,sensorTot, settings, engineT0, currentState, availableStates, environment, mission, rocket);
+
     % simulate sensor acquisition
     if settings.dataNoise
-        [sensorData, sensorTot] = acquisition_Sys(sensorData, sensorSettings, sensorTot, settings, t0);
+        [sensorData, sensorTot] = acquisition_Sys(sensorData, sensorSettings, sensorTot, t0, mission);
     end
-    
+
     %% subsystems
 
     % SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU SIMU
@@ -448,10 +457,10 @@ while settings.flagStopIntegration && n_old < nmax                          % St
 
     % airbrakes reference update (for the ODE)
     ap_ref = [ ap_ref_old ap_ref_new ];
-    
+
     % parafoil control action update for the ODE
     deltaA_ref = [ deltaA_ref_old deltaA_ref_new ];
-    
+
 
     %% vertical velocity for update of the state machine
     if  settings.flagAscent || (not(settings.flagAscent) && settings.ballisticFligth) || currentState == availableStates.parachute_descent
@@ -461,7 +470,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         vx =  vels(2);   % north
         vy =  vels(1);   % east
     else
-        vz = - Yf(end, 6); 
+        vz = - Yf(end, 6);
         vx = Yf(end, 5);
         vy = Yf(end, 4);
     end
@@ -473,7 +482,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         % the current simulation step, because the parac
         Q    =   Yf(end, 10:13);
         vels =   quatrotate(quatconj(Q), Yf(end, 4:6));
-        Y0 = [Yf(end, 1:3), vels, Yf(end, 7:end)]; 
+        Y0 = [Yf(end, 1:3), vels, Yf(end, 7:end)];
     elseif ~lastFlagExpulsion2 && eventExpulsion2 && not(settings.scenario == "ballistic")
         Q    =   Yf(end, 10:13);
         vels =   quatrotate(Q, Yf(end, 4:6));
@@ -488,18 +497,18 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     normV = norm([vz vx vy]);
     mach = normV/a;
 
-    %% wind update
-    if settings.windModel == "multiplicative"
+    %%% wind update
+    % if settings.windModel == "multiplicative"
+    %
+    %     [uw, vw, ww] = windInputGenerator(settings, -Y0(3), settings.wind.inputUncertainty);
+    %
+    %     settings.constWind = [uw, vw, ww];
+    %
+    %     windMag = [windMag sqrt(uw^2+vw^2+ww^2)];
+    %     windAz = [windAz atan2(sqrt(uw^2+vw^2+ww^2)/vw,sqrt(uw^2+vw^2+ww^2)/uw)];
+    % end
 
-        [uw, vw, ww] = windInputGenerator(settings, -Y0(3), settings.wind.inputUncertainty);
 
-        settings.constWind = [uw, vw, ww];
-
-        windMag = [windMag sqrt(uw^2+vw^2+ww^2)];
-        windAz = [windAz atan2(sqrt(uw^2+vw^2+ww^2)/vw,sqrt(uw^2+vw^2+ww^2)/uw)];
-    end
-
-    
     if t1-t_last_arb_control >= 1/settings.frequencies.arbFrequency - 1e-6
         t_change_ref_ABK = t1 + settings.servo.delay;
     end
@@ -517,7 +526,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     sensorTot.sfd.time(iTimes) = t1;
     sensorTot.sfd.pressure(iTimes) = sensorData.barometer.measures(end);
     % sensorTot.sfd.faults(iTimes,:) = settings.faulty_sensors;
-    dataRecall.true_mass(n_old:n_old+n-1, 1) = settings.parout.m'; % if you want to save other parameters, remember to go down and remove the last two values                                                                                            
+    dataRecall.true_mass(n_old:n_old+n-1, 1) = settings.parout.m'; % if you want to save other parameters, remember to go down and remove the last two values
     n_old = n_old + n -1;
 
 
@@ -529,11 +538,11 @@ while settings.flagStopIntegration && n_old < nmax                          % St
 
     if not(settings.montecarlo)
         if settings.flagAscent
-            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + -sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,14)); %  + ", quatNorm: "+ vecnorm(Yf(end,10:13))
+            disp("z: " + (-Yf(end,3)+environment.z0) +", z_est: " + -sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,14)); %  + ", quatNorm: "+ vecnorm(Yf(end,10:13))
         elseif currentState == availableStates.payload_descent
-            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + -sensorData.kalman.z + ", deltaA_ref: " + deltaA_ref_new + ", deltaA_ode: " + Yf(end,15)); % +", quatNorm: "+ vecnorm(Yf(end,10:13))
+            disp("z: " + (-Yf(end,3)+environment.z0) +", z_est: " + -sensorData.kalman.z + ", deltaA_ref: " + deltaA_ref_new + ", deltaA_ode: " + Yf(end,15)); % +", quatNorm: "+ vecnorm(Yf(end,10:13))
         else
-            disp("z: " + (-Yf(end,3)+settings.z0) +", z_est: " + -sensorData.kalman.z);
+            disp("z: " + (-Yf(end,3)+environment.z0) +", z_est: " + -sensorData.kalman.z);
         end
     end
 
@@ -556,7 +565,7 @@ end
 t_ada    = settings.ada.t_ada;
 settings.flagMatr = settings.flagMatr(1:n_old, :);
 
-%% RETRIVE PARAMETERS FROM THE ODE (RECALL ODE) 
+%% RETRIVE PARAMETERS FROM THE ODE (RECALL ODE)
 
 % if ~settings.electronics && ~settings.montecarlo && not(settings.scenario == "descent")
 %     settings.wind.output_time = Tf;
@@ -575,9 +584,9 @@ struct_out.Y = Yf;
 % struct_out.flags = settings.flagMatr;
 struct_out.state_lastTimes = state_lastTime;
 % wind
-struct_out.wind.Mag = settings.wind.Mag;
-struct_out.wind.Az = settings.wind.Az;
-struct_out.wind.El = settings.wind.El;
+struct_out.wind.Mag = wind.magnitude(1);
+struct_out.wind.Az =  wind.azimuth(1);
+% struct_out.wind.El =  wind.El(1);
 struct_out.wind.Vel = [uw, vw, ww];
 
 % sensors (ADA, NAS, MEA, SFD, and all sensor data are stored here)
@@ -631,7 +640,7 @@ if settings.scenario == "descent" || settings.scenario == "full flight"
     struct_out.PRF.landing_velocities_BODY = Yf(idx_landing,4:6);
     struct_out.PRF.landing_velocities_NED = quatrotate(quatconj(Yf(idx_landing,10:13)),Yf(idx_landing,4:6));
     % deployment
-    struct_out.PRF.deploy_altitude_set = settings.para(1).z_cut + settings.z0; % set altitude for deployment
+    struct_out.PRF.deploy_altitude_set = settings.para(1).z_cut + environment.z0; % set altitude for deployment
     struct_out.PRF.deploy_position = Yf(lastDrogueIndex+1,1:3); % actual position of deployment
     struct_out.PRF.deploy_velocity = Yf(lastDrogueIndex+1,4:6);
 else

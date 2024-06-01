@@ -92,7 +92,7 @@ coeffsCA = load(strcat(dataPath, '/CAinterpCoeffs.mat'));
 %% NEEDED PARAMETERS
 
 settingsSim.g0 = settings.g0;
-settingsSim.z0 = settings.z0;
+settingsSim.z0 = environment.z0;
 settingsSim.C  = settings.C;
 settingsSim.CD_correction_ref = settings.CD_correction_ref;
 

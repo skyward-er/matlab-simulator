@@ -59,7 +59,7 @@ else
     flagOverwrite  =false;
 end
 
-saveFileName  = "flightData\"+settings.mission+"estimatedCorrectionFactor";
+saveFileName  = "flightData\"+mission.name+"estimatedCorrectionFactor";
 
 %% generate guess
 x0(1)     =  1;   % multiplicative factor for drag coefficient in the 
@@ -79,12 +79,12 @@ R = eye(6);
 R_m = inv(R);
 %% extract data from simulation
 
-% fileNAS = "flightData\"+settings.mission+"\Boardcore_NASState";
-% fileOutputABK = "flightData\"+settings.mission+"\Boardcore_ServoData";
-fileNAS = "flightData\"+settings.mission+"\NASData_corrected";
-fileOutputABK = "flightData\"+settings.mission+"\ABKData_corrected";
+% fileNAS = "flightData\"+mission.name+"\Boardcore_NASState";
+% fileOutputABK = "flightData\"+mission.name+"\Boardcore_ServoData";
+fileNAS = "flightData\"+mission.name+"\NASData_corrected";
+fileOutputABK = "flightData\"+mission.name+"\ABKData_corrected";
 
-switch settings.mission
+switch mission.name
     case 'Pyxis_Portugal_October_2022'
         t_start =3338; 
         t_end = 3350;
@@ -92,9 +92,9 @@ switch settings.mission
           error('We do not have the logs of the air brakes unfortunately for this flight.\n')
     
     case 'Gemini_Roccaraso_September_2023'
-        % t_start = 8536 + settings.tb; 
+        % t_start = 8536 + rocket.motor.time(end); 
         % t_end = 8553; 
-        t_start = 1 + settings.tb; 
+        t_start = 1 + rocket.motor.time(end); 
         t_end = 18; 
 end
 
@@ -155,7 +155,7 @@ for i = 1: length(t_m)
     end
 end
 ABK_value = ABK_value*settings.servo.maxAngle;
-time_offset = t_m(1)-settings.motor.expTime(end);
+time_offset = t_m(1)-rocket.motor.time(end);
 ABK_time = ABK_time-time_offset;
 t_m = t_m-time_offset;
 ABK_perc = [ABK_time,ABK_value];
