@@ -46,32 +46,36 @@ threshold      =   10e-11;
 % output of the system multiplied by 1000 to deal with magnitude of order
 % of covariance
 
-H11 = 1000/a;
+H11 = 1/a;
 H12 = 0;
-H21 = (1000000*x_pred(2)*sind(1000*lat0 + (1000*x_pred(1))/a))/(a*b*cosd(1000*lat0 + (1000*x_pred(1))/a)^2);
-H22 = 1000/(b*cosd(1000*lat0 + (1000*x_pred(1))/a));
+H21 = (1*x_pred(2)*sind(1*lat0 + (1*x_pred(1))/a))/(a*b*cosd(1*lat0 + (1*x_pred(1))/a)^2);
+H22 = 1/(b*cosd(1*lat0 + (1*x_pred(1))/a));
 
 H              =  [  H11  H12  0  0  0  0;                                 %Pre-allocation of gradient 
                      H21  H22  0  0  0  0;
                       0    0   0  1  0  0;
                       0    0   0  0  1  0;];                               %of the output function  
 
-R              =   sigma_GPS.*[1 1 max(1,vGPS)];                       %VARIANCE MATRIX SCALED 
+% R              =   sigma_GPS.*[1e-6*a^2 1e-6*b^2*(cosd(lat0))^2 max(1,vGPS)];                       %VARIANCE MATRIX SCALED 
                                                                            %TAKING INTO ACCOUNT
                                                                            %NUMBER OF SATELITES
                                                                            %AVAILABLE
-
+R              =   sigma_GPS.*[1e-6 1e-6 max(1,vGPS)]; 
+                                                                           
 if fix==1    
+
+% pos = [a*(pGPS(1)-lat0); b*cosd(pGPS(1))*(pGPS(2)-lon0) ];
+% z = [x_pred(1), x_pred(2), x_pred(4), x_pred(5)]';
+% e              =   [pos;vGPS'] - z;
 
 lat = x_pred(1)/a + lat0;
 lon = x_pred(2)/(b*cosd(lat)) + lon0;
 z = [lat, lon, x_pred(4), x_pred(5)]';
-
 e              =   [pGPS';vGPS'] - z;
 
 S              =   H*P_pred*H'+R;                    %Matrix necessary for the correction factor
 
-    if cond(S) > threshold 
+    if cond(S) > threshold
 
         K              =   P_pred*H'/S;              %Kalman correction factor
 
