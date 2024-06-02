@@ -1,4 +1,9 @@
-function [sensorData,sensorTot] = run_MEA_LY(sensorData,sensorTot,settings,contSettings,u,T1)
+function [sensorData,sensorTot] = run_MEA_LY(sensorData,sensorTot,settings,contSettings,T1)
+
+%range for mass in case MEA diverges
+m_max = 40; 
+m_min = 20;
+M_est = 29; %probable mass used to predict the apogee in this case
 
 ign = 40;
 % mass estimation
@@ -50,13 +55,13 @@ for ii = 2:length(t_mea)
         if norm(sensorTot.imu.accelerometer_measures(index_imu, :)) > ign && vnorm_nas(ii) > 40
 
             % model
-            cd = getDrag(vnorm_nas(ii), -z_nas(ii), 0, contSettings.coeff_Cd); %add correction shut_down??
+            cd = 1*getDrag(vnorm_nas(ii), -z_nas(ii), 0, contSettings.coeff_Cd); %add correction shut_down??
             [~,~,P_e, rho] = atmosisa(-z_nas(ii));
             q = 0.5*rho*vnorm_nas(ii)^2; %dynamic pressure
             F_a = q*settings.S*cd;        %aerodynamic force
 
             if  -z_nas(ii,1)> 800
-                F_s = (P_0-P_e)*settings.motor.Ae;
+                F_s = (P_0-P_e)*settings.motor.Ae ;
             else 
                 F_s = 0;
             end
@@ -84,18 +89,26 @@ for ii = 2:length(t_mea)
 CD = settings.CD_correction_shutDown*getDrag(vnorm_nas(ii), -z_nas(ii), 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
 [~,~,~,rho] = atmosisa(-z_nas(ii));
 
+
 propagation_steps = contSettings.N_prediction_threshold - settings.mea.counter_shutdown;
+
+if x(ii, :) > m_max || x(ii, :) < m_min
+    m_pred = M_est;
+else 
+    m_pred = x(ii, :);
+end
+
 if propagation_steps >=1
     [z_pred, vz_pred] = PredictFuture(-z_nas(ii),-vz_nas(ii), ...
         K_t .* sensorTot.comb_chamber.measures(index_chambPress), ...
-        settings.S, CD, rho, x(ii,:), dt, propagation_steps);
+        settings.S, CD, rho,m_pred, dt, propagation_steps);
 else
     z_pred = -z_nas(ii);
     vz_pred = -vz_nas(ii);
 end
 
-predicted_apogee(ii) = z_pred-settings.z0 + 1./(2.*( 0.5.*rho .* CD * settings.S ./ x(ii,:)))...
-    .* log(1 + (vz_pred.^2 .* (0.5 .* rho .* CD .* settings.S) ./ x(ii,:)) ./ 9.81 );
+predicted_apogee(ii) = z_pred-settings.z0 + 1./(2.*( 0.5.*rho .* CD * settings.S ./ m_pred))...
+    .* log(1 + (vz_pred.^2 .* (0.5 .* rho .* CD .* settings.S) ./ m_pred) ./ 9.81 );
 
 end
 

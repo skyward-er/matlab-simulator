@@ -169,6 +169,7 @@ settings.nas.flagStopPitotCorrection = false;
 
 %% MEA PARAMETERS (mass estimation algorithm) 
 sensorData.mea.x = [0,0,settings.m0];     % initial state estimate
+sensorData.mea.estimated_mass(1) = settings.m0;
 sensorData.mea.P = diag([0 0 0.36^2]);          % initial value for P
 sensorData.mea.time = 0;
 sensorData.mea.estimated_mass = settings.m0;
@@ -204,7 +205,7 @@ sensorTot.pitot.temperature                     =   288.15;
 sensorTot.pitot.airspeed                        =   0;
 sensorTot.nas.states                            =   sensorData.nas.states;
 sensorTot.mea.pressure                          =   0; %it's a differential pressure sensor
-sensorTot.mea.mass                              =   0;
+sensorTot.mea.mass                              =   settings.m0;
 sensorTot.mea.prediction                        =   0;
 sensorTot.mea.time                              =   0;
 
