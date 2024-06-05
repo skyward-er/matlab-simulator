@@ -51,8 +51,8 @@ H12 = 0;
 H21 = (1*x_pred(2)*sind(1*lat0 + (1*x_pred(1))/a))/(a*b*cosd(1*lat0 + (1*x_pred(1))/a)^2);
 H22 = 1/(b*cosd(1*lat0 + (1*x_pred(1))/a));
 
-H              =  [  H11  H12  0  0  0  0;                                 %Pre-allocation of gradient 
-                     H21  H22  0  0  0  0;
+H              =  [  H11*1000  H12*1000  0  0  0  0;                                 %Pre-allocation of gradient 
+                     H21*1000  H22*1000  0  0  0  0;
                       0    0   0  1  0  0;
                       0    0   0  0  1  0;];                               %of the output function  
 
@@ -60,7 +60,7 @@ H              =  [  H11  H12  0  0  0  0;                                 %Pre-
                                                                            %TAKING INTO ACCOUNT
                                                                            %NUMBER OF SATELITES
                                                                            %AVAILABLE
-R              =   sigma_GPS.*[1e-6 1e-6 max(1,vGPS)]; 
+R              =   sigma_GPS.*[1 1 max(1,vGPS)]; 
                                                                            
 if fix==1    
 
@@ -72,9 +72,10 @@ lat = x_pred(1)/a + lat0;
 lon = x_pred(2)/(b*cosd(lat)) + lon0;
 z = [lat, lon, x_pred(4), x_pred(5)]';
 e              =   [pGPS';vGPS'] - z;
-
+e = e .* [1000 1000 1 1]';
 S              =   H*P_pred*H'+R;                    %Matrix necessary for the correction factor
 
+cond(S)
     if cond(S) > threshold
 
         K              =   P_pred*H'/S;              %Kalman correction factor
