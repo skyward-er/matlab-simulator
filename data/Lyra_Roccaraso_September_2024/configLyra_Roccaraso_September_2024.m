@@ -133,14 +133,15 @@ settings.ada.P0          =   [  0.1    0      0;                            % In
 [settings.ada.temp_ref, ~,...
  settings.ada.p_ref, ~]  =   atmosisa(settings.z0);                                  % Reference temperature in kelvin and pressure in Pa 
 
-settings.ada.v0          =   0;                                         % Vertical velocity initial condition
-settings.ada.a0          =   0;                                         % Acceleration velocity initial condition
+settings.ada.v0          =   -10;                                         % Vertical velocity initial condition
+settings.ada.a0          =   -100;                                         % Acceleration velocity initial condition
 settings.ada.x0          =  [settings.ada.p_ref, settings.ada.v0, settings.ada.a0];         
                                                                            % Ada initial condition
 
 settings.ada.v_thr       =   2.5;                                          % Velocity threshold for the detected apogee
 settings.ada.count_thr   =   5;                                            % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.ada.counter     =   0;
+settings.ada.altitude_confidence_thr = 5;                                   % If the ada recognizes altitude_confidence_thr samples under parachute cutting altitude, it sends the command
 
 settings.ada.t_ada       =   -1;                                           % Apogee detection timestamp
 settings.ada.flag_apo    =   false;                                        % True when the apogee is detected
@@ -156,7 +157,7 @@ settings.mea.engine_model_C1 = [1.780138883879285,-1.625379384370081,0];
 settings.mea.Q=0.1*diag([1,1,1]);      % model noise covariance matrix    
 settings.mea.R=0.36; 
 % shut down prediction altitude
-settings.mea.z_shutdown  = 1000;
+settings.mea.z_shutdown  = 850;
 settings.mea.t_lower_shadowmode  = 0;        % minimunm burning time
 settings.mea.t_higher_shadowmode = 10;       % maximum burning time
 settings.shutdownValveDelay      = 0.2;      % have to be to tuned

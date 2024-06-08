@@ -1,4 +1,4 @@
-function [dY, parout] = ascentControl(t, Y,  settings, contSettings, ap_ref_vec,t_change_ref, tLaunch,varargin)
+function [dY, parout] = ascentControl(t, Y,  settings, contSettings, ap_ref_vec,t_change_ref, engineT0,varargin)
 %{
 ascent - ode function of the 6DOF Rigid Rocket Model
 
@@ -83,10 +83,10 @@ end
 
 %% INERTIAS
 
-if t < tb
-    if t < settings.timeEngineCut
-        I = interpLinear(settings.motor.expTime, settings.I, t);
-        Idot = interpLinear(settings.motor.expTime, settings.Idot, t);
+if t-engineT0 < tb
+    if t-engineT0 < settings.timeEngineCut
+        I = interpLinear(settings.motor.expTime, settings.I, t-engineT0);
+        Idot = interpLinear(settings.motor.expTime, settings.Idot, t-engineT0);
     else
         I = settings.IengineCut;
         Idot = zeros(3, 1);
@@ -162,12 +162,12 @@ M = V_norm/a;
 M_value = M;
 
 %% TIME-DEPENDENTS VARIABLES
-if t < tb
+if t-engineT0 < tb
 
     if t < settings.timeEngineCut
-        m = interpLinear(settings.motor.expTime, settings.mTotalTime, t);
-        T = interpLinear(settings.motor.expTime, settings.motor.expThrust, t);
-        Pe = interpLinear(settings.motor.expTime, settings.motor.Pe, t);
+        m = interpLinear(settings.motor.expTime, settings.mTotalTime, t-engineT0);
+        T = interpLinear(settings.motor.expTime, settings.motor.expThrust, t-engineT0);
+        Pe = interpLinear(settings.motor.expTime, settings.motor.Pe, t-engineT0);
         T = T + settings.motor.Ae*(Pe - P);
     else
         m = settings.expMengineCut + settings.ms;
@@ -201,7 +201,7 @@ beta_value = beta;
 %% CHOSING THE EMPTY CONDITION VALUE
 % interpolation of the coefficients with the value in the nearest condition of the Coeffs matrix
 
-if t >= settings.tControl && M <= settings.MachControl
+if t-engineT0 >= settings.tControl && M <= settings.MachControl
     c = settings.control;
 else
     c = 1;
@@ -214,7 +214,7 @@ end
 
 c1 = 2;
 ext1 = settings.arb.maxExt/2;
-[coeffsValues1, angle0] = interpCoeffs(t, alpha, M, beta, absoluteAltitude,...
+[coeffsValues1, angle0] = interpCoeffs(t-engineT0, alpha, M, beta, absoluteAltitude,...
     c1, settings);
 ext = extension_From_Angle(ap, settings);
 
@@ -224,7 +224,7 @@ if ext == ext1
 elseif ext > ext1
     c2 = 3;
     ext2 = settings.arb.maxExt;
-    [coeffsValues2, angle2] = interpCoeffs(t, alpha, M, beta, absoluteAltitude,...
+    [coeffsValues2, angle2] = interpCoeffs(t-engineT0, alpha, M, beta, absoluteAltitude,...
         c2, settings);
 
     coeffsValues = coeffsValues1 + ( (coeffsValues2 - coeffsValues1).*(ext-ext1)./(ext2-ext1) );
@@ -232,7 +232,7 @@ elseif ext > ext1
 else
     c2 = 1;
     ext2 = 0;
-    [coeffsValues2, angle2] = interpCoeffs(t, alpha, M, beta, absoluteAltitude,...
+    [coeffsValues2, angle2] = interpCoeffs(t-engineT0, alpha, M, beta, absoluteAltitude,...
         c2, settings);
 
     coeffsValues = coeffsValues1 + ( (coeffsValues2 - coeffsValues1).*(ext-ext1)./(ext2-ext1) );

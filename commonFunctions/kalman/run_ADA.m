@@ -1,4 +1,4 @@
-function [sensorData, sensorTot, ada]   =  run_ADA(sensorData, sensorTot, settings,tf)
+function [sensorData, sensorTot, ada, flagApogee, flagOpenPara]   =  run_ADA(sensorData, sensorTot, settings,tf)
 
 % Author: Alessandro Del Duca
 % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@skywarder.eu
@@ -119,9 +119,24 @@ if length(t_ada)>1
                 ada.flag_apo = true;
             end
         end
+        
+        if strcmp(settings.scenario, 'descent') || ada.flag_apo
+            if ada.flagOpenPara == false
+                if xv(ii,1) < settings.para(1).z_cut
+                    ada.paraCounter = ada.paraCounter+1;
+                else
+                    ada.paraCounter = 0;
+                end
+                if ada.paraCounter >= ada.altitude_confidence_thr
+                    ada.t_para = t_ada(ii);
+                    ada.flagOpenPara = true;
+                end
+            end
+        end
     end
     
-
+flagApogee = ada.flag_apo;
+flagOpenPara = ada.flagOpenPara;
     
 sensorData.ada.xp = xp;
 sensorData.ada.xv = xv;

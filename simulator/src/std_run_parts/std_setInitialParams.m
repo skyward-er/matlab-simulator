@@ -15,6 +15,15 @@ else
 end    
     % Altitude
 
+%% ADA Initialization
+
+settings.ada.counter     =   0;
+settings.ada.paraCounter =   0;
+
+settings.ada.t_ada       =   -1;                    % Apogee detection timestamp
+settings.ada.flag_apo    =   false;                 % True when the apogee is detected
+settings.ada.flagOpenPara =  false;                 % True when the main parachute should be opened
+
 %% Initialization of sensor measurement time
 control_freq = settings.frequencies.controlFrequency;
 
@@ -42,7 +51,7 @@ sensorData.barometer_sens{3}.t0 = initSensorT0...
 sensorData.pitot.t0 = initSensorT0...
     (control_freq,settings.frequencies.pitotFrequency);
 
-if contains(settings.mission,'_2023')
+if contains(settings.mission,'_2023')  || contains(settings.mission,'_2024')
 sensorData.chamberPressure.t0 = initSensorT0...
     (control_freq,settings.frequencies.chamberPressureFrequency);
 end
@@ -111,6 +120,7 @@ lastDrogueIndex = 0;
 idx_apogee = NaN;
 idx_landing = NaN;
 
+engineT0 = 0;       % Initial time for engine time computations
 %% sensor fault initial conditions
 sensorData.chunk{1} = zeros(1,50);
 sensorData.chunk{2} = zeros(1,50);
@@ -121,6 +131,15 @@ barometer_time = [];
 sfd_mean_p = [];
 
 %% ADA initial conditions (Apogee Detection Algorithm)
+
+if strcmp(settings.scenario, 'descent')
+    [~, ~, p_fin, ~]  =   atmosisa(settings.z_final+settings.z0);               % Reference temperature in kelvin and pressure in Pa
+
+    settings.ada.v0          =   -10;                                           % Vertical velocity initial condition
+    settings.ada.a0          =   -100;                                          % Acceleration velocity initial condition
+    settings.ada.x0          =  [p_fin, settings.ada.v0, settings.ada.a0];
+    % Ada initial condition
+end
 
 if settings.flagADA
     sensorData.ada.xp = settings.ada.x0;
@@ -157,7 +176,7 @@ sensorData.mea.estimated_pressure = 0;
 sensorData.mea.predicted_apogee = 0;
 settings.t_shutdown = Inf;
 settings.mea.counter_shutdown = 0;
-
+settings.flagMEAInit = false;
 %% parafoil
 deltaA = contSettings.payload.deltaA_0;
 para = 1;

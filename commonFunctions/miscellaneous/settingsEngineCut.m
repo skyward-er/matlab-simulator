@@ -1,4 +1,4 @@
-function settings = settingsEngineCut(settings)
+function settings = settingsEngineCut(settings, engineT0)
 %{
     settingsEngineCut - This function computes specifc parameters at engine
                         cut event
@@ -23,7 +23,7 @@ function settings = settingsEngineCut(settings)
     SPDX-License-Identifier: GPL-3.0-or-later
 %}
     
-    
+    settings.timeEngineCut = settings.timeEngineCut - engineT0;
 
     if (settings.timeEngineCut) > 0 && ( settings.timeEngineCut  <= (settings.tb - settings.tCO) )
         
@@ -56,4 +56,6 @@ function settings = settingsEngineCut(settings)
     elseif settings.timeEngineCut <= 0
         error('settings.timeEngineCut must be grater than zero');
     end
+
+    settings.timeEngineCut = settings.timeEngineCut + engineT0;
 end
