@@ -1,4 +1,4 @@
-function [x,P,y_res] = correctionGPS(x_pred,P_pred,pGPS,vGPS,sigma_GPS,sats,fix, lat0, lon0, a, b)
+function [x,P,y_res] = correctionGPS(x_pred,P_pred,pGPS,vGPS,sigma_GPS, fix, lat0, lon0, a, b)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
@@ -75,7 +75,6 @@ e              =   [pGPS';vGPS'] - z;
 e = e .* [1000 1000 1 1]';
 S              =   H*P_pred*H'+R;                    %Matrix necessary for the correction factor
 
-cond(S)
     if cond(S) > threshold
 
         K              =   P_pred*H'/S;              %Kalman correction factor
