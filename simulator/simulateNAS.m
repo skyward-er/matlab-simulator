@@ -109,7 +109,7 @@ function nas_result = simulateNAS(sim_output, settings, algorithm)
                 [x_lin, P_lin, ~] = correctionGPS(x_lin, ...
                     P_lin, sim_gps_data(index_gps, 2:3), ...
                     sim_gps_data(index_gps, 5:6), nas_struct.sigma_GPS, ...
-                    16, 1, settings.lat0, settings.lon0, nas_struct.GPS.a, nas_struct.GPS.b);
+                    16, settings.lat0, settings.lon0, nas_struct.GPS.a, nas_struct.GPS.b);
             end
         end
         gps_lin = x_lin;
@@ -120,7 +120,7 @@ function nas_result = simulateNAS(sim_output, settings, algorithm)
         baro_data(idx, :) = [timestamp sim_pressure_data(index_baro, 2)];
         
         if ismember(algorithm, ["baro", "complete"])
-            [x_lin, P_lin, ~] = correctionBarometer(x_lin, P_lin, sim_baro_data(index_baro, 2), nas_struct.sigma_baro);
+            [x_lin, P_lin, ~] = correctionBarometer(x_lin, P_lin, sim_baro_data(index_baro, 2), nas_struct.sigma_baro, nas_struct.baro);
         end
         baro_lin = x_lin;
 
