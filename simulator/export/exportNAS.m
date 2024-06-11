@@ -308,7 +308,7 @@ function export_steps(data, file, target, algorithm)
             end
             write(content, cpp_file);
             write("};",    cpp_file);
-        end
+    end
     disp("  Done exporting steps to: " + file);
 end
 
