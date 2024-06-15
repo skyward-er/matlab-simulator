@@ -35,7 +35,7 @@ if (contains(mission.name,'2023') || contains(mission.name,'2024')) && currentSt
         end
         if ~settings.shutdown
 
-            [sensorData,sensorTot,settings,contSettings] = run_MTR_SIM ...
+            [sensorData,sensorTot,settings,contSettings,rocket] = run_MTR_SIM ...
                 (sensorData,sensorTot,settings,contSettings,t1, engineT0,dt_ode,rocket,environment);
             sensorTot.mea.t_shutdown = settings.t_shutdown;
 
@@ -77,7 +77,7 @@ if flagAeroBrakes && settings.flagNAS && settings.control && ...
 
     if (contains(mission.name,'2023') || contains(mission.name,'2024')) && contSettings.traj_choice == 1 && settings.expShutdown
         if ~strcmp(contSettings.algorithm,'complete')
-            m = settings.ms;
+            m = rocket.massNoMotor + rocket.motor.mass(end);
         else
             m = sensorData.mea.estimated_mass(end);
         end
