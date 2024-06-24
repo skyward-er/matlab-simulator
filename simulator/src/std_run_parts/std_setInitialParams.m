@@ -171,6 +171,7 @@ settings.nas.flagStopPitotCorrection = false;
 sensorData.mea.x = [0,0,settings.m0];     % initial state estimate
 sensorData.mea.estimated_mass(1) = settings.m0;
 sensorData.mea.P = diag([0 0 0.36^2]);          % initial value for P
+sensorData.mea.P_acc = diag([0 0 0.36^2]);
 sensorData.mea.time = 0;
 sensorData.mea.estimated_mass = settings.m0;
 sensorData.mea.estimated_pressure = 0;
