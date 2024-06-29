@@ -24,8 +24,6 @@ OUTPUTS:
     % email: pierfrancesco.bachini@skywarder.eu
     % Revision date: 27/08/2023
 
-    global isLaunch
-    
     % Calculate how many values should be sent to obsw based on frequencies
     simulationPeriod = 1/frequencies.controlFrequency;
     num_data_acc = ceil(frequencies.accelerometerFrequency * simulationPeriod);
@@ -72,7 +70,7 @@ OUTPUTS:
 
     % waiting for the response of the obsw
     % Receive data from serial comunication
-    obswVals = serialbridge('Read','main', 32);
+    obswVals = serialbridge('Read','main', 26);
 
     actuatorData.ada.mslAltitude = obswVals(1);
     actuatorData.ada.aglAltitude = obswVals(2);
@@ -100,19 +98,6 @@ OUTPUTS:
     actuatorData.actuators.mainValvePercentage = obswVals(24);
     actuatorData.actuators.ventingValvePercentage = obswVals(25);
     actuatorData.actuators.cutterState = obswVals(26);
-    actuatorData.flags.flag_flight = logical(obswVals(27));
-    actuatorData.flags.flag_ascent = logical(obswVals(28));
-    actuatorData.flags.flag_burning = logical(obswVals(29));
-    actuatorData.flags.flag_airbrakes = logical(obswVals(30));
-    actuatorData.flags.flag_para1 = logical(obswVals(31));
-    actuatorData.flags.flag_para2 = logical(obswVals(32));
-
-    % if the obsw sets flagFlight to true while the flag isLaunch is still
-    % false, triggers the liftoff
-    if (actuatorData.flags.flag_flight && not(isLaunch))
-        isLaunch = true;
-        disp("Liftoff (obsw signal)!");
-    end
 
     hilData.abk.airbrakes_opening = actuatorData.actuators.airbrakesPercentage;
     hilData.abk.updating = actuatorData.abk.updating;
@@ -131,10 +116,4 @@ OUTPUTS:
     hilData.mea = actuatorData.mea;
     hilData.actuators = actuatorData.actuators;
     hilData.actuators = rmfield(hilData.actuators, "airbrakesPercentage"); % Remove abk field as is already saved in another part of hilData
-    hilData.flagsArray = [actuatorData.flags.flag_flight, ...
-                  actuatorData.flags.flag_ascent, ...
-                  actuatorData.flags.flag_burning, ...
-                  actuatorData.flags.flag_airbrakes, ...
-                  actuatorData.flags.flag_para1, ...
-                  actuatorData.flags.flag_para2];
 end
