@@ -4,11 +4,6 @@ hardware in the loop script
 
 %}
 
-
-%% Prepare data to be sent to and read from obsw
-
-flagsArray = [isLaunch, settings.flagAscent, flagBurning, flagAeroBrakes, flagPara1, flagPara2];
-
 % Add gravity acceleration only when still on ramp
 if ~flagFlight
     sensorData.accelerometer.measures = sensorData.accelerometer.measures + (quat2dcm(Yf(end,10:13)) * [0;0;-9.81])';
@@ -19,34 +14,44 @@ freq = settings.frequencies;
 
 % Execute serial communication with obsw
 if strcmp(settings.board,"main")
-    [hilData] = run_MAIN_HIL(sensorData, sensorSettings, freq, flagsArray);
+    [hilData] = run_MAIN_HIL(sensorData, sensorSettings, freq);
 elseif strcmp(settings.board,"payload")
-    [hilData] = run_PAY_HIL(sensorData, sensorSettings, freq, flagsArray);
+    [hilData] = run_PAY_HIL(sensorData, sensorSettings, freq);
 else 
-    [hilData] = run_FULL_HIL(sensorData, sensorSettings, freq, flagsArray);
+    [hilData] = run_FULL_HIL(sensorData, sensorSettings, freq);
 end
 
 %% Remapping flags
 settings.lastLaunchFlag = launchFlag;
-launchFlag = hilData.flagsArray(1);
-settings.flagAscent = hilData.flagsArray(2);
-flagBurning = hilData.flagsArray(3);
-flagAeroBrakes = hilData.flagsArray(4);
-flagPara1 = hilData.flagsArray(5);
-flagPara2 = hilData.flagsArray(6);
 
-if(flagPara1 >0)
-    eventExpulsion = true;
+% launch
+if isfield(hilData.actuators, "mainValvePercentage") && hilData.actuators.mainValvePercentage > 0.5
+    disp("launcFlag true");
+    launchFlag = true;
 end
 
-if(flagPara2 >0)
-    eventExpulsion2 = true;
+% Shutdown
+if isfield(hilData.actuators, "mainValvePercentage") && settings.lastLaunchFlag && hilData.actuators.mainValvePercentage <= 0.5
+    disp("mainValve closed");
+    settings.shutdown = true;
+end
+
+% Expulsion
+if isfield(hilData.actuators, "expulsionPercentage") && hilData.actuators.expulsionPercentage > 0.5
+    disp("expulsionServo Open");
+    flagApogee = true;
+end
+
+% cutting
+if isfield(hilData.actuators, "cutterState") && settings.lastLaunchFlag && hilData.actuators.cutterState >= 0.5
+    disp("cutterState ON");
+    flagOpenPara = true;
 end
 
 
-disp("HIL flight: " + hilData.flagsArray(1) + ", ascent: " + hilData.flagsArray(2) + ...
-    ", burning: " + hilData.flagsArray(3) + ", airbrakes: " + hilData.flagsArray(4) + ...
-    ", para1: " + hilData.flagsArray(5) + ", para2: " + hilData.flagsArray(6));
+disp("launch: " + launchFlag + " mainValvePercentage: " + hilData.actuators.mainValvePercentage +" ventingValvePercentage: " + hilData.actuators.ventingValvePercentage +" airbrakes_opening: " + hilData.abk.airbrakes_opening +" expulsionPercentage: " + hilData.actuators.expulsionPercentage +" cutterState: " + hilData.actuators.cutterState)
+
+disp("shutdown: " + settings.shutdown + " Apogee: " + flagApogee + " OpenPara: " + flagOpenPara);
 
 %% Update ADA data
 if isfield(hilData, "ada")
@@ -54,17 +59,18 @@ if isfield(hilData, "ada")
     sensorData.ada.xv = [hilData.ada.aglAltitude hilData.ada.verticalSpeed];
     settings.ada.flag_apo = hilData.ada.apogeeDetected;
 
-    sensorTot.ada.xp(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1) -2,:) = sensorData.ada.xp(2:end,:);
-    sensorTot.ada.xv(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xv(:,1),1)-2,:)  = sensorData.ada.xv(2:end,:);
-    sensorTot.ada.time(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1)-2)  = sensorData.ada.time(2:end);
-    sensorTot.ada.n_old = sensorTot.ada.n_old + size(sensorData.ada.xp,1)-1;
+    sensorTot.ada.xp(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1)-1,:) = sensorData.ada.xp;
+    sensorTot.ada.xv(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xv(:,1),1)-1,:)  = sensorData.ada.xv;
+    sensorTot.ada.time(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1)-1)  = sensorData.barometer.time(end);
+    sensorTot.ada.n_old = sensorTot.ada.n_old + size(sensorData.ada.xp,1);
 else
     if settings.flagADA && settings.dataNoise
-        [sensorData, sensorTot, settings.ada]   =  run_ADA(sensorData, sensorTot, settings,t1);
+        [sensorData, sensorTot, settings.ada, flagApogee, flagOpenPara]   =  run_ADA(sensorData, sensorTot, settings,t1);
     end
 end
 
 %% Update NAS data
+disp("nasOBSW: " + hilData.nas.x_est(1) + " " + hilData.nas.x_est(2) + " " + hilData.nas.x_est(3))
 sensorData.nas.time = Tf(end);
 sensorData.nas.states = hilData.nas.x_est;
 
@@ -72,28 +78,16 @@ sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.n
 sensorTot.nas.time(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-1)    = sensorData.nas.time(1:end); % NAS time output
 sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1);
 
-if ~flagFlight
-    sensorData.kalman.x    = 0;
-    sensorData.kalman.y    = 0;
-    sensorData.kalman.z    = 0;
-    sensorData.kalman.vx   = 0;
-    sensorData.kalman.vy   = 0;
-    sensorData.kalman.vz   = 0;
-    sensorData.kalman.vMod = 0;
-else
-    sensorData.kalman.x  =  sensorTot.nas.states(end, 2);
-    sensorData.kalman.y  =  sensorTot.nas.states(end, 1);
-    sensorData.kalman.z  =  sensorTot.nas.states(end, 3);
-    sensorData.kalman.vx =  sensorTot.nas.states(end, 4);   % north
-    sensorData.kalman.vy =  sensorTot.nas.states(end, 5);   % east
-    sensorData.kalman.vz =  sensorTot.nas.states(end, 6);   % down
-end
+%%%%%%%%%%%%%%%%%% DA RIVEDERE L'UTILIZZO DI QUESTE VARIABILI ASSOLUTAMENTE %%%%%%%%%%%%%%%%%%%%%%%%
+sensorData.kalman.x  =  sensorData.nas.states(end, 2);
+sensorData.kalman.y  =  sensorData.nas.states(end, 1);
+sensorData.kalman.z  =  sensorData.nas.states(end, 3);
+sensorData.kalman.vx =  sensorData.nas.states(end, 4);   % north
+sensorData.kalman.vy =  sensorData.nas.states(end, 5);   % east
+sensorData.kalman.vz =  sensorData.nas.states(end, 6);   % down
 
 %% Update Mass estimation data
 if isfield(hilData, "mea")
-    lastShutdown = settings.shutdown;
-    settings.shutdown = not(flagBurning);
-
     if ~settings.shutdown
         sensorData.mea.estimated_mass = hilData.mea.estimatedMass;
         sensorData.mea.estimated_pressure = hilData.mea.correctedPressure;
@@ -107,53 +101,46 @@ if isfield(hilData, "mea")
         sensorTot.mea.time(iTimes) = t1;
     end
 
-    if settings.shutdown && not(lastShutdown) && flagFlight     % Need to check if this happens only once or the condition can be met multiple times
+    if settings.shutdown && currentState ~= availableStates.on_ground     % Need to check if this happens only once or the condition can be met multiple times
         t_shutdown = Tf(end);
         settings.expShutdown = 1;
         settings.timeEngineCut = t_shutdown;
         settings.expTimeEngineCut = t_shutdown;
         settings.expMengineCut = m - settings.ms;
         settings.shutdown = 1;
-        settings = settingsEngineCut(settings);
+        settings = settingsEngineCut(settings, engineT0);
         settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
         [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
         sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
-    elseif ~settings.shutdown && Tf(end) >= settings.tb
+    elseif ~settings.shutdown && Tf(end)-engineT0 >= settings.tb && currentState ~= availableStates.on_ground
         t_shutdown = settings.tb;
         settings.expShutdown = 1;
         settings.timeEngineCut = t_shutdown;
         settings.expTimeEngineCut = t_shutdown;
         settings.expMengineCut = m - settings.ms;
         settings.shutdown = 1;
-        settings = settingsEngineCut(settings);
+        settings = settingsEngineCut(settings, engineT0);
         settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
         [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
         sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
     end
 else
-    if (contains(mission.name,'_2023') || contains(mission.name,'_2024')) && currentState ~= availableStates.on_ground
+    if (contains(settings.mission,'_2023') ||  contains(settings.mission,'_2024')) && currentState ~= availableStates.on_ground
         if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
 
             if isnan(sensorTot.comb_chamber.measures(end))
                 sensorTot.comb_chamber.measures(end) = 0;
             end
             if ~settings.shutdown
-                [sensorData,sensorTot,settings,contSettings] =run_MTR_SIM (sensorData,sensorTot,settings,contSettings,t1);
-                m = sensorData.mea.estimated_mass(end);
-                sensorTot.mea.pressure(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.estimated_pressure,1)-1,:) = sensorData.mea.estimated_pressure;
-                sensorTot.mea.mass(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.estimated_mass',1)-1,:) = sensorData.mea.estimated_mass';
-                sensorTot.mea.prediction(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.predicted_apogee',1)-1,:) = sensorData.mea.predicted_apogee';
-                sensorTot.mea.time(sensorTot.mea.n_old:sensorTot.mea.n_old + size(t1,1)-1,:) = t1;
-            end
-
                 [sensorData,sensorTot,settings,contSettings] =run_MTR_SIM (sensorData,sensorTot,settings,contSettings,t1, engineT0,dt_ode);
                 sensorTot.mea.t_shutdown = settings.t_shutdown;
-
-                if  Tf(end)-engineT0 >= rocket.motor.time(end)
+    
+                if  Tf(end)-engineT0 >= settings.tb
                     settings.expShutdown = true;
                     settings.shutdown = true;
-                    settings.t_shutdown = rocket.motor.time(end);
-                    rocket.motor.cutoffTime = settings.t_shutdown;
+                    settings.t_shutdown = settings.tb;
+                    settings.timeEngineCut = settings.t_shutdown;
+                    disp("settings.timeEngineCut "+ settings.timeEngineCut);
                     settings.expTimeEngineCut = settings.t_shutdown;
                     % settings.expMengineCut = settings.parout.m(end) - settings.ms;
                     % settings = settingsEngineCut(settings);
@@ -162,17 +149,20 @@ else
                     sensorTot.mea.t_shutdown = settings.t_shutdown; % to pass the value out of the std_run to the structOut
                 end
             end
-
-
-        elseif ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')) && Tf(end)-engineT0 > rocket.motor.time(end)
+    
+    
+        elseif ~(strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete')) && Tf(end)-engineT0 > settings.tb
             settings.shutdown = 1;
             settings.expShutdown = 1;
-            rocket.motor.cutoffTime = rocket.motor.time(end);
-            settings.expTimeEngineCut = rocket.motor.time(end);
+            settings.timeEngineCut = settings.tb;
+            disp("settings.timeEngineCut "+ settings.timeEngineCut);
+            settings.expTimeEngineCut = settings.tb;
         end
     else
-        if t0-engineT0 > rocket.motor.time(end)
+        if t0-engineT0 > settings.motor.expTime(end) && currentState ~= availableStates.on_ground 
+            settings.shutdown = 1;
             settings.expShutdown = 1;
+            settings.expTimeEngineCut = engineT0 + settings.tb;
         end
     end
 

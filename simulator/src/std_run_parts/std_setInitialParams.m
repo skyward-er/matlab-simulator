@@ -4,6 +4,11 @@ integration initialization script- setting initial condition before control phas
 
 %}
 
+%% Flags initialization
+settings.shutdown = false;
+launchFlag = false;
+flagApogee = false;
+flagOpenPara = false;
 
 %% kalman initialization
 if not(settings.scenario == "descent")

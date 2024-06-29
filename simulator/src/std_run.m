@@ -181,18 +181,6 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     lastFlagAscent = settings.flagAscent;                                   % Saves the last value of the flagAscent to recall it later
     lastFlagExpulsion2 = eventExpulsion2;                                   % saves the last value of the expulsion to recall the opening of the second chute later
 
-    if settings.launchWindow
-        if not(settings.lastLaunchFlag) && launchFlag
-            std_setInitialParams
-            iTimes = 1;
-            t0 = 0;
-            t1 = dt;
-            tLaunch = t0;
-        end
-    else
-        tLaunch = 0;
-    end
-
     %% State machine
 
     switch currentState
@@ -578,7 +566,7 @@ settings.flagMatr = settings.flagMatr(1:n_old, :);
 
 % if ~settings.electronics && ~settings.montecarlo && not(settings.scenario == "descent")
 %     settings.wind.output_time = Tf;
-%     dataAscent = recallOdeFcn2(@ascentControl, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, Yf(:,14), settings.servo.delay,tLaunch,'apVec');
+%     dataAscent = recallOdeFcn2(@ascentControl, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, Yf(:,14), settings.servo.delay,engineT0,'apVec');
 % else
 %     dataAscent = [];
 % end
