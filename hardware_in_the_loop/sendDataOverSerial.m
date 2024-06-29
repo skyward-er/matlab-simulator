@@ -1,4 +1,4 @@
-function [] = sendDataOverSerial(sensorData, sensorSettings, frequencies)%, flags)
+function [] = sendDataOverSerial(sensorData, sensorSettings, frequencies, flags)
 
 %{
 -----------DESCRIPTION OF FUNCTION:------------------
@@ -47,7 +47,7 @@ INPUTS:
     end
 
     % control nan
-    if isnan(sensorData.chamberPressure.measures(end)) % || not(flags(1))
+    if isnan(sensorData.chamberPressure.measures(end)) || not(flags(1))
         dataToBeSent.chamberPressure = zeros(1,num_data_chPress);
     else
         dataToBeSent.chamberPressure = sensorData.chamberPressure.measures(1:num_data_chPress); % transforming from mBar to Bar
@@ -59,14 +59,14 @@ INPUTS:
 
     dataToBeSent.temperature = sensorData.barometer_sens{1}.temperature(1);
 
-    % dataToBeSent.flags.flagFligth = cast(flags(1), "double");
-    % dataToBeSent.flags.flagAscent = cast(flags(2), "double");
-    % dataToBeSent.flags.flagBurning = cast(flags(3), "double");
-    % dataToBeSent.flags.flagAeroBrakes = cast(flags(4), "double");
-    % dataToBeSent.flags.flagPara1 = cast(flags(5), "double");
-    % dataToBeSent.flags.flagPara2 = cast(flags(6), "double");
+    dataToBeSent.flags.flagFligth = cast(flags(1), "double");
+    dataToBeSent.flags.flagAscent = cast(flags(2), "double");
+    dataToBeSent.flags.flagBurning = cast(flags(3), "double");
+    dataToBeSent.flags.flagAeroBrakes = cast(flags(4), "double");
+    dataToBeSent.flags.flagPara1 = cast(flags(5), "double");
+    dataToBeSent.flags.flagPara2 = cast(flags(6), "double");
 
     arrayToBeSent = structToSingles(dataToBeSent);
-
-    serialbridge("Write", arrayToBeSent);
+    arrayToBeSent = single(vertcat(arrayToBeSent));
+    serialbridge('Write','main', arrayToBeSent);
 end

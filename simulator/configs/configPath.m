@@ -27,5 +27,5 @@ if conf.HIL
     addpath('../hardware_in_the_loop/');
     addpath('../hardware_in_the_loop/serialbridge');
     run('HILconfig.m');
-    serialbridge("Open", hil_settings.serial_port, hil_settings.baudrate); % Initialization of the serial port
+    serialbridge('Open','main', hil_settings.serial_port, hil_settings.baudrate); % Initialization of the serial port
 end

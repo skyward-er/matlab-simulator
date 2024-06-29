@@ -4,3 +4,6 @@
 [submodule "commonFunctions/graphics/general-utilities"]
 	path = commonFunctions/graphics/general-utilities
 	url = https://git.skywarder.eu/skyward/general-utilities.git
+[submodule "hardware_in_the_loop/serialbridge"]
+	path = hardware_in_the_loop/serialbridge
+	url = https://git.skywarder.eu/avn/swd/serial-bridge.git
