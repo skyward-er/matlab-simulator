@@ -44,11 +44,8 @@ OUTPUTS:
     dataToBeSent.main.gyro = sensorData.gyro.measures(1:num_data_gyro, :);
     dataToBeSent.main.magnetometer = sensorData.magnetometer.measures(1:num_data_magn, :);
 
-    [dataToBeSent.main.gps.positionMeasures(:,1),dataToBeSent.main.gps.positionMeasures(:,2), ...
-        dataToBeSent.main.gps.positionMeasures(:,3)] = ned2geodetic(sensorData.gps.positionMeasures(1:num_data_gps,1),sensorData.gps.positionMeasures(1:num_data_gps,2), ...
-        sensorData.gps.positionMeasures(1:num_data_gps,3),sensorSettings.lat0, sensorSettings.lon0, sensorSettings.z0,sensorSettings.spheroid ,'degrees');
-
-    dataToBeSent.main.gps.velocityMeasures = sensorData.gps.velocityMeasures(1:num_data_gps, :);
+    dataToBeSent.main.gps.positionMeasures = sensorData.gps.positionMeasures(end-num_data_gps+1:end, :);
+    dataToBeSent.main.gps.velocityMeasures = sensorData.gps.velocityMeasures(end-num_data_gps+1:end, :);
     dataToBeSent.main.gps.fix = 3;
     dataToBeSent.main.gps.nsat = 16;
 
@@ -57,7 +54,7 @@ OUTPUTS:
     end
 
     % control nan
-    if isnan(sensorData.chamberPressure.measures(end)) || not(flagsArray(1))
+    if isnan(sensorData.chamberPressure.measures(end))
         dataToBeSent.main.chamberPressure = zeros(1,num_data_chPress);
     else
         dataToBeSent.main.chamberPressure = sensorData.chamberPressure.measures(1:num_data_chPress); % transforming from mBar to Bar
@@ -77,11 +74,8 @@ OUTPUTS:
     dataToBeSent.payload.gyro = sensorData.gyro.measures(1:num_data_gyro, :);
     dataToBeSent.payload.magnetometer = sensorData.magnetometer.measures(1:num_data_magn, :);
 
-    [dataToBeSent.payload.gps.positionMeasures(:,1),dataToBeSent.payload.gps.positionMeasures(:,2), ...
-        dataToBeSent.payload.gps.positionMeasures(:,3)] = ned2geodetic(sensorData.gps.positionMeasures(1:num_data_gps,1),sensorData.gps.positionMeasures(1:num_data_gps,2), ...
-        sensorData.gps.positionMeasures(1:num_data_gps,3),sensorSettings.lat0, sensorSettings.lon0, sensorSettings.z0,sensorSettings.spheroid ,'degrees');
-
-    dataToBeSent.payload.gps.velocityMeasures = sensorData.gps.velocityMeasures(1:num_data_gps, :);
+    dataToBeSent.payload.gps.positionMeasures = sensorData.gps.positionMeasures(end-num_data_gps+1:end, :);
+    dataToBeSent.payload.gps.velocityMeasures = sensorData.gps.velocityMeasures(end-num_data_gps+1:end, :);
     dataToBeSent.payload.gps.fix = 3;
     dataToBeSent.payload.gps.nsat = 16;
 
@@ -100,7 +94,7 @@ OUTPUTS:
 
     % MOTOR
     % control nan
-    if isnan(sensorData.chamberPressure.measures(end)) || not(flagsArray(1))
+    if isnan(sensorData.chamberPressure.measures(end))
         dataToBeSent.motor.chamberPressure = zeros(1,num_data_chPress);
     else
         dataToBeSent.motor.chamberPressure = sensorData.chamberPressure.measures(1:num_data_chPress); % transforming from mBar to Bar
@@ -118,7 +112,7 @@ OUTPUTS:
 
     % waiting for the response of the obsw
     % Receive data from serial comunication for main
-    obswVals = serialbridge('Read','main', 32);
+    obswVals = serialbridge('Read','main', 26);
 
     actuatorData.ada.mslAltitude = obswVals(1);
     actuatorData.ada.aglAltitude = obswVals(2);
@@ -146,12 +140,6 @@ OUTPUTS:
     % actuatorData.actuators.mainValvePercentage = obswVals(24);
     % actuatorData.actuators.ventingValvePercentage = obswVals(25);
     actuatorData.actuators.mainCutterState = obswVals(26);
-    actuatorData.flags.flag_flight = logical(obswVals(27));
-    actuatorData.flags.flag_ascent = logical(obswVals(28));
-    actuatorData.flags.flag_burning = logical(obswVals(29));
-    actuatorData.flags.flag_airbrakes = logical(obswVals(30));
-    actuatorData.flags.flag_para1 = logical(obswVals(31));
-    % actuatorData.flags.flag_para2 = logical(obswVals(32));
 
     % Receive data from serial comunication for payload
     obswVals = serialbridge('Read','payload', 26);
@@ -181,21 +169,13 @@ OUTPUTS:
     % actuatorData.flags.flag_burning = logical(obswVals(23));
     % actuatorData.flags.flag_airbrakes = logical(obswVals(24));
     % actuatorData.flags.flag_para1 = logical(obswVals(25));
-    actuatorData.flags.flag_para2 = logical(obswVals(26));
+    % actuatorData.flags.flag_para2 = logical(obswVals(26));
 
     % Receive data from serial comunication for motor
     obswVals = serialbridge('Read','motor', 2);
     
     actuatorData.actuators.mainValvePercentage = obswVals(1);
     actuatorData.actuators.ventingValvePercentage = obswVals(2);
-
-    
-    % if the obsw sets flagFlight to true while the flag isLaunch is still
-    % false, triggers the liftoff
-    if (actuatorData.flags.flag_flight && not(isLaunch))
-        isLaunch = true;
-        disp("Liftoff (obsw signal)!");
-    end
 
     hilData.abk.airbrakes_opening = actuatorData.actuators.airbrakesPercentage; 
     hilData.abk.updating = actuatorData.abk.updating; 
@@ -216,10 +196,4 @@ OUTPUTS:
     hilData.wes = [actuatorData.wes.windX actuatorData.wes.windY];
     hilData.gnc = actuatorData.guidance;
     hilData.actuators = actuatorData.actuators;
-    hilData.flagsArray = [actuatorData.flags.flag_flight, ... 
-            actuatorData.flags.flag_ascent, ... 
-            actuatorData.flags.flag_burning, ... 
-            actuatorData.flags.flag_airbrakes, ... 
-            actuatorData.flags.flag_para1, ... 
-            actuatorData.flags.flag_para2]; 
 end

@@ -25,8 +25,8 @@ end
 settings.lastLaunchFlag = launchFlag;
 
 % launch
-if isfield(hilData.actuators, "mainValvePercentage") && hilData.actuators.mainValvePercentage > 0.5
-    disp("launcFlag true");
+if (isfield(hilData.actuators, "mainValvePercentage") && hilData.actuators.mainValvePercentage > 0.5) || (settings.board == "payload" && hilData.flagsArray(1))
+    disp("obsw liftoff triggered");
     launchFlag = true;
 end
 
@@ -44,12 +44,35 @@ end
 
 % cutting
 if isfield(hilData.actuators, "cutterState") && settings.lastLaunchFlag && hilData.actuators.cutterState >= 0.5
-    disp("cutterState ON");
+    disp("cutter activated");
     flagOpenPara = true;
 end
 
-
-disp("launch: " + launchFlag + " mainValvePercentage: " + hilData.actuators.mainValvePercentage +" ventingValvePercentage: " + hilData.actuators.ventingValvePercentage +" airbrakes_opening: " + hilData.abk.airbrakes_opening +" expulsionPercentage: " + hilData.actuators.expulsionPercentage +" cutterState: " + hilData.actuators.cutterState)
+if(settings.board == "main")
+    disp("launch: " + launchFlag + ...
+        " mainValvePercentage: " + hilData.actuators.mainValvePercentage + ...
+        " ventingValvePercentage: " + hilData.actuators.ventingValvePercentage + ...
+        " airbrakes_opening: " + hilData.abk.airbrakes_opening + ...
+        " expulsionPercentage: " + hilData.actuators.expulsionPercentage + ...
+        " cutterState: " + hilData.actuators.cutterState ...
+    );
+elseif(settings.board == "payload")
+    disp("launch: " + launchFlag + ...
+        " cutterState: " + hilData.actuators.cutterState ...
+        " parafoilLeftPercentage: " + hilData.actuators.parafoilLeftPercentage + ...
+        " parafoilRightPercentage: " + hilData.actuators.parafoilRightPercentage + ...
+    );
+elseif(settings.board == "full_hil")
+    disp("launch: " + launchFlag + ...
+        " mainValvePercentage: " + hilData.actuators.mainValvePercentage + ...
+        " ventingValvePercentage: " + hilData.actuators.ventingValvePercentage + ...
+        " airbrakes_opening: " + hilData.abk.airbrakes_opening + ...
+        " expulsionPercentage: " + hilData.actuators.expulsionPercentage + ...
+        " cutterState: " + hilData.actuators.cutterState ...
+        " parafoilLeftPercentage: " + hilData.actuators.parafoilLeftPercentage + ...
+        " parafoilRightPercentage: " + hilData.actuators.parafoilRightPercentage + ...
+    );
+end
 
 disp("shutdown: " + settings.shutdown + " Apogee: " + flagApogee + " OpenPara: " + flagOpenPara);
 
@@ -70,7 +93,6 @@ else
 end
 
 %% Update NAS data
-disp("nasOBSW: " + hilData.nas.x_est(1) + " " + hilData.nas.x_est(2) + " " + hilData.nas.x_est(3))
 sensorData.nas.time = Tf(end);
 sensorData.nas.states = hilData.nas.x_est;
 
@@ -216,7 +238,7 @@ end
 
 %% PARAFOIL
 if ~settings.flagAscent && isfield(hilData, "wes") && isfield(hilData, "gnc")
-    if flagPara2
+    if currentState == availableStates.payload_descent
         if contSettings.flagFirstControlPRF % set in
                 t_parafoil = t1;
                 t_last_prf_control = t1;
