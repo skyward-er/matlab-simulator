@@ -1,4 +1,4 @@
-function [x,P,y_res] = correctionBarometer(x_pred,P_pred,p_meas,sigma_h, params)
+function [x,P,y_res] = correctionBarometer(x_pred,P_pred,p_meas,sigma_baro, params)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
@@ -36,18 +36,19 @@ function [x,P,y_res] = correctionBarometer(x_pred,P_pred,p_meas,sigma_h, params)
 %---------------------------------------------------------------------------
 
 refPressure =  params.refPressure;
+refTemperature = params.refTemperature;
 a = params.a;
 n = params.n;
 
 alt = -x_pred(3);
-[temp, ~, y_hat] = atmosisa(alt);
+[~, ~, y_hat] = atmosisa(alt);
 
 threshold      =   10e-11;
 H              =   sparse(1,6);                %Pre-allocation of gradient 
                                                 %of the output function
-R              =   sigma_h^2;
+R              =   sigma_baro^2;
 
-H(3) = a*n*refPressure*((1+a*alt/temp)^(-n-1))/temp;                          %Update of the matrix H 
+H(3) = (refPressure*a*n*((a*x_pred(3))/refTemperature + 1)^(n - 1))/refPressure;                          %Update of the matrix H 
 
 S              =   H*P_pred*H'+R;                %Matrix necessary for the correction factor
 
@@ -57,7 +58,6 @@ if cond(S) > threshold
    K       =   P_pred*H'/S;                   %Kalman correction factor
 
    x       =   x_pred + (K*e)';               %Corrector step of the state
-   
 
    P       =   (eye(6) - K*H)*P_pred;        %Corrector step of the state covariance
 else
@@ -66,10 +66,10 @@ else
 end
 
 % check we are above ground
-if -x(3) < 0
-   x(3) = 0;
-   warning('Altitude below zero')
-end
+% % % if -x(3) < 0
+% % %    x(3) = 0;
+% % %    warning('Altitude below zero')
+% % % end
 
 alt_new = -x_pred(3);
 p_corr         =   atmosisa(alt_new);                          %Corrected output expectation

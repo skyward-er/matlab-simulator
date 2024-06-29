@@ -85,7 +85,7 @@ settings.servo.maxAngle = fix(settings.servo.maxAngle*1e9)/1e9; % to avoid compu
 
 %% NAS TUNING PARAMETERS
 settings.nas.dt_k          =   0.02;                                        % [s]        nas time step
-settings.nas.sigma_baro    =   50^2;                                          % [Pa^2]   estimated barometer variance    
+settings.nas.sigma_baro    =   200;                                          % [Pa]   estimated barometer variance    
 settings.nas.sigma_mag     =   10;                                          % [mgauss^2] estimated magnetometer variance    
 settings.nas.sigma_GPS     =   diag([0.002 0.002 0.01/30 0.01/30]);               % [millideg^2 m^2/s^2]     estimated GPS variance. position from test, velocity from datasheet
 settings.nas.sigma_w       =   10;                                          % [rad^2/s^2]   estimated gyroscope variance;
@@ -103,7 +103,7 @@ settings.nas.counter       =   0;
 
 settings.nas.baro.a = 0.0065;
 settings.nas.baro.n = 5.255933;
-[~,~,settings.nas.baro.refPressure] = atmosisa(settings.z0);
+[settings.nas.baro.refTemperature,~,settings.nas.baro.refPressure] = atmosisa(0);
 settings.nas.stopPitotAltitude = 800;
 
 settings.nas.t_nas         =   -1;                                          % Apogee detection timestamp
