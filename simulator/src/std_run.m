@@ -186,18 +186,6 @@ while settings.flagStopIntegration && n_old < nmax                          % St
 
     lastFlagAscent = settings.flagAscent;                                   % Saves the last value of the flagAscent to recall it later
     lastFlagExpulsion2 = eventExpulsion2;                                   % saves the last value of the expulsion to recall the opening of the second chute later
-    
-    if settings.launchWindow
-        if not(settings.lastLaunchFlag) && launchFlag
-            std_setInitialParams
-            iTimes = 1;
-            t0 = 0;
-            t1 = dt;
-            tLaunch = t0;
-        end
-    else
-        tLaunch = 0;
-    end
 
     %% State machine
 
@@ -372,22 +360,22 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                 case availableStates.drogue_descent
                     para = 1;
                     Y0_ode = Y0(:,1:6);
-                    [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode, settings, uw, vw, ww, para, Y0(end,10:13),tLaunch); % ..., para, uncert);
-                    parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para, Y0(end,10:13),tLaunch);
+                    [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode, settings, uw, vw, ww, para, Y0(end,10:13),engineT0); % ..., para, uncert);
+                    parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para, Y0(end,10:13),engineT0);
                     [nd, ~] = size(Yd);
                     Yf = [Yd, zeros(nd, 3), ones(nd,1).*Y0(end,10:13), zeros(nd,2)];
                 case availableStates.parachute_descent
                     para = 2;
                     Y0_ode = Y0(:,1:6);
-                    [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode,  settings, uw, vw, ww, para, Y0(end,10:13),tLaunch); % ..., para, uncert);
+                    [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode,  settings, uw, vw, ww, para, Y0(end,10:13),engineT0); % ..., para, uncert);
                     parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para, Y0(end,10:13));
                     [nd, ~] = size(Yd);
                     Yf = [Yd, zeros(nd, 3), ones(nd,1).*Y0(end,10:13), zeros(nd,2)];
 
                 case availableStates.payload_descent
                     Y0_ode = Y0(:,[1:13,15]);
-                    [Tf, Yd] = ode4(@descentParafoil, tspan, Y0_ode, settings,contSettings, deltaA_ref, t_change_ref_PRF,tLaunch);
-                    parout = RecallOdeFcn(@descentParafoil, Tf, Yd, settings,contSettings, Yd(:,14),t_change_ref_PRF,tLaunch,'apVec');
+                    [Tf, Yd] = ode4(@descentParafoil, tspan, Y0_ode, settings,contSettings, deltaA_ref, t_change_ref_PRF,engineT0);
+                    parout = RecallOdeFcn(@descentParafoil, Tf, Yd, settings,contSettings, Yd(:,14),t_change_ref_PRF,engineT0,'apVec');
                     [nd, ~] = size(Yd);
                     Yf = [Yd(:,1:13), zeros(nd,1),Yd(:,14)];
             end
@@ -560,7 +548,7 @@ settings.flagMatr = settings.flagMatr(1:n_old, :);
 
 % if ~settings.electronics && ~settings.montecarlo && not(settings.scenario == "descent")
 %     settings.wind.output_time = Tf;
-%     dataAscent = recallOdeFcn2(@ascentControl, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, Yf(:,14), settings.servo.delay,tLaunch,'apVec');
+%     dataAscent = recallOdeFcn2(@ascentControl, Tf(settings.flagMatr(:, 2)), Yf(settings.flagMatr(:, 2), :), settings, Yf(:,14), settings.servo.delay,engineT0,'apVec');
 % else
 %     dataAscent = [];
 % end
