@@ -1,4 +1,4 @@
-function [hilData] = run_MAIN_HIL(sensorData, sensorSettings, frequencies, flagsArray)
+function [hilData] = run_MAIN_HIL(sensorData, sensorSettings, frequencies)
 
 %{
 -----------DESCRIPTION OF FUNCTION:------------------
@@ -10,7 +10,6 @@ INPUTS:
     - sensorData:           struct containing all the simulated sensors data
     - sensorSettings:       struct containing all sensor config data
     - frequencies           struct containing the frequencies of all sensors and algorithms
-    - flagsArray:           array with all the flags that need to be sent to obsw
 
 OUTPUTS:
     - hilData:              struct containing all data received from obsw
@@ -43,11 +42,8 @@ OUTPUTS:
     dataToBeSent.gyro = sensorData.gyro.measures(1:num_data_gyro, :);
     dataToBeSent.magnetometer = sensorData.magnetometer.measures(1:num_data_magn, :);
 
-    [dataToBeSent.gps.positionMeasures(:,1),dataToBeSent.gps.positionMeasures(:,2), ...
-        dataToBeSent.gps.positionMeasures(:,3)] = ned2geodetic(sensorData.gps.positionMeasures(1:num_data_gps,1),sensorData.gps.positionMeasures(1:num_data_gps,2), ...
-        sensorData.gps.positionMeasures(1:num_data_gps,3),sensorSettings.lat0, sensorSettings.lon0, sensorSettings.z0,sensorSettings.spheroid ,'degrees');
-
-    dataToBeSent.gps.velocityMeasures = sensorData.gps.velocityMeasures(1:num_data_gps, :);
+    dataToBeSent.gps.positionMeasures = sensorData.gps.positionMeasures(end-num_data_gps+1:end, :);
+    dataToBeSent.gps.velocityMeasures = sensorData.gps.velocityMeasures(end-num_data_gps+1:end, :);
     dataToBeSent.gps.fix = 3;
     dataToBeSent.gps.nsat = 16;
 
@@ -56,7 +52,7 @@ OUTPUTS:
     end
 
     % control nan
-    if isnan(sensorData.chamberPressure.measures(end)) || not(flagsArray(1))
+    if isnan(sensorData.chamberPressure.measures(end))
         dataToBeSent.chamberPressure = zeros(1,num_data_chPress);
     else
         dataToBeSent.chamberPressure = sensorData.chamberPressure.measures(1:num_data_chPress); % transforming from mBar to Bar
@@ -103,7 +99,7 @@ OUTPUTS:
     actuatorData.actuators.expulsionPercentage = obswVals(23);
     actuatorData.actuators.mainValvePercentage = obswVals(24);
     actuatorData.actuators.ventingValvePercentage = obswVals(25);
-    actuatorData.actuators.mainCutterState = obswVals(26);
+    actuatorData.actuators.cutterState = obswVals(26);
     actuatorData.flags.flag_flight = logical(obswVals(27));
     actuatorData.flags.flag_ascent = logical(obswVals(28));
     actuatorData.flags.flag_burning = logical(obswVals(29));
