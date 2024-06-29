@@ -158,7 +158,7 @@ plot3(simOutput.Y(1:end-10, 2), simOutput.Y(1:end-10, 1), -simOutput.Y(1:end-10,
 hold on; grid on;
 plot3(simOutput.sensors.nas.states(1:end-10, 2), simOutput.sensors.nas.states(1:end-10, 1), -simOutput.sensors.nas.states(1:end-10, 3)-environment.z0,'DisplayName','NAS trajectory');
 
-if not(settings.scenario == "descent")
+if not(settings.scenario == "descent") && not(settings.board == "payload")
     plot3(simOutput.ARB.openingPosition(2),simOutput.ARB.openingPosition(1),simOutput.ARB.openingPosition(3),'ko','DisplayName','Airbrake deployment')
 end
 plot3(simOutput.apogee.position(2),simOutput.apogee.position(1),-simOutput.apogee.position(3),'ro','DisplayName','Apogee')
