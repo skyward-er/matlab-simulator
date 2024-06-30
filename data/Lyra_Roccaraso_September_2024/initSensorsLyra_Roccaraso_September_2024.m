@@ -144,8 +144,9 @@ sensorSettings.comb_chamber = Sensor(); % presure in mbar, temp should be in C°
 sensorSettings.comb_chamber.maxMeasurementRange  =   40000;                   % 1100, 1300 in mbar
 sensorSettings.comb_chamber.minMeasurementRange  =   0;                    % 300, 10 in mbar
 sensorSettings.comb_chamber.noiseVariance        =   60000;                      %  mbar
-% sensorSettings.comb_chamber.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
+%sensorSettings.comb_chamber.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
 sensorSettings.comb_chamber.resolution           =   1;     % random value stolen from baro
+%sensorSettings.comb_chamber.offset              = 0;
 % check 2d offset for chamber pressure sensor
 
 %% pitot  

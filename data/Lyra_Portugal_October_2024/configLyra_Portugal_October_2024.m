@@ -156,18 +156,18 @@ settings.ada.shadowmode = 18;
 %motor model for kalman filter prediction/correction scheme
 settings.mea.engine_model_A1     = [1.850256474259625, -0.850256474275721, 0; 1.000000000000000, 0, 0; -7.901993537244965e-04 ,  7.901993537244965e-04, 1];
 %[1.657873659381573, -0.706435915211752; 1, 0; ]
-[1.850256474259625, -0.850256474275721, 0; 1.000000000000000, 0, 0; -7.901993537244965e-04 ,  7.901993537244965e-04, 1];
+%[1.850256474259625, -0.850256474275721, 0; 1.000000000000000, 0, 0; -7.901993537244965e-04 ,  7.901993537244965e-04, 1];
 settings.mea.engine_model_B1     = [2;0;0];
 settings.mea.engine_model_C1     = [0.944030389140057, -0.945656895768324 ,0];
-settings.mea.K_t = 92;
-settings.mea.V_e = 1880;
+settings.mea.K_t = 104.2;
+settings.mea.V_e = 2200;
 settings.mea.Rs = 1.0e+03*[0.4771    1.4391];%[ 0.459044830815909   4.898695751098663]
 
 % covariance matrices
-settings.mea.Q                   = 01e4*diag([1,1,1]);                      % model noise covariance matrix    
+settings.mea.Q                   = 1*diag([1,1,1]);                      % model noise covariance matrix    
 settings.mea.R                   = 0.36; 
 % shut down prediction altitude
 settings.mea.z_shutdown          = 3000;                                    % [m] target apogee prediction for shutdown
 settings.mea.t_lower_shadowmode  = 0;                                       % minimunm burning time
 settings.mea.t_higher_shadowmode = 10;                                      % maximum burning time
-settings.shutdownValveDelay      = 0.3;                                     % time from the shut down command to the actual valve closure
+settings.shutdownValveDelay      = 0.1;                                     % time from the shut down command to the actual valve closure

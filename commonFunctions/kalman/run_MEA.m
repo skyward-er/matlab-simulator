@@ -30,6 +30,7 @@ t_imu = sensorTot.imu.time;
 x(1,:) = sensorData.mea.x(end,:);
 P(:,:,1) = sensorData.mea.P(:,:,end);
 P_acc(:,:,1) = sensorData.mea.P_acc(:,:,end);
+predicted_apogee = 0;
 % predicted_apogee(1) = sensorData.mea.predicted_apogee(end);
 % estimated_mass(1) = sensorData.mea.estimated_mass(end);
 % estimated_pressure(1) = sensorData.mea.estimated_pressure(end);
@@ -85,7 +86,7 @@ for ii = 2:length(t_mea)
             %H = -(K_t * C*x(ii, :)'+ F_s)/x(ii, 3)^2 + F_a/x(ii , 3)^2;
 
             %correction
-            R2 = 0.5*(alpha*q + c);
+            R2 = (alpha*q + c);
            
             S = H*P(:,:,ii)*H' + R2;
             if ~det(S)<1e-3
@@ -98,6 +99,24 @@ for ii = 2:length(t_mea)
     else
         x(ii,:) = x(ii-1,:); 
     end
+    %propagate apogee
+        CD = settings.CD_correction_shutDown*getDrag(vnorm_nas(ii), -z_nas(ii), 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
+    [~,~,~,rho] = atmosisa(-z_nas(ii));
+    
+    
+    propagation_steps = 0;%contSettings.N_prediction_threshold - settings.mea.counter_shutdown;
+    
+    if propagation_steps >=1
+        [z_pred, vz_pred] = PredictFuture(-z_nas(ii),-vz_nas(ii), ...
+            K_t .* sensorTot.comb_chamber.measures(index_chambPress), ...
+            settings.S, CD, rho,x(ii, 3), 0.02, propagation_steps);
+    else
+        z_pred = -z_nas(ii);
+        vz_pred = -vz_nas(ii);
+    end
+    
+    predicted_apogee(ii) = z_pred-settings.z0 + 1./(2.*( 0.5.*rho .* CD * settings.S ./ x(ii, 3)))...
+        .* log(1 + (vz_pred.^2 .* (0.5 .* rho .* CD .* settings.S) ./ x(ii, 3)) ./ 9.81 );
 
     % retrieve NAS data
     index_NAS = sum(t_mea(ii) >= t_nas);
@@ -111,12 +130,8 @@ estimated_pressure = C*x';
 % mass estimation
 estimated_mass = x(:,3);
 
-% compute CD
-CD = settings.CD_correction_shutDown*getDrag(vnorm_nas, -z_nas+settings.z0, 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
-[~,~,~,rho] = atmosisa(-z_nas);
 
-predicted_apogee = -z_nas-settings.z0 + 1./(2.*( 0.5.*rho .* CD * settings.S ./ estimated_mass))...
-    .* log(1 + (vz_nas.^2 .* (0.5 .* rho .* CD .* settings.S) ./ estimated_mass) ./ 9.81 );
+
 
 % update local state
 sensorData.mea.time = t_mea;

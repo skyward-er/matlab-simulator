@@ -85,30 +85,30 @@ for ii = 2:length(t_mea)
         x(ii,:) = x(ii-1,:);
     end
 
-    % propagate apogee
-CD = settings.CD_correction_shutDown*getDrag(vnorm_nas(ii), -z_nas(ii), 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
-[~,~,~,rho] = atmosisa(-z_nas(ii));
-
-
-propagation_steps = contSettings.N_prediction_threshold - settings.mea.counter_shutdown;
-
-if x(ii, :) > m_max || x(ii, :) < m_min
-    m_pred = M_est;
-else 
-    m_pred = x(ii, :);
-end
-
-if propagation_steps >=1
-    [z_pred, vz_pred] = PredictFuture(-z_nas(ii),-vz_nas(ii), ...
-        K_t .* sensorTot.comb_chamber.measures(index_chambPress), ...
-        settings.S, CD, rho,m_pred, dt, propagation_steps);
-else
-    z_pred = -z_nas(ii);
-    vz_pred = -vz_nas(ii);
-end
-
-predicted_apogee(ii) = z_pred-settings.z0 + 1./(2.*( 0.5.*rho .* CD * settings.S ./ m_pred))...
-    .* log(1 + (vz_pred.^2 .* (0.5 .* rho .* CD .* settings.S) ./ m_pred) ./ 9.81 );
+        % propagate apogee
+    CD = settings.CD_correction_shutDown*getDrag(vnorm_nas(ii), -z_nas(ii), 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
+    [~,~,~,rho] = atmosisa(-z_nas(ii));
+    
+    
+    propagation_steps = contSettings.N_prediction_threshold - settings.mea.counter_shutdown;
+    
+    if x(ii, :) > m_max || x(ii, :) < m_min
+        m_pred = M_est;
+    else 
+        m_pred = x(ii, :);
+    end
+    
+    if propagation_steps >=1
+        [z_pred, vz_pred] = PredictFuture(-z_nas(ii),-vz_nas(ii), ...
+            K_t .* sensorTot.comb_chamber.measures(index_chambPress), ...
+            settings.S, CD, rho,m_pred, dt, propagation_steps);
+    else
+        z_pred = -z_nas(ii);
+        vz_pred = -vz_nas(ii);
+    end
+    
+    predicted_apogee(ii) = z_pred-settings.z0 + 1./(2.*( 0.5.*rho .* CD * settings.S ./ m_pred))...
+        .* log(1 + (vz_pred.^2 .* (0.5 .* rho .* CD .* settings.S) ./ m_pred) ./ 9.81 );
 
 end
 
