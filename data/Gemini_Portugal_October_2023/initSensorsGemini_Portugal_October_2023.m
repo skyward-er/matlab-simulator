@@ -147,6 +147,7 @@ sensorSettings.comb_chamber.maxMeasurementRange  =   40000;                   % 
 sensorSettings.comb_chamber.minMeasurementRange  =   0;                    % 300, 10 in mbar
 sensorSettings.comb_chamber.noiseVariance        =   60000;                      %  mbar
 % sensorSettings.comb_chamber.error2dOffset        =   ep_data;                % [p in mbar, T in celsius, ep in mbar]
+sensorSettings.comb_chamber.offset =        -2000;
 sensorSettings.comb_chamber.resolution           =   1;     % random value stolen from baro
 % check 2d offset for chamber pressure sensor
 
