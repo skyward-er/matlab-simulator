@@ -377,21 +377,25 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                     Yf = [Yd, ones(nd,1)*Y0(end,15)];
                     para = NaN;
                 case availableStates.drogue_descent
-                    para = 1;
+                    if settings.parafoil; descentData.stage = 2; else; descentData.stage = 1; end
+                    descentData.para = 1;
                     Y0_ode = Y0(:,1:6);
-                    [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode, settings, uw, vw, ww, para, Y0(end,10:13),tLaunch); % ..., para, uncert);
-                    parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para, Y0(end,10:13),tLaunch);
+                    [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode, rocket, environment, wind, descentData);
+                    parout = RecallOdeFcn(@descentParachute, Tf, Yd, rocket, environment, wind, descentData);
                     [nd, ~] = size(Yd);
                     Yf = [Yd, zeros(nd, 3), ones(nd,1).*Y0(end,10:13), zeros(nd,2)];
                 case availableStates.parachute_descent
-                    para = 2;
+                    descentData.para = 2;
+                    descentData.stage = 1;
                     Y0_ode = Y0(:,1:6);
-                    [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode,  settings, uw, vw, ww, para, Y0(end,10:13),tLaunch); % ..., para, uncert);
-                    parout = RecallOdeFcn(@descentParachute, Tf, Yd, settings, uw, vw, ww, para, Y0(end,10:13));
+                    [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode, rocket, environment, wind, descentData);
+                    parout = RecallOdeFcn(@descentParachute, Tf, Yd, rocket, environment, wind, descentData);
                     [nd, ~] = size(Yd);
                     Yf = [Yd, zeros(nd, 3), ones(nd,1).*Y0(end,10:13), zeros(nd,2)];
 
                 case availableStates.payload_descent
+                    descentData.para = 2;
+                    descentData.stage = 2;
                     Y0_ode = Y0(:,[1:13,15]);
                     [Tf, Yd] = ode4(@descentParafoil, tspan, Y0_ode, settings,contSettings, deltaA_ref, t_change_ref_PRF,tLaunch);
                     parout = RecallOdeFcn(@descentParafoil, Tf, Yd, settings,contSettings, Yd(:,14),t_change_ref_PRF,tLaunch,'apVec');
@@ -483,10 +487,10 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         Q    =   Yf(end, 10:13);
         vels =   quatrotate(quatconj(Q), Yf(end, 4:6));
         Y0 = [Yf(end, 1:3), vels, Yf(end, 7:end)];
-    elseif ~lastFlagExpulsion2 && eventExpulsion2 && not(settings.scenario == "ballistic")
-        Q    =   Yf(end, 10:13);
-        vels =   quatrotate(Q, Yf(end, 4:6));
-        Y0 = [Yf(end, 1:3), vels, Yf(end, 7:end)];
+    % elseif ~lastFlagExpulsion2 && eventExpulsion2 && not(settings.scenario == "ballistic")
+    %     Q    =   Yf(end, 10:13);
+    %     vels =   quatrotate(Q, Yf(end, 4:6));
+    %     Y0 = [Yf(end, 1:3), vels, Yf(end, 7:end)];
     else
         Y0 = Yf(end, :);
     end
@@ -640,7 +644,7 @@ if settings.scenario == "descent" || settings.scenario == "full flight"
     struct_out.PRF.landing_velocities_BODY = Yf(idx_landing,4:6);
     struct_out.PRF.landing_velocities_NED = quatrotate(quatconj(Yf(idx_landing,10:13)),Yf(idx_landing,4:6));
     % deployment
-    struct_out.PRF.deploy_altitude_set = settings.para(1).z_cut + environment.z0; % set altitude for deployment
+    % struct_out.PRF.deploy_altitude_set = settings.para(1).z_cut + environment.z0; % set altitude for deployment
     struct_out.PRF.deploy_position = Yf(lastDrogueIndex+1,1:3); % actual position of deployment
     struct_out.PRF.deploy_velocity = Yf(lastDrogueIndex+1,4:6);
 else

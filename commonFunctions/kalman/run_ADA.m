@@ -122,7 +122,7 @@ if length(t_ada)>1
         
         if strcmp(settings.scenario, 'descent') || ada.flag_apo
             if ada.flagOpenPara == false
-                if xv(ii,1) < settings.ada.para(1).z_cut
+                if xv(ii,1) < settings.ada.para.z_cut(1)
                     ada.paraCounter = ada.paraCounter+1;
                 else
                     ada.paraCounter = 0;
