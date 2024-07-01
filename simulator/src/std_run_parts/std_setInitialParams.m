@@ -203,6 +203,7 @@ sensorTot.pitot.static_pressure                 =   P0;
 sensorTot.pitot.temperature                     =   288.15;
 sensorTot.pitot.airspeed                        =   0;
 sensorTot.nas.states                            =   sensorData.nas.states;
+sensorTot.nas.timestampPitotCorrection          =   nan;
 sensorTot.mea.pressure                          =   0; %it's a differential pressure sensor
 sensorTot.mea.mass                              =   0;
 sensorTot.mea.prediction                        =   0;
