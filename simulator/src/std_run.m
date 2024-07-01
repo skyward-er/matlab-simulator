@@ -380,16 +380,18 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                     if settings.parafoil; descentData.stage = 2; else; descentData.stage = 1; end
                     descentData.para = 1;
                     Y0_ode = Y0(:,1:6);
-                    [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode, rocket, environment, wind, descentData);
-                    parout = RecallOdeFcn(@descentParachute, Tf, Yd, rocket, environment, wind, descentData);
+                    Q0_ode = Y0(end, 10:13);
+                    [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode, rocket, environment, wind, descentData, [], Q0_ode);
+                    parout = RecallOdeFcn(@descentParachute, Tf, Yd, rocket, environment, wind, descentData, [], Q0_ode);
                     [nd, ~] = size(Yd);
                     Yf = [Yd, zeros(nd, 3), ones(nd,1).*Y0(end,10:13), zeros(nd,2)];
                 case availableStates.parachute_descent
                     descentData.para = 2;
                     descentData.stage = 1;
                     Y0_ode = Y0(:,1:6);
-                    [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode, rocket, environment, wind, descentData);
-                    parout = RecallOdeFcn(@descentParachute, Tf, Yd, rocket, environment, wind, descentData);
+                    Q0_ode = Y0(end, 10:13);
+                    [Tf, Yd] = ode4(@descentParachute, tspan, Y0_ode, rocket, environment, wind, descentData, [], Q0_ode);
+                    parout = RecallOdeFcn(@descentParachute, Tf, Yd, rocket, environment, wind, descentData, [], Q0_ode);
                     [nd, ~] = size(Yd);
                     Yf = [Yd, zeros(nd, 3), ones(nd,1).*Y0(end,10:13), zeros(nd,2)];
 
