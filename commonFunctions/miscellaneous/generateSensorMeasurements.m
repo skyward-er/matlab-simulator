@@ -109,10 +109,13 @@ if isfield(freq, 'pitotFrequency')
     sensorData.pitot.time = round(sensorData.pitot.time*1e4)/1e4;                   % as the GPS is usually very slow, this helps to stabilize truncation error
     sensorData.pitot.pTotMeasures = zeros(size(sensorData.pitot.time,1),1);
     sensorData.pitot.pStatMeasures = zeros(size(sensorData.pitot.time,1),1);
+    sensorData.pitot.pDynMeasures = zeros(size(sensorData.pitot.time,1),1);
     sensorData.pitot.temperature = zeros(size(sensorData.pitot.time,1),1);
+    
     sensorData.pitot.airspeed = zeros(size(sensorData.pitot.time,1),1);
     sensorData.pitot.pTotMeasures(1) = sensorTot.pitot.total_pressure(end);
     sensorData.pitot.pStatMeasures(1) = sensorTot.pitot.static_pressure(end);
+    sensorData.pitot.pDynMeasures(1) = sensorTot.pitot.total_pressure(end) - sensorTot.pitot.static_pressure(end);
     sensorData.pitot.temperature(1) = sensorTot.pitot.temperature(end);
     if length(sensorData.pitot.time)>1
         TfPitot =  round(Tf*1e4)/1e4;  
@@ -125,6 +128,7 @@ if isfield(freq, 'pitotFrequency')
         sensorData.pitot.temperature(2:end) = Temp;
         sensorData.pitot.pTotMeasures(2:end) = P.*(1+(gamma-1)/2*(v./a).^2).^(gamma/(gamma-1)); % dynamic pressure
         sensorData.pitot.pStatMeasures(2:end) = P.*(1+(gamma-1)/2*(wind_body(2)./a).^2).^(gamma/(gamma-1));
+        sensorData.pitot.pDynMeasures(2:end) = sensorData.pitot.pTotMeasures(2:end) - sensorData.pitot.pStatMeasures(2:end);
     end
     % check for nan
     if any(isnan(sensorData.pitot.pTotMeasures))

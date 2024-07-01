@@ -6,12 +6,12 @@ plot(simOutput.sensors.barometer_sens{1, 2}.time,simOutput.sensors.barometer_sen
 plot(simOutput.sensors.barometer_sens{1, 3}.time,simOutput.sensors.barometer_sens{1, 3}.pressure_measures,'r','DisplayName','Baro 3')
 legend
 title('Barometer measurements')
-%% static pitot vs static presure
+%% static pitot vs static pressure
 figure
 plot(simOutput.sensors.pitot.time,simOutput.sensors.pitot.static_pressure)
 hold on;
 plot(simOutput.sensors.barometer_sens{1}.time,simOutput.sensors.barometer_sens{1}.pressure_measures)
-
+title('Static pitot vs static pressure')
 %% mea pressure vs true pressure
 if length(simOutput.sensors.mea.time) > 1
     figure
