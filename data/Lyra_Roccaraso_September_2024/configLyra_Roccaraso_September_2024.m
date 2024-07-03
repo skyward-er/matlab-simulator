@@ -149,29 +149,26 @@ settings.ada.flag_apo    =   false;                                        % Tru
 settings.ada.shadowmode = 10;
 
 %% MEA TUNING PARAMETERS / MOTOR SHUT DOWN TUNING PARAMETERS
-% motor model for kalman filter prediction/correction scheme
-
-settings.mea.engine_model_A1     = [1.850256474259625, -0.850256474275721, 0; 1.000000000000000, 0, 0; -0.001084654013538 ,  0.001086522806071, 1];
-
+settings.mea.engine_model_A1     = [1.850256474259625, -0.850256474275721, 0; 1.000000000000000, 0, 0; -7.901993537244965e-04 ,  7.901993537244965e-04, 1];
 settings.mea.engine_model_B1     = [2;0;0];
 settings.mea.engine_model_C1     = [0.944030389140057, -0.945656895768324 ,0];
-% 
-% settings.mea.engine_model_A1 = [1.435871191228868,-0.469001276508780,0;1,0,0;-0.002045309260755,0.001867496708935,1];
-% settings.mea.engine_model_B1 = [4;0;0];
-% settings.mea.engine_model_C1 = [1.780138883879285,-1.625379384370081,0];
-settings.mea.K_t = 92;
-settings.mea.V_e = 1601.447;
-settings.mea.Rs =  1.0e+03 *[ 0.459044830815909   4.898695751098663];
-%[0.2385    1.5575];
-%[0.4822    3.4480];
-%[0.4771    1.4391];
+settings.mea.K_t = 104.2;
 
-%[ 0.459044830815909   4.898695751098663];
 % covariance matrices
-settings.mea.Q = 0.36; %for old MEA 0.1*diag([1,1,1]); % model noise covariance matrix    
-settings.mea.R = 0.36; 
+settings.mea.Q                   = eye(3);                      % model noise covariance matrix    
+settings.mea.R                   = 0.36; 
+
 % shut down prediction altitude
-settings.mea.z_shutdown  = 850;
-settings.mea.t_lower_shadowmode  = 0;        % minimunm burning time
-settings.mea.t_higher_shadowmode = 10;       % maximum burning time
-settings.shutdownValveDelay      = 0.2;      % have to be to tuned
+settings.mea.z_shutdown          = 800;                                    % [m] target apogee prediction for shutdown
+settings.mea.t_lower_shadowmode  = 0;                                       % minimunm burning time
+settings.mea.t_higher_shadowmode = 10;                                      % maximum burning time
+settings.shutdownValveDelay      = 0.2;                                     % time from the shut down command to the actual valve closure
+
+% accelerometer correction parameters
+[~,~,settings.mea.P0] = atmosisa(103);     %[Pa] reference pressure at the SFT location
+settings.mea.acc_threshold = 40;           %[m/s^2] minimum acceleration to perform correction with accelerometer
+settings.mea.vel_threshold = 40;           %[m/s] minimum velocity to perform correction with accelerometer
+Rs = 1.0e+03*[0.4771    1.4391];
+% variable variance coefficients for accelerometer
+settings.mea.alpha = (Rs(2) - Rs(1))/(100^2-30^2);
+settings.mea.c = -settings.mea.alpha*30^2+Rs(1); 

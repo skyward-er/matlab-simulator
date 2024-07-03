@@ -10,11 +10,9 @@ function [sensorData,sensorTot,settings,contSettings] = run_MTR_SIM (sensorData,
         sensorTot.mea.time = T1-dt_ode;
         settings.flagMEAInit =  true;
     end
-    if contains(settings.mission, '_2023')
+    
         [sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1);
-    elseif contains(settings.mission, '_2024')
-        [sensorData,sensorTot] = run_MEA_LY(sensorData,sensorTot,settings,contSettings,T1);
-    end
+ 
     if sensorTot.mea.prediction(end) >= settings.mea.z_shutdown
         settings.mea.counter_shutdown = settings.mea.counter_shutdown + 1*floor(settings.frequencies.MEAFrequency/settings.frequencies.controlFrequency); % the last multiplication is to take into account the frequency difference
         if ~settings.expShutdown

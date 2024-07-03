@@ -6,40 +6,26 @@ A = settings.mea.engine_model_A1;
 B = settings.mea.engine_model_B1;
 C = settings.mea.engine_model_C1;
 
-K_t = settings.mea.K_t;
-V_e = settings.mea.V_e+200;
-R_min = settings.mea.Rs(1);
-R_max = settings.mea.Rs(2);
-
-alpha = (R_max - R_min)/(100^2-30^2);
-c = -alpha*30^2+R_min;
-
-[~,~,P_0] = atmosisa(200);
-ign = 40;
-g = 9.81;
-
-% prediction
-
 % define time array for mea algorithm
 t_mea = sensorTot.mea.time(end):1/settings.frequencies.MEAFrequency:T1;
+
 % define time array for sensors
 t_chambPress = sensorTot.comb_chamber.time;%(sensorTot.comb_chamber.time >= T1);
 t_nas = sensorTot.nas.time;%(sensorTot.nas.time>= T1); % we need also nas to estimate cd etc
 t_imu = sensorTot.imu.time;
+
 % initialise state update
 x(1,:) = sensorData.mea.x(end,:);
 P(:,:,1) = sensorData.mea.P(:,:,end);
 P_acc(:,:,1) = sensorData.mea.P_acc(:,:,end);
 predicted_apogee = 0;
-% predicted_apogee(1) = sensorData.mea.predicted_apogee(end);
-% estimated_mass(1) = sensorData.mea.estimated_mass(end);
-% estimated_pressure(1) = sensorData.mea.estimated_pressure(end);
 z_nas = zeros(length(t_mea), 1);
 vnorm_nas = zeros(length(t_mea), 1);
 vz_nas = zeros(length(t_mea), 1);
 z_nas(1) = sensorData.nas.states(end,3);
 vnorm_nas(1) = norm(sensorData.nas.states(end,4:6));
 vz_nas(1) = sensorData.nas.states(end,6);
+
 
 for ii = 2:length(t_mea)
     index_chambPress = sum(t_mea(ii) >= t_chambPress);
@@ -50,62 +36,65 @@ for ii = 2:length(t_mea)
     vnorm_nas(ii,1) = norm(sensorTot.nas.states(index_nas,4:6));
     vz_nas(ii,1) = sensorTot.nas.states(index_nas,6);
 
-    if sensorTot.comb_chamber.measures(index_chambPress)  > 1
-        % prediction
-        x(ii,:) = (A*x(ii-1,:)' + B*u)'; % x is a row but to apply matrix product we need it column, therefore the transpositions
-        P(:,:,ii) = A*P(:,:,ii-1)*A' + settings.mea.Q;
-        P_acc(:,:,ii) = P_acc(:,:,ii-1);% + diag([0, 0, 0.36]);% settings.mea.Q(end, end) ;
-        %P_acc(:,:,ii) = P_acc(:,:,ii-1) + 0.36;% settings.mea.Q(end, end) ;
+    % prediction
+    x(ii,:) = (A*x(ii-1,:)' + B*u)'; % x is a row but to apply matrix product we need it column, therefore the transpositions
+    P(:,:,ii) = A*P(:,:,ii-1)*A' + settings.mea.Q;
 
-        % correction
+    % barometer correction
+    if sensorTot.comb_chamber.measures(index_chambPress)  > 1
         S = C*P(:,:,ii)*C' + settings.mea.R;
         if ~det(S)<1e-3
             K = P(:,:,ii)*C' / S; % if you want to try with constant gain [0.267161;-0.10199;-0.000205604 ];
             P(:,:,ii) = (eye(3)-K*C)*P(:,:,ii);
             x(ii,:) = x(ii,:)' + K* (sensorTot.comb_chamber.measures(index_chambPress) -  C * x(ii,:)'); % /1000 to have the measure in bar
         end
-        
-        if norm(sensorTot.imu.accelerometer_measures(index_imu, :)) > ign && vnorm_nas(ii) > 40
-            %P(:,:,ii) = P(:,:,ii) + diag(0.1*ones(1, 3));% settings.mea.Q(end, end) ;
-            % model
+    end
+    %accelerometer correction (not for 2023)
+    if ~contains(settings.mission, '2023')
+        K_t = settings.mea.K_t;
+        alpha = settings.mea.alpha;
+        c = settings.mea.c;
+        P_0 = settings.mea.P0;
+        acc_threshold = settings.mea.acc_threshold;
+        vel_threshold = settings.mea.vel_threshold;
+
+        if norm(sensorTot.imu.accelerometer_measures(index_imu, :)) > acc_threshold...
+                && vnorm_nas(ii) > vel_threshold
+
             cd = 1*getDrag(vnorm_nas(ii), -z_nas(ii), 0, contSettings.coeff_Cd); %add correction shut_down??
             [~,~,P_e, rho] = atmosisa(-z_nas(ii));
             q = 0.5*rho*vnorm_nas(ii)^2; %dynamic pressure
-            F_a = q*settings.S*cd;        %aerodynamic force
+            F_a = q*settings.S*cd;       %aerodynamic force
 
             if  -z_nas(ii,1)> 800
                 F_s = (P_0-P_e)*settings.motor.Ae ;
-            else 
+            else
                 F_s = 0;
             end
 
-            C2 = (K_t * C*x(ii, :)' + F_s)/x(ii,3)  - F_a/x(ii, 3);
+            y_est = (K_t * C*x(ii, :)' + F_s)/x(ii,3)  - F_a/x(ii, 3);
             H = [K_t*C(1)/x(ii, 3), ...
-                 K_t*C(2)/x(ii, 3),...
-                (K_t*C(3)*x(ii,3)-K_t*C*x(ii, :)' + F_s - F_a)/x(ii, 3)^2];
-            %H = -(K_t * C*x(ii, :)'+ F_s)/x(ii, 3)^2 + F_a/x(ii , 3)^2;
+                K_t*C(2)/x(ii, 3),...
+                -( K_t*C*x(ii,:)'+ F_s - F_a)/x(ii, 3)^2];
 
-            %correction
             R2 = (alpha*q + c);
-           
+
             S = H*P(:,:,ii)*H' + R2;
+
             if ~det(S)<1e-3
                 K = P(:,:,ii)*H' / S;
                 P(:,:,ii) = (eye(3)-K*H)*P(:,:,ii);
-                x(ii,:) = x(ii,:)' + K.*(sensorTot.imu.accelerometer_measures(index_imu, 1) - C2);
+                x(ii,:) = x(ii,:)' + K.*(sensorTot.imu.accelerometer_measures(index_imu, 1) - y_est);
             end
 
         end
-    else
-        x(ii,:) = x(ii-1,:); 
     end
+
     %propagate apogee
-        CD = settings.CD_correction_shutDown*getDrag(vnorm_nas(ii), -z_nas(ii), 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
+    CD = settings.CD_correction_shutDown*getDrag(vnorm_nas(ii), -z_nas(ii), 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
     [~,~,~,rho] = atmosisa(-z_nas(ii));
-    
-    
+
     propagation_steps = 0;%contSettings.N_prediction_threshold - settings.mea.counter_shutdown;
-    
     if propagation_steps >=1
         [z_pred, vz_pred] = PredictFuture(-z_nas(ii),-vz_nas(ii), ...
             K_t .* sensorTot.comb_chamber.measures(index_chambPress), ...
@@ -114,7 +103,7 @@ for ii = 2:length(t_mea)
         z_pred = -z_nas(ii);
         vz_pred = -vz_nas(ii);
     end
-    
+
     predicted_apogee(ii) = z_pred-settings.z0 + 1./(2.*( 0.5.*rho .* CD * settings.S ./ x(ii, 3)))...
         .* log(1 + (vz_pred.^2 .* (0.5 .* rho .* CD .* settings.S) ./ x(ii, 3)) ./ 9.81 );
 
@@ -129,8 +118,6 @@ estimated_pressure = C*x';
 
 % mass estimation
 estimated_mass = x(:,3);
-
-
 
 
 % update local state
