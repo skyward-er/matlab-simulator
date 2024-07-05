@@ -177,6 +177,13 @@ end
 % Salvo input/output per testare algoritmo cpp
 contSettings.indice_test = 1; % serve?
 
+if (settings.electronics)
+    
+    signal.endSimulation = false;
+    signal.startSimulation = true;
+
+end
+
 while settings.flagStopIntegration && n_old < nmax                          % Starts CHRONO
     if settings.launchWindow && ~launchFlag
         pause(1e-5);
@@ -431,6 +438,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     else
 
         std_hardwareInTheLoop;
+        signal.startSimulation = false;
 
     end
 
@@ -525,6 +533,12 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         end
     end
 
+end
+
+if (settings.electronics)
+    signal.startSimulation = false;
+    signal.endSimulation = true;
+    std_hardwareInTheLoop;
 end
 
 if settings.launchWindow
@@ -687,8 +701,6 @@ if settings.montecarlo
     % overwrite the time vector
     struct_out.t = t_vec;
 end
-
-
 
 
 

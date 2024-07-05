@@ -244,3 +244,10 @@ sensorTot.ada.n_old = 2;
 sensorTot.nas.n_old = 2;
 sensorTot.mea.n_old = 2;
 sensorTot.sfd.n_old = 2;
+
+% initialization params
+flagFlight = false;
+flagBurning = false;
+flagAeroBrakes = false;
+flagPara1 = false;
+flagPara2 = false;
