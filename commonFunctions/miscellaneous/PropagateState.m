@@ -1,4 +1,4 @@
-function [z, Vz] = PredictFuture(z,Vz, thrust, S, Cd, density,mass,dt, imax)
+function [z, Vz] = PropagateState(z,Vz, thrust, S, Cd, density,mass,dt, imax)
 % PredictFuture - Function to predict the future ~0.1s altitude and
 % velocity of the rocket, to anticipate valve actuation lags etc.
 %
