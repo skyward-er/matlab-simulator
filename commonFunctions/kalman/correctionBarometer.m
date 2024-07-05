@@ -1,4 +1,4 @@
-function [x,P,y_res] = correctionBarometer(x_pred,P_pred,p_meas,sigma_baro, params)
+function [x,P,y_res] = correctionBarometer(x_pred,P_pred,p_meas,sigma_baro, params, refAltitude)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
@@ -48,7 +48,7 @@ H              =   sparse(1,6);                %Pre-allocation of gradient
                                                 %of the output function
 R              =   sigma_baro^2;
 
-H(3) = (refPressure*a*n*((a*x_pred(3))/refTemperature + 1)^(n - 1))/refPressure;                          %Update of the matrix H 
+H(3) = (refPressure*a*n*((a*(x_pred(3) - refAltitude))/refTemperature + 1).^(n - 1))/refTemperature;  %Update of the matrix H 
 
 S              =   H*P_pred*H'+R;                %Matrix necessary for the correction factor
 
