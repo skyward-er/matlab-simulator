@@ -14,7 +14,7 @@ if settings.montecarlo
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % how many simulations
-N_sim = 500; % set to at least 500
+N_sim = 10; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
 
@@ -44,10 +44,9 @@ displayIter = true; % set to false if you don't want to see the iteration number
             %%% spegnimento dell'ibrido
 
             sigma_Kt = 5/3;  %thrust coefficient standard deviation
-            mu_Kt = 92;      %thrust coefficient mean value
+            mu_Kt = 0;      %thrust coefficient mean value
 
-            Thrust_coefficient = normrnd(mu_Kt, sigma_Kt, N_sim, 1);
-            stoch.Kt = Thrust_coefficient;
+            stoch.delta_Kt = normrnd(mu_Kt, sigma_Kt, N_sim, 1);
 
             impulse_uncertainty = normrnd(1,0.05/3,N_sim,1);
             stoch.expThrust = diag(impulse_uncertainty)*((1./thrust_percentage) * settings.motor.expTime);          % burning time - same notation as thrust here

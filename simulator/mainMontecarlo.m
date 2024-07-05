@@ -102,12 +102,13 @@ for alg_index = 4
     wind_el = zeros(N_sim,1);
     wind_az = zeros(N_sim,1);
     t_shutdown.value = zeros(N_sim,1);
+    motor_K = settings.motor.K;
 
     parfor i = 1:N_sim
         settings_mont = settings_mont_init;
         settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
         settings_mont.motor.expTime = stoch.expThrust(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
-        settings_mont.motor.K = stoch.Kt(i,:);                  % 
+        settings_mont.motor.K = motor_K + stoch.delta_Kt(i,:);                  % 
         settings_mont.tb = max( stoch.expThrust(i,stoch.expThrust(i,:)<=settings.tb) );     % initialize the burning time of the current simulation (parfor purposes)
         settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
         settings_mont.mass_offset = stoch.mass_offset(i);
