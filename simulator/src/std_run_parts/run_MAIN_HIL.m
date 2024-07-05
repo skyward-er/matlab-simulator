@@ -1,4 +1,4 @@
-function [hilData] = run_MAIN_HIL(sensorData, sensorSettings, frequencies)
+function [hilData] = run_MAIN_HIL(sensorData, sensorSettings, frequencies, signal)
 
 %{
 -----------DESCRIPTION OF FUNCTION:------------------
@@ -61,6 +61,17 @@ OUTPUTS:
     dataToBeSent.pitot.pStatic =  sensorData.pitot.pStatMeasures(1:num_data_pitot);
 
     dataToBeSent.temperature = sensorData.barometer_sens{1}.temperature(1);
+
+    if(~signal.startSimulation && ~signal.endSimulation)
+        disp("zero")
+        dataToBeSent.signal = 0;
+    elseif (signal.startSimulation && ~signal.endSimulation)
+        disp("uno")
+        dataToBeSent.signal = 1;
+    elseif(signal.endSimulation && ~signal.startSimulation)
+        disp("due")
+        dataToBeSent.signal = 2;
+    end
 
     arrayToBeSent = structToSingles(dataToBeSent);
     arrayToBeSent = single(vertcat(arrayToBeSent));
