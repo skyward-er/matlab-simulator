@@ -57,6 +57,8 @@ for ii = 2:length(t_mea)
         P_0 = settings.mea.P0;
         acc_threshold = settings.mea.acc_threshold;
         vel_threshold = settings.mea.vel_threshold;
+        mass_max = settings.mea.mass_interval(2);
+        mass_min = settings.mea.mass_interval(1);
 
         if norm(sensorTot.imu.accelerometer_measures(index_imu, :)) > acc_threshold...
                 && vnorm_nas(ii) > vel_threshold
@@ -88,6 +90,16 @@ for ii = 2:length(t_mea)
             end
 
         end
+        
+        % use only reasonable masses to predict the apogee
+        if x(ii,3) > mass_max
+            mass = mass_max;
+        elseif x(ii,3) < mass_min
+            mass = mass_min;
+        else
+            mass = x(ii,3);
+        end
+
     end
 
     %propagate apogee
@@ -96,7 +108,7 @@ for ii = 2:length(t_mea)
 
     propagation_steps = 0;%contSettings.N_prediction_threshold - settings.mea.counter_shutdown;
     if propagation_steps >=1
-        [z_pred, vz_pred] = PredictFuture(-z_nas(ii),-vz_nas(ii), ...
+        [z_pred, vz_pred] = PropagateState(-z_nas(ii),-vz_nas(ii), ...
             K_t .* sensorTot.comb_chamber.measures(index_chambPress), ...
             settings.S, CD, rho,x(ii, 3), 0.02, propagation_steps);
     else
@@ -104,8 +116,8 @@ for ii = 2:length(t_mea)
         vz_pred = -vz_nas(ii);
     end
 
-    predicted_apogee(ii) = z_pred-settings.z0 + 1./(2.*( 0.5.*rho .* CD * settings.S ./ x(ii, 3)))...
-        .* log(1 + (vz_pred.^2 .* (0.5 .* rho .* CD .* settings.S) ./ x(ii, 3)) ./ 9.81 );
+    predicted_apogee(ii) = z_pred-settings.z0 + 1./(2.*( 0.5.*rho .* CD * settings.S ./ mass))...
+        .* log(1 + (vz_pred.^2 .* (0.5 .* rho .* CD .* settings.S) ./ mass) ./ 9.81 );
 
     % retrieve NAS data
     index_NAS = sum(t_mea(ii) >= t_nas);

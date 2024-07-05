@@ -172,3 +172,5 @@ Rs = 1.0e+03*[0.4771    1.4391];
 % variable variance coefficients for accelerometer
 settings.mea.alpha = (Rs(2) - Rs(1))/(100^2-30^2);
 settings.mea.c = -settings.mea.alpha*30^2+Rs(1); 
+settings.mea.mass_interval = [settings.ms; settings.m0];
+
