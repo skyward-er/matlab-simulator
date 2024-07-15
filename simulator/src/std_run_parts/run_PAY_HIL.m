@@ -1,4 +1,4 @@
-function [hilData] = run_PAY_HIL(sensorData, sensorSettings, frequencies, flagsArray)
+function [hilData] = run_PAY_HIL(sensorData, sensorSettings, frequencies, signal)
 
 %{
 -----------DESCRIPTION OF FUNCTION:------------------
@@ -32,9 +32,9 @@ OUTPUTS:
     num_data_acc = ceil(frequencies.accelerometerFrequency * simulationPeriod);
     num_data_gyro = ceil(frequencies.gyroFrequency * simulationPeriod);
     num_data_magn = ceil(frequencies.magnetometerFrequency * simulationPeriod);
-    num_data_gps = ceil(frequencies.gpsFrequency* simulationPeriod);
+    num_data_gps = ceil(frequencies.gpsFrequency * simulationPeriod);
     num_data_baro = ceil(frequencies.barometerFrequency * simulationPeriod);
-    num_data_pitot = ceil(frequencies.pitotFrequency* simulationPeriod);
+    num_data_pitot = ceil(frequencies.pitotFrequency * simulationPeriod);
 
     
     % Send the exact number of values the obsw expects 
@@ -56,6 +56,14 @@ OUTPUTS:
 
     dataToBeSent.temperature = sensorData.barometer_sens{1}.temperature(1);
 
+    if(~signal.startSimulation && ~signal.endSimulation)
+        dataToBeSent.signal = 0;
+    elseif (signal.startSimulation && ~signal.endSimulation)
+        dataToBeSent.signal = 1;
+    elseif (signal.endSimulation && ~signal.startSimulation)
+        dataToBeSent.signal = 2;
+    end
+
     arrayToBeSent = structToSingles(dataToBeSent);
     arrayToBeSent = single(vertcat(arrayToBeSent));
 
@@ -64,7 +72,7 @@ OUTPUTS:
 
     % waiting for the response of the obsw
     % Receive data from serial comunication
-    obswVals = serialbridge('Read','payload', 26);
+    obswVals = serialbridge('Read','payload', 21);
 
     actuatorData.nas.n = obswVals(1);
     actuatorData.nas.e = obswVals(2);
@@ -86,16 +94,11 @@ OUTPUTS:
     actuatorData.guidance.deltaA = obswVals(18);
     actuatorData.guidance.currentTargetN = obswVals(19);
     actuatorData.guidance.currentTargetE = obswVals(20);
-    actuatorData.flags.flag_flight = logical(obswVals(21));
-    actuatorData.flags.flag_ascent = logical(obswVals(22));
-    actuatorData.flags.flag_burning = logical(obswVals(23));
-    actuatorData.flags.flag_airbrakes = logical(obswVals(24));
-    actuatorData.flags.flag_para1 = logical(obswVals(25));
-    actuatorData.flags.flag_para2 = logical(obswVals(26));
+    actuatorData.signal = obswVals(21);
 
     % if the obsw sets flagFlight to true while the flag isLaunch is still
     % false, triggers the liftoff
-    if (actuatorData.flags.flag_flight && not(isLaunch))
+    if (actuatorData.signal == 3 && not(isLaunch))
         isLaunch = true;
         disp("Liftoff (obsw signal)!");
     end
@@ -114,13 +117,5 @@ OUTPUTS:
     hilData.actuators = actuatorData.actuators;
     hilData.wes = [actuatorData.wes.windX actuatorData.wes.windY];
     hilData.gnc = actuatorData.guidance;
-    hilData.flagsArray = [actuatorData.flags.flag_flight, ...
-                  actuatorData.flags.flag_ascent, ...
-                  actuatorData.flags.flag_burning, ...
-                  actuatorData.flags.flag_airbrakes, ...
-                  actuatorData.flags.flag_para1, ...
-                  actuatorData.flags.flag_para2];
-
-    disp(hilData.flagsArray);
-
+    hilData.signal = actuatorData.signal;
 end
