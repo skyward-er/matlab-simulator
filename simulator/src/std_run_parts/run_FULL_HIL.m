@@ -1,4 +1,4 @@
-function [hilData] = run_FULL_HIL(sensorData, sensorSettings, frequencies, flagsArray)
+function [hilData] = run_FULL_HIL(sensorData, sensorSettings, frequencies, signal)
 
 %{
 -----------DESCRIPTION OF FUNCTION:------------------
@@ -65,6 +65,14 @@ OUTPUTS:
 
     dataToBeSent.main.temperature = sensorData.barometer_sens{1}.temperature(1);
 
+    if(~signal.startSimulation && ~signal.endSimulation)
+        dataToBeSent.main.signal = 0;
+    elseif (signal.startSimulation && ~signal.endSimulation)
+        dataToBeSent.main.signal = 1;
+    elseif(signal.endSimulation && ~signal.startSimulation)
+        dataToBeSent.main.signal = 2;
+    end
+
     arrayToBeSent.main = structToSingles(dataToBeSent.main);
     arrayToBeSent.main = single(vertcat(arrayToBeSent.main));
 
@@ -89,6 +97,14 @@ OUTPUTS:
 
     dataToBeSent.payload.temperature = sensorData.barometer_sens{1}.temperature(1);
 
+    if(~signal.startSimulation && ~signal.endSimulation)
+        dataToBeSent.payload.signal = 0;
+    elseif (signal.startSimulation && ~signal.endSimulation)
+        dataToBeSent.payload.signal = 1;
+    elseif(signal.endSimulation && ~signal.startSimulation)
+        dataToBeSent.payload.signal = 2;
+    end
+
     arrayToBeSent.payload = structToSingles(dataToBeSent.payload);
     arrayToBeSent.payload = single(vertcat(arrayToBeSent.payload));
 
@@ -100,6 +116,14 @@ OUTPUTS:
         dataToBeSent.motor.chamberPressure = sensorData.chamberPressure.measures(1:num_data_chPress); % transforming from mBar to Bar
     end
 
+    if(~signal.startSimulation && ~signal.endSimulation)
+        dataToBeSent.motor.signal = 0;
+    elseif (signal.startSimulation && ~signal.endSimulation)
+        dataToBeSent.motor.signal = 1;
+    elseif(signal.endSimulation && ~signal.startSimulation)
+        dataToBeSent.motor.signal = 2;
+    end
+
     arrayToBeSent.motor = structToSingles(dataToBeSent.motor);
     arrayToBeSent.motor = single(vertcat(arrayToBeSent.motor));
 
@@ -107,7 +131,7 @@ OUTPUTS:
     % sending sensor data over the serial port
     serialbridge('Write','main', arrayToBeSent.main);
     serialbridge('Write','payload', arrayToBeSent.payload);
-    serialbridge('Write','motor', arrayToBeSent.motor);  
+    serialbridge('Write','motor', arrayToBeSent.motor);
 
 
     % waiting for the response of the obsw
@@ -142,7 +166,7 @@ OUTPUTS:
     actuatorData.actuators.mainCutterState = obswVals(26);
 
     % Receive data from serial comunication for payload
-    obswVals = serialbridge('Read','payload', 26);
+    obswVals = serialbridge('Read','payload', 21);
 
     actuatorData.nas.n = obswVals(1);
     actuatorData.nas.e = obswVals(2);
@@ -164,12 +188,7 @@ OUTPUTS:
     actuatorData.guidance.deltaA = obswVals(18);
     actuatorData.guidance.currentTargetN = obswVals(19);
     actuatorData.guidance.currentTargetE = obswVals(20);
-    % actuatorData.flags.flag_flight = logical(obswVals(21));
-    % actuatorData.flags.flag_ascent = logical(obswVals(22));
-    % actuatorData.flags.flag_burning = logical(obswVals(23));
-    % actuatorData.flags.flag_airbrakes = logical(obswVals(24));
-    % actuatorData.flags.flag_para1 = logical(obswVals(25));
-    % actuatorData.flags.flag_para2 = logical(obswVals(26));
+    % actuatorData.signal = obswVals(21);
 
     % Receive data from serial comunication for motor
     obswVals = serialbridge('Read','motor', 2);

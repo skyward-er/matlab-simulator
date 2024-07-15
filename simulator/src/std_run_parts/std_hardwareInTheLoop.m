@@ -16,16 +16,16 @@ freq = settings.frequencies;
 if strcmp(settings.board,"main")
     [hilData] = run_MAIN_HIL(sensorData, sensorSettings, freq, signal);
 elseif strcmp(settings.board,"payload")
-    [hilData] = run_PAY_HIL(sensorData, sensorSettings, freq);
+    [hilData] = run_PAY_HIL(sensorData, sensorSettings, freq, signal);
 else 
-    [hilData] = run_FULL_HIL(sensorData, sensorSettings, freq);
+    [hilData] = run_FULL_HIL(sensorData, sensorSettings, freq, signal);
 end
 
 %% Remapping flags
 settings.lastLaunchFlag = launchFlag;
 
 % launch
-if (isfield(hilData.actuators, "mainValvePercentage") && hilData.actuators.mainValvePercentage > 0.5) || (settings.board == "payload" && hilData.flagsArray(1))
+if (isfield(hilData.actuators, "mainValvePercentage") && hilData.actuators.mainValvePercentage > 0.5) || (settings.board == "payload" && hilData.signal == 3)
     disp("obsw liftoff triggered");
     launchFlag = true;
 end

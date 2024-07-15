@@ -63,13 +63,10 @@ OUTPUTS:
     dataToBeSent.temperature = sensorData.barometer_sens{1}.temperature(1);
 
     if(~signal.startSimulation && ~signal.endSimulation)
-        disp("zero")
         dataToBeSent.signal = 0;
     elseif (signal.startSimulation && ~signal.endSimulation)
-        disp("uno")
         dataToBeSent.signal = 1;
     elseif(signal.endSimulation && ~signal.startSimulation)
-        disp("due")
         dataToBeSent.signal = 2;
     end
 
