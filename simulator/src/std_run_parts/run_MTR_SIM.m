@@ -1,5 +1,5 @@
 function [sensorData,sensorTot,settings,contSettings,rocket] = run_MTR_SIM...
-    (sensorData,sensorTot,settings,contSettings,T1, engineT0,dt_ode,rocket,environment)
+    (sensorData,sensorTot,settings,contSettings,T1, engineT0,dt_ode,rocket,environment, mission)
 
 % impose valve position
 if T1 < rocket.motor.cutoffTime
@@ -11,7 +11,7 @@ if ~settings.flagMEAInit
     sensorTot.mea.time = T1-dt_ode;
     settings.flagMEAInit =  true;
 end
-[sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1,environment,rocket);
+[sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1,engineT0,environment,rocket, mission);
 if sensorTot.mea.prediction(end) >= settings.mea.z_shutdown
     settings.mea.counter_shutdown = settings.mea.counter_shutdown + 1*floor(settings.frequencies.MEAFrequency/settings.frequencies.controlFrequency); % the last multiplication is to take into account the frequency difference
     if ~settings.expShutdown
@@ -79,7 +79,7 @@ else
     settings.expMengineCut = settings.parout.m(end) - (rocket.massNoMotor + rocket.motor.mass(end));
     if T1 - engineT0 > rocket.motor.cutoffTime
         settings.shutdown = true;
-         rocket.updateCutoff;
+        rocket.updateCutoff;
         [settings,rocket] = settingsEngineCut(settings, engineT0, rocket);
         settings.quatCut = [sensorTot.nas.states(end, 10) sensorTot.nas.states(end, 7:9)];
         [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');

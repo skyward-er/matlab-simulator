@@ -36,7 +36,7 @@ if (contains(mission.name,'2023') || contains(mission.name,'2024')) && currentSt
         if ~settings.shutdown
 
             [sensorData,sensorTot,settings,contSettings,rocket] = run_MTR_SIM ...
-                (sensorData,sensorTot,settings,contSettings,t1, engineT0,dt_ode,rocket,environment);
+                (sensorData,sensorTot,settings,contSettings,t1, engineT0,dt_ode,rocket,environment, mission);
             sensorTot.mea.t_shutdown = settings.t_shutdown;
 
             if  Tf(end)-engineT0 >= rocket.motor.time(end)

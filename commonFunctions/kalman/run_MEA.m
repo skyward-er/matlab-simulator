@@ -1,4 +1,4 @@
-function [sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1,environment,rocket)
+function [sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1,engineT0,environment,rocket, mission)
 
 
 % mass estimation
@@ -50,7 +50,7 @@ for ii = 2:length(t_mea)
         end
     end
     %accelerometer correction (not for 2023)
-    if ~contains(settings.mission, '2023')
+    if ~contains(mission.name, '2023')
         K_t = settings.mea.K_t;
         alpha = settings.mea.alpha;
         c = settings.mea.c;
@@ -66,10 +66,10 @@ for ii = 2:length(t_mea)
             cd = 1*getDrag(vnorm_nas(ii), -z_nas(ii), 0, contSettings.coeff_Cd); %add correction shut_down??
             [~,~,P_e, rho] = atmosisa(-z_nas(ii));
             q = 0.5*rho*vnorm_nas(ii)^2; %dynamic pressure
-            F_a = q*settings.S*cd;       %aerodynamic force
+            F_a = q*rocket.crossSection*cd;       %aerodynamic force
 
             if  -z_nas(ii,1)> 800
-                F_s = (P_0-P_e)*settings.motor.Ae ;
+                F_s = (P_0-P_e)*rocket.motor.ae;
             else
                 F_s = 0;
             end
@@ -110,14 +110,14 @@ for ii = 2:length(t_mea)
     if propagation_steps >=1
         [z_pred, vz_pred] = PropagateState(-z_nas(ii),-vz_nas(ii), ...
             K_t .* sensorTot.comb_chamber.measures(index_chambPress), ...
-            settings.S, CD, rho,x(ii, 3), 0.02, propagation_steps);
+            rocket.crossSection, CD, rho,x(ii, 3), 0.02, propagation_steps);
     else
         z_pred = -z_nas(ii);
         vz_pred = -vz_nas(ii);
     end
 
-    predicted_apogee(ii) = z_pred-settings.z0 + 1./(2.*( 0.5.*rho .* CD * settings.S ./ mass))...
-        .* log(1 + (vz_pred.^2 .* (0.5 .* rho .* CD .* settings.S) ./ mass) ./ 9.81 );
+    predicted_apogee(ii) = z_pred-environment.z0 + 1./(2.*( 0.5.*rho .* CD * rocket.crossSection ./ mass))...
+        .* log(1 + (vz_pred.^2 .* (0.5 .* rho .* CD .* rocket.crossSection) ./ mass) ./ 9.81 );
 
     % retrieve NAS data
     index_NAS = sum(t_mea(ii) >= t_nas);
