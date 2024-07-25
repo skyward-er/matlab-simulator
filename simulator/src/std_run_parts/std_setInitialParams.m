@@ -89,7 +89,7 @@ deltaA_ref_new = 0;
 deltaA_ref_old = 0;
 deltaA_ref = [deltaA_ref_old,deltaA_ref_new];
 % servo motor time delay - in ode it needs to be set to change reference value
-t_change_ref_PRF =      t0 + contSettings.payload.deltaA_delay;
+t_change_ref_PRF =      t0 + rocket.parachutes(2,2).controlParams.deltaA_delay;
 t_last_prf_control = 0;
 
 

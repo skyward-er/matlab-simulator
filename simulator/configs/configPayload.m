@@ -33,17 +33,17 @@ contSettings.WES.deltaA = 0.05;        % [-] DeltaA before guidance
 payload.simParam.incControl = true;
 
 % Subtract the wind from the velocity
-payload.simParam.wind_sub = 1;            % Set as 1 for subtracting and 0 otherwise
+% payload.simParam.wind_sub = 1;            % Set as 1 for subtracting and 0 otherwise
 % payload.simParam.WES0 = environment.wind; % Windspeed considered in the subtraction
 
 % P and PI controller
-contSettings.payload.Kp = 0.4;
-contSettings.payload.Ki = 0.08;
-contSettings.payload.uMax = 0.1;
-contSettings.payload.uMin = -0.1;
-contSettings.payload.deltaA_tau = 0.4; % [s], absolutely arbitrary value
-contSettings.payload.deltaA_delay = 0; % [s], absolutely arbitrary value
-contSettings.payload.deltaA_maxSpeed = deg2rad(300);
+rocket.parachutes(2,2).controlParams.Kp = 0.4;
+rocket.parachutes(2,2).controlParams.Ki = 0.08;
+rocket.parachutes(2,2).controlParams.uMax = 0.1;
+rocket.parachutes(2,2).controlParams.uMin = -0.1;
+rocket.parachutes(2,2).controlParams.deltaA_tau = 0.4; % [s], absolutely arbitrary value
+rocket.parachutes(2,2).controlParams.deltaA_delay = 0; % [s], absolutely arbitrary value
+rocket.parachutes(2,2).controlParams.deltaA_maxSpeed = deg2rad(300);
 
 %% Guidance algorithm
 % Algorithm selection: choose from "closed loop", "t-approach"

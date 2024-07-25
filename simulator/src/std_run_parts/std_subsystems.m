@@ -127,6 +127,7 @@ if ~settings.flagAscent && settings.parafoil
             sensorTot.wes.measure(iTimes,:) = wind_est;
             sensorTot.wes.time(iTimes) = t1;
         else
+            contSettings.WES.state = 2;
             wind_est = [0,0];
         end
 
@@ -137,7 +138,8 @@ if ~settings.flagAscent && settings.parafoil
             pos_est = sensorData.nas.states(end,1:3);
             pos_est(3) = -pos_est(3)-environment.z0;
 
-            [deltaA_ref_new,contSettings] = run_parafoilGuidance(pos_est, sensorData.nas.states(end,4:5), wind_est, settings.payload.target, contSettings);
+            [deltaA_ref_new,contSettings] = run_parafoilGuidance(pos_est, sensorData.nas.states(end,4:5), wind_est, ...
+                settings.payload.target, contSettings, rocket.parachutes(2,2).controlParams);
         end
 
     end

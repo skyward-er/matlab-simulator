@@ -1,4 +1,4 @@
-function [deltaA_ref, contSettings] = run_parafoilGuidance(pos_est, vel_est, wind_est, target, contSettings)
+function [deltaA_ref, contSettings] = run_parafoilGuidance(pos_est, vel_est, wind_est, target, contSettings, controlParams)
 % HELP:
 % 
 % parafoil guidance algorithm
@@ -43,16 +43,16 @@ else
     % compute heading difference
     error_psi = angdiff(psi,psi_ref); 
 
-    P = contSettings.payload.Kp * error_psi;
+    P = controlParams.Kp * error_psi;
     if contSettings.payload.saturation == false
-        contSettings.payload.I = contSettings.payload.Ki * error_psi + contSettings.payload.I;
+        contSettings.payload.I = controlParams.Ki * error_psi + contSettings.payload.I;
     end 
     
 
 
     deltaA_ref = P + contSettings.payload.I;
 
-    [deltaA_ref,contSettings.payload.saturation] = Saturation(deltaA_ref,contSettings.payload.uMin, contSettings.payload.uMax);
+    [deltaA_ref,contSettings.payload.saturation] = Saturation(deltaA_ref,controlParams.uMin, controlParams.uMax);
    
      % inserire WES conditions
      % storia dei 15 secondi di calibrazione etc

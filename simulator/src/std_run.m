@@ -399,8 +399,10 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                     descentData.para = 2;
                     descentData.stage = 2;
                     Y0_ode = Y0(:,[1:13,15]);
-                    [Tf, Yd] = ode4(@descentParafoil, tspan, Y0_ode, settings,contSettings, deltaA_ref, t_change_ref_PRF,tLaunch);
-                    parout = RecallOdeFcn(@descentParafoil, Tf, Yd, settings,contSettings, Yd(:,14),t_change_ref_PRF,tLaunch,'apVec');
+                    control.deltaARef = deltaA_ref;
+                    control.timeChangeRef = t_change_ref_PRF;
+                    [Tf, Yd] = ode4(@descentParafoil, tspan, Y0_ode, rocket, environment, wind, descentData, control, engineT0);
+                    parout = RecallOdeFcn(@descentParafoil, Tf, Yd, rocket, environment, wind, descentData, control, engineT0);
                     [nd, ~] = size(Yd);
                     Yf = [Yd(:,1:13), zeros(nd,1),Yd(:,14)];
             end
@@ -438,7 +440,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
 
     % [sensorData] = manageSignalFrequencies(magneticFieldApprox, settings.flagAscent, settings,sensorData, Yf, Tf, uw, vw, ww);
     % wind = [uw, vw, ww];
-    [uw, vw, ww] = wind.getVels(-Yf(:,end));
+    [uw, vw, ww] = wind.getVels(-Yf(end, 3));
     wind_vector = [uw, vw, ww];
     [sensorData] = generateSensorMeasurements(magneticFieldApprox, Yf, Tf, wind_vector, sensorData,sensorTot, settings, engineT0, currentState, availableStates, environment, mission, rocket);
 
@@ -519,7 +521,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         t_change_ref_ABK = t1 + settings.servo.delay;
     end
     if t1-t_last_prf_control >= 1/settings.frequencies.prfFrequency - 1e-6
-        t_change_ref_PRF = t1 + contSettings.payload.deltaA_delay;
+        t_change_ref_PRF = t1 + rocket.parachutes(2,2).controlParams.deltaA_delay;
     end
     % assemble total state
     [n, ~] = size(Yf);
