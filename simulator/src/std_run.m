@@ -293,7 +293,17 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                         disp("Transition to parachute descent");
                     end
                 end
+                % Transition to landed condition
+            elseif -Y0(end,3) < -1
+                state_lastTime(currentState) = t0;
 
+                % Exit condition of parachute_descent / Entry condition of landed:
+                flagFlight = false;
+                idx_landing = n_old-1;
+                currentState = availableStates.landed;
+                if ~settings.montecarlo
+                    disp("Transition to landed");
+                end
             end
         case availableStates.parachute_descent
 
