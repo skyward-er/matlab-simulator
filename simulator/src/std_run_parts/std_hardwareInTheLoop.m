@@ -34,6 +34,7 @@ end
 if isfield(hilData.actuators, "mainValvePercentage") && settings.lastLaunchFlag && hilData.actuators.mainValvePercentage <= 0.5
     disp("mainValve closed");
     settings.shutdown = true;
+    settings.t_shutdown = Tf(end);
 end
 
 % Expulsion
@@ -123,28 +124,21 @@ if isfield(hilData, "mea")
         sensorTot.mea.time(iTimes) = t1;
     end
 
-    if settings.shutdown && currentState ~= availableStates.on_ground     % Need to check if this happens only once or the condition can be met multiple times
-        t_shutdown = Tf(end);
-        settings.expShutdown = 1;
-        settings.timeEngineCut = t_shutdown;
-        settings.expTimeEngineCut = t_shutdown;
-        settings.expMengineCut = m - settings.ms;
-        settings.shutdown = 1;
-        settings = settingsEngineCut(settings, engineT0);
-        settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
-        [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
-        sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
-    elseif ~settings.shutdown && Tf(end)-engineT0 >= settings.tb && currentState ~= availableStates.on_ground
-        t_shutdown = settings.tb;
-        settings.expShutdown = 1;
-        settings.timeEngineCut = t_shutdown;
-        settings.expTimeEngineCut = t_shutdown;
-        settings.expMengineCut = m - settings.ms;
-        settings.shutdown = 1;
-        settings = settingsEngineCut(settings, engineT0);
-        settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
-        [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
-        sensorTot.mea.t_shutdown = t_shutdown; % to pass the value out of the std_run to the structOut
+    if ~settings.shutdown
+        sensorTot.mea.t_shutdown = settings.t_shutdown;
+
+        if  Tf(end)-engineT0 >= settings.tb
+            settings.expShutdown = true;
+            settings.shutdown = true;
+            settings.t_shutdown = settings.tb;
+            settings.timeEngineCut = settings.t_shutdown;
+            settings.expTimeEngineCut = settings.t_shutdown;
+            settings.expMengineCut = settings.parout.m(end) - settings.ms;
+            settings = settingsEngineCut(settings, engineT0);
+            settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
+            [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
+            sensorTot.mea.t_shutdown = settings.t_shutdown; % to pass the value out of the std_run to the structOut
+        end
     end
 else
     if (contains(settings.mission,'_2023') ||  contains(settings.mission,'_2024')) && currentState ~= availableStates.on_ground
