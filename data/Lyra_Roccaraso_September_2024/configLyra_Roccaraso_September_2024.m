@@ -84,13 +84,13 @@ settings.servo.maxAngle = fix(settings.servo.maxAngle*1e9)/1e9; % to avoid compu
 
 %% NAS TUNING PARAMETERS
 settings.nas.dt_k          =   0.02;                                    % [s]        nas time step
-settings.nas.sigma_baro    =   200;                                      % [Pa]   estimated barometer variance    
+settings.nas.sigma_baro    =  50;                                      % [Pa]   estimated barometer variance    
 settings.nas.sigma_mag     =   10;                                       % [mgauss^2] estimated magnetometer variance    
 settings.nas.sigma_GPS     =   diag([0.002 0.002 0.01/30 0.01/30]);               % [millideg^2 m^2/s^2]     estimated GPS variance. position from test, velocity from datasheet
 settings.nas.sigma_w       =   10;                                       % [rad^2/s^2]   estimated gyroscope variance;
 settings.nas.sigma_beta    =   1e-4;                                    % [rad/s^2]   estimated gyroscope bias variance;
 settings.nas.sigma_pitot   =   20^2;    
-settings.nas.sigma_pitot2  =   100; 
+settings.nas.sigma_pitot2  =   0.1; 
 
 settings.nas.Mach_max = 0.4; % max mach number expected for the mission (for nas with pitot update purposes) - not currently used
 settings.nas.GPS.a = 111132.95225;

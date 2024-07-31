@@ -238,3 +238,5 @@ sensorTot.ada.n_old = 2;
 sensorTot.nas.n_old = 2;
 sensorTot.mea.n_old = 2;
 sensorTot.sfd.n_old = 2;
+sensorTot.gps.lastindex = 0;
+sensorTot.pitot.lastindex = 0;
