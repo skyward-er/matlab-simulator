@@ -40,33 +40,24 @@ Revision date: 11/04/2022
 
 %}
 
-% generate wind
-wind = WindCustom(mission);
-
 if nargin > 5
     settings_mont = varargin{1};
     rocket.motor.thrust = settings_mont.motor.expThrust;
     rocket.motor.time = settings_mont.motor.expTime;
-    rocket.motor.time(end) = settings_mont.tb;
-    settings.motor.K = settings_mont.motor.K;
-    settings.Coeffs = settings_mont.Coeffs;
-    switch settings.windModel
-        case "constant"
-            settings.wind.uw = settings_mont.wind.uw;
-            settings.wind.vw = settings_mont.wind.vw;
-            settings.wind.ww = settings_mont.wind.ww;
-            settings.wind.Az = settings_mont.wind.Az;
-            settings.wind.El = settings_mont.wind.El;
-        case "multiplicative"
-            settings.wind.inputGround = settings_mont.wind.Mag;
-            % settings.wind.inputAzimut = settings_mont.wind.Az;
-            settings.wind.input_uncertainty = settings_mont.wind.unc;
-    end
-
-    settings.State.xcgTime = settings_mont.State.xcgTime;
+    % rocket.motor.time(end) = settings_mont.tb;
     settings.mass_offset = settings_mont.mass_offset;
-    settings.OMEGA = settings_mont.OMEGA;
-    settings.PHI = settings_mont.PHI;
+    settings.motor.K = settings_mont.motor.K;
+    rocket.coefficients.total = settings_mont.Coeffs;
+    wind = settings_mont.wind;
+
+    rocket.coefficients.state.xcgTime = settings_mont.State.xcgTime;
+    environment.omega = settings_mont.OMEGA;
+    environment.phi = settings_mont.PHI;
+end
+
+if ~exist("wind", "var")
+    % If the wind was not already defined, generate new one
+    wind = WindCustom(mission);
 end
 
 if settings.electronics % global variables slow down a bit the comunication over thread, we don't need these for montecarlo analysis
@@ -107,7 +98,6 @@ Y0 = initialCond';
 % settings.wind.El = El;
 % settings.wind.Az = Az;
 
-%% stochastic parameter settings:
 
 %% INTEGRATION
 % integration time

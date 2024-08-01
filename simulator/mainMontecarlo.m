@@ -26,6 +26,7 @@ end
 % adds folders to the path and retrieves rocket, mission, simulation, etc
 % data.
 
+restoredefaultpath;
 filePath = fileparts(mfilename('fullpath'));
 currentPath = pwd;
 if not(strcmp(filePath, currentPath))
@@ -37,6 +38,10 @@ addpath(genpath(currentPath));
 
 % Common Functions path
 addpath(genpath(commonFunctionsPath));
+
+% add common data path
+dataPath = strcat('../common');
+addpath(genpath(dataPath));
 
 %% CHECK IF MSA-TOOLKIT IS UPDATED
 % msaToolkitURL = 'https://github.com/skyward-er/msa-toolkit';
@@ -89,6 +94,8 @@ clearvars   msaToolkitURL Itot
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%CONFIG%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 settings_mont_init = struct('x',[]);
+wind_vec = cell(N_sim, 1);
+rocket_vec = cell(N_sim, 1);
 
 %% start simulation
 for alg_index = 4
@@ -105,43 +112,42 @@ for alg_index = 4
     motor_K = settings.motor.K;
 
     parfor i = 1:N_sim
+        rocket_vec{i} = copy(rocket);
         settings_mont = settings_mont_init;
         settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
-        settings_mont.motor.expTime = stoch.expThrust(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
-        settings_mont.tb = max( stoch.expThrust(i,stoch.expThrust(i,:)<=rocket.motor.time(end)) );     % initialize the burning time of the current simulation (parfor purposes)
+        settings_mont.motor.expTime = stoch.expTime(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
         settings_mont.motor.K = motor_K + stoch.delta_Kt(i,:);                  % 
         settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
         settings_mont.mass_offset = stoch.mass_offset(i);
         settings_mont.OMEGA = stoch.OMEGA_rail(i);
         settings_mont.PHI = stoch.PHI_rail(i);
-        
-        
-
-   
+        wind_vec{i} = copy(stoch.wind);
+        wind_vec{i}.updateAll();
+        settings_mont.wind = wind_vec{i};
+       
         % Define coeffs matrix for the i-th simulation
-        settings_mont.Coeffs = settings.Coeffs* (1+stoch.aer_percentage(i));
+        settings_mont.Coeffs = rocket.coefficients.total * (1+stoch.aer_percentage(i));
 
-stoch;
-        % set the wind parameters
-        switch settings.windModel
-            case "constant"
-                settings_mont.wind.uw = stoch.wind.uw(i);
-                settings_mont.wind.vw = stoch.wind.vw(i);
-                settings_mont.wind.ww = stoch.wind.ww(i);
-                settings_mont.wind.Az = stoch.wind.Az(i);
-                settings_mont.wind.El = stoch.wind.El(i);
-            case "multiplicative"
-                settings_mont.wind.Mag = stoch.wind.Mag(i);
-                settings_mont.wind.Az = stoch.wind.Az(i,:);
-                settings_mont.wind.unc = stoch.wind.unc(i,:);
-        end
+%         % set the wind parameters
+%         switch settings.windModel
+%             case "constant"
+%                 settings_mont.wind.uw = stoch.wind.uw(i);
+%                 settings_mont.wind.vw = stoch.wind.vw(i);
+%                 settings_mont.wind.ww = stoch.wind.ww(i);
+%                 settings_mont.wind.Az = stoch.wind.Az(i);
+%                 settings_mont.wind.El = stoch.wind.El(i);
+%             case "multiplicative"
+%                 settings_mont.wind.Mag = stoch.wind.Mag(i);
+%                 settings_mont.wind.Az = stoch.wind.Az(i,:);
+%                 settings_mont.wind.unc = stoch.wind.unc(i,:);
+%         end
         
         if displayIter == true
             fprintf("simulation = " + num2str(i) + " of " + num2str(N_sim) + ", algorithm: " + contSettings.algorithm +", scenario: "+ settings.scenario +"\n");
         end
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STD_RUN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        [simOutput] = std_run(settings,contSettings,settings_mont);
+        [simOutput] = std_run(settings,contSettings,rocket_vec{i},environment,mission,settings_mont);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STD_RUN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         save_thrust{i} = simOutput;
 
@@ -174,14 +180,13 @@ stoch;
         % time of engine shutdown
         t_shutdown.value(i) = save_thrust{i}.sensors.mea.t_shutdown;
 
-        if ~settings.wind.model && ~settings.wind.input
-            % wind magnitude
-            wind_Mag(i) = save_thrust{i}.wind.Mag;
-            % wind azimuth
-            wind_az(i) = save_thrust{i}.wind.Az;
-            %wind elevation
-            wind_el(i) = save_thrust{i}.wind.El;
-        end
+        % wind magnitude
+        wind_Mag(i) = wind_vec{i}.magnitude(1);
+        % wind azimuth
+        wind_az(i) = wind_vec{i}.azimuth(1);
+        %wind elevation
+        wind_el(i) = wind_vec{i}.elevation(1);
+
         %reached apogee time
         apogee.times(i) = save_thrust{i}.apogee.time;
         apogee.prediction(i) = save_thrust{i}.sensors.mea.prediction(end);
@@ -342,12 +347,8 @@ stoch;
             case 'Gemini_Roccaraso_September_2023'
                 folder = [folder ; "MontecarloResults\"+mission.name+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*rocket.airbrakes.maxMach)+"_"+simulationType_thrust+"_"+saveDate]; % offline
 
-            case 'Lyra_Portugal_October_2024'
+            case {'2024_Lyra_Portugal_October', '2024_Lyra_Roccaraso_September'}
                 folder = [folder ; "MontecarloResults\"+mission.name+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*rocket.airbrakes.maxMach)+"_"+simulationType_thrust+"_"+saveDate]; % offline
-
-            case 'Lyra_Roccaraso_September_2024'
-                folder = [folder ; "MontecarloResults\"+mission.name+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*rocket.airbrakes.maxMach)+"_"+simulationType_thrust+"_"+saveDate]; % offline
-    
         end
 
     end
@@ -410,27 +411,32 @@ stoch;
             % %             end
 
             %%%%%%%%%%%%%%%%%%%%%%%%%%%
-            fprintf(fid,'WIND \n\n ');
-            fprintf(fid,'Wind model: %s \n',settings.windModel);
-            if settings.windModel == "constant"
-                fprintf(fid,'Wind model parameters: \n'); % inserisci tutti i parametri del vento
-                fprintf(fid,'Wind Magnitude: 0-%d m/s\n',settings.wind.MagMax);
-                fprintf(fid,'Wind minimum azimuth: %d [°] \n',rad2deg(settings.wind.AzMin));
-                fprintf(fid,'Wind maximum azimuth: %d [°] \n',rad2deg(settings.wind.AzMax));
-                fprintf(fid,'Wind minimum elevation: %d [°] \n', rad2deg(settings.wind.ElMin));
-                fprintf(fid,'Wind maximum elevation: %d [°] \n\n\n',rad2deg(settings.wind.ElMax));
-            else
-                fprintf(fid,'Wind model parameters: \n'); % inserisci tutti i parametri del vento
-                fprintf(fid,'Ground wind Magnitude: 0-%d m/s\n\n\n',settings.wind.MagMax);
+            fprintf(fid,'WIND \n\n');
+            fprintf(fid,'Wind model parameters: \n'); % inserisci tutti i parametri del vento
+            fprintf(fid,'Wind altitudes: '+string(repmat('%.2f m ', [1 length(wind.altitudes)]))+"\n\n", wind.altitudes);
+            for ii = 1:length(wind.altitudes)
+                fprintf(fid,'Wind magnitude distribution at %.2f m: \"%s\"\n', wind.altitudes(ii), string(wind.magnitudeDistribution(ii)));
+                fprintf(fid,'Wind magnitude parameters at %.2f m: %d-%d m/s\n',wind.altitudes(ii), stoch.wind_params.MagMin(ii), stoch.wind_params.MagMax(ii));
             end
+            fprintf(fid, '\n');
+            for ii = 1:length(wind.altitudes)
+                fprintf(fid,'Wind azimuth distribution at %.2f m: \"%s\"\n', wind.altitudes(ii), string(wind.azimuthDistribution(ii)));
+                fprintf(fid,'Wind azimuth parameters at %.2f m: %d-%d [°] \n', wind.altitudes(ii), rad2deg(stoch.wind_params.AzMin(ii)), rad2deg(stoch.wind_params.AzMax(ii)));
+            end
+            fprintf(fid, '\n');
+            for ii = 1:length(wind.altitudes)
+                fprintf(fid,'Wind elevation distribution at %.2f m: \"%s\"\n', wind.altitudes(ii), string(wind.elevationDistribution(ii)));
+                fprintf(fid,'Wind elevation parameters at %.2f m: %d-%d [°] \n', wind.altitudes(ii), rad2deg(stoch.wind_params.ElMin(ii)), rad2deg(stoch.wind_params.ElMax(ii)));
+            end
+            fprintf(fid,'\n\n');
 
             %%%%%%%%%%%%%%%%%%%%%%%%%%%
             if (settings.scenario == "descent" || settings.scenario == "full flight") && settings.parafoil
                 fprintf(fid,'PARAFOIL \n\n');
                 fprintf(fid,'Guidance approach %s \n',contSettings.payload.guidance_alg);
-                fprintf(fid,'PID proportional gain %s \n',contSettings.payload.Kp);
-                fprintf(fid,'PID integral gain %s \n',contSettings.payload.Ki);
-                fprintf(fid,'Opening altitude %s \n',settings.para(1).z_cut);
+                fprintf(fid,'PID proportional gain %s \n',rocket.parachutes(2,2).controlParams.Kp);
+                fprintf(fid,'PID integral gain %s \n',rocket.parachutes(2,2).controlParams.Ki);
+                fprintf(fid,'Opening altitude %s \n',settings.ada.para.z_cut);
             end
             fprintf(fid,'MASS: \n\n');
             fprintf(fid,'Interval : +-%d at 3sigma \n',3*sigma_m );

@@ -247,12 +247,6 @@ if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'co
 end
 
 %% PLOT APOGEE 3D
-if ~settings.wind.model && ~settings.wind.input
-    for i = 1:N_sim
-        wind_Mag(i) = save_thrust{i}.wind.Mag;
-        wind_az(i) = save_thrust{i}.wind.Az;
-        wind_el(i) = save_thrust{i}.wind.El;
-    end
 montFigures.apogee_3D_wind_thrust = figure;
 %%%%%%%%%% wind magnitude - thrust - apogee
 subplot(2,2,1)
@@ -295,7 +289,7 @@ zlabel('Apogee')
 % zlim([settings.z_final-200,settings.z_final+200])
 view(30,20)
 legend(contSettings.algorithm);
-end
+
 
  
 
