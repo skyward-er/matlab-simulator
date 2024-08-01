@@ -143,7 +143,6 @@ settings.ada.v0          =   -10;                                           % Ve
 settings.ada.a0          =   -100;                                          % Acceleration velocity initial condition
 settings.ada.x0          =  [settings.ada.p_ref, settings.ada.v0, settings.ada.a0];         
                                                                             % Ada initial condition
-settings.ada.para.z_cut  = [350; 0];
 settings.ada.v_thr       =   0;                                           % Velocity threshold for the detected apogee
 settings.ada.count_thr   =   5;                                             % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.ada.counter     =   0;
@@ -152,6 +151,13 @@ settings.ada.altitude_confidence_thr = 5;                                   % If
 settings.ada.t_ada       =   -1;                                            % Apogee detection timestamp
 settings.ada.flag_apo    =   false;                                         % True when the apogee is detected
 settings.ada.shadowmode = 18;
+
+if ~settings.parafoil
+    settings.ada.para.z_cut  = rocket.parachutes(1,1).finalAltitude;
+else
+    settings.ada.para.z_cut  = rocket.parachutes(1,2).finalAltitude;
+end
+
 %% MEA TUNING PARAMETERS / MOTOR SHUT DOWN TUNING PARAMETERS
 %motor model for kalman filter prediction/correction scheme
 settings.mea.engine_model_A1     = [1.850256474259625, -0.850256474275721, 0; 1.000000000000000, 0, 0; -7.901993537244965e-04 ,  7.901993537244965e-04, 1];
