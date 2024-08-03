@@ -113,7 +113,7 @@ displayIter = true; % set to false if you don't want to see the iteration number
                     wind.elevationDistribution = repmat("u", size(wind.altitudes));
                     wind.elevationParameters = [stoch.wind_params.ElMin; stoch.wind_params.ElMax];
                 case "g"
-                    mu_El = ( stoch.wind_params.ElMax + stoch.wind_params.ElMin ) / 2;
+                    mu_El = (stoch.wind_params.ElMax + stoch.wind_params.ElMin) / 2;
                     sigma_El = (stoch.wind_params.ElMax - mu_El)/3;
                     wind.elevationDistribution = repmat("g", size(wind.altitudes));
                     wind.elevationParameters = [mu_El; sigma_El];
@@ -123,14 +123,13 @@ displayIter = true; % set to false if you don't want to see the iteration number
                     wind.azimuthDistribution = repmat("u", size(wind.altitudes));
                     wind.azimuthParameters = [stoch.wind_params.AzMin; stoch.wind_params.AzMax];
                 case "g"
-                    mu_Az = ( stoch.wind_params.AzMax + stoch.wind_params.AzMin ) / 2;
+                    mu_Az = (stoch.wind_params.AzMax + stoch.wind_params.AzMin) / 2;
                     sigma_Az = (stoch.wind_params.AzMax - mu_Az)/3;
                     wind.magnitudeDistribution = repmat("g", size(wind.altitudes));
                     wind.magnitudeParameters = [mu_Az; sigma_Az];
             end
 
             wind.updateAll();
-
             stoch.wind = wind;
 
             %%% mass offset distribution
@@ -152,14 +151,61 @@ displayIter = true; % set to false if you don't want to see the iteration number
         case "extreme"
 
             thrust_percentage = [0.9;1.1]; % this is overwritten in the next step, but it sets the values to retrieve in the parameter generation
+            Az_vec = deg2rad([-180 -90 0 90]);
+            El_vec = deg2rad([-60 60]);
 
-            %%% wind parameters
-            [stoch.wind_params.uw, stoch.wind_params.vw, stoch.wind_params.ww, stoch.wind_params.Az, stoch.wind_params.El ,thrust_percentage, N_sim] = windConstGeneratorMontecarlo(settings.wind,N_sim,simulationType_thrust,thrust_percentage);
+            [A,B,C] = meshgrid(Az_vec,El_vec,thrust_percentage);
+            Az = [];
+            El = [];
+            thrust_percentage = [];
+            for i = 1:size(A,1)
+                for j = 1:size(A,2)
+                    for k = 1:size(A,3)
+                        Az = [Az; A(i,j,k)];
+                        El = [El; B(i,j,k)];
+                        thrust_percentage = [thrust_percentage; C(i,j,k)];
+                    end
+                end
+            end
+
+            N_sim = length(Az);
+
+            wind = WindCustom(mission);
+            wind.altitudes = 0;
+            wind.magnitudeDistribution = "u";
+            wind.azimuthDistribution = "u";
+            wind.elevationDistribution = "u";
+            wind.magnitudeParameters = 5;
+
+            wind_vec = cell(N_sim, 1);
+
+            for ii = 1:N_sim
+                wind_vec{ii} = copy(wind);
+                wind_vec{ii}.azimuthParameters = Az(ii);
+                wind_vec{ii}.elevationParameters = El(ii);
+                wind_vec{ii}.updateAll();
+            end
 
             stoch.thrust = thrust_percentage*rocket.motor.thrust;                  % thrust - the notation used creates a matrix where each row is the expThrust multiplied by one coefficient in the thrust percentage array
-            %%%
             stoch.expTime = (1./thrust_percentage) * rocket.motor.time;          % burning time - same notation as thrust here
     
+            stoch.delta_Kt = zeros(N_sim, 1);
+
+            for i =1:N_sim
+                stoch.State.xcgTime(:,i) =  rocket.coefficients.state.xcgTime/rocket.motor.time(end) .* stoch.expTime(i,end);  % Xcg time
+            end
+
+            % aero coeffs
+            stoch.aer_percentage = zeros(N_sim,1);
+
+            % mass offset distribution
+            stoch.mass_offset = zeros(N_sim, 1);
+
+            % launch rail orientation
+            stoch.OMEGA_rail = ones(N_sim,1) .* environment.omega;
+
+            % launch rail orientation
+            stoch.PHI_rail = ones(N_sim,1) .* environment.phi;
             
     end
 

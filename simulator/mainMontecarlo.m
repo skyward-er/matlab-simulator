@@ -94,8 +94,11 @@ clearvars   msaToolkitURL Itot
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%CONFIG%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 settings_mont_init = struct('x',[]);
-wind_vec = cell(N_sim, 1);
 rocket_vec = cell(N_sim, 1);
+
+if ~exist("wind_vec", 'var')
+    wind_vec = cell(N_sim, 1);
+end
 
 %% start simulation
 for alg_index = 4
@@ -121,26 +124,17 @@ for alg_index = 4
         settings_mont.mass_offset = stoch.mass_offset(i);
         settings_mont.OMEGA = stoch.OMEGA_rail(i);
         settings_mont.PHI = stoch.PHI_rail(i);
-        wind_vec{i} = copy(stoch.wind);
-        wind_vec{i}.updateAll();
+
+        if isempty(wind_vec{i})
+            wind_vec{i} = copy(stoch.wind);
+            wind_vec{i}.updateAll();
+        end
+        
         settings_mont.wind = wind_vec{i};
        
         % Define coeffs matrix for the i-th simulation
         settings_mont.Coeffs = rocket.coefficients.total * (1+stoch.aer_percentage(i));
 
-%         % set the wind parameters
-%         switch settings.windModel
-%             case "constant"
-%                 settings_mont.wind.uw = stoch.wind.uw(i);
-%                 settings_mont.wind.vw = stoch.wind.vw(i);
-%                 settings_mont.wind.ww = stoch.wind.ww(i);
-%                 settings_mont.wind.Az = stoch.wind.Az(i);
-%                 settings_mont.wind.El = stoch.wind.El(i);
-%             case "multiplicative"
-%                 settings_mont.wind.Mag = stoch.wind.Mag(i);
-%                 settings_mont.wind.Az = stoch.wind.Az(i,:);
-%                 settings_mont.wind.unc = stoch.wind.unc(i,:);
-%         end
         
         if displayIter == true
             fprintf("simulation = " + num2str(i) + " of " + num2str(N_sim) + ", algorithm: " + contSettings.algorithm +", scenario: "+ settings.scenario +"\n");
