@@ -27,6 +27,7 @@ else
     clearvars -except flagSubmodulesUpdated
 end
 
+restoredefaultpath;
 filePath = fileparts(mfilename('fullpath'));
 currentPath = pwd;
 if not(strcmp(filePath, currentPath))
@@ -42,6 +43,10 @@ addpath(genpath(commonFunctionsPath));
 % Config path
 addpath('../simulator/configs/');
 
+% add MSA data path
+commonPath = strcat('../common');
+addpath(genpath(commonPath));
+
 %% CHECK IF MSA-TOOLKIT IS UPDATED
 % msaToolkitURL = 'https://github.com/skyward-er/msa-toolkit';
 % localRepoPath = '../data/msa-toolkit';
@@ -56,7 +61,7 @@ configSimulator;
 %% AIRBRAKES RADIAL EXTENSION
 % Airbrakes extension vector
 delta_alpha_values  = linspace(settings.servo.minAngle,settings.servo.maxAngle,2);
-[deltaX_values] = extension_From_Angle(delta_alpha_values, settings);
+[deltaX_values] = extension_From_Angle(delta_alpha_values, settings, mission);
 % I exclude the limits for robustness
 % deltaX_values = deltaX_values(2:end-1);
 
@@ -73,7 +78,7 @@ y_final  =  settings.y_final;
 %% INITIAL VELOCITY
 
 %%% Attitude
-Q0 = angleToQuat(settings.PHI, settings.OMEGA, 0*pi/180)'; % set initial quaternion to ramp angles
+Q0 = angleToQuat(environment.phi, environment.omega, 0*pi/180)'; % set initial quaternion to ramp angles
 
 %%% State
 X0 = [0 0 0]';
@@ -81,19 +86,20 @@ V0 = [0 0 0]';
 W0 = [0 0 0]';
 
 %%% wind initialization
-[uw, vw, ww, ~] = windConstGenerator(settings.wind);
+wind = WindCustom(mission);
+[uw, vw, ww] = wind.getVels(0);
 settings.constWind = [uw, vw, ww];
 
 Z_initial = 0;
 
 %% INTERPOLATED CA
-coeffsCA = load(strcat(dataPath, '/CAinterpCoeffs.mat'));
+coeffsCA = load(strcat(commonPath, '/missions/', mission.name, '/data/CAinterpCoeffs.mat'));
 
 %% NEEDED PARAMETERS
 
-settingsSim.g0 = settings.g0;
+settingsSim.g0 = environment.g0;
 settingsSim.z0 = environment.z0;
-settingsSim.C  = settings.C;
+settingsSim.C  = rocket.diameter;
 settingsSim.CD_correction_ref = settings.CD_correction_ref;
 
 %% COMPUTE THE TRAJECTORIES BY BACK INTEGRATION
@@ -141,7 +147,7 @@ for j = 1:N_mass
 
 end
 %% SAVING
-%  settings.save = false;
+% settings.save = false;
 % load test
 if ~settings.save
     warning('save is set to false')
