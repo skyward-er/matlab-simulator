@@ -160,10 +160,12 @@ end
 
 %% MEA TUNING PARAMETERS / MOTOR SHUT DOWN TUNING PARAMETERS
 %motor model for kalman filter prediction/correction scheme
-settings.mea.engine_model_A1     = [1.850256474259625, -0.850256474275721, 0; 1.000000000000000, 0, 0; -7.901993537244965e-04 ,  7.901993537244965e-04, 1];
+
+
+settings.mea.engine_model_A1     = [1.62583090191848 -0.680722129751093	0; 1 0 0; -0.00102053146869855 0.000494919888520664 1];
 settings.mea.engine_model_B1     = [2;0;0];
-settings.mea.engine_model_C1     = [0.944030389140057, -0.945656895768324 ,0];
-settings.mea.K_t = 104.2;
+settings.mea.engine_model_C1     = [1.00196621875211 -0.485916431287183 0];
+settings.mea.K_t = 105.2;
 
 % covariance matrices
 settings.mea.Q                   = eye(3);                      % model noise covariance matrix    
