@@ -24,9 +24,7 @@ function [settings, rocket] = settingsEngineCut(settings, engineT0, rocket)
 %}
     
     rocket.motor.cutoffTime = rocket.motor.cutoffTime - engineT0;
-    rocket.updateCutoff;
     if (rocket.motor.cutoffTime) > 0 && ( rocket.motor.cutoffTime  <= (rocket.motor.time(end) - rocket.motor.cutoffTransient) )
-        
         tEC = rocket.motor.cutoffTime;           % controlled shutoff moment, 0.3 is the delay
         tCO = rocket.motor.cutoffTransient;                     % cutoff transient duration
 
@@ -52,5 +50,7 @@ function [settings, rocket] = settingsEngineCut(settings, engineT0, rocket)
     elseif rocket.motor.cutoffTime <= 0
         error('rocket.motor.cutoffTime must be grater than zero');
     end
+    
+    rocket.updateCutoff;
 
 end
