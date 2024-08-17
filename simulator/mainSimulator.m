@@ -45,15 +45,11 @@ if not(strcmp(filePath, currentPath))
     cd (filePath);
     currentPath = filePath;
 end
-commonFunctionsPath = '../commonFunctions';
 addpath(genpath(currentPath));
 
-% Common Functions path
-addpath(genpath(commonFunctionsPath));
-
-% add MSA data path
-dataPath = strcat('../common');
-addpath(genpath(dataPath));
+% add common submodule path
+commonPath = strcat('../common');
+addpath(genpath(commonPath));
 
 %% CHECK SUBMODULES UPDATES
 % if ~exist('flagSubmodulesUpdated','var')

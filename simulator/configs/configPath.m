@@ -6,19 +6,18 @@ folder path configuration script
 
 % Retrieve MSA-Toolkit rocket data
 
-
-%
-commonFunctionsPath = '../common/functions/';
-addpath(genpath(commonFunctionsPath))
-
 % Retrieve Control rocket data
 ConDataPath = strcat('../data/', mission.name);
 addpath(ConDataPath);
- 
 
-% Control common functions
+% Common Functions path
 commonFunctionsPath = '../commonFunctions';
-addpath(genpath(commonFunctionsPath))
+addpath(genpath(commonFunctionsPath));
+
+% Remove unwanted paths
+missionPath = strcat('../common/missions/', mission.name);
+rmpath(genpath('../common/missions/'));
+addpath(genpath(missionPath));
 
 % only for hardware in the loop - path configuration
 if conf.HIL
