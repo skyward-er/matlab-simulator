@@ -41,7 +41,7 @@ a = params.a;
 n = params.n;
 
 alt = -x_pred(3);
-[~, ~, y_hat] = atmosisa(alt);
+[~, ~, y_hat] = computeAtmosphericData(alt);
 
 threshold      =   10e-11;
 H              =   sparse(1,6);                %Pre-allocation of gradient 
@@ -76,7 +76,7 @@ end
 % % % end
 
 alt_new = -x_pred(3);
-p_corr         =   atmosisa(alt_new);                          %Corrected output expectation
+p_corr         =   computeAtmosphericData   (alt_new);                          %Corrected output expectation
 
 y_res          =   p_meas - p_corr;
 

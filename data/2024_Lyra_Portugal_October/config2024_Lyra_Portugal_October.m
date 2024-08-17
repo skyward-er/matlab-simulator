@@ -103,7 +103,7 @@ settings.nas.counter       =   0;
 
 settings.nas.baro.a = 0.0065;
 settings.nas.baro.n = 5.255933;
-[settings.nas.baro.refTemperature,~,settings.nas.baro.refPressure] = atmosisa(0);
+[settings.nas.baro.refTemperature,~,settings.nas.baro.refPressure] = computeAtmosphericData(0);
 settings.nas.stopPitotAltitude = 800;
 
 settings.nas.t_nas         =   -1;                                          % Apogee detection timestamp
@@ -137,7 +137,7 @@ settings.ada.P0          =   [  0.1    0      0;                            % In
                                 0      0.1     0;                           % state covariance matrix 
                                 0      0      0.1;];
 [settings.ada.temp_ref, ~,...
- settings.ada.p_ref, ~]  =   atmosisa(environment.z0);                         % Reference temperature in kelvin and pressure in Pa 
+ settings.ada.p_ref, ~]  =   computeAtmosphericData(environment.z0);                         % Reference temperature in kelvin and pressure in Pa 
 
 settings.ada.v0          =   -10;                                           % Vertical velocity initial condition
 settings.ada.a0          =   -100;                                          % Acceleration velocity initial condition
@@ -178,7 +178,7 @@ settings.mea.t_higher_shadowmode = 10;                                      % ma
 settings.shutdownValveDelay      = 0.2;                                     % time from the shut down command to the actual valve closure
 
 % accelerometer correction parameters
-[~,~,settings.mea.P0] = atmosisa(103);     %[Pa] reference pressure at the SFT location
+[~,~,settings.mea.P0] = computeAtmosphericData(103);     %[Pa] reference pressure at the SFT location
 settings.mea.acc_threshold = 40;           %[m/s^2] minimum acceleration to perform correction with accelerometer
 settings.mea.vel_threshold = 40;           %[m/s] minimum velocity to perform correction with accelerometer
 Rs = 1.0e+03*[0.4771    1.4391];

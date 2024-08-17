@@ -317,7 +317,7 @@ legend(contSettings.algorithm);
 qdyn_max = zeros(size(save_thrust));
 max_force_kg = zeros(size(save_thrust));
 for i =1:N_sim
-    [~,~,~,rho] = atmosisa(-save_thrust{i}.Y(:,3));
+    [~,~,~,rho] = computeAtmosphericData(-save_thrust{i}.Y(:,3));
     qdyn = 1/2 * vecnorm(save_thrust{i}.Y(:,4:6),2,2).^2 .* rho;
     qdyn_max(i) = max(abs(qdyn));
     dS = 3*settings.arb.surfPol * save_thrust{i}.Y(:,14);

@@ -64,7 +64,7 @@ for ii = 2:length(t_mea)
                 && vnorm_nas(ii) > vel_threshold
 
             cd = 1*getDrag(vnorm_nas(ii), -z_nas(ii), 0, contSettings.coeff_Cd); %add correction shut_down??
-            [~,~,P_e, rho] = atmosisa(-z_nas(ii));
+            [~,~,P_e, rho] = computeAtmosphericData(-z_nas(ii));
             q = 0.5*rho*vnorm_nas(ii)^2; %dynamic pressure
             F_a = q*rocket.crossSection*cd;       %aerodynamic force
 
@@ -104,7 +104,7 @@ for ii = 2:length(t_mea)
 
     %propagate apogee
     CD = settings.CD_correction_shutDown*getDrag(vnorm_nas(ii), -z_nas(ii), 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
-    [~,~,~,rho] = atmosisa(-z_nas(ii));
+    [~,~,~,rho] = computeAtmosphericData(-z_nas(ii));
 
     propagation_steps = 0;%contSettings.N_prediction_threshold - settings.mea.counter_shutdown;
     if propagation_steps >=1

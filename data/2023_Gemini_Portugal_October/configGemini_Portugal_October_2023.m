@@ -103,7 +103,7 @@ settings.nas.counter       =   0;
 
 settings.nas.baro.a = 0.0065;
 settings.nas.baro.n = 5.255933;
-[settings.nas.baro.refTemperature,~,settings.nas.baro.refPressure] = atmosisa(0);
+[settings.nas.baro.refTemperature,~,settings.nas.baro.refPressure] = computeAtmosphericData(0);
 
 settings.nas.stopPitotAltitude = 800;
 
@@ -138,7 +138,7 @@ settings.ada.P0          =   [  0.1    0      0;                            % In
                                 0      0.1     0;                           % state covariance matrix 
                                 0      0      0.1;];
 [settings.ada.temp_ref, ~,...
- settings.ada.p_ref, ~]  =   atmosisa(environment.z0);                         % Reference temperature in kelvin and pressure in Pa 
+ settings.ada.p_ref, ~]  =   computeAtmosphericData(environment.z0);                         % Reference temperature in kelvin and pressure in Pa 
 
 settings.ada.v0          =   -10;                                           % Vertical velocity initial condition
 settings.ada.a0          =   -100;                                          % Acceleration velocity initial condition

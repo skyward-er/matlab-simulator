@@ -92,10 +92,10 @@ for i_baro = 1:length(sensorData.barometer_sens)
     sensorData.barometer_sens{i_baro}.measures = zeros(size(sensorData.barometer_sens{i_baro}.time,1),1);
     sensorData.barometer_sens{i_baro}.z = zeros(size(sensorData.barometer_sens{i_baro}.time,1),1); % this initialization is needed in acquisition_system, do not delete it unless you know what you are doing. Needed in order to have arrays of the same size. Otherwise, if the new array is shorter (e.g. 2 instead of 3 elements) the last element is brought in the next sensorTot saving step and breaks the simulation
     sensorData.barometer_sens{i_baro}.measures(1) = sensorTot.barometer_sens{i_baro}.pressure_measures(end);
-    [sensorData.barometer_sens{i_baro}.temperature,~,~,~] = atmosisa(-interp1(Tf,Y(:,3),sensorData.barometer_sens{i_baro}.time) + environment.z0);
+    [sensorData.barometer_sens{i_baro}.temperature,~,~,~] = computeAtmosphericData(-interp1(Tf,Y(:,3),sensorData.barometer_sens{i_baro}.time) + environment.z0);
     if length(sensorData.barometer_sens{i_baro}.time)>1
         z = -interp1(Tf,Y(:,3),sensorData.barometer_sens{i_baro}.time(2:end)) + environment.z0;
-        [~, ~, P, ~] = atmosisa(z);
+        [~, ~, P, ~] = computeAtmosphericData(z);
         sensorData.barometer_sens{i_baro}.measures(2:end) = P;
     end
     % check for nan
@@ -126,7 +126,7 @@ if isfield(freq, 'pitotFrequency')
         Q = interp1(TfPitot,Y(:,10:13),sensorData.pitot.time(2:end));
         wind_body = quatrotate(Q,wind);
         v = v + wind_body(1);
-        [Temp, a, P, ~] = atmosisa(z);
+        [Temp, a, P, ~] = computeAtmosphericData(z);
         sensorData.pitot.temperature(2:end) = Temp;
         sensorData.pitot.pTotMeasures(2:end) = P.*(1+(gamma-1)/2*(v./a).^2).^(gamma/(gamma-1)); % dynamic pressure
         sensorData.pitot.pStatMeasures(2:end) = P.*(1+(gamma-1)/2*(wind_body(2)./a).^2).^(gamma/(gamma-1));

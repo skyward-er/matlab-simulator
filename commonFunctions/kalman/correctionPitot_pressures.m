@@ -40,7 +40,7 @@ end
 gamma = 1.4;
 
 % compute the density and the speed of sound
-[~,a,~,rho] = atmosisa(-x_pred(3));
+[~,a,~,rho] = computeAtmosphericData(-x_pred(3));
 
 % compute mach number squared and 
 M2 = 2/(gamma-1) * ( (p0/p)^(( gamma-1 )/gamma) -1 );

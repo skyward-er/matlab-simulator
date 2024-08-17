@@ -133,7 +133,7 @@ sfd_mean_p = [];
 %% ADA initial conditions (Apogee Detection Algorithm)
 
 if strcmp(settings.scenario, 'descent')
-    [~, ~, p_fin, ~]  =   atmosisa(settings.z_final+environment.z0);               % Reference temperature in kelvin and pressure in Pa
+    [~, ~, p_fin, ~]  =   computeAtmosphericData(settings.z_final+environment.z0);               % Reference temperature in kelvin and pressure in Pa
 
     settings.ada.v0          =   -10;                                           % Vertical velocity initial condition
     settings.ada.a0          =   -100;                                          % Acceleration velocity initial condition
@@ -185,7 +185,7 @@ para = 1;
 
 %% total sensors initialization
 % total measurements
-[~,~,P0,~] = atmosisa(environment.z0);
+[~,~,P0,~] = computeAtmosphericData(environment.z0);
 sensorTot.barometer_sens{1}.pressure_measures   =   P0;
 sensorTot.barometer_sens{2}.pressure_measures   =   P0;
 sensorTot.barometer_sens{3}.pressure_measures   =   P0;

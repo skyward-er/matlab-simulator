@@ -500,7 +500,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     end
 
     %% atmosphere
-    [~, a, ~, ~] = atmosisa(-sensorData.kalman.z);        % speed of sound at each sample time, kalman is mean sea level (MSL) so there is no need to add z0
+    [~, a, ~, ~] = computeAtmosphericData(-sensorData.kalman.z);        % speed of sound at each sample time, kalman is mean sea level (MSL) so there is no need to add z0
     %   normV = norm(Yf(end, 4:6));
     normV = norm([vz vx vy]);
     mach = normV/a;
@@ -592,10 +592,11 @@ struct_out.Y = Yf;
 % struct_out.flags = settings.flagMatr;
 struct_out.state_lastTimes = state_lastTime;
 % wind
-struct_out.wind.Mag = wind.magnitude(1);
-struct_out.wind.Az =  wind.azimuth(1);
-% struct_out.wind.El =  wind.El(1);
-struct_out.wind.Vel = [uw, vw, ww];
+% struct_out.wind.Mag = wind.magnitude(1);
+% struct_out.wind.Az =  wind.azimuth(1);
+% % struct_out.wind.El =  wind.El(1);
+% struct_out.wind.Vel = [uw, vw, ww];
+struct_out.wind = wind;
 
 % sensors (ADA, NAS, MEA, SFD, and all sensor data are stored here)
 struct_out.sensors = sensorTot;
