@@ -4,11 +4,6 @@ hardware in the loop script
 
 %}
 
-% Add gravity acceleration only when still on ramp
-if ~flagFlight
-    sensorData.accelerometer.measures = sensorData.accelerometer.measures + (quat2dcm(Yf(end,10:13)) * [0;0;-9.81])';
-end
-
 % extract frequencies from settings struct
 freq = settings.frequencies;
 
