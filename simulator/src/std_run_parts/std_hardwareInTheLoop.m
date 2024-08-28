@@ -19,8 +19,8 @@ end
 %% Remapping flags
 settings.lastLaunchFlag = launchFlag;
 
-% launch
-if (isfield(hilData.actuators, "mainValvePercentage") && hilData.actuators.mainValvePercentage > 0.5) || (settings.board == "payload" && hilData.signal == 3)
+% launch - if opened after the time on ground and the mainValvePercentage is opened
+if (isfield(hilData.actuators, "mainValvePercentage") && hilData.actuators.mainValvePercentage > 0.5 && t0 > time_on_ground) || (settings.board == "payload" && hilData.signal == 3)
     disp("obsw liftoff triggered");
     launchFlag = true;
 end
@@ -28,8 +28,8 @@ end
 % Shutdown
 if isfield(hilData.actuators, "mainValvePercentage") && settings.lastLaunchFlag && hilData.actuators.mainValvePercentage <= 0.5
     disp("mainValve closed");
-    settings.shutdown = true;
-    settings.t_shutdown = Tf(end);
+    settings.expShutdown = true;
+    settings.expTimeEngineCut = Tf(end);
 end
 
 % Expulsion
@@ -39,7 +39,7 @@ if isfield(hilData.actuators, "expulsionPercentage") && hilData.actuators.expuls
 end
 
 % cutting
-if isfield(hilData.actuators, "cutterState") && settings.lastLaunchFlag && hilData.actuators.cutterState >= 0.5
+if isfield(hilData.actuators, "cutterState") && hilData.actuators.cutterState >= 0.5
     disp("cutter activated");
     flagOpenPara = true;
 end
@@ -106,34 +106,27 @@ sensorData.kalman.vz =  sensorData.nas.states(end, 6);   % down
 
 %% Update Mass estimation data
 if isfield(hilData, "mea")
-    if ~settings.shutdown
-        sensorData.mea.estimated_mass = hilData.mea.estimatedMass;
-        sensorData.mea.estimated_pressure = hilData.mea.correctedPressure;
-        sensorData.mea.predicted_apogee = hilData.mea.estimatedApogee;
+    sensorData.mea.estimated_mass = hilData.mea.estimatedMass;
+    sensorData.mea.estimated_pressure = hilData.mea.correctedPressure;
+    sensorData.mea.predicted_apogee = hilData.mea.estimatedApogee;
 
-        m = sensorData.mea.estimated_mass(end);
+    m = sensorData.mea.estimated_mass(end);
 
-        sensorTot.mea.pressure(iTimes) = sensorData.mea.estimated_pressure;
-        sensorTot.mea.mass(iTimes) = sensorData.mea.estimated_mass;
-        sensorTot.mea.prediction(iTimes) = sensorData.mea.predicted_apogee;
-        sensorTot.mea.time(iTimes) = t1;
-    end
+    sensorTot.mea.pressure(iTimes) = sensorData.mea.estimated_pressure;
+    sensorTot.mea.mass(iTimes) = sensorData.mea.estimated_mass;
+    sensorTot.mea.prediction(iTimes) = sensorData.mea.predicted_apogee;
+    sensorTot.mea.time(iTimes) = t1;
+    sensorTot.mea.t_shutdown = settings.t_shutdown;
 
-    if ~settings.shutdown
-        sensorTot.mea.t_shutdown = settings.t_shutdown;
-
-        if  Tf(end)-engineT0 >= settings.tb
-            settings.expShutdown = true;
-            settings.shutdown = true;
-            settings.t_shutdown = settings.tb;
-            settings.timeEngineCut = settings.t_shutdown;
-            settings.expTimeEngineCut = settings.t_shutdown;
-            settings.expMengineCut = settings.parout.m(end) - settings.ms;
-            settings = settingsEngineCut(settings, engineT0);
-            settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
-            [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
-            sensorTot.mea.t_shutdown = settings.t_shutdown; % to pass the value out of the std_run to the structOut
-        end
+    if settings.expShutdown
+        settings.shutdown = true;
+        settings.t_shutdown = settings.expTimeEngineCut;
+        settings.timeEngineCut = settings.t_shutdown;
+        settings.expMengineCut = settings.parout.m(end) - settings.ms;
+        settings = settingsEngineCut(settings, engineT0);
+        settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
+        [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
+        sensorTot.mea.t_shutdown = settings.t_shutdown; % to pass the value out of the std_run to the structOut
     end
 else
     if (contains(settings.mission,'_2023') ||  contains(settings.mission,'_2024')) && currentState ~= availableStates.on_ground
