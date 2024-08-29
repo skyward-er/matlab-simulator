@@ -119,7 +119,7 @@ for alg_index = 4
         settings_mont = settings_mont_init;
         settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
         settings_mont.motor.expTime = stoch.expTime(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
-        settings_mont.motor.K = motor_K + stoch.delta_Kt(i,:);                  % 
+        settings_mont.motor.K = stoch.Kt(i,:);                  % 
         settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
         settings_mont.mass_offset = stoch.mass_offset(i);
         settings_mont.OMEGA = stoch.OMEGA_rail(i);
@@ -430,7 +430,7 @@ for alg_index = 4
                 fprintf(fid,'Guidance approach %s \n',contSettings.payload.guidance_alg);
                 fprintf(fid,'PID proportional gain %s \n',rocket.parachutes(2,2).controlParams.Kp);
                 fprintf(fid,'PID integral gain %s \n',rocket.parachutes(2,2).controlParams.Ki);
-                fprintf(fid,'Opening altitude %s \n',settings.ada.para.z_cut);
+                fprintf(fid,'Opening altitude %s \n', num2str(settings.ada.para.z_cut));
             end
             fprintf(fid,'MASS: \n\n');
             fprintf(fid,'Interval : +-%d at 3sigma \n',3*sigma_m );

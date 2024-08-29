@@ -44,6 +44,7 @@ if nargin > 5
     settings_mont = varargin{1};
     rocket.motor.thrust = settings_mont.motor.expThrust;
     rocket.motor.time = settings_mont.motor.expTime;
+    rocket.motor.cutoffTime = rocket.motor.time(end);
     % rocket.motor.time(end) = settings_mont.tb;
     settings.mass_offset = settings_mont.mass_offset;
     settings.motor.K = settings_mont.motor.K;

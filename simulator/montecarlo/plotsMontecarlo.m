@@ -370,8 +370,8 @@ montFigures.landing_ellipses = figure;
 scatter(landing.position(:,1),landing.position(:,2),'k.','DisplayName','Landings')
 hold on;
 scatter(settings.payload.target(1),settings.payload.target(2),'DisplayName','Target')
-drawCircle(settings.payload.target([2,1]),50,'+-50 meters','r')
-drawCircle(settings.payload.target([2,1]),150,'+-150 meters','b')
+drawCircle(settings.payload.target([1,2]),50,'+-50 meters','r')
+drawCircle(settings.payload.target([1,2]),150,'+-150 meters','b')
 xlabel('North [m]')
 ylabel('East [m]')
 zlabel('Down [m]')
@@ -383,18 +383,18 @@ legend
 %% apogee velocity
 montFigures.apogee_velocity = figure;
 subplot(3,1,1)
-title('vn')
 plot(apogee.horizontalSpeedX)
+title('vn')
 hold on;
 yline(mean(apogee.horizontalSpeedX),'--',['Mean = ',num2str(mean(apogee.horizontalSpeedX))])
 subplot(3,1,2)
-title('ve')
 plot(apogee.horizontalSpeedX)
+title('ve')
 hold on;
 yline(mean(apogee.horizontalSpeedX),'--',['Mean = ',num2str(mean(apogee.horizontalSpeedY))])
 subplot(3,1,3)
-title('vnorm')
 plot(apogee.horizontalSpeed)
+title('vnorm')
 hold on;
 yline(mean(apogee.horizontalSpeedX),'--',['Mean = ',num2str(mean(apogee.horizontalSpeed))])
 

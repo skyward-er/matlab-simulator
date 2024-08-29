@@ -85,7 +85,7 @@ settings.servo.maxAngle = fix(settings.servo.maxAngle*1e9)/1e9; % to avoid compu
 
 %% NAS TUNING PARAMETERS
 settings.nas.dt_k          =   0.02;                                        % [s]        nas time step
-settings.nas.sigma_baro    =   50;                                          % [Pa]   estimated barometer variance    
+settings.nas.sigma_baro    =   500;                                          % [Pa]   estimated barometer variance    
 settings.nas.sigma_mag     =   10;                                          % [mgauss^2] estimated magnetometer variance    
 settings.nas.sigma_GPS     =   diag([0.002 0.002 0.01/30 0.01/30]);               % [millideg^2 m^2/s^2]     estimated GPS variance. position from test, velocity from datasheet
 settings.nas.sigma_w       =   10;                                          % [rad^2/s^2]   estimated gyroscope variance;
@@ -185,4 +185,4 @@ Rs = 1.0e+03*[0.4771    1.4391];
 % variable variance coefficients for accelerometer
 settings.mea.alpha = (Rs(2) - Rs(1))/(100^2-30^2);
 settings.mea.c = -settings.mea.alpha*30^2+Rs(1); 
-settings.mea.mass_interval = [rocket.massNoMotor + rocket.motor.structureMass; rocket.mass(1)];
+settings.mea.mass_interval = [25; 35];
