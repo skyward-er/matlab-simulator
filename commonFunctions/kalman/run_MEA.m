@@ -100,6 +100,8 @@ for ii = 2:length(t_mea)
             mass = x(ii,3);
         end
 
+    else
+        mass = x(ii,3);
     end
 
     %propagate apogee

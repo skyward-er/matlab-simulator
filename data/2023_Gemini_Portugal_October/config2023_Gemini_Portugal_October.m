@@ -59,7 +59,7 @@ settings.arb.extPol(1) = -0.009083;                                         % co
 settings.arb.extPol(2) = 0.02473;                                           % coefficient for extension - alpha^3
 settings.arb.extPol(3) = -0.01677;                                          % coefficient for extension - alpha^2
 settings.arb.extPol(4) = 0.03129;                                           % coefficient for extension - alpha
-settings.arb.maxExt    = settings.hprot(end);                               % maximum extension of air brake aerodynamic surface
+settings.arb.maxExt    = rocket.airbrakes.height(end);                               % maximum extension of air brake aerodynamic surface
 
 % servo angle to exposed surface of the airbrakes (GEMINI)
 settings.arb.surfPol = 0.00932857142857;                                    % coefficient for surface - alpha
@@ -78,7 +78,7 @@ settings.arb.R  = 66e-3;                                                    % tr
 x = @(alpha) settings.arb.extPol(1)*alpha.^4 + ...
     settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + ...
     settings.arb.extPol(4).*alpha;
-fun = @(alpha) x(alpha) - settings.hprot(end);
+fun = @(alpha) x(alpha) - settings.arb.maxExt;
 settings.servo.maxAngle = fzero(fun, deg2rad(50));
 settings.servo.maxAngle = fix(settings.servo.maxAngle*1e9)/1e9; % to avoid computational error propagation (truncates the angle to the ninth decimal)
 
@@ -153,6 +153,12 @@ settings.ada.altitude_confidence_thr = 5;                                   % If
 settings.ada.t_ada       =   -1;                                            % Apogee detection timestamp
 settings.ada.flag_apo    =   false;                                         % True when the apogee is detected
 settings.ada.shadowmode = 18;
+
+if ~settings.parafoil
+    settings.ada.para.z_cut  = rocket.parachutes(1,1).finalAltitude;
+else
+    settings.ada.para.z_cut  = rocket.parachutes(1,2).finalAltitude;
+end
 %% MEA TUNING PARAMETERS / MOTOR SHUT DOWN TUNING PARAMETERS
 % motor model for kalman filter prediction/correction scheme
 settings.mea.engine_model_A1     = [1.435871191228868,-0.469001276508780,0;1,0,0;-0.002045309260755,0.001867496708935,1];
