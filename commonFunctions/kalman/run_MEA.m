@@ -24,7 +24,7 @@ vnorm_nas = zeros(length(t_mea), 1);
 vz_nas = zeros(length(t_mea), 1);
 z_nas(1) = sensorData.nas.states(end,3);
 vnorm_nas(1) = norm(sensorData.nas.states(end,4:6));
-vz_nas(1) = sensorData.nas.states(end,6);
+vz_nas(1) = -sensorData.nas.states(end,6);
 
 
 for ii = 2:length(t_mea)
@@ -34,7 +34,7 @@ for ii = 2:length(t_mea)
 
     z_nas(ii,1) = sensorTot.nas.states(index_nas,3);
     vnorm_nas(ii,1) = norm(sensorTot.nas.states(index_nas,4:6));
-    vz_nas(ii,1) = sensorTot.nas.states(index_nas,6);
+    vz_nas(ii,1) = -sensorTot.nas.states(index_nas,6);
 
     % prediction
     x(ii,:) = (A*x(ii-1,:)' + B*u)'; % x is a row but to apply matrix product we need it column, therefore the transpositions
