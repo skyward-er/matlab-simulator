@@ -84,49 +84,56 @@ displayIter = true; % set to false if you don't want to see the iteration number
             stoch.aer_percentage = normrnd(mu_aer,sigma_aer,N_sim,1);
 
             %%% wind parameters
-            stoch.wind_params.altitudes = [0 3000];
-            stoch.wind_params.MagMin = [5 1.6];                                               % [m/s] Minimum Wind Magnitude
-            stoch.wind_params.MagMax = [7 1.6];                                               % [m/s] Maximum Wind Magnitude
-            stoch.wind_params.MagType = "g";
-            stoch.wind_params.ElMin  = + deg2rad([0 1.6]);
-            stoch.wind_params.ElMax  = + deg2rad([0 1.6]);
-            stoch.wind_params.ElType = "g";
-            stoch.wind_params.AzMin  = + deg2rad([0 0]);
-            stoch.wind_params.AzMax  = + deg2rad([360 360]);
-            stoch.wind_params.AzType = "u";
-
             wind = WindCustom(mission);
-
+            stoch.wind_params.altitudes = [0 3000];
             wind.altitudes = stoch.wind_params.altitudes;
+            
+            stoch.wind_params.MagType = "g";
             switch stoch.wind_params.MagType
                 case "u"
+                    stoch.wind_params.MagMin = [0 5];                   % [m/s] Minimum Wind Magnitude
+                    stoch.wind_params.MagMax = [4 9];                   % [m/s] Maximum Wind Magnitude
+
                     wind.magnitudeDistribution = repmat("u", size(wind.altitudes));
-                    wind.magnitudeParameters = [stoch.wind_params.MagMin' stoch.wind_params.MagMax'];
+                    wind.magnitudeParameters = [stoch.wind_params.MagMin; stoch.wind_params.MagMax];
                 case "g"
-                    % mu_Mag = (stoch.wind_params.MagMax + stoch.wind_params.MagMin) / 2;
-                    % sigma_Mag = (stoch.wind_params.MagMax - mu_Mag)/3;
+                    stoch.wind_params.MagMean = [5 7];                  % [m/s] Mean Wind Magnitude
+                    stoch.wind_params.MagStd = [1.6 1.6];               % [m/s] Wind Magnitude standard deviation
+
                     wind.magnitudeDistribution = repmat("g", size(wind.altitudes));
-                    wind.magnitudeParameters = [stoch.wind_params.MagMin' stoch.wind_params.MagMax'];
+                    wind.magnitudeParameters = [stoch.wind_params.MagMean; stoch.wind_params.MagStd];
             end
+
+            stoch.wind_params.ElType = "g";
             switch stoch.wind_params.ElType
                 case "u"
+                    stoch.wind_params.ElMin = [-5 -5];                 % [m/s] Minimum Wind Elevation
+                    stoch.wind_params.ElMax = [5 5];                   % [m/s] Maximum Wind Elevation
+
                     wind.elevationDistribution = repmat("u", size(wind.altitudes));
-                    wind.elevationParameters = [stoch.wind_params.ElMin' stoch.wind_params.ElMax'];
+                    wind.elevationParameters = [stoch.wind_params.ElMin; stoch.wind_params.ElMax];
                 case "g"
-                    % mu_El = (stoch.wind_params.ElMax + stoch.wind_params.ElMin) / 2;
-                    % sigma_El = (stoch.wind_params.ElMax - mu_El)/3;
+                    stoch.wind_params.ElMean = [0 0];                  % [m/s] Mean Wind Elevation
+                    stoch.wind_params.ElStd = [1.6 1.6];               % [m/s] Wind Elevation standard deviation
+
                     wind.elevationDistribution = repmat("g", size(wind.altitudes));
-                    wind.elevationParameters = [stoch.wind_params.ElMin' stoch.wind_params.ElMax'];
+                    wind.elevationParameters = [stoch.wind_params.ElMean; stoch.wind_params.ElStd];
             end
+
+            stoch.wind_params.AzType = "u";
             switch stoch.wind_params.AzType
                 case "u"
+                    stoch.wind_params.AzMin = + deg2rad([0 0]);                 % [m/s] Minimum Wind Azimuth
+                    stoch.wind_params.AzMax = + deg2rad([360 360]);             % [m/s] Maximum Wind Azimuth
+
                     wind.azimuthDistribution = repmat("u", size(wind.altitudes));
                     wind.azimuthParameters = [stoch.wind_params.AzMin; stoch.wind_params.AzMax];
                 case "g"
-                    % mu_Az = (stoch.wind_params.AzMax + stoch.wind_params.AzMin) / 2;
-                    % sigma_Az = (stoch.wind_params.AzMax - mu_Az)/3;
-                    wind.magnitudeDistribution = repmat("g", size(wind.altitudes));
-                    wind.magnitudeParameters = [stoch.wind_params.AzMin; stoch.wind_params.AzMax];
+                    stoch.wind_params.AzMean = deg2rad([180 180]);              % [m/s] Mean Wind magnitude
+                    stoch.wind_params.AzStd = deg2rad([45 45]);                 % [m/s] Wind Magnitude standard deviation
+
+                    wind.azimuthDistribution = repmat("g", size(wind.altitudes));
+                    wind.azimuthParameters = [stoch.wind_params.AzMean; stoch.wind_params.AzStd];
             end
 
             wind.updateAll();

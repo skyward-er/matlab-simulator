@@ -408,19 +408,37 @@ for alg_index = 4
             fprintf(fid,'WIND \n\n');
             fprintf(fid,'Wind model parameters: \n'); % inserisci tutti i parametri del vento
             fprintf(fid,'Wind altitudes: '+string(repmat('%.2f m ', [1 length(wind.altitudes)]))+"\n\n", wind.altitudes);
+
             for ii = 1:length(wind.altitudes)
                 fprintf(fid,'Wind magnitude distribution at %.2f m: \"%s\"\n', wind.altitudes(ii), string(wind.magnitudeDistribution(ii)));
-                fprintf(fid,'Wind magnitude parameters at %.2f m: %d-%d m/s\n',wind.altitudes(ii), stoch.wind_params.MagMin(ii), stoch.wind_params.MagMax(ii));
+                switch wind.magnitudeDistribution(ii)
+                    case "u"
+                        fprintf(fid,'Wind magnitude parameters at %.2f m: %d-%d m/s\n', wind.altitudes(ii), stoch.wind_params.MagMin(ii), stoch.wind_params.MagMax(ii));
+                    case "g"
+                        fprintf(fid,'Wind magnitude parameters at %.2f m: %d-%d m/s\n', wind.altitudes(ii), stoch.wind_params.MagMean(ii), stoch.wind_params.MagStd(ii));
+                end
             end
             fprintf(fid, '\n');
+
             for ii = 1:length(wind.altitudes)
                 fprintf(fid,'Wind azimuth distribution at %.2f m: \"%s\"\n', wind.altitudes(ii), string(wind.azimuthDistribution(ii)));
-                fprintf(fid,'Wind azimuth parameters at %.2f m: %d-%d [°] \n', wind.altitudes(ii), rad2deg(stoch.wind_params.AzMin(ii)), rad2deg(stoch.wind_params.AzMax(ii)));
+                switch wind.azimuthDistribution(ii)
+                    case "u"
+                        fprintf(fid,'Wind azimuth parameters at %.2f m: %d-%d [°] \n', wind.altitudes(ii), rad2deg(stoch.wind_params.AzMin(ii)), rad2deg(stoch.wind_params.AzMax(ii)));
+                    case "g"
+                        fprintf(fid,'Wind azimuth parameters at %.2f m: %d-%d m/s\n', wind.altitudes(ii), rad2deg(stoch.wind_params.AzMean(ii)), rad2deg(stoch.wind_params.AzStd(ii)));
+                end
             end
             fprintf(fid, '\n');
+
             for ii = 1:length(wind.altitudes)
                 fprintf(fid,'Wind elevation distribution at %.2f m: \"%s\"\n', wind.altitudes(ii), string(wind.elevationDistribution(ii)));
-                fprintf(fid,'Wind elevation parameters at %.2f m: %d-%d [°] \n', wind.altitudes(ii), rad2deg(stoch.wind_params.ElMin(ii)), rad2deg(stoch.wind_params.ElMax(ii)));
+                switch wind.elevationDistribution(ii)
+                    case "u"
+                        fprintf(fid,'Wind elevation parameters at %.2f m: %d-%d [°] \n', wind.altitudes(ii), rad2deg(stoch.wind_params.ElMin(ii)), rad2deg(stoch.wind_params.ElMax(ii)));
+                    case "g"
+                        fprintf(fid,'Wind elevation parameters at %.2f m: %d-%d [°] \n', wind.altitudes(ii), rad2deg(stoch.wind_params.ElMean(ii)), rad2deg(stoch.wind_params.ElStd(ii)));
+                end
             end
             fprintf(fid,'\n\n');
 

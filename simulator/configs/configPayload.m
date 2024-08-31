@@ -1,7 +1,7 @@
 %% payload constants
 % Target coordinates 
-x_target = -500;
-y_target = 500;
+x_target = 500;
+y_target = 200;
 z_target = 0;
 
 %% Target

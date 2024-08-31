@@ -365,11 +365,21 @@ ylabel('Apogee time cdf')
 title('Estimated final mass')
 
 %% parafoil
+
+deployment = zeros(N_sim, 2);
+
+for ii = 1:N_sim    
+    time_deployment = save_thrust{ii}.state_lastTimes(4);
+    idx_dep = sum(save_thrust{ii}.t <= time_deployment);
+    deployment(ii,:) = save_thrust{ii}.Y(idx_dep, 1:2);
+end
+
 %%%%%%%%%%%%%%%% landing position w.r.t. target
 montFigures.landing_ellipses = figure;
 scatter(landing.position(:,1),landing.position(:,2),'k.','DisplayName','Landings')
 hold on;
 scatter(settings.payload.target(1),settings.payload.target(2),'DisplayName','Target')
+scatter(deployment(:,1), deployment(:,2), 'g.', 'DisplayName', 'Deployment');
 drawCircle(settings.payload.target([1,2]),50,'+-50 meters','r')
 drawCircle(settings.payload.target([1,2]),150,'+-150 meters','b')
 xlabel('North [m]')
@@ -379,6 +389,19 @@ axis equal
 title('Landing positions')
 view([90,-90])
 legend
+
+%% Parafoil trajectories
+
+montFigures.prf_trajs = figure;
+for ii = 1:N_sim
+plot3(save_thrust{ii}.Y(idx_dep:end, 2), save_thrust{ii}.Y(idx_dep:end, 1), -save_thrust{ii}.Y(idx_dep:end, 3));
+hold on;
+end
+xlabel('East [m]')
+ylabel('North [m]')
+zlabel('Up [m]')
+axis equal
+title('Parafoil trajecotries')
 
 %% apogee velocity
 montFigures.apogee_velocity = figure;
