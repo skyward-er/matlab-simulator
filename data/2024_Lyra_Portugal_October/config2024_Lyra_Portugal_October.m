@@ -85,13 +85,15 @@ settings.servo.maxAngle = fix(settings.servo.maxAngle*1e9)/1e9; % to avoid compu
 
 %% NAS TUNING PARAMETERS
 settings.nas.dt_k          =   0.02;                                        % [s]        nas time step
-settings.nas.sigma_baro    =   500;                                          % [Pa]   estimated barometer variance    
+settings.nas.sigma_baro    =   50;                                          % [Pa]   estimated barometer variance    
 settings.nas.sigma_mag     =   10;                                          % [mgauss^2] estimated magnetometer variance    
 settings.nas.sigma_GPS     =   diag([0.002 0.002 0.01/30 0.01/30]);               % [millideg^2 m^2/s^2]     estimated GPS variance. position from test, velocity from datasheet
 settings.nas.sigma_w       =   10;                                          % [rad^2/s^2]   estimated gyroscope variance;
 settings.nas.sigma_beta    =   1e-4;                                        % [rad/s^2]   estimated gyroscope bias variance;
 settings.nas.sigma_pitot   =   20^2;    
 settings.nas.sigma_pitot2  =   0.1;    
+settings.nas.sigma_acc     = 0.05;                                          % [m/s^2]
+settings.nas.P             = 0.01*eye(12);
 
 settings.nas.Mach_max = 0.9;                                                % max mach number expected for the mission (for nas with pitot update purposes)
 
@@ -105,6 +107,7 @@ settings.nas.baro.a = 0.0065;
 settings.nas.baro.n = 5.255933;
 [settings.nas.baro.refTemperature,~,settings.nas.baro.refPressure] = computeAtmosphericData(0);
 settings.nas.stopPitotAltitude = 800;
+settings.nas.PitotThreshold = 50;                                       %[m/s]
 
 settings.nas.t_nas         =   -1;                                          % Apogee detection timestamp
 settings.nas.flag_apo      =   false;                                       % True when the apogee is detected
@@ -113,16 +116,21 @@ settings.nas.lat0          = environment.lat0;
 settings.nas.lon0          = environment.lon0;
 settings.nas.z0            = -environment.z0;
 settings.nas.spheroid      = wgs84Ellipsoid;
+settings.nas.ned_mag       = normalize(wrldmagm(-settings.nas.z0,settings.nas.lat0,settings.nas.lon0,2024.78));
+settings.nas.mag_decimate  = 50;                            % Perform mag correction once every 50 steps (1Hz)
 
+% for attitude correction with accelerometer in obsw
+settings.nas.acc1g_confidence = 0.5;            %[to verify]
+settings.nas.acc1g_samples = 20;
 
 % Process noise covariance matrix for the linear dynamics
 settings.nas.QLinear       =   0.005*...
                                  [4       0       0        0        0       0;
                                   0       4       0        0        0       0;
-                                  0       0       400      0        0       0;
+                                  0       0       4        0        0       0;
                                   0       0       0        2        0       0;
                                   0       0       0        0        2       0;
-                                  0       0       0        0        0       200];
+                                  0       0       0        0        0       2];
 
 % Process noise covariance matrix for the quaternion dynamics
 settings.nas.Qq              =   [(settings.nas.sigma_w^2*settings.nas.dt_k+(1/3)*settings.nas.sigma_beta^2*settings.nas.dt_k^3)*eye(3)          0.5*settings.nas.sigma_beta^2*settings.nas.dt_k^2*eye(3);

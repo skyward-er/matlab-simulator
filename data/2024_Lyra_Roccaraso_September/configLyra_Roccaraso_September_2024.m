@@ -91,6 +91,8 @@ settings.nas.sigma_w       =   10;                                       % [rad^
 settings.nas.sigma_beta    =   1e-4;                                    % [rad/s^2]   estimated gyroscope bias variance;
 settings.nas.sigma_pitot   =   20^2;    
 settings.nas.sigma_pitot2  =   0.1; 
+settings.nas.sigma_acc     =   0.05;                                    % [m/s^2]
+settings.nas.P             = 0.01*eye(12);
 
 settings.nas.Mach_max = 0.4; % max mach number expected for the mission (for nas with pitot update purposes) - not currently used
 settings.nas.GPS.a = 111132.95225;
@@ -104,7 +106,7 @@ settings.nas.baro.n = 5.255933;
 [settings.nas.baro.refTemperature,~,settings.nas.baro.refPressure] = computeAtmosphericData(0);
 
 settings.nas.stopPitotAltitude = 300;
-
+settings.nas.PitotThreshold = 50;                                       %[m/s]
 settings.nas.t_nas         =   -1;                                      % Apogee detection timestamp
 settings.nas.flag_apo      =   false;                                   % True when the apogee is detected
 
@@ -112,6 +114,12 @@ settings.nas.lat0          = environment.lat0;
 settings.nas.lon0          = environment.lon0;
 settings.nas.z0            = -environment.z0;
 settings.nas.spheroid      = wgs84Ellipsoid;
+settings.nas.ned_mag       = normalize(wrldmagm(-settings.nas.z0,settings.nas.lat0,settings.nas.lon0,2024.70));
+settings.nas.mag_decimate  = 50;                            % Perform mag correction once every 50 steps (1Hz)
+
+% for attitude correction with accelerometer in obsw
+settings.nas.acc1g_confidence = 0.5;            %[to verify]
+settings.nas.acc1g_samples = 20;
 
 % Process noise covariance matrix for the linear dynamics
 settings.nas.QLinear       =   0.005*...
