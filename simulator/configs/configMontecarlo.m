@@ -14,7 +14,7 @@ if settings.montecarlo
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % how many simulations
-N_sim = 128; % set to at least 500
+N_sim = 1000; % set to at least 500
 simulationType_thrust = "gaussian";  % "gaussian", "exterme"
 displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
 
@@ -114,7 +114,7 @@ displayIter = true; % set to false if you don't want to see the iteration number
                     wind.elevationParameters = [stoch.wind_params.ElMin; stoch.wind_params.ElMax];
                 case "g"
                     stoch.wind_params.ElMean = [0 0];                  % [m/s] Mean Wind Elevation
-                    stoch.wind_params.ElStd = [1.6 1.6];               % [m/s] Wind Elevation standard deviation
+                    stoch.wind_params.ElStd = deg2rad([1.6 1.6]);               % [m/s] Wind Elevation standard deviation
 
                     wind.elevationDistribution = repmat("g", size(wind.altitudes));
                     wind.elevationParameters = [stoch.wind_params.ElMean; stoch.wind_params.ElStd];
