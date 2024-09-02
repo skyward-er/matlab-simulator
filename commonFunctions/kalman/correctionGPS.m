@@ -60,7 +60,7 @@ H              =  [  H11*1000  H12*1000  0  0  0  0;                            
                                                                            %TAKING INTO ACCOUNT
                                                                            %NUMBER OF SATELITES
                                                                            %AVAILABLE
-R              =   sigma_GPS.*[1 1 max(1,vGPS)]; 
+R              =   sigma_GPS.*[1 1 max(30,abs(vGPS))]; 
                                                                            
 if fix==1    
 

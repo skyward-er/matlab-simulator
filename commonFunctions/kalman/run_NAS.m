@@ -181,7 +181,7 @@ if length(t_nas) > 1
         if settings.flagAscent && ~settings.nas.flagStopPitotCorrection
             index_pit   =  sum(t_nas(ii) >= t_pittemp);
             if index_pit~=sensorTot.pitot.lastindex
-                if sensorTot.pitot.airspeed(index_pit,:) > 50
+                if -x_lin(ii,3)-settings.nas.z0 < settings.nas.stopPitotAltitude && -x_lin(ii,6) > settings.nas.PitotThreshold
                     timestampPitotCorrection = t_nas;
                     % [x_lin(ii,:),P_lin(4:6,4:6,ii),~] = correctionPitot_pressures(x_lin(ii,:),P_lin(4:6,4:6,ii),sensorTot.pitot.total_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot,xq(ii,1:4),nas.Mach_max);
                     % [x_lin(ii,:),P_lin(4:6,4:6,ii),~] = correctionPitot_airspeed(x_lin(ii,:),P_lin(4:6,4:6,ii),sensorTot.pitot.airspeed(index_pit,:),nas.sigma_pitot2,settings.OMEGA);
