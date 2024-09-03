@@ -7,9 +7,6 @@
 %
 % check also export_HILdataPRF for parafoil HIL and software testing 
 
-switch mission.name
-   
-    case {"Gemini_Portugal_October_2023", "Gemini_Roccaraso_September_2023"}
         folder = "HIL_CPP_files_ABK";
         if ~exist(ConDataPath+"/"+folder,"dir")
             mkdir(ConDataPath+"/"+folder)
@@ -89,5 +86,3 @@ switch mission.name
         outputABK_export_table.Properties.VariableNames = ABK_varNames;
         writetable(outputABK_export_table,ConDataPath+"/"+folder+"/ABK_outputABK_"+mission.name+".csv")
         
-        
-end

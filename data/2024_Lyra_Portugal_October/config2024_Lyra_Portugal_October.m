@@ -178,13 +178,14 @@ settings.mea.K_t = 105.2;
 % covariance matrices
 settings.mea.Q                   = eye(3);                      % model noise covariance matrix    
 settings.mea.R                   = 0.36; 
+settings.mea.P0_mat = diag([0 0 0.36^2]);
 
 % shut down prediction altitude
 settings.mea.z_shutdown          = 3200;                                    % [m] target apogee prediction for shutdown
 settings.mea.t_lower_shadowmode  = 0;                                       % minimunm burning time
 settings.mea.t_higher_shadowmode = 10;                                      % maximum burning time
 settings.shutdownValveDelay      = 0.2;                                     % time from the shut down command to the actual valve closure
-
+settings.mea.cd_correction_factor = 2.69;
 % accelerometer correction parameters
 [~,~,settings.mea.P0] = computeAtmosphericData(103);     %[Pa] reference pressure at the SFT location
 settings.mea.acc_threshold = 40;           %[m/s^2] minimum acceleration to perform correction with accelerometer

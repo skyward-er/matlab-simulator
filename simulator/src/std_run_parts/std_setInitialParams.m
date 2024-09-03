@@ -161,7 +161,7 @@ if settings.flagNAS || settings.electronics
     else
         sensorData.nas.states(3) = -settings.z_final-environment.z0;
     end
-    sensorData.nas.P = 0.01*eye(12);
+    sensorData.nas.P = settings.nas.P;
 end
 sensorData.nas.time = 0;
 % stop correction with pitot
@@ -170,7 +170,7 @@ settings.nas.flagStopPitotCorrection = false;
 %% MEA PARAMETERS (mass estimation algorithm) 
 sensorData.mea.x = [0,0,rocket.mass(1)];     % initial state estimate
 sensorData.mea.estimated_mass(1) = rocket.mass(1);
-sensorData.mea.P = diag([0 0 0.36^2]);          % initial value for P
+sensorData.mea.P = settings.mea.P0_mat;          % initial value for P
 sensorData.mea.P_acc = diag([0 0 0.36^2]);
 sensorData.mea.time = 0;
 sensorData.mea.estimated_mass = rocket.mass(1);
