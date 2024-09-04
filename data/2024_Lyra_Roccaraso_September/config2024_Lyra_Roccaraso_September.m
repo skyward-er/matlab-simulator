@@ -59,7 +59,7 @@ settings.arb.extPol(1) = -0.009083;                                         % co
 settings.arb.extPol(2) = 0.02473;                                           % coefficient for extension - alpha^3
 settings.arb.extPol(3) = -0.01677;                                          % coefficient for extension - alpha^2
 settings.arb.extPol(4) = 0.03129;                                           % coefficient for extension - alpha
-settings.arb.maxExt = settings.hprot(end);
+settings.arb.maxExt = rocket.airbrakes.height(end);
 
 % servo angle to exposed surface of the airbrakes (GEMINI)
 settings.arb.surfPol = 0.00932857142857;                                    % coefficient for surface - alpha
@@ -78,7 +78,7 @@ settings.arb.R = 66e-3;                                                     % tr
 x = @(alpha) settings.arb.extPol(1)*alpha.^4 + ...
     settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + ...
     settings.arb.extPol(4).*alpha;
-fun = @(alpha) x(alpha) - settings.hprot(end);
+fun = @(alpha) x(alpha) - settings.arb.maxExt;
 settings.servo.maxAngle = fzero(fun, deg2rad(50));
 settings.servo.maxAngle = fix(settings.servo.maxAngle*1e9)/1e9; % to avoid computational error propagation (truncates the angle to the ninth decimal)
 
@@ -104,9 +104,9 @@ settings.nas.counter       =   0;
 settings.nas.baro.a = 0.0065;
 settings.nas.baro.n = 5.255933;
 [settings.nas.baro.refTemperature,~,settings.nas.baro.refPressure] = computeAtmosphericData(0);
-
 settings.nas.stopPitotAltitude = 300;
 settings.nas.PitotThreshold = 50;                                       %[m/s]
+
 settings.nas.t_nas         =   -1;                                      % Apogee detection timestamp
 settings.nas.flag_apo      =   false;                                   % True when the apogee is detected
 
@@ -150,7 +150,7 @@ settings.ada.a0          =   -100;                                         % Acc
 settings.ada.x0          =  [settings.ada.p_ref, settings.ada.v0, settings.ada.a0];         
                                                                            % Ada initial condition
 
-settings.ada.v_thr       =   2.5;                                          % Velocity threshold for the detected apogee
+settings.ada.v_thr       =   0;                                          % Velocity threshold for the detected apogee
 settings.ada.count_thr   =   5;                                            % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.ada.counter     =   0;
 settings.ada.altitude_confidence_thr = 5;                                   % If the ada recognizes altitude_confidence_thr samples under parachute cutting altitude, it sends the command
@@ -159,6 +159,12 @@ settings.ada.t_ada       =   -1;                                           % Apo
 settings.ada.flag_apo    =   false;                                        % True when the apogee is detected
 
 settings.ada.shadowmode = 10;
+
+if ~settings.parafoil
+    settings.ada.para.z_cut  = rocket.parachutes(1,1).finalAltitude;
+else
+    settings.ada.para.z_cut  = rocket.parachutes(1,2).finalAltitude;
+end
 
 %% MEA TUNING PARAMETERS / MOTOR SHUT DOWN TUNING PARAMETERS
 settings.mea.engine_model_A1     = [1.62583090191848 -0.680722129751093	0; 1 0 0; -0.00102053146869855 0.000494919888520664 1];
@@ -186,5 +192,5 @@ Rs = 1.0e+03*[0.4771    1.4391];
 % variable variance coefficients for accelerometer
 settings.mea.alpha = (Rs(2) - Rs(1))/(100^2-30^2);
 settings.mea.c = -settings.mea.alpha*30^2+Rs(1); 
-settings.mea.mass_interval = [settings.ms; settings.m0];
+settings.mea.mass_interval = [25; 35];
 
