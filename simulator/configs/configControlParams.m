@@ -200,5 +200,5 @@ switch mission.name
 end
 
 % quantities independent from mission
-settings.CD_correction_ref =0.80; % same, but for the trajectory generation.
+settings.CD_correction_ref = 1; % same, but for the trajectory generation.
 settings.CD_correction_shutDown =1; % cd correction for engine shutdown

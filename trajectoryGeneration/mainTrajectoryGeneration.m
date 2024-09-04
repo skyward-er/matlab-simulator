@@ -58,6 +58,8 @@ conf.script = "trajectory generation"; % this defines which configuration script
 settings.montecarlo = false;
 configSimulator;
 
+fprintf('Check settings.flagFlightRef value: %d \n', settings.flagFlightRef)
+
 %% AIRBRAKES RADIAL EXTENSION
 % Airbrakes extension vector
 delta_alpha_values  = linspace(settings.servo.minAngle,settings.servo.maxAngle,2);
@@ -93,7 +95,12 @@ settings.constWind = [uw, vw, ww];
 Z_initial = 0;
 
 %% INTERPOLATED CA
-coeffsCA = load(strcat(commonPath, '/missions/', mission.name, '/data/CAinterpCoeffs.mat'));
+if settings.flagFlightRef
+    coeffsCA = load(strcat(commonPath, '/missions/', mission.name, '/data/CAinterpCoeffsCFD.mat'));
+else
+    coeffsCA = load(strcat(commonPath, '/missions/', mission.name, '/data/CAinterpCoeffs.mat'));
+end
+
 
 %% NEEDED PARAMETERS
 
@@ -154,14 +161,18 @@ if ~settings.save
 end
 
 if settings.save
-    save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
+    if settings.flagFlightRef
+        save(strcat(ConDataPath, '/TrajectoriesCFD.mat'), 'trajectories_saving')
+    else
+        save(strcat(ConDataPath, '/Trajectories.mat'), 'trajectories_saving')
+    end
 end
 
-if settings.CD_correction_ref == 1
-    save traj0perc.mat trajectories_saving
-elseif settings.CD_correction_ref == 0.75
-    save traj-25perc.mat trajectories_saving
-end
+% if settings.CD_correction_ref == 1
+%     save traj0perc.mat trajectories_saving
+% elseif settings.CD_correction_ref == 0.75
+%     save traj-25perc.mat trajectories_saving
+% end
 %% PLOT
 if settings.plots
     tg_plots
@@ -177,30 +188,30 @@ warning on
 return
 
 %% hybrid references
-if settings.CD_correction_ref == 1
-    datcom_0_closed = trajectories_saving{1,end};
-    datcom_0_open = trajectories_saving{2,end};
-    save plot0 datcom_0_closed datcom_0_open
-elseif settings.CD_correction_ref == 0.75
-    datcom_25_closed = trajectories_saving{1,end};
-    datcom_25_open = trajectories_saving{2,end};
-    save plot25 datcom_25_closed datcom_25_open
-end
+% if settings.CD_correction_ref == 1
+%     datcom_0_closed = trajectories_saving{1,end};
+%     datcom_0_open = trajectories_saving{2,end};
+%     save plot0 datcom_0_closed datcom_0_open
+% elseif settings.CD_correction_ref == 0.75
+%     datcom_25_closed = trajectories_saving{1,end};
+%     datcom_25_open = trajectories_saving{2,end};
+%     save plot25 datcom_25_closed datcom_25_open
+% end
 %%
-clearvars; close all; clc;
-
-load plot0
-load plot25
-
-figure('Position',[100,100,600,600])
-hold on;
-grid on;
-plot(datcom_0_open.Z_ref,datcom_0_open.VZ_ref,'k','DisplayName','datcom')
-plot(datcom_0_closed.Z_ref,datcom_0_closed.VZ_ref,'k',"HandleVisibility","off")
-
-plot(datcom_25_open.Z_ref,datcom_25_open.VZ_ref,'b','DisplayName','datcom-25')
-plot(datcom_25_closed.Z_ref,datcom_25_closed.VZ_ref,'b',"HandleVisibility","off")
-legend
+% clearvars; close all; clc;
+% 
+% load plot0
+% load plot25
+% 
+% figure('Position',[100,100,600,600])
+% hold on;
+% grid on;
+% plot(datcom_0_open.Z_ref,datcom_0_open.VZ_ref,'k','DisplayName','datcom')
+% plot(datcom_0_closed.Z_ref,datcom_0_closed.VZ_ref,'k',"HandleVisibility","off")
+% 
+% plot(datcom_25_open.Z_ref,datcom_25_open.VZ_ref,'b','DisplayName','datcom-25')
+% plot(datcom_25_closed.Z_ref,datcom_25_closed.VZ_ref,'b',"HandleVisibility","off")
+% legend
 
 
 

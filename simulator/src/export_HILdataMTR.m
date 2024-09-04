@@ -9,7 +9,8 @@
 
         % first file: aerodynamic coefficients
         load CAinterpCoeffsCFD.mat
-        CD_coefficients  = [n000, n100, n200, n300, n400, n500, n600];
+        CD_coefficients  = [coeffs.n000, coeffs.n100, coeffs.n200, coeffs.n300,...
+            coeffs.n400, coeffs.n500, coeffs.n600];
         CD_coeff_table = table; 
         varNames = {'n000','n100','n200','n300','n400','n500','n600'};
         for i = 1:size(CD_coefficients,2)

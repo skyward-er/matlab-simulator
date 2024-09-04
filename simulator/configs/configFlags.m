@@ -27,8 +27,8 @@ scenarios explanation:
 
 
 % scenario configuration
-conf.scenario = "full flight";
-conf.board = "payload";            % Either "main" or "payload"
+conf.scenario = "controlled ascent";
+conf.board = "main";            % Either "main" or "payload"
 conf.HIL = false;
 
 % WIP flags
@@ -50,9 +50,10 @@ settings.identification = false;
 % EXPORT GRAPHICS (from simulations)
 settings.flagExportPLOTS = false;
 
-% export csv files for CPP implementation?
+% export csv files for CPP implementation
 settings.flagExportCSV = false;
-
+% generate reference for abk flight using CFD data
+settings.flagFlightRef = true;
 
 
 %% ------------------------------- don't modify unless you really know what you are doing, touch only the flags before this line ---------------------------- %%
