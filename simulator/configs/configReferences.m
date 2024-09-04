@@ -11,10 +11,13 @@ called reference
 %}
 
 %% LOAD TRAJECTORIES
-struct_trajectories = load(strcat(ConDataPath, '/Trajectories.mat'));
-contSettings.data_trajectories = struct_trajectories.trajectories_saving;
-
-
+if settings.flagFlightRef
+    struct_trajectories = load(strcat(ConDataPath, '/TrajectoriesCFD.mat'));
+    contSettings.data_trajectories = struct_trajectories.trajectories_saving;
+else
+    struct_trajectories = load(strcat(ConDataPath, '/Trajectories.mat'));
+    contSettings.data_trajectories = struct_trajectories.trajectories_saving;
+end
 %% LOAD REFERENCES
 % select the trajectories for the rocket used in the simulation
 switch mission.name

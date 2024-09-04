@@ -53,7 +53,7 @@ settings.flagExportPLOTS = false;
 % export csv files for CPP implementation
 settings.flagExportCSV = false;
 % generate reference for abk flight using CFD data
-settings.flagFlightRef = true;
+settings.flagFlightRef = false;
 
 
 %% ------------------------------- don't modify unless you really know what you are doing, touch only the flags before this line ---------------------------- %%
