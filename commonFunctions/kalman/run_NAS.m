@@ -173,7 +173,11 @@ if length(t_nas) > 1
         [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometer(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar),nas.sigma_baro,nas.baro,environment.z0);
 
         % magnetometer
-        [xq(ii,:),P_q(:,:,ii),~,~]        = correctorQuat(xq(ii,:),P_q(:,:,ii),sensorTot.imu.magnetometer_measures(index_imu,:),nas.sigma_mag,mag_NED);
+
+        if round(t_nas(ii) - sensorTot.nas.timestampMagnetometerCorrection, 6) >= 1/nas.mag_freq
+            [xq(ii,:),P_q(:,:,ii),~,~]        = correctorQuat(xq(ii,:),P_q(:,:,ii),sensorTot.imu.magnetometer_measures(index_imu,:),nas.sigma_mag,mag_NED);
+            sensorTot.nas.timestampMagnetometerCorrection = t_nas(ii);
+        end
 
         % reintroduce pitot
         % pitot

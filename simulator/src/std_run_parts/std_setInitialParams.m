@@ -166,6 +166,7 @@ end
 sensorData.nas.time = 0;
 % stop correction with pitot
 settings.nas.flagStopPitotCorrection = false;
+settings.nas.mag_freq = settings.frequencies.NASFrequency/settings.nas.mag_decimate;
 
 %% MEA PARAMETERS (mass estimation algorithm) 
 sensorData.mea.x = [0,0,rocket.mass(1)];     % initial state estimate
@@ -206,6 +207,7 @@ sensorTot.pitot.temperature                     =   288.15;
 sensorTot.pitot.airspeed                        =   0;
 sensorTot.nas.states                            =   sensorData.nas.states;
 sensorTot.nas.timestampPitotCorrection          =   nan;
+sensorTot.nas.timestampMagnetometerCorrection   =   0;
 sensorTot.mea.pressure                          =   0; %it's a differential pressure sensor
 sensorTot.mea.mass                              =   rocket.motor.mass(1);
 sensorTot.mea.prediction                        =   0;
