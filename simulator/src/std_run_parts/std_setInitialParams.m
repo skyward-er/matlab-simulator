@@ -244,3 +244,11 @@ sensorTot.mea.n_old = 2;
 sensorTot.sfd.n_old = 2;
 sensorTot.gps.lastindex = 0;
 sensorTot.pitot.lastindex = 0;
+
+% initialization params
+flagFlight = false;
+flagBurning = false;
+flagAeroBrakes = false;
+flagApogee = false;
+flagPara1 = false;
+flagPara2 = false;
