@@ -52,7 +52,8 @@ OUTPUTS:
     end
 
     dataToBeSent.staticPressure = sensorData.pitot.pStatMeasures(1:num_data_pitot);
-    dataToBeSent.dynamicPressure = sensorData.pitot.pTotMeasures(1:num_data_pitot);
+    dataToBeSent.dynamicPressure = sensorData.pitot.pTotMeasures(1:num_data_pitot) - sensorData.pitot.pStatMeasures(1:num_data_pitot);
+
 
     dataToBeSent.temperature = sensorData.barometer_sens{1}.temperature(1);
 

@@ -93,7 +93,7 @@ OUTPUTS:
 
     dataToBeSent.payload.pitot.staticPressure = sensorData.pitot.pStatMeasures(1:num_data_pitot);
 
-    dataToBeSent.payload.pitot.dynamicPressure = sensorData.pitot.pTotMeasures(1:num_data_pitot);
+    dataToBeSent.payload.pitot.dynamicPressure = sensorData.pitot.pTotMeasures(1:num_data_pitot) - sensorData.pitot.pStatMeasures(1:num_data_pitot);
 
     dataToBeSent.payload.temperature = sensorData.barometer_sens{1}.temperature(1);
 
