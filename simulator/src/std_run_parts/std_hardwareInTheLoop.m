@@ -122,8 +122,6 @@ if isfield(hilData, "mea")
         settings.shutdown = true;
         settings.t_shutdown = settings.expTimeEngineCut;
         settings.timeEngineCut = settings.t_shutdown;
-        settings.expMengineCut = settings.parout.m(end) - settings.ms;
-        settings = settingsEngineCut(settings, engineT0);
         settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
         [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
         sensorTot.mea.t_shutdown = settings.t_shutdown; % to pass the value out of the std_run to the structOut
@@ -174,7 +172,7 @@ end
 
 %% Update Airbrakes data
 if isfield(hilData, "abk")
-    if flagAeroBrakes && mach < settings.MachControl
+    if flagAeroBrakes && mach < rocket.airbrakes.maxMach
         if contSettings.flagFirstControlABK % set in
             t_airbrakes = t0;
             t_last_arb_control = t0;
