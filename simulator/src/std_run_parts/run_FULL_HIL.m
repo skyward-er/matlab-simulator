@@ -143,17 +143,17 @@ OUTPUTS:
     actuatorData.ada.verticalSpeed = obswVals(3);
     actuatorData.ada.apogeeDetected = obswVals(4);
     actuatorData.ada.updating = obswVals(5);
-    % actuatorData.nas.n = obswVals(6);
-    % actuatorData.nas.e = obswVals(7);
-    % actuatorData.nas.d = obswVals(8);
-    % actuatorData.nas.vn = obswVals(9);
-    % actuatorData.nas.ve = obswVals(10);
-    % actuatorData.nas.vd = obswVals(11);
-    % actuatorData.nas.qx = obswVals(12);
-    % actuatorData.nas.qy = obswVals(13);
-    % actuatorData.nas.qz = obswVals(14);
-    % actuatorData.nas.qw = obswVals(15);
-    % actuatorData.nas.updating = obswVals(16);
+     actuatorData.nas.n = obswVals(6);
+     actuatorData.nas.e = obswVals(7);
+     actuatorData.nas.d = obswVals(8);
+     actuatorData.nas.vn = obswVals(9);
+     actuatorData.nas.ve = obswVals(10);
+     actuatorData.nas.vd = obswVals(11);
+     actuatorData.nas.qx = obswVals(12);
+     actuatorData.nas.qy = obswVals(13);
+     actuatorData.nas.qz = obswVals(14);
+     actuatorData.nas.qw = obswVals(15);
+     actuatorData.nas.updating = obswVals(16);
     actuatorData.abk.updating = obswVals(17);
     actuatorData.mea.correctedPressure = obswVals(18);
     actuatorData.mea.estimatedMass = obswVals(19);
@@ -166,29 +166,27 @@ OUTPUTS:
     actuatorData.actuators.mainCutterState = obswVals(26);
 
     % Receive data from serial comunication for payload
-    obswVals = serialbridge('Read','payload', 21);
+    obswVals = serialbridge('Read','payload', 19);
 
-    actuatorData.nas.n = obswVals(1);
-    actuatorData.nas.e = obswVals(2);
-    actuatorData.nas.d = obswVals(3);
-    actuatorData.nas.vn = obswVals(4);
-    actuatorData.nas.ve = obswVals(5);
-    actuatorData.nas.vd = obswVals(6);
-    actuatorData.nas.qx = obswVals(7);
-    actuatorData.nas.qy = obswVals(8);
-    actuatorData.nas.qz = obswVals(9);
-    actuatorData.nas.qw = obswVals(10);
-    actuatorData.nas.updating = obswVals(11);
+    % actuatorData.nas.n = obswVals(1);
+    %actuatorData.nas.e = obswVals(2);
+    %actuatorData.nas.d = obswVals(3);
+    %actuatorData.nas.vn = obswVals(4);
+    %actuatorData.nas.ve = obswVals(5);
+    %actuatorData.nas.vd = obswVals(6);
+    %actuatorData.nas.qx = obswVals(7);
+    %actuatorData.nas.qy = obswVals(8);
+    %actuatorData.nas.qz = obswVals(9);
+    %actuatorData.nas.qw = obswVals(10);
+    % actuatorData.nas.updating = obswVals(11);
     actuatorData.actuators.parafoilLeftPercentage = obswVals(12);
     actuatorData.actuators.parafoilRightPercentage = obswVals(13);
     actuatorData.actuators.cutterState = obswVals(14);
-    actuatorData.wes.windX = obswVals(15);
-    actuatorData.wes.windY = obswVals(16);
-    actuatorData.guidance.psiRef = obswVals(17);
-    actuatorData.guidance.deltaA = obswVals(18);
-    actuatorData.guidance.currentTargetN = obswVals(19);
-    actuatorData.guidance.currentTargetE = obswVals(20);
-    % actuatorData.signal = obswVals(21);
+    actuatorData.guidance.psiRef = obswVals(15);
+    actuatorData.guidance.deltaA = obswVals(16);
+    actuatorData.guidance.currentTargetN = obswVals(17);
+    actuatorData.guidance.currentTargetE = obswVals(18);
+    % actuatorData.signal = obswVals(19);
 
     % Receive data from serial comunication for motor
     obswVals = serialbridge('Read','motor', 2);
@@ -212,7 +210,7 @@ OUTPUTS:
     hilData.nas.updating = actuatorData.nas.updating; 
     hilData.ada = actuatorData.ada;
     hilData.mea = actuatorData.mea;
-    hilData.wes = [actuatorData.wes.windX actuatorData.wes.windY];
+    hilData.wes = [0 0];
     hilData.gnc = actuatorData.guidance;
     hilData.actuators = actuatorData.actuators;
 end

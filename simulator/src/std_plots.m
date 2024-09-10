@@ -198,8 +198,10 @@ if settings.parafoil  && (settings.scenario == "descent" || settings.scenario ==
     xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
 xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
+try
 xline(min(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Start pitot correction')
 xline(max(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Stop pitot correction')
+end
 ylabel('V_x [m/s]');
 legend
 %
@@ -214,8 +216,10 @@ if settings.parafoil  && (settings.scenario == "descent" || settings.scenario ==
     xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
 xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
+try
 xline(min(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Start pitot correction')
 xline(max(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Stop pitot correction')
+end
 ylabel('V_y [m/s]');
 legend
 %
@@ -230,8 +234,10 @@ if settings.parafoil  && (settings.scenario == "descent" || settings.scenario ==
     xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
 xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
+try
 xline(min(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Start pitot correction')
 xline(max(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Stop pitot correction')
+end
 xlabel('Time [s]');
 ylabel('V_z [m/s]');
 sgtitle('Velocities BODY');

@@ -27,8 +27,8 @@ scenarios explanation:
 
 
 % scenario configuration
-conf.scenario = "controlled ascent";
-conf.board = "main";            % Either "main" or "payload" or "full_hil"
+conf.scenario = "full flight";
+settings.board = "main";            % Either "main" or "payload" or "full_hil"
 conf.HIL = false;
 
 % WIP flags

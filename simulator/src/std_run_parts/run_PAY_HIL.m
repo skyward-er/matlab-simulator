@@ -73,7 +73,7 @@ OUTPUTS:
 
     % waiting for the response of the obsw
     % Receive data from serial comunication
-    obswVals = serialbridge('Read','payload', 21);
+    obswVals = serialbridge('Read','payload', 19);
 
     actuatorData.nas.n = obswVals(1);
     actuatorData.nas.e = obswVals(2);
@@ -89,13 +89,11 @@ OUTPUTS:
     actuatorData.actuators.parafoilLeftPercentage = obswVals(12);
     actuatorData.actuators.parafoilRightPercentage = obswVals(13);
     actuatorData.actuators.cutterState = obswVals(14);
-    actuatorData.wes.windX = obswVals(15);
-    actuatorData.wes.windY = obswVals(16);
-    actuatorData.guidance.psiRef = obswVals(17);
-    actuatorData.guidance.deltaA = obswVals(18);
-    actuatorData.guidance.currentTargetN = obswVals(19);
-    actuatorData.guidance.currentTargetE = obswVals(20);
-    actuatorData.signal = obswVals(21);
+    actuatorData.guidance.psiRef = obswVals(15);
+    actuatorData.guidance.deltaA = obswVals(16);
+    actuatorData.guidance.currentTargetN = obswVals(17);
+    actuatorData.guidance.currentTargetE = obswVals(18);
+    actuatorData.signal = obswVals(19);
 
     % if the obsw sets flagFlight to true while the flag isLaunch is still
     % false, triggers the liftoff
@@ -116,7 +114,7 @@ OUTPUTS:
                          actuatorData.nas.qw, 0, 0, 0]; % Bias is not sent so is set to zero
     hilData.nas.updating = actuatorData.nas.updating;
     hilData.actuators = actuatorData.actuators;
-    hilData.wes = [actuatorData.wes.windX actuatorData.wes.windY];
+    hilData.wes = [0 0];
     hilData.gnc = actuatorData.guidance;
     hilData.signal = actuatorData.signal;
 end
