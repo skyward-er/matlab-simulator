@@ -216,6 +216,10 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                 if ~settings.montecarlo
                     disp("Transition to powered ascent")
                 end
+            elseif flagApogee
+                error("CRITICAL FAILURE: Expulsion on ground!");
+            elseif flagOpenPara
+                error("CRITICAL FAILURE: Cutter on ground!");                
             end
         case availableStates.powered_ascent
 
@@ -233,6 +237,10 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                 if ~settings.montecarlo
                     disp("Transition to unpowered ascent");
                 end
+            elseif flagApogee
+                error("CRITICAL FAILURE: Expulsion in powered ascent!");
+            elseif flagOpenPara
+                error("CRITICAL FAILURE: Cutter in powered ascent!");                
             end
         case availableStates.unpowered_ascent
 
@@ -254,6 +262,8 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                 if ~settings.montecarlo
                     disp("Requested transition to drogue descent");
                 end
+            elseif flagOpenPara
+                error("CRITICAL FAILURE: Cutter on unpowered ascent!");                
             elseif -Y0(end,3) < -1
                 % Exit condition of unpowered_ascent / Entry condition of landed:
                 flagAeroBrakes = false;
