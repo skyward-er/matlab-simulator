@@ -109,7 +109,7 @@ switch mission.name
         end
     case '2024_Lyra_Roccaraso_September'
 
-        load("Trajectories.mat")
+        load("TrajectoriesCFD.mat")
         for i = 1:size(trajectories_saving,1)
             for j = 1:size(trajectories_saving,2)
                 reference.vz_ref{i,j} = trajectories_saving{i,j}.VZ_ref;

@@ -33,7 +33,7 @@ addpath(genpath(commonFunctionsPath))
 
 
 %% AEROBRAKES EXTENSION DISCRETIZATION
-settings.Ndx = 10;                                % [m] Number of trajectories
+settings.Ndx = 2;                                % [m] Number of trajectories
 
 %% FINAL VERTICAL VELOCITY
 settings.Vz_initialPerc = 0.05;                   % [-] Percentage of increasing the initial vertical velocity

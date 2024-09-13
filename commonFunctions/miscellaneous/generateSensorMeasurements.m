@@ -76,8 +76,13 @@ if length(sensorData.gps.time)>1
     sensorData.gps.positionMeasures(2:end, :) = ...
         interp1(TfGPS,[Y(:,1:2),-Y(:,3)+environment.z0],sensorData.gps.time(2:end));
     vel = interp1(TfGPS,Y(:,4:6),sensorData.gps.time(2:end));
-    quat = interp1(TfGPS,Y(:,10:13),sensorData.gps.time(2:end));
-    sensorData.gps.velocityMeasures(2:end, :) = quatrotate(quatconj(quat),vel);
+    if currentState ~= availableStates.drogue_descent && currentState ~= availableStates.parachute_descent
+
+        quat = interp1(TfGPS,Y(:,10:13),sensorData.gps.time(2:end));
+        sensorData.gps.velocityMeasures(2:end, :) = quatrotate(quatconj(quat),vel);
+    else
+        sensorData.gps.velocityMeasures(2:end,:) = vel;
+    end
 end
 % check for nan
 if any(isnan(sensorData.gps.positionMeasures))
@@ -113,14 +118,14 @@ if isfield(freq, 'pitotFrequency')
     sensorData.pitot.pStatMeasures = zeros(size(sensorData.pitot.time,1),1);
     sensorData.pitot.pDynMeasures = zeros(size(sensorData.pitot.time,1),1);
     sensorData.pitot.temperature = zeros(size(sensorData.pitot.time,1),1);
-    
+
     sensorData.pitot.airspeed = zeros(size(sensorData.pitot.time,1),1);
     sensorData.pitot.pTotMeasures(1) = sensorTot.pitot.total_pressure(end);
     sensorData.pitot.pStatMeasures(1) = sensorTot.pitot.static_pressure(end);
     sensorData.pitot.pDynMeasures(1) = sensorTot.pitot.total_pressure(end) - sensorTot.pitot.static_pressure(end);
     sensorData.pitot.temperature(1) = sensorTot.pitot.temperature(end);
     if length(sensorData.pitot.time)>1
-        TfPitot =  round(Tf*1e4)/1e4;  
+        TfPitot =  round(Tf*1e4)/1e4;
         z = -interp1(TfPitot,Y(:,3),sensorData.pitot.time(2:end)) + environment.z0;
         v = interp1(TfPitot,Y(:,4),sensorData.pitot.time(2:end));
         Q = interp1(TfPitot,Y(:,10:13),sensorData.pitot.time(2:end));
@@ -146,7 +151,7 @@ if (contains(mission.name,'2023') || contains(mission.name,'2024')) && currentSt
     if length(sensorData.chamberPressure.time) >1
         sensorData.chamberPressure.measures(2:end)= interp1(rocket.motor.time, rocket.motor.thrust,sensorData.chamberPressure.time(2:end)-engineT0)/settings.motor.K;
     end
-else 
+else
     sensorData.chamberPressure.time = (sensorTot.comb_chamber.time(end):1/freq.chamberPressureFrequency:Tf(end))';
     sensorData.chamberPressure.measures = zeros(size(sensorData.chamberPressure.time,1),1);
 end

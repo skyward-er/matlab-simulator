@@ -11,7 +11,7 @@ All the parameters are stored in the "contSetting" structure.
  %}
 
 %% LOAD CD COEFFICIENTS
-data = load(strcat(mission.dataPath, '/CAinterpCoeffs'));
+data = load(strcat(mission.dataPath, '/CAinterpCoeffsCFD'));
 contSettings.coeff_Cd = data.coeffs;
 
 %% CONTROL PARAMETERS

@@ -10,26 +10,26 @@ montecarlo settings
 % settings.stoch.Day;
 % settings.stoch.Hour;
 
-if settings.montecarlo 
+if settings.montecarlo
 
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% how many simulations
-N_sim = 1000; % set to at least 500
-simulationType_thrust = "gaussian";  % "gaussian", "exterme"
-displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
-
-
+    %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % how many simulations
+    N_sim = 500; % set to at least 500
+    simulationType_thrust = "gaussian";  % "gaussian", "exterme"
+    displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% %%%%%%%%%%%%%%%%% untouchable parameters (unless you know really well what you are doing) %%%%%%%%%%%%%%%
-%% stochastic parameters
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    %% %%%%%%%%%%%%%%%%% untouchable parameters (unless you know really well what you are doing) %%%%%%%%%%%%%%%
+    %% stochastic parameters
 
     switch simulationType_thrust
 
         case "gaussian"
-            
+
             %%% thrust uncertainty
             sigma_t = 3.3/100;             % thrust_percentage standard deviation
             mu_t = 1;                         % thrust_percentage mean value
@@ -37,7 +37,7 @@ displayIter = true; % set to false if you don't want to see the iteration number
             thrust_percentage = normrnd(mu_t,sigma_t,N_sim,1);       %generate normally distributed values ( [0.8 1.20] = 3sigma) % serve il toolbox
             stoch.thrust = thrust_percentage*rocket.motor.thrust;                  % thrust - the notation used creates a matrix where each row is the expThrust multiplied by one coefficient in the thrust percentage array
 
-            
+
             %%% in questo modo però il burning time rimane fissato perchè è
             %%% settato al'interno di simulationData.m -> possibili errori per
             %%% le simulazioni con exp_thrust aumentato se si vuole fare
@@ -50,7 +50,7 @@ displayIter = true; % set to false if you don't want to see the iteration number
 
             impulse_uncertainty = normrnd(1,1.67/100,N_sim,1);
             stoch.expTime = diag(impulse_uncertainty)*((1./thrust_percentage) * rocket.motor.time);          % burning time - same notation as thrust here
-            
+
             for ii = 1:N_sim
                 if stoch.expTime(ii, end) <= rocket.motor.time(end)
                     continue
@@ -71,7 +71,7 @@ displayIter = true; % set to false if you don't want to see the iteration number
 
                 stoch.expTime(ii, :) = padTime;
             end
-            
+
             %%%
             for i =1:N_sim
                 stoch.State.xcgTime(:,i) =  rocket.coefficients.state.xcgTime/rocket.motor.time(end) .* stoch.expTime(i,end);  % Xcg time
@@ -85,9 +85,9 @@ displayIter = true; % set to false if you don't want to see the iteration number
 
             %%% wind parameters
             wind = WindCustom(mission);
-            stoch.wind_params.altitudes = [0 3000];
+            stoch.wind_params.altitudes = [0 500 800 1000 1200 1500];
             wind.altitudes = stoch.wind_params.altitudes;
-            
+
             stoch.wind_params.MagType = "g";
             switch stoch.wind_params.MagType
                 case "u"
@@ -97,18 +97,34 @@ displayIter = true; % set to false if you don't want to see the iteration number
                     wind.magnitudeDistribution = repmat("u", size(wind.altitudes));
                     wind.magnitudeParameters = [stoch.wind_params.MagMin; stoch.wind_params.MagMax];
                 case "g"
-                    stoch.wind_params.MagMean = [5 7];                  % [m/s] Mean Wind Magnitude
-                    stoch.wind_params.MagStd = [1.6 1.6];               % [m/s] Wind Magnitude standard deviation
+                    stoch.wind_params.MagMean = [4 8 8 8 9 9];                  % [m/s] Mean Wind Magnitude
+                    stoch.wind_params.MagStd = [1.6 1.6 1.6 1.6 1.6 1.6];               % [m/s] Wind Magnitude standard deviation
 
                     wind.magnitudeDistribution = repmat("g", size(wind.altitudes));
                     wind.magnitudeParameters = [stoch.wind_params.MagMean; stoch.wind_params.MagStd];
             end
 
-            stoch.wind_params.ElType = "g";
+            stoch.wind_params.AzType = "g";
+            switch stoch.wind_params.AzType
+                case "u"
+                    stoch.wind_params.AzMin = + deg2rad([0 0]);                 % [m/s] Minimum Wind Azimuth
+                    stoch.wind_params.AzMax = + deg2rad([360 360]);             % [m/s] Maximum Wind Azimuth
+
+                    wind.azimuthDistribution = repmat("u", size(wind.altitudes));
+                    wind.azimuthParameters = [stoch.wind_params.AzMin; stoch.wind_params.AzMax];
+                case "g"
+                    stoch.wind_params.AzMean = deg2rad([320 320 320 320 320 310]);              % [m/s] Mean Wind magnitude
+                    stoch.wind_params.AzStd = deg2rad([10 10 10 10 10 10]);                 % [m/s] Wind Magnitude standard deviation
+
+                    wind.azimuthDistribution = repmat("g", size(wind.altitudes));
+                    wind.azimuthParameters = [stoch.wind_params.AzMean; stoch.wind_params.AzStd];
+            end
+
+            stoch.wind_params.ElType = "u";
             switch stoch.wind_params.ElType
                 case "u"
-                    stoch.wind_params.ElMin = [-5 -5];                 % [m/s] Minimum Wind Elevation
-                    stoch.wind_params.ElMax = [5 5];                   % [m/s] Maximum Wind Elevation
+                    stoch.wind_params.ElMin = [0 0 0 0 0 0];                 % [m/s] Minimum Wind Elevation
+                    stoch.wind_params.ElMax = [0 0 0 0 0 0];                   % [m/s] Maximum Wind Elevation
 
                     wind.elevationDistribution = repmat("u", size(wind.altitudes));
                     wind.elevationParameters = [stoch.wind_params.ElMin; stoch.wind_params.ElMax];
@@ -118,22 +134,6 @@ displayIter = true; % set to false if you don't want to see the iteration number
 
                     wind.elevationDistribution = repmat("g", size(wind.altitudes));
                     wind.elevationParameters = [stoch.wind_params.ElMean; stoch.wind_params.ElStd];
-            end
-
-            stoch.wind_params.AzType = "u";
-            switch stoch.wind_params.AzType
-                case "u"
-                    stoch.wind_params.AzMin = + deg2rad([0 0]);                 % [m/s] Minimum Wind Azimuth
-                    stoch.wind_params.AzMax = + deg2rad([360 360]);             % [m/s] Maximum Wind Azimuth
-
-                    wind.azimuthDistribution = repmat("u", size(wind.altitudes));
-                    wind.azimuthParameters = [stoch.wind_params.AzMin; stoch.wind_params.AzMax];
-                case "g"
-                    stoch.wind_params.AzMean = deg2rad([180 180]);              % [m/s] Mean Wind magnitude
-                    stoch.wind_params.AzStd = deg2rad([45 45]);                 % [m/s] Wind Magnitude standard deviation
-
-                    wind.azimuthDistribution = repmat("g", size(wind.altitudes));
-                    wind.azimuthParameters = [stoch.wind_params.AzMean; stoch.wind_params.AzStd];
             end
 
             wind.updateAll();
@@ -195,7 +195,7 @@ displayIter = true; % set to false if you don't want to see the iteration number
 
             stoch.thrust = thrust_percentage*rocket.motor.thrust;                  % thrust - the notation used creates a matrix where each row is the expThrust multiplied by one coefficient in the thrust percentage array
             stoch.expTime = (1./thrust_percentage) * rocket.motor.time;          % burning time - same notation as thrust here
-    
+
             stoch.Kt = zeros(N_sim, 1);
 
             for i =1:N_sim
@@ -213,12 +213,12 @@ displayIter = true; % set to false if you don't want to see the iteration number
 
             % launch rail orientation
             stoch.PHI_rail = ones(N_sim,1) .* environment.phi;
-            
+
     end
 
 
     %% save arrays
-    
+
     % algorithms
     algorithm_vec = {'interp';'NoControl';'engine';'complete'; 'PID_2021'; 'shooting'}; % interpolation, no control, engine shutdown, engine+arb, PID change every 2s, shooting
 
