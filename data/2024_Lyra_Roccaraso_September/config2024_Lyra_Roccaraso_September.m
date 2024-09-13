@@ -114,7 +114,7 @@ settings.nas.lat0          = environment.lat0;
 settings.nas.lon0          = environment.lon0;
 settings.nas.z0            = -environment.z0;
 settings.nas.spheroid      = wgs84Ellipsoid;
-settings.nas.ned_mag       = normalize(wrldmagm(-settings.nas.z0,settings.nas.lat0,settings.nas.lon0,2024.70));
+settings.nas.ned_mag       = wrldmagm(-settings.nas.z0,settings.nas.lat0,settings.nas.lon0,2024.70)/norm(wrldmagm(-settings.nas.z0,settings.nas.lat0,settings.nas.lon0,2024.70));
 settings.nas.mag_decimate  = 50;                            % Perform mag correction once every 50 steps (1Hz)
 
 % for attitude correction with accelerometer in obsw
