@@ -42,7 +42,8 @@ fprintf('OUTCOMES:\n\n\n')
 % fprintf('max step omputational Time: %.3f [s]: \n\n', max(cpuTimes))
 
 fprintf('apogee: %.1f [m] \n', max_z);
-fprintf('@time: %g [sec] \n\n', T_apo)
+fprintf('@time: %g [sec] \n', T_apo)
+fprintf('@vz: %g [sec] \n\n', structIn.apogee_vz)
 
 fprintf('max speed reached: %g [m/s] \n', max_v)
 fprintf('@altitude: %g [m] \n', z(imax_v))

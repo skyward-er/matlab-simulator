@@ -252,6 +252,12 @@ while settings.flagStopIntegration && n_old < nmax                          % St
             % drogue_descent if full_flight,
             % landed if apogee was never detected
             if flagApogee
+                v_ned = quatrotate(quatconj(Y0(end, 10:13)), Y0(end, 4:6));
+                struct_out.apogee_vz = v_ned(3);
+                if abs(v_ned(3)) > 5
+                    disp(v_ned(3))
+                    error("CRITICAL FAILURE: Expulsion at a too high speed!");  
+                end
                 state_lastTime(currentState) = t0;
 
                 % Exit condition of unpowered_ascent / Entry condition of drogue_descent:
