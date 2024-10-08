@@ -23,7 +23,7 @@ function [settings, rocket] = settingsEngineCut(settings, engineT0, rocket)
     SPDX-License-Identifier: GPL-3.0-or-later
 %}
     
-    rocket.motor.cutoffTime = rocket.motor.cutoffTime - engineT0;
+    % rocket.motor.cutoffTime = rocket.motor.cutoffTime - engineT0;
     if (rocket.motor.cutoffTime) > 0 && ( rocket.motor.cutoffTime  <= (rocket.motor.time(end) - rocket.motor.cutoffTransient) )
         tEC = rocket.motor.cutoffTime;           % controlled shutoff moment, 0.3 is the delay
         tCO = rocket.motor.cutoffTransient;                     % cutoff transient duration

@@ -18,14 +18,14 @@ if sensorTot.mea.prediction(end) >= settings.mea.z_shutdown
         if  settings.mea.counter_shutdown > contSettings.N_prediction_threshold %&& T1 > settings.mea.t_lower_shadowmode% threshold set in configControl
             settings.expShutdown = true;
             settings.t_shutdown = T1;
-            rocket.motor.cutoffTime  = settings.t_shutdown + settings.shutdownValveDelay;
+            rocket.motor.cutoffTime  = settings.t_shutdown + settings.shutdownValveDelay - engineT0;
             settings.expTimeEngineCut = settings.t_shutdown;
             [settings, rocket] = settingsEngineCut(settings, engineT0, rocket);
         end
         if T1-engineT0 >= settings.mea.t_higher_shadowmode
             settings.expShutdown = true;
             settings.t_shutdown = T1;
-            rocket.motor.cutoffTime = settings.t_shutdown + settings.shutdownValveDelay;
+            rocket.motor.cutoffTime = settings.t_shutdown + settings.shutdownValveDelay - engineT0;
             settings.expTimeEngineCut = settings.t_shutdown;
         end
 
@@ -66,7 +66,7 @@ else
     if ~settings.expShutdown && T1-engineT0 >= settings.mea.t_higher_shadowmode
         settings.expShutdown = true;
         settings.t_shutdown = T1;
-        rocket.motor.cutoffTime  = settings.t_shutdown + settings.shutdownValveDelay;
+        rocket.motor.cutoffTime  = settings.t_shutdown + settings.shutdownValveDelay - engineT0;
         settings.expTimeEngineCut = settings.t_shutdown;
     end
     % if T1-engineT0 < rocket.motor.time(end)

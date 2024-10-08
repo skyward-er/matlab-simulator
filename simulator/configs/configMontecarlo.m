@@ -14,7 +14,7 @@ if settings.montecarlo
 
     %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % how many simulations
-    N_sim = 500; % set to at least 500
+    N_sim = 60; % set to at least 500
     simulationType_thrust = "gaussian";  % "gaussian", "exterme"
     displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
 
@@ -85,7 +85,7 @@ if settings.montecarlo
 
             %%% wind parameters
             wind = WindCustom(mission);
-            stoch.wind_params.altitudes = [0 500 800 1000 1200 1500];
+            stoch.wind_params.altitudes = [0 500 900 1200];
             wind.altitudes = stoch.wind_params.altitudes;
 
             stoch.wind_params.MagType = "g";
@@ -97,8 +97,8 @@ if settings.montecarlo
                     wind.magnitudeDistribution = repmat("u", size(wind.altitudes));
                     wind.magnitudeParameters = [stoch.wind_params.MagMin; stoch.wind_params.MagMax];
                 case "g"
-                    stoch.wind_params.MagMean = [4 8 8 8 9 9];                  % [m/s] Mean Wind Magnitude
-                    stoch.wind_params.MagStd = [1.6 1.6 1.6 1.6 1.6 1.6];               % [m/s] Wind Magnitude standard deviation
+                    stoch.wind_params.MagMean = [4 6 5 5];                  % [m/s] Mean Wind Magnitude
+                    stoch.wind_params.MagStd = [0.8 0.8 0.8 0.8];               % [m/s] Wind Magnitude standard deviation
 
                     wind.magnitudeDistribution = repmat("g", size(wind.altitudes));
                     wind.magnitudeParameters = [stoch.wind_params.MagMean; stoch.wind_params.MagStd];
@@ -113,8 +113,8 @@ if settings.montecarlo
                     wind.azimuthDistribution = repmat("u", size(wind.altitudes));
                     wind.azimuthParameters = [stoch.wind_params.AzMin; stoch.wind_params.AzMax];
                 case "g"
-                    stoch.wind_params.AzMean = deg2rad([320 320 320 320 320 310]);              % [m/s] Mean Wind magnitude
-                    stoch.wind_params.AzStd = deg2rad([10 10 10 10 10 10]);                 % [m/s] Wind Magnitude standard deviation
+                    stoch.wind_params.AzMean = deg2rad([320 310 310 300]);              % [m/s] Mean Wind magnitude
+                    stoch.wind_params.AzStd = deg2rad([15 15 15 15]);                 % [m/s] Wind Magnitude standard deviation
 
                     wind.azimuthDistribution = repmat("g", size(wind.altitudes));
                     wind.azimuthParameters = [stoch.wind_params.AzMean; stoch.wind_params.AzStd];
