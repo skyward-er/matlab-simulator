@@ -1,35 +1,45 @@
 classdef SensorNew < dynamicprops
+
+    % Author: Stefano Belletti
+    % Skyward Experimental Rocketry | AVN - GNC
+    % email: stefano.belletti@skywarder.eu
+    % Release date: 17/11/2024
+    % 
+    % SENSOR Super call for all sensor
+    % 
+    % Creating a new sensor: [sensor obj] = Sensor(is3D, isFaulty)
+    % 
+    % INPUT:        DIMENSIONS:     TYPE:
+    % is3D          [1x1]           logical
+    % isFaulty      [1x1]           logical
+
     % properties
-    properties (Access='public')
-        % phisical characteristics
+    properties (Access = 'public')
         minMeasurementRange;                    % Max limit of sensor
         maxMeasurementRange;                    % Min limit of sensor
-        bit;                                    % number of bits for the sensor ( if available)
-        resolution;                             % resolution of the sensor
+        bit;                                    % Number of bits for the sensor (if available)
+        resolution;                             % resolution of the sensor (set internally if bit is available)
         dt;                                     % Sampling time
-        
-        % noise
-        noiseVariance;                          % Varianze for the gaussian white noise
+
+        % noises
+        noiseVariance;                          % Defining gaussian white noise
         
         % offset
         offset;                                 % Offset in all directions
         tempOffset;                             % Coefficent for temperature depending offset
         error2dOffset;                          % first column: inputArg, second column: relativeArg, third column: error
-        
-        % fault
-        fault_time;                             % if set to -1 it will be randomly chosen between a min and a max time in seconds
-        min_fault_time;                         % lower bound of the time window where the fault can occur in case it's randomly chosen
-        max_fault_time;                         % upper bound of the time window where the fault can occur in case it's randomly chosen
     end
     
-    % methods
-    methods (Access='public')
-        function obj = SensorNew(is3D)
+    methods (Access = 'public')
+        % Main methods for all sensors, here new sensors are created and
+        % initialized; the function "sens" is defined here
+
+        function obj = SensorNew(is3D, isFaulty)
             % creating a new sensor
 
             % adding Sensor3D properties if is3D == true
+            obj.addprop("is3D");
             if is3D
-                obj.addprop("is3D");
                 obj.is3D = true;
 
                 obj.addprop("TD_offset");
@@ -41,16 +51,48 @@ classdef SensorNew < dynamicprops
                 obj.TD_stateWalk.y = 0;
                 obj.TD_stateWalk.z = 0;
             else
-                obj.addprop("is3D");
                 obj.is3D = false;
+            end
+
+            % fault
+            obj.addprop("isFaulty");
+            if isFaulty
+                obj.isFaulty = true;
+
+                obj.addprop("fault_time");
+                obj.addprop("max_fault_time");
+                obj.addprop("min_fault_time");
+                obj.addprop("failureType");
+                obj.addprop("fault_offset");
+                obj.addprop("lambda");
+                obj.addprop("sigmaDeg");
+                obj.addprop("sigmaIS");
+                obj.addprop("tError");
+                obj.addprop("gain");
+                obj.addprop("value");
+                obj.addprop("likelihoodFS");
+                obj.addprop("likelihoodIS");
+                obj.addprop("alsoNegSpikes");
+                obj.addprop("severity");
+                obj.addprop("randomSpikeAmpl");
+                obj.addprop("satMax");
+                obj.addprop("satMin");
+                obj.addprop("settings");
+                obj.addprop("frozenValue");
+
+                obj = obj.fault_reset();
+            else
+                obj.isFaulty = false;
             end
         end
         
+        % sens function
         function outputArg = sens(obj,inputArg,temp)
             if ~isstruct(inputArg)
                 inputArg = obj.addOffset(inputArg);
                 inputArg = obj.add2DOffset(inputArg,temp);
                 inputArg = obj.addTempOffset(inputArg,temp);
+                inputArg = obj.whiteNoise(inputArg);
                 inputArg = obj.quantization(inputArg);
                 inputArg = obj.saturation(inputArg);
                 outputArg = inputArg;
@@ -71,6 +113,10 @@ classdef SensorNew < dynamicprops
                 inputArg.y = obj.addTempOffset(inputArg.y,temp);
                 inputArg.z = obj.addTempOffset(inputArg.z,temp);
 
+                inputArg.x = obj.whiteNoise(inputArg.x);
+                inputArg.y = obj.whiteNoise(inputArg.y);
+                inputArg.z = obj.whiteNoise(inputArg.z);
+
                 inputArg.x = obj.quantization(inputArg.x);
                 inputArg.y = obj.quantization(inputArg.y);
                 inputArg.z = obj.quantization(inputArg.z);
@@ -86,7 +132,10 @@ classdef SensorNew < dynamicprops
         end
     end
 
-    methods (Access='protected')
+    methods (Access = 'protected')
+        % Main protected methods, here all the internal functions are
+        % located
+
         function [outputArg] = addOffset3D(obj,inputArg)            
             if (~isempty(obj.TD_offset.x))
                 inputArg.x = inputArg.x + ones(size(inputArg.x)).*obj.TD_offset.x;
@@ -143,7 +192,6 @@ classdef SensorNew < dynamicprops
             outputArg.z = inputArg.z;
         end
 
-        % old 2D
         function outputArg = addOffset(obj,inputArg)
             if (~isempty(obj.offset))
                 inputArg=inputArg+ones(size(inputArg)).*obj.offset;
@@ -165,10 +213,20 @@ classdef SensorNew < dynamicprops
             outputArg = inputArg;
         end
 
-        function outputArg = quantization(obj,inputArg)
-            if (~isempty(obj.resolution))
-                inputArg = obj.resolution*round(inputArg/obj.resolution);
+        function outputArg = whiteNoise(obj,inputArg)
+            if (~isempty(obj.noiseVariance))
+                inputArg=inputArg+sqrt(obj.noiseVariance).*randn(length(inputArg),1);
             end
+            outputArg = inputArg;
+        end
+
+        function outputArg = quantization(obj,inputArg)
+            if isempty(obj.resolution)
+                if (~isempty(obj.maxMeasurementRange)) && (~isempty(obj.minMeasurementRange)) && (~isempty(obj.bit))
+                    obj.resolution = (obj.maxMeasurementRange - obj.minMeasurementRange)/(2^obj.bit);
+                end
+            end
+            inputArg = obj.resolution*round(inputArg/obj.resolution);
             outputArg = inputArg;
         end
 
@@ -183,6 +241,147 @@ classdef SensorNew < dynamicprops
             end
             
             outputArg = inputArg;
+        end
+
+        % faulty sensors
+        function obj = fault_reset(obj)
+            obj.failureType = 'None';
+            obj.fault_offset = 0;
+            obj.lambda = 0;
+            obj.sigmaDeg = 0;
+            obj.sigmaIS = 0;
+            obj.tError = 0;
+            obj.gain = 1;
+            obj.value = 0;
+            obj.likelihoodFS = 0;
+            obj.likelihoodIS = 0;
+            obj.alsoNegSpikes = false;
+            obj.severity = 0;
+            obj.randomSpikeAmpl = false;
+            obj.satMax = inf;
+            obj.satMin = -inf;
+            obj.settings.saturateFlag = false;
+            obj.settings.bias = false;
+            obj.settings.drift = false;
+            obj.settings.degradation = false;
+            obj.settings.freezing = false;
+            obj.settings.calerr = false;
+            obj.settings.fs = false;
+            obj.settings.is = false;
+            
+            obj.frozenValue = nan;
+        end
+
+        function data = saturate(data)
+            data = max(obj.satMin, min(obj.satMax, data));
+        end
+    end
+
+    methods (Access = 'public')
+        % Main methods for faulty sensors
+
+        function obj = getFaultTime(obj) % to set when the fault occurs
+            if obj.fault_time == -1
+                obj.fault_time = randi((obj.max_fault_time-obj.min_fault_time)*10)/10 + obj.min_fault_time;
+            end
+        end
+
+        function [obj, tError] = setErrorTime(obj) % to set when the fault occurs
+            obj.getFaultTime()
+            if obj.fault_time >= 0
+                obj.tError = obj.fault_time;
+                tError = obj.fault_time;
+            else
+                error('Time needs to be positive')
+            end
+        end
+
+        function [obj, sensorData] = applyFailure(obj, sensorData, timestamp) %function necessary to set a fault at a certain timestamp of the simulation, the operation applied depends on the simulated fault
+            for i = 1:length(timestamp)
+                if timestamp(i) >= obj.tError
+                    if obj.settings.bias
+                        sensorData(i) = sensorData(i) + obj.fault_offset;
+                    end
+                    if obj.settings.drift
+                        sensorData(i) = sensorData(i) + obj.lambda * (timestamp(i) - obj.tError);
+                    end
+                    if obj.settings.degradation
+                        sensorData(i) = sensorData(i) - obj.sigmaDeg + 2*obj.sigmaDeg*rand;
+                    end
+                    if obj.settings.freezing
+                        % if timestamp(i) == obj.tError
+                        %     obj.frozenValue = sensorData(i);
+                        % end
+                        sensorData(i) = obj.frozenValue;
+                    end
+                    if obj.settings.calerr
+                        sensorData(i) = sensorData(i)*obj.gain;
+                    end
+                    if obj.settings.fs
+                        if rand > (1 - obj.likelihoodFS)
+                            sensorData(i) = obj.value;
+                        end
+                    end
+                    if obj.settings.is
+                        if rand > (1 - obj.likelihoodIS)
+                            if obj.randomSpikeAmpl == true
+                                randVal = rand;
+                            else
+                                randVal = 1;
+                            end
+                            if obj.alsoNegSpikes
+                                sensorData(i) = sensorData(i) -obj.sigmaIS + 2*obj.sigmaIS*randVal;
+                            else
+                                sensorData(i) = sensorData(i) +obj.sigmaIS*randVal;
+                            end
+                        end
+                    end
+                else
+                    if obj.settings.freezing
+                        obj.frozenValue = sensorData(i);
+                        % sensorData(i) = obj.frozenValue;
+                    end
+                end
+            end
+    
+            if obj.settings.saturateFlag
+                sensorData = obj.saturate(sensorData);
+            end
+    
+        end
+
+        function obj = setOffset(obj, fault_offset)
+            obj.fault_offset = fault_offset;
+            obj.settings.bias = true;
+        end
+    
+        function obj = setDrift(obj, lambda)
+            obj.lambda = lambda;
+            obj.settings.drift = true;
+        end
+    
+        function obj = setDegradation(obj, sigma)
+            obj.sigmaDeg = sigma;
+            obj.settings.degradation = true;
+        end
+    
+        function obj = setFreezing (obj)
+            obj.settings.freezing = true;
+        end
+    
+        function obj = setCalibrationError(obj, gain)
+            obj.gain = gain;
+            obj.settings.calerr = true;
+        end
+    
+        function obj = setFixedSpiking(obj, value, likelihood)
+            if (likelihood > 0 && likelihood  < 1)
+                obj.value = value;
+                obj.likelihoodFS = likelihood;
+                obj.settings.fs = true;
+            else
+                error('The likelihood must be between 0 and 1')
+            end
         end
     end
 end
