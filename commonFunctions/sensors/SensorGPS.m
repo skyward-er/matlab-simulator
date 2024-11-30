@@ -1,4 +1,4 @@
-classdef GPS < Sensor3D
+classdef SensorGPS < Sensor3D
     
     % Author: Stefano Belletti, Samuel Flore
     % Skyward Experimental Rocketry | AVN - GNC
@@ -14,7 +14,7 @@ classdef GPS < Sensor3D
     % meter before and afterwards transforms it back to degree
     
     methods
-        function obj = GPS()
+        function obj = SensorGPS()
             obj=obj@Sensor3D();
         end
         
