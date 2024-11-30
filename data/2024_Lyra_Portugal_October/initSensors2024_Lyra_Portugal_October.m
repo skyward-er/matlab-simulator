@@ -146,7 +146,7 @@ sensorSettings.spheroid            =   wgs84Ellipsoid;
 
 %% initial chamber pressure sensor NAT825281
 % NOTE: pressure in mbar, temp should be in C°;
-%       check 2d offset for chamber pressure sensor
+%       check 2D offset for chamber pressure sensor
 sensorSettings.comb_chamber = Sensor2D();
 sensorSettings.comb_chamber.maxMeasurementRange   =   40000;                        % 1100, 1300 in mbar
 sensorSettings.comb_chamber.minMeasurementRange   =   0;                            % 300, 10 in mbar

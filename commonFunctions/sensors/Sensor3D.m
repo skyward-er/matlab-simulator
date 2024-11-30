@@ -48,9 +48,9 @@ classdef Sensor3D < Sensor2D
             inputArg2 = obj.addTempOffset(inputArg2,temp);
             inputArg3 = obj.addTempOffset(inputArg3,temp);
 
-            inputArg1 = obj.whiteNoise(inputArg1);
-            inputArg2 = obj.whiteNoise(inputArg2);
-            inputArg3 = obj.whiteNoise(inputArg3);
+            inputArg1 = obj.addNoise(inputArg1);
+            inputArg2 = obj.addNoise(inputArg2);
+            inputArg3 = obj.addNoise(inputArg3);
 
             inputArg1 = obj.quantization(inputArg1);
             inputArg2 = obj.quantization(inputArg2);
