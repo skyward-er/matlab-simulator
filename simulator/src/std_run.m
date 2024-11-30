@@ -555,11 +555,14 @@ while settings.flagStopIntegration && n_old < nmax                          % St
 
     if not(settings.montecarlo)
         if settings.flagAscent
-            disp("z: " + (-Yf(end,3)+environment.z0) +", z_est: " + -sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,14)); %  + ", quatNorm: "+ vecnorm(Yf(end,10:13))
+            fprintf("z: %4.4f, z_est: %4.4f, ap_ref: %4.4f, ap_ode:  %4.4f\n", (-Yf(end,3)+environment.z0), -sensorData.kalman.z, ap_ref_new, Yf(end,14))
+            % disp("z: " + (-Yf(end,3)+environment.z0) +", z_est: " + -sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,14)); %  + ", quatNorm: "+ vecnorm(Yf(end,10:13))
         elseif currentState == availableStates.payload_descent
-            disp("z: " + (-Yf(end,3)+environment.z0) +", z_est: " + -sensorData.kalman.z + ", deltaA_ref: " + deltaA_ref_new + ", deltaA_ode: " + Yf(end,15)); % +", quatNorm: "+ vecnorm(Yf(end,10:13))
+            fprintf("z: %4.4f, z_est: %4.4f, deltaA_ref: %4.4f, deltaA_ode:  %4.4f\n", (-Yf(end,3)+environment.z0), -sensorData.kalman.z, deltaA_ref_new, Yf(end,15))
+            % disp("z: " + (-Yf(end,3)+environment.z0) +", z_est: " + -sensorData.kalman.z + ", deltaA_ref: " + deltaA_ref_new + ", deltaA_ode: " + Yf(end,15)); % +", quatNorm: "+ vecnorm(Yf(end,10:13))
         else
-            disp("z: " + (-Yf(end,3)+environment.z0) +", z_est: " + -sensorData.kalman.z);
+            fprintf("z: %4.4f, z_est: %4.4f\n", (-Yf(end,3)+environment.z0), -sensorData.kalman.z)
+            % disp("z: " + (-Yf(end,3)+environment.z0) +", z_est: " + -sensorData.kalman.z);
         end
     end
 
