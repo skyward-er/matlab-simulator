@@ -17,7 +17,9 @@ classdef Sensor2D < handle
         dt;                                     % Sampling time
 
         % noises
+        noiseType;                              % White (default) or Pink
         noiseVariance;                          % Defining gaussian white noise
+        pink_properties;                        % Defining pink noise
         
         % offset
         offset;                                 % Offset in all directions
@@ -28,13 +30,14 @@ classdef Sensor2D < handle
     methods (Access = 'public')
         function obj = Sensor2D()
         % creating a new sensor
+            obj.noiseType = "White";
         end
 
         function [outputArg] = sens(obj,inputArg,temp)
             inputArg = obj.addOffset(inputArg);
             inputArg = obj.add2DOffset(inputArg,temp);
             inputArg = obj.addTempOffset(inputArg,temp);
-            inputArg = obj.whiteNoise(inputArg);
+            inputArg = obj.addNoise(inputArg);
             inputArg = obj.quantization(inputArg);
             inputArg = obj.saturation(inputArg);
             outputArg = inputArg;
@@ -63,9 +66,11 @@ classdef Sensor2D < handle
             outputArg = inputArg;
         end
 
-        function outputArg = whiteNoise(obj,inputArg)
-            if (~isempty(obj.noiseVariance))
+        function outputArg = addNoise(obj,inputArg)
+            if obj.noiseType == "White"
                 inputArg=inputArg+sqrt(obj.noiseVariance).*randn(length(inputArg),1);
+            elseif obj.noiseType == "Pink"
+                % TBI
             end
             outputArg = inputArg;
         end
