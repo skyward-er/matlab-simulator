@@ -164,7 +164,7 @@ end
 
 
 if not(settings.montecarlo)
-    fprintf('START:\n\n\n');
+    fprintf('START:\n\n');
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -358,7 +358,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     end
 
     % For ascent only we stop the simulation once the ode apogee has been reached
-    if vz(end) < 0 && flagFlight && settings.ascentOnly
+    if vz(end) < 0 && flagFlight && settings.ascentOnly && flagApogee
         break;
     end
 

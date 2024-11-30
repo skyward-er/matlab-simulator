@@ -1,133 +1,89 @@
-classdef Sensor3D < Sensor
-    
-    % Author: Jan Hammelman
-    % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@skywarder.eu
-    % email: jan.hammelmann@skywarder.eu,alessandro.delduca@skywarder.eu
-    % Release date: 01/03/2021
-    
-    %SENSOR_3D For all 3D sensors
-    %   Extends Sensor with methods, which work with 3D sensors
+classdef Sensor3D < Sensor2D
 
-    properties (Access='public')
-        offsetX; % offset in x direction
-        offsetY; % offset in y direction
-        offsetZ; % offset in z direction
-        
-        walkDiffusionCoef; % diffusion coefficient for the random walk
-        
-        transMatrix % transformation matrix
+    % Author: Stefano Belletti, Samuel Flore
+    % Skyward Experimental Rocketry | AVN - GNC
+    % email: stefano.belletti@skywarder.eu
+    % Release date: 18/11/2024
+    % 
+    % Sensor class for 3D sensors
+    % 
+    % Creating a new sensor: [obj] = Sensor3D()
+    
+    properties
+        offsetX;
+        offsetY;
+        offsetZ;
+
+        walkDiffusionCoef;
+        transMatrix;
+    end
+
+    properties (Access = 'protected')
+        stateWalkX;
+        stateWalkY;
+        stateWalkZ;
     end
     
-    properties (Dependent=false)
-        stateWalkX; % State of random walk in x direction
-        stateWalkY; % State of random walk in y direction
-        stateWalkZ; % State of random walk in z direction
-    end
-    
-    methods (Access='public')
+    methods (Access = 'public')
         function obj = Sensor3D()
-            %SENSOR_3D Construct an instance of this class
-            %   Sets the random walk states to zero
-            
-            obj.stateWalkX=0;
-            obj.stateWalkY=0;
-            obj.stateWalkZ=0;
+            obj.stateWalkX = 0;
+            obj.stateWalkY = 0;
+            obj.stateWalkZ = 0;
         end
-        
-        function [outputArgX,outputArgY,outputArgZ] = sens(obj,inputArgX,inputArgY,inputArgZ,temp)
-            %SENS Method to use the sensor.
-            %   Gets the simulation data and extract the unideal sensor
-            %   output
-            %
-            %  Inputs:
-            %  inputArgX,inputArgY,inputArgZ: sensor data
-            %  temp: temperature of the sensor
-            %  
-            %  Outputs:
-            %  outputArgX,outputArgY, outputArgZ: sensor data with nois,
-            %  offsets, etc.
-            
-            [inputArgX,inputArgY,inputArgZ] = tranformAxis(obj,inputArgX,inputArgY,inputArgZ);
-            
-            inputArgX=obj.add2DOffset(inputArgX,temp);
-            inputArgY=obj.add2DOffset(inputArgY,temp);
-            inputArgZ=obj.add2DOffset(inputArgZ,temp);
-            
-            [inputArgX,inputArgY,inputArgZ] = addOffset3D(obj,inputArgX,inputArgY,inputArgZ);
-            
-            inputArgX=obj.whiteNoise(inputArgX);
-            inputArgY=obj.whiteNoise(inputArgY);
-            inputArgZ=obj.whiteNoise(inputArgZ);
-            
-            inputArgX=obj.addOffset(inputArgX);
-            inputArgY=obj.addOffset(inputArgY);
-            inputArgZ=obj.addOffset(inputArgZ);
-            
-            inputArgX=obj.addTempOffset(inputArgX,temp);
-            inputArgY=obj.addTempOffset(inputArgY,temp);
-            inputArgZ=obj.addTempOffset(inputArgZ,temp);
-            
-            [inputArgX,inputArgY,inputArgZ] = obj.randomWalk(inputArgX,inputArgY,inputArgZ);
-            
-            inputArgX=obj.quantization(inputArgX);
-            inputArgY=obj.quantization(inputArgY);
-            inputArgZ=obj.quantization(inputArgZ);
-            
-            inputArgX=obj.saturation(inputArgX);
-            inputArgY=obj.saturation(inputArgY);
-            inputArgZ=obj.saturation(inputArgZ);
-            
-            outputArgX = inputArgX;
-            outputArgY = inputArgY;
-            outputArgZ = inputArgZ;
+
+        function [outputArg1,outputArg2,outputArg3] = sens(obj,inputArg1,inputArg2,inputArg3,temp)
+            [inputArg1,inputArg2,inputArg3] = obj.tranformAxis(inputArg1,inputArg2,inputArg3);
+            [inputArg1,inputArg2,inputArg3] = obj.addOffset3D(inputArg1,inputArg2,inputArg3);
+            [inputArg1,inputArg2,inputArg3] = obj.randomWalk(inputArg1,inputArg2,inputArg3);
+
+            inputArg1 = obj.addOffset(inputArg1);
+            inputArg2 = obj.addOffset(inputArg2);
+            inputArg3 = obj.addOffset(inputArg3);
+
+            inputArg1 = obj.add2DOffset(inputArg1,temp);
+            inputArg2 = obj.add2DOffset(inputArg2,temp);
+            inputArg3 = obj.add2DOffset(inputArg3,temp);
+
+            inputArg1 = obj.addTempOffset(inputArg1,temp);
+            inputArg2 = obj.addTempOffset(inputArg2,temp);
+            inputArg3 = obj.addTempOffset(inputArg3,temp);
+
+            inputArg1 = obj.whiteNoise(inputArg1);
+            inputArg2 = obj.whiteNoise(inputArg2);
+            inputArg3 = obj.whiteNoise(inputArg3);
+
+            inputArg1 = obj.quantization(inputArg1);
+            inputArg2 = obj.quantization(inputArg2);
+            inputArg3 = obj.quantization(inputArg3);
+
+            inputArg1 = obj.saturation(inputArg1);
+            inputArg2 = obj.saturation(inputArg2);
+            inputArg3 = obj.saturation(inputArg3);
+
+            outputArg1 = inputArg1;
+            outputArg2 = inputArg2;
+            outputArg3 = inputArg3;
         end
     end
-    
-    methods (Access='protected')
-        function [outputArgX,outputArgY,outputArgZ] = addOffset3D(obj,inputArgX,inputArgY,inputArgZ)
-            %ADD_OFFSET Adds an 3D offset to the signal
-            %   adds the properties offsetX, offsetY and offsetZ to the
-            %   input signal components
-            %
-            %  Necessary properties:
-            %  offsetX, offsetY, offsetZ: Offset for all directions
-            %
-            %  Inputs:
-            %  inputArgX,inputArgY,inputArgZ: sensor data
-            %  
-            %  Outputs:
-            %  outputArgX,outputArgY, outputArgZ: sensor data with offset
-            
-            if (~isempty(obj.offsetX))
-                inputArgX=inputArgX+ones(size(inputArgX)).*obj.offsetX;
-            end
-            if (~isempty(obj.offsetY))
-                inputArgY=inputArgY+ones(size(inputArgY)).*obj.offsetY;
-            end
-            if (~isempty(obj.offsetZ))
-                inputArgZ=inputArgZ+ones(size(inputArgZ)).*obj.offsetZ;
-            end
-            outputArgX=inputArgX;
-            outputArgY=inputArgY;
-            outputArgZ=inputArgZ;
-        end
-        
-        function [outputArgX,outputArgY, outputArgZ] = randomWalk(obj,inputArgX,inputArgY,inputArgZ)
-            %RANDOM_WALK Adds a random walk
-            %  Adds a brown motion with the diffusion coefficient walkDiffusionCoef for each step
-            %
-            %  Necessary properties:
-            %  walkDiffusionCoef: diffusion coefficient for the random walk
-            %  dt: Sampling time
-            %
-            %  Inputs:
-            %  inputArgX,inputArgY,inputArgZ: sensor data
-            %  
-            %  Outputs:
-            %  outputArgX,outputArgY, outputArgZ: sensor data with random
-            %  walk
 
-            if (~isempty(obj.walkDiffusionCoef))
+    methods (Access = 'protected')
+        function [outputArg1,outputArg2,outputArg3] = addOffset3D(obj,inputArg1,inputArg2,inputArg3)            
+            if (~isempty(obj.offsetX)) && obj.offsetX
+                inputArg1 = inputArg1 + ones(size(inputArg1)).*obj.offsetX;
+            end
+            if (~isempty(obj.offsetY)) && obj.offsetY
+                inputArg2 = inputArg2 + ones(size(inputArg2)).*obj.offsetY;
+            end
+            if (~isempty(obj.offsetZ)) && obj.offsetZ
+                inputArg3 = inputArg3 + ones(size(inputArg3)).*obj.offsetZ;
+            end
+            outputArg1 = inputArg1;
+            outputArg2 = inputArg2;
+            outputArg3 = inputArg3;
+        end
+
+        function [outputArgX,outputArgY,outputArgZ] = randomWalk(obj,inputArgX,inputArgY,inputArgZ)
+            if (~isempty(obj.walkDiffusionCoef)) && obj.walkDiffusionCoef
                 % distance
                 s = sqrt ( 2.0 * 3 * obj.walkDiffusionCoef * obj.dt ) * randn ( 1, 1);
 
@@ -146,40 +102,25 @@ classdef Sensor3D < Sensor
                 obj.stateWalkX=obj.stateWalkX+dx;
                 obj.stateWalkY=obj.stateWalkY+dy;
                 obj.stateWalkZ=obj.stateWalkZ+dz;
-                
             end
             
             outputArgX=inputArgX+obj.stateWalkX;
             outputArgY=inputArgY+obj.stateWalkY;
             outputArgZ=inputArgZ+obj.stateWalkZ;
         end
-        
-        function [outputArgX,outputArgY, outputArgZ] = tranformAxis(obj,inputArgX,inputArgY,inputArgZ)
-            %RANDOM_WALK Adds a random walk
-            %  Adds a brown motion with the diffusion coefficient walkDiffusionCoef for each step
-            %
-            %  Necessary properties:
-            %  transMatrix: transformation matrix
-            %
-            %  Inputs:
-            %  inputArgX,inputArgY,inputArgZ: sensor data
-            %  
-            %  Outputs:
-            %  outputArgX,outputArgY, outputArgZ: sensor data with
-            %  transformation xout=transMatrix*xin
-            
+
+        function [outputArg1,outputArg2,outputArg3] = tranformAxis(obj,inputArg1,inputArg2,inputArg3)
             if (~isempty(obj.transMatrix))
-                transOut=obj.transMatrix*[inputArgX;inputArgY;inputArgZ];
-                inputArgX=transOut(1);
-                inputArgY=transOut(2);
-                inputArgZ=transOut(3);
+                transOut=obj.transMatrix*[inputArg1,inputArg2,inputArg3]';
+                inputArg1 = transOut(1);
+                inputArg2 = transOut(2);
+                inputArg3 = transOut(3);
             end
             
-            outputArgX=inputArgX;
-            outputArgY=inputArgY;
-            outputArgZ=inputArgZ;
+            outputArg1 = inputArg1;
+            outputArg2 = inputArg2;
+            outputArg3 = inputArg3;
         end
-            
     end
 end
 
