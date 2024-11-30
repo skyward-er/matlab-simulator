@@ -26,7 +26,7 @@ classdef SensorNew < dynamicprops
         
         % offset
         offset;                                 % Offset in all directions
-        tempOffset;                             % Coefficent for temperature depending offset
+        tempOffset;                             % Coefficient for temperature depending offset
         error2dOffset;                          % first column: inputArg, second column: relativeArg, third column: error
     end
     
@@ -34,22 +34,26 @@ classdef SensorNew < dynamicprops
         % Main methods for all sensors, here new sensors are created and
         % initialized; the function "sens" is defined here
 
-        function obj = SensorNew(is3D, isFaulty)
+        function obj = SensorNew(is3D_input, isFaulty)
             % creating a new sensor
 
             % adding Sensor3D properties if is3D == true
             obj.addprop("is3D");
-            if is3D
+            if is3D_input
                 obj.is3D = true;
 
-                obj.addprop("TD_offset");
-                obj.addprop("TD_walkDiffusionCoef");
-                obj.addprop("TD_transMatrix");
+                obj.addprop("offsetX");
+                obj.addprop("offsetY");
+                obj.addprop("offsetZ");
+                obj.addprop("walkDiffusionCoef");
+                obj.addprop("transMatrix");
 
-                obj.addprop("TD_stateWalk");
-                obj.TD_stateWalk.x = 0;
-                obj.TD_stateWalk.y = 0;
-                obj.TD_stateWalk.z = 0;
+                obj.addprop("stateWalkX");
+                obj.addprop("stateWalkY");
+                obj.addprop("stateWalkZ");
+                obj.stateWalkX = 0;
+                obj.stateWalkY = 0;
+                obj.stateWalkZ = 0;
             else
                 obj.is3D = false;
             end
@@ -87,47 +91,51 @@ classdef SensorNew < dynamicprops
         end
         
         % sens function
-        function outputArg = sens(obj,inputArg,temp)
-            if ~isstruct(inputArg)
-                inputArg = obj.addOffset(inputArg);
-                inputArg = obj.add2DOffset(inputArg,temp);
-                inputArg = obj.addTempOffset(inputArg,temp);
-                inputArg = obj.whiteNoise(inputArg);
-                inputArg = obj.quantization(inputArg);
-                inputArg = obj.saturation(inputArg);
-                outputArg = inputArg;
+        function [outputArg1, outputArg2, outputArg3] = sens(obj,temp,inputArg1,inputArg2,inputArg3)
+            if nargin == 3
+                inputArg1 = obj.addOffset(inputArg1);
+                inputArg1 = obj.add2DOffset(inputArg1,temp);
+                inputArg1 = obj.addTempOffset(inputArg1,temp);
+                inputArg1 = obj.whiteNoise(inputArg1);
+                inputArg1 = obj.quantization(inputArg1);
+                inputArg1 = obj.saturation(inputArg1);
+                outputArg1 = inputArg1;
+                outputArg2 = NaN;
+                outputArg3 = NaN;
+            elseif nargin == 5
+                [inputArg1,inputArg2,inputArg3] = obj.tranformAxis(inputArg1,inputArg2,inputArg3);
+                [inputArg1,inputArg2,inputArg3] = obj.addOffset3D(inputArg1,inputArg2,inputArg3);
+                [inputArg1,inputArg2,inputArg3] = obj.randomWalk(inputArg1,inputArg2,inputArg3);
+
+                inputArg1 = obj.addOffset(inputArg1);
+                inputArg2 = obj.addOffset(inputArg2);
+                inputArg3 = obj.addOffset(inputArg3);
+
+                inputArg1 = obj.add2DOffset(inputArg1,temp);
+                inputArg2 = obj.add2DOffset(inputArg2,temp);
+                inputArg3 = obj.add2DOffset(inputArg3,temp);
+
+                inputArg1 = obj.addTempOffset(inputArg1,temp);
+                inputArg2 = obj.addTempOffset(inputArg2,temp);
+                inputArg3 = obj.addTempOffset(inputArg3,temp);
+
+                inputArg1 = obj.whiteNoise(inputArg1);
+                inputArg2 = obj.whiteNoise(inputArg2);
+                inputArg3 = obj.whiteNoise(inputArg3);
+
+                inputArg1 = obj.quantization(inputArg1);
+                inputArg2 = obj.quantization(inputArg2);
+                inputArg3 = obj.quantization(inputArg3);
+
+                inputArg1 = obj.saturation(inputArg1);
+                inputArg2 = obj.saturation(inputArg2);
+                inputArg3 = obj.saturation(inputArg3);
+
+                outputArg1 = inputArg1;
+                outputArg2 = inputArg2;
+                outputArg3 = inputArg3;
             else
-                inputArg = obj.tranformAxis(inputArg);          
-                inputArg = obj.addOffset3D(inputArg);           
-                inputArg = obj.randomWalk(inputArg);            
-
-                inputArg.x = obj.addOffset(inputArg.x);
-                inputArg.y = obj.addOffset(inputArg.y);
-                inputArg.z = obj.addOffset(inputArg.z);
-
-                inputArg.x = obj.add2DOffset(inputArg.x,temp);
-                inputArg.y = obj.add2DOffset(inputArg.y,temp);
-                inputArg.z = obj.add2DOffset(inputArg.z,temp);
-
-                inputArg.x = obj.addTempOffset(inputArg.x,temp);
-                inputArg.y = obj.addTempOffset(inputArg.y,temp);
-                inputArg.z = obj.addTempOffset(inputArg.z,temp);
-
-                inputArg.x = obj.whiteNoise(inputArg.x);
-                inputArg.y = obj.whiteNoise(inputArg.y);
-                inputArg.z = obj.whiteNoise(inputArg.z);
-
-                inputArg.x = obj.quantization(inputArg.x);
-                inputArg.y = obj.quantization(inputArg.y);
-                inputArg.z = obj.quantization(inputArg.z);
-
-                inputArg.x = obj.saturation(inputArg.x);
-                inputArg.y = obj.saturation(inputArg.y);
-                inputArg.z = obj.saturation(inputArg.z);
-
-                outputArg.x = inputArg.x;
-                outputArg.y = inputArg.y;
-                outputArg.z = inputArg.z;
+                error("Invalid number of inputs")
             end
         end
     end
@@ -136,25 +144,25 @@ classdef SensorNew < dynamicprops
         % Main protected methods, here all the internal functions are
         % located
 
-        function [outputArg] = addOffset3D(obj,inputArg)            
-            if (~isempty(obj.TD_offset.x))
-                inputArg.x = inputArg.x + ones(size(inputArg.x)).*obj.TD_offset.x;
+        function [outputArg1,outputArg2,outputArg3] = addOffset3D(obj,inputArg1,inputArg2,inputArg3)            
+            if (~isempty(obj.offsetX))
+                inputArg1 = inputArg1 + ones(size(inputArg1)).*obj.offsetX;
             end
-            if (~isempty(obj.TD_offset.y))
-                inputArg.y = inputArg.y + ones(size(inputArg.y)).*obj.TD_offset.y;
+            if (~isempty(obj.offsetY))
+                inputArg2 = inputArg2 + ones(size(inputArg2)).*obj.offsetY;
             end
-            if (~isempty(obj.TD_offset.z))
-                inputArg.z = inputArg.z + ones(size(inputArg.z)).*obj.TD_offset.z;
+            if (~isempty(obj.offsetZ))
+                inputArg3 = inputArg3 + ones(size(inputArg3)).*obj.offsetZ;
             end
-            outputArg.x = inputArg.x;
-            outputArg.y = inputArg.y;
-            outputArg.z = inputArg.z;
+            outputArg1 = inputArg1;
+            outputArg2 = inputArg2;
+            outputArg3 = inputArg3;
         end
 
-        function [outputArg] = randomWalk(obj,inputArg)
-            if (~isempty(obj.TD_walkDiffusionCoef))
+        function [outputArg1,outputArg2,outputArg3] = randomWalk(obj,inputArg1,inputArg2,inputArg3)
+            if (~isempty(obj.walkDiffusionCoef))
                 % distance
-                s = sqrt ( 2.0 * 3 * obj.TD_walkDiffusionCoef * obj.dt ) * randn ( 1, 1);
+                s = sqrt ( 2.0 * 3 * obj.walkDiffusionCoef * obj.dt ) * randn ( 1, 1);
 
                 % direction
                 x=randn(1,1);
@@ -168,28 +176,28 @@ classdef SensorNew < dynamicprops
                 dz=z*v;
 
                 % sum random walk
-                obj.TD_stateWalk.x = obj.TD_stateWalk.x + dx;
-                obj.TD_stateWalk.y = obj.TD_stateWalk.y + dy;
-                obj.TD_stateWalk.z = obj.TD_stateWalk.z + dz;
+                obj.stateWalkX=obj.stateWalkX+dx;
+                obj.stateWalkY=obj.stateWalkY+dy;
+                obj.stateWalkZ=obj.stateWalkZ+dz;
                 
             end
             
-            outputArg.x = inputArg.x + obj.TD_stateWalk.x;
-            outputArg.y = inputArg.y + obj.TD_stateWalk.y;
-            outputArg.z = inputArg.z + obj.TD_stateWalk.z;
+            outputArg1=inputArg1+obj.stateWalkX;
+            outputArg2=inputArg2+obj.stateWalkY;
+            outputArg3=inputArg3+obj.stateWalkZ;
         end
 
-        function [outputArg] = tranformAxis(obj,inputArg)
-            if (~isempty(obj.TD_transMatrix))
-                transOut=obj.TD_transMatrix*[inputArg.x;inputArg.y;inputArg.z];
-                inputArg.x = transOut(1);
-                inputArg.y = transOut(2);
-                inputArg.z = transOut(3);
+        function [outputArg1,outputArg2,outputArg3] = tranformAxis(obj,inputArg1,inputArg2,inputArg3)
+            if (~isempty(obj.transMatrix))
+                transOut=obj.transMatrix*[inputArg1,inputArg2,inputArg3]';
+                inputArg1 = transOut(1);
+                inputArg2 = transOut(2);
+                inputArg3 = transOut(3);
             end
             
-            outputArg.x = inputArg.x;
-            outputArg.y = inputArg.y;
-            outputArg.z = inputArg.z;
+            outputArg1 = inputArg1;
+            outputArg2 = inputArg2;
+            outputArg3 = inputArg3;
         end
 
         function outputArg = addOffset(obj,inputArg)

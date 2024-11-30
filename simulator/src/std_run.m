@@ -164,7 +164,7 @@ end
 
 
 if not(settings.montecarlo)
-    fprintf('START:\n\n\n');
+    fprintf('START:\n\n');
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

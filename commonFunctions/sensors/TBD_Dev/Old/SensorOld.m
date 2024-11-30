@@ -1,4 +1,4 @@
-classdef Sensor < handle
+classdef SensorOld < handle
     
     % Author: Jan Hammelman
     % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@skywarder.eu
@@ -29,7 +29,7 @@ classdef Sensor < handle
     
     
     methods (Access='public')
-        function obj = Sensor()
+        function obj = SensorOld()
             %SENSOR Construct an instance of this class
             %   Sensor is the Superclass of all sensors
             

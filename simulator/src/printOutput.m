@@ -35,7 +35,7 @@ Points = @(AA) 175 * ((-1*cos(AA*pi/settings.z_final)+1)/2)^10;
 
 
 % DATA RECORD (display)
-fprintf('OUTCOMES:\n\n\n')
+fprintf('\n\nOUTCOMES:\n\n')
 
 % fprintf('total computational Time: %.3f [s]: \n', sum(cpuTimes))
 % fprintf('mean step computational Time: %.3f [s]: \n', mean(cpuTimes))
@@ -72,5 +72,3 @@ end
 
 fprintf('apogee: %.2f [m] \n', max_z);
 fprintf('@time: %g [sec] \n\n', T_apo)
-
-fprintf('Euroc points: %.2f/175 \n', Points(max_z));
