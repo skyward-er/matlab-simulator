@@ -376,7 +376,6 @@ while settings.flagStopIntegration && n_old < nmax                          % St
             parout = RecallOdeFcn(@ballistic, Tf, Yd, rocket, environment, wind, control, engineT0);
             [nd, ~] = size(Yd);
             Yf = [Yd, ones(nd,1)*Y0(end,15)];
-            para = NaN;
         else
             switch currentState
                 case {availableStates.powered_ascent, availableStates.unpowered_ascent}
@@ -386,7 +385,6 @@ while settings.flagStopIntegration && n_old < nmax                          % St
                     parout = RecallOdeFcn(@ballistic, Tf, Yd, rocket, environment, wind, control, engineT0);
                     [nd, ~] = size(Yd);
                     Yf = [Yd, ones(nd,1)*Y0(end,15)];
-                    para = NaN;
                 case availableStates.drogue_descent
                     if settings.parafoil; descentData.stage = 2; else; descentData.stage = 1; end
                     descentData.para = 1;
@@ -421,7 +419,6 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     else
         Tf = [t0, t1]';
         Yf = [Y0; Y0];
-        para = NaN;
     end
 
     % recall some useful parameters
