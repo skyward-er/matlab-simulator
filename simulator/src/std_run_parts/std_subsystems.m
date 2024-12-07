@@ -27,7 +27,7 @@ if settings.flagNAS && settings.dataNoise
 end
 
 %% Engine Control algorithm
-if (contains(mission.name,'2023') || contains(mission.name,'2024')) && currentState ~= availableStates.on_ground
+if (contains(mission.name,'2023') || contains(mission.name,'2024') || contains(mission.name,'2025')) && currentState ~= availableStates.on_ground
     if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
 
         if isnan(sensorTot.comb_chamber.measures(end))
@@ -75,7 +75,7 @@ if flagAeroBrakes && settings.flagNAS && settings.control && ...
         ~( strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine')) && ...
         mach < rocket.airbrakes.maxMach && Tf(end) > settings.expTimeEngineCut + contSettings.ABK_shutdown_delay
 
-    if (contains(mission.name,'2023') || contains(mission.name,'2024')) && contSettings.traj_choice == 1 && settings.expShutdown
+    if (contains(mission.name,'2023') || contains(mission.name,'2024') || contains(mission.name, '2025')) && contSettings.traj_choice == 1 && settings.expShutdown
         if ~strcmp(contSettings.algorithm,'complete')
             m = rocket.massNoMotor + rocket.motor.mass(end);
         else

@@ -12,7 +12,7 @@ eul = rad2deg(eul);
 v_ned = quatrotate(quatconj(simOutput.Y(:, 10:13)), simOutput.Y(:, 4:6));
 
 %% MASS ESTIMATION ALGORITHM
-if contains(mission.name, '2023') || contains(mission.name, '2024')
+if contains(mission.name,'2023') || contains(mission.name,'2024') || contains(mission.name,'2025')
     if (strcmp(contSettings.algorithm,'engine') || strcmp(contSettings.algorithm,'complete'))
         figures.MEA = figure('Name', 'Predicted apogee','ToolBar','auto');
         sgtitle('MEA')

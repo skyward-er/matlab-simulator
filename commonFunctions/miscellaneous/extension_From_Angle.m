@@ -8,6 +8,17 @@ function [x,varargout] = extension_From_Angle(alpha, settings, mission)
 
 switch mission.name
     
+    case '2025_Orion_Roccaraso_September'
+        x = settings.arb.extPol(1)*alpha.^4 + settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + settings.arb.extPol(4).*alpha;
+        deltaS = alpha * settings.arb.surfPol;
+        varargout{1} = deltaS;
+
+    case '2025_Orion_Portugal_October' % to be modified when updated data are available
+        
+        x = settings.arb.extPol(1)*alpha.^4 + settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + settings.arb.extPol(4).*alpha;
+        deltaS = alpha * settings.arb.surfPol;
+        varargout{1} = deltaS;
+    
     case '2024_Lyra_Roccaraso_September'
         x = settings.arb.extPol(1)*alpha.^4 + settings.arb.extPol(2)*alpha.^3+settings.arb.extPol(3)*alpha.^2 + settings.arb.extPol(4).*alpha;
         deltaS = alpha * settings.arb.surfPol;

@@ -14,7 +14,7 @@ if settings.montecarlo
 
     %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % how many simulations
-    N_sim = 60; % set to at least 500
+    N_sim = 1000; % set to at least 500
     simulationType_thrust = "gaussian";  % "gaussian", "exterme"
     displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
 
@@ -85,7 +85,7 @@ if settings.montecarlo
 
             %%% wind parameters
             wind = WindCustom(mission);
-            stoch.wind_params.altitudes = [0 500 900 1200];
+            stoch.wind_params.altitudes = [0 140 500 1000 1500 2000 2500 3000 3500 4000];
             wind.altitudes = stoch.wind_params.altitudes;
 
             stoch.wind_params.MagType = "g";
@@ -97,18 +97,18 @@ if settings.montecarlo
                     wind.magnitudeDistribution = repmat("u", size(wind.altitudes));
                     wind.magnitudeParameters = [stoch.wind_params.MagMin; stoch.wind_params.MagMax];
                 case "g"
-                    stoch.wind_params.MagMean = [4 6 5 5];                  % [m/s] Mean Wind Magnitude
-                    stoch.wind_params.MagStd = [0.8 0.8 0.8 0.8];               % [m/s] Wind Magnitude standard deviation
+                    stoch.wind_params.MagMean = [5 7 18 19 18 18 19 20 21 21];                  % [m/s] Mean Wind Magnitude
+                    stoch.wind_params.MagStd = [1.5 1.5 3 3 3 3 3 3 3 3];               % [m/s] Wind Magnitude standard deviation
 
                     wind.magnitudeDistribution = repmat("g", size(wind.altitudes));
                     wind.magnitudeParameters = [stoch.wind_params.MagMean; stoch.wind_params.MagStd];
             end
 
-            stoch.wind_params.AzType = "g";
+            stoch.wind_params.AzType = "u";
             switch stoch.wind_params.AzType
                 case "u"
-                    stoch.wind_params.AzMin = + deg2rad([0 0]);                 % [m/s] Minimum Wind Azimuth
-                    stoch.wind_params.AzMax = + deg2rad([360 360]);             % [m/s] Maximum Wind Azimuth
+                    stoch.wind_params.AzMin = + deg2rad([180 190 190 210 220 220 230 230 230 230]);                 % [m/s] Minimum Wind Azimuth
+                    stoch.wind_params.AzMax = + deg2rad([200 230 230 250 260 260 270 270 270 270]);             % [m/s] Maximum Wind Azimuth
 
                     wind.azimuthDistribution = repmat("u", size(wind.altitudes));
                     wind.azimuthParameters = [stoch.wind_params.AzMin; stoch.wind_params.AzMax];
@@ -123,8 +123,8 @@ if settings.montecarlo
             stoch.wind_params.ElType = "u";
             switch stoch.wind_params.ElType
                 case "u"
-                    stoch.wind_params.ElMin = [0 0 0 0 0 0];                 % [m/s] Minimum Wind Elevation
-                    stoch.wind_params.ElMax = [0 0 0 0 0 0];                   % [m/s] Maximum Wind Elevation
+                    stoch.wind_params.ElMin = zeros(1,10);                 % [m/s] Minimum Wind Elevation
+                    stoch.wind_params.ElMax = zeros(1,10);                   % [m/s] Maximum Wind Elevation
 
                     wind.elevationDistribution = repmat("u", size(wind.altitudes));
                     wind.elevationParameters = [stoch.wind_params.ElMin; stoch.wind_params.ElMax];
@@ -145,7 +145,7 @@ if settings.montecarlo
             stoch.mass_offset = normrnd(mu_m,sigma_m,N_sim,1);
 
 
-            % launch rail orientation
+            % launch rail elevation
             sigma_om = 2/3 *pi/180; % 2 [deg] of offset (uncertainty on ramp elevation angle)
             mu_om = environment.omega;
             stoch.OMEGA_rail = normrnd(mu_om,sigma_om,N_sim,1);

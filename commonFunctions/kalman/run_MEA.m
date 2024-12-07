@@ -26,6 +26,12 @@ z_nas(1) = sensorData.nas.states(end,3);
 vnorm_nas(1) = norm(sensorData.nas.states(end,4:6));
 vz_nas(1) = -sensorData.nas.states(end,6);
 
+ if settings.flagFlightRef
+     coeffs = contSettings.coeff_Cd;
+ else
+     coeffs = contSettings.coeffs;
+ end
+
 
 for ii = 2:length(t_mea)
     index_chambPress = sum(t_mea(ii) >= t_chambPress);
@@ -50,7 +56,7 @@ for ii = 2:length(t_mea)
         end
     end
     %accelerometer correction (not for 2023)
-    if ~contains(mission.name, '2023')
+    if contains(mission.name, '2024')
         K_t = settings.mea.K_t;
         alpha = settings.mea.alpha;
         c = settings.mea.c;
@@ -63,7 +69,7 @@ for ii = 2:length(t_mea)
         if norm(sensorTot.imu.accelerometer_measures(index_imu, :)) > acc_threshold...
                 && vz_nas(ii) > vel_threshold
 
-            cd = 1*getDrag(vz_nas(ii), -z_nas(ii), 0, contSettings.coeff_Cd); %add correction shut_down??
+            cd = 1*getDrag(vz_nas(ii), -z_nas(ii), 0, coeffs); %add correction shut_down??
             [~,~,P_e, rho] = computeAtmosphericData(-z_nas(ii));
             q = 0.5*rho*vz_nas(ii)^2; %dynamic pressure
             F_a = q*rocket.crossSection*cd;       %aerodynamic force
@@ -105,7 +111,7 @@ for ii = 2:length(t_mea)
     end
 
     %propagate apogee
-    CD = settings.CD_correction_shutDown*getDrag(vz_nas(ii), -z_nas(ii), 0, contSettings.coeff_Cd); % coeffs potrebbe essere settings.coeffs
+    CD = settings.CD_correction_shutDown*getDrag(vz_nas(ii), -z_nas(ii), 0, coeffs); % coeffs potrebbe essere settings.coeffs
     [~,~,~,rho] = computeAtmosphericData(-z_nas(ii));
 
     propagation_steps = 0;%contSettings.N_prediction_threshold - settings.mea.counter_shutdown;

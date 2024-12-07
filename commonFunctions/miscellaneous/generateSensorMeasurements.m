@@ -144,7 +144,7 @@ if isfield(freq, 'pitotFrequency')
 end
 
 %% chamber pressure sensor
-if (contains(mission.name,'2023') || contains(mission.name,'2024')) && currentState ~= availableStates.on_ground
+if (contains(mission.name,'2023') || contains(mission.name,'2024') || contains(mission.name,'2025')) && currentState ~= availableStates.on_ground
     sensorData.chamberPressure.time = (sensorTot.comb_chamber.time(end):1/freq.chamberPressureFrequency:Tf(end))';
     sensorData.chamberPressure.measures = zeros(size(sensorData.chamberPressure.time,1),1);
     sensorData.chamberPressure.measures(1) = sensorTot.comb_chamber.measures(end);
