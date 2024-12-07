@@ -121,13 +121,42 @@ switch mission.name
                 end
             end
         end
+    case '2025_Orion_Portugal_October'
+
+        load("Trajectories.mat")
+        for i = 1:size(trajectories_saving,1)
+            for j = 1:size(trajectories_saving,2)
+                reference.vz_ref{i,j} = trajectories_saving{i,j}.VZ_ref;
+                reference.vy_ref{i,j} = trajectories_saving{i,j}.VY_ref;
+                reference.vx_ref{i,j} = trajectories_saving{i,j}.VX_ref;
+                reference.altitude_ref{i,j} = trajectories_saving{i,j}.Z_ref;
+
+                for k = 1:length(reference.vz_ref{i,1})
+                    reference.Vnorm_ref{i,j}(k) = norm([reference.vz_ref{i,j}(k) reference.vx_ref{i,j}(k) reference.vy_ref{i,j}(k)]);
+                end
+            end
+        end
+    case '2025_Orion_Roccaraso_September'
+
+        load("Trajectories.mat")
+        for i = 1:size(trajectories_saving,1)
+            for j = 1:size(trajectories_saving,2)
+                reference.vz_ref{i,j} = trajectories_saving{i,j}.VZ_ref;
+                reference.vy_ref{i,j} = trajectories_saving{i,j}.VY_ref;
+                reference.vx_ref{i,j} = trajectories_saving{i,j}.VX_ref;
+                reference.altitude_ref{i,j} = trajectories_saving{i,j}.Z_ref;
+                for k = 1:length(reference.vz_ref{i,1})
+                    reference.Vnorm_ref{i,j}(k) = norm([reference.vz_ref{i,j}(k) reference.vx_ref{i,j}(k) reference.vy_ref{i,j}(k)]);
+                end
+            end
+        end
 end
 
 
 contSettings.reference.deltaZ = 10;
 heights = (0:contSettings.reference.deltaZ:settings.z_final)';
 
-if contains(mission.name,'2024') || contains(mission.name,'2023')
+if contains(mission.name, '2025') || contains(mission.name,'2024') || contains(mission.name,'2023')
 
     V_rescale = cell( size(reference.altitude_ref,1),size(reference.altitude_ref,2) );
     for j = 1 : size(reference.altitude_ref,2)

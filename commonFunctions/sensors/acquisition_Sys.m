@@ -178,7 +178,7 @@ if isfield(sensorData.pitot,'time')
 end
 
 %% Chamber Pressure acquisition loop
-if contains(mission.name,'2023') || contains(mission.name,'2024')
+if contains(mission.name,'2023') || contains(mission.name,'2024') || contains(mission.name,'2025')
     for ii=1:length(sensorData.chamberPressure.time)
         sensorData.chamberPressure.measures(ii) = sensorSettings.comb_chamber.sens(sensorData.chamberPressure.measures(ii)*1000,50); % 50 temperature in °C (random)
         sensorData.chamberPressure.measures(ii) = sensorData.chamberPressure.measures(ii)/1000;
