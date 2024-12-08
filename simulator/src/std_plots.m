@@ -9,7 +9,30 @@ eul = quat2eul(simOutput.Y(:,10:13));
 eul = flip(eul,2);
 eul = unwrap(eul);
 eul = rad2deg(eul);
-v_ned = quatrotate(quatconj(simOutput.Y(:, 10:13)), simOutput.Y(:, 4:6));
+
+% ODE velocity rotated in ned frame
+v_ned = zeros(length(simOutput.t), 3);
+drogue_idx = sum(simOutput.t <= simOutput.state_lastTimes(3));
+v_ned(1:drogue_idx,:) = quatrotate(quatconj(simOutput.Y(1:drogue_idx, 10:13)), simOutput.Y(1:drogue_idx, 4:6));
+if simOutput.state_lastTimes(6) == 0
+    v_ned(drogue_idx+1:end,:) = simOutput.Y(drogue_idx+1:end,4:6);
+else
+    prf_idx = sum(simOutput.t <= simOutput.state_lastTimes(4));
+    v_ned(drogue_idx+1:prf_idx,:) = simOutput.Y(drogue_idx+1:prf_idx,4:6);
+    v_ned(prf_idx+1:end,:) = quatrotate(quatconj(simOutput.Y(prf_idx+1:end, 10:13)), simOutput.Y(prf_idx+1:end, 4:6));
+end
+
+% NAS velocity rotated in body frame
+v_NAS_body = zeros(length(simOutput.sensors.nas.time),3);
+nas_drogue_idx = sum(simOutput.sensors.nas.time <= simOutput.state_lastTimes(3));
+v_NAS_body(1:nas_drogue_idx,:) = quatrotate(simOutput.sensors.nas.states(1:nas_drogue_idx,[10,7:9]), simOutput.sensors.nas.states(1:nas_drogue_idx, 4:6));
+if simOutput.state_lastTimes(6) == 0
+    v_NAS_body(nas_drogue_idx+1:end,:) = simOutput.sensors.nas.states(nas_drogue_idx+1:end, 4:6);
+else
+    prf_idx = sum(simOutput.sensors.nas.time <= simOutput.state_lastTimes(4));
+    v_NAS_body(nas_drogue_idx+1:prf_idx,:) = simOutput.sensors.nas.states(nas_drogue_idx+1:prf_idx, 4:6);
+    v_NAS_body(prf_idx+1:end,:) = quatrotate(simOutput.sensors.nas.states(prf_idx+1:end,[10,7:9]), simOutput.sensors.nas.states(prf_idx+1:end, 4:6));
+end
 
 %% MASS ESTIMATION ALGORITHM
 if contains(mission.name,'2023') || contains(mission.name,'2024') || contains(mission.name,'2025')
@@ -184,13 +207,13 @@ if settings.flagExportPLOTS == true
 end
 
 %% Velocities BODY w.r.t. time against NAS
-V_NAS_BODY = quatrotate(simOutput.sensors.nas.states(:,[10,7:9]), simOutput.sensors.nas.states(:, 4:6));
+
 figures.velocities_BODY = figure('Name', 'Velocities BODY','ToolBar','auto','Position',[100,100,600,400]);
 %
 subplot(3,1,1)
 plot(simOutput.t, simOutput.Y(:, 4),'DisplayName','Vx')
 hold on; grid on;
-plot(simOutput.sensors.nas.time, V_NAS_BODY(:, 1),'DisplayName','Vx est')
+plot(simOutput.sensors.nas.time, v_NAS_body(:, 1),'DisplayName','Vx est')
 if not(settings.scenario == "descent")
     xline(simOutput.ARB.allowanceTime,'k--')
 end
@@ -198,15 +221,17 @@ if settings.parafoil  && (settings.scenario == "descent" || settings.scenario ==
     xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
 xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
-xline(min(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Start pitot correction')
-xline(max(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Stop pitot correction')
+if any(~isnan(simOutput.sensors.nas.timestampPitotCorrection))
+    xline(min(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Start pitot correction')
+    xline(max(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Stop pitot correction')
+end
 ylabel('V_x [m/s]');
 legend
 %
 subplot(3,1,2)
 plot(simOutput.t, simOutput.Y(:, 5),'DisplayName','Vy')
 hold on;
-plot(simOutput.sensors.nas.time, V_NAS_BODY(:, 2),'DisplayName','Vy est')
+plot(simOutput.sensors.nas.time, v_NAS_body(:, 2),'DisplayName','Vy est')
 if not(settings.scenario == "descent")
     xline(simOutput.ARB.allowanceTime,'k--')
 end
@@ -214,15 +239,17 @@ if settings.parafoil  && (settings.scenario == "descent" || settings.scenario ==
     xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
 xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
-xline(min(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Start pitot correction')
-xline(max(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Stop pitot correction')
+if any(~isnan(simOutput.sensors.nas.timestampPitotCorrection))
+    xline(min(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Start pitot correction')
+    xline(max(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Stop pitot correction')
+end
 ylabel('V_y [m/s]');
 legend
 %
 subplot(3,1,3)
 plot(simOutput.t, simOutput.Y(:, 6),'DisplayName','Vz')
 hold on;
-plot(simOutput.sensors.nas.time, V_NAS_BODY(:, 3),'DisplayName','Vz est')
+plot(simOutput.sensors.nas.time, v_NAS_body(:, 3),'DisplayName','Vz est')
 if not(settings.scenario == "descent")
     xline(simOutput.ARB.allowanceTime,'k--','DisplayName','Air brakes opening')
 end
@@ -230,8 +257,10 @@ if settings.parafoil  && (settings.scenario == "descent" || settings.scenario ==
     xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
 xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
-xline(min(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Start pitot correction')
-xline(max(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Stop pitot correction')
+if any(~isnan(simOutput.sensors.nas.timestampPitotCorrection))
+    xline(min(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Start pitot correction')
+    xline(max(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Stop pitot correction')
+end
 xlabel('Time [s]');
 ylabel('V_z [m/s]');
 sgtitle('Velocities BODY');
@@ -241,11 +270,11 @@ if settings.flagExportPLOTS == true
 end
 
 %% Velocities NED w.r.t. time against NAS
-V_SIM_NED = quatrotate(quatconj(simOutput.Y(:,10:13)), simOutput.Y(:, 4:6));
+
 figures.velocities_NED = figure('Name', 'Velocities NED','ToolBar','auto','Position',[100,100,600,400]);
 %
 subplot(3,1,1)
-plot(simOutput.t, V_SIM_NED(:, 1),'DisplayName','Vn')
+plot(simOutput.t, v_ned(:, 1),'DisplayName','Vn')
 hold on; grid on;
 plot(simOutput.sensors.nas.time, simOutput.sensors.nas.states(:, 4),'DisplayName','Vn est')
 if not(settings.scenario == "descent")
@@ -255,7 +284,7 @@ ylabel('V_x [m/s]');
 legend
 %
 subplot(3,1,2)
-plot(simOutput.t, V_SIM_NED(:, 2),'DisplayName','Ve')
+plot(simOutput.t, v_ned(:, 2),'DisplayName','Ve')
 hold on;
 plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:, 5) ,'DisplayName','Ve est')
 if not(settings.scenario == "descent")
@@ -265,7 +294,7 @@ ylabel('V_y [m/s]');
 legend
 %
 subplot(3,1,3)
-plot(simOutput.t, V_SIM_NED(:, 3),'DisplayName','Vd')
+plot(simOutput.t, v_ned(:, 3),'DisplayName','Vd')
 hold on;
 plot(simOutput.sensors.nas.time, simOutput.sensors.nas.states(:, 6),'DisplayName','Vd est')
 if not(settings.scenario == "descent")
@@ -290,7 +319,7 @@ for i = 2:length(simOutput.sensors.nas.states(:,6))
 end
 
 for i = 2:length(simOutput.Y(:,6))
-    v_int_simulation(i) = v_int_simulation(i-1) + sum(V_SIM_NED([i-1,i],3)*0.01)/2;
+    v_int_simulation(i) = v_int_simulation(i-1) + sum(v_ned([i-1,i],3)*0.01)/2;
 end
 
 figure
