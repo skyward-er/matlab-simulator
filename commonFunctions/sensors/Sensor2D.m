@@ -18,8 +18,8 @@ classdef Sensor2D < handle
 
         % noises
         noiseType;                              % White (default) or Pink
+        noiseDataTrack1;
         noiseVariance;                          % Defining gaussian white noise
-        pink_properties;                        % Defining pink noise
         
         % offset
         offset;                                 % Offset in all directions
@@ -29,8 +29,7 @@ classdef Sensor2D < handle
     
     methods (Access = 'public')
         function obj = Sensor2D()
-        % creating a new sensor
-            obj.noiseType = "White";
+            % creating a new sensor
         end
 
         function [outputArg] = sens(obj,inputArg,temp)
@@ -67,9 +66,13 @@ classdef Sensor2D < handle
         end
 
         function outputArg = addNoise(obj,inputArg)
-            if obj.noiseType == "White"
-                inputArg=inputArg+sqrt(obj.noiseVariance).*randn(length(inputArg),1);
-            elseif obj.noiseType == "Pink"
+            if isempty(obj.noiseType)
+                obj.noiseType = "white";
+            end
+
+            if obj.noiseType == "white"
+                inputArg = inputArg+sqrt(obj.noiseVariance).*randn(length(inputArg),1);
+            elseif obj.noiseType == "pink"
                 % TBI
             end
             outputArg = inputArg;

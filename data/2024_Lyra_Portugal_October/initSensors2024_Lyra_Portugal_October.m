@@ -5,6 +5,7 @@
 % release 24/02/2024
 % latest update: Stefano Belletti (30/11/2024)
 
+load("Lyra_Port_sensor_vect_res.mat")
 
 %% barometer1 - static measure (HSCMAND001BAAA5)
 % NOTE: pressure in mbar, temp should be in C°
@@ -148,6 +149,12 @@ sensorSettings.spheroid            =   wgs84Ellipsoid;
 % NOTE: pressure in mbar, temp should be in C°;
 %       check 2D offset for chamber pressure sensor
 sensorSettings.comb_chamber = Sensor2D();
+
+
+sensorSettings.comb_chamber = loadSensorNoiseData(sensorSettings.comb_chamber, Lyra_Port_sensor_vect, "motor_Motor_TopTankPressureData.csv");
+
+
+
 sensorSettings.comb_chamber.maxMeasurementRange   =   40000;                        % 1100, 1300 in mbar
 sensorSettings.comb_chamber.minMeasurementRange   =   0;                            % 300, 10 in mbar
 sensorSettings.comb_chamber.noiseVariance         =   60000;                        % mbar
@@ -174,4 +181,32 @@ sensorSettings.pitot_total.noiseVariance         =   2*0.043043;                
 % 
 % now is in std_setInitialParams.m
 %
+
+
+%% Functions
+
+function [obj] = loadSensorNoiseData(obj, vect, name)
+
+len = length(vect);
+
+for ii = 1:len
+    found = strcmp(name, vect(ii).name);
+    if found
+        break
+    end
+end
+
+obj.noiseType = vect(ii).noise_type;
+
+if strcmp("Sensor2D", class(obj))
+    obj.noiseDataTrack1 = vect(ii).track1;
+elseif strcmp("Sensor3D", class(obj)) || strcmp("SensorGPS", class(obj))
+    obj.noiseDataTrack1 = vect(ii).track1;
+    obj.noiseDataTrack2 = vect(ii).track2;
+    obj.noiseDataTrack3 = vect(ii).track3;
+else
+    error("Not found")
+end
+
+end
 
