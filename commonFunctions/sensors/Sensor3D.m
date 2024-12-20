@@ -10,6 +10,9 @@ classdef Sensor3D < Sensor2D
     % Creating a new sensor: [obj] = Sensor3D()
     
     properties
+        noiseDataTrack2;
+        noiseDataTrack3;
+        
         offsetX;
         offsetY;
         offsetZ;
