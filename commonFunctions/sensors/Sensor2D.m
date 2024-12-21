@@ -19,6 +19,7 @@ classdef Sensor2D < handle
         % noises
         noiseType;                              % White (default) or Pink
         noiseDataTrack1;
+        noiseFactor;
         noiseVariance;                          % Defining gaussian white noise
         
         % offset
@@ -32,11 +33,11 @@ classdef Sensor2D < handle
             % creating a new sensor
         end
 
-        function [outputArg] = sens(obj,inputArg,temp)
+        function [outputArg] = sens(obj,inputArg,temp,t)
             inputArg = obj.addOffset(inputArg);
             inputArg = obj.add2DOffset(inputArg,temp);
             inputArg = obj.addTempOffset(inputArg,temp);
-            inputArg = obj.addNoise(inputArg);
+            inputArg = obj.addNoise(inputArg,t);
             inputArg = obj.quantization(inputArg);
             inputArg = obj.saturation(inputArg);
             outputArg = inputArg;
@@ -65,15 +66,20 @@ classdef Sensor2D < handle
             outputArg = inputArg;
         end
 
-        function outputArg = addNoise(obj,inputArg)
-            if isempty(obj.noiseType)
-                obj.noiseType = "white";
-            end
-
-            if obj.noiseType == "white"
-                inputArg = inputArg+sqrt(obj.noiseVariance).*randn(length(inputArg),1);
-            elseif obj.noiseType == "pink"
-                % TBI
+        function outputArg = addNoise(obj,inputArg,t)
+            if ~isempty(obj.noiseVariance)              % check for old results
+                inputArg = inputArg + sqrt(obj.noiseVariance).*randn(length(inputArg),1);
+            elseif ~isempty(obj.noiseDataTrack1)    
+                if strcmp(obj.noiseType, "white")
+                    inputArg = inputArg + sqrt(obj.noiseDataTrack1*obj.noiseFactor).*randn(length(inputArg),1);
+                elseif strcmp(obj.noiseType, "pink")
+                    for ii = 1:length(obj.noiseDataTrack1.peaks_vect_f)
+                        inputArg = inputArg + obj.noiseDataTrack1.peaks_vect_val(ii)*obj.noiseFactor*sin(2*pi*obj.noiseDataTrack1.peaks_vect_f(ii)*t + randn(1));
+                    end
+                    inputArg = inputArg + sqrt(obj.noiseDataTrack1.variance*obj.noiseFactor).*randn(length(inputArg),1);
+                else
+                    error("This noise is not defined")
+                end
             end
             outputArg = inputArg;
         end
