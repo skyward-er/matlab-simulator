@@ -15,12 +15,8 @@ sensorSettings.barometer1.minMeasurementRange   =   0;                      % 30
 sensorSettings.barometer1.bit                   =   24;                     % adc on rocket is 24 bits 
 sensorSettings.barometer1.resolution = (sensorSettings.barometer1.maxMeasurementRange -sensorSettings.barometer1.minMeasurementRange)/(2^sensorSettings.barometer1.bit);
 
-
-
 sensorSettings.barometer1 = loadSensorNoiseData(sensorSettings.barometer1, Lyra_Port_sensor_vect, "main_Main_StaticPressureData1.csv", 1);
 % sensorSettings.barometer1.noiseVariance         =   1;                      % mbar^2
-
-
 
 sensorSettings.barometer1.fault_time = 9;           % if negative it will be generated at random between a max and a min value
 sensorSettings.barometer1.max_fault_time = 96;      % max seconds to wait before possible fault
@@ -50,12 +46,8 @@ sensorSettings.barometer2.minMeasurementRange   =   0;                      % 30
 sensorSettings.barometer2.bit                   =   24;                     % adc on rocket is 24 bits 
 sensorSettings.barometer2.resolution = (sensorSettings.barometer2.maxMeasurementRange -sensorSettings.barometer2.minMeasurementRange)/(2^sensorSettings.barometer2.bit);
 
-
-
 sensorSettings.barometer2 = loadSensorNoiseData(sensorSettings.barometer2, Lyra_Port_sensor_vect, "main_Main_StaticPressureData2.csv", 1);
 % sensorSettings.barometer2.noiseVariance         =   1;                      % mbar^2
-
-
 
 sensorSettings.barometer2.fault_time = -1;          % if negative it will be generated at random between a max and a min value
 sensorSettings.barometer2.max_fault_time = 96;      % max seconds to wait before possible fault
@@ -85,12 +77,8 @@ sensorSettings.barometer3.minMeasurementRange   =   260;                    % 30
 sensorSettings.barometer3.bit                   =   24; 
 sensorSettings.barometer3.resolution = (sensorSettings.barometer3.maxMeasurementRange -sensorSettings.barometer3.minMeasurementRange)/(2^sensorSettings.barometer3.bit);
 
-
-
 sensorSettings.barometer3 = loadSensorNoiseData(sensorSettings.barometer3, Lyra_Port_sensor_vect, "main_Boardcore_LPS28DFWData.csv", 1);
 % sensorSettings.barometer3.noiseVariance         =   4.06;                   % guess in mbar
-
-
 
 sensorSettings.barometer3.fault_time = -1;          % if negative it will be generated at random between a max and a min value
 sensorSettings.barometer3.max_fault_time = 96;      % max seconds to wait before possible fault
@@ -119,12 +107,8 @@ sensorSettings.accelerometer.maxMeasurementRange   =   16000;                   
 sensorSettings.accelerometer.minMeasurementRange   =   -16000;                      % -2000, -4000, -8000, -16000 in mg
 sensorSettings.accelerometer.bit                   =   16; 
 
-
-
 sensorSettings.accelerometer = loadSensorNoiseData(sensorSettings.accelerometer, Lyra_Port_sensor_vect, "main_Boardcore_LSM6DSRXData.csv", 1);
 % sensorSettings.accelerometer.noiseVariance         =   10;                          % guess in mg 
-
-
 
 sensorSettings.accelerometer.offsetX               =   0;                           % +-90 in mg
 sensorSettings.accelerometer.offsetY               =   0;                           % +-90 in mg
@@ -139,12 +123,8 @@ sensorSettings.gyroscope.maxMeasurementRange   =   245e3;                       
 sensorSettings.gyroscope.minMeasurementRange   =   -245e3;                          % -245e3, -500e3, -2000e3 in mdps
 sensorSettings.gyroscope.bit                   =   16;
 
-
-
 sensorSettings.gyroscope = loadSensorNoiseData(sensorSettings.gyroscope, Lyra_Port_sensor_vect, "main_Boardcore_LSM6DSRXData.csv", 2);
 % sensorSettings.gyroscope.noiseVariance         =   50;                              % guess in mdps    100 was original
-
-
 
 sensorSettings.gyroscope.offsetX               =   0;                               % +-30e3 in mdps
 sensorSettings.gyroscope.offsetY               =   0;                               % +-30e3 in mdps
@@ -182,14 +162,11 @@ sensorSettings.spheroid            =   wgs84Ellipsoid;
 %       check 2D offset for chamber pressure sensor
 sensorSettings.comb_chamber = Sensor2D();
 
-
 sensorSettings.comb_chamber = loadSensorNoiseData(sensorSettings.comb_chamber, Lyra_Port_sensor_vect, "motor_Motor_TopTankPressureData.csv", 1);
-
-
+% sensorSettings.comb_chamber.noiseVariance         =   60000;                        % mbar
 
 sensorSettings.comb_chamber.maxMeasurementRange   =   40000;                        % 1100, 1300 in mbar
 sensorSettings.comb_chamber.minMeasurementRange   =   0;                            % 300, 10 in mbar
-% sensorSettings.comb_chamber.noiseVariance         =   60000;                        % mbar
 % sensorSettings.comb_chamber.error2dOffset         =   ep_data;                      % [p in mbar, T in Celsius, ep in mbar]
 sensorSettings.comb_chamber.resolution            =   1;                            % random value stolen from baro
 sensorSettings.comb_chamber.offset                =   0;
@@ -200,6 +177,7 @@ sensorSettings.pitot_static = Sensor2D();
 sensorSettings.pitot_static.maxMeasurementRange   =   1034.21;                      % mbar (15 psi)
 sensorSettings.pitot_static.minMeasurementRange   =   0;
 sensorSettings.pitot_static.bit                   =   12; 
+
 sensorSettings.pitot_static = loadSensorNoiseData(sensorSettings.pitot_static, Lyra_Port_sensor_vect, "payload_Payload_StaticPressureData.csv", 1);
 % sensorSettings.pitot_static.noiseVariance         =   0.043043;                     % from flight logs
 
