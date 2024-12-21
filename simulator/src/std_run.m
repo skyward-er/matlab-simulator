@@ -546,6 +546,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
     sensorTot.sfd.pressure(iTimes) = sensorData.barometer.measures(end);
     % sensorTot.sfd.faults(iTimes,:) = settings.faulty_sensors;
     dataRecall.true_mass(n_old:n_old+n-1, 1) = settings.parout.m'; % if you want to save other parameters, remember to go down and remove the last two values
+    dataRecall.accelerations_body(n_old:n_old+n-1, 1:3) = settings.parout.acc;
     n_old = n_old + n -1;
 
 
@@ -721,6 +722,7 @@ if settings.montecarlo
     end
     % recall
     struct_out.recall.true_mass = interp1(struct_out.t,struct_out.recall.true_mass,t_vec);
+    struct_out.recall.accelerations_body = interp1(struct_out.t,struct_out.recall.accelerations_body,t_vec);
 
     % remove the rest
     struct_out = rmfield(struct_out,{'events'});
