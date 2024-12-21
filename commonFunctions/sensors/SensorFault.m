@@ -19,6 +19,10 @@ classdef SensorFault < handle
         bit; % number of bits for the sensor ( if available)
         resolution; % resolution of the sensor
         
+        % noises
+        noiseType;                              % White (default) or Pink
+        noiseDataTrack1;
+        noiseFactor;
         noiseVariance; % Varianze for the gaussian white noise
         
         offset; % Offset in all directions
@@ -65,7 +69,7 @@ classdef SensorFault < handle
             obj = obj.reset();
         end
         
-        function outputArg = sens(obj,inputArg,temp)
+        function outputArg = sens(obj,inputArg,temp,t)
             %SENS Method to use the sensor.
             %   Gets the simulation data and extract the unideal sensor
             %   output
@@ -83,7 +87,7 @@ classdef SensorFault < handle
             % a characteristic of the transducer or sensor in question that
             % we already know it's present. 
             inputArg=obj.add2DOffset(inputArg,temp);
-            inputArg=obj.whiteNoise(inputArg);
+            inputArg=obj.addNoise(inputArg,t);
             inputArg=obj.addOffset(inputArg);
             inputArg=obj.addTempOffset(inputArg,temp);
             inputArg=obj.quantization(inputArg);
@@ -275,7 +279,7 @@ classdef SensorFault < handle
         end
         
         
-        function outputArg = whiteNoise(obj,inputArg)
+        function outputArg = addNoise(obj,inputArg,t)
             %WHITE_NOISE Includes gaussian white noise to the sensor data
             %   Adds gaussian white noise with variance noiseVariance
             %
@@ -288,10 +292,27 @@ classdef SensorFault < handle
             %  Outputs:
             %  outputArg: sensor data with white noise
             
-            if (~isempty(obj.noiseVariance))
-                %inputArg=inputArg+ones(size(inputArg)).*sqrt(obj.noiseVariance).*randn(1,1);,
-                inputArg=inputArg+sqrt(obj.noiseVariance).*randn(size(inputArg));
+            % if (~isempty(obj.noiseVariance))
+            %     %inputArg=inputArg+ones(size(inputArg)).*sqrt(obj.noiseVariance).*randn(1,1);,
+            %     inputArg=inputArg+sqrt(obj.noiseVariance).*randn(size(inputArg));
+            % end
+            % outputArg = inputArg;
+
+            if ~isempty(obj.noiseVariance)              % check for old results
+                inputArg = inputArg + sqrt(obj.noiseVariance).*randn(length(inputArg),1);
+            elseif ~isempty(obj.noiseDataTrack1)    
+                if strcmp(obj.noiseType, "white")
+                    inputArg = inputArg + sqrt(obj.noiseDataTrack1*obj.noiseFactor).*randn(length(inputArg),1);
+                elseif strcmp(obj.noiseType, "pink")
+                    for ii = 1:length(obj.noiseDataTrack1.peaks_vect_f)
+                        inputArg = inputArg + obj.noiseDataTrack1.peaks_vect_val(ii)*obj.noiseFactor*sin(2*pi*obj.noiseDataTrack1.peaks_vect_f(ii)*t + randn(1));
+                    end
+                    inputArg = inputArg + sqrt(obj.noiseDataTrack1.variance*obj.noiseFactor).*randn(length(inputArg),1);
+                else
+                    error("This noise is not defined")
+                end
             end
+
             outputArg = inputArg;
         end
                 

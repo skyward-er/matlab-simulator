@@ -18,12 +18,12 @@ classdef SensorGPS < Sensor3D
             obj=obj@Sensor3D();
         end
         
-        function [outPos, outVel] = sens(obj,state,temp,lat0,lon0)
+        function [outPos, outVel] = sens(obj,state,temp,lat0,lon0,t)
             mLat= 1/111132.95225 * state(1) + lat0;
             mLon= 1  / (111412.87733*cosd(mLat)) * state(2) + lon0;
             
             inputArg = [mLat; mLon; state(3:end)]; 
-            [outMeas] = sens@Sensor2D(obj,inputArg,temp);
+            [outMeas] = sens@Sensor2D(obj,inputArg,temp,t);
             outPos = outMeas(1:3);
             outVel = outMeas(4:6);
         end

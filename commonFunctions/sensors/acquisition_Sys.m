@@ -37,7 +37,7 @@ for i_baro = 1:3
         if isfield(sensorData.barometer_sens{i_baro},'time')
             for ii=1:length(sensorData.barometer_sens{i_baro}.time)
                 sensorData.barometer_sens{i_baro}.measures(ii,1)        =      sensorSettings.barometer1.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,...
-                    sensorData.barometer_sens{i_baro}.temperature(ii,1) - 273.15);
+                    sensorData.barometer_sens{i_baro}.temperature(ii,1) - 273.15, t);
                 sensorData.barometer_sens{i_baro}.measures(ii,1)        =      sensorData.barometer_sens{i_baro}.measures(ii)*100;
                 [~, sensorData.barometer_sens{i_baro}.measures(ii,1)] = sensorSettings.barometer1.applyFailure(sensorData.barometer_sens{i_baro}.measures(ii), t);
                 sensorData.barometer_sens{i_baro}.z(ii,1)               =     -atmospalt(sensorData.barometer_sens{i_baro}.measures(ii),'None');
@@ -47,7 +47,7 @@ for i_baro = 1:3
         if isfield(sensorData.barometer_sens{3},'time')
             for ii=1:length(sensorData.barometer_sens{i_baro}.time)
                 sensorData.barometer_sens{i_baro}.measures(ii,1)        =      sensorSettings.barometer2.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,...
-                    sensorData.barometer_sens{i_baro}.temperature(ii,1) - 273.15);
+                    sensorData.barometer_sens{i_baro}.temperature(ii,1) - 273.15, t);
                 sensorData.barometer_sens{i_baro}.measures(ii,1)        =      sensorData.barometer_sens{i_baro}.measures(ii)*100;
                 [~, sensorData.barometer_sens{i_baro}.measures(ii,1)] = sensorSettings.barometer2.applyFailure(sensorData.barometer_sens{i_baro}.measures(ii), t);
                 sensorData.barometer_sens{i_baro}.z(ii,1)               =     -atmospalt(sensorData.barometer_sens{i_baro}.measures(ii),'None');
@@ -57,7 +57,7 @@ for i_baro = 1:3
         if isfield(sensorData.barometer_sens{3},'time')
             for ii=1:length(sensorData.barometer_sens{i_baro}.time)
                 sensorData.barometer_sens{i_baro}.measures(ii,1)        =      sensorSettings.barometer3.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,...
-                    sensorData.barometer_sens{i_baro}.temperature(ii,1) - 273.15);
+                    sensorData.barometer_sens{i_baro}.temperature(ii,1) - 273.15, t);
                 sensorData.barometer_sens{i_baro}.measures(ii,1)        =      sensorData.barometer_sens{i_baro}.measures(ii)*100;
                 [~, sensorData.barometer_sens{i_baro}.measures(ii,1)] = sensorSettings.barometer3.applyFailure(sensorData.barometer_sens{i_baro}.measures(ii), t);
                 sensorData.barometer_sens{i_baro}.z(ii,1)               =     -atmospalt(sensorData.barometer_sens{i_baro}.measures(ii),'None');
@@ -92,19 +92,19 @@ if isfield(sensorData.accelerometer,'time')
             sensorData.accelerometer.measures(ii,1)*1000/9.81,...
             sensorData.accelerometer.measures(ii,2)*1000/9.81,...
             sensorData.accelerometer.measures(ii,3)*1000/9.81,...
-            14.8500);
+            14.8500, t);
         [sensorData.gyro.measures(ii,1),sensorData.gyro.measures(ii,2),sensorData.gyro.measures(ii,3)]   =      ...
             sensorSettings.gyroscope.sens( ...
             sensorData.gyro.measures(ii,1)*1000*360/2/pi,...
             sensorData.gyro.measures(ii,2)*1000*360/2/pi,...
             sensorData.gyro.measures(ii,3)*1000*360/2/pi,...
-            14.8500);
+            14.8500, t);
         [sensorData.magnetometer.measures(ii,1),sensorData.magnetometer.measures(ii,2),sensorData.magnetometer.measures(ii,3)]      =      ...
             sensorSettings.magnetometer.sens( ...
             sensorData.magnetometer.measures(ii,1)*0.01,...
             sensorData.magnetometer.measures(ii,2)*0.01,...
             sensorData.magnetometer.measures(ii,3)*0.01,...
-            14.8500);
+            14.8500, t);
         sensorData.accelerometer.measures(ii,:) = sensorData.accelerometer.measures(ii,:)*9.81/1000;
         sensorData.gyro.measures(ii,:)  = sensorData.gyro.measures(ii,:)*2*pi/360/1000;
     end
@@ -129,7 +129,7 @@ if isfield(sensorData.gps,'time')
                     sensorData.gps.velocityMeasures(ii,3); ];
 
         [sensorData.gps.positionMeasures(ii,1:3),sensorData.gps.velocityMeasures(ii,1:3)] = ...
-            sensorSettings.GPS.sens(gps_data, 14.8500, sensorSettings.lat0, sensorSettings.lon0);
+            sensorSettings.GPS.sens(gps_data, 14.8500, sensorSettings.lat0, sensorSettings.lon0, t);
         
     end
     if length(sensorData.gps.time)>1
@@ -148,9 +148,9 @@ if isfield(sensorData.pitot,'time')
     airspeed = zeros(length(sensorData.pitot.time),1);
     for ii=1:length(sensorData.pitot.time)
         sensorData.pitot.pTotMeasures(ii)       =   sensorSettings.pitot_total.sens(sensorData.pitot.pTotMeasures(ii)/100,...
-            sensorData.pitot.temperature(ii) - 273.15);
+            sensorData.pitot.temperature(ii) - 273.15, t);
         sensorData.pitot.pStatMeasures(ii)      =   sensorSettings.pitot_static.sens(sensorData.pitot.pStatMeasures(ii)/100,...
-            sensorData.pitot.temperature(ii) - 273.15);
+            sensorData.pitot.temperature(ii) - 273.15, t);
         sensorData.pitot.pTotMeasures(ii)       = sensorData.pitot.pTotMeasures(ii)*100;
         sensorData.pitot.pStatMeasures(ii)      = sensorData.pitot.pStatMeasures(ii)*100;
         gamma = 1.4;
@@ -180,7 +180,7 @@ end
 %% Chamber Pressure acquisition loop
 if contains(mission.name,'2023') || contains(mission.name,'2024') || contains(mission.name,'2025')
     for ii=1:length(sensorData.chamberPressure.time)
-        sensorData.chamberPressure.measures(ii) = sensorSettings.comb_chamber.sens(sensorData.chamberPressure.measures(ii)*1000,50); % 50 temperature in °C (random)
+        sensorData.chamberPressure.measures(ii) = sensorSettings.comb_chamber.sens(sensorData.chamberPressure.measures(ii)*1000,50,t); % 50 temperature in °C (random)
         sensorData.chamberPressure.measures(ii) = sensorData.chamberPressure.measures(ii)/1000;
     end
     if length(sensorData.chamberPressure.time)>1
