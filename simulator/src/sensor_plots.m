@@ -51,27 +51,27 @@ xlabel("Time [s]")
 std_magneticField;
 magnFieldInertial = magneticFieldApprox(-simOutput.Y(:,3)+environment.z0);
 Q = simOutput.Y(:,10:13);
-magnFieldBody = quatrotate(Q, magnFieldInertial).*0.01;
+magnFieldBody = quatrotate(Q, magnFieldInertial)/1e3;
 
 figure('Name', "Magnetometer measurements")
 subplot(3,1,1)
-plot(simOutput.sensors.imu.time, simOutput.sensors.imu.magnetometer_measures(:,1));
+plot(simOutput.sensors.imu.time, simOutput.sensors.imu.magnetometer_measures(:,1)/1e1);
 hold on; grid on;
 plot(simOutput.t, magnFieldBody(:,1));
 legend("Magnetometer", "Real");
-title("Magnetic field BODY $X\ [nT]$", 'Interpreter','latex');
+title("Magnetic field BODY $X\ [\mu T]$", 'Interpreter','latex');
 subplot(3,1,2)
-plot(simOutput.sensors.imu.time, simOutput.sensors.imu.magnetometer_measures(:,2));
+plot(simOutput.sensors.imu.time, simOutput.sensors.imu.magnetometer_measures(:,2)/1e1);
 hold on; grid on;
 plot(simOutput.t, magnFieldBody(:,2));
 legend("Magnetometer", "Real");
-title("Magnetic field BODY $Y\ [nT]$", 'Interpreter','latex');
+title("Magnetic field BODY $Y\ [\mu T]$", 'Interpreter','latex');
 subplot(3,1,3)
-plot(simOutput.sensors.imu.time, simOutput.sensors.imu.magnetometer_measures(:,3));
+plot(simOutput.sensors.imu.time, simOutput.sensors.imu.magnetometer_measures(:,3)/1e1);
 hold on; grid on;
 plot(simOutput.t, magnFieldBody(:,3));
 legend("Magnetometer", "Real");
-title("Magnetic field BODY $Z\ [nT]$", 'Interpreter','latex');
+title("Magnetic field BODY $Z\ [\mu T]$", 'Interpreter','latex');
 xlabel("Time [s]")
 
 %% GPS measurements
