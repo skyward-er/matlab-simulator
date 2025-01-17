@@ -107,7 +107,6 @@ sensorSettings.accelerometer.maxMeasurementRange   =   16000;                   
 sensorSettings.accelerometer.minMeasurementRange   =   -16000;                      % -2000, -4000, -8000, -16000 in mg
 sensorSettings.accelerometer.bit                   =   16; 
 
-sensorSettings.accelerometer = loadSensorNoiseData(sensorSettings.accelerometer, Lyra_Port_sensor_vect, "main_Boardcore_LSM6DSRXData.csv", 1);
 % sensorSettings.accelerometer.noiseVariance         =   10;                          % guess in mg 
 
 sensorSettings.accelerometer.offsetX               =   0;                           % +-90 in mg
@@ -116,6 +115,8 @@ sensorSettings.accelerometer.offsetZ               =   0;                       
 sensorSettings.accelerometer.walkDiffusionCoef     =   0;                           % guess
 sensorSettings.accelerometer.dt                    =   0.01;                        % sampling time
 
+sensorSettings.accelerometer.update(Lyra_Port_sensor_vect, "main_Boardcore_LSM6DSRXData.csv", 1);
+
 %% initial gyroscope sensor from LSM9DS1
 % NOTE: angular rate in mdps
 sensorSettings.gyroscope = Sensor3D();
@@ -123,7 +124,6 @@ sensorSettings.gyroscope.maxMeasurementRange   =   245e3;                       
 sensorSettings.gyroscope.minMeasurementRange   =   -245e3;                          % -245e3, -500e3, -2000e3 in mdps
 sensorSettings.gyroscope.bit                   =   16;
 
-sensorSettings.gyroscope = loadSensorNoiseData(sensorSettings.gyroscope, Lyra_Port_sensor_vect, "main_Boardcore_LSM6DSRXData.csv", 2);
 % sensorSettings.gyroscope.noiseVariance         =   50;                              % guess in mdps    100 was original
 
 sensorSettings.gyroscope.offsetX               =   0;                               % +-30e3 in mdps
@@ -132,6 +132,8 @@ sensorSettings.gyroscope.offsetZ               =   0;                           
 sensorSettings.gyroscope.walkDiffusionCoef     =   1;                               % guess
 sensorSettings.gyroscope.dt                    =   0.01;                            % sampling time
 sensorSettings.gyroscope.transMatrix           =   diag([1 1 1]);                   % axis transformation
+
+sensorSettings.gyroscope.update(Lyra_Port_sensor_vect, "main_Boardcore_LSM6DSRXData.csv", 2);
 
 %% initial magnetometer sensor from LSM9DS1
 % NOTE: magnetic field in mG (m Gauss)
@@ -146,6 +148,8 @@ sensorSettings.magnetometer.offsetZ               =   0;                        
 sensorSettings.magnetometer.walkDiffusionCoef     =   0;                            % guess
 sensorSettings.magnetometer.dt                    =   0.01;                         % sampling time
 sensorSettings.magnetometer.transMatrix           =   diag([1 1 1]);                % axis transformation
+
+sensorSettings.magnetometer.update();
 
 %% initial GPS sensor from NEO-M9N
 % NOTE: lon, in degree lat in degree, alt in m
@@ -162,7 +166,6 @@ sensorSettings.spheroid            =   wgs84Ellipsoid;
 %       check 2D offset for chamber pressure sensor
 sensorSettings.comb_chamber = Sensor1D();
 
-sensorSettings.comb_chamber = loadSensorNoiseData(sensorSettings.comb_chamber, Lyra_Port_sensor_vect, "motor_Motor_TopTankPressureData.csv", 1);
 % sensorSettings.comb_chamber.noiseVariance         =   60000;                        % mbar
 
 sensorSettings.comb_chamber.maxMeasurementRange   =   40000;                        % 1100, 1300 in mbar
@@ -171,6 +174,9 @@ sensorSettings.comb_chamber.minMeasurementRange   =   0;                        
 sensorSettings.comb_chamber.resolution            =   1;                            % random value stolen from baro
 sensorSettings.comb_chamber.offset                =   0;
 
+sensorSettings.comb_chamber.update(Lyra_Port_sensor_vect, "motor_Motor_TopTankPressureData.csv", 1);
+
+
 %% pitot  
 % static pressure
 sensorSettings.pitot_static = Sensor1D();
@@ -178,16 +184,18 @@ sensorSettings.pitot_static.maxMeasurementRange   =   1034.21;                  
 sensorSettings.pitot_static.minMeasurementRange   =   0;
 sensorSettings.pitot_static.bit                   =   12; 
 
-sensorSettings.pitot_static = loadSensorNoiseData(sensorSettings.pitot_static, Lyra_Port_sensor_vect, "payload_Payload_StaticPressureData.csv", 1);
 % sensorSettings.pitot_static.noiseVariance         =   0.043043;                     % from flight logs
+
+sensorSettings.pitot_static.update(Lyra_Port_sensor_vect, "payload_Payload_StaticPressureData.csv", 1);
 
 % total pressure
 sensorSettings.pitot_total = Sensor1D();
 sensorSettings.pitot_total.maxMeasurementRange   =   2*1034.21;                     % mbar (30 psi)
 sensorSettings.pitot_total.minMeasurementRange   =   0;
 sensorSettings.pitot_total.bit                   =   12; 
-sensorSettings.pitot_total = loadSensorNoiseData(sensorSettings.pitot_total, Lyra_Port_sensor_vect, "payload_Payload_StaticPressureData.csv", 1);
 % sensorSettings.pitot_total.noiseVariance         =   2*0.043043;                    % from flight logs
+
+sensorSettings.pitot_total.update(Lyra_Port_sensor_vect, "payload_Payload_StaticPressureData.csv", 1);
 
 %% total sensor initialization 
 % 
