@@ -15,17 +15,17 @@ addpath(genpath(matFolder))
 clear, clc
 close all
 
-sensor_single.name = "motor_Motor_CCPressureData.csv";
-sensor_single.noise_type = "colored";
+sensor_single.name = "payload_Payload_StaticPressureData.csv";
+sensor_single.noise_type = "pink";
 if strcmp(sensor_single.noise_type, "pink") || strcmp(sensor_single.noise_type, "colored")
-    sensor_single.colored_data.white_variance = 0.000025;
-    sensor_single.colored_data.fcut = 0.15;
+    sensor_single.colored_data.white_variance = 10;
+    sensor_single.colored_data.fcut = 0.3;
     sensor_single.colored_data.butterOrder = 1;
 end
 sensor_single.track = 2;
 sensor_single.fs = 100;
-sensor_single.bound_left = 0.35;
-sensor_single.bound_right = 0.5;
+sensor_single.bound_left = 0.2;
+sensor_single.bound_right = 0.25;
 sensor_single.bounds = [sensor_single.bound_left sensor_single.bound_right];
 
 

@@ -3,10 +3,6 @@
 clear, clc
 close all
 
-% .colored_data.white_variance = 15
-% .colored_data.fcut = 0.3
-% .colored_data.butterOrder = 1
-
 ii = 1;
 
 % Ok, check factor
@@ -23,19 +19,21 @@ Lyra_Port_sensor_vect(ii).factor = 1000;
 
 ii = ii + 1;
 
+% Ok, check factor
 Lyra_Port_sensor_vect(ii).name = "main_Main_StaticPressureData1.csv";
 Lyra_Port_sensor_vect(ii).info = "barometer1";
 Lyra_Port_sensor_vect(ii).fs = 100;
 Lyra_Port_sensor_vect(ii).noise_type = "pink";
-Lyra_Port_sensor_vect(ii).colored_data.white_variance = 15;
+Lyra_Port_sensor_vect(ii).colored_data.white_variance = 10;
 Lyra_Port_sensor_vect(ii).colored_data.fcut = 0.3;
 Lyra_Port_sensor_vect(ii).colored_data.butterOrder = 1;
-Lyra_Port_sensor_vect(ii).bounds = [0.5 0.6];
+Lyra_Port_sensor_vect(ii).bounds = [0.6 0.7];
 Lyra_Port_sensor_vect(ii).tracks = 2;
 Lyra_Port_sensor_vect(ii).factor = 0.01;
 
 ii = ii + 1;
 
+% Ok, check factor
 Lyra_Port_sensor_vect(ii).name = "main_Main_StaticPressureData2.csv";
 Lyra_Port_sensor_vect(ii).info = "barometer2";
 Lyra_Port_sensor_vect(ii).fs = 100;
@@ -63,6 +61,7 @@ Lyra_Port_sensor_vect(ii).factor = 0.01;
 
 ii = ii + 1;
 
+% Ok, check factor
 Lyra_Port_sensor_vect(ii).name = "payload_Payload_DynamicPressureData.csv";
 Lyra_Port_sensor_vect(ii).info = "DynamicPressure";
 Lyra_Port_sensor_vect(ii).fs = 100;
@@ -76,6 +75,7 @@ Lyra_Port_sensor_vect(ii).factor = 0.01;
 
 ii = ii + 1;
 
+% Ok, check factor
 Lyra_Port_sensor_vect(ii).name = "main_Boardcore_LPS28DFWData.csv";
 Lyra_Port_sensor_vect(ii).info = "barometer3";
 Lyra_Port_sensor_vect(ii).fs = 50;
@@ -86,6 +86,7 @@ Lyra_Port_sensor_vect(ii).factor = 0.01;
 
 ii = ii + 1;
 
+% Ok, check factor
 Lyra_Port_sensor_vect(ii).name = "main_Boardcore_LSM6DSRXData.csv";
 Lyra_Port_sensor_vect(ii).info = "accelerometer";
 Lyra_Port_sensor_vect(ii).fs = 440;
@@ -96,6 +97,7 @@ Lyra_Port_sensor_vect(ii).factor = 1000/9.81;
 
 ii = ii + 1;
 
+% Ok, check factor
 Lyra_Port_sensor_vect(ii).name = "main_Boardcore_LSM6DSRXData.csv";
 Lyra_Port_sensor_vect(ii).info = "initial gyroscope";
 Lyra_Port_sensor_vect(ii).fs = 440;
@@ -120,14 +122,15 @@ Lyra_Port_sensor_vect(ii).factor = 0.01;
 
 ii = ii + 1;
 
+% Ok, check factor
 Lyra_Port_sensor_vect(ii).name = "payload_Payload_StaticPressureData.csv";
 Lyra_Port_sensor_vect(ii).info = "pitot (static + total)";
 Lyra_Port_sensor_vect(ii).fs = 100;
 Lyra_Port_sensor_vect(ii).noise_type = "pink";
-Lyra_Port_sensor_vect(ii).colored_data.white_variance = 15;
+Lyra_Port_sensor_vect(ii).colored_data.white_variance = 10;
 Lyra_Port_sensor_vect(ii).colored_data.fcut = 0.3;
 Lyra_Port_sensor_vect(ii).colored_data.butterOrder = 1;
-Lyra_Port_sensor_vect(ii).bounds = [0.3 0.47];
+Lyra_Port_sensor_vect(ii).bounds = [0.2 0.25];
 Lyra_Port_sensor_vect(ii).tracks = 2;
 Lyra_Port_sensor_vect(ii).factor = 0.01;
 
