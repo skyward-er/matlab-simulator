@@ -1,46 +1,22 @@
-classdef SensorFault < handle
+classdef SensorFault < Sensor1D
     
-    % Author: Jan Hammelman
-    % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@skywarder.eu
-    % email: jan.hammelmann@skywarder.eu,alessandro.delduca@skywarder.eu
-    % Release date: 01/03/2021
-    
-    %SENSOR Super call for all sensor
-    %   Inherit from handle to have state variables which can be changed
-    %   inside a method
-    % update: Alessandro Donadi, 31/08/2023
-    %NOTE ON THE UPDATE:
-    %   Added fault simulation capabilities from the faliure simulator made
-    %   by Angelo G. Gaillet and released on 31/07/2022
-    properties (Access='public')
-        minMeasurementRange; % Max limit of sensor
-        maxMeasurementRange; % Min limit of sensor
-        
-        bit; % number of bits for the sensor ( if available)
-        resolution; % resolution of the sensor
-        
-        % noises
-        noiseType;                              % White (default) or Pink
-        noiseDataTrack1;
-        noiseFactor;
-        noiseVariance; % Varianze for the gaussian white noise
-        
-        offset; % Offset in all directions
-        
-        tempOffset; % Coefficent for temperature depending offset
-        
-        dt; % Sampling time
-        
-        error2dOffset; % first column: inputArg, second column: relativeArg, third column: error
+    % Author: Stefano Belletti, Samuel Flore
+    % Skyward Experimental Rocketry | AVN - GNC
+    % email: stefano.belletti@skywarder.eu
+    % Release date: 18/11/2024
+    % 
+    % Sensor class for SensorFault
+    % 
+    % Creating a new sensor: [obj] = Sensor1D()
 
+    properties (Access='public')
         fault_time; % if set to -1 it will be randomly chosen between a min and a max time in seconds
 
         max_fault_time; %upper bound of the time window where the fault can occur in case it's randomly chosen
 
         min_fault_time; %lower bound of the time window where the fault can occur in case it's randomly chosen
-    end
 
-    properties (Access = public) %attributes used for fault simulation
+        % attributes used for fault simulation
         failureType;
         fault_offset;
         lambda;
@@ -231,191 +207,33 @@ classdef SensorFault < handle
     
     
     methods (Access='protected')
-        function outputArg = saturation(obj,inputArg)
-            %SATURATION Includes saturation to the sensor model
-            %   inputArg is limited to minMeasurementRange at the lower end and maxMeasurementRange at the upper end
-            %
-            %  Necessary properties:
-            %  minMeasurementRange: Max limit of sensor
-            %  maxMeasurementRange: Min limit of sensor
-            %
-            %  Inputs:
-            %  inputArg: sensor data
-            %  
-            %  Outputs:
-            %  outputArg: sensor data with saturation
-            
-            % checks if sensor data is higher than max possible value
-            if (~isempty(obj.maxMeasurementRange))
-                inputArg(inputArg>obj.maxMeasurementRange)=obj.maxMeasurementRange;
-            end
-            
-            % checks if sensor data is lower than min possible value
-            if (~isempty(obj.minMeasurementRange))
-                inputArg(inputArg<obj.minMeasurementRange)=obj.minMeasurementRange;
-            end
-            
-            outputArg = inputArg;
-        end
-        
-        
-        function outputArg = quantization(obj,inputArg)
-            %QUATIZATION Quantize the sensor data
-            %   Quantizes the signal with the resolution properie of the object
-            %
-            %  Necessary properties:
-            %  resolution: resolution of the sensor
-            %
-            %  Inputs:
-            %  inputArg: sensor data
-            %  
-            %  Outputs:
-            %  outputArg: quantized sensor data
-            
-            if (~isempty(obj.resolution))
-                inputArg = obj.resolution*round(inputArg/obj.resolution);
-            end
-            outputArg = inputArg;
-        end
-        
-        
-        function outputArg = addNoise(obj,inputArg,t)
-            %WHITE_NOISE Includes gaussian white noise to the sensor data
-            %   Adds gaussian white noise with variance noiseVariance
-            %
-            %  Necessary properties:
-            %  noiseVariance: Varianze for the gaussian white noise
-            %
-            %  Inputs:
-            %  inputArg: sensor data
-            %  
-            %  Outputs:
-            %  outputArg: sensor data with white noise
-            
-            % if (~isempty(obj.noiseVariance))
-            %     %inputArg=inputArg+ones(size(inputArg)).*sqrt(obj.noiseVariance).*randn(1,1);,
-            %     inputArg=inputArg+sqrt(obj.noiseVariance).*randn(size(inputArg));
-            % end
-            % outputArg = inputArg;
-
-            if ~isempty(obj.noiseVariance)              % check for old results
-                inputArg = inputArg + sqrt(obj.noiseVariance).*randn(length(inputArg),1);
-            elseif ~isempty(obj.noiseDataTrack1)    
-                if strcmp(obj.noiseType, "white")
-                    inputArg = inputArg + sqrt(obj.noiseDataTrack1*obj.noiseFactor).*randn(length(inputArg),1);
-                elseif strcmp(obj.noiseType, "pink")
-                    for ii = 1:length(obj.noiseDataTrack1.peaks_vect_f)
-                        inputArg = inputArg + obj.noiseDataTrack1.peaks_vect_val(ii)*obj.noiseFactor*sin(2*pi*obj.noiseDataTrack1.peaks_vect_f(ii)*t + randn(1));
-                    end
-                    inputArg = inputArg + sqrt(obj.noiseDataTrack1.variance*obj.noiseFactor).*randn(length(inputArg),1);
-                else
-                    error("This noise is not defined")
-                end
-            end
-
-            outputArg = inputArg;
-        end
-                
-        
-        function outputArg = addOffset(obj,inputArg)
-            %ADD_OFFSET Adds an offset to the signal
-            %   adds the propertie offset to the input signal
-            %
-            %  Necessary properties:
-            %  offset: Offset in all directions
-            %
-            %  Inputs:
-            %  inputArg: sensor data
-            %  
-            %  Outputs:
-            %  outputArg: sensor data plus offset
-            
-            if (~isempty(obj.offset))
-                inputArg=inputArg+ones(size(inputArg)).*obj.offset;
-            end
-            outputArg = inputArg;
-        end
-        
-        
-        function outputArg = addTempOffset(obj,inputArg,temp)
-            %ADD_Temp_OFFSET Adds an temperature dependen offset to the signal
-            %   adds the propertie tempOffset multiplied by the temperature input temp to the input signal
-            %
-            %  Necessary properties:
-            %  tempOffset: Coefficent for temperature depending offset
-            %
-            %  Inputs:
-            %  inputArg: sensor data
-            %  temp: temperature of the sensor
-            %  
-            %  Outputs:
-            %  outputArg: sensor data plus temerature depending offset
-            
-            if (~isempty(obj.tempOffset))
-                inputArg=inputArg+ones(size(inputArg)).*temp*obj.tempOffset;
-            end
-            outputArg = inputArg;
-        end
-        
-        
-        function outputArg = add2DOffset(obj,inputArg,temp)
-            %ADD_2D_OFFSET Adds a offset that depends on the inputArg and temp
-            %  The offset is linear interpolated with the data in matrice error2dOffset
-            %
-            %  Necessary properties:
-            %  error2dOffset: data for offset with first column: inputArg, second column: relativeArg, third column: error
-            %
-            %  Inputs:
-            %  inputArg: sensor data
-            %  temp: temperature of the sensor
-            %  
-            %  Outputs:
-            %  outputArg: sensor data plus 2D depending offset
-            
-            if (~isempty(obj.error2dOffset))
-                inputArg=inputArg+...
-                    griddata(obj.error2dOffset(:,1),obj.error2dOffset(:,2),obj.error2dOffset(:,3),inputArg,temp);
-            end
-            outputArg = inputArg;
-        end
-        
         function obj = reset(obj) %method
-                obj.failureType = 'None';
-                obj.fault_offset = 0;
-                obj.lambda = 0;
-                obj.sigmaDeg = 0;
-                obj.sigmaIS = 0;
-                obj.tError = 0;
-                obj.gain = 1;
-                obj.value = 0;
-                obj.likelihoodFS = 0;
-                obj.likelihoodIS = 0;
-                obj.alsoNegSpikes = false;
-                obj.severity = 0;
-                obj.randomSpikeAmpl = false;
-                obj.satMax = inf;
-                obj.satMin = -inf;
-                obj.settings.saturateFlag = false;
-                obj.settings.bias = false;
-                obj.settings.drift = false;
-                obj.settings.degradation = false;
-                obj.settings.freezing = false;
-                obj.settings.calerr = false;
-                obj.settings.fs = false;
-                obj.settings.is = false;
-    
-                obj.frozenValue = nan;
-            end
+            obj.failureType = 'None';
+            obj.fault_offset = 0;
+            obj.lambda = 0;
+            obj.sigmaDeg = 0;
+            obj.sigmaIS = 0;
+            obj.tError = 0;
+            obj.gain = 1;
+            obj.value = 0;
+            obj.likelihoodFS = 0;
+            obj.likelihoodIS = 0;
+            obj.alsoNegSpikes = false;
+            obj.severity = 0;
+            obj.randomSpikeAmpl = false;
+            obj.satMax = inf;
+            obj.satMin = -inf;
+            obj.settings.saturateFlag = false;
+            obj.settings.bias = false;
+            obj.settings.drift = false;
+            obj.settings.degradation = false;
+            obj.settings.freezing = false;
+            obj.settings.calerr = false;
+            obj.settings.fs = false;
+            obj.settings.is = false;
 
-    
-    end
-    
-    methods (Access = private)
-    
-        function data = saturate(data)
-            data = max(obj.satMin, min(obj.satMax, data));
+            obj.frozenValue = nan;
         end
-    
     end
 end
 

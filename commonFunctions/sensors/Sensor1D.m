@@ -87,10 +87,10 @@ classdef Sensor1D < handle
                 if found
                     obj.noiseType = vect(ii).noise_type;
                     
-                    if isa(obj,"Sensor1D") || isa(obj,"SensorFault")
+                    if strcmp("Sensor1D", class(obj)) || strcmp("SensorFault", class(obj))
                         obj.noiseDataTrack1 = vect(ii).track1;
                         obj.noiseFactor = vect(ii).factor;
-                    elseif isa(obj,"Sensor3D") || isa(obj,"SensorGPS")
+                    elseif strcmp("Sensor3D", class(obj)) || strcmp("SensorGPS", class(obj))
                         obj.noiseDataTrack1 = vect(ii).track1;
                         obj.noiseDataTrack2 = vect(ii).track2;
                         obj.noiseDataTrack3 = vect(ii).track3;
@@ -99,9 +99,9 @@ classdef Sensor1D < handle
                         error("Sensor not defined")
                     end
                 else
-                    if isa(obj,"Sensor1D") || isa(obj,"SensorFault")
+                    if strcmp("Sensor1D", class(obj)) || strcmp("SensorFault", class(obj))
                         obj.noiseDataTrack1 = [];
-                    elseif isa(obj,"Sensor3D") || isa(obj,"SensorGPS")
+                    elseif strcmp("Sensor3D", class(obj)) || strcmp("SensorGPS", class(obj))
                         obj.noiseDataTrack1 = [];
                         obj.noiseDataTrack2 = [];
                         obj.noiseDataTrack3 = [];

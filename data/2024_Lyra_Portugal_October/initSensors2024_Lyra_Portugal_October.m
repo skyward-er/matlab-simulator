@@ -13,9 +13,9 @@ sensorSettings.barometer1 = SensorFault();
 sensorSettings.barometer1.maxMeasurementRange   =   1000;                   % 1100, 1300 in mbar
 sensorSettings.barometer1.minMeasurementRange   =   0;                      % 300, 10 in mbar
 sensorSettings.barometer1.bit                   =   24;                     % adc on rocket is 24 bits 
-sensorSettings.barometer1.resolution = (sensorSettings.barometer1.maxMeasurementRange -sensorSettings.barometer1.minMeasurementRange)/(2^sensorSettings.barometer1.bit);
+% sensorSettings.barometer1.resolution = (sensorSettings.barometer1.maxMeasurementRange -sensorSettings.barometer1.minMeasurementRange)/(2^sensorSettings.barometer1.bit);
 
-sensorSettings.barometer1 = loadSensorNoiseData(sensorSettings.barometer1, Lyra_Port_sensor_vect, "main_Main_StaticPressureData1.csv", 1);
+% sensorSettings.barometer1 = loadSensorNoiseData(sensorSettings.barometer1, Lyra_Port_sensor_vect, "main_Main_StaticPressureData1.csv", 1);
 % sensorSettings.barometer1.noiseVariance         =   1;                      % mbar^2
 
 sensorSettings.barometer1.fault_time = 9;           % if negative it will be generated at random between a max and a min value
@@ -38,15 +38,17 @@ switch  settings.fault_sim.fault_type(1)
     otherwise
 end
 
+sensorSettings.barometer1.update(Lyra_Port_sensor_vect, "main_Main_StaticPressureData1.csv", 1);
+
 %% barometer2 - static measure (HSCMAND001BAAA5)
 % NOTE: pressure in mbar, temp should be in C°
 sensorSettings.barometer2 = SensorFault();
 sensorSettings.barometer2.maxMeasurementRange   =   1000;                   % 1100, 1300 in mbar
 sensorSettings.barometer2.minMeasurementRange   =   0;                      % 300, 10 in mbar
 sensorSettings.barometer2.bit                   =   24;                     % adc on rocket is 24 bits 
-sensorSettings.barometer2.resolution = (sensorSettings.barometer2.maxMeasurementRange -sensorSettings.barometer2.minMeasurementRange)/(2^sensorSettings.barometer2.bit);
+% sensorSettings.barometer2.resolution = (sensorSettings.barometer2.maxMeasurementRange -sensorSettings.barometer2.minMeasurementRange)/(2^sensorSettings.barometer2.bit);
 
-sensorSettings.barometer2 = loadSensorNoiseData(sensorSettings.barometer2, Lyra_Port_sensor_vect, "main_Main_StaticPressureData2.csv", 1);
+% sensorSettings.barometer2 = loadSensorNoiseData(sensorSettings.barometer2, Lyra_Port_sensor_vect, "main_Main_StaticPressureData2.csv", 1);
 % sensorSettings.barometer2.noiseVariance         =   1;                      % mbar^2
 
 sensorSettings.barometer2.fault_time = -1;          % if negative it will be generated at random between a max and a min value
@@ -69,15 +71,17 @@ switch  settings.fault_sim.fault_type(2)
     otherwise
 end
 
+sensorSettings.barometer2.update(Lyra_Port_sensor_vect, "main_Main_StaticPressureData2.csv", 1);
+
 %% barometer3 - digital measure (LPS28DFWTR)
 % NOTE: pressure in mbar, temp should be in C°
 sensorSettings.barometer3 = SensorFault();
 sensorSettings.barometer3.maxMeasurementRange   =   4060;                   % 1100, 1300 in mbar
 sensorSettings.barometer3.minMeasurementRange   =   260;                    % 300, 10 in mbar
 sensorSettings.barometer3.bit                   =   24; 
-sensorSettings.barometer3.resolution = (sensorSettings.barometer3.maxMeasurementRange -sensorSettings.barometer3.minMeasurementRange)/(2^sensorSettings.barometer3.bit);
+% sensorSettings.barometer3.resolution = (sensorSettings.barometer3.maxMeasurementRange -sensorSettings.barometer3.minMeasurementRange)/(2^sensorSettings.barometer3.bit);
 
-sensorSettings.barometer3 = loadSensorNoiseData(sensorSettings.barometer3, Lyra_Port_sensor_vect, "main_Boardcore_LPS28DFWData.csv", 1);
+% sensorSettings.barometer3 = loadSensorNoiseData(sensorSettings.barometer3, Lyra_Port_sensor_vect, "main_Boardcore_LPS28DFWData.csv", 1);
 % sensorSettings.barometer3.noiseVariance         =   4.06;                   % guess in mbar
 
 sensorSettings.barometer3.fault_time = -1;          % if negative it will be generated at random between a max and a min value
@@ -99,6 +103,8 @@ switch  settings.fault_sim.fault_type(3)
         [sensorSettings.barometer3, fault_time_3] = sensorSettings.barometer3.setErrorTime(); % in seconds
     otherwise
 end
+
+sensorSettings.barometer3.update(Lyra_Port_sensor_vect, "main_Boardcore_LPS28DFWData.csv", 1);
 
 %% accelerometer (6 dof imu - LSM6DSRXTR)
 % NOTE: acceleration in mg
