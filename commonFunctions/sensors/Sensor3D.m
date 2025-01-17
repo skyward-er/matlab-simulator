@@ -142,6 +142,8 @@ classdef Sensor3D < Sensor1D
                     inputArg1 = inputArg1 + sqrt(obj.noiseDataTrack1.variance*obj.noiseFactor).*randn(length(inputArg1),1);
                     inputArg2 = inputArg2 + sqrt(obj.noiseDataTrack2.variance*obj.noiseFactor).*randn(length(inputArg2),1);
                     inputArg3 = inputArg3 + sqrt(obj.noiseDataTrack3.variance*obj.noiseFactor).*randn(length(inputArg3),1);
+                elseif strcmp(obj.noiseType, "colored")
+                    error("Yet to be implemented")
                 else
                     error("This noise is not defined")
                 end

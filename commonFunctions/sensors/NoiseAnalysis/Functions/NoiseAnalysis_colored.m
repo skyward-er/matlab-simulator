@@ -1,4 +1,4 @@
-function [sensor_vect] = NoiseAnalysis_pink(sensor_vect, sensor_number, track, plot_val)
+function [sensor_vect] = NoiseAnalysis_colored(sensor_vect, sensor_number, track, plot_val)
 
 fprintf("Sensor analyzed: %s, track: %d and noise type: %s\n\n", sensor_vect(sensor_number).name, track, sensor_vect(sensor_number).noise_type);
 
@@ -11,10 +11,6 @@ b_right = sensor_vect(sensor_number).bounds(2);
 white_variance = sensor_vect(sensor_number).colored_data.white_variance;
 fcut = sensor_vect(sensor_number).colored_data.fcut;
 butterOrder = sensor_vect(sensor_number).colored_data.butterOrder;
-
-
-%% Magic value
-temp_val = 0.1;
 
 
 %% Noise extraction
@@ -47,65 +43,19 @@ tf = length(noise)/fs;
 t = 0:1/fs:tf;
 [G_n,f] = dft(noise,t);
 
-
-%% Peaks identification & pink noise creator
-max_height = round(max(abs(G_n))*temp_val);
-
 if plot_val
     figure(3)
     subplot(1,2,1), hold on, hold on, grid on, title("Real noise"), xlabel("f [Hz]"), ylabel("|fft(X)|")
     plot(f,abs(G_n))
-    plot([0 max(f)], [max_height max_height], '.--')
-end
-
-peaks_count = 0;
-peaks_vect_val = [];
-peaks_vect_f = [];
-peaks_last = 0;
-for ii = round(length(G_n)/2) : length(G_n)-1
-    if abs(G_n(ii)) > max_height && abs(G_n(ii+1)) < abs(G_n(ii)) && ii-peaks_last>1
-        peaks_count = peaks_count + 1;
-        peaks_vect_val = [peaks_vect_val abs(G_n(ii))];
-        peaks_vect_f = [peaks_vect_f f(ii)];
-        peaks_last = ii;
-        
-        if plot_val
-            plot(f(ii), abs(G_n(ii)), 'or')
-        end
-    end
-end
-
-% Peaks creator as sine waves
-factor = 2/(length(t));               % normalize the height
-sine_vect = zeros(1,length(t));
-for ii = 1:length(peaks_vect_val)
-    sine_vect = sine_vect + factor*peaks_vect_val(ii)*sin(2*pi*peaks_vect_f(ii)*t + randn(1));
 end
 
 
-
-%% Noise cut for variance
-% new_vect=zeros(1,length(G_n));
-% for ii = 1:length(G_n)
-%     if abs(G_n(ii)) < max_height
-%         new_vect(ii) = G_n(ii);
-%     else
-%         new_vect(ii) = 0;
-%     end
-% end
-% figure
-% plot(f,abs(new_vect))
-% 
-% signal_new = idft(new_vect',f,t);
-% variance1 = var(signal_new);
-
-
-%% Pink noise creator
+%% Colored noise creator
 white_noise = sqrt(white_variance)*randn(size(t));
 
 [b, a] = butter(butterOrder, fcut, 'low');
 pink_noise = filter(b, a, white_noise);
-noise_modeled = sine_vect + pink_noise;
+noise_modeled = pink_noise;
 
 
 %% Final plots
@@ -137,17 +87,17 @@ if ~plot_val
     end
     switch track
         case 2
-            sensor_vect(sensor_number).track1.peaks_vect_f = peaks_vect_f;
-            sensor_vect(sensor_number).track1.peaks_vect_val = factor*peaks_vect_val;
-            sensor_vect(sensor_number).track1.variance = white_variance*sensor_vect(sensor_number).factor;
+            sensor_vect(sensor_number).track1.white_variance = white_variance*sensor_vect(sensor_number).factor;
+            sensor_vect(sensor_number).track1.fcut = fcut;
+            sensor_vect(sensor_number).track1.butterOrder = butterOrder;
         case 3
-            sensor_vect(sensor_number).track2.peaks_vect_f = peaks_vect_f;
-            sensor_vect(sensor_number).track2.peaks_vect_val = factor*peaks_vect_val;
-            sensor_vect(sensor_number).track2.variance = white_variance*sensor_vect(sensor_number).factor;
+            sensor_vect(sensor_number).track2.white_variance = white_variance*sensor_vect(sensor_number).factor;
+            sensor_vect(sensor_number).track2.fcut = fcut;
+            sensor_vect(sensor_number).track2.butterOrder = butterOrder;
         case 4
-            sensor_vect(sensor_number).track3.peaks_vect_f = peaks_vect_f;
-            sensor_vect(sensor_number).track3.peaks_vect_val = factor*peaks_vect_val;
-            sensor_vect(sensor_number).track3.variance = white_variance*sensor_vect(sensor_number).factor;
+            sensor_vect(sensor_number).track3.white_variance = white_variance*sensor_vect(sensor_number).factor;
+            sensor_vect(sensor_number).track3.fcut = fcut;
+            sensor_vect(sensor_number).track3.butterOrder = butterOrder;
     end
 end
 

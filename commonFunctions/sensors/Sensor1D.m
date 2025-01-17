@@ -20,6 +20,7 @@ classdef Sensor1D < handle
         noiseType;                              % White (default) or Pink
         noiseDataTrack1;
         noiseFactor;
+        colored_opts;
         noiseVariance;                          % Defining gaussian white noise
         
         % offset
@@ -98,6 +99,13 @@ classdef Sensor1D < handle
                     else
                         error("Sensor not defined")
                     end
+
+                    if strcmp(obj.noiseType, "colored")
+                        obj.colored_opts.white_variance = vect(ii).colored_data.white_variance;
+                        obj.colored_opts.fcut = vect(ii).colored_data.fcut;
+                        obj.colored_opts.butterOrder = vect(ii).colored_data.butterOrder;
+                        obj.colored_opts.filterStatus = 0;
+                    end
                 else
                     if strcmp("Sensor1D", class(obj)) || strcmp("SensorFault", class(obj))
                         obj.noiseDataTrack1 = [];
@@ -149,6 +157,10 @@ classdef Sensor1D < handle
                         inputArg = inputArg + obj.noiseDataTrack1.peaks_vect_val(ii)*obj.noiseFactor*sin(2*pi*obj.noiseDataTrack1.peaks_vect_f(ii)*t + randn(1));
                     end
                     inputArg = inputArg + sqrt(obj.noiseDataTrack1.variance*obj.noiseFactor).*randn(length(inputArg),1);
+                elseif strcmp(obj.noiseType, "colored")
+                    inputArg = inputArg + sqrt(obj.colored_opts.white_variance*obj.noiseFactor).*randn(length(inputArg),1);
+                    [b, a] = butter(obj.colored_opts.butterOrder, obj.colored_opts.fcut, 'low');
+                    [inputArg, obj.colored_opts.filterStatus] = filter(b, a, inputArg, obj.colored_opts.filterStatus);
                 else
                     error("This noise is not defined")
                 end

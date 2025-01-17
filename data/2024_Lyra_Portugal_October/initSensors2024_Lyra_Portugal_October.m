@@ -155,7 +155,7 @@ sensorSettings.comb_chamber.minMeasurementRange   =   0;                        
 sensorSettings.comb_chamber.resolution            =   1;                            % random value stolen from baro
 sensorSettings.comb_chamber.offset                =   0;
 
-sensorSettings.comb_chamber.update(Lyra_Port_sensor_vect, "motor_Motor_TopTankPressureData.csv", 1);
+sensorSettings.comb_chamber.update(Lyra_Port_sensor_vect, "motor_Motor_CCPressureData.csv", 1);
 
 
 %% pitot  
@@ -171,7 +171,7 @@ sensorSettings.pitot_total = Sensor1D();
 sensorSettings.pitot_total.maxMeasurementRange   =   2*1034.21;                     % mbar (30 psi)
 sensorSettings.pitot_total.minMeasurementRange   =   0;
 sensorSettings.pitot_total.bit                   =   12; 
-sensorSettings.pitot_total.update(Lyra_Port_sensor_vect, "payload_Payload_StaticPressureData.csv", 1);
+sensorSettings.pitot_total.update(Lyra_Port_sensor_vect, "payload_Payload_DynamicPressureData.csv", 1);
 
 %% total sensor initialization 
 % 

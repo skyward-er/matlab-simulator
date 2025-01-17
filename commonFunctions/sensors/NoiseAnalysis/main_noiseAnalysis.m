@@ -16,7 +16,12 @@ clear, clc
 close all
 
 sensor_single.name = "motor_Motor_CCPressureData.csv";
-sensor_single.noise_type = "white";
+sensor_single.noise_type = "colored";
+if strcmp(sensor_single.noise_type, "pink") || strcmp(sensor_single.noise_type, "colored")
+    sensor_single.colored_data.white_variance = 0.000025;
+    sensor_single.colored_data.fcut = 0.15;
+    sensor_single.colored_data.butterOrder = 1;
+end
 sensor_single.track = 2;
 sensor_single.fs = 100;
 sensor_single.bound_left = 0.35;
@@ -39,6 +44,8 @@ if sensor_single.noise_type == "white"
     sensor_vect = NoiseAnalysis_white(sensor_single, 1, sensor_single.track, 1);
 elseif sensor_single.noise_type == "pink"
     sensor_vect = NoiseAnalysis_pink(sensor_single, 1, sensor_single.track, 1);
+elseif sensor_single.noise_type == "colored"
+    sensor_vect = NoiseAnalysis_colored(sensor_single, 1, sensor_single.track, 1);
 else
     error("Noise type is neither 'white' nor 'pink'")
 end
@@ -64,8 +71,10 @@ for sensor_num  = 1:length(Lyra_Port_sensor_vect)
             Lyra_Port_sensor_vect = NoiseAnalysis_white(Lyra_Port_sensor_vect, sensor_num, track, 0);
         elseif Lyra_Port_sensor_vect(sensor_num).noise_type == "pink"
             Lyra_Port_sensor_vect = NoiseAnalysis_pink(Lyra_Port_sensor_vect, sensor_num, track, 0);
+        elseif Lyra_Port_sensor_vect(sensor_num).noise_type == "colored"
+            Lyra_Port_sensor_vect = NoiseAnalysis_colored(Lyra_Port_sensor_vect, sensor_num, track, 0);
         else
-            error("Noise type is neither 'white' nor 'pink'")
+            error("Noise type is not 'white', 'pink' or 'colored'")
         end
     end
 end
@@ -75,7 +84,7 @@ save(save_name, name)
 
 %% 3 - fs
 
-name = "payload_Payload_StaticPressureData.csv";
+name = sensor_single.name;
 track = 1;              % timestamp track
 
 timestamp = importdata(name).data;
