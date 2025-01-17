@@ -1,4 +1,4 @@
-classdef Sensor3D < Sensor2D
+classdef Sensor3D < Sensor1D
 
     % Author: Stefano Belletti, Samuel Flore
     % Skyward Experimental Rocketry | AVN - GNC

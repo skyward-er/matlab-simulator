@@ -23,7 +23,7 @@ classdef SensorGPS < Sensor3D
             mLon= 1  / (111412.87733*cosd(mLat)) * state(2) + lon0;
             
             inputArg = [mLat; mLon; state(3:end)]; 
-            [outMeas] = sens@Sensor2D(obj,inputArg,temp,t);
+            [outMeas] = sens@Sensor1D(obj,inputArg,temp,t);
             outPos = outMeas(1:3);
             outVel = outMeas(4:6);
         end

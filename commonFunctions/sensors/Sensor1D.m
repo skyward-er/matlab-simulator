@@ -1,13 +1,13 @@
-classdef Sensor2D < handle
+classdef Sensor1D < handle
 
     % Author: Stefano Belletti, Samuel Flore
     % Skyward Experimental Rocketry | AVN - GNC
     % email: stefano.belletti@skywarder.eu
     % Release date: 18/11/2024
     % 
-    % Sensor class for 2D sensors
+    % Sensor class for 1D sensors
     % 
-    % Creating a new sensor: [obj] = Sensor2D()
+    % Creating a new sensor: [obj] = Sensor1D()
     
     properties
         minMeasurementRange;                    % Max limit of sensor
@@ -15,7 +15,7 @@ classdef Sensor2D < handle
         bit;                                    % Number of bits for the sensor (if available)
         resolution;                             % resolution of the sensor (set internally if bit is available)
         dt;                                     % Sampling time
-
+        
         % noises
         noiseType;                              % White (default) or Pink
         noiseDataTrack1;
@@ -29,11 +29,13 @@ classdef Sensor2D < handle
     end
     
     methods (Access = 'public')
-        function obj = Sensor2D()
+        function obj = Sensor1D()
             % creating a new sensor
         end
 
         function [outputArg] = sens(obj,inputArg,temp,t)
+            % Sens loop: here the ideal input is transformed into the real
+            % output
             inputArg = obj.addOffset(inputArg);
             inputArg = obj.add2DOffset(inputArg,temp);
             inputArg = obj.addTempOffset(inputArg,temp);
@@ -46,6 +48,7 @@ classdef Sensor2D < handle
 
     methods (Access = 'protected')
         function outputArg = addOffset(obj,inputArg)
+            % Adding offset to a 2D sensor
             if (~isempty(obj.offset))
                 inputArg=inputArg+ones(size(inputArg)).*obj.offset;
             end
@@ -60,6 +63,7 @@ classdef Sensor2D < handle
         end
 
         function outputArg = addTempOffset(obj,inputArg,temp)
+            % Add temperature offset
             if (~isempty(obj.tempOffset))
                 inputArg=inputArg+ones(size(inputArg)).*temp*obj.tempOffset;
             end
@@ -67,6 +71,7 @@ classdef Sensor2D < handle
         end
 
         function outputArg = addNoise(obj,inputArg,t)
+            % Add noise
             if ~isempty(obj.noiseVariance)              % check for old results
                 inputArg = inputArg + sqrt(obj.noiseVariance).*randn(length(inputArg),1);
             elseif ~isempty(obj.noiseDataTrack1)    
@@ -85,6 +90,7 @@ classdef Sensor2D < handle
         end
 
         function outputArg = quantization(obj,inputArg)
+            % Quantization of the input
             if isempty(obj.resolution)
                 if (~isempty(obj.maxMeasurementRange)) && (~isempty(obj.minMeasurementRange)) && (~isempty(obj.bit))
                     obj.resolution = (obj.maxMeasurementRange - obj.minMeasurementRange)/(2^obj.bit);
@@ -96,7 +102,8 @@ classdef Sensor2D < handle
             outputArg = inputArg;
         end
 
-        function outputArg = saturation(obj,inputArg)                        
+        function outputArg = saturation(obj,inputArg)
+            % Add sensor saturation
             % checks if sensor data is lower than min possible value
             if (~isempty(obj.minMeasurementRange))
                 inputArg(inputArg<obj.minMeasurementRange)=obj.minMeasurementRange;

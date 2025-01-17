@@ -160,7 +160,7 @@ sensorSettings.spheroid            =   wgs84Ellipsoid;
 %% initial chamber pressure sensor NAT825281
 % NOTE: pressure in mbar, temp should be in C°;
 %       check 2D offset for chamber pressure sensor
-sensorSettings.comb_chamber = Sensor2D();
+sensorSettings.comb_chamber = Sensor1D();
 
 sensorSettings.comb_chamber = loadSensorNoiseData(sensorSettings.comb_chamber, Lyra_Port_sensor_vect, "motor_Motor_TopTankPressureData.csv", 1);
 % sensorSettings.comb_chamber.noiseVariance         =   60000;                        % mbar
@@ -173,7 +173,7 @@ sensorSettings.comb_chamber.offset                =   0;
 
 %% pitot  
 % static pressure
-sensorSettings.pitot_static = Sensor2D();
+sensorSettings.pitot_static = Sensor1D();
 sensorSettings.pitot_static.maxMeasurementRange   =   1034.21;                      % mbar (15 psi)
 sensorSettings.pitot_static.minMeasurementRange   =   0;
 sensorSettings.pitot_static.bit                   =   12; 
@@ -182,7 +182,7 @@ sensorSettings.pitot_static = loadSensorNoiseData(sensorSettings.pitot_static, L
 % sensorSettings.pitot_static.noiseVariance         =   0.043043;                     % from flight logs
 
 % total pressure
-sensorSettings.pitot_total = Sensor2D();
+sensorSettings.pitot_total = Sensor1D();
 sensorSettings.pitot_total.maxMeasurementRange   =   2*1034.21;                     % mbar (30 psi)
 sensorSettings.pitot_total.minMeasurementRange   =   0;
 sensorSettings.pitot_total.bit                   =   12; 
@@ -215,7 +215,7 @@ end
 if found
     obj.noiseType = vect(ii).noise_type;
     
-    if strcmp("Sensor2D", class(obj)) || strcmp("SensorFault", class(obj))
+    if strcmp("Sensor1D", class(obj)) || strcmp("SensorFault", class(obj))
         obj.noiseDataTrack1 = vect(ii).track1;
         obj.noiseFactor = vect(ii).factor;
     elseif strcmp("Sensor3D", class(obj)) || strcmp("SensorGPS", class(obj))
@@ -227,7 +227,7 @@ if found
         error("Sensor not defined")
     end
 else
-    if strcmp("Sensor2D", class(obj)) || strcmp("SensorFault", class(obj))
+    if strcmp("Sensor1D", class(obj)) || strcmp("SensorFault", class(obj))
         obj.noiseDataTrack1 = [];
     elseif strcmp("Sensor3D", class(obj)) || strcmp("SensorGPS", class(obj))
         obj.noiseDataTrack1 = [];
