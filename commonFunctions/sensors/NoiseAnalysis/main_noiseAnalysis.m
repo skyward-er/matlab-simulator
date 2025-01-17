@@ -5,7 +5,7 @@ restoredefaultpath
 
 %% Path
 
-matFolder = "";
+matFolder = "C:\Users\stebe\Desktop\New data";
 addpath(genpath("./Functions"))
 addpath(genpath(matFolder))
 

@@ -87,15 +87,15 @@ if ~plot_val
     end
     switch track
         case 2
-            sensor_vect(sensor_number).track1.white_variance = white_variance*sensor_vect(sensor_number).factor;
+            sensor_vect(sensor_number).track1.white_variance = white_variance;
             sensor_vect(sensor_number).track1.fcut = fcut;
             sensor_vect(sensor_number).track1.butterOrder = butterOrder;
         case 3
-            sensor_vect(sensor_number).track2.white_variance = white_variance*sensor_vect(sensor_number).factor;
+            sensor_vect(sensor_number).track2.white_variance = white_variance;
             sensor_vect(sensor_number).track2.fcut = fcut;
             sensor_vect(sensor_number).track2.butterOrder = butterOrder;
         case 4
-            sensor_vect(sensor_number).track3.white_variance = white_variance*sensor_vect(sensor_number).factor;
+            sensor_vect(sensor_number).track3.white_variance = white_variance;
             sensor_vect(sensor_number).track3.fcut = fcut;
             sensor_vect(sensor_number).track3.butterOrder = butterOrder;
     end

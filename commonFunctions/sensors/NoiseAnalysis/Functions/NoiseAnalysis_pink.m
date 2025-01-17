@@ -139,15 +139,15 @@ if ~plot_val
         case 2
             sensor_vect(sensor_number).track1.peaks_vect_f = peaks_vect_f;
             sensor_vect(sensor_number).track1.peaks_vect_val = factor*peaks_vect_val;
-            sensor_vect(sensor_number).track1.variance = white_variance*sensor_vect(sensor_number).factor;
+            sensor_vect(sensor_number).track1.variance = white_variance;
         case 3
             sensor_vect(sensor_number).track2.peaks_vect_f = peaks_vect_f;
             sensor_vect(sensor_number).track2.peaks_vect_val = factor*peaks_vect_val;
-            sensor_vect(sensor_number).track2.variance = white_variance*sensor_vect(sensor_number).factor;
+            sensor_vect(sensor_number).track2.variance = white_variance;
         case 4
             sensor_vect(sensor_number).track3.peaks_vect_f = peaks_vect_f;
             sensor_vect(sensor_number).track3.peaks_vect_val = factor*peaks_vect_val;
-            sensor_vect(sensor_number).track3.variance = white_variance*sensor_vect(sensor_number).factor;
+            sensor_vect(sensor_number).track3.variance = white_variance;
     end
 end
 

@@ -135,15 +135,38 @@ classdef Sensor3D < Sensor1D
                     inputArg3 = inputArg3 + sqrt(obj.noiseDataTrack3*obj.noiseFactor).*randn(length(inputArg3),1);
                 elseif strcmp(obj.noiseType, "pink")
                     for ii = 1:length(obj.noiseDataTrack1.peaks_vect_f)
-                        inputArg1 = inputArg1 + obj.noiseDataTrack1.peaks_vect_val(ii)*obj.noiseFactor*sin(2*pi*obj.noiseDataTrack1.peaks_vect_f(ii)*t + randn(1));
-                        inputArg2 = inputArg2 + obj.noiseDataTrack2.peaks_vect_val(ii)*obj.noiseFactor*sin(2*pi*obj.noiseDataTrack2.peaks_vect_f(ii)*t + randn(1));
-                        inputArg3 = inputArg3 + obj.noiseDataTrack3.peaks_vect_val(ii)*obj.noiseFactor*sin(2*pi*obj.noiseDataTrack3.peaks_vect_f(ii)*t + randn(1));
+                        inputArg1 = inputArg1 + obj.noiseDataTrack1.peaks_vect_val(ii)*sin(2*pi*obj.noiseDataTrack1.peaks_vect_f(ii)*t + randn(1));
+                        inputArg2 = inputArg2 + obj.noiseDataTrack2.peaks_vect_val(ii)*sin(2*pi*obj.noiseDataTrack2.peaks_vect_f(ii)*t + randn(1));
+                        inputArg3 = inputArg3 + obj.noiseDataTrack3.peaks_vect_val(ii)*sin(2*pi*obj.noiseDataTrack3.peaks_vect_f(ii)*t + randn(1));
                     end
-                    inputArg1 = inputArg1 + sqrt(obj.noiseDataTrack1.variance*obj.noiseFactor).*randn(length(inputArg1),1);
-                    inputArg2 = inputArg2 + sqrt(obj.noiseDataTrack2.variance*obj.noiseFactor).*randn(length(inputArg2),1);
-                    inputArg3 = inputArg3 + sqrt(obj.noiseDataTrack3.variance*obj.noiseFactor).*randn(length(inputArg3),1);
+                    % Colored noise
+                    white_noise1 = sqrt(obj.noiseDataTrack1.variance*obj.noiseFactor).*randn(1,1);
+                    [b1, a1] = butter(obj.noiseDataTrack1.butterOrder, obj.noiseDataTrack1.fcut, 'low');
+                    [colored_noise1, obj.colored_opts.filterStatus1] = filter(b1, a1, white_noise1, obj.colored_opts.filterStatus1);
+                    white_noise2 = sqrt(obj.noiseDataTrack2.variance*obj.noiseFactor).*randn(1,1);
+                    [b2, a2] = butter(obj.noiseDataTrack2.butterOrder, obj.noiseDataTrack2.fcut, 'low');
+                    [colored_noise2, obj.colored_opts.filterStatus2] = filter(b2, a2, white_noise2, obj.colored_opts.filterStatus2);
+                    white_noise3 = sqrt(obj.noiseDataTrack3.variance*obj.noiseFactor).*randn(1,1);
+                    [b3, a3] = butter(obj.noiseDataTrack3.butterOrder, obj.noiseDataTrack3.fcut, 'low');
+                    [colored_noise3, obj.colored_opts.filterStatus3] = filter(b3, a3, white_noise3, obj.colored_opts.filterStatus3);
+
+                    inputArg1 = inputArg1 + colored_noise1;
+                    inputArg2 = inputArg2 + colored_noise2;
+                    inputArg3 = inputArg3 + colored_noise3;
                 elseif strcmp(obj.noiseType, "colored")
-                    error("Yet to be implemented")
+                    white_noise1 = sqrt(obj.noiseDataTrack1.variance*obj.noiseFactor).*randn(1,1);
+                    [b1, a1] = butter(obj.noiseDataTrack1.butterOrder, obj.noiseDataTrack1.fcut, 'low');
+                    [colored_noise1, obj.colored_opts.filterStatus1] = filter(b1, a1, white_noise1, obj.colored_opts.filterStatus1);
+                    white_noise2 = sqrt(obj.noiseDataTrack2.variance*obj.noiseFactor).*randn(1,1);
+                    [b2, a2] = butter(obj.noiseDataTrack2.butterOrder, obj.noiseDataTrack2.fcut, 'low');
+                    [colored_noise2, obj.colored_opts.filterStatus2] = filter(b2, a2, white_noise2, obj.colored_opts.filterStatus2);
+                    white_noise3 = sqrt(obj.noiseDataTrack3.variance*obj.noiseFactor).*randn(1,1);
+                    [b3, a3] = butter(obj.noiseDataTrack3.butterOrder, obj.noiseDataTrack3.fcut, 'low');
+                    [colored_noise3, obj.colored_opts.filterStatus3] = filter(b3, a3, white_noise3, obj.colored_opts.filterStatus3);
+
+                    inputArg1 = inputArg1 + colored_noise1;
+                    inputArg2 = inputArg2 + colored_noise2;
+                    inputArg3 = inputArg3 + colored_noise3;
                 else
                     error("This noise is not defined")
                 end
