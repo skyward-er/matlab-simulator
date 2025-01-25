@@ -11,15 +11,19 @@ eul = unwrap(eul);
 eul = rad2deg(eul);
 
 % ODE velocity rotated in ned frame
-v_ned = zeros(length(simOutput.t), 3);
-drogue_idx = sum(simOutput.t <= simOutput.state_lastTimes(3));
-v_ned(1:drogue_idx,:) = quatrotate(quatconj(simOutput.Y(1:drogue_idx, 10:13)), simOutput.Y(1:drogue_idx, 4:6));
-if simOutput.state_lastTimes(6) == 0
-    v_ned(drogue_idx+1:end,:) = simOutput.Y(drogue_idx+1:end,4:6);
+if strcmp(settings.scenario, "controlled ascent")
+    v_ned = quatrotate(quatconj(simOutput.Y(:, 10:13)), simOutput.Y(:, 4:6));
 else
-    prf_idx = sum(simOutput.t <= simOutput.state_lastTimes(4));
-    v_ned(drogue_idx+1:prf_idx,:) = simOutput.Y(drogue_idx+1:prf_idx,4:6);
-    v_ned(prf_idx+1:end,:) = quatrotate(quatconj(simOutput.Y(prf_idx+1:end, 10:13)), simOutput.Y(prf_idx+1:end, 4:6));
+    v_ned = zeros(length(simOutput.t), 3);
+    drogue_idx = sum(simOutput.t <= simOutput.state_lastTimes(3));
+    v_ned(1:drogue_idx,:) = quatrotate(quatconj(simOutput.Y(1:drogue_idx, 10:13)), simOutput.Y(1:drogue_idx, 4:6));
+    if simOutput.state_lastTimes(6) == 0
+        v_ned(drogue_idx+1:end,:) = simOutput.Y(drogue_idx+1:end,4:6);
+    else
+        prf_idx = sum(simOutput.t <= simOutput.state_lastTimes(4));
+        v_ned(drogue_idx+1:prf_idx,:) = simOutput.Y(drogue_idx+1:prf_idx,4:6);
+        v_ned(prf_idx+1:end,:) = quatrotate(quatconj(simOutput.Y(prf_idx+1:end, 10:13)), simOutput.Y(prf_idx+1:end, 4:6));
+    end
 end
 
 % NAS velocity rotated in body frame
