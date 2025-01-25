@@ -186,7 +186,7 @@ settings.mea.z_shutdown          = 3000;                                    % [m
 settings.mea.t_lower_shadowmode  = 0;                                       % minimunm burning time
 settings.mea.t_higher_shadowmode = 10;                                      % maximum burning time
 settings.shutdownValveDelay      = 0.2;                                     % time from the shut down command to the actual valve closure
-settings.mea.cd_correction_factor = 2.69;
+settings.mea.cd_correction_factor = 1;
 % accelerometer correction parameters
 [~,~,settings.mea.P0] = computeAtmosphericData(103);     %[Pa] reference pressure at the SFT location
 settings.mea.acc_threshold = 40;           %[m/s^2] minimum acceleration to perform correction with accelerometer
@@ -195,4 +195,4 @@ Rs = 1.0e+03*[0.4771    1.4391];
 % variable variance coefficients for accelerometer
 settings.mea.alpha = (Rs(2) - Rs(1))/(100^2-30^2);
 settings.mea.c = -settings.mea.alpha*30^2+Rs(1); 
-settings.mea.mass_interval = [25; 35];
+settings.mea.mass_interval = [28; 35];
