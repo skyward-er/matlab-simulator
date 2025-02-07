@@ -126,7 +126,7 @@ sensorSettings.magnetometer = Sensor3D();
 sensorSettings.magnetometer.maxMeasurementRange   =   16000;                        % 4000, 8000, 12000, 16000 in mG
 sensorSettings.magnetometer.minMeasurementRange   =   -16000;                       % -4000, -8000, -12000, -16000 in mG
 sensorSettings.magnetometer.resolution            =   0.58;                         % 0.14, 0.29, 0.43, 0.58 in mG
-sensorSettings.magnetometer.noiseVariance         =   4;                            % guess in mG (original guess 2)
+% sensorSettings.magnetometer.noiseVariance         =   4;                            % guess in mG (original guess 2)
 sensorSettings.magnetometer.offsetX               =   0;                            % +-1000 in mG
 sensorSettings.magnetometer.offsetY               =   0;                            % +-1000 in mG
 sensorSettings.magnetometer.offsetZ               =   0;                            % +-1000 in mG
@@ -134,7 +134,7 @@ sensorSettings.magnetometer.walkDiffusionCoef     =   0;                        
 sensorSettings.magnetometer.dt                    =   0.01;                         % sampling time
 sensorSettings.magnetometer.transMatrix           =   diag([1 1 1]);                % axis transformation
 
-sensorSettings.magnetometer.update();
+sensorSettings.magnetometer.update(Lyra_Port_sensor_vect, "main_Boardcore_LIS2MDLData.csv", 1);
 
 %% initial GPS sensor from NEO-M9N
 % NOTE: lon, in degree lat in degree, alt in m

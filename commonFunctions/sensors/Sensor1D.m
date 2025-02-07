@@ -154,18 +154,18 @@ classdef Sensor1D < handle
                 inputArg = inputArg + sqrt(obj.noiseVariance).*randn(length(inputArg),1);
             elseif ~isempty(obj.noiseDataTrack1)    
                 if strcmp(obj.noiseType, "white")
-                    inputArg = inputArg + sqrt(obj.noiseDataTrack1*obj.noiseFactor).*randn(length(inputArg),1);
+                    inputArg = inputArg + sqrt(obj.noiseDataTrack1*obj.noiseFactor^2).*randn(length(inputArg),1);
                 elseif strcmp(obj.noiseType, "pink")
                     for ii = 1:length(obj.noiseDataTrack1.peaks_vect_f)
                         inputArg = inputArg + obj.noiseDataTrack1.peaks_vect_val(ii)*obj.noiseFactor*sin(2*pi*obj.noiseDataTrack1.peaks_vect_f(ii)*t + randn(1));
                     end
                     % Colored noise
-                    white_noise = sqrt(obj.noiseDataTrack1.variance*obj.noiseFactor).*randn(length(inputArg),1);
+                    white_noise = sqrt(obj.noiseDataTrack1.variance*obj.noiseFactor^2).*randn(length(inputArg),1);
                     [b, a] = butter(obj.colored_opts.butterOrder, obj.colored_opts.fcut, 'low');
                     [colored_noise, obj.colored_opts.filterStatus1] = filter(b, a, white_noise, obj.colored_opts.filterStatus1);
                     inputArg = inputArg + colored_noise;
                 elseif strcmp(obj.noiseType, "colored")
-                    inputArg = inputArg + sqrt(obj.noiseDataTrack1.white_variance*obj.noiseFactor).*randn(length(inputArg),1);
+                    inputArg = inputArg + sqrt(obj.noiseDataTrack1.white_variance*obj.noiseFactor^2).*randn(length(inputArg),1);
                     [b, a] = butter(obj.noiseDataTrack1.butterOrder, obj.noiseDataTrack1.fcut, 'low');
                     [inputArg, obj.colored_opts.filterStatus1] = filter(b, a, inputArg, obj.colored_opts.filterStatus1);
                 else
