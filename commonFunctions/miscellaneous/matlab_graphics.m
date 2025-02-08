@@ -4,8 +4,9 @@ Set graphical values for better looking plots
 
 %% interpreter:
 
-set(0, 'defaultTextInterpreter', 'tex')
-set(0, 'defaultAxesTickLabelInterpreter', 'tex')
+set(0, 'defaultTextInterpreter', 'latex')
+set(0, 'defaultAxesTickLabelInterpreter', 'latex')
+set(0, 'defaultLegendInterpreter', 'latex')
 
 %% figure properties:
 
@@ -30,6 +31,7 @@ set(0,'defaultLineLineWidth', defaultLineWidth);
 set(0,'defaultStairLineWidth', defaultLineWidth); % needs a different command for no reason apparently
 % ylines
 % set(0,'defaultYLineLineWidth', defaultLineWidth)
+
 %% legend:
 set(0, 'defaultLegendLocation','best');
 set(0, 'defaultLegendFontSize',7);

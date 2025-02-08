@@ -22,6 +22,11 @@ REVISIONS:
                     sensor fault detection, engine shut-down, and much
                     more.
 
+- 5     07/02/2025, update,     Stefano Belletti, GNC IPT
+                                Samuel Flore, GNC IPT
+                    Added new sensor classes and noises, added new noise
+                    analyzer, fix terminal print, fix plots.
+
 Copyright © 2022, Skyward Experimental Rocketry, SCS department
 All rights reserved
 
@@ -37,7 +42,6 @@ else
 end
 
 %% path loading
-
 restoredefaultpath;
 filePath = fileparts(mfilename('fullpath'));
 currentPath = pwd;
@@ -58,7 +62,6 @@ addpath(genpath(commonPath));
 % end
 
 %% CONFIGs
-
 conf.script = "simulator"; % this defines which configuration scripts to run
 settings.montecarlo = false;
 configSimulator; 
@@ -73,7 +76,6 @@ if settings.tuning
 end 
 
 %% SET SPECIFIC PARAMETERS FOR A PRE LAUNCH SIMULATION
-
 %  config_SpecialConditions;
 
 %% START THE SIMULATION

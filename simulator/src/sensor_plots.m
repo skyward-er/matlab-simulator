@@ -167,7 +167,6 @@ if length(simOutput.sensors.mea.time) > 1
 
     figure("Name","Combustion chamber pressure")
     plot(simOutput.sensors.mea.time,simOutput.sensors.mea.pressure,'DisplayName','Estimated pressure')
-    hold on;
     plot(simOutput.sensors.comb_chamber.time,simOutput.sensors.comb_chamber.measures,'DisplayName','Sensor')
     plot(simOutput.t, P_cc_real, 'DisplayName', 'Real cc pressure');
     legend()
@@ -189,7 +188,6 @@ return
 % title('Barometer measurements')
 
 %% fft 
-
 [f_1,x_1] = fourierSingleSided(50,simOutput.barometer_measures{1});
 [f_2,x_2] = fourierSingleSided(50,simOutput.barometer_measures{2});
 [f_3,x_3] = fourierSingleSided(50,simOutput.barometer_measures{3});
@@ -203,3 +201,6 @@ hold on;
 semilogy(f_2,x_2)
 % subplot(3,1,3)
 semilogy(f_3,x_3)
+
+end
+
