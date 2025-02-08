@@ -67,8 +67,10 @@ if contains(mission.name,'2023') || contains(mission.name,'2024') || contains(mi
     end
 end
 
+drawnow
+
 %% ada
-figures.ada = figure('Position',[100,100,600,400]);
+figures.ada = figure;
 plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xv(:,1),'DisplayName','$ADA_{z}$')
 hold on
 plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xv(:,2),'DisplayName','$ADA_{vz}$')
@@ -77,15 +79,17 @@ plot( simOutput.t,  -v_ned(:,3),'DisplayName','True Vz')
 legend;
 title('ADA vs trajectory')
 xlabel("Time [s]"), ylabel("Altitude AGL \& Velocity [m, m/s]")
+drawnow
 
-figure('Position',[100,100,600,400])
+figure
 hold on
 plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xp(:,2),'DisplayName','ADA dp')
 title('ADA pressure derivative')
 xlabel("Time [s]")
+drawnow
 
 %% reference
-figure('Position',[100,100,600,400])
+figure
 yyaxis left
 hold on
 if ~settings.electronics
@@ -100,12 +104,12 @@ plot( -simOutput.sensors.nas.states(:,3)-environment.z0,  -simOutput.sensors.nas
 % plot( structIn.ADA(:,4),  structIn.ADA(:,5),'b','DisplayName','ADA z')
 yyaxis right
 plot( -simOutput.Y(:, 3), simOutput.Y(:, 14),'g','DisplayName','arb')
-
 legend
 xlabel("Altitude AGL [m]")
+drawnow
 
 %% quaternions
-figures.EulerAngles = figure('Name','Euler angles','Position',[100,100,600,400]);
+figures.EulerAngles = figure('Name','Euler angles');
 %
 subplot(2,2,1)
 plot(simOutput.t,simOutput.Y(:,10),'k','DisplayName','$q_w$');
@@ -147,17 +151,15 @@ plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:,9),'r','DisplayNa
 if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
     xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
 end
-legend
-ylabel('$q_z$')
-xlabel('Time [s]')
-
+ylabel('$q_z$'), xlabel('Time [s]')
 legend
 sgtitle('Quaternions')
+drawnow
 
 %% Control variable: servo angle + reference values
 % air brakes
 if not(settings.scenario == "descent")
-    figures.servo_angle = figure('Name', 'Servo angle after burning phase','ToolBar','auto','Position',[100,100,600,400]);
+    figures.servo_angle = figure('Name', 'Servo angle after burning phase','ToolBar','auto');
     plot(simOutput.t, simOutput.Y(:,14));
     hold on; grid on;
     stairs(simOutput.ARB.cmdTime,simOutput.ARB.cmdPosition,'r');
@@ -171,22 +173,23 @@ if not(settings.scenario == "descent")
     if settings.flagExportPLOTS == true
         exportStandardizedFigure(figures.servo_angle,"report_images\"+mission.name+"\src_servo_angle.pdf",0.9)
     end
+    drawnow
 end
 % parafoil
 if settings.parafoil && (settings.scenario == "descent" || settings.scenario == "full flight")
-    figures.parafoil_servo_action = figure('Name', 'Parafoil deltaA','ToolBar','auto','Position',[100,100,600,400]);
+    figures.parafoil_servo_action = figure('Name', 'Parafoil deltaA','ToolBar','auto');
     plot(simOutput.t,simOutput.Y(:,15),'DisplayName','$\delta_A$');
     hold on;
     stairs(simOutput.PRF.cmdTime,simOutput.PRF.cmddeltaA,'DisplayName','$\Delta_A$ cmd');
     xline(simOutput.t(simOutput.events.mainChuteIndex),'--','DisplayName','Parafoil deployment')
     legend
     title('Parafoil control action')
-    xlabel('Time [s]')
-    ylabel('Normalized control action [-]')
+    xlabel('Time [s]'), ylabel('Normalized control action [-]')
+    drawnow
 end
 
 %% Trajectory
-figures.trajectory = figure('Name', 'Trajectory','ToolBar','auto','Position',[100,100,600,400]);
+figures.trajectory = figure('Name', 'Trajectory','ToolBar','auto');
 plot3(simOutput.Y(1:end-10, 2), simOutput.Y(1:end-10, 1), -simOutput.Y(1:end-10, 3),'DisplayName','True trajectory');
 hold on; grid on;
 plot3(simOutput.sensors.nas.states(1:end-10, 2), simOutput.sensors.nas.states(1:end-10, 1), -simOutput.sensors.nas.states(1:end-10, 3)-environment.z0,'DisplayName','NAS trajectory');
@@ -215,6 +218,7 @@ legend
 if settings.flagExportPLOTS == true
     exportStandardizedFigure(figures.trajectory,"report_images\"+mission.name+"\src_trajectory.pdf",0.49)
 end
+drawnow
 
 %% Velocities BODY w.r.t. time against NAS
 
@@ -278,6 +282,7 @@ legend
 if settings.flagExportPLOTS == true
     exportStandardizedFigure(figures.velocities_BODY,"report_images\"+mission.name+"\src_velocities_BODY.pdf",0.9)
 end
+drawnow
 
 %% Velocities NED w.r.t. time against NAS
 
@@ -318,6 +323,7 @@ legend
 if settings.flagExportPLOTS == true
     exportStandardizedFigure(figures.velocities_NED,"report_images\"+mission.name+"\src_velocities_NED.pdf",0.9)
 end
+drawnow
 
 %% check consistency of NAS:
 altitude = simOutput.sensors.nas.states(:,3)+environment.z0;
@@ -339,13 +345,14 @@ plot(simOutput.t,simOutput.Y(:,3),'DisplayName','Altitude Simulation')
 plot(simOutput.t,v_int_simulation,'DisplayName','Velocity simulation integrated')
 legend
 xlabel("Time [s]"), ylabel("-Altitude AGL [m]")
+drawnow
 
 %% euler angles
 eul_NAS = quat2eul(simOutput.sensors.nas.states(:,[10,7:9]));
 eul_NAS = flip(eul_NAS,2);
 eul_NAS = unwrap(eul_NAS);
 eul_NAS = rad2deg(eul_NAS);
-figures.EulerAngles = figure('Name','Euler angles','Position',[100,100,600,400]);
+figures.EulerAngles = figure('Name','Euler angles');
 %
 subplot(3,1,1)
 plot(simOutput.t,eul(:,1),'DisplayName','$\phi$');
@@ -378,9 +385,10 @@ ylabel('Yaw [deg]')
 legend
 sgtitle('Euler angles')
 xlabel('Time [s]')
+drawnow
 
 %% angular rotations
-figures.velocities = figure('Name', 'Angular rotations BODY','ToolBar','auto','Position',[100,100,600,400]);
+figures.velocities = figure('Name', 'Angular rotations BODY','ToolBar','auto');
 %
 subplot(3,1,1)
 plot(simOutput.t, simOutput.Y(:, 7),'DisplayName','p')
@@ -425,6 +433,7 @@ legend
 if settings.flagExportPLOTS == true
     exportStandardizedFigure(figures.velocities,"report_images\"+mission.name+"\src_Angular_rotations_BODY.pdf",0.9)
 end
+drawnow
 
 %% euler angles vs altitude
 figure
@@ -437,6 +446,7 @@ legend
 title('Euler angles wrt altitude')
 xlabel('Altitude [m]')
 ylabel('Angle [deg]')
+drawnow
 
 end
 

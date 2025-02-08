@@ -148,6 +148,8 @@ plot(simOutput.sensors.barometer_sens{1, 3}.time,simOutput.sensors.barometer_sen
 plot(simOutput.t, P_real, 'g', 'DisplayName', 'Real pressure');
 legend
 title('Barometer measurements')
+xlabel("Time [s]"), ylabel("Pressure [Pa]")
+drawnow
 
 %% Pitot measurements
 figure("Name", "Pitot measurements")
@@ -156,6 +158,8 @@ hold on;
 plot(simOutput.t, P_real, 'DisplayName', "Real pressure");
 legend()
 title('Pitot static pressure')
+xlabel("Time [s]"), ylabel("Pressure [Pa]")
+drawnow
 
 %% mea pressure vs true pressure
 if length(simOutput.sensors.mea.time) > 1
@@ -171,6 +175,7 @@ if length(simOutput.sensors.mea.time) > 1
     plot(simOutput.t, P_cc_real, 'DisplayName', 'Real cc pressure');
     legend()
 end
+drawnow
 
 return
 
@@ -201,6 +206,7 @@ hold on;
 semilogy(f_2,x_2)
 % subplot(3,1,3)
 semilogy(f_3,x_3)
+drawnow
 
 end
 

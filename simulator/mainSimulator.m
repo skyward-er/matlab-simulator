@@ -25,7 +25,7 @@ REVISIONS:
 - 5     07/02/2025, update,     Stefano Belletti, GNC IPT
                                 Samuel Flore, GNC IPT
                     Added new sensor classes and noises, added new noise
-                    analyzer, fix terminal print, fix plots.
+                    analyzer, fix plots.
 
 Copyright © 2022, Skyward Experimental Rocketry, SCS department
 All rights reserved
@@ -116,3 +116,6 @@ if settings.flagExportCSV % this is set in configFlags
     export_HILdataADA
     export_HILdataNAS
 end
+
+% Reset to default plot
+reset(groot);

@@ -87,8 +87,8 @@ v_ned = quatrotate(quatconj(structIn.Y(:, 10:13)), structIn.Y(:, 4:6));
 if ~settings.electronics
     contSettings = structIn.contSettings; % because the trajectory are chosen during the simulation, not a priori
     if not(settings.scenario == "descent")
-        plot(contSettings.reference.Z, contSettings.reference.Vz(:,1),'DisplayName','Reference 0%')
-        plot(contSettings.reference.Z, contSettings.reference.Vz(:,2),'DisplayName','Reference 100%')
+        plot(contSettings.reference.Z, contSettings.reference.Vz(:,1),'DisplayName','Reference 0$\%$')
+        plot(contSettings.reference.Z, contSettings.reference.Vz(:,2),'DisplayName','Reference 100$\%$')
     end
 end
 plot( -structIn.Y(:, 3), -v_ned(:,3),'DisplayName','Trajectory')
@@ -98,7 +98,7 @@ exportStandardizedFigure(figures.ABK_wrt_referenceTrajectory, '[AVN][GNC]ABK_wrt
 yyaxis right
 plot( -structIn.Y(:, 3), structIn.Y(:, 14)./settings.servo.maxAngle*100,'DisplayName','ABK')
 xlabel('Altitude [m]')
-ylabel('ABK extension [%]')
+ylabel('ABK extension [\%]')
 set(gca,'YColor','#FDAF00')
 legend
 exportStandardizedFigure(figures.ABK_wrt_referenceTrajectory, '[AVN][GNC]ABK_wrt_references',0.6, 'forcedMarkers',10);
