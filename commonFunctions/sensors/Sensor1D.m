@@ -5,7 +5,8 @@ classdef Sensor1D < handle
     % email: stefano.belletti@skywarder.eu
     % Release date: 18/11/2024
     % 
-    % Sensor class for 1D sensors
+    % Sensor class for 1D sensors, adding properties and noise as defined
+    % in initSensorsYYYY_Mission.m
     % 
     % Creating a new sensor: [obj] = Sensor1D()
     
@@ -18,9 +19,9 @@ classdef Sensor1D < handle
         
         % noises
         noiseType;                              % White (default) or Pink
-        noiseDataTrack1;
-        noiseFactor;
-        colored_opts;
+        noiseDataTrack1;                        % Noise data for track1 (only data for 1D sensors)
+        noiseFactor;                            % Scale factor
+        colored_opts;                           % Colored data noise
 
         noiseVariance;                          % Defining gaussian white noise
         
@@ -49,9 +50,11 @@ classdef Sensor1D < handle
 
         function [] = update(obj,varargin)
             if isa(obj,'SensorGPS')
+                % Noise is still unknown
                 error("Do not use .update for class SensorGPS")
             end
 
+            % Check for crucial data
             if isempty(obj.minMeasurementRange)
                 error("Empty minMeasurementRange")
             end
@@ -67,8 +70,9 @@ classdef Sensor1D < handle
                 end
             end
 
-            % Noise
+            % Noise initialization
             if size(varargin,2) == 3
+                % Find the correct element of the vector
                 vect = varargin{1};
                 name = varargin{2};
                 number = varargin{3};
@@ -105,20 +109,22 @@ classdef Sensor1D < handle
                         obj.colored_opts.white_variance = vect(ii).colored_data.white_variance;
                         obj.colored_opts.fcut = vect(ii).colored_data.fcut;
                         obj.colored_opts.butterOrder = vect(ii).colored_data.butterOrder;
+                        % "Filter's memory":
                         obj.colored_opts.filterStatus1 = 0;
                         obj.colored_opts.filterStatus2 = 0;
                         obj.colored_opts.filterStatus3 = 0;
                     end
                 else
-                    if strcmp("Sensor1D", class(obj)) || strcmp("SensorFault", class(obj))
-                        obj.noiseDataTrack1 = [];
-                    elseif strcmp("Sensor3D", class(obj)) || strcmp("SensorGPS", class(obj))
-                        obj.noiseDataTrack1 = [];
-                        obj.noiseDataTrack2 = [];
-                        obj.noiseDataTrack3 = [];
-                    else
-                        error("Sensor not defined")
-                    end
+                    % if strcmp("Sensor1D", class(obj)) || strcmp("SensorFault", class(obj))
+                    %     obj.noiseDataTrack1 = [];
+                    % elseif strcmp("Sensor3D", class(obj)) || strcmp("SensorGPS", class(obj))
+                    %     obj.noiseDataTrack1 = [];
+                    %     obj.noiseDataTrack2 = [];
+                    %     obj.noiseDataTrack3 = [];
+                    % else
+                    %     error("Sensor not defined")
+                    % end
+                    error("Sensor not found")
                 end
             end
         end
@@ -133,7 +139,8 @@ classdef Sensor1D < handle
             outputArg = inputArg;
         end
 
-        function outputArg = add2DOffset(obj,inputArg,temp)            
+        function outputArg = add2DOffset(obj,inputArg,temp)
+            % Adding 2DOffset if present
             if (~isempty(obj.error2dOffset))
                 inputArg=inputArg + griddata(obj.error2dOffset(:,1),obj.error2dOffset(:,2),obj.error2dOffset(:,3),inputArg,temp);
             end
@@ -149,10 +156,10 @@ classdef Sensor1D < handle
         end
 
         function outputArg = addNoise(obj,inputArg,t)
-            % Add noise
-            if ~isempty(obj.noiseVariance)              % check for old results
+            % Add noise, depending on the type and magnitude
+            if ~isempty(obj.noiseVariance) % white noise override
                 inputArg = inputArg + sqrt(obj.noiseVariance).*randn(length(inputArg),1);
-            elseif ~isempty(obj.noiseDataTrack1)    
+            elseif ~isempty(obj.noiseDataTrack1)
                 if strcmp(obj.noiseType, "white")
                     inputArg = inputArg + sqrt(obj.noiseDataTrack1*obj.noiseFactor^2).*randn(length(inputArg),1);
                 elseif strcmp(obj.noiseType, "pink")

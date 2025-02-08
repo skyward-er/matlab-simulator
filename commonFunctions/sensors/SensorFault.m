@@ -5,7 +5,8 @@ classdef SensorFault < Sensor1D
     % email: stefano.belletti@skywarder.eu
     % Release date: 18/11/2024
     % 
-    % Sensor class for SensorFault
+    % Sensor class for SensorFault, adding properties and noise as defined
+    % in initSensorsYYYY_Mission.m
     % 
     % Creating a new sensor: [obj] = Sensor1D()
 
@@ -76,7 +77,6 @@ classdef SensorFault < Sensor1D
                 obj.fault_time = randi((obj.max_fault_time-obj.min_fault_time)*10)/10 + obj.min_fault_time;
             end
         end
-
 
         function [obj, tError] = setErrorTime(obj) % to set when the fault occurs
             obj.getFaultTime()
@@ -207,7 +207,7 @@ classdef SensorFault < Sensor1D
     
     
     methods (Access='protected')
-        function obj = reset(obj) %method
+        function obj = reset(obj) % method
             obj.failureType = 'None';
             obj.fault_offset = 0;
             obj.lambda = 0;

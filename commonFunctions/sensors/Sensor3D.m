@@ -5,36 +5,40 @@ classdef Sensor3D < Sensor1D
     % email: stefano.belletti@skywarder.eu
     % Release date: 18/11/2024
     % 
-    % Sensor class for 3D sensors
+    % Sensor class for 3D sensors, adding properties and noise as defined
+    % in initSensorsYYYY_Mission.m
     % 
     % Creating a new sensor: [obj] = Sensor3D()
     
     properties
-        noiseDataTrack2;
-        noiseDataTrack3;
+        noiseDataTrack2;                        % Noise data for track2
+        noiseDataTrack3;                        % Noise data for track3
         
-        offsetX;
-        offsetY;
-        offsetZ;
+        offsetX;                                % Offset in X direction
+        offsetY;                                % Offset in Y direction
+        offsetZ;                                % Offset in Z direction
 
-        walkDiffusionCoef;
-        transMatrix;
+        walkDiffusionCoef;                      % Random walk coefficient
+        transMatrix;                            % Alignment matrix
     end
 
     properties (Access = 'protected')
-        stateWalkX;
-        stateWalkY;
-        stateWalkZ;
+        % state walk = drift
+        stateWalkX;                             % Walk in X direction
+        stateWalkY;                             % Walk in Y direction
+        stateWalkZ;                             % Walk in Z direction
     end
     
     methods (Access = 'public')
         function obj = Sensor3D()
-            obj.stateWalkX = 0;
-            obj.stateWalkY = 0;
-            obj.stateWalkZ = 0;
+            obj.stateWalkX = 0;                 % Initial X walk = 0
+            obj.stateWalkY = 0;                 % Initial Y walk = 0
+            obj.stateWalkZ = 0;                 % Initial Z walk = 0
         end
 
         function [outputArg1,outputArg2,outputArg3] = sens(obj,inputArg1,inputArg2,inputArg3,temp,t)
+            % Sens loop: here the ideal input is transformed into the real
+            % output
             [inputArg1,inputArg2,inputArg3] = obj.tranformAxis(inputArg1,inputArg2,inputArg3);
             [inputArg1,inputArg2,inputArg3] = obj.addOffset3D(inputArg1,inputArg2,inputArg3);
             [inputArg1,inputArg2,inputArg3] = obj.randomWalk(inputArg1,inputArg2,inputArg3);
@@ -68,7 +72,8 @@ classdef Sensor3D < Sensor1D
     end
 
     methods (Access = 'protected')
-        function [outputArg1,outputArg2,outputArg3] = addOffset3D(obj,inputArg1,inputArg2,inputArg3)            
+        function [outputArg1,outputArg2,outputArg3] = addOffset3D(obj,inputArg1,inputArg2,inputArg3)        
+            % Adding 3D offset
             if (~isempty(obj.offsetX)) && obj.offsetX
                 inputArg1 = inputArg1 + ones(size(inputArg1)).*obj.offsetX;
             end
@@ -84,6 +89,7 @@ classdef Sensor3D < Sensor1D
         end
 
         function [outputArgX,outputArgY,outputArgZ] = randomWalk(obj,inputArgX,inputArgY,inputArgZ)
+            % Adding random walk
             if (~isempty(obj.walkDiffusionCoef)) && obj.walkDiffusionCoef
                 % distance
                 s = sqrt ( 2.0 * 3 * obj.walkDiffusionCoef * obj.dt ) * randn ( 1, 1);
@@ -111,6 +117,7 @@ classdef Sensor3D < Sensor1D
         end
 
         function [outputArg1,outputArg2,outputArg3] = tranformAxis(obj,inputArg1,inputArg2,inputArg3)
+            % Adding transformation
             if (~isempty(obj.transMatrix))
                 transOut=obj.transMatrix*[inputArg1,inputArg2,inputArg3]';
                 inputArg1 = transOut(1);
@@ -124,11 +131,17 @@ classdef Sensor3D < Sensor1D
         end
 
         function [outputArg1,outputArg2,outputArg3] = addNoise3D(obj,inputArg1,inputArg2,inputArg3,t)
-            if ~isempty(obj.noiseVariance)              % check for old results
+            % Check for all three channels
+            if ~isempty(obj.noiseDataTrack1) + ~isempty(obj.noiseDataTrack2) + ~isempty(obj.noiseDataTrack3) ~= 3
+                error("The 3D sensor does not have 3 noise channels")
+            end
+
+            % Adding noise
+            if ~isempty(obj.noiseVariance) % white noise override
                 inputArg1 = inputArg1 + sqrt(obj.noiseVariance).*randn(length(inputArg1),1);
                 inputArg2 = inputArg2 + sqrt(obj.noiseVariance).*randn(length(inputArg2),1);
                 inputArg3 = inputArg3 + sqrt(obj.noiseVariance).*randn(length(inputArg3),1);
-            elseif ~isempty(obj.noiseDataTrack1)
+            elseif ~isempty(obj.noiseDataTrack1) && ~isempty(obj.noiseDataTrack2) && ~isempty(obj.noiseDataTrack3)
                 if strcmp(obj.noiseType, "white")
                     inputArg1 = inputArg1 + sqrt(obj.noiseDataTrack1*obj.noiseFactor^2).*randn(length(inputArg1),1);
                     inputArg2 = inputArg2 + sqrt(obj.noiseDataTrack2*obj.noiseFactor^2).*randn(length(inputArg2),1);
@@ -139,36 +152,25 @@ classdef Sensor3D < Sensor1D
                         inputArg2 = inputArg2 + obj.noiseDataTrack2.peaks_vect_val(ii)*obj.noiseFactor*sin(2*pi*obj.noiseDataTrack2.peaks_vect_f(ii)*t + randn(1));
                         inputArg3 = inputArg3 + obj.noiseDataTrack3.peaks_vect_val(ii)*obj.noiseFactor*sin(2*pi*obj.noiseDataTrack3.peaks_vect_f(ii)*t + randn(1));
                     end
-                    % Colored noise
-                    white_noise1 = sqrt(obj.noiseDataTrack1.variance*obj.noiseFactor^2).*randn(1,1);
-                    [b1, a1] = butter(obj.noiseDataTrack1.butterOrder, obj.noiseDataTrack1.fcut, 'low');
-                    [colored_noise1, obj.colored_opts.filterStatus1] = filter(b1, a1, white_noise1, obj.colored_opts.filterStatus1);
-                    white_noise2 = sqrt(obj.noiseDataTrack2.variance*obj.noiseFactor^2).*randn(1,1);
-                    [b2, a2] = butter(obj.noiseDataTrack2.butterOrder, obj.noiseDataTrack2.fcut, 'low');
-                    [colored_noise2, obj.colored_opts.filterStatus2] = filter(b2, a2, white_noise2, obj.colored_opts.filterStatus2);
-                    white_noise3 = sqrt(obj.noiseDataTrack3.variance*obj.noiseFactor^2).*randn(1,1);
-                    [b3, a3] = butter(obj.noiseDataTrack3.butterOrder, obj.noiseDataTrack3.fcut, 'low');
-                    [colored_noise3, obj.colored_opts.filterStatus3] = filter(b3, a3, white_noise3, obj.colored_opts.filterStatus3);
-
-                    inputArg1 = inputArg1 + colored_noise1;
-                    inputArg2 = inputArg2 + colored_noise2;
-                    inputArg3 = inputArg3 + colored_noise3;
-                elseif strcmp(obj.noiseType, "colored")
-                    white_noise1 = sqrt(obj.noiseDataTrack1.variance*obj.noiseFactor^2).*randn(1,1);
-                    [b1, a1] = butter(obj.noiseDataTrack1.butterOrder, obj.noiseDataTrack1.fcut, 'low');
-                    [colored_noise1, obj.colored_opts.filterStatus1] = filter(b1, a1, white_noise1, obj.colored_opts.filterStatus1);
-                    white_noise2 = sqrt(obj.noiseDataTrack2.variance*obj.noiseFactor^2).*randn(1,1);
-                    [b2, a2] = butter(obj.noiseDataTrack2.butterOrder, obj.noiseDataTrack2.fcut, 'low');
-                    [colored_noise2, obj.colored_opts.filterStatus2] = filter(b2, a2, white_noise2, obj.colored_opts.filterStatus2);
-                    white_noise3 = sqrt(obj.noiseDataTrack3.variance*obj.noiseFactor^2).*randn(1,1);
-                    [b3, a3] = butter(obj.noiseDataTrack3.butterOrder, obj.noiseDataTrack3.fcut, 'low');
-                    [colored_noise3, obj.colored_opts.filterStatus3] = filter(b3, a3, white_noise3, obj.colored_opts.filterStatus3);
-
-                    inputArg1 = inputArg1 + colored_noise1;
-                    inputArg2 = inputArg2 + colored_noise2;
-                    inputArg3 = inputArg3 + colored_noise3;
                 else
                     error("This noise is not defined")
+                end
+
+                if strcmp(obj.noiseType, "pink") || strcmp(obj.noiseType, "colored")
+                    % Colored noise: added to pink and colored noise types
+                    white_noise1 = sqrt(obj.noiseDataTrack1.variance*obj.noiseFactor^2).*randn(1,1);
+                    [b1, a1] = butter(obj.noiseDataTrack1.butterOrder, obj.noiseDataTrack1.fcut, 'low');
+                    [colored_noise1, obj.colored_opts.filterStatus1] = filter(b1, a1, white_noise1, obj.colored_opts.filterStatus1);
+                    white_noise2 = sqrt(obj.noiseDataTrack2.variance*obj.noiseFactor^2).*randn(1,1);
+                    [b2, a2] = butter(obj.noiseDataTrack2.butterOrder, obj.noiseDataTrack2.fcut, 'low');
+                    [colored_noise2, obj.colored_opts.filterStatus2] = filter(b2, a2, white_noise2, obj.colored_opts.filterStatus2);
+                    white_noise3 = sqrt(obj.noiseDataTrack3.variance*obj.noiseFactor^2).*randn(1,1);
+                    [b3, a3] = butter(obj.noiseDataTrack3.butterOrder, obj.noiseDataTrack3.fcut, 'low');
+                    [colored_noise3, obj.colored_opts.filterStatus3] = filter(b3, a3, white_noise3, obj.colored_opts.filterStatus3);
+
+                    inputArg1 = inputArg1 + colored_noise1;
+                    inputArg2 = inputArg2 + colored_noise2;
+                    inputArg3 = inputArg3 + colored_noise3;
                 end
             end
 
