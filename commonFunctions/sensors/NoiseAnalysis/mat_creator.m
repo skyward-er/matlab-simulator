@@ -104,7 +104,7 @@ Lyra_Port_sensor_vect(ii).fs = 100;
 Lyra_Port_sensor_vect(ii).noise_type = "white";
 Lyra_Port_sensor_vect(ii).bounds = [0.35 0.5];
 Lyra_Port_sensor_vect(ii).tracks = [6 7 8];
-Lyra_Port_sensor_vect(ii).factor = 1000;
+Lyra_Port_sensor_vect(ii).factor = 180/pi*1000;
 
 ii = ii + 1;
 

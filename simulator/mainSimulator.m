@@ -118,4 +118,4 @@ if settings.flagExportCSV % this is set in configFlags
 end
 
 % Reset to default plot
-reset(groot);
+% reset(groot);
