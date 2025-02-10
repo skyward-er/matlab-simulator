@@ -222,12 +222,12 @@ drawnow
 
 %% Velocities BODY w.r.t. time against NAS
 
-figures.velocities_BODY = figure('Name', 'Velocities BODY','ToolBar','auto','Position',[100,100,600,400]);
+figures.velocities_BODY = figure('Name', 'Velocities BODY','ToolBar','auto');
 %
 subplot(3,1,1)
 plot(simOutput.t, simOutput.Y(:, 4),'DisplayName','$V_x$')
 hold on; grid on;
-plot(simOutput.sensors.nas.time, V_NAS_BODY(:, 1),'DisplayName','$V_x$ est')
+plot(simOutput.sensors.nas.time, v_NAS_body(:, 1),'DisplayName','$V_x$ est')
 if not(settings.scenario == "descent")
     xline(simOutput.ARB.allowanceTime,'k--')
 end
@@ -245,7 +245,7 @@ legend
 subplot(3,1,2)
 plot(simOutput.t, simOutput.Y(:, 5),'DisplayName','$V_y$')
 hold on;
-plot(simOutput.sensors.nas.time, V_NAS_BODY(:, 2),'DisplayName','$V_y$ est')
+plot(simOutput.sensors.nas.time, v_NAS_body(:, 2),'DisplayName','$V_y$ est')
 if not(settings.scenario == "descent")
     xline(simOutput.ARB.allowanceTime,'k--')
 end
@@ -263,7 +263,7 @@ legend
 subplot(3,1,3)
 plot(simOutput.t, simOutput.Y(:, 6),'DisplayName','$V_z$')
 hold on;
-plot(simOutput.sensors.nas.time, V_NAS_BODY(:, 3),'DisplayName','$V_z$ est')
+plot(simOutput.sensors.nas.time, v_NAS_body(:, 3),'DisplayName','$V_z$ est')
 if not(settings.scenario == "descent")
     xline(simOutput.ARB.allowanceTime,'k--','DisplayName','Air brakes opening')
 end
@@ -286,10 +286,10 @@ drawnow
 
 %% Velocities NED w.r.t. time against NAS
 
-figures.velocities_NED = figure('Name', 'Velocities NED','ToolBar','auto','Position',[100,100,600,400]);
+figures.velocities_NED = figure('Name', 'Velocities NED','ToolBar','auto');
 %
 subplot(3,1,1)
-plot(simOutput.t, V_SIM_NED(:, 1),'DisplayName','$V_n$')
+plot(simOutput.t, v_ned(:, 1),'DisplayName','$V_n$')
 hold on; grid on;
 plot(simOutput.sensors.nas.time, simOutput.sensors.nas.states(:, 4),'DisplayName','$V_n$ est')
 if not(settings.scenario == "descent")
@@ -299,7 +299,7 @@ ylabel('$V_x$ [m/s]');
 legend
 %
 subplot(3,1,2)
-plot(simOutput.t, V_SIM_NED(:, 2),'DisplayName','$V_e$')
+plot(simOutput.t, v_ned(:, 2),'DisplayName','$V_e$')
 hold on;
 plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:, 5) ,'DisplayName','$V_e$ est')
 if not(settings.scenario == "descent")
@@ -309,7 +309,7 @@ ylabel('$V_y$ [m/s]');
 legend
 %
 subplot(3,1,3)
-plot(simOutput.t, V_SIM_NED(:, 3),'DisplayName','$V_d$')
+plot(simOutput.t, v_ned(:, 3),'DisplayName','$V_d$')
 hold on;
 plot(simOutput.sensors.nas.time, simOutput.sensors.nas.states(:, 6),'DisplayName','$V_d$ est')
 if not(settings.scenario == "descent")
