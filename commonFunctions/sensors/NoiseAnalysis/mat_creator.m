@@ -89,7 +89,7 @@ ii = ii + 1;
 % Ok, check factor
 Lyra_Port_sensor_vect(ii).name = "main_Boardcore_LSM6DSRXData.csv";
 Lyra_Port_sensor_vect(ii).info = "accelerometer";
-Lyra_Port_sensor_vect(ii).fs = 440;
+Lyra_Port_sensor_vect(ii).fs = 100;
 Lyra_Port_sensor_vect(ii).noise_type = "white";
 Lyra_Port_sensor_vect(ii).bounds = [0.35 0.5];
 Lyra_Port_sensor_vect(ii).tracks = [2 3 4];
@@ -100,7 +100,7 @@ ii = ii + 1;
 % Ok, check factor
 Lyra_Port_sensor_vect(ii).name = "main_Boardcore_LSM6DSRXData.csv";
 Lyra_Port_sensor_vect(ii).info = "initial gyroscope";
-Lyra_Port_sensor_vect(ii).fs = 440;
+Lyra_Port_sensor_vect(ii).fs = 100;
 Lyra_Port_sensor_vect(ii).noise_type = "white";
 Lyra_Port_sensor_vect(ii).bounds = [0.35 0.5];
 Lyra_Port_sensor_vect(ii).tracks = [6 7 8];
