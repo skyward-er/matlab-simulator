@@ -7,7 +7,7 @@
 
 load("Lyra_Port_sensor_vect_res.mat")
 
-%% barometer1 - static measure (HSCMAND001BAAA5)
+%% barometer1 - static measure
 % NOTE: pressure in mbar, temp should be in C°
 sensorSettings.barometer1 = SensorFault();
 sensorSettings.barometer1.maxMeasurementRange   =   1000;                   % 1100, 1300 in mbar
@@ -35,7 +35,7 @@ end
 
 sensorSettings.barometer1.update(Lyra_Port_sensor_vect, "main_Main_StaticPressureData1.csv", 1);
 
-%% barometer2 - static measure (HSCMAND001BAAA5)
+%% barometer2 - static measure
 % NOTE: pressure in mbar, temp should be in C°
 sensorSettings.barometer2 = SensorFault();
 sensorSettings.barometer2.maxMeasurementRange   =   1000;                   % 1100, 1300 in mbar
@@ -63,7 +63,7 @@ end
 
 sensorSettings.barometer2.update(Lyra_Port_sensor_vect, "main_Main_StaticPressureData2.csv", 1);
 
-%% barometer3 - digital measure (LPS28DFWTR)
+%% barometer3 - digital measure (LPS28DFW)
 % NOTE: pressure in mbar, temp should be in C°
 sensorSettings.barometer3 = SensorFault();
 sensorSettings.barometer3.maxMeasurementRange   =   4060;                   % 1100, 1300 in mbar
@@ -91,7 +91,7 @@ end
 
 sensorSettings.barometer3.update(Lyra_Port_sensor_vect, "main_Boardcore_LPS28DFWData.csv", 1);
 
-%% accelerometer (6 dof imu - LSM6DSRXTR)
+%% accelerometer (6 dof imu - LSM6DSRX)
 % NOTE: acceleration in mg
 sensorSettings.accelerometer = Sensor3D();
 sensorSettings.accelerometer.maxMeasurementRange   =   16000;                       % 2000, 4000, 8000, 16000 in mg
@@ -105,7 +105,7 @@ sensorSettings.accelerometer.dt                    =   0.01;                    
 
 sensorSettings.accelerometer.update(Lyra_Port_sensor_vect, "main_Boardcore_LSM6DSRXData.csv", 1);
 
-%% initial gyroscope sensor from LSM9DS1
+%% initial gyroscope sensor from LSM6DSRX
 % NOTE: angular rate in mdps
 sensorSettings.gyroscope = Sensor3D();
 sensorSettings.gyroscope.maxMeasurementRange   =   245e3;                           % 245e3, 500e3, 2000e3 in mdps
@@ -120,7 +120,7 @@ sensorSettings.gyroscope.transMatrix           =   diag([1 1 1]);               
 
 sensorSettings.gyroscope.update(Lyra_Port_sensor_vect, "main_Boardcore_LSM6DSRXData.csv", 2);
 
-%% initial magnetometer sensor from LSM9DS1
+%% initial magnetometer sensor from LIS2MDL
 % NOTE: magnetic field in mG (m Gauss)
 sensorSettings.magnetometer = Sensor3D();
 sensorSettings.magnetometer.maxMeasurementRange   =   16000;                        % 4000, 8000, 12000, 16000 in mG
@@ -146,7 +146,7 @@ sensorSettings.lon0                =   environment.lon0;
 sensorSettings.z0                  =   environment.z0;
 sensorSettings.spheroid            =   wgs84Ellipsoid;
 
-%% initial chamber pressure sensor NAT825281
+%% initial chamber pressure sensor
 % NOTE: pressure in mbar, temp should be in C°;
 %       check 2D offset for chamber pressure sensor
 sensorSettings.comb_chamber = Sensor1D();
@@ -157,8 +157,7 @@ sensorSettings.comb_chamber.offset                =   0;
 
 sensorSettings.comb_chamber.update(Lyra_Port_sensor_vect, "motor_Motor_CCPressureData.csv", 1);
 
-
-%% pitot  
+%% Pitot  
 % static pressure
 sensorSettings.pitot_static = Sensor1D();
 sensorSettings.pitot_static.maxMeasurementRange   =   1034.21;                      % mbar (15 psi)
@@ -172,9 +171,4 @@ sensorSettings.pitot_total.maxMeasurementRange   =   2*1034.21;                 
 sensorSettings.pitot_total.minMeasurementRange   =   0;
 sensorSettings.pitot_total.bit                   =   12; 
 sensorSettings.pitot_total.update(Lyra_Port_sensor_vect, "payload_Payload_DynamicPressureData.csv", 1);
-
-%% total sensor initialization 
-% 
-% now is in std_setInitialParams.m
-%
 
