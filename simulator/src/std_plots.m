@@ -69,29 +69,30 @@ end
 
 drawnow
 
-%% ada
-figures.ada = figure;
+%% ADA
+figures.ada = figure('Name', 'ADA vs trajectory');
 plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xv(:,1),'DisplayName','$ADA_{z}$')
 hold on
 plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xv(:,2),'DisplayName','$ADA_{vz}$')
-plot( simOutput.t,  -simOutput.Y(:,3),'DisplayName','True z')
-plot( simOutput.t,  -v_ned(:,3),'DisplayName','True Vz')
-legend;
+plot( simOutput.t, -simOutput.Y(:,3),'DisplayName','True z')
+plot( simOutput.t, -v_ned(:,3),'DisplayName','True Vz')
+legend
 title('ADA vs trajectory')
 xlabel("Time [s]"), ylabel("Altitude AGL \& Velocity [m, m/s]")
 drawnow
 
-figure
+figures.ADADer = figure('Name', 'ADA Derivatives');
 hold on
-plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xp(:,2),'DisplayName','ADA dp')
+plot(simOutput.sensors.ada.time, simOutput.sensors.ada.xp(:,2), 'DisplayName','ADA dp')
 title('ADA pressure derivative')
-xlabel("Time [s]")
+xlabel("Time [s]"), ylabel("")
 drawnow
 
 %% reference
-figure
+figures.NASABKRef = figure('Name', 'NAS vs ABK reference');
 yyaxis left
 hold on
+title('NAS vs ABK reference');
 if ~settings.electronics
     contSettings = simOutput.contSettings; % because the trajectory are chosen during the simulation, not a priori
     if not(settings.scenario == "descent")
@@ -221,7 +222,6 @@ end
 drawnow
 
 %% Velocities BODY w.r.t. time against NAS
-
 figures.velocities_BODY = figure('Name', 'Velocities BODY','ToolBar','auto');
 %
 subplot(3,1,1)
@@ -285,7 +285,6 @@ end
 drawnow
 
 %% Velocities NED w.r.t. time against NAS
-
 figures.velocities_NED = figure('Name', 'Velocities NED','ToolBar','auto');
 %
 subplot(3,1,1)
@@ -337,9 +336,10 @@ for i = 2:length(simOutput.Y(:,6))
     v_int_simulation(i) = v_int_simulation(i-1) + sum(v_ned([i-1,i],3)*0.01)/2;
 end
 
-figure
+figures.AltNAS = figure('Name', 'Altitude NAS');
 plot(simOutput.sensors.nas.time,altitude,'DisplayName','Altitude NAS')
-hold on;
+hold on
+title("Altitude NAS and simulation")
 plot(simOutput.sensors.nas.time,v_int_NAS,'DisplayName','Velocity NAS integrated')
 plot(simOutput.t,simOutput.Y(:,3),'DisplayName','Altitude Simulation')
 plot(simOutput.t,v_int_simulation,'DisplayName','Velocity simulation integrated')
