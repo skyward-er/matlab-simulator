@@ -21,6 +21,14 @@ end
 data = load(strcat(mission.dataPath, '/CAinterpCoeffs'));
 contSettings.coeffs = data.coeffs;
 
+%% ADA Multiple instances parameters
+
+contSettings.ADA_N_instances = 3;
+
+if mod(contSettings.ADA_N_instances, 2) == 0 || contSettings.ADA_N_instances <= 0
+    error("The number of instances of ADA must be odd and positive");
+end
+
 %% CONTROL PARAMETERS
 
 % choose strategy:
@@ -96,8 +104,6 @@ contSettings.flagCorrectWithPitch = false;
 settings.motor.K = settings.mea.K_t;
 
 % contSettings.Engine_model_Kgain = [0.237322102194205;0.242208876758461;-0.000686466033197479];
-
-%% engine control initialization - Mass Estimation Algorithm
 
 
 %% MAGNETIC MAP

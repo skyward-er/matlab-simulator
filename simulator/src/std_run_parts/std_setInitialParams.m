@@ -17,9 +17,6 @@ end
 
 %% ADA Initialization
 
-settings.ada.counter     =   0;
-settings.ada.paraCounter =   0;
-
 settings.ada.t_ada       =   -1;                    % Apogee detection timestamp
 settings.ada.flag_apo    =   false;                 % True when the apogee is detected
 settings.ada.flagOpenPara =  false;                 % True when the main parachute should be opened
@@ -132,24 +129,38 @@ sfd_mean_p = [];
 
 %% ADA initial conditions (Apogee Detection Algorithm)
 
+% First we need to check that the number of barometer is sufficient for all
+% the instances of the ada we want to run
+if length(sensorData.barometer_sens) < contSettings.ADA_N_instances
+    error("The number of barometer is not sufficient for all the ADA instances to be run!");
+end
+
+% If we are simulating only the descent the initial condition need to match
+% the simulation one
 if strcmp(settings.scenario, 'descent')
     [~, ~, p_fin, ~]  =   computeAtmosphericData(settings.z_final+environment.z0);               % Reference temperature in kelvin and pressure in Pa
 
     settings.ada.v0          =   -10;                                           % Vertical velocity initial condition
     settings.ada.a0          =   -100;                                          % Acceleration velocity initial condition
     settings.ada.x0          =  [p_fin, settings.ada.v0, settings.ada.a0];
-    % Ada initial condition
 end
 
 if settings.flagADA
-    sensorData.ada.xp = settings.ada.x0;
-    sensorData.ada.xv = [0 0];
-    sensorData.ada.P = settings.ada.P0;
-    sensorData.ada.time = 0;   
+    % Initialize all instances of the algorithm
+    for ii = 1:contSettings.ADA_N_instances
+        sensorData.ada{ii}.counter = 0;
+        sensorData.ada{ii}.paraCounter = 0;
+        sensorData.ada{ii}.xp = settings.ada.x0;
+        sensorData.ada{ii}.xv = [0 0];
+        sensorData.ada{ii}.P = settings.ada.P0;
+        sensorData.ada{ii}.lastBaroTimestamp = 0;
+    end
+
+    sensorTot.ada.flagApogee = false(1, contSettings.ADA_N_instances);
+    sensorTot.ada.flagOpenPara = false(1, contSettings.ADA_N_instances);
 end
-% ada_prev  =   settings.ada.x0; % erano dentro all'if, son qui perché
-% vorrei eliminarli concettualmente (oggi: 12/09/23)
-% Pada_prev =   settings.ada.P0;
+
+
 
 %% NAS initial conditions (Navigation and Attitude System)
 
@@ -225,25 +236,25 @@ sensorTot.comb_chamber.time         =   0;
 sensorTot.imu.time                  =   0;
 sensorTot.gps.time                  =   0;
 sensorTot.pitot.time                =   0;
-sensorTot.nas.time                  =   0;
 sensorTot.ada.time                  =   0;
+sensorTot.nas.time                  =   0;
 sensorTot.mea.time                  =   0;
 
 % initialization of the indexes
-sensorTot.barometer_sens{1}.n_old = 2;
-sensorTot.barometer_sens{2}.n_old = 2;
-sensorTot.barometer_sens{3}.n_old = 2;
-sensorTot.barometer.n_old = 2;
-sensorTot.imu.n_old = 2;
-sensorTot.gps.n_old = 2;
-sensorTot.pitot.n_old = 2;
-sensorTot.comb_chamber.n_old = 2;
-sensorTot.ada.n_old = 2;
-sensorTot.nas.n_old = 2;
-sensorTot.mea.n_old = 2;
-sensorTot.sfd.n_old = 2;
-sensorTot.gps.lastindex = 0;
-sensorTot.pitot.lastindex = 0;
+sensorTot.barometer_sens{1}.n_old   =   2;
+sensorTot.barometer_sens{2}.n_old   =   2;
+sensorTot.barometer_sens{3}.n_old   =   2;
+sensorTot.barometer.n_old           =   2;
+sensorTot.imu.n_old                 =   2;
+sensorTot.gps.n_old                 =   2;
+sensorTot.pitot.n_old               =   2;
+sensorTot.comb_chamber.n_old        =   2;
+sensorTot.ada.n_old                 =   2;
+sensorTot.nas.n_old                 =   2;
+sensorTot.mea.n_old                 =   2;
+sensorTot.sfd.n_old                 =   2;
+sensorTot.gps.lastindex             =   0;
+sensorTot.pitot.lastindex           =   0;
 
 % initialization params
 flagFlight = false;
