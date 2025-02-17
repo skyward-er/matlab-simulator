@@ -14,11 +14,6 @@ addpath(ConDataPath);
 commonFunctionsPath = '../commonFunctions';
 addpath(genpath(commonFunctionsPath));
 
-% % Remove unwanted paths
-% missionPath = strcat('../common/missions/', mission.name);
-% rmpath(genpath('../common/missions/'));
-% addpath(genpath(missionPath));
-
 % only for hardware in the loop - path configuration
 if conf.HIL
     % add path for Hardware In the Loop

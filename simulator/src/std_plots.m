@@ -69,21 +69,26 @@ end
 
 drawnow
 
-%% ADA
-figures.ada = figure('Name', 'ADA vs trajectory');
-plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xv(:,1),'DisplayName','$ADA_{z}$')
-hold on
-plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xv(:,2),'DisplayName','$ADA_{vz}$')
-plot( simOutput.t, -simOutput.Y(:,3),'DisplayName','True z')
-plot( simOutput.t, -v_ned(:,3),'DisplayName','True Vz')
-legend
-title('ADA vs trajectory')
+%% ada
+figures.ada = figure('Position',[100,100,600,400]);
+hold on; grid on;
+for ii = 1:contSettings.ADA_N_instances
+    plot(simOutput.sensors.ada.time, simOutput.sensors.ada.data{ii}.xv(:,1),'DisplayName',strcat('$ADA\_', num2str(ii), '_{z}$'));
+    plot(simOutput.sensors.ada.time, simOutput.sensors.ada.data{ii}.xv(:,2),'DisplayName',strcat('$ADA\_', num2str(ii), '_{vz}$'));
+end
+plot(simOutput.t, -simOutput.Y(:,3), 'DisplayName','True z');
+plot(simOutput.t, -v_ned(:,3), 'DisplayName','True Vz');
+legend('Interpreter','latex');
+title('ADA vs Trajectory');
 xlabel("Time [s]"), ylabel("Altitude AGL \& Velocity [m, m/s]")
 drawnow
 
 figures.ADADer = figure('Name', 'ADA Derivatives');
 hold on
-plot(simOutput.sensors.ada.time, simOutput.sensors.ada.xp(:,2), 'DisplayName','ADA dp')
+for ii = 1:contSettings.ADA_N_instances
+    plot(simOutput.sensors.ada.time, simOutput.sensors.ada.data{ii}.xp(:,2), 'DisplayName', strcat('$ADA\_', num2str(ii), '\ dp$'))
+end
+legend('Interpreter','latex');
 title('ADA pressure derivative')
 xlabel("Time [s]"), ylabel("")
 drawnow
