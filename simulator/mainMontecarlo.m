@@ -115,6 +115,7 @@ for alg_index = 4
     motor_K = settings.motor.K;
 
     parfor i = 1:N_sim
+    % for i = 1:N_sim
         rocket_vec{i} = copy(rocket);
         settings_mont = settings_mont_init;
         settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
@@ -314,7 +315,25 @@ for alg_index = 4
     p_50 = normcdf([settings.z_final-50, settings.z_final+50],apogee.altitude_mean,apogee.altitude_std);
     apogee.accuracy_gaussian_50 =( p_50(2) - p_50(1) )*100;
 
-    
+    %% 
+    clc
+    for ii = 1:N_sim
+        if sum(save_thrust{ii}.sensors.ada.apo_times == -1) > 1
+            disp("Problems with ADA " + num2str(ii));
+        end
+    end
+
+    %%
+
+    ada_diff = zeros(N_sim, 1);
+    for ii = 1:N_sim
+        if save_thrust{ii}.sensors.old_ada.t_apogee ~= -1
+            ada_diff(ii) = save_thrust{ii}.sensors.ada.t_apogee - save_thrust{ii}.sensors.old_ada.t_apogee;
+        else
+            ada_diff(ii) = -1;
+        end
+    end
+
     %% PLOTS
 
     plotsMontecarlo;
@@ -342,6 +361,9 @@ for alg_index = 4
                 folder = [folder ; "MontecarloResults\"+mission.name+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*rocket.airbrakes.maxMach)+"_"+simulationType_thrust+"_"+saveDate]; % offline
 
             case {'2024_Lyra_Portugal_October', '2024_Lyra_Roccaraso_September'}
+                folder = [folder ; "MontecarloResults\"+mission.name+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*rocket.airbrakes.maxMach)+"_"+simulationType_thrust+"_"+saveDate]; % offline
+            
+            case {'2025_Orion_Portugal_October', '2025_Orion_Roccaraso_September'}
                 folder = [folder ; "MontecarloResults\"+mission.name+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"sim_Mach"+num2str(100*rocket.airbrakes.maxMach)+"_"+simulationType_thrust+"_"+saveDate]; % offline
         end
 
