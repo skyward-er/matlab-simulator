@@ -8,7 +8,9 @@ This function runs all subsystems in a simulated environment
 
 %% ADA
 if settings.flagADA && settings.dataNoise
-    % [sensorData, sensorTot, settings.ada, flagApogee, flagOpenPara]   =  run_ADA(sensorData, sensorTot, settings,t1);
+    if contSettings.run_old_ada
+        [sensorData, sensorTot]   =  run_ADA(sensorData, sensorTot, settings,t1);
+    end
 
     [sensorData, sensorTot, settings.ada, flagApogee, flagOpenPara] = run_Majority_ADA(Tf, contSettings.ADA_N_instances, settings.ada, settings.frequencies.ADAFrequency, sensorData, sensorTot, currentState, engineT0);
 end
