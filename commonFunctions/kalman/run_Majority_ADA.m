@@ -61,7 +61,7 @@ function [sensorData, sensorTot, ada_settings, flagMajorityApogee, flagMajorityO
                             % shadowmode issue a warning to notify of it
                             % happening
                             if t_ada(ii) < (ada_settings.shadowmode + engineT0)
-                                warning("ADA %d detected an apogee while still in shadowmode", jj);
+                                % warning("ADA %d detected an apogee while still in shadowmode", jj);
                             else
                                 flagApogeeMat(ii, jj) = true;
                             end
@@ -93,7 +93,7 @@ function [sensorData, sensorTot, ada_settings, flagMajorityApogee, flagMajorityO
             % is set to true
             if ada_settings.flag_apo == false && sum(flagApogeeMat(ii,:)) >= ceil(ADA_N_instances/2)
                 flagMajorityApogee = true;
-                ada_settings.t_apo = t_ada(ii);
+                ada_settings.t_ada = t_ada(ii);
             end
 
             % If more than 50% of the instances detect parachute opening altitude
