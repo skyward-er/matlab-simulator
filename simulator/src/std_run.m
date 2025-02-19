@@ -689,7 +689,15 @@ if settings.montecarlo
     struct_out.Y = interp1(struct_out.t,struct_out.Y,t_vec);
 
     % sensors - ADA
-    struct_out.sensors.ada = rmfield(struct_out.sensors.ada,{'time','n_old','xp','xv'});
+    apogee_idxs = sum(~struct_out.sensors.ada.flagApogee) + (struct_out.sensors.ada.flagApogee(end,:) ~= 0);
+    struct_out.sensors.ada.apo_times = struct_out.sensors.ada.time(apogee_idxs);
+    struct_out.sensors.ada.apo_times(struct_out.sensors.ada.flagApogee(end,:) == 0) = -1;
+    struct_out.sensors.ada = rmfield(struct_out.sensors.ada,{'time','n_old','flagApogee','flagOpenPara', 'data'});
+
+    if contSettings.run_old_ada
+        struct_out.sensors.old_ada.t_apogee = struct_out.sensors.old_ada.t_ada;
+        struct_out.sensors.old_ada = rmfield(struct_out.sensors.old_ada, {'flagApogee', 'flagOpenPara', 'xp', 'xv', 't_ada'});
+    end
 
 
     % sensors - NAS

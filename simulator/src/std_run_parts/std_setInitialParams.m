@@ -158,6 +158,13 @@ if settings.flagADA
 
     sensorTot.ada.flagApogee = false(1, contSettings.ADA_N_instances);
     sensorTot.ada.flagOpenPara = false(1, contSettings.ADA_N_instances);
+
+    if contSettings.run_old_ada
+        sensorData.old_ada = sensorData.ada{1};
+        sensorTot.old_ada.t_ada = -1;
+        sensorTot.old_ada.flagApogee = false;
+        sensorTot.old_ada.flagOpenPara = false;
+    end
 end
 
 
