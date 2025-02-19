@@ -1,4 +1,4 @@
-function [sensorData, sensorTot, ada, flagApogee, flagOpenPara]   =  run_ADA(sensorData, sensorTot, settings,tf)
+function [sensorData, sensorTot]   =  run_ADA(sensorData, sensorTot, settings,tf)
 
 % Author: Alessandro Del Duca
 % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@skywarder.eu
@@ -70,9 +70,9 @@ xp = zeros(length(t_ada),3);
 P = zeros(3,3,length(t_ada));
 xv = zeros(length(t_ada),2);
 
-xp(1,:)  = sensorData.ada.xp(end,:);
-P(:,:,1) = sensorData.ada.P(:,:,end);
-xv(1,:) = sensorData.ada.xv(end,:);
+xp(1,:)  = sensorData.old_ada.xp(end,:);
+P(:,:,1) = sensorData.old_ada.P(:,:,end);
+xv(1,:) = sensorData.old_ada.xv(end,:);
 
 if length(t_ada)>1
     % initialize dt
@@ -108,45 +108,42 @@ if length(t_ada)>1
         xv(ii,1)  =   getaltitude(xp(ii,1),ada.temp_ref, ada.p_ref);
         xv(ii,2)  =   getvelocity(xp(ii,1),xp(ii,2),ada.temp_ref, ada.p_ref);
 
-        if ada.flag_apo  == false
+        if sensorTot.old_ada.flagApogee  == false
             if xv(ii,2) < ada.v_thr && xv(ii,1) > 100
-                ada.counter = ada.counter + 1;
+                sensorData.old_ada.counter = sensorData.old_ada.counter + 1;
             else
-                ada.counter = 0;
+                sensorData.old_ada.counter = 0;
             end
-            if ada.counter >= ada.count_thr
-                ada.t_ada = t_ada(ii);
-                ada.flag_apo = true;
+            if sensorData.old_ada.counter >= ada.count_thr
+                sensorTot.old_ada.t_ada = t_ada(ii);
+                sensorTot.old_ada.flagApogee = true;
             end
         end
         
-        if strcmp(settings.scenario, 'descent') || ada.flag_apo
-            if ada.flagOpenPara == false
-                if xv(ii,1) < settings.ada.para.z_cut
-                    ada.paraCounter = ada.paraCounter+1;
+        if strcmp(settings.scenario, 'descent') || sensorTot.old_ada.flagApogee
+            if sensorTot.old_ada.flagOpenPara == false
+                if xv(ii,1) < ada.z_cut
+                    sensorData.old_ada.paraCounter = sensorData.old_ada.paraCounter+1;
                 else
-                    ada.paraCounter = 0;
+                    sensorData.old_ada.paraCounter = 0;
                 end
-                if ada.paraCounter >= ada.altitude_confidence_thr
-                    ada.t_para = t_ada(ii);
-                    ada.flagOpenPara = true;
+                if sensorData.old_ada.paraCounter >= ada.altitude_confidence_thr
+                    sensorTot.old_ada.t_para = t_ada(ii);
+                    sensorTot.old_ada.flagOpenPara = true;
                 end
             end
         end
     end
     
-flagApogee = ada.flag_apo;
-flagOpenPara = ada.flagOpenPara;
-    
-sensorData.ada.xp = xp;
-sensorData.ada.xv = xv;
-sensorData.ada.P = P;
-sensorData.ada.time = t_ada;
+sensorData.old_ada.xp = xp;
+sensorData.old_ada.xv = xv;
+sensorData.old_ada.P = P;
+% sensorData.old_ada.time = t_ada;
 
-sensorTot.ada.xp(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1) -2,:) = sensorData.ada.xp(2:end,:);
-sensorTot.ada.xv(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xv(:,1),1)-2,:)  = sensorData.ada.xv(2:end,:);
-sensorTot.ada.time(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1)-2)  = sensorData.ada.time(2:end);
-sensorTot.ada.n_old = sensorTot.ada.n_old + size(sensorData.ada.xp,1)-1;
+sensorTot.old_ada.xp(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.old_ada.xp(:,1),1) -2,:) = sensorData.old_ada.xp(2:end,:);
+sensorTot.old_ada.xv(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.old_ada.xv(:,1),1)-2,:)  = sensorData.old_ada.xv(2:end,:);
+% sensorTot.ada.time(sensorTot.ada.n_old:sensorTot.ada.n_old + size(sensorData.ada.xp(:,1),1)-2)  = sensorData.ada.time(2:end);
+% sensorTot.ada.n_old = sensorTot.ada.n_old + size(sensorData.ada.xp,1)-1;
 
 end
 

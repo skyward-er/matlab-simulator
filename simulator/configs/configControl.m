@@ -23,6 +23,11 @@ contSettings.coeffs = data.coeffs;
 
 %% ADA Multiple instances parameters
 
+% Set this flag to true to also run the old version of the ada (the one
+% implemented in run_ADA). Useful to compare the results between old and
+% new implementation
+contSettings.run_old_ada = true;
+% Number of instances to be run
 contSettings.ADA_N_instances = 3;
 
 if mod(contSettings.ADA_N_instances, 2) == 0 || contSettings.ADA_N_instances <= 0
