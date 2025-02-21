@@ -14,9 +14,9 @@ sensorSettings.barometer1.bit = 24; % adc on rocket is 24 bits
 sensorSettings.barometer1.resolution = (sensorSettings.barometer1.maxMeasurementRange -sensorSettings.barometer1.minMeasurementRange)/(2^sensorSettings.barometer1.bit);
 sensorSettings.barometer1.noiseVariance        =   1;                     % mbar^2
 
-sensorSettings.barometer1.fault_time = 9; %if negative it will be generated at random between a max and a min value
-sensorSettings.barometer1.max_fault_time = 96; %max seconds to wait before possible fault
-sensorSettings.barometer1.min_fault_time = 6; %min seconds to wait before possible fault
+sensorSettings.barometer1.fault_time = -1; %if negative it will be generated at random between a max and a min value
+sensorSettings.barometer1.max_fault_time = 60; %max seconds to wait before possible fault
+sensorSettings.barometer1.min_fault_time = 6; % min seconds to wait before possible fault
 
 % fault generation
 switch  settings.fault_sim.fault_type(1)
@@ -43,8 +43,8 @@ sensorSettings.barometer2.resolution = (sensorSettings.barometer2.maxMeasurement
 sensorSettings.barometer2.noiseVariance        =   1;                     % mbar^2
 
 sensorSettings.barometer2.fault_time = -1; %if negative it will be generated at random between a max and a min value
-sensorSettings.barometer2.max_fault_time = 96; %max seconds to wait before possible fault
-sensorSettings.barometer2.min_fault_time = 6; %min seconds to wait before possible fault
+sensorSettings.barometer2.max_fault_time = 24; %max seconds to wait before possible fault
+sensorSettings.barometer2.min_fault_time = 6; % min seconds to wait before possible fault
 
 % fault generation
 
@@ -72,8 +72,8 @@ sensorSettings.barometer3.resolution = (sensorSettings.barometer3.maxMeasurement
 sensorSettings.barometer3.noiseVariance        =   4.06;                      % guess in mbar
 
 sensorSettings.barometer3.fault_time = -1; %if negative it will be generated at random between a max and a min value
-sensorSettings.barometer3.max_fault_time = 96; %max seconds to wait before possible fault
-sensorSettings.barometer3.min_fault_time = 6; %min seconds to wait before possible fault
+sensorSettings.barometer3.max_fault_time = 60; %max seconds to wait before possible fault
+sensorSettings.barometer3.min_fault_time = 6; % min seconds to wait before possible fault
 
 % fault generation
 

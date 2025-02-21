@@ -99,7 +99,7 @@ classdef Sensor_with_fault_sim < handle
 
 
         function [obj, tError] = setErrorTime(obj) % to set when the fault occurs
-            obj.getFaultTime()
+            obj.getFaultTime();
             if obj.fault_time >= 0
                 obj.tError = obj.fault_time;
                 tError = obj.fault_time;
