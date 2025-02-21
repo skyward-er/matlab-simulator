@@ -613,6 +613,7 @@ struct_out.wind = wind;
 % sensors (ADA, NAS, MEA, SFD, and all sensor data are stored here)
 struct_out.sensors = sensorTot;
 struct_out.sensors.ada.t_apogee = settings.ada.t_ada;
+struct_out.sensors.ada.t_para = settings.ada.t_para;
 struct_out.sensors.nas.t_apogee = settings.nas.t_nas;
 if settings.scenario ~= "descent"
     struct_out.sensors.mea.mass_offset = settings.mass_offset;

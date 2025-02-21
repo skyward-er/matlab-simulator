@@ -27,7 +27,7 @@ OUTPUT:
 
 %% Baro Acquisition loop
 
-if ~contains(mission.name, '2023')
+if ~contains(mission.name, {'2023', '2024', '2025'})
     sensorSettings.barometer2 = sensorSettings.barometer1;
     sensorSettings.barometer3 = sensorSettings.barometer1;
 end
