@@ -140,9 +140,10 @@ end
 if strcmp(settings.scenario, 'descent')
     [~, ~, p_fin, ~]  =   computeAtmosphericData(settings.z_final+environment.z0);               % Reference temperature in kelvin and pressure in Pa
 
-    settings.ada.v0          =   -10;                                           % Vertical velocity initial condition
-    settings.ada.a0          =   -100;                                          % Acceleration velocity initial condition
+    settings.ada.v0          =   10;                                        % Pressure derivative initial condition
+    settings.ada.a0          =   100;                                       % Pressure second derivative initial condition
     settings.ada.x0          =  [p_fin, settings.ada.v0, settings.ada.a0];
+    settings.ada.flag_apo = true;
 end
 
 if settings.flagADA
