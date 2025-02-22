@@ -6,7 +6,7 @@ restoredefaultpath
 %% Path
 
 matFolder = "..\New data";
-addpath(genpath("./Functions"))
+addpath(genpath(".\Functions"))
 addpath(genpath(matFolder))
 
 
@@ -56,30 +56,42 @@ end
 clear, clc
 close all
 
-name = "Lyra_Port_sensor_vect";
+% rocketName = "2025_Orion";
+% missionName = 'Orion_Temp_sensor_vect';
+% save_name = "Orion_Temp_sensor_vect_res";
+rocketName = "2024_Lyra";
+missionName = 'Lyra_Port_sensor_vect';
 save_name = "Lyra_Port_sensor_vect_res";
 
 try
-    load(name)
+    load(rocketName + "\" + missionName)
 catch
-    error("Use mat_creator first")
+    error("Use mat_creator first (inside the chosen mission)")
 end
 
-for sensor_num  = 1:length(Lyra_Port_sensor_vect)
-    for track = Lyra_Port_sensor_vect(sensor_num).tracks
-        if Lyra_Port_sensor_vect(sensor_num).noise_type == "white"
-            Lyra_Port_sensor_vect = NoiseAnalysis_white(Lyra_Port_sensor_vect, sensor_num, track, 0);
-        elseif Lyra_Port_sensor_vect(sensor_num).noise_type == "pink"
-            Lyra_Port_sensor_vect = NoiseAnalysis_pink(Lyra_Port_sensor_vect, sensor_num, track, 0);
-        elseif Lyra_Port_sensor_vect(sensor_num).noise_type == "colored"
-            Lyra_Port_sensor_vect = NoiseAnalysis_colored(Lyra_Port_sensor_vect, sensor_num, track, 0);
+% missionMat = Orion_Temp_sensor_vect;
+missionMat = Lyra_Port_sensor_vect;
+
+for sensor_num  = 1:length(missionMat)
+    for track = missionMat(sensor_num).tracks
+        if missionMat(sensor_num).noise_type == "white"
+            missionMat = NoiseAnalysis_white(missionMat, sensor_num, track, 0);
+        elseif missionMat(sensor_num).noise_type == "pink"
+            missionMat = NoiseAnalysis_pink(missionMat, sensor_num, track, 0);
+        elseif missionMat(sensor_num).noise_type == "colored"
+            missionMat = NoiseAnalysis_colored(missionMat, sensor_num, track, 0);
         else
             error("Noise type is not 'white', 'pink' or 'colored'")
         end
     end
 end
 
-save(save_name, name)
+% Orion_Temp_sensor_vect = missionMat;
+Lyra_Port_sensor_vect = missionMat;
+
+% save(rocketName + "\" + save_name, 'Orion_Temp_sensor_vect')
+save(rocketName + "\" + save_name, 'Lyra_Port_sensor_vect')
+fprintf("Copy paste the generated .mat in %s\n", ".\matlab-simulator\data\"+rocketName)
 
 
 %% 3 - fs

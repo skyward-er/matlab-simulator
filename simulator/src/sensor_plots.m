@@ -175,7 +175,7 @@ if length(simOutput.sensors.mea.time) > 1
     plot(simOutput.sensors.comb_chamber.time(1:cut_idx),simOutput.sensors.comb_chamber.measures(1:cut_idx),'DisplayName','Sensor')
     plot(simOutput.t, P_cc_real, 'DisplayName', 'Real cc pressure');
     legend
-    xlabel("Time [s]"), ylabel("Pressure [Pa]")
+    xlabel("Time [s]"), ylabel("Pressure [Bar]")
 end
 drawnow
 
