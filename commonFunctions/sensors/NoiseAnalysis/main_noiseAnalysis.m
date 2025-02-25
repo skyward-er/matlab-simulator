@@ -6,7 +6,6 @@ restoredefaultpath
 %% Path
 
 matFolder = "..\New data";
-matFolder = "C:\Users\stebe\Desktop\New data";
 addpath(genpath(".\Functions"))
 addpath(genpath(matFolder))
 
