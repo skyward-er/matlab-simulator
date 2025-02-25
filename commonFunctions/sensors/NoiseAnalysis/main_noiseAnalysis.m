@@ -6,6 +6,7 @@ restoredefaultpath
 %% Path
 
 matFolder = "..\New data";
+matFolder = "C:\Users\stebe\Desktop\New data";
 addpath(genpath(".\Functions"))
 addpath(genpath(matFolder))
 
@@ -15,17 +16,17 @@ addpath(genpath(matFolder))
 clear, clc
 close all
 
-sensor_single.name = "main_Boardcore_LSM6DSRXData.csv";
+sensor_single.name = "main_Boardcore_LIS2MDLData.csv";
 sensor_single.noise_type = "white";
 if strcmp(sensor_single.noise_type, "pink") || strcmp(sensor_single.noise_type, "colored")
     sensor_single.colored_data.white_variance = 10;
     sensor_single.colored_data.fcut = 0.3;
     sensor_single.colored_data.butterOrder = 1;
 end
-sensor_single.track = 7; % [6 7 8]
+sensor_single.track = 2; % [6 7 8]
 sensor_single.fs = 100;
-sensor_single.bound_left = 0.35;
-sensor_single.bound_right = 0.5;
+sensor_single.bound_left = 0.5;
+sensor_single.bound_right = 0.7;
 sensor_single.bounds = [sensor_single.bound_left sensor_single.bound_right];
 
 
