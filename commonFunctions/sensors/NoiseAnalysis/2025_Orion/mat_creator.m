@@ -14,7 +14,7 @@ Orion_Temp_sensor_vect(ii).colored_data.fcut = 0.3;
 Orion_Temp_sensor_vect(ii).colored_data.butterOrder = 1;
 Orion_Temp_sensor_vect(ii).bounds = [0.5 0.7];
 Orion_Temp_sensor_vect(ii).tracks = [2 3 4];
-Orion_Temp_sensor_vect(ii).factor = 1000;
+Orion_Temp_sensor_vect(ii).factor = 0.01;
 
 ii = ii + 1;
 

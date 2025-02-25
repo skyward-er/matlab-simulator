@@ -14,7 +14,7 @@ Lyra_Port_sensor_vect(ii).colored_data.fcut = 0.3;
 Lyra_Port_sensor_vect(ii).colored_data.butterOrder = 1;
 Lyra_Port_sensor_vect(ii).bounds = [0.5 0.7];
 Lyra_Port_sensor_vect(ii).tracks = [2 3 4];
-Lyra_Port_sensor_vect(ii).factor = 1000;
+Lyra_Port_sensor_vect(ii).factor = 0.01;
 
 ii = ii + 1;
 
