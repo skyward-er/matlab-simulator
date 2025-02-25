@@ -83,23 +83,6 @@ for ii = 1:length(peaks_vect_val)
 end
 
 
-
-%% Noise cut for variance
-% new_vect=zeros(1,length(G_n));
-% for ii = 1:length(G_n)
-%     if abs(G_n(ii)) < max_height
-%         new_vect(ii) = G_n(ii);
-%     else
-%         new_vect(ii) = 0;
-%     end
-% end
-% figure
-% plot(f,abs(new_vect))
-% 
-% signal_new = idft(new_vect',f,t);
-% variance1 = var(signal_new);
-
-
 %% Pink noise creator
 white_noise = sqrt(white_variance)*randn(size(t));
 
