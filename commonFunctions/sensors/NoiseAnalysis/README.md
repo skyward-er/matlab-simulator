@@ -3,7 +3,7 @@
 This folder contains all the scripts needed to perform sensor analysis for current and future missions.
 
 The folder is structured as follows:
-- `<YYY>_<RocketName>`
+- `<YYYY>_<RocketName>`
     - `mat_creator.m`
     - `<RocketName>_<MissionShort>_sensor_vect.mat`
     - `<RocketName>_<MissionShort>_sensor_vect_res.mat`
