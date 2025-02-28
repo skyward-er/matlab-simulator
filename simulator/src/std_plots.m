@@ -436,8 +436,7 @@ end
 drawnow
 
 %% euler angles vs altitude
-figure
-
+figures.eulerAltitude = figure;
 plot(-simOutput.Y(:,3),eul(:,1),'DisplayName','$\phi$')
 hold on;
 plot(-simOutput.Y(:,3),eul(:,2),'DisplayName','$\theta$')
