@@ -29,7 +29,7 @@ scenarios explanation:
 % scenario configuration
 conf.scenario = "full flight";
 settings.board = "main";            % Either "main" or "payload" or "full_hil"
-conf.HIL = false;
+conf.HIL = true;
 
 % WIP flags
 settings.machControlActive  = false; % Switch on the mach control in ascentControl.m

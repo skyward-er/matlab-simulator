@@ -74,11 +74,17 @@ OUTPUTS:
     arrayToBeSent = single(vertcat(arrayToBeSent));
 
     % sending sensor data over the serial port
+    % java.lang.Thread.sleep(100);
     serialbridge('Write','main', arrayToBeSent);
+
+    if dataToBeSent.signal == 1
+        pause(10.0);
+    end
 
     % waiting for the response of the obsw
     % Receive data from serial comunication
     obswVals = serialbridge('Read','main', 26);
+    % obswVals = zeros(26,1);
 
     actuatorData.ada.mslAltitude = obswVals(1);
     actuatorData.ada.aglAltitude = obswVals(2);
