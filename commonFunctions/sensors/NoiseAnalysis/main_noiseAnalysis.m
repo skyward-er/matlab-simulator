@@ -56,21 +56,19 @@ end
 clear, clc
 close all
 
-% rocketName = "2025_Orion";
-% missionName = 'Orion_Temp_sensor_vect';
-% save_name = "Orion_Temp_sensor_vect_res";
-rocketName = "2024_Lyra";
-missionName = 'Lyra_Port_sensor_vect';
-save_name = "Lyra_Port_sensor_vect_res";
+rocketName = "2025_Orion";
+missionName = 'Orion_Temp_sensor_vect';
+save_name = "Orion_Temp_sensor_vect_res";
+% rocketName = "2024_Lyra";
+% missionName = 'Lyra_Port_sensor_vect';
+% save_name = "Lyra_Port_sensor_vect_res";
 
 try
-    load(rocketName + "\" + missionName)
+    missionMat = load(rocketName + "\" + missionName);
 catch
     error("Use mat_creator first (inside the chosen mission)")
 end
-
-% missionMat = Orion_Temp_sensor_vect;
-missionMat = Lyra_Port_sensor_vect;
+missionMat = missionMat.(missionName);
 
 for sensor_num  = 1:length(missionMat)
     for track = missionMat(sensor_num).tracks
@@ -86,11 +84,8 @@ for sensor_num  = 1:length(missionMat)
     end
 end
 
-% Orion_Temp_sensor_vect = missionMat;
-Lyra_Port_sensor_vect = missionMat;
-
-% save(rocketName + "\" + save_name, 'Orion_Temp_sensor_vect')
-save(rocketName + "\" + save_name, 'Lyra_Port_sensor_vect')
+S.(missionName) = missionMat;
+save(rocketName + "\" + save_name, '-struct', 'S')
 fprintf("Copy paste the generated .mat in %s\n", ".\matlab-simulator\data\"+rocketName)
 
 
