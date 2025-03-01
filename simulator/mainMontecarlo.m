@@ -115,7 +115,6 @@ for alg_index = 4
     motor_K = settings.motor.K;
 
     parfor i = 1:N_sim
-    % for i = 1:N_sim
         rocket_vec{i} = copy(rocket);
         settings_mont = settings_mont_init;
         settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)

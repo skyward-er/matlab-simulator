@@ -16,7 +16,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 
-settings.launchDate = [2023 9 18];
+settings.launchDate = [2024 9 14];
+warning("Launch date set to 2024 as wrldmagm does not support 2025 launch date")
 settings.HREmot = true;
 
 %% TRAJECTORY GENERATION PARAMETERS
@@ -39,7 +40,7 @@ settings.frequencies.accelerometerFrequency     =   100;                   % [hz
 settings.frequencies.gyroFrequency              =   100;                   % [hz] sensor frequency
 settings.frequencies.magnetometerFrequency      =   100;                   % [hz] sensor frequency
 settings.frequencies.gpsFrequency               =   10;                    % [hz] sensor frequency
-settings.frequencies.barometerFrequency         =   50;                   % [hz] sensor frequency
+settings.frequencies.barometerFrequency         =   100;                    % [hz] sensor frequency
 settings.frequencies.chamberPressureFrequency   =   50;                    % [hz] sensor frequency
 settings.frequencies.pitotFrequency             =   20;                    % [hz] sensor frequency
 settings.frequencies.NASFrequency               =   50;                    % [hz] sensor frequency
@@ -59,7 +60,7 @@ settings.arb.extPol(1) = -0.009083;                                         % co
 settings.arb.extPol(2) = 0.02473;                                           % coefficient for extension - alpha^3
 settings.arb.extPol(3) = -0.01677;                                          % coefficient for extension - alpha^2
 settings.arb.extPol(4) = 0.03129;                                           % coefficient for extension - alpha
-settings.arb.maxExt = rocket.airbrakes.height(end);
+settings.arb.maxExt    = rocket.airbrakes.height(end);                               % maximum extension of air brake aerodynamic surface
 
 % servo angle to exposed surface of the airbrakes (GEMINI)
 settings.arb.surfPol = 0.00932857142857;                                    % coefficient for surface - alpha
@@ -72,7 +73,7 @@ settings.arb.guidePol(2) = 0.5337;                                          % co
 settings.arb.ma = 150e-3;                                                   % airbrake mass
 settings.arb.mb = 20e-3;                                                    % tristar beam mass
 settings.arb.mu = 0.05;                                                     % friction coefficient between air brake and guide
-settings.arb.R = 66e-3;                                                     % tristar beam length (rod)
+settings.arb.R  = 66e-3;                                                    % tristar beam length (rod)
 
 % Get maximum extension angle
 x = @(alpha) settings.arb.extPol(1)*alpha.^4 + ...
@@ -97,8 +98,8 @@ settings.nas.P             = 0.01*eye(12);
 settings.nas.Mach_max = 0.4; % max mach number expected for the mission (for nas with pitot update purposes) - not currently used
 settings.nas.GPS.a = 111132.95225;
 settings.nas.GPS.b = 111412.87733;
-settings.nas.v_thr         =   2.5;                                     % Velocity threshold for the detected apogee
-settings.nas.count_thr     =   5;                                       % If the apogee is detected count_thr time, the algorithm will return the apogee event
+settings.nas.v_thr         =   2.5;                                         % Velocity threshold for the detected apogee
+settings.nas.count_thr     =   5;                                           % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.nas.counter       =   0;
 
 settings.nas.baro.a = 0.0065;
@@ -145,25 +146,21 @@ settings.ada.P0          =   [  0.1    0      0;                            % In
 [settings.ada.temp_ref, ~,...
  settings.ada.p_ref, ~]  =   computeAtmosphericData(environment.z0);                                  % Reference temperature in kelvin and pressure in Pa 
 
-settings.ada.v0          =   -10;                                         % Vertical velocity initial condition
-settings.ada.a0          =   -100;                                         % Acceleration velocity initial condition
+settings.ada.v0          =   0;                                           % Vertical velocity initial condition
+settings.ada.a0          =   0;                                          % Acceleration velocity initial condition
 settings.ada.x0          =  [settings.ada.p_ref, settings.ada.v0, settings.ada.a0];         
-                                                                           % Ada initial condition
+                                                                            % Ada initial condition
 
-settings.ada.v_thr       =   0;                                          % Velocity threshold for the detected apogee
-settings.ada.count_thr   =   5;                                            % If the apogee is detected count_thr time, the algorithm will return the apogee event
+settings.ada.v_thr       =   0;                                             % Velocity threshold for the detected apogee
+settings.ada.count_thr   =   5;                                             % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.ada.counter     =   0;
 settings.ada.altitude_confidence_thr = 5;                                   % If the ada recognizes altitude_confidence_thr samples under parachute cutting altitude, it sends the command
-
-settings.ada.t_ada       =   -1;                                           % Apogee detection timestamp
-settings.ada.flag_apo    =   false;                                        % True when the apogee is detected
-
 settings.ada.shadowmode = 10;
 
 if ~settings.parafoil
-    settings.ada.para.z_cut  = rocket.parachutes(1,1).finalAltitude;
+    settings.ada.z_cut  = rocket.parachutes(1,1).finalAltitude;
 else
-    settings.ada.para.z_cut  = rocket.parachutes(1,2).finalAltitude;
+    settings.ada.z_cut  = rocket.parachutes(1,2).finalAltitude;
 end
 
 %% MEA TUNING PARAMETERS / MOTOR SHUT DOWN TUNING PARAMETERS
@@ -182,7 +179,7 @@ settings.mea.z_shutdown          = 800;                                    % [m]
 settings.mea.t_lower_shadowmode  = 2;                                       % minimunm burning time
 settings.mea.t_higher_shadowmode = 10;                                      % maximum burning time
 settings.shutdownValveDelay      = 0.2;                                     % time from the shut down command to the actual valve closure
-settings.mea.cd_correction_factor = 2.69;
+settings.mea.cd_correction_factor = 1;
 
 % accelerometer correction parameters
 [~,~,settings.mea.P0] = computeAtmosphericData(103);     %[Pa] reference pressure at the SFT location

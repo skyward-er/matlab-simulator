@@ -125,9 +125,6 @@ if contSettings.run_old_ada
     sgtitle("Absolute error between run\_ADA and majority voting ADA instances");
 end
 
-return
-
-
 %% reference
 figures.NASABKRef = figure('Name', 'NAS vs ABK reference');
 yyaxis left
