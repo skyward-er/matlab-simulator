@@ -1,4 +1,4 @@
-function std_plots(simOutput, settings,contSettings,mission,rocket,environment)
+function std_plots(simOutput, settings,contSettings,mission,environment)
 
 if ~exist("report_images\"+mission.name,"dir")
     mkdir("report_images\"+mission.name)
@@ -70,7 +70,7 @@ end
 drawnow
 
 %% ada
-figures.ada = figure('Position',[100,100,600,400]);
+figures.ada = figure('Name', 'ADA vs Trajectory');
 hold on; grid on;
 for ii = 1:contSettings.ADA_N_instances
     plot(simOutput.sensors.ada.time, simOutput.sensors.ada.data{ii}.xv(:,1),'DisplayName',strcat('$ADA\_', num2str(ii), '_{z}$'));
@@ -95,7 +95,7 @@ drawnow
 
 if contSettings.run_old_ada
     
-    figure('Position', [100,100,600,400]);
+    figures.ADAComp = figure('Name', 'ADA Comparisons');
     hold on; grid on;
     
     plot(simOutput.sensors.ada.time, simOutput.sensors.old_ada.xv(:,1), 'LineWidth', 1.5, 'DisplayName', "$run\_ADA_{z}$");
@@ -106,23 +106,25 @@ if contSettings.run_old_ada
     end
     legend("Interpreter", "latex");
     title("Comparison between run\_ADA and majority voting ADA");
+    drawnow
 
-    figure('Position', [100,100,600,400]);
+    figures.ADAErr = figure('Name', 'ADA Absolute error wrt run_ADA');
     subplot(2,1,1); hold on; grid on;
     subplot(2,1,2); hold on; grid on;
     for ii = 1:contSettings.ADA_N_instances
         subplot(2,1,1);
         plot(simOutput.sensors.ada.time, simOutput.sensors.old_ada.xv(:,1) - simOutput.sensors.ada.data{ii}.xv(:,1), 'DisplayName', strcat('$ADA\_', num2str(ii), '_{z}$'));
-        disp("ADA " + num2str(ii) + " mean z error: " + num2str(mean(simOutput.sensors.old_ada.xv(:,1) - simOutput.sensors.ada.data{ii}.xv(:,1))) + " m");
-        disp("ADA " + num2str(ii) + " std z error: " + num2str(std(simOutput.sensors.old_ada.xv(:,1) - simOutput.sensors.ada.data{ii}.xv(:,1))) + " m");
+        % disp("ADA " + num2str(ii) + " mean z error: " + num2str(mean(simOutput.sensors.old_ada.xv(:,1) - simOutput.sensors.ada.data{ii}.xv(:,1))) + " m");
+        % disp("ADA " + num2str(ii) + " std z error: " + num2str(std(simOutput.sensors.old_ada.xv(:,1) - simOutput.sensors.ada.data{ii}.xv(:,1))) + " m");
         subplot(2,1,2);
         plot(simOutput.sensors.ada.time, simOutput.sensors.old_ada.xv(:,2) - simOutput.sensors.ada.data{ii}.xv(:,2), 'DisplayName', strcat('$ADA\_', num2str(ii), '_{vz}$'));
-        disp("ADA " + num2str(ii) + " mean vz error: " + num2str(mean(simOutput.sensors.old_ada.xv(:,2) - simOutput.sensors.ada.data{ii}.xv(:,2))) + " m/s");
-        disp("ADA " + num2str(ii) + " std vz error: " + num2str(std(simOutput.sensors.old_ada.xv(:,2) - simOutput.sensors.ada.data{ii}.xv(:,2))) + " m/s");
+        % disp("ADA " + num2str(ii) + " mean vz error: " + num2str(mean(simOutput.sensors.old_ada.xv(:,2) - simOutput.sensors.ada.data{ii}.xv(:,2))) + " m/s");
+        % disp("ADA " + num2str(ii) + " std vz error: " + num2str(std(simOutput.sensors.old_ada.xv(:,2) - simOutput.sensors.ada.data{ii}.xv(:,2))) + " m/s");
     end
     subplot(2,1,1); legend("Interpreter", "latex");
     subplot(2,1,2); legend("Interpreter", "latex");
     sgtitle("Absolute error between run\_ADA and majority voting ADA instances");
+    drawnow
 end
 
 %% reference
