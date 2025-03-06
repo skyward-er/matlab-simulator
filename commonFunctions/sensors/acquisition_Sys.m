@@ -36,31 +36,25 @@ for i_baro = 1:3
     if i_baro == 1
         if isfield(sensorData.barometer_sens{i_baro},'time')
             for ii=1:length(sensorData.barometer_sens{i_baro}.time)
-                sensorData.barometer_sens{i_baro}.measures(ii,1)        =      sensorSettings.barometer1.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,...
-                    sensorData.barometer_sens{i_baro}.temperature(ii,1) - 273.15, t);
-                sensorData.barometer_sens{i_baro}.measures(ii,1)        =      sensorData.barometer_sens{i_baro}.measures(ii)*100;
+                sensorData.barometer_sens{i_baro}.measures(ii,1) = sensorSettings.barometer1.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,sensorData.barometer_sens{i_baro}.temperature(ii,1) - 273.15, t)*100;
                 [~, sensorData.barometer_sens{i_baro}.measures(ii,1)] = sensorSettings.barometer1.applyFailure(sensorData.barometer_sens{i_baro}.measures(ii), t);
-                sensorData.barometer_sens{i_baro}.z(ii,1)               =     -atmospalt(sensorData.barometer_sens{i_baro}.measures(ii),'None');
+                sensorData.barometer_sens{i_baro}.z(ii,1) = -atmospalt(sensorData.barometer_sens{i_baro}.measures(ii),'None');
             end
         end
     elseif i_baro == 2
-        if isfield(sensorData.barometer_sens{3},'time')
+        if isfield(sensorData.barometer_sens{i_baro},'time')
             for ii=1:length(sensorData.barometer_sens{i_baro}.time)
-                sensorData.barometer_sens{i_baro}.measures(ii,1)        =      sensorSettings.barometer2.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,...
-                    sensorData.barometer_sens{i_baro}.temperature(ii,1) - 273.15, t);
-                sensorData.barometer_sens{i_baro}.measures(ii,1)        =      sensorData.barometer_sens{i_baro}.measures(ii)*100;
+                sensorData.barometer_sens{i_baro}.measures(ii,1) = sensorSettings.barometer2.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,sensorData.barometer_sens{i_baro}.temperature(ii,1) - 273.15, t)*100;
                 [~, sensorData.barometer_sens{i_baro}.measures(ii,1)] = sensorSettings.barometer2.applyFailure(sensorData.barometer_sens{i_baro}.measures(ii), t);
-                sensorData.barometer_sens{i_baro}.z(ii,1)               =     -atmospalt(sensorData.barometer_sens{i_baro}.measures(ii),'None');
+                sensorData.barometer_sens{i_baro}.z(ii,1) = -atmospalt(sensorData.barometer_sens{i_baro}.measures(ii),'None');
             end
         end
     elseif i_baro == 3
-        if isfield(sensorData.barometer_sens{3},'time')
+        if isfield(sensorData.barometer_sens{i_baro},'time')
             for ii=1:length(sensorData.barometer_sens{i_baro}.time)
-                sensorData.barometer_sens{i_baro}.measures(ii,1)        =      sensorSettings.barometer3.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,...
-                    sensorData.barometer_sens{i_baro}.temperature(ii,1) - 273.15, t);
-                sensorData.barometer_sens{i_baro}.measures(ii,1)        =      sensorData.barometer_sens{i_baro}.measures(ii)*100;
+                sensorData.barometer_sens{i_baro}.measures(ii,1) = sensorSettings.barometer3.sens(sensorData.barometer_sens{i_baro}.measures(ii)/100,sensorData.barometer_sens{i_baro}.temperature(ii,1) - 273.15, t)*100;
                 [~, sensorData.barometer_sens{i_baro}.measures(ii,1)] = sensorSettings.barometer3.applyFailure(sensorData.barometer_sens{i_baro}.measures(ii), t);
-                sensorData.barometer_sens{i_baro}.z(ii,1)               =     -atmospalt(sensorData.barometer_sens{i_baro}.measures(ii),'None');
+                sensorData.barometer_sens{i_baro}.z(ii,1) = -atmospalt(sensorData.barometer_sens{i_baro}.measures(ii),'None');
             end
         end
     end

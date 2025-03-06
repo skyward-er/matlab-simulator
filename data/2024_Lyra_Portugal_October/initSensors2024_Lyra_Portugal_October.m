@@ -13,7 +13,7 @@ sensorSettings.barometer1 = SensorFault();
 sensorSettings.barometer1.maxMeasurementRange   =   1000;                   % 1100, 1300 in mbar
 sensorSettings.barometer1.minMeasurementRange   =   0;                      % 300, 10 in mbar
 sensorSettings.barometer1.bit                   =   24;                     % adc on rocket is 24 bits 
-sensorSettings.barometer1.fault_time = 9;           % if negative it will be generated at random between a max and a min value
+sensorSettings.barometer1.fault_time = 1;           % if negative it will be generated at random between a max and a min value
 sensorSettings.barometer1.max_fault_time = 96;      % max seconds to wait before possible fault
 sensorSettings.barometer1.min_fault_time = 6;       % min seconds to wait before possible fault
 
