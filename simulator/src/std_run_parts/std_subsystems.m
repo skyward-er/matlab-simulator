@@ -149,3 +149,9 @@ if ~settings.flagAscent && settings.parafoil
     end
 end
 
+
+%% ZVK
+
+% if currentState == availableStates.on_ground
+%     ZVK(t1,  XYZ0*0.01, sensorData, sensorTot, settings, environment)
+% end
