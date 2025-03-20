@@ -26,11 +26,10 @@ OUTPUT:
 % update: Marco Marchesi, Pier Francesco Bachini, 31/08/2023
 
 %% Baro Acquisition loop
-
-if ~contains(mission.name, '2023')
-    sensorSettings.barometer2 = sensorSettings.barometer1;
-    sensorSettings.barometer3 = sensorSettings.barometer1;
-end
+% if ~contains(mission.name, '2023')
+%     sensorSettings.barometer2 = sensorSettings.barometer1;
+%     sensorSettings.barometer3 = sensorSettings.barometer1;
+% end
 
 for i_baro = 1:3
     if i_baro == 1
@@ -112,7 +111,6 @@ if isfield(sensorData.accelerometer,'time')
 end
 
 %% GPS Acquisition loop
-
 if isfield(sensorData.gps,'time')
     for ii=1:length(sensorData.gps.time)
         gps_data = [sensorData.gps.positionMeasures(ii,1);
@@ -136,6 +134,7 @@ end
 if any(isnan(sensorTot.gps.position_measures))
     error('gps is nan')
 end
+
 %% Pitot acquisition loop
 if isfield(sensorData.pitot,'time')
     M2 = zeros(length(sensorData.pitot.time),1);
