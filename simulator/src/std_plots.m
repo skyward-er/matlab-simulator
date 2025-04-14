@@ -486,5 +486,15 @@ xlabel('Altitude [m]')
 ylabel('Angle [deg]')
 drawnow
 
+
+
+
+%% ZVK
+% figure.zvk
+
+
+
+
+
 end
 

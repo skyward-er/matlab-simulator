@@ -706,6 +706,10 @@ if settings.montecarlo
     struct_out.sensors.nas.states = interp1(struct_out.sensors.nas.time',struct_out.sensors.nas.states,t_vec);
     struct_out.sensors.nas.time = t_vec;
 
+    % sensors - ZVK
+    struct_out.sensors.zvk.states = interp1(struct_out.sensors.zvk.time',struct_out.sensors.zvk.states,t_vec);
+    struct_out.sensors.zvk.time = t_vec;
+
     % sensors - MEA already good
 
 

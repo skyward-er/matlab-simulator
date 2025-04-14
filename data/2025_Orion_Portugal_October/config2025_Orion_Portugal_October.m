@@ -50,6 +50,9 @@ settings.frequencies.NASFrequency               =   50;                    % [hz
 settings.frequencies.ADAFrequency               =   50;                    % [hz] sensor frequency
 settings.frequencies.MEAFrequency               =   50;                    % [hz] sensor frequency
 
+settings.frequencies.ZVKFrequency               =   50;                    % [hz] sensor frequency
+
+
 % Servo (MARK STAR - HBL 3850)
 settings.servo.tau       = 0.0374588;                                       % Servo motor time constant 
 settings.servo.delay     = 0.070548;                                        % Servo motor delay
@@ -139,6 +142,24 @@ settings.nas.QLinear       =   0.005*...
 % Process noise covariance matrix for the quaternion dynamics
 settings.nas.Qq              =   [(settings.nas.sigma_w^2*settings.nas.dt_k+(1/3)*settings.nas.sigma_beta^2*settings.nas.dt_k^3)*eye(3)          0.5*settings.nas.sigma_beta^2*settings.nas.dt_k^2*eye(3);
                                       0.5*settings.nas.sigma_beta^2*settings.nas.dt_k^2*eye(3)                                              settings.nas.sigma_beta^2*settings.nas.dt_k*eye(3)];
+
+%% ZVK TUNING PARAMETER
+
+% settings.zvk
+settings.zvk.Q = diag( 0.1^2*ones(12,1) );
+
+settings.zvk.mu = 3.986004418e14;
+settings.zvk.Re = 6378137;
+settings.zvk.J2 = 1.082636e-3;
+
+settings.zvk.P = 0.5*eye(33);
+
+settings.zvk.gyro_bias_noise = 0.05;
+settings.zvk.acc_bias_noise  = 0.05;
+
+
+
+
 %% ADA TUNING PARAMETER
 
 settings.ada.Q           =   [30     0       0;                             % Process noise covariance matrix
