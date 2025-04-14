@@ -189,6 +189,21 @@ sensorData.nas.time = 0;
 settings.nas.flagStopPitotCorrection = false;
 settings.nas.mag_freq = settings.frequencies.NASFrequency/settings.nas.mag_decimate;
 
+
+%% ZVK initial
+
+% if settings.flagNAS || settings.electronics  ??????
+
+sensorData.zvk.states = [Q0(2:4); Q0(1); X0; V0; zeros(6,1); zeros(18,1)]';
+
+if settings.scenario ~="descent"
+    sensorData.zvk.states(7) = -environment.z0;
+else
+    sensorData.zvk.states(7) = -settings.z_final-environment.z0;
+end
+sensorData.zvk.P = settings.zvk.P;
+
+
 %% MEA PARAMETERS (mass estimation algorithm) 
 sensorData.mea.x = [0,0,rocket.mass(1)];     % initial state estimate
 sensorData.mea.estimated_mass(1) = rocket.mass(1);
@@ -234,6 +249,11 @@ sensorTot.mea.mass                              =   rocket.motor.mass(1);
 sensorTot.mea.prediction                        =   0;
 sensorTot.mea.time                              =   0;
 
+
+sensorTot.zvk.time                              =   0;
+sensorTot.zvk.states                            =   sensorData.zvk.states;
+
+
 % inizializzare i tempi dei sensori a 0 e poi mettere tutti i n_old = 2
 sensorTot.barometer_sens{1}.time    =   0;
 sensorTot.barometer_sens{2}.time    =   0;
@@ -250,6 +270,9 @@ sensorTot.ada.time                  =   0;
 sensorTot.nas.time                  =   0;
 sensorTot.mea.time                  =   0;
 
+
+
+
 % initialization of the indexes
 sensorTot.barometer_sens{1}.n_old   =   2;
 sensorTot.barometer_sens{2}.n_old   =   2;
@@ -265,6 +288,9 @@ sensorTot.mea.n_old                 =   2;
 sensorTot.sfd.n_old                 =   2;
 sensorTot.gps.lastindex             =   0;
 sensorTot.pitot.lastindex           =   0;
+
+
+sensorTot.zvk.n_old = 2;
 
 % initialization params
 flagFlight = false;

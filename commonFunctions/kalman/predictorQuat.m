@@ -38,6 +38,7 @@ omega       = w - beta_prev;                            %Computation of real w (
 omega_mat   = [ 0      -omega(3)   omega(2);
                omega(3)  0       -omega(1);
                -omega(2)  omega(1)   0;];
+
 Omega       = [ -omega_mat  omega';
                 -omega      0];
 %-------------------------------------------------------------------------
