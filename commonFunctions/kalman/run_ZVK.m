@@ -1,4 +1,4 @@
-function [sensorTot] = run_ZVK(Tf, sensorData, sensorTot, settings, environment)
+function [sensorData, sensorTot] = run_ZVK(Tf, sensorData, sensorTot, settings, environment)
 
 
 % recall zvk time
@@ -46,10 +46,9 @@ if length(t_zvk) > 1
 
         
         %%% Correction
-        correctorZVK( x(ii,:), P_z(:,:,ii) );
+        [x(ii,:), P_z(:,:,ii)] = correctorZVK( x(ii,:), P_z(:,:,ii) );
 
-        
-        
+       
         
     end
 

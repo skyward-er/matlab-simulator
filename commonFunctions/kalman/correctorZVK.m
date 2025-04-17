@@ -25,12 +25,14 @@ function [x_new, P_new] = correctrZVK(x_pred, P_pred)
     %        zeros(3) zeros(3) skewOmega*A    zeros(3) zeros(3) zeros(3)];
 
 
-    P_xx_pred = P_pred(1:15,1:15,end);
-    P_xp_pred = P_pred(16:33,1:15,end);
-    P_pp_pred = P_pred(16:33,16:33,end);
+    P_xx_pred = P_pred(1:15,1:15);
+    P_xp_pred = P_pred(1:15,16:33);
+    P_pp_pred = P_pred(16:33,16:33);
 
+    R = [1e-3*diag(ones(3,1)),  zeros(3);
+         zeros(3),              1e-3*diag(ones(3,1))];
 
-    S = H_x * P_xx_pred * H_x';
+    S = H_x * P_xx_pred * H_x' + R;
 
     K = P_xx_pred * H_x' * S;
 
@@ -48,5 +50,12 @@ function [x_new, P_new] = correctrZVK(x_pred, P_pred)
     
     x_new(1:4) = [ (quat_pred(4)*quat_error(1:3) + quat_error(4)*quat_pred(1:3) - cross(quat_error(1:3),quat_pred(1:3)) )';
                   quat_error(4)*quat_pred(4) - quat_error(1:3)*quat_pred(1:3)' ];
+
+
+    P_xx_new = (1 - K * H_x) * P_xx_pred;
+
+    P_new = [P_xx_new,      P_xp_pred;
+             P_xp_pred',    P_pp_pred];
+
 
 end
