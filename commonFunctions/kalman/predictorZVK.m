@@ -39,8 +39,8 @@ function [z_pred, P_pred] = predictorZVK( x_prev, P_prev, a_b_m, om_b_m, dt, zvk
 
 
     %%% Biases random walk
-    bias_a_pred = (eye(3) + zvk.acc_bias_noise) * bias_a_prev;
-    bias_g_pred = (eye(3) + zvk.gyro_bias_noise) * bias_g_prev; 
+    bias_a_pred = eye(3)*bias_a_prev + zvk.acc_bias_noise;
+    bias_g_pred = eye(3)*bias_g_prev + zvk.gyro_bias_noise; 
 
     
     % Assemble predicted global state
@@ -51,13 +51,14 @@ function [z_pred, P_pred] = predictorZVK( x_prev, P_prev, a_b_m, om_b_m, dt, zvk
 
     %%% Covariance prediction
 
-    F11 = - omega_mat;
-    F15 = - eye(3);
-    F23 = eye(3);
-    F31 = - A * [ 0         -a_b(3)    a_b(2);
-                  a_b(3)    0          -a_b(1);
-                  -a_b(2)  a_b(1)     0;];
-    F34 = - A;
+    F11 = - omega_mat;                              % phi/phi
+    F14 = - eye(3);                                 % phi/beta_gyro
+    F23 = eye(3);                                   % r/v
+    F31 = - A * [ 0         -a_i(3)    a_i(2);      % v/phi
+                  a_i(3)    0          -a_i(1);
+                  -a_i(2)  a_i(1)     0;];
+    F35 = - A;                                      % v/beta_acc
+
     
     % x = r_prev(1);
     % y = r_prev(2);
@@ -71,39 +72,40 @@ function [z_pred, P_pred] = predictorZVK( x_prev, P_prev, a_b_m, om_b_m, dt, zvk
     F32 = zeros(3);
     % Ho tolto la dipendenza dell'acceleraizone dalla posizone (i.e. la perturbazione J2)
 
-    F = [F11,  zeros(3),    zeros(3),    zeros(3),   F15;
-          zeros(3),   zeros(3),   F23,   zeros(3),    zeros(3);
-         F31, F32,   zeros(3),   F34,   zeros(3);
-          zeros(3),   zeros(3),    zeros(3),    zeros(3),    zeros(3);
-          zeros(3),   zeros(3),    zeros(3),    zeros(3),    zeros(3)];
+    F = [F11,       zeros(3),   zeros(3),   F14,        zeros(3);
+         zeros(3),  zeros(3),   F23,        zeros(3),   zeros(3);
+         F31,       F32,        zeros(3),   zeros(3)    F35;
+         zeros(3),  zeros(3),   zeros(3),   zeros(3),   zeros(3);
+         zeros(3),  zeros(3),   zeros(3),   zeros(3),   zeros(3)];
  
 
-    G_w = [-diag(ones(3,1)),  zeros(3),  zeros(3),  zeros(3);
-            zeros(3),  zeros(3),  zeros(3),  zeros(3);
-            zeros(3),  zeros(3), -A,  diag(ones(3,1));
-            zeros(3),  zeros(3),  zeros(3),  diag(ones(3,1));
-            zeros(3),  diag(ones(3,1)),  zeros(3),  zeros(3)]; 
+    G_w = [-diag(ones(3,1)),    zeros(3),           zeros(3),   zeros(3);
+            zeros(3),           zeros(3),           zeros(3),   zeros(3);
+            zeros(3),           zeros(3),           -A,         diag(ones(3,1));
+            zeros(3),           diag(ones(3,1)),    zeros(3),   zeros(3);
+            zeros(3),           zeros(3),           zeros(3),   diag(ones(3,1))]; 
+
 
     G11 = - diag(om_b);
     G12 = - omega_mat;
     G13 = - [      0, om_b(3), om_b(2);
              om_b(3),       0, om_b(2);
              om_b(2), om_b(1),       0]; 
-    G34 = - A * diag(a_b);
-    G35 = A * diag(a_b);
-    G36 = - A * [     0, a_b(3), a_b(2);
-                 a_b(3),      0, a_b(2);
-                 a_b(2), a_b(1),      0];
+    G34 = - A * diag(a_i);
+    G35 = A * diag(a_i);
+    G36 = - A * [     0, a_i(3), a_i(2);
+                 a_i(3),      0, a_i(2);
+                 a_i(2), a_i(1),      0];
 
    
-    G_p = [G11, G12,  G13,   zeros(3),    zeros(3),    zeros(3);
-            zeros(3),   zeros(3),    zeros(3),    zeros(3),    zeros(3),    zeros(3);
-            zeros(3),   zeros(3),    zeros(3),   G34,  G35,  G36;
-            zeros(3),   zeros(3),    zeros(3),    zeros(3),    zeros(3),    zeros(3);
-            zeros(3),   zeros(3),    zeros(3),    zeros(3),    zeros(3),    zeros(3)];
+    G_p = [G11,         G12,        G13,        zeros(3),   zeros(3),   zeros(3);
+           zeros(3),    zeros(3),   zeros(3),   zeros(3),   zeros(3),   zeros(3);
+           zeros(3),    zeros(3),   zeros(3),   G34,        G35,        G36;
+           zeros(3),    zeros(3),   zeros(3),   zeros(3),   zeros(3),   zeros(3);
+           zeros(3),    zeros(3),   zeros(3),   zeros(3),   zeros(3),   zeros(3)];
 
 
-    PHI = exp(F * dt);
+    PHI = expm(F * dt);
 
     GAMMA = (PHI*G_w);
 
@@ -111,18 +113,18 @@ function [z_pred, P_pred] = predictorZVK( x_prev, P_prev, a_b_m, om_b_m, dt, zvk
 
 
     
-    P_xx_prev = P_prev(1:15,1:15,end);
-    P_xp_prev = P_prev(16:33,1:15,end);
-    P_pp_prev = P_prev(16:33,16:33,end);
+    P_xx_prev = P_prev(1:15,1:15);
+    P_xp_prev = P_prev(1:15,16:33);
+    P_pp_prev = P_prev(16:33,16:33);
 
     
     P_xx_pred = PHI * P_xx_prev * PHI'+ ...
                 GAMMA * zvk.Q * dt * GAMMA' + ...
-                PHI * P_xp_prev' * PSI' + ...
-                PSI * P_xp_prev * PHI' + ...             % note: P_PX_prev = P_XP_prev'
+                PHI * P_xp_prev * PSI' + ...
+                PSI * P_xp_prev' * PHI + ...             % note: P_PX_prev = P_XP_prev'
                 PSI * P_pp_prev * PSI';
 
-    P_xp_pred = PHI * P_xp_prev' + PSI * P_pp_prev;
+    P_xp_pred = PHI * P_xp_prev + PSI * P_pp_prev;
 
     % P_pp does nto change
 

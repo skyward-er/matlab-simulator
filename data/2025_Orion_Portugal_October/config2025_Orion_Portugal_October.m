@@ -148,14 +148,14 @@ settings.nas.Qq              =   [(settings.nas.sigma_w^2*settings.nas.dt_k+(1/3
 % settings.zvk
 settings.zvk.Q = diag( 0.1^2*ones(12,1) );
 
-settings.zvk.mu = 3.986004418e14;
-settings.zvk.Re = 6378137;
-settings.zvk.J2 = 1.082636e-3;
+% settings.zvk.mu = 3.986004418e14;
+% settings.zvk.Re = 6378137;
+% settings.zvk.J2 = 1.082636e-3;
 
-settings.zvk.P = 0.5*eye(33);
+settings.zvk.P = 0.1*eye(33);
 
-settings.zvk.gyro_bias_noise = 0.05;
-settings.zvk.acc_bias_noise  = 0.05;
+settings.zvk.gyro_bias_noise = deg2rad(0.5)/sqrt(3600);
+settings.zvk.acc_bias_noise  = 10000*9.81e-6/sqrt(50);
 
 
 
