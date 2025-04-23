@@ -159,23 +159,23 @@ drawnow
 
 %% Control variable: servo angle + reference values
 % air brakes
-if not(settings.scenario == "descent")
-    figures.servo_angle = figure('Name', 'Servo angle after burning phase','ToolBar','auto');
-    plot(simOutput.t, simOutput.Y(:,14));
-    hold on; grid on;
-    stairs(simOutput.ARB.cmdTime,simOutput.ARB.cmdPosition,'r');
-    xline(simOutput.ARB.allowanceTime,'k--')
-    xline(simOutput.apogee.time,'r--')
-    xlabel('Time [s]');
-    ylabel('$\alpha$ [rad]');
-    title('Servo angle');
-    legend('simulated','reference values','Airbrakes deployment','Apogee')
-
-    if settings.flagExportPLOTS == true
-        exportStandardizedFigure(figures.servo_angle,"report_images\"+mission.name+"\src_servo_angle.pdf",0.9)
-    end
-    drawnow
-end
+% if not(settings.scenario == "descent")
+%     figures.servo_angle = figure('Name', 'Servo angle after burning phase','ToolBar','auto');
+%     plot(simOutput.t, simOutput.Y(:,14));
+%     hold on; grid on;
+%     stairs(simOutput.ARB.cmdTime,simOutput.ARB.cmdPosition,'r');
+%     xline(simOutput.ARB.allowanceTime,'k--')
+%     xline(simOutput.apogee.time,'r--')
+%     xlabel('Time [s]');
+%     ylabel('$\alpha$ [rad]');
+%     title('Servo angle');
+%     legend('simulated','reference values','Airbrakes deployment','Apogee')
+% 
+%     if settings.flagExportPLOTS == true
+%         exportStandardizedFigure(figures.servo_angle,"report_images\"+mission.name+"\src_servo_angle.pdf",0.9)
+%     end
+%     drawnow
+% end
 % % parafoil
 % if settings.parafoil && (settings.scenario == "descent" || settings.scenario == "full flight")
 %     figures.parafoil_servo_action = figure('Name', 'Parafoil deltaA','ToolBar','auto');
@@ -190,36 +190,36 @@ end
 % end
 
 %% Trajectory
-figures.trajectory = figure('Name', 'Trajectory','ToolBar','auto');
-plot3(simOutput.Y(1:end-10, 2), simOutput.Y(1:end-10, 1), -simOutput.Y(1:end-10, 3),'DisplayName','True trajectory');
-hold on; grid on;
-plot3(simOutput.sensors.nas.states(1:end-10, 2), simOutput.sensors.nas.states(1:end-10, 1), -simOutput.sensors.nas.states(1:end-10, 3)-environment.z0,'DisplayName','NAS trajectory');
-
-if not(settings.scenario == "descent")
-    plot3(simOutput.ARB.openingPosition(2),simOutput.ARB.openingPosition(1),simOutput.ARB.openingPosition(3),'ko','DisplayName','Airbrake deployment')
-end
-plot3(simOutput.apogee.position(2),simOutput.apogee.position(1),-simOutput.apogee.position(3),'ro','DisplayName','Apogee')
-
-if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    plot3(simOutput.Y(simOutput.events.mainChuteIndex, 2), simOutput.Y(simOutput.events.mainChuteIndex, 1), -simOutput.Y(simOutput.events.mainChuteIndex, 3),'d','DisplayName','Main chute opening');
-    plot3(settings.payload.target(2),settings.payload.target(1),settings.payload.target(3),'go','DisplayName','Payload Target')
-    if contSettings.payload.guidance_alg == "t-approach"
-        makeCone(simOutput.payload.EMC([2,1]),15,-simOutput.Y(simOutput.events.mainChuteIndex,3),'EMC')
-        makeCone(simOutput.payload.M1([2,1]),15,-simOutput.Y(simOutput.events.mainChuteIndex,3),'M1')
-        makeCone(simOutput.payload.M2([2,1]),15,-simOutput.Y(simOutput.events.mainChuteIndex,3),'M2')
-    end
-end
-xlabel('E [m]');
-ylabel('N [m]');
-zlabel('U [m]');
-title('Trajectory (ENU)');
-axis equal
-view([157,55])
-legend
-if settings.flagExportPLOTS == true
-    exportStandardizedFigure(figures.trajectory,"report_images\"+mission.name+"\src_trajectory.pdf",0.49)
-end
-drawnow
+% figures.trajectory = figure('Name', 'Trajectory','ToolBar','auto');
+% plot3(simOutput.Y(1:end-10, 2), simOutput.Y(1:end-10, 1), -simOutput.Y(1:end-10, 3),'DisplayName','True trajectory');
+% hold on; grid on;
+% plot3(simOutput.sensors.nas.states(1:end-10, 2), simOutput.sensors.nas.states(1:end-10, 1), -simOutput.sensors.nas.states(1:end-10, 3)-environment.z0,'DisplayName','NAS trajectory');
+% 
+% if not(settings.scenario == "descent")
+%     plot3(simOutput.ARB.openingPosition(2),simOutput.ARB.openingPosition(1),simOutput.ARB.openingPosition(3),'ko','DisplayName','Airbrake deployment')
+% end
+% plot3(simOutput.apogee.position(2),simOutput.apogee.position(1),-simOutput.apogee.position(3),'ro','DisplayName','Apogee')
+% 
+% if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
+%     plot3(simOutput.Y(simOutput.events.mainChuteIndex, 2), simOutput.Y(simOutput.events.mainChuteIndex, 1), -simOutput.Y(simOutput.events.mainChuteIndex, 3),'d','DisplayName','Main chute opening');
+%     plot3(settings.payload.target(2),settings.payload.target(1),settings.payload.target(3),'go','DisplayName','Payload Target')
+%     if contSettings.payload.guidance_alg == "t-approach"
+%         makeCone(simOutput.payload.EMC([2,1]),15,-simOutput.Y(simOutput.events.mainChuteIndex,3),'EMC')
+%         makeCone(simOutput.payload.M1([2,1]),15,-simOutput.Y(simOutput.events.mainChuteIndex,3),'M1')
+%         makeCone(simOutput.payload.M2([2,1]),15,-simOutput.Y(simOutput.events.mainChuteIndex,3),'M2')
+%     end
+% end
+% xlabel('E [m]');
+% ylabel('N [m]');
+% zlabel('U [m]');
+% title('Trajectory (ENU)');
+% axis equal
+% view([157,55])
+% legend
+% if settings.flagExportPLOTS == true
+%     exportStandardizedFigure(figures.trajectory,"report_images\"+mission.name+"\src_trajectory.pdf",0.49)
+% end
+% drawnow
 
 %% Velocities BODY w.r.t. time against NAS
 figures.velocities_BODY = figure('Name', 'Velocities BODY','ToolBar','auto');

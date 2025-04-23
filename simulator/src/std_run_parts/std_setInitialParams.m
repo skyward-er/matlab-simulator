@@ -7,18 +7,17 @@ integration initialization script- setting initial condition before control phas
 
 %% kalman initialization
 if not(settings.scenario == "descent")
-    sensorData.kalman.vz = 0;                                                   % Vertical velocity
+    sensorData.kalman.vz = 0;                                               % Vertical velocity
     sensorData.kalman.z  = -environment.z0;
 else 
-    sensorData.kalman.vz = -settings.Vz_final;                                                   % Vertical velocity
+    sensorData.kalman.vz = -settings.Vz_final;                              % Vertical velocity
     sensorData.kalman.z  = -settings.z_final;
-end    
-    % Altitude
+end
+% Altitude
 
 %% ADA Initialization
-
-settings.ada.counter     =   0;
-settings.ada.paraCounter =   0;
+settings.ada.counter     =   0;                     % Counter for ADA
+settings.ada.paraCounter =   0;                     % Counter for ADA
 
 settings.ada.t_ada       =   -1;                    % Apogee detection timestamp
 settings.ada.flag_apo    =   false;                 % True when the apogee is detected
@@ -27,33 +26,20 @@ settings.ada.flagOpenPara =  false;                 % True when the main parachu
 %% Initialization of sensor measurement time
 control_freq = settings.frequencies.controlFrequency;
 
-sensorData.accelerometer.t0 = initSensorT0...
-    (control_freq ,settings.frequencies.accelerometerFrequency);
-
-sensorData.gyro.t0 = initSensorT0...
-    (control_freq,settings.frequencies.gyroFrequency);
-
-sensorData.magnetometer.t0 = initSensorT0...
-    (control_freq,settings.frequencies.magnetometerFrequency);
-
-sensorData.gps.t0 = initSensorT0...
-    (control_freq,settings.frequencies.gpsFrequency);
-
+sensorData.accelerometer.t0 = initSensorT0(control_freq ,settings.frequencies.accelerometerFrequency);
+sensorData.gyro.t0 = initSensorT0(control_freq,settings.frequencies.gyroFrequency);
+sensorData.magnetometer.t0 = initSensorT0(control_freq,settings.frequencies.magnetometerFrequency);
+sensorData.gps.t0 = initSensorT0(control_freq,settings.frequencies.gpsFrequency);
 
 % triplicate sensors for sensor fault detection testing
-sensorData.barometer_sens{1}.t0 = initSensorT0...
-    (control_freq,settings.frequencies.barometerFrequency);
-sensorData.barometer_sens{2}.t0 = initSensorT0...
-    (control_freq,settings.frequencies.barometerFrequency);
-sensorData.barometer_sens{3}.t0 = initSensorT0...
-    (control_freq,settings.frequencies.barometerFrequency);
+sensorData.barometer_sens{1}.t0 = initSensorT0(control_freq,settings.frequencies.barometerFrequency);
+sensorData.barometer_sens{2}.t0 = initSensorT0(control_freq,settings.frequencies.barometerFrequency);
+sensorData.barometer_sens{3}.t0 = initSensorT0(control_freq,settings.frequencies.barometerFrequency);
 
-sensorData.pitot.t0 = initSensorT0...
-    (control_freq,settings.frequencies.pitotFrequency);
+sensorData.pitot.t0 = initSensorT0(control_freq,settings.frequencies.pitotFrequency);
 
 if contains(mission.name,'2023')  || contains(mission.name,'2024') || contains(mission.name,'2025')
-sensorData.chamberPressure.t0 = initSensorT0...
-    (control_freq,settings.frequencies.chamberPressureFrequency);
+    sensorData.chamberPressure.t0 = initSensorT0(control_freq,settings.frequencies.chamberPressureFrequency);
 end
 
 sensorData.barometer_sens{1}.time = [];
@@ -82,8 +68,9 @@ ap_ref_old = 0;
 ap_ref = [ ap_ref_old ap_ref_new ];
 
 % servo motor time delay - in ode it needs to be set to change reference value
-t_change_ref_ABK =      t0 + settings.servo.delay;
+t_change_ref_ABK = t0 + settings.servo.delay;
 t_last_arb_control = 0;
+
 %% parafoil control action initialization
 deltaA_ref_new = 0;
 deltaA_ref_old = 0;
@@ -91,7 +78,6 @@ deltaA_ref = [deltaA_ref_old,deltaA_ref_new];
 % servo motor time delay - in ode it needs to be set to change reference value
 t_change_ref_PRF =      t0 + rocket.parachutes(2,2).controlParams.deltaA_delay;
 t_last_prf_control = 0;
-
 
 %% initialization of other variables - for speed purposes
 mach        =       0;                                                      % Mach number
@@ -121,6 +107,7 @@ idx_apogee = NaN;
 idx_landing = NaN;
 
 engineT0 = 0;       % Initial time for engine time computations
+
 %% sensor fault initial conditions
 sensorData.chunk{1} = zeros(1,50);
 sensorData.chunk{2} = zeros(1,50);
@@ -131,7 +118,6 @@ barometer_time = [];
 sfd_mean_p = [];
 
 %% ADA initial conditions (Apogee Detection Algorithm)
-
 if strcmp(settings.scenario, 'descent')
     [~, ~, p_fin, ~]  =   computeAtmosphericData(settings.z_final+environment.z0);               % Reference temperature in kelvin and pressure in Pa
 
@@ -152,7 +138,6 @@ end
 % Pada_prev =   settings.ada.P0;
 
 %% NAS initial conditions (Navigation and Attitude System)
-
 if settings.flagNAS || settings.electronics
     % initialize states of the NAS 
     sensorData.nas.states = [X0; V0; Q0(2:4); Q0(1);0;0;0]';
@@ -180,6 +165,7 @@ sensorData.mea.predicted_apogee = 0;
 settings.t_shutdown = Inf;
 settings.mea.counter_shutdown = 0;
 settings.flagMEAInit = false;
+
 %% parafoil
 deltaA = contSettings.payload.deltaA_0;
 para = 1;
@@ -209,7 +195,8 @@ sensorTot.nas.states                            =   sensorData.nas.states;
 sensorTot.nas.timestampPitotCorrection          =   nan;
 sensorTot.nas.timestampMagnetometerCorrection   =   0;
 sensorTot.mea.pressure                          =   0; %it's a differential pressure sensor
-sensorTot.mea.mass                              =   rocket.motor.mass(1);
+% sensorTot.mea.mass                              =   rocket.motor.mass(1);
+sensorTot.mea.mass                              =   rocket.mass(1);
 sensorTot.mea.prediction                        =   0;
 sensorTot.mea.time                              =   0;
 
@@ -252,3 +239,4 @@ flagAeroBrakes = false;
 flagApogee = false;
 flagPara1 = false;
 flagPara2 = false;
+

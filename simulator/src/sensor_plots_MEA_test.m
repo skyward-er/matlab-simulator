@@ -23,83 +23,83 @@ legend("Accelerometer", "Real");
 xlabel("Time [s]"), ylabel("$a_Z$ [g]")
 drawnow
 
-%% Gyroscope measurements
-figure('Name', "Gyroscope measurements")
-subplot(3,1,1)
-plot(simOutput.sensors.imu.time, simOutput.sensors.imu.gyro_measures(:,1));
-hold on, grid on
-plot(simOutput.t, simOutput.Y(:,7));
-legend("Gyroscope", "Real");
-title("$\omega$ BODY");
-ylabel("$\omega_X$ $[rad/s]$")
-subplot(3,1,2)
-plot(simOutput.sensors.imu.time, simOutput.sensors.imu.gyro_measures(:,2));
-hold on, grid on
-plot(simOutput.t, simOutput.Y(:,8));
-legend("Gyroscope", "Real");
-ylabel("$\omega_Y$ $[rad/s]$")
-subplot(3,1,3)
-plot(simOutput.sensors.imu.time, simOutput.sensors.imu.gyro_measures(:,3));
-hold on, grid on
-plot(simOutput.t, simOutput.Y(:,9));
-legend("Gyroscope", "Real");
-xlabel("Time [s]"), ylabel("$\omega_Z$ $[rad/s]$")
-drawnow
+% %% Gyroscope measurements
+% figure('Name', "Gyroscope measurements")
+% subplot(3,1,1)
+% plot(simOutput.sensors.imu.time, simOutput.sensors.imu.gyro_measures(:,1));
+% hold on, grid on
+% plot(simOutput.t, simOutput.Y(:,7));
+% legend("Gyroscope", "Real");
+% title("$\omega$ BODY");
+% ylabel("$\omega_X$ $[rad/s]$")
+% subplot(3,1,2)
+% plot(simOutput.sensors.imu.time, simOutput.sensors.imu.gyro_measures(:,2));
+% hold on, grid on
+% plot(simOutput.t, simOutput.Y(:,8));
+% legend("Gyroscope", "Real");
+% ylabel("$\omega_Y$ $[rad/s]$")
+% subplot(3,1,3)
+% plot(simOutput.sensors.imu.time, simOutput.sensors.imu.gyro_measures(:,3));
+% hold on, grid on
+% plot(simOutput.t, simOutput.Y(:,9));
+% legend("Gyroscope", "Real");
+% xlabel("Time [s]"), ylabel("$\omega_Z$ $[rad/s]$")
+% drawnow
 
-%% Magnetometer measurements
-std_magneticField;
-magnFieldInertial = magneticFieldApprox(-simOutput.Y(:,3)+environment.z0);
-Q = simOutput.Y(:,10:13);
-magnFieldBody = quatrotate(Q, magnFieldInertial)/1e3;
+% %% Magnetometer measurements
+% std_magneticField;
+% magnFieldInertial = magneticFieldApprox(-simOutput.Y(:,3)+environment.z0);
+% Q = simOutput.Y(:,10:13);
+% magnFieldBody = quatrotate(Q, magnFieldInertial)/1e3;
+% 
+% figure('Name', "Magnetometer measurements")
+% subplot(3,1,1)
+% plot(simOutput.sensors.imu.time, simOutput.sensors.imu.magnetometer_measures(:,1)/1e1);
+% hold on; grid on;
+% plot(simOutput.t, magnFieldBody(:,1));
+% legend("Magnetometer", "Real");
+% title("Magnetic field BODY");
+% ylabel("$X\ [\mu T]$");
+% subplot(3,1,2)
+% plot(simOutput.sensors.imu.time, simOutput.sensors.imu.magnetometer_measures(:,2)/1e1);
+% hold on; grid on;
+% plot(simOutput.t, magnFieldBody(:,2));
+% legend("Magnetometer", "Real");
+% ylabel("$Y\ [\mu T]$");
+% subplot(3,1,3)
+% plot(simOutput.sensors.imu.time, simOutput.sensors.imu.magnetometer_measures(:,3)/1e1);
+% hold on; grid on;
+% plot(simOutput.t, magnFieldBody(:,3));
+% legend("Magnetometer", "Real");
+% xlabel("Time [s]"), ylabel("$Z\ [\mu T]$");
+% drawnow
 
-figure('Name', "Magnetometer measurements")
-subplot(3,1,1)
-plot(simOutput.sensors.imu.time, simOutput.sensors.imu.magnetometer_measures(:,1)/1e1);
-hold on; grid on;
-plot(simOutput.t, magnFieldBody(:,1));
-legend("Magnetometer", "Real");
-title("Magnetic field BODY");
-ylabel("$X\ [\mu T]$");
-subplot(3,1,2)
-plot(simOutput.sensors.imu.time, simOutput.sensors.imu.magnetometer_measures(:,2)/1e1);
-hold on; grid on;
-plot(simOutput.t, magnFieldBody(:,2));
-legend("Magnetometer", "Real");
-ylabel("$Y\ [\mu T]$");
-subplot(3,1,3)
-plot(simOutput.sensors.imu.time, simOutput.sensors.imu.magnetometer_measures(:,3)/1e1);
-hold on; grid on;
-plot(simOutput.t, magnFieldBody(:,3));
-legend("Magnetometer", "Real");
-xlabel("Time [s]"), ylabel("$Z\ [\mu T]$");
-drawnow
-
-%% GPS measurements
-% Positions
-[GPS_NED(:,1), GPS_NED(:,2), GPS_NED(:,3)] = geodetic2ned(simOutput.sensors.gps.position_measures(:,1), simOutput.sensors.gps.position_measures(:,2), simOutput.sensors.gps.position_measures(:,3), ...
-    environment.lat0, environment.lon0, environment.z0, wgs84Ellipsoid);
-
-figure("Name", "GPS Position measurements")
-subplot(3,1,1)
-plot(simOutput.sensors.gps.time, GPS_NED(:,1));
-hold on; grid on;
-plot(simOutput.t, simOutput.Y(:,1));
-legend("GPS", "Real");
-title("Positions");
-ylabel("North [m]");
-subplot(3,1,2)
-plot(simOutput.sensors.gps.time, GPS_NED(:,2));
-hold on; grid on;
-plot(simOutput.t, simOutput.Y(:,2));
-legend("GPS", "Real");
-ylabel("East [m]");
-subplot(3,1,3)
-plot(simOutput.sensors.gps.time, -GPS_NED(:,3));
-hold on; grid on;
-plot(simOutput.t, -simOutput.Y(:,3));
-legend("GPS", "Real");
-xlabel("Time [s]"), ylabel("Up agl [m]");
-drawnow
+% %% GPS measurements
+% % Positions
+% [GPS_NED(:,1), GPS_NED(:,2), GPS_NED(:,3)] = geodetic2ned(simOutput.sensors.gps.position_measures(:,1), simOutput.sensors.gps.position_measures(:,2), simOutput.sensors.gps.position_measures(:,3), ...
+%     environment.lat0, environment.lon0, environment.z0, wgs84Ellipsoid);
+% 
+% figure("Name", "GPS Position measurements")
+% subplot(3,1,1)
+% plot(simOutput.sensors.gps.time, GPS_NED(:,1));
+% hold on; grid on;
+% plot(simOutput.t, simOutput.Y(:,1));
+% legend("GPS", "Real");
+% title("Positions");
+% ylabel("North [m]");
+% subplot(3,1,2)
+% plot(simOutput.sensors.gps.time, GPS_NED(:,2));
+% hold on; grid on;
+% plot(simOutput.t, simOutput.Y(:,2));
+% legend("GPS", "Real");
+% ylabel("East [m]");
+% subplot(3,1,3)
+% plot(simOutput.sensors.gps.time, -GPS_NED(:,3));
+% hold on; grid on;
+% plot(simOutput.t, -simOutput.Y(:,3));
+% legend("GPS", "Real");
+% xlabel("Time [s]"), ylabel("Up agl [m]");
+% drawnow
 
 %% Velocities
 % ODE velocity rotated in ned frame
@@ -136,29 +136,29 @@ legend("GPS", "Real");
 xlabel("Time [s]"), ylabel("$V_D\ [m/s]$");
 drawnow
 
-%% Barometer measurements
-[~, ~, P_real] = computeAtmosphericData(-simOutput.Y(:,3)+environment.z0);
+% %% Barometer measurements
+% [~, ~, P_real] = computeAtmosphericData(-simOutput.Y(:,3)+environment.z0);
+% 
+% figure("Name", "Barometer measurements")
+% hold on;
+% plot(simOutput.sensors.barometer_sens{1, 1}.time,simOutput.sensors.barometer_sens{1, 1}.pressure_measures,'b','DisplayName','Baro 1')
+% plot(simOutput.sensors.barometer_sens{1, 2}.time,simOutput.sensors.barometer_sens{1, 2}.pressure_measures,'k','DisplayName','Baro 2')
+% plot(simOutput.sensors.barometer_sens{1, 3}.time,simOutput.sensors.barometer_sens{1, 3}.pressure_measures,'r','DisplayName','Baro 3')
+% plot(simOutput.t, P_real, 'g', 'DisplayName', 'Real pressure');
+% legend
+% title('Barometer measurements')
+% xlabel("Time [s]"), ylabel("Pressure [Pa]")
+% drawnow
 
-figure("Name", "Barometer measurements")
-hold on;
-plot(simOutput.sensors.barometer_sens{1, 1}.time,simOutput.sensors.barometer_sens{1, 1}.pressure_measures,'b','DisplayName','Baro 1')
-plot(simOutput.sensors.barometer_sens{1, 2}.time,simOutput.sensors.barometer_sens{1, 2}.pressure_measures,'k','DisplayName','Baro 2')
-plot(simOutput.sensors.barometer_sens{1, 3}.time,simOutput.sensors.barometer_sens{1, 3}.pressure_measures,'r','DisplayName','Baro 3')
-plot(simOutput.t, P_real, 'g', 'DisplayName', 'Real pressure');
-legend
-title('Barometer measurements')
-xlabel("Time [s]"), ylabel("Pressure [Pa]")
-drawnow
-
-%% Pitot measurements
-figure("Name", "Pitot measurements")
-plot(simOutput.sensors.pitot.time,simOutput.sensors.pitot.static_pressure, 'DisplayName', "Pitot static pressure")
-hold on;
-plot(simOutput.t, P_real, 'DisplayName', "Real pressure");
-legend()
-title('Pitot static pressure')
-xlabel("Time [s]"), ylabel("Pressure [Pa]")
-drawnow
+% %% Pitot measurements
+% figure("Name", "Pitot measurements")
+% plot(simOutput.sensors.pitot.time,simOutput.sensors.pitot.static_pressure, 'DisplayName', "Pitot static pressure")
+% hold on;
+% plot(simOutput.t, P_real, 'DisplayName', "Real pressure");
+% legend()
+% title('Pitot static pressure')
+% xlabel("Time [s]"), ylabel("Pressure [Pa]")
+% drawnow
 
 %% MEA pressure vs true pressure
 if length(simOutput.sensors.mea.time) > 1

@@ -14,23 +14,26 @@ t_chambPress = sensorTot.comb_chamber.time;%(sensorTot.comb_chamber.time >= T1);
 t_nas = sensorTot.nas.time;%(sensorTot.nas.time>= T1); % we need also nas to estimate cd etc
 t_imu = sensorTot.imu.time;
 
-% initialise state update
+% initialize state update
 x(1,:) = sensorData.mea.x(end,:);
 P(:,:,1) = sensorData.mea.P(:,:,end);
 P_acc(:,:,1) = sensorData.mea.P_acc(:,:,end);
-predicted_apogee = 0;
+
 z_nas = zeros(length(t_mea), 1);
 vnorm_nas = zeros(length(t_mea), 1);
 vz_nas = zeros(length(t_mea), 1);
+
 z_nas(1) = sensorData.nas.states(end,3);
 vnorm_nas(1) = norm(sensorData.nas.states(end,4:6));
 vz_nas(1) = -sensorData.nas.states(end,6);
 
- if settings.flagFlightRef
-     coeffs = contSettings.coeff_Cd;
- else
-     coeffs = contSettings.coeffs;
- end
+predicted_apogee = 0;
+
+if settings.flagFlightRef
+    coeffs = contSettings.coeff_Cd;
+else
+    coeffs = contSettings.coeffs;
+end
 
 
 for ii = 2:length(t_mea)
@@ -55,7 +58,8 @@ for ii = 2:length(t_mea)
             x(ii,:) = x(ii,:)' + K* (sensorTot.comb_chamber.measures(index_chambPress) -  C * x(ii,:)'); % /1000 to have the measure in bar
         end
     end
-    %accelerometer correction (not for 2023)
+
+    % accelerometer correction (not for 2023)
     if contains(mission.name, '2024')
         K_t = settings.mea.K_t;
         alpha = settings.mea.alpha;
@@ -66,13 +70,11 @@ for ii = 2:length(t_mea)
         mass_max = settings.mea.mass_interval(2);
         mass_min = settings.mea.mass_interval(1);
 
-        if norm(sensorTot.imu.accelerometer_measures(index_imu, :)) > acc_threshold...
-                && vz_nas(ii) > vel_threshold
-
-            cd = 1*getDrag(vz_nas(ii), -z_nas(ii), 0, coeffs); %add correction shut_down??
+        if norm(sensorTot.imu.accelerometer_measures(index_imu, :)) > acc_threshold && vz_nas(ii) > vel_threshold
+            cd = 1*getDrag(vz_nas(ii), -z_nas(ii), 0, coeffs);      % add correction shut_down??
             [~,~,P_e, rho] = computeAtmosphericData(-z_nas(ii));
-            q = 0.5*rho*vz_nas(ii)^2; %dynamic pressure
-            F_a = q*rocket.crossSection*cd;       %aerodynamic force
+            q = 0.5*rho*vz_nas(ii)^2;                               % dynamic pressure
+            F_a = q*rocket.crossSection*cd;                         % aerodynamic force
 
             if  -z_nas(ii,1)> 800
                 F_s = (P_0-P_e)*rocket.motor.ae;
@@ -94,7 +96,6 @@ for ii = 2:length(t_mea)
                 P(:,:,ii) = (eye(3)-K*H)*P(:,:,ii);
                 x(ii,:) = x(ii,:)' + K.*(sensorTot.imu.accelerometer_measures(index_imu, 1) - y_est);
             end
-
         end
         
         % use only reasonable masses to predict the apogee
@@ -105,16 +106,15 @@ for ii = 2:length(t_mea)
         else
             mass = x(ii,3);
         end
-
     else
         mass = x(ii,3);
     end
 
-    %propagate apogee
+    % propagate apogee
     CD = settings.CD_correction_shutDown*getDrag(vz_nas(ii), -z_nas(ii), 0, coeffs); % coeffs potrebbe essere settings.coeffs
     [~,~,~,rho] = computeAtmosphericData(-z_nas(ii));
 
-    propagation_steps = 0;%contSettings.N_prediction_threshold - settings.mea.counter_shutdown;
+    propagation_steps = 0; % contSettings.N_prediction_threshold - settings.mea.counter_shutdown;
     if propagation_steps >=1
         [z_pred, vz_pred] = PropagateState(-z_nas(ii),-vz_nas(ii), ...
             K_t .* sensorTot.comb_chamber.measures(index_chambPress), ...
@@ -133,12 +133,12 @@ for ii = 2:length(t_mea)
     vnorm_nas(ii,1) = norm(sensorTot.nas.states(index_NAS,4:6));
     vz_nas(ii,1) = sensorTot.nas.states(index_NAS,6);
 end
+
 % pressure estimation
 estimated_pressure = C*x';
 
 % mass estimation
 estimated_mass = x(:,3);
-
 
 % update local state
 sensorData.mea.time = t_mea;
@@ -156,5 +156,5 @@ sensorTot.mea.prediction(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorDa
 sensorTot.mea.time(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-2) = sensorData.mea.time(2:end);
 sensorTot.mea.n_old = sensorTot.mea.n_old + size(sensorData.mea.x,1) -1;
 
-
 end
+
