@@ -1,27 +1,27 @@
 function sensor_plots_MEA_test(simOutput, environment, rocket, settings)
 
-%% Accelerometer measurements
-figure('Name', "Accelerometer measurements")
-subplot(3,1,1)
-plot(simOutput.sensors.imu.time, simOutput.sensors.imu.accelerometer_measures(:,1)./9.81);
-hold on, grid on
-plot(simOutput.t, simOutput.recall.accelerations_body(:,1)./9.81);
-legend("Accelerometer", "Real");
-title("Acceleration BODY", 'Interpreter','latex');
-ylabel("$a_X$ [g]")
-subplot(3,1,2)
-plot(simOutput.sensors.imu.time, simOutput.sensors.imu.accelerometer_measures(:,2)./9.81);
-hold on, grid on
-plot(simOutput.t, simOutput.recall.accelerations_body(:,2)./9.81);
-legend("Accelerometer", "Real");
-ylabel("$a_Y$ [g]")
-subplot(3,1,3)
-plot(simOutput.sensors.imu.time, simOutput.sensors.imu.accelerometer_measures(:,3)./9.81);
-hold on, grid on
-plot(simOutput.t, simOutput.recall.accelerations_body(:,3)./9.81);
-legend("Accelerometer", "Real");
-xlabel("Time [s]"), ylabel("$a_Z$ [g]")
-drawnow
+% %% Accelerometer measurements
+% figure('Name', "Accelerometer measurements")
+% subplot(3,1,1)
+% plot(simOutput.sensors.imu.time, simOutput.sensors.imu.accelerometer_measures(:,1)./9.81);
+% hold on, grid on
+% plot(simOutput.t, simOutput.recall.accelerations_body(:,1)./9.81);
+% legend("Accelerometer", "Real");
+% title("Acceleration BODY", 'Interpreter','latex');
+% ylabel("$a_X$ [g]")
+% subplot(3,1,2)
+% plot(simOutput.sensors.imu.time, simOutput.sensors.imu.accelerometer_measures(:,2)./9.81);
+% hold on, grid on
+% plot(simOutput.t, simOutput.recall.accelerations_body(:,2)./9.81);
+% legend("Accelerometer", "Real");
+% ylabel("$a_Y$ [g]")
+% subplot(3,1,3)
+% plot(simOutput.sensors.imu.time, simOutput.sensors.imu.accelerometer_measures(:,3)./9.81);
+% hold on, grid on
+% plot(simOutput.t, simOutput.recall.accelerations_body(:,3)./9.81);
+% legend("Accelerometer", "Real");
+% xlabel("Time [s]"), ylabel("$a_Z$ [g]")
+% drawnow
 
 % %% Gyroscope measurements
 % figure('Name', "Gyroscope measurements")
@@ -101,40 +101,40 @@ drawnow
 % xlabel("Time [s]"), ylabel("Up agl [m]");
 % drawnow
 
-%% Velocities
-% ODE velocity rotated in ned frame
-v_ned = zeros(length(simOutput.t), 3);
-drogue_idx = sum(simOutput.t <= simOutput.state_lastTimes(3));
-v_ned(1:drogue_idx,:) = quatrotate(quatconj(simOutput.Y(1:drogue_idx, 10:13)), simOutput.Y(1:drogue_idx, 4:6));
-if simOutput.state_lastTimes(6) == 0
-    v_ned(drogue_idx+1:end,:) = simOutput.Y(drogue_idx+1:end,4:6);
-else
-    prf_idx = sum(simOutput.t <= simOutput.state_lastTimes(4));
-    v_ned(drogue_idx+1:prf_idx,:) = simOutput.Y(drogue_idx+1:prf_idx,4:6);
-    v_ned(prf_idx+1:end,:) = quatrotate(quatconj(simOutput.Y(prf_idx+1:end, 10:13)), simOutput.Y(prf_idx+1:end, 4:6));
-end
-
-figure("Name", "GPS Velocity measurements")
-subplot(3,1,1)
-plot(simOutput.sensors.gps.time, simOutput.sensors.gps.velocity_measures(:,1));
-hold on; grid on;
-plot(simOutput.t, v_ned(:,1));
-legend("GPS", "Real");
-title("Velocities");
-ylabel("$V_N\ [m/s]$");
-subplot(3,1,2)
-plot(simOutput.sensors.gps.time, simOutput.sensors.gps.velocity_measures(:,2));
-hold on; grid on;
-plot(simOutput.t, v_ned(:,2));
-legend("GPS", "Real");
-ylabel("$V_E\ [m/s]$");
-subplot(3,1,3)
-plot(simOutput.sensors.gps.time, simOutput.sensors.gps.velocity_measures(:,3));
-hold on; grid on;
-plot(simOutput.t, v_ned(:,3));
-legend("GPS", "Real");
-xlabel("Time [s]"), ylabel("$V_D\ [m/s]$");
-drawnow
+% %% Velocities
+% % ODE velocity rotated in ned frame
+% v_ned = zeros(length(simOutput.t), 3);
+% drogue_idx = sum(simOutput.t <= simOutput.state_lastTimes(3));
+% v_ned(1:drogue_idx,:) = quatrotate(quatconj(simOutput.Y(1:drogue_idx, 10:13)), simOutput.Y(1:drogue_idx, 4:6));
+% if simOutput.state_lastTimes(6) == 0
+%     v_ned(drogue_idx+1:end,:) = simOutput.Y(drogue_idx+1:end,4:6);
+% else
+%     prf_idx = sum(simOutput.t <= simOutput.state_lastTimes(4));
+%     v_ned(drogue_idx+1:prf_idx,:) = simOutput.Y(drogue_idx+1:prf_idx,4:6);
+%     v_ned(prf_idx+1:end,:) = quatrotate(quatconj(simOutput.Y(prf_idx+1:end, 10:13)), simOutput.Y(prf_idx+1:end, 4:6));
+% end
+% 
+% figure("Name", "GPS Velocity measurements")
+% subplot(3,1,1)
+% plot(simOutput.sensors.gps.time, simOutput.sensors.gps.velocity_measures(:,1));
+% hold on; grid on;
+% plot(simOutput.t, v_ned(:,1));
+% legend("GPS", "Real");
+% title("Velocities");
+% ylabel("$V_N\ [m/s]$");
+% subplot(3,1,2)
+% plot(simOutput.sensors.gps.time, simOutput.sensors.gps.velocity_measures(:,2));
+% hold on; grid on;
+% plot(simOutput.t, v_ned(:,2));
+% legend("GPS", "Real");
+% ylabel("$V_E\ [m/s]$");
+% subplot(3,1,3)
+% plot(simOutput.sensors.gps.time, simOutput.sensors.gps.velocity_measures(:,3));
+% hold on; grid on;
+% plot(simOutput.t, v_ned(:,3));
+% legend("GPS", "Real");
+% xlabel("Time [s]"), ylabel("$V_D\ [m/s]$");
+% drawnow
 
 % %% Barometer measurements
 % [~, ~, P_real] = computeAtmosphericData(-simOutput.Y(:,3)+environment.z0);

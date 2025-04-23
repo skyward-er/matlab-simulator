@@ -45,20 +45,21 @@ if contains(mission.name,'2023') || contains(mission.name,'2024') || contains(mi
         sgtitle('MEA')
         subplot(2,1,1)
 
-        plot(simOutput.t, -simOutput.Y(:, 3),'DisplayName','Altitude');
-        title('Predicted vs Real apogee');
+        plot(simOutput.t, -simOutput.Y(:, 3),'DisplayName','Altitude')
+        title('Predicted vs Real apogee')
         hold on; grid on;
-        plot(simOutput.sensors.mea.time, simOutput.sensors.mea.prediction,'DisplayName','Prediction');
+        plot(simOutput.sensors.mea.time, simOutput.sensors.mea.prediction,'DisplayName','Prediction')
+        xline(simOutput.sensors.mea.t_shutdown,'r--','DisplayName','MEA ShutDown')
         legend
         ylabel('Altitude AGL [m]')
 
         subplot(2,1,2)
-        plot(simOutput.sensors.mea.time, simOutput.sensors.mea.mass   ,'DisplayName','Est mass');
-        title('Estimated vs real mass');
+        plot(simOutput.sensors.mea.time, simOutput.sensors.mea.mass,'DisplayName','Est mass')
+        title('Estimated vs real mass')
         hold on;
-        plot(simOutput.t, simOutput.recall.true_mass   ,'DisplayName','True mass');
+        plot(simOutput.t, simOutput.recall.true_mass,'DisplayName','True mass')
+        xline(simOutput.sensors.mea.t_shutdown,'r--','DisplayName','MEA ShutDown')
         legend
-        xline(simOutput.sensors.mea.t_shutdown,'r--')
         xlabel('Time [s]');
         ylabel('Mass [kg]');
         if settings.flagExportPLOTS == true
@@ -69,17 +70,17 @@ end
 
 drawnow
 
-%% ADA
-figures.ada = figure('Name', 'ADA vs trajectory');
-plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xv(:,1),'DisplayName','$ADA_{z}$')
-hold on
-plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xv(:,2),'DisplayName','$ADA_{vz}$')
-plot( simOutput.t, -simOutput.Y(:,3),'DisplayName','True z')
-plot( simOutput.t, -v_ned(:,3),'DisplayName','True Vz')
-legend
-title('ADA vs trajectory')
-xlabel("Time [s]"), ylabel("Altitude AGL \& Velocity [m, m/s]")
-drawnow
+% %% ADA
+% figures.ada = figure('Name', 'ADA vs trajectory');
+% plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xv(:,1),'DisplayName','$ADA_{z}$')
+% hold on
+% plot( simOutput.sensors.ada.time,  simOutput.sensors.ada.xv(:,2),'DisplayName','$ADA_{vz}$')
+% plot( simOutput.t, -simOutput.Y(:,3),'DisplayName','True z')
+% plot( simOutput.t, -v_ned(:,3),'DisplayName','True Vz')
+% legend
+% title('ADA vs trajectory')
+% xlabel("Time [s]"), ylabel("Altitude AGL \& Velocity [m, m/s]")
+% drawnow
 
 % figures.ADADer = figure('Name', 'ADA Derivatives');
 % hold on
@@ -221,131 +222,131 @@ drawnow
 % end
 % drawnow
 
-%% Velocities BODY w.r.t. time against NAS
-figures.velocities_BODY = figure('Name', 'Velocities BODY','ToolBar','auto');
-%
-subplot(3,1,1)
-plot(simOutput.t, simOutput.Y(:, 4),'DisplayName','$V_x$')
-hold on; grid on;
-plot(simOutput.sensors.nas.time, v_NAS_body(:, 1),'DisplayName','$V_x$ est')
-if not(settings.scenario == "descent")
-    xline(simOutput.ARB.allowanceTime,'k--')
-end
-if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
-end
-xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
-if any(~isnan(simOutput.sensors.nas.timestampPitotCorrection))
-    xline(min(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Start pitot correction')
-    xline(max(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Stop pitot correction')
-end
-ylabel('$V_x$ [m/s]');
-legend
-%
-subplot(3,1,2)
-plot(simOutput.t, simOutput.Y(:, 5),'DisplayName','$V_y$')
-hold on;
-plot(simOutput.sensors.nas.time, v_NAS_body(:, 2),'DisplayName','$V_y$ est')
-if not(settings.scenario == "descent")
-    xline(simOutput.ARB.allowanceTime,'k--')
-end
-if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
-end
-xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
-if any(~isnan(simOutput.sensors.nas.timestampPitotCorrection))
-    xline(min(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Start pitot correction')
-    xline(max(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Stop pitot correction')
-end
-ylabel('$V_y$ [m/s]');
-legend
-%
-subplot(3,1,3)
-plot(simOutput.t, simOutput.Y(:, 6),'DisplayName','$V_z$')
-hold on;
-plot(simOutput.sensors.nas.time, v_NAS_body(:, 3),'DisplayName','$V_z$ est')
-if not(settings.scenario == "descent")
-    xline(simOutput.ARB.allowanceTime,'k--','DisplayName','Air brakes opening')
-end
-if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
-    xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
-end
-xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
-if any(~isnan(simOutput.sensors.nas.timestampPitotCorrection))
-    xline(min(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Start pitot correction')
-    xline(max(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Stop pitot correction')
-end
-xlabel('Time [s]');
-ylabel('$V_z$ [m/s]');
-sgtitle('Velocities BODY');
-legend
-if settings.flagExportPLOTS == true
-    exportStandardizedFigure(figures.velocities_BODY,"report_images\"+mission.name+"\src_velocities_BODY.pdf",0.9)
-end
-drawnow
+% %% Velocities BODY w.r.t. time against NAS
+% figures.velocities_BODY = figure('Name', 'Velocities BODY','ToolBar','auto');
+% %
+% subplot(3,1,1)
+% plot(simOutput.t, simOutput.Y(:, 4),'DisplayName','$V_x$')
+% hold on; grid on;
+% plot(simOutput.sensors.nas.time, v_NAS_body(:, 1),'DisplayName','$V_x$ est')
+% if not(settings.scenario == "descent")
+%     xline(simOutput.ARB.allowanceTime,'k--')
+% end
+% if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
+%     xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+% end
+% xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
+% if any(~isnan(simOutput.sensors.nas.timestampPitotCorrection))
+%     xline(min(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Start pitot correction')
+%     xline(max(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Stop pitot correction')
+% end
+% ylabel('$V_x$ [m/s]');
+% legend
+% %
+% subplot(3,1,2)
+% plot(simOutput.t, simOutput.Y(:, 5),'DisplayName','$V_y$')
+% hold on;
+% plot(simOutput.sensors.nas.time, v_NAS_body(:, 2),'DisplayName','$V_y$ est')
+% if not(settings.scenario == "descent")
+%     xline(simOutput.ARB.allowanceTime,'k--')
+% end
+% if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
+%     xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+% end
+% xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
+% if any(~isnan(simOutput.sensors.nas.timestampPitotCorrection))
+%     xline(min(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Start pitot correction')
+%     xline(max(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Stop pitot correction')
+% end
+% ylabel('$V_y$ [m/s]');
+% legend
+% %
+% subplot(3,1,3)
+% plot(simOutput.t, simOutput.Y(:, 6),'DisplayName','$V_z$')
+% hold on;
+% plot(simOutput.sensors.nas.time, v_NAS_body(:, 3),'DisplayName','$V_z$ est')
+% if not(settings.scenario == "descent")
+%     xline(simOutput.ARB.allowanceTime,'k--','DisplayName','Air brakes opening')
+% end
+% if settings.parafoil  && (settings.scenario == "descent" || settings.scenario == "full flight")
+%     xline(simOutput.t(simOutput.events.mainChuteIndex),'b--','DisplayName','Parafoil opening')
+% end
+% xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
+% if any(~isnan(simOutput.sensors.nas.timestampPitotCorrection))
+%     xline(min(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Start pitot correction')
+%     xline(max(simOutput.sensors.nas.timestampPitotCorrection(~isnan(simOutput.sensors.nas.timestampPitotCorrection))),'b--','Stop pitot correction')
+% end
+% xlabel('Time [s]');
+% ylabel('$V_z$ [m/s]');
+% sgtitle('Velocities BODY');
+% legend
+% if settings.flagExportPLOTS == true
+%     exportStandardizedFigure(figures.velocities_BODY,"report_images\"+mission.name+"\src_velocities_BODY.pdf",0.9)
+% end
+% drawnow
 
-%% Velocities NED w.r.t. time against NAS
-figures.velocities_NED = figure('Name', 'Velocities NED','ToolBar','auto');
-%
-subplot(3,1,1)
-plot(simOutput.t, v_ned(:, 1),'DisplayName','$V_n$')
-hold on; grid on;
-plot(simOutput.sensors.nas.time, simOutput.sensors.nas.states(:, 4),'DisplayName','$V_n$ est')
-if not(settings.scenario == "descent")
-    xline(simOutput.ARB.allowanceTime,'k--')
-end
-ylabel('$V_x$ [m/s]');
-legend
-%
-subplot(3,1,2)
-plot(simOutput.t, v_ned(:, 2),'DisplayName','$V_e$')
-hold on;
-plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:, 5) ,'DisplayName','$V_e$ est')
-if not(settings.scenario == "descent")
-    xline(simOutput.ARB.allowanceTime,'k--')
-end
-ylabel('$V_y$ [m/s]');
-legend
-%
-subplot(3,1,3)
-plot(simOutput.t, v_ned(:, 3),'DisplayName','$V_d$')
-hold on;
-plot(simOutput.sensors.nas.time, simOutput.sensors.nas.states(:, 6),'DisplayName','$V_d$ est')
-if not(settings.scenario == "descent")
-    xline(simOutput.ARB.allowanceTime,'k--','DisplayName','Air brakes opening')
-end
-xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
-xlabel('Time [s]');
-ylabel('$V_z$ [m/s]');
-sgtitle('Velocities NED');
-legend
-if settings.flagExportPLOTS == true
-    exportStandardizedFigure(figures.velocities_NED,"report_images\"+mission.name+"\src_velocities_NED.pdf",0.9)
-end
-drawnow
+% %% Velocities NED w.r.t. time against NAS
+% figures.velocities_NED = figure('Name', 'Velocities NED','ToolBar','auto');
+% %
+% subplot(3,1,1)
+% plot(simOutput.t, v_ned(:, 1),'DisplayName','$V_n$')
+% hold on; grid on;
+% plot(simOutput.sensors.nas.time, simOutput.sensors.nas.states(:, 4),'DisplayName','$V_n$ est')
+% if not(settings.scenario == "descent")
+%     xline(simOutput.ARB.allowanceTime,'k--')
+% end
+% ylabel('$V_x$ [m/s]');
+% legend
+% %
+% subplot(3,1,2)
+% plot(simOutput.t, v_ned(:, 2),'DisplayName','$V_e$')
+% hold on;
+% plot(simOutput.sensors.nas.time,simOutput.sensors.nas.states(:, 5) ,'DisplayName','$V_e$ est')
+% if not(settings.scenario == "descent")
+%     xline(simOutput.ARB.allowanceTime,'k--')
+% end
+% ylabel('$V_y$ [m/s]');
+% legend
+% %
+% subplot(3,1,3)
+% plot(simOutput.t, v_ned(:, 3),'DisplayName','$V_d$')
+% hold on;
+% plot(simOutput.sensors.nas.time, simOutput.sensors.nas.states(:, 6),'DisplayName','$V_d$ est')
+% if not(settings.scenario == "descent")
+%     xline(simOutput.ARB.allowanceTime,'k--','DisplayName','Air brakes opening')
+% end
+% xline(simOutput.apogee.time,'r--','DisplayName','Apogee')
+% xlabel('Time [s]');
+% ylabel('$V_z$ [m/s]');
+% sgtitle('Velocities NED');
+% legend
+% if settings.flagExportPLOTS == true
+%     exportStandardizedFigure(figures.velocities_NED,"report_images\"+mission.name+"\src_velocities_NED.pdf",0.9)
+% end
+% drawnow
 
-%% check consistency of NAS:
-altitude = simOutput.sensors.nas.states(:,3)+environment.z0;
-v_int_NAS = 0;
-v_int_simulation = 0;
-for i = 2:length(simOutput.sensors.nas.states(:,6))
-    v_int_NAS(i) = v_int_NAS(i-1) + sum(simOutput.sensors.nas.states([i-1,i],6))/settings.frequencies.NASFrequency/2;
-end
-
-for i = 2:length(simOutput.Y(:,6))
-    v_int_simulation(i) = v_int_simulation(i-1) + sum(v_ned([i-1,i],3)*0.01)/2;
-end
-
-figures.AltNAS = figure('Name', 'Altitude NAS');
-plot(simOutput.sensors.nas.time,altitude,'DisplayName','Altitude NAS')
-hold on
-title("Altitude NAS and simulation")
-plot(simOutput.sensors.nas.time,v_int_NAS,'DisplayName','Velocity NAS integrated')
-plot(simOutput.t,simOutput.Y(:,3),'DisplayName','Altitude Simulation')
-plot(simOutput.t,v_int_simulation,'DisplayName','Velocity simulation integrated')
-legend
-xlabel("Time [s]"), ylabel("-Altitude AGL [m]")
-drawnow
+% %% check consistency of NAS:
+% altitude = simOutput.sensors.nas.states(:,3)+environment.z0;
+% v_int_NAS = 0;
+% v_int_simulation = 0;
+% for i = 2:length(simOutput.sensors.nas.states(:,6))
+%     v_int_NAS(i) = v_int_NAS(i-1) + sum(simOutput.sensors.nas.states([i-1,i],6))/settings.frequencies.NASFrequency/2;
+% end
+% 
+% for i = 2:length(simOutput.Y(:,6))
+%     v_int_simulation(i) = v_int_simulation(i-1) + sum(v_ned([i-1,i],3)*0.01)/2;
+% end
+% 
+% figures.AltNAS = figure('Name', 'Altitude NAS');
+% plot(simOutput.sensors.nas.time,altitude,'DisplayName','Altitude NAS')
+% hold on
+% title("Altitude NAS and simulation")
+% plot(simOutput.sensors.nas.time,v_int_NAS,'DisplayName','Velocity NAS integrated')
+% plot(simOutput.t,simOutput.Y(:,3),'DisplayName','Altitude Simulation')
+% plot(simOutput.t,v_int_simulation,'DisplayName','Velocity simulation integrated')
+% legend
+% xlabel("Time [s]"), ylabel("-Altitude AGL [m]")
+% drawnow
 
 % %% euler angles
 % eul_NAS = quat2eul(simOutput.sensors.nas.states(:,[10,7:9]));

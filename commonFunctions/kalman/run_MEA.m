@@ -50,7 +50,7 @@ for ii = 2:length(t_mea)
     P(:,:,ii) = A*P(:,:,ii-1)*A' + settings.mea.Q;
 
     % barometer correction
-    if sensorTot.comb_chamber.measures(index_chambPress)  > 1
+    if sensorTot.comb_chamber.measures(index_chambPress) > 1
         S = C*P(:,:,ii)*C' + settings.mea.R;
         if ~det(S)<1e-3
             K = P(:,:,ii)*C' / S; % if you want to try with constant gain [0.267161;-0.10199;-0.000205604 ];
@@ -60,7 +60,7 @@ for ii = 2:length(t_mea)
     end
 
     % accelerometer correction (not for 2023)
-    if contains(mission.name, '2024')
+    if contains(mission.name, '2024') || contains(mission.name, '2025')
         K_t = settings.mea.K_t;
         alpha = settings.mea.alpha;
         c = settings.mea.c;

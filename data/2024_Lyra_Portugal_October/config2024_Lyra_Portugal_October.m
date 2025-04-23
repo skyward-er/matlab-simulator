@@ -176,9 +176,12 @@ settings.mea.engine_model_C1     = [1.00196621875211 -0.485916431287183 0];
 settings.mea.K_t = 105.2;
 
 % covariance matrices
-settings.mea.Q                   = eye(3);                      % model noise covariance matrix    
-settings.mea.R                   = 0.36; 
-settings.mea.P0_mat = diag([0 0 0.36^2]);
+% settings.mea.Q                   = eye(3);                                  % model noise covariance matrix       
+% settings.mea.R                   = 0.36; 
+% settings.mea.P0_mat = diag([0 0 0.36^2]);
+settings.mea.Q                   = diag([1 1 5]);                                  % model noise covariance matrix       
+settings.mea.R                   = 3.6; 
+settings.mea.P0_mat = diag([0 0 3.6^2]);
 
 % shut down prediction altitude
 settings.mea.z_shutdown          = 3200;                                    % [m] target apogee prediction for shutdown
@@ -186,11 +189,14 @@ settings.mea.t_lower_shadowmode  = 0;                                       % mi
 settings.mea.t_higher_shadowmode = 10;                                      % maximum burning time
 settings.shutdownValveDelay      = 0.2;                                     % time from the shut down command to the actual valve closure
 settings.mea.cd_correction_factor = 2.69;
+
 % accelerometer correction parameters
-[~,~,settings.mea.P0] = computeAtmosphericData(103);     %[Pa] reference pressure at the SFT location
-settings.mea.acc_threshold = 40;           %[m/s^2] minimum acceleration to perform correction with accelerometer
-settings.mea.vel_threshold = 40;           %[m/s] minimum velocity to perform correction with accelerometer
-Rs = 1.0e+03*[0.4771    1.4391];
+[~,~,settings.mea.P0] = computeAtmosphericData(160);                        % [Pa] reference pressure at the SFT location
+settings.mea.acc_threshold = 40;                                            % [m/s^2] minimum acceleration to perform correction with accelerometer
+settings.mea.vel_threshold = 40;                                            % [m/s] minimum velocity to perform correction with accelerometer
+% Rs = 1.0e+03*[0.4771    1.4391];
+Rs = 3.0e+03*[0.4771    1.4391];
+
 % variable variance coefficients for accelerometer
 settings.mea.alpha = (Rs(2) - Rs(1))/(100^2-30^2);
 settings.mea.c = -settings.mea.alpha*30^2+Rs(1); 
