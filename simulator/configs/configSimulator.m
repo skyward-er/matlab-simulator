@@ -20,7 +20,7 @@ configFlags;
 
 
 %% Mission parameters
-mission = Mission(true);
+mission = Mission(true, 'changeMatlabPath', true);
 rocket = Rocket(mission);
 environment = Environment(mission, rocket.motor);
 

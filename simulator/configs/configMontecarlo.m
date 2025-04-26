@@ -73,8 +73,13 @@ if settings.montecarlo
             end
 
             %%%
-            for i =1:N_sim
-                stoch.State.xcgTime(:,i) =  rocket.coefficients.state.xcgTime/rocket.motor.time(end) .* stoch.expTime(i,end);  % Xcg time
+            % xcgTime must be updated ONLY if rocket.dynamicDerivatives is
+            % enabled, otherwise the coefficients do not depend on xcg, and
+            % it can be handled directly by the Rocket class
+            if rocket.dynamicDerivatives
+                for i =1:N_sim
+                    stoch.State.xcgTime(:,i) =  rocket.coefficients.state.xcgTime/rocket.motor.time(end) .* stoch.expTime(i,end);  % Xcg time
+                end
             end
 
             %%% Aero coefficients uncertainty
@@ -84,7 +89,7 @@ if settings.montecarlo
             stoch.aer_percentage = normrnd(mu_aer,sigma_aer,N_sim,1);
 
             %%% wind parameters
-            wind = WindCustom(mission);
+            wind = Wind(mission);
             stoch.wind_params.altitudes = [0 140 500 1000 1500 2000 2500 3000 3500 4000];
             wind.altitudes = stoch.wind_params.altitudes;
 
@@ -136,7 +141,6 @@ if settings.montecarlo
                     wind.elevationParameters = [stoch.wind_params.ElMean; stoch.wind_params.ElStd];
             end
 
-            wind.updateAll();
             stoch.wind = wind;
 
             %%% mass offset distribution
@@ -177,7 +181,7 @@ if settings.montecarlo
 
             N_sim = length(Az);
 
-            wind = WindCustom(mission);
+            wind = Wind(mission);
             wind.altitudes = 0;
             wind.magnitudeDistribution = "u";
             wind.azimuthDistribution = "u";

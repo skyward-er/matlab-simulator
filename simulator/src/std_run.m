@@ -51,14 +51,16 @@ if nargin > 5
     rocket.coefficients.total = settings_mont.Coeffs;
     wind = settings_mont.wind;
 
-    rocket.coefficients.state.xcgTime = settings_mont.State.xcgTime;
+    if isfield(settings_mont, 'State')
+        rocket.coefficients.state.xcgTime = settings_mont.State.xcgTime;
+    end
     environment.omega = settings_mont.OMEGA;
     environment.phi = settings_mont.PHI;
 end
 
 if ~exist("wind", "var")
     % If the wind was not already defined, generate new one
-    wind = WindCustom(mission);
+    wind = Wind(mission);
 end
 
 if settings.electronics % global variables slow down a bit the comunication over thread, we don't need these for montecarlo analysis
@@ -114,7 +116,6 @@ end
 std_setInitialParams;
 
 rocket.massNoMotor = rocket.massNoMotor + settings.mass_offset;
-rocket.updateMass;
 
 %% SENSORS INIT
 run(strcat('initSensors', mission.name));
@@ -529,7 +530,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         t_change_ref_ABK = t1 + settings.servo.delay;
     end
     if t1-t_last_prf_control >= 1/settings.frequencies.prfFrequency - 1e-6
-        t_change_ref_PRF = t1 + rocket.parachutes(2,2).controlParams.deltaA_delay;
+        t_change_ref_PRF = t1 + rocket.parachutes{2,2}.controlParams.deltaA_delay;
     end
     % assemble total state
     [n, ~] = size(Yf);

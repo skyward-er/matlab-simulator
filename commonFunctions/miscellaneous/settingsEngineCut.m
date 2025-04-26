@@ -41,7 +41,6 @@ function [settings, rocket] = settingsEngineCut(settings, engineT0, rocket)
         end
         
         rocket.motor.cutoffTime = rocket.motor.cutoffTime + rocket.motor.cutoffTransient;
-        rocket.updateCutoff;
         
     elseif rocket.motor.cutoffTime >= (rocket.motor.time(end) - rocket.motor.cutoffTransient)
     
@@ -50,7 +49,5 @@ function [settings, rocket] = settingsEngineCut(settings, engineT0, rocket)
     elseif rocket.motor.cutoffTime <= 0
         error('rocket.motor.cutoffTime must be grater than zero');
     end
-    
-    rocket.updateCutoff;
 
 end

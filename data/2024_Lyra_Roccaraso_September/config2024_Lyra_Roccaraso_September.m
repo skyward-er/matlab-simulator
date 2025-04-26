@@ -157,9 +157,9 @@ settings.ada.altitude_confidence_thr = 5;                                   % If
 settings.ada.shadowmode = 10;
 
 if ~settings.parafoil
-    settings.ada.z_cut  = rocket.parachutes(1,1).finalAltitude;
+    settings.ada.z_cut  = rocket.parachutes{1,1}.finalAltitude;
 else
-    settings.ada.z_cut  = rocket.parachutes(1,2).finalAltitude;
+    settings.ada.z_cut  = rocket.parachutes{1,2}.finalAltitude;
 end
 
 

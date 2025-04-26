@@ -143,7 +143,7 @@ if ~settings.flagAscent && settings.parafoil
             pos_est(3) = -pos_est(3)-environment.z0;
 
             [deltaA_ref_new,contSettings] = run_parafoilGuidance(pos_est, sensorData.nas.states(end,4:5), wind_est, ...
-                settings.payload.target, contSettings, rocket.parachutes(2,2).controlParams);
+                settings.payload.target, contSettings, rocket.parachutes{2,2}.controlParams);
         end
 
     end

@@ -115,19 +115,21 @@ for alg_index = 4
     motor_K = settings.motor.K;
 
     parfor i = 1:N_sim
-        rocket_vec{i} = copy(rocket);
+        rocket_vec{i} = rocket;
         settings_mont = settings_mont_init;
         settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
         settings_mont.motor.expTime = stoch.expTime(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
         settings_mont.motor.K = stoch.Kt(i,:);                  % 
-        settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
         settings_mont.mass_offset = stoch.mass_offset(i);
         settings_mont.OMEGA = stoch.OMEGA_rail(i);
         settings_mont.PHI = stoch.PHI_rail(i);
 
+        if isfield(stoch, 'State')
+            settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
+        end
+
         if isempty(wind_vec{i})
-            wind_vec{i} = copy(stoch.wind);
-            wind_vec{i}.updateAll();
+            wind_vec{i} = stoch.wind.updateAll();
         end
         
         settings_mont.wind = wind_vec{i};
@@ -314,8 +316,7 @@ for alg_index = 4
     p_50 = normcdf([settings.z_final-50, settings.z_final+50],apogee.altitude_mean,apogee.altitude_std);
     apogee.accuracy_gaussian_50 =( p_50(2) - p_50(1) )*100;
 
-    %% 
-    clc
+    %%     
     for ii = 1:N_sim
         if sum(save_thrust{ii}.sensors.ada.apo_times == -1) > 1
             disp("Problems with ADA " + num2str(ii));
@@ -467,8 +468,8 @@ for alg_index = 4
             if (settings.scenario == "descent" || settings.scenario == "full flight") && settings.parafoil
                 fprintf(fid,'PARAFOIL \n\n');
                 fprintf(fid,'Guidance approach %s \n',contSettings.payload.guidance_alg);
-                fprintf(fid,'PID proportional gain %s \n',rocket.parachutes(2,2).controlParams.Kp);
-                fprintf(fid,'PID integral gain %s \n',rocket.parachutes(2,2).controlParams.Ki);
+                fprintf(fid,'PID proportional gain %s \n',rocket.parachutes{2,2}.controlParams.Kp);
+                fprintf(fid,'PID integral gain %s \n',rocket.parachutes{2,2}.controlParams.Ki);
                 fprintf(fid,'Opening altitude %s \n', num2str(settings.ada.para.z_cut));
             end
             fprintf(fid,'MASS: \n\n');

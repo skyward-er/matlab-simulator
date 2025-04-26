@@ -155,9 +155,9 @@ settings.ada.flag_apo    =   false;                                         % Tr
 settings.ada.shadowmode = 18;
 
 if ~settings.parafoil
-    settings.ada.para.z_cut  = rocket.parachutes(1,1).finalAltitude;
+    settings.ada.para.z_cut  = rocket.parachutes{1,1}.finalAltitude;
 else
-    settings.ada.para.z_cut  = rocket.parachutes(1,2).finalAltitude;
+    settings.ada.para.z_cut  = rocket.parachutes{1,2}.finalAltitude;
 end
 %% MEA TUNING PARAMETERS / MOTOR SHUT DOWN TUNING PARAMETERS
 % motor model for kalman filter prediction/correction scheme

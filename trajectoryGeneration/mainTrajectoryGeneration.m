@@ -88,7 +88,7 @@ V0 = [0 0 0]';
 W0 = [0 0 0]';
 
 %%% wind initialization
-wind = WindCustom(mission);
+wind = Wind(mission);
 [uw, vw, ww] = wind.getVels(0);
 settings.constWind = [uw, vw, ww];
 
