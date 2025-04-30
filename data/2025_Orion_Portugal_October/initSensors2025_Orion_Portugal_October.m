@@ -97,9 +97,9 @@ sensorSettings.accelerometer = Sensor3D();
 sensorSettings.accelerometer.maxMeasurementRange   =   16000;                       % 2000, 4000, 8000, 16000 in mg
 sensorSettings.accelerometer.minMeasurementRange   =   -16000;                      % -2000, -4000, -8000, -16000 in mg
 sensorSettings.accelerometer.bit                   =   16; 
-sensorSettings.accelerometer.offsetX               =   0;                           % +-90 in mg
-sensorSettings.accelerometer.offsetY               =   0;                           % +-90 in mg
-sensorSettings.accelerometer.offsetZ               =   0;                           % +-90 in mg
+sensorSettings.accelerometer.offsetX               =   -5;                           % +-90 in mg
+sensorSettings.accelerometer.offsetY               =   15;                           % +-90 in mg
+sensorSettings.accelerometer.offsetZ               =   15;                           % +-90 in mg
 sensorSettings.accelerometer.walkDiffusionCoef     =   0;                           % guess
 sensorSettings.accelerometer.dt                    =   0.01;                        % sampling time
 

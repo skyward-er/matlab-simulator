@@ -142,17 +142,25 @@ settings.nas.Qq              =   [(settings.nas.sigma_w^2*settings.nas.dt_k+(1/3
 
 %% ZVK TUNING PARAMETER
 
-% settings.zvk
-settings.zvk.Q = diag( 0.1^2*ones(12,1) );
-
 % settings.zvk.mu = 3.986004418e14;
 % settings.zvk.Re = 6378137;
 % settings.zvk.J2 = 1.082636e-3;
 
-settings.zvk.P = 0.1*eye(33);
+settings.zvk.sigma_gyro         =   0.01;           % [rad/s]   estimated gyroscope variance;
+settings.zvk.sigma_beta_g       =   1e-6;           % [rad/s]   estimated gyroscope bias variance;
+settings.zvk.sigma_acc          =   0.1;            % [m/s^2]   estimated accelerometer variance;
+settings.zvk.sigma_beta_acc     =   1e-4;           % [m/s^2]   estimated accelerometer bias variance;  %% VERIFICARE
 
-settings.zvk.gyro_bias_noise = deg2rad(0.5)/sqrt(3600);
-settings.zvk.acc_bias_noise  = 10000*9.81e-6/sqrt(50);
+settings.zvk.Q = diag( [ones(1,3)*settings.zvk.sigma_gyro^2, ones(1,3)*settings.zvk.sigma_beta_g^2, ones(1,3)*settings.zvk.sigma_acc^2, ones(1,3)*settings.zvk.sigma_beta_acc^2] );
+
+
+settings.zvk.P = diag( [0.01*ones(1,3), 0.1*ones(1,3), 0.1*ones(1,3), 0.5*ones(1,3), 0.1*ones(1,3)] );
+
+
+settings.zvk.R = [1e-3*eye(3) zeros(3);
+                  zeros(3)    1e-6*eye(3)];
+
+   
 
 
 
