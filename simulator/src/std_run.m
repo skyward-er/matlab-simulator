@@ -150,7 +150,7 @@ else
 end
 
 if ~settings.montecarlo
-    time_on_ground = 5; % [s] - How much time the rockets stays on ramp before launch
+    time_on_ground = 30; % [s] - How much time the rockets stays on ramp before launch
 else
     time_on_ground = 0; % [s] - If montecarlo the rocket starts immediately
 end
