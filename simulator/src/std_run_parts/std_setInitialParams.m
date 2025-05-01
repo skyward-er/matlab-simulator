@@ -208,7 +208,7 @@ settings.nas.mag_freq = settings.frequencies.NASFrequency/settings.nas.mag_decim
 
 % if settings.flagNAS || settings.electronics  ??????
 
-sensorData.zvk.states = [Q0(2:4); Q0(1); V0; X0; [0.07; -0.14;0.15]; 0*ones(3,1)]';
+sensorData.zvk.states = [Q0(2:4); Q0(1); V0; X0; [-0.05; 0.15; -0.15]; 0*ones(3,1)]';
 
 if settings.scenario ~="descent"
     sensorData.zvk.states(10) = -environment.z0;
