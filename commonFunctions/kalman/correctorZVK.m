@@ -13,8 +13,8 @@ function [x_new, P_new] = correctorZVK(x_pred, P_pred, a_b_m, om_b_m, zvk)
 
     a_b = a_b_m' - bias_a_pred;  
 
-    g_est = (A * [0, 0, -9.81]') / norm(A * [0, 0, -9.81]');
-    g_meas = a_b/norm(a_b);
+    g_est = (A * [0, 0, -9.81]');
+    g_meas = a_b;
     
     M = [0         -g_est(3)    g_est(2);
          g_est(3)   0          -g_est(1);
@@ -23,7 +23,7 @@ function [x_new, P_new] = correctorZVK(x_pred, P_pred, a_b_m, om_b_m, zvk)
 
     H_x = [zeros(3) eye(3)   zeros(3) zeros(3) zeros(3);
            zeros(3) zeros(3) zeros(3) zeros(3) -eye(3);
-           M        zeros(3) zeros(3) zeros(3) zeros(3)];
+           M        zeros(3) zeros(3) eye(3) zeros(3)];
 
     % H_x = [zeros(3) eye(3)   zeros(3) zeros(3) zeros(3);
     %        zeros(3) zeros(3) zeros(3) zeros(3) -eye(3)];
