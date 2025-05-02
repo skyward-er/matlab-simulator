@@ -176,7 +176,7 @@ settings.zvk.P = diag([
 settings.zvk.R = [
     1e-3 * eye(3),      zeros(3),        zeros(3);     % fake zero velocity [m/s]
     zeros(3),           1e-5 * eye(3),   zeros(3);     % fake zero angular velocity [rad/s]
-    zeros(3),           zeros(3),        1e-3 * eye(3) % accelerometer as gravity observation [m/s^2]
+    zeros(3),           zeros(3),        1e-1 * eye(3) % accelerometer as gravity observation [m/s^2]
 ];
 
 
