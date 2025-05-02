@@ -149,23 +149,39 @@ settings.nas.Qq              =   [(settings.nas.sigma_w^2*settings.nas.dt_k+(1/3
 % settings.zvk.Re = 6378137;
 % settings.zvk.J2 = 1.082636e-3;
 
-settings.zvk.sigma_gyro         =   0.01;           % [rad/s]   estimated gyroscope variance;
-settings.zvk.sigma_beta_g       =   1e-6;           % [rad/s]   estimated gyroscope bias variance;
-settings.zvk.sigma_acc          =   0.1;            % [m/s^2]   estimated accelerometer variance;
-settings.zvk.sigma_beta_acc     =   1e-4;           % [m/s^2]   estimated accelerometer bias variance;  %% VERIFICARE
+% Estimated noise standard deviations
+settings.zvk.sigma_gyro         = 1e-2;    % [rad/s]   gyroscope noise
+settings.zvk.sigma_beta_g       = 1e-5;    % [rad/s]   gyroscope bias drift
+settings.zvk.sigma_acc          = 1e-1;    % [m/s^2]   accelerometer noise
+settings.zvk.sigma_beta_acc     = 1e-3;    % [m/s^2]   accelerometer bias drift
 
-settings.zvk.Q = diag( [ones(1,3)*settings.zvk.sigma_gyro^2, ones(1,3)*settings.zvk.sigma_beta_g^2, ones(1,3)*settings.zvk.sigma_acc^2, ones(1,3)*settings.zvk.sigma_beta_acc^2] );
+% Process noise covariance matrix Q
+settings.zvk.Q = diag([
+    ones(1,3) * settings.zvk.sigma_gyro^2, ...
+    ones(1,3) * settings.zvk.sigma_beta_g^2, ...
+    ones(1,3) * settings.zvk.sigma_acc^2, ...
+    ones(1,3) * settings.zvk.sigma_beta_acc^2
+]);
+
+% Initial state covariance matrix P
+settings.zvk.P = diag([
+    1e-3 * ones(1,3),...   % small-angle errors [rad]
+    0.01 * ones(1,3),...   % velocity uncertainty [m/s]
+    0.1  * ones(1,3),...   % position uncertainty [m]
+    0.5  * ones(1,3),...   % accelerometer bias [m/s^2]
+    0.1  * ones(1,3)...    % gyroscope bias [rad/s]
+]);
+
+% Measurement noise covariance matrix R
+settings.zvk.R = [
+    1e-3 * eye(3),      zeros(3),        zeros(3);     % fake zero velocity [m/s]
+    zeros(3),           1e-5 * eye(3),   zeros(3);     % fake zero angular velocity [rad/s]
+    zeros(3),           zeros(3),        1e-3 * eye(3) % accelerometer as gravity observation [m/s^2]
+];
 
 
-settings.zvk.P = diag( [0.01*ones(1,3), 0.1*ones(1,3), 0.1*ones(1,3), 0.5*ones(1,3), 0.1*ones(1,3)] );
-
-
-settings.zvk.R = [1e-3*eye(3) zeros(3);
-                  zeros(3)    1e-6*eye(3)];
-
-   
-
-
+% settings.zvk.R = [1e-3*eye(3)   zeros(3);
+%                   zeros(3)      1e-6*eye(3)];
 
 
 %% ADA TUNING PARAMETER

@@ -40,7 +40,7 @@ if length(t_zvk) > 1
 
         
         %%% Correction
-        [x(ii,:), P(:,:,ii)] = correctorZVK( x(ii,:), P(:,:,ii), om_b_m, settings.zvk);
+        [x(ii,:), P(:,:,ii)] = correctorZVK( x(ii,:), P(:,:,ii), a_b_m, om_b_m, settings.zvk);
 
        
         

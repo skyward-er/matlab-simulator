@@ -1,4 +1,4 @@
-function [x_new, P_new] = correctorZVK(x_pred, P_pred, om_b_m, zvk)
+function [x_new, P_new] = correctorZVK(x_pred, P_pred, a_b_m, om_b_m, zvk)
 
     quat_pred   = x_pred(1:4)';
     v_pred      = x_pred(5:7)';
@@ -11,17 +11,35 @@ function [x_new, P_new] = correctorZVK(x_pred, P_pred, om_b_m, zvk)
                  2*(quat_pred(1)*quat_pred(3) + quat_pred(2)*quat_pred(4)),               2*(quat_pred(2)*quat_pred(3) - quat_pred(1)*quat_pred(4)),       -quat_pred(1)^2 - quat_pred(2)^2 + quat_pred(3)^2 + quat_pred(4)^2];
 
 
+    a_b = a_b_m' - bias_a_pred;  
+
+    g_est = (A * [0, 0, -9.81]') / norm(A * [0, 0, -9.81]');
+    g_meas = a_b/norm(a_b);
+    
+    M = [0         -g_est(3)    g_est(2);
+         g_est(3)   0          -g_est(1);
+        -g_est(2)   g_est(1)    0];
+
+
     H_x = [zeros(3) eye(3)   zeros(3) zeros(3) zeros(3);
-           zeros(3) zeros(3) zeros(3) zeros(3) -eye(3)];
+           zeros(3) zeros(3) zeros(3) zeros(3) -eye(3);
+           M        zeros(3) zeros(3) zeros(3) zeros(3)];
+
+    % H_x = [zeros(3) eye(3)   zeros(3) zeros(3) zeros(3);
+    %        zeros(3) zeros(3) zeros(3) zeros(3) -eye(3)];
 
     S = H_x * P_pred * H_x' + zvk.R;
 
     K = P_pred * H_x' * inv(S);
 
-    error = [zeros(6,1)] - [v_pred; om_b_m'-bias_g_pred ];
+
+    error = [zeros(6,1); g_meas] - [v_pred; om_b_m'-bias_g_pred; g_est];
+
+    % error = [zeros(6,1)] - [v_pred; om_b_m'-bias_g_pred];
 
     update = K * error;
 
+    
     x_new = zeros(1,16);
     x_new(5:end) = x_pred(5:end) + update(4:end)';
 
@@ -47,5 +65,47 @@ function [x_new, P_new] = correctorZVK(x_pred, P_pred, om_b_m, zvk)
     
     P_new = (eye(15) - K * H_x) * P_pred;
 
+
+    disp(x_new)
+
+
+
+
+    % r = [ 0.5*update(1:3), sqrt(1-0.25*update(1:3)*update(1:3)') ]; % scalar last
+    % 
+    % u = quatProd(r',x_pred(1:4)')';
+    % 
+    % x_new(1:4) = u / norm(u);
+    % 
+    % 
+    % P_new = (eye(15) - K * H_x) * P_pred;
+    % 
+    % 
+    % 
+    % function quat = quatProd( quat1, quat2 )
+    % %	Calculates the Hemiltonian product between two quaternions
+    % %
+    % %   quat = quatProd( quat1, quat2 )
+    % %
+    % %   This function compute the hamiltonian product between two quaternions
+    % %   written as 4-by-1 vectors with the scalar component as the fourth
+    % %   element of the vector.
+    % %
+    % %   References:
+    % %	[1] Markley, F. Landis. "Attitude error representations for Kalman filtering." 
+    % %       Journal of guidance control and dynamics 26.2 (2003): 311-317.
+    % 
+    % qv1 = quat1(1:3);
+    % qs1 = quat1(4);
+    % 
+    % qv2 = quat2(1:3);
+    % qs2 = quat2(4); % scalar last in the hamiltonian product
+    % 
+    % quat = [qs1 * qv2 + qs2 * qv1' - cross( qv1, qv2 )' ;
+    %               qs1 * qs2 - dot( qv1, qv2 )        ];
+    % 
+    % quat = quat / norm(quat);
+    % 
+    % end
 
 end

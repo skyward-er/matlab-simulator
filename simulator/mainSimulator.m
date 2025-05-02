@@ -122,23 +122,84 @@ end
 
 
 %%
+close all
 zvk = simOutput.sensors.zvk;
 
 figure()
-plot(zvk.time,ones(1,length(zvk.time)).*-0.05,...
-     zvk.time,ones(1,length(zvk.time)).*0.15,...
-     zvk.time,ones(1,length(zvk.time)).*-0.15,...
-     zvk.time,zvk.states(:,11),...
-     zvk.time,zvk.states(:,12),...
-     zvk.time,zvk.states(:,13),'LineWidth',2);
-legend('X','Y','Z','bias accelerometro x','bias accelerometro y','bias acceleromtro z')
+subplot(3,1,1)
+plot(zvk.time,ones(1,length(zvk.time)).*-0.15, 'r',...
+     zvk.time,zvk.states(:,11), 'r', 'LineWidth',2);
+legend('X','bias accelerometro x')
+subplot(3,1,2)
+plot(zvk.time,ones(1,length(zvk.time)).*0.12, 'g',...
+     zvk.time,zvk.states(:,12), 'g','LineWidth',2);
+legend('Y','bias accelerometro y')
+subplot(3,1,3)
+plot(zvk.time,ones(1,length(zvk.time)).*-0.05, 'b',...
+     zvk.time,zvk.states(:,13),'b', 'LineWidth',2);
+legend('Z','bias acceleromtro z')
 
 figure()
-plot(zvk.time,ones(1,length(zvk.time)).*0.008,...
-     zvk.time,ones(1,length(zvk.time)).*0.005,...
-     zvk.time,ones(1,length(zvk.time)).*0.002,...
-     zvk.time,zvk.states(:,14),...
-     zvk.time,zvk.states(:,15),...
-     zvk.time,zvk.states(:,16),...
-     'LineWidth',2);
-legend('X','Y','Z','bias gyro x','bias gyro y','bias gyro z')
+subplot(3,1,1)
+plot(zvk.time,ones(1,length(zvk.time)).*0.008,'r',...
+     zvk.time,zvk.states(:,14), 'r', 'LineWidth',2);
+legend('X','bias gyro x')
+subplot(3,1,2)
+plot(zvk.time,ones(1,length(zvk.time)).*-0.005, 'g',...
+     zvk.time,zvk.states(:,15), 'g','LineWidth',2);
+legend('Y','bias gyro y')
+subplot(3,1,3)
+plot(zvk.time,ones(1,length(zvk.time)).*0.002, 'b',...
+     zvk.time,zvk.states(:,16), 'b','LineWidth',2);
+legend('Z','bias gyro z')
+
+
+
+
+[a,b,c] = quat2angle(zvk.states(:,1:4));
+a = wrapTo2Pi(a);
+
+a = rad2deg(a);
+b = rad2deg(b);
+c = rad2deg(c);
+
+figure()
+subplot(3,1,1)
+hold on
+plot(zvk.time,a)
+yline(a(1))
+subplot(3,1,2)
+hold on
+plot(zvk.time,b)
+yline(b(1))
+subplot(3,1,3)
+hold on
+plot(zvk.time,c)
+yline(c(1))
+
+
+
+
+
+
+
+quat_init = zvk.states(1,1:4);
+quat_end = zvk.states(end,1:4);
+
+disp(quat_init)
+disp(quat_end )
+
+disp(rad2deg(quat2eul(quat_init)))
+disp(rad2deg(quat2eul(quat_end)))
+
+
+A_init   = [quat_init(1)^2 - quat_init(2)^2 - quat_init(3)^2 + quat_init(4)^2,               2*(quat_init(1)*quat_init(2) + quat_init(3)*quat_init(4)),                 2*(quat_init(1)*quat_init(3) - quat_init(2)*quat_init(4));
+     2*(quat_init(1)*quat_init(2) - quat_init(3)*quat_init(4)),      -quat_init(1)^2 + quat_init(2)^2 - quat_init(3)^2 + quat_init(4)^2,                2*(quat_init(2)*quat_init(3) + quat_init(1)*quat_init(4)) ;
+     2*(quat_init(1)*quat_init(3) + quat_init(2)*quat_init(4)),               2*(quat_init(2)*quat_init(3) - quat_init(1)*quat_init(4)),       -quat_init(1)^2 - quat_init(2)^2 + quat_init(3)^2 + quat_init(4)^2];
+
+A_end   = [quat_end(1)^2 - quat_end(2)^2 - quat_end(3)^2 + quat_end(4)^2,               2*(quat_end(1)*quat_end(2) + quat_end(3)*quat_end(4)),                 2*(quat_end(1)*quat_end(3) - quat_end(2)*quat_end(4));
+     2*(quat_end(1)*quat_end(2) - quat_end(3)*quat_end(4)),      -quat_end(1)^2 + quat_end(2)^2 - quat_end(3)^2 + quat_end(4)^2,                2*(quat_end(2)*quat_end(3) + quat_end(1)*quat_end(4)) ;
+     2*(quat_end(1)*quat_end(3) + quat_end(2)*quat_end(4)),               2*(quat_end(2)*quat_end(3) - quat_end(1)*quat_end(4)),       -quat_end(1)^2 - quat_end(2)^2 + quat_end(3)^2 + quat_end(4)^2];
+
+
+% disp(A_end-A_init)

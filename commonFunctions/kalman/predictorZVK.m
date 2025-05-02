@@ -39,6 +39,8 @@ function [x_pred, P_pred] = predictorZVK( x_prev, P_prev, sf_b_measure, om_b_m, 
 
 
     %%% Biases random walk
+    % bias_a_pred = bias_a_prev + 1e-4*randn;
+    % bias_g_pred = bias_g_prev + 1e-6*randn;
     bias_a_pred = bias_a_prev + zvk.sigma_beta_acc*randn;
     bias_g_pred = bias_g_prev + zvk.sigma_beta_g*randn;
     % bias_a_pred = bias_a_prev;
