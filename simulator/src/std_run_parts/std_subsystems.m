@@ -153,5 +153,5 @@ end
 %% ZVK
 
 if currentState == availableStates.on_ground
-    [sensorData, sensorTot] = run_ZVK(t1,sensorData, sensorTot, settings, environment);
+    [sensorData, sensorTot] = run_ZVK(t1,sensorData, sensorTot, settings, XYZ0*0.01, environment);
 end

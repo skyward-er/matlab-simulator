@@ -174,10 +174,10 @@ if length(t_nas) > 1
 
         % magnetometer
 
-        % if round(t_nas(ii) - sensorTot.nas.timestampMagnetometerCorrection, 6) >= 1/nas.mag_freq
-        %     [xq(ii,:),P_q(:,:,ii),~,~]        = correctorQuat(xq(ii,:),P_q(:,:,ii),sensorTot.imu.magnetometer_measures(index_imu,:),nas.sigma_mag,mag_NED);
-        %     sensorTot.nas.timestampMagnetometerCorrection = t_nas(ii);
-        % end
+        if round(t_nas(ii) - sensorTot.nas.timestampMagnetometerCorrection, 6) >= 1/nas.mag_freq
+            [xq(ii,:),P_q(:,:,ii),~,~]        = correctorQuat(xq(ii,:),P_q(:,:,ii),sensorTot.imu.magnetometer_measures(index_imu,:),nas.sigma_mag,mag_NED);
+            sensorTot.nas.timestampMagnetometerCorrection = t_nas(ii);
+        end
 
         % reintroduce pitot
         % pitot
