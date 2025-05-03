@@ -1,4 +1,4 @@
-function [x_new, P_new] = correctorZVK(x_pred, P_pred, a_b_m, om_b_m, zvk)
+function [x_new, P_new] = correctorZVK(x_pred, P_pred, a_b_m, om_b_m, mag_meas, mag_NED, zvk)
 
     quat_pred   = x_pred(1:4)';
     v_pred      = x_pred(5:7)';
@@ -10,7 +10,7 @@ function [x_new, P_new] = correctorZVK(x_pred, P_pred, a_b_m, om_b_m, zvk)
                  2*(quat_pred(1)*quat_pred(2) - quat_pred(3)*quat_pred(4)),      -quat_pred(1)^2 + quat_pred(2)^2 - quat_pred(3)^2 + quat_pred(4)^2,                2*(quat_pred(2)*quat_pred(3) + quat_pred(1)*quat_pred(4)) ;
                  2*(quat_pred(1)*quat_pred(3) + quat_pred(2)*quat_pred(4)),               2*(quat_pred(2)*quat_pred(3) - quat_pred(1)*quat_pred(4)),       -quat_pred(1)^2 - quat_pred(2)^2 + quat_pred(3)^2 + quat_pred(4)^2];
 
-
+    % accelerometer correciton
     a_b = a_b_m' - bias_a_pred;  
 
     g_est = (A * [0, 0, -9.81]');
@@ -20,20 +20,29 @@ function [x_new, P_new] = correctorZVK(x_pred, P_pred, a_b_m, om_b_m, zvk)
          g_est(3)   0          -g_est(1);
         -g_est(2)   g_est(1)    0];
 
+    % magnetometer correction
+    mag_meas =  mag_meas/norm(mag_meas);
+    mag_NED = mag_NED/norm(mag_NED);
 
+    z       = A*mag_NED;                   %Magnetic vector in the body axis (estimated)
+    z_mat   = [ 0      -z(3)   z(2);
+                z(3)     0     -z(1);
+               -z(2)     z(1)   0;];        %Matrix needed to obtain the derivative H
+
+
+    % Measurment matrix
     H_x = [zeros(3) eye(3)   zeros(3) zeros(3) zeros(3);
            zeros(3) zeros(3) zeros(3) zeros(3) -eye(3);
-           M        zeros(3) zeros(3) eye(3) zeros(3)];
+           M        zeros(3) zeros(3) eye(3)   zeros(3);            % Pesavo ci adesse -eye ma funziona cosi..
+           z_mat    zeros(3) zeros(3) zeros(3) zeros(3)];
 
-    % H_x = [zeros(3) eye(3)   zeros(3) zeros(3) zeros(3);
-    %        zeros(3) zeros(3) zeros(3) zeros(3) -eye(3)];
 
     S = H_x * P_pred * H_x' + zvk.R;
 
     K = P_pred * H_x' * inv(S);
 
 
-    error = [zeros(6,1); g_meas] - [v_pred; om_b_m'-bias_g_pred; g_est];
+    error = [zeros(6,1); g_meas; mag_meas'] - [v_pred; om_b_m'-bias_g_pred; g_est; z];
 
     % error = [zeros(6,1)] - [v_pred; om_b_m'-bias_g_pred];
 

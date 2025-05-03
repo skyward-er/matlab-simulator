@@ -1,4 +1,4 @@
-function [sensorData, sensorTot] = run_ZVK(Tf, sensorData, sensorTot, settings, environment)
+function [sensorData, sensorTot] = run_ZVK(Tf, sensorData, sensorTot, settings, mag_NED, environment)
 
 
 % recall zvk time
@@ -37,10 +37,11 @@ if length(t_zvk) > 1
         [x(ii,:), P(:,:,ii)] = predictorZVK( x(ii-1,:), P(:,:,ii-1), a_b_m, om_b_m, dt_k, settings.zvk);
 
 
-
+        
+        mag_meas = sensorTot.imu.magnetometer_measures(index_imu,:);
         
         %%% Correction
-        [x(ii,:), P(:,:,ii)] = correctorZVK( x(ii,:), P(:,:,ii), a_b_m, om_b_m, settings.zvk);
+        [x(ii,:), P(:,:,ii)] = correctorZVK( x(ii,:), P(:,:,ii), a_b_m, om_b_m, mag_meas, mag_NED, settings.zvk);
 
        
         
