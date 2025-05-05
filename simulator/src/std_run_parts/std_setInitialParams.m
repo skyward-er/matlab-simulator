@@ -208,6 +208,7 @@ settings.nas.mag_freq = settings.frequencies.NASFrequency/settings.nas.mag_decim
 
 % if settings.flagNAS || settings.electronics  ??????
 
+% sensorData.zvk.states = [Q0(2:4); Q0(1); V0; X0; [-0.05; 0.1; -0.05]; [-0.005; 0; 0.007]]';
 % sensorData.zvk.states = [Q0(2:4); Q0(1); V0; X0; [-0.25; 0.20; 0.10]; 0*ones(3,1)]';
 sensorData.zvk.states = [Q0(2:4); Q0(1); V0; X0; 0*ones(6,1)]';
 
@@ -216,7 +217,7 @@ if settings.scenario ~="descent"
 else
     sensorData.zvk.states(10) = -settings.z_final-environment.z0;
 end
-sensorData.zvk.P = settings.zvk.P;
+sensorData.zvk.P = settings.zvk.P0;
 
 
 %% MEA PARAMETERS (mass estimation algorithm) 
@@ -267,6 +268,7 @@ sensorTot.mea.time                              =   0;
 
 sensorTot.zvk.time                              =   0;
 sensorTot.zvk.states                            =   sensorData.zvk.states;
+sensorTot.zvk.P                                 =   sensorData.zvk.P;
 
 
 % inizializzare i tempi dei sensori a 0 e poi mettere tutti i n_old = 2
