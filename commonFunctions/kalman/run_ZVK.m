@@ -51,8 +51,9 @@ if length(t_zvk) > 1
     sensorData.zvk.P = P;
     sensorData.zvk.time = t_zvk;
 
-    sensorTot.zvk.states(sensorTot.zvk.n_old:sensorTot.zvk.n_old + size(sensorData.zvk.states(:,1),1)-2, 1:16 )  = sensorData.zvk.states(2:end,1:16); % ZVK output
-    sensorTot.zvk.time( sensorTot.zvk.n_old : sensorTot.zvk.n_old+size(sensorData.zvk.states(:,1),1)-2 )    = sensorData.zvk.time(2:end); % ZVK time output
+    sensorTot.zvk.P(1:15, 1:15, sensorTot.zvk.n_old:sensorTot.zvk.n_old + size(sensorData.zvk.P,3)-2 )   = sensorData.zvk.P(:,:,2:end);
+    sensorTot.zvk.states(sensorTot.zvk.n_old:sensorTot.zvk.n_old + size(sensorData.zvk.states,1)-2, 1:16 )  = sensorData.zvk.states(2:end,:); % ZVK output
+    sensorTot.zvk.time( sensorTot.zvk.n_old : sensorTot.zvk.n_old+size(sensorData.zvk.states,1)-2 )    = sensorData.zvk.time(2:end); % ZVK time output
     % sensorTot.zvk.time(:)
     sensorTot.zvk.n_old = sensorTot.zvk.n_old + size(sensorData.zvk.states,1)-1;
 end

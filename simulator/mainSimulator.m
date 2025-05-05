@@ -124,34 +124,48 @@ end
 %%
 close all
 zvk = simOutput.sensors.zvk;
+run(strcat('initSensors', mission.name));
+sensorSettings.accelerometer.offsetX*9.81/1e3
+bias_acc_x = sensorSettings.accelerometer.offsetX*9.81/1e3;
+bias_acc_y = sensorSettings.accelerometer.offsetY*9.81/1e3;
+bias_acc_z = sensorSettings.accelerometer.offsetZ*9.81/1e3;
+bias_gyro_x = deg2rad(sensorSettings.gyroscope.offsetX/1e3);
+bias_gyro_y = deg2rad(sensorSettings.gyroscope.offsetY/1e3);
+bias_gyro_z = deg2rad(sensorSettings.gyroscope.offsetZ/1e3);
 
 figure()
 subplot(3,1,1)
-plot(zvk.time,ones(1,length(zvk.time)).*-0.05, 'r',...
+plot(zvk.time,ones(1,length(zvk.time)).*bias_acc_x, 'k--',...
      zvk.time,zvk.states(:,11), 'r', 'LineWidth',2);
 legend('X','bias accelerometro x')
 subplot(3,1,2)
-plot(zvk.time,ones(1,length(zvk.time)).*0.10, 'g',...
+plot(zvk.time,ones(1,length(zvk.time)).*bias_acc_y, 'k--',...
      zvk.time,zvk.states(:,12), 'g','LineWidth',2);
 legend('Y','bias accelerometro y')
 subplot(3,1,3)
-plot(zvk.time,ones(1,length(zvk.time)).*-0.15, 'b',...
+plot(zvk.time,ones(1,length(zvk.time)).*bias_acc_z, 'k--',...
      zvk.time,zvk.states(:,13),'b', 'LineWidth',2);
 legend('Z','bias acceleromtro z')
 
 figure()
 subplot(3,1,1)
-plot(zvk.time,ones(1,length(zvk.time)).*0.008,'r',...
+plot(zvk.time,ones(1,length(zvk.time)).*bias_gyro_x,'k--',...
      zvk.time,zvk.states(:,14), 'r', 'LineWidth',2);
 legend('X','bias gyro x')
 subplot(3,1,2)
-plot(zvk.time,ones(1,length(zvk.time)).*-0.005, 'g',...
+plot(zvk.time,ones(1,length(zvk.time)).*bias_gyro_y, 'k--',...
      zvk.time,zvk.states(:,15), 'g','LineWidth',2);
 legend('Y','bias gyro y')
 subplot(3,1,3)
-plot(zvk.time,ones(1,length(zvk.time)).*0.002, 'b',...
+plot(zvk.time,ones(1,length(zvk.time)).*bias_gyro_z, 'k--',...
      zvk.time,zvk.states(:,16), 'b','LineWidth',2);
 legend('Z','bias gyro z')
+
+media_acc = sum(zvk.states(:,11:13))/length(zvk.time);
+error_acc = media_acc - [bias_acc_x bias_acc_y bias_acc_z]
+
+media_gyro = sum(zvk.states(:,14:16))/length(zvk.time);
+error_gyro = media_gyro - [bias_gyro_x bias_gyro_y bias_gyro_z]
 
 
 
