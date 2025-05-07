@@ -89,8 +89,9 @@ end
 if ~exist("../commonFunctions/graphics/general-utilities/","dir")
     warning('To export file you need to download the repository, read the README file in the folder')
 end
-std_plots(simOutput,settings,contSettings,mission,environment)
-sensor_plots(simOutput, environment, rocket, settings);
+% std_plots(simOutput,settings,contSettings,mission,rocket,environment)
+% sensor_plots(simOutput, environment, rocket, settings);
+std_plots_ABK_test(simOutput,settings,contSettings,mission,rocket,environment)
 % report_plots(simOutput,settings,contSettings)
 
 %% state visualiser
