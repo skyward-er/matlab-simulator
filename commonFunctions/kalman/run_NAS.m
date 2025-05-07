@@ -226,5 +226,9 @@ if length(t_nas) > 1
     sensorTot.nas.timestampPitotCorrection(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.timestampPitotCorrection(2:end); % NAS time output
     sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1)-1;
 
+    % For over/under-estimating
+    val = 1;
+    sensorTot.nas.states(end,6) = sensorTot.nas.states(end,6)*val;
+
 end
 end

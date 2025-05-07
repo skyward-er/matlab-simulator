@@ -97,7 +97,7 @@ if flagAeroBrakes && settings.flagNAS && settings.control && ...
         ap_ref_old = ap_ref_new;
         settings.quat = [sensorTot.nas.states(end, [10,7:9])];
         [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
-        [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old,environment); % "simulated" airbrakes because otherwise are run by the HIL.
+        [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old,environment,dt); % "simulated" airbrakes because otherwise are run by the HIL.
     end
 else
     ap_ref_new = 0;
@@ -143,7 +143,7 @@ if ~settings.flagAscent && settings.parafoil
             pos_est(3) = -pos_est(3)-environment.z0;
 
             [deltaA_ref_new,contSettings] = run_parafoilGuidance(pos_est, sensorData.nas.states(end,4:5), wind_est, ...
-                settings.payload.target, contSettings, rocket.parachutes{2,2}.controlParams);
+                settings.payload.target, contSettings, rocket.parachutes(2,2).controlParams);
         end
 
     end
