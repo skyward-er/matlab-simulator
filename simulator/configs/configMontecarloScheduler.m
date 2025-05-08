@@ -15,7 +15,7 @@ if settings.montecarlo
 
         %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % how many simulations
-        N_sim = 1000; % set to at least 500
+        N_sim = 2000; % set to at least 500
         simulationType_thrust = "gaussian";  % "gaussian", "extreme"
         displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlo on hpe)
     
@@ -27,6 +27,11 @@ if settings.montecarlo
         switch simulationType_thrust
     
             case "gaussian"
+
+                %%% NAS uncertainty
+                mu_NAS = 1;
+                sigma_NAS = 0.05;
+                stoch.NAS = normrnd(mu_NAS,sigma_NAS,N_sim,1);
     
                 %%% thrust uncertainty
                 sigma_t = 3.3/100;             % thrust_percentage standard deviation
@@ -228,7 +233,7 @@ if settings.montecarlo
 
         %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % how many simulations
-        N_sim = 1000; % set to at least 500
+        N_sim = 2000; % set to at least 500
         simulationType_thrust = "gaussian";  % "gaussian", "extreme"
         displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlo on hpe)
     
@@ -240,6 +245,11 @@ if settings.montecarlo
         switch simulationType_thrust
     
             case "gaussian"
+
+                %%% NAS uncertainty
+                mu_NAS = 1;
+                sigma_NAS = 0.05;
+                stoch.NAS = normrnd(mu_NAS,sigma_NAS,N_sim,1);
     
                 %%% thrust uncertainty
                 sigma_t = 3.3/100;             % thrust_percentage standard deviation

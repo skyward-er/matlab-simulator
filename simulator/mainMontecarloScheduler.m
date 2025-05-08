@@ -140,6 +140,7 @@ for idx_scheduler = 1:n_run
             settings_mont.mass_offset = stoch.mass_offset(i);
             settings_mont.OMEGA = stoch.OMEGA_rail(i);
             settings_mont.PHI = stoch.PHI_rail(i);
+            settings_mont.stochNas = stoch.NAS(i);
     
             if isfield(stoch, 'State')
                 settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector

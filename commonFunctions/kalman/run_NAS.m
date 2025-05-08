@@ -1,4 +1,4 @@
-function [sensorData,sensorTot,nas] = run_NAS(Tf, mag_NED,sensorData,sensorTot,settings, environment)
+function [sensorData,sensorTot,nas] = run_NAS(Tf, mag_NED,sensorData,sensorTot,settings,environment,stochNas)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
@@ -227,7 +227,7 @@ if length(t_nas) > 1
     sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1)-1;
 
     % For over/under-estimating
-    val = 1;
+    val = stochNas;
     sensorTot.nas.states(end,6) = sensorTot.nas.states(end,6)*val;
 
 end

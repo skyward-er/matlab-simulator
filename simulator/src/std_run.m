@@ -51,6 +51,8 @@ if nargin > 5
     rocket.coefficients.total = settings_mont.Coeffs;
     wind = settings_mont.wind;
 
+    stochNas = settings_mont.stochNas;
+
     if isfield(settings_mont, 'State')
         rocket.coefficients.state.xcgTime = settings_mont.State.xcgTime;
     end
