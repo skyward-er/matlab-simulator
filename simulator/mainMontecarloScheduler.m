@@ -18,12 +18,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %% Number of complete run
 
-n_run = 7;
+n_run = 1:7;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-for idx_scheduler = 1:n_run    
+for idx_scheduler = n_run    
 
     if ~exist('flagSubmodulesUpdated','var') % every first time you use the simulator checks for updates, then stops doing it (note: if you clear all vars it starts doing it)
         close all; clc;
@@ -86,7 +86,7 @@ for idx_scheduler = 1:n_run
     
     fprintf("Scenario: " + settings.scenario + "\n")
     fprintf("Save method: offline\n")
-    fprintf("Total MC: " + idx_scheduler + "/" + n_run + "\n")
+    fprintf("Total MC: " + sum(n_run<=idx_scheduler) + "/" + length(n_run) + "\n")
     pause(2)
     
     

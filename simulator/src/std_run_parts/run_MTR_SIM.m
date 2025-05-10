@@ -79,7 +79,7 @@ else
     settings.expMengineCut = settings.parout.m(end) - (rocket.massNoMotor + rocket.motor.mass(end));
     if T1 - engineT0 > rocket.motor.cutoffTime
         settings.shutdown = true;
-        rocket.updateCutoff;
+        % rocket.updateCutoff;
         [settings,rocket] = settingsEngineCut(settings, engineT0, rocket);
         settings.quatCut = [sensorTot.nas.states(end, 10) sensorTot.nas.states(end, 7:9)];
         [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
