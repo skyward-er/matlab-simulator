@@ -97,7 +97,7 @@ if flagAeroBrakes && settings.flagNAS && settings.control && ...
         ap_ref_old = ap_ref_new;
         settings.quat = [sensorTot.nas.states(end, [10,7:9])];
         [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
-        [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old,environment,dt); % "simulated" airbrakes because otherwise are run by the HIL.
+        [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old,environment,dt,stochABK_alg,stochABK_curve); % "simulated" airbrakes because otherwise are run by the HIL.
     end
 else
     ap_ref_new = 0;

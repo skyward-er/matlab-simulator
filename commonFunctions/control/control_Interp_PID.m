@@ -1,4 +1,4 @@
-function [alpha0,contSettings] = control_Interp_PID(z,Vz,settings,contSettings,alpha0_old,dt)
+function [alpha0,contSettings] = control_Interp_PID(z,Vz,settings,contSettings,alpha0_old,dt,stochABK_alg,stochABK_curve)
 
 % HELP
 %
@@ -68,16 +68,19 @@ else
             % elseif percentage > 1
             %     percentage = 1;
             % end
-            ref = 0.2;
-            error = current_position - ref;
-            prev_error = alpha0_old - ref;
-            percentage = 1.2*error + 0.01*prev_error/dt + ref;
-            if percentage < 0
-                percentage = 0;
-            elseif percentage > 1
-                percentage = 1;
+            if stochABK_alg == 2
+                ref = stochABK_curve;
+                error = current_position - ref;
+                prev_error = alpha0_old - ref;
+                percentage = 1.2*error + 0.01*prev_error/dt + ref;
+                if percentage < 0
+                    percentage = 0;
+                elseif percentage > 1
+                    percentage = 1;
+                end
+            elseif stochABK_alg == 1
+                percentage = current_position;
             end
-            % percentage = current_position;
         case 'sinusoidal'
             percentage = 0.5+0.5*cos(-pi+pi*(Vz-V_extrema(1))/(V_extrema(2)-V_extrema(1))); % same as choice 1, but with a sinusoidal approach
     end

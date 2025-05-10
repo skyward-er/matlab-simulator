@@ -52,6 +52,8 @@ if nargin > 5
     wind = settings_mont.wind;
 
     stochNas = settings_mont.stochNas;
+    stochABK_alg = settings_mont.stochABK_alg;
+    stochABK_curve = settings_mont.stochABK_curve;
 
     if isfield(settings_mont, 'State')
         rocket.coefficients.state.xcgTime = settings_mont.State.xcgTime;

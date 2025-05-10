@@ -1,4 +1,4 @@
-function [ap_ref_new,contSettings,varargout] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old,environment,dt)
+function [ap_ref_new,contSettings,varargout] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old,environment,dt,stochABK_alg,stochABK_curve)
 
 
 %% HELP:
@@ -32,7 +32,7 @@ switch true % set this value in configControl.m
         % help in the function
 
         % [ap_ref_new,contSettings] = control_Interp(-sensorData.kalman.z-environment.z0,-sensorData.kalman.vz,settings,contSettings,ap_ref_old); % cambiare nome alla funzione tra le altre cose
-        [ap_ref_new,contSettings] = control_Interp_PID(-sensorData.kalman.z-environment.z0,-sensorData.kalman.vz,settings,contSettings,ap_ref_old,dt); % cambiare nome alla funzione tra le altre cose
+        [ap_ref_new,contSettings] = control_Interp_PID(-sensorData.kalman.z-environment.z0,-sensorData.kalman.vz,settings,contSettings,ap_ref_old,dt,stochABK_alg,stochABK_curve); % cambiare nome alla funzione tra le altre cose
       
         
     case strcmp (contSettings.algorithm,'shooting')

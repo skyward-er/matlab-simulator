@@ -18,7 +18,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %% Number of complete run
 
-n_run = 2;
+n_run = 5;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -140,7 +140,10 @@ for idx_scheduler = 1:n_run
             settings_mont.mass_offset = stoch.mass_offset(i);
             settings_mont.OMEGA = stoch.OMEGA_rail(i);
             settings_mont.PHI = stoch.PHI_rail(i);
+
             settings_mont.stochNas = stoch.NAS(i);
+            settings_mont.stochABK_curve = stoch.ABK_curve(i);
+            settings_mont.stochABK_alg = stoch.ABK_alg(i);
     
             if isfield(stoch, 'State')
                 settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
