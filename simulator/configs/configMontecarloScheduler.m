@@ -172,6 +172,99 @@ elseif idx_scheduler == 7
         stoch.ABK_alg = 1*ones(N_sim,1);
         stoch.ABK_curve = 0.2*ones(N_sim,1);
 
+
+elseif idx_scheduler == 8
+
+        %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % how many simulations
+        N_sim = 1000; % set to at least 500
+        simulationType_thrust = "gaussian";  % "gaussian", "extreme"
+        displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlo on hpe)
+    
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+        %% %%%%%%%%%%%%%%%%% untouchable parameters (unless you know really well what you are doing) %%%%%%%%%%%%%%%
+        %% stochastic parameters
+        [stoch,wind,algorithm_vec,thrust_percentage] = main_fnc_montecarlo(N_sim,simulationType_thrust,rocket,mission,environment);
+
+        %%% NAS uncertainty
+        mu_NAS = 0.9;
+        sigma_NAS = 0.001;
+        stoch.NAS = normrnd(mu_NAS,sigma_NAS,N_sim,1);
+
+        %%% ABK algorithm
+        stoch.ABK_alg = 2*ones(N_sim,1);
+        stoch.ABK_curve = 0.5*ones(N_sim,1);
+
+elseif idx_scheduler == 9
+
+        %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % how many simulations
+        N_sim = 1000; % set to at least 500
+        simulationType_thrust = "gaussian";  % "gaussian", "extreme"
+        displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlo on hpe)
+    
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+        %% %%%%%%%%%%%%%%%%% untouchable parameters (unless you know really well what you are doing) %%%%%%%%%%%%%%%
+        %% stochastic parameters
+        [stoch,wind,algorithm_vec,thrust_percentage] = main_fnc_montecarlo(N_sim,simulationType_thrust,rocket,mission,environment);
+
+        %%% NAS uncertainty
+        mu_NAS = 1.1;
+        sigma_NAS = 0.001;
+        stoch.NAS = normrnd(mu_NAS,sigma_NAS,N_sim,1);
+
+        %%% ABK algorithm
+        stoch.ABK_alg = 2*ones(N_sim,1);
+        stoch.ABK_curve = 0.5*ones(N_sim,1);
+
+elseif idx_scheduler == 10
+
+        %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % how many simulations
+        N_sim = 1000; % set to at least 500
+        simulationType_thrust = "gaussian";  % "gaussian", "extreme"
+        displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlo on hpe)
+    
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+        %% %%%%%%%%%%%%%%%%% untouchable parameters (unless you know really well what you are doing) %%%%%%%%%%%%%%%
+        %% stochastic parameters
+        [stoch,wind,algorithm_vec,thrust_percentage] = main_fnc_montecarlo(N_sim,simulationType_thrust,rocket,mission,environment);
+
+        %%% NAS uncertainty
+        mu_NAS = 1;
+        sigma_NAS = 0;
+        stoch.NAS = normrnd(mu_NAS,sigma_NAS,N_sim,1);
+
+        %%% ABK algorithm
+        stoch.ABK_alg = 2*ones(N_sim,1);
+        stoch.ABK_curve = 0.5*ones(N_sim,1);
+
+elseif idx_scheduler == 11
+
+        %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settable parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % how many simulations
+        N_sim = 1000; % set to at least 500
+        simulationType_thrust = "gaussian";  % "gaussian", "extreme"
+        displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlo on hpe)
+    
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+        %% %%%%%%%%%%%%%%%%% untouchable parameters (unless you know really well what you are doing) %%%%%%%%%%%%%%%
+        %% stochastic parameters
+        [stoch,wind,algorithm_vec,thrust_percentage] = main_fnc_montecarlo(N_sim,simulationType_thrust,rocket,mission,environment);
+
+        %%% NAS uncertainty
+        mu_NAS = 1;
+        sigma_NAS = 0;
+        stoch.NAS = normrnd(mu_NAS,sigma_NAS,N_sim,1);
+
+        %%% ABK algorithm
+        stoch.ABK_alg = 1*ones(N_sim,1);
+        stoch.ABK_curve = 0.5*ones(N_sim,1);
+
     end
 
 else
