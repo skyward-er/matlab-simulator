@@ -18,7 +18,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %% Number of complete run
 
-n_run = 5;
+n_run = 7;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
