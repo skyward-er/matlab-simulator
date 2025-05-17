@@ -500,40 +500,43 @@ while settings.flagStopIntegration && n_old < nmax                          % St
              zvk.time,zvk.states(:,9),'b', 'LineWidth',2);
         legend('Z','bias acceleromtro z')
         
-        % figure()
-        % subplot(3,1,1)
-        % plot(zvk.time,ones(1,length(zvk.time)).*bias_gyro_x,'k--',...
-        %      zvk.time,zvk.states(:,7), 'r', 'LineWidth',2);
-        % legend('X','bias gyro x')
-        % subplot(3,1,2)
-        % plot(zvk.time,ones(1,length(zvk.time)).*bias_gyro_y, 'k--',...
-        %      zvk.time,zvk.states(:,8), 'g','LineWidth',2);
-        % legend('Y','bias gyro y')
-        % subplot(3,1,3)
-        % plot(zvk.time,ones(1,length(zvk.time)).*bias_gyro_z, 'k--',...
-        %      zvk.time,zvk.states(:,9), 'b','LineWidth',2);
-        % legend('Z','bias gyro z')
+        figure()
+        subplot(3,1,1)
+        plot(zvk.time,ones(1,length(zvk.time)).*bias_gyro_x,'k--',...
+             zvk.time,zvk.states(:,16), 'r', 'LineWidth',2);
+        legend('X','bias gyro x')
+        subplot(3,1,2)
+        plot(zvk.time,ones(1,length(zvk.time)).*bias_gyro_y, 'k--',...
+             zvk.time,zvk.states(:,17), 'g','LineWidth',2);
+        legend('Y','bias gyro y')
+        subplot(3,1,3)
+        plot(zvk.time,ones(1,length(zvk.time)).*bias_gyro_z, 'k--',...
+             zvk.time,zvk.states(:,18), 'b','LineWidth',2);
+        legend('Z','bias gyro z')
 
 
-        estimated_bias_acc = zvk.states(end,7:9);
-        estimated_bias_acc_sigma = sqrt( diag(zvk.P(7:9, 7:9, end))' ); 
+        estimated_bias_acc          = zvk.states(end,7:9);
+        estimated_bias_acc_sigma    = sqrt( diag(zvk.P(7:9, 7:9, end))' ); 
+        bias_acc_error              = estimated_bias_acc - [bias_acc_x, bias_acc_y, bias_acc_z];
         
-        % estimated_bias_gyro = zvk.states(end,7:9);
-        % estimated_bias_gyro_sigma = sqrt( diag(zvk.P(7:9, 7:9, end))' );
+        estimated_bias_gyro         = zvk.states(end,16:18);
+        estimated_bias_gyro_sigma   = sqrt( diag(zvk.P(16:18, 16:18, end))' );
+        bias_gyro_error             = estimated_bias_gyro - [bias_gyro_x, bias_gyro_y, bias_gyro_z];
 
 
-        disp("estimated_bias_acc")
-        disp(estimated_bias_acc)
-
-        disp("estimated_bias_acc_sigma")
-        disp(estimated_bias_acc_sigma)
+        % disp("estimated_bias_acc")
+        % disp(estimated_bias_acc)
+        % disp("estimated_bias_acc_sigma")
+        % disp(estimated_bias_acc_sigma)
+        disp("bias_acc_error")
+        disp(bias_acc_error)
 
         % disp("estimated_bias_gyro")
         % disp(estimated_bias_gyro)
-        % 
         % disp("estimated_bias_gyro_sigma")
         % disp(estimated_bias_gyro_sigma)
-
+        disp("bias_gyro_error")
+        disp(bias_gyro_error)
 
         % [a,b,c] = quat2angle( [ zvk.states(:,4) zvk.states(:,1:3) ] );
         % a = wrapTo2Pi(a);

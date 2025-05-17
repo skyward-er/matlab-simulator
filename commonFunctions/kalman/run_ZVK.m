@@ -5,10 +5,10 @@ function [sensorData, sensorTot] = run_ZVK(Tf, sensorData, sensorTot, settings, 
 t_zvk = sensorTot.zvk.time(end):1/settings.frequencies.ZVKFrequency:Tf;
 
 % preallocate update
-x =   zeros(length(t_zvk),9);        % Pre-allocation of pos, vel, quaternion and biases     [3v 3a 3beta_a]
+x =   zeros(length(t_zvk),18);        % Pre-allocation of pos, vel, quaternion and biases     [3v 3a 3beta_a || 3angle 3om 3beta_g]
 % note that covariance has one state less because error state has  3 small
 % deviation angles instead of quaternions
-P =   zeros(9,9,length(t_zvk));
+P =   zeros(18,18,length(t_zvk));
 
 
 % first update
@@ -51,8 +51,8 @@ if length(t_zvk) > 1
     sensorData.zvk.P = P;
     sensorData.zvk.time = t_zvk;
 
-    sensorTot.zvk.P(1:9, 1:9, sensorTot.zvk.n_old:sensorTot.zvk.n_old + size(sensorData.zvk.P,3)-2 )   = sensorData.zvk.P(:,:,2:end);
-    sensorTot.zvk.states(sensorTot.zvk.n_old:sensorTot.zvk.n_old + size(sensorData.zvk.states,1)-2, 1:9 )  = sensorData.zvk.states(2:end,:); % ZVK output
+    sensorTot.zvk.P(1:18, 1:18, sensorTot.zvk.n_old:sensorTot.zvk.n_old + size(sensorData.zvk.P,3)-2 )   = sensorData.zvk.P(:,:,2:end);
+    sensorTot.zvk.states(sensorTot.zvk.n_old:sensorTot.zvk.n_old + size(sensorData.zvk.states,1)-2, 1:18 )  = sensorData.zvk.states(2:end,:); % ZVK output
     sensorTot.zvk.time( sensorTot.zvk.n_old : sensorTot.zvk.n_old+size(sensorData.zvk.states,1)-2 )    = sensorData.zvk.time(2:end); % ZVK time output
     % sensorTot.zvk.time(:)
     sensorTot.zvk.n_old = sensorTot.zvk.n_old + size(sensorData.zvk.states,1)-1;

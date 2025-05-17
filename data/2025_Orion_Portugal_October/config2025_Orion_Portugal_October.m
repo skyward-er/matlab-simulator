@@ -147,42 +147,41 @@ settings.nas.Qq              =   [(settings.nas.sigma_w^2*settings.nas.dt_k+(1/3
 % settings.zvk.J2 = 1.082636e-3;
 
 % Estimated noise standard deviations
-settings.zvk.sigma_gyro         = 2e-4;     % [rad/s]   gyroscope variance               NAS
-settings.zvk.sigma_beta_g       = 1e-5;     % [rad/s]   gyroscope bias variance         NAS
+settings.zvk.sigma_gyro         = 5e-5;     % [rad/s]   gyroscope variance               NAS
+settings.zvk.sigma_beta_g       = 1e-6;     % [rad/s]   gyroscope bias variance         NAS
 settings.zvk.sigma_acc          = 5e-2;     % [m/s^2]   accelerometer variance           NAS
-settings.zvk.sigma_beta_acc     = 1e-4;     % [m/s^2]   accelerometer bias variance     BOH
+settings.zvk.sigma_beta_acc     = 1e-5;     % [m/s^2]   accelerometer bias variance     BOH
 settings.zvk.sigma_mag          = 3;       % [mgauss]  magnetometer variance            NAS = 10?????   mentre sito STM di 3mGs RMS noise
 
-% Process noise covariance matrix Q
-% settings.zvk.Q = diag([
-%     ones(1,3) * settings.zvk.sigma_gyro^2, ...
-%     ones(1,3) * settings.zvk.sigma_beta_g^2, ...
-%     ones(1,3) * settings.zvk.sigma_acc^2, ...
-%     ones(1,3) * settings.zvk.sigma_beta_acc^2
-% ]);
 
 settings.zvk.Q = diag([
-    ones(1,3) * (1e-6)^2, ...   % vel
-    ones(1,3) * (1e-6)^2, ...   % acc
-    ones(1,3) * (1e-6)^2;       % bais acc
+    (1e-6)^2                            * ones(3,1);    % vel
+    (1e-6)^2                            * ones(3,1);    % acceleration
+    settings.zvk.sigma_beta_acc^2       * ones(3,1);    % bias accelerometer
+    (1e-6)^2                            * ones(3,1);    % theta
+    (1e-6)^2                            * ones(3,1);    % angular velocity
+    settings.zvk.sigma_beta_g^2         * ones(3,1);    % bias gyroscope
 ]);
 
 
 % Initial state covariance matrix P
 settings.zvk.P0 = diag([
-    1e-5 * ones(1,3),...   % velocity uncertainty [m/s]
-    1e-5  * ones(1,3),...   % acceleration [m/s^2]
-    0.1 * ones(1,3)...    % accelerometer bias [m/s^2]
+    (1e-5)^2    * ones(3,1);    % velocity uncertainty [m/s]
+    (1e-5)^2    * ones(3,1);    % acceleration [m/s^2]
+    (1e-1)^2    * ones(3,1);    % accelerometer bias [m/s^2]
+    (1e-5)^2    * ones(3,1);    % ang velocity [rad/s]
+    (1e-5)^2    * ones(3,1);    % ang acceleration [rad/s^2]
+    (1e-3)^2    * ones(3,1)     % gyro bias [rad/s]
 ]);
 
 
 % Measurement noise covariance matrix R
-settings.zvk.R = zeros(6);
-settings.zvk.R(1:3,1:3) = eye(3) * (1e-6)^2;                            % fake zero velocity [m/s]
-settings.zvk.R(4:6,4:6) = eye(3) * settings.zvk.sigma_acc^2;        % accelerometro [m/s^2]
-
-% settings.zvk.R(4:6,4:6) = 1e-6 * eye(3);        % fake zero angular velocity [rad/s]
-% settings.zvk.R(7:9,7:9) = settings.zvk.sigma_acc;
+settings.zvk.R = diag([
+    (1e-6)^2                        * ones(3,1);        % FAKE zero velocity [m/s]
+    settings.zvk.sigma_acc^2        * ones(3,1);        % accelerometer [m/s^2]
+    (1e-6)^2                        * ones(3,1);        % FAKE angle [rad]
+    settings.zvk.sigma_gyro^2       * ones(3,1)         % angular velocity [rad/s]
+]);
 
 
 %% ADA TUNING PARAMETER
