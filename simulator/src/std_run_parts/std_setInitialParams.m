@@ -208,6 +208,14 @@ settings.nas.mag_freq = settings.frequencies.NASFrequency/settings.nas.mag_decim
 
 % if settings.flagNAS || settings.electronics  ??????
 
+% small = [1 deg2rad([0.005 -0.005 0.005]) ];
+% 
+% Q0 = quatmultiply(Q0', small);
+% 
+% rad2deg(quat2eul(Q0))
+% 
+% Q0 = Q0';
+
 % sensorData.zvk.states = [Q0(2:4); Q0(1); V0; X0; [-0.05; 0.1; -0.05]; [-0.005; 0; 0.007]]';
 % sensorData.zvk.states = [Q0(2:4); Q0(1); V0; X0; [-0.25; 0.20; 0.10]; 0*ones(3,1)]';
 sensorData.zvk.states = [Q0(2:4); Q0(1); V0; X0; 0*ones(6,1)]';

@@ -36,12 +36,12 @@ function [x_pred, P_pred] = predictorZVK( x_prev, P_prev, sf_b_measure, om_b_m, 
                     -om_b'      0];
     
     quat_pred  = (eye(4) + 0.5*Omega*dt) * quat_prev;
+    quat_pred = quat_pred / norm(quat_pred);
 
-    % disp(rad2deg(quat2eul(quat_pred')))
+
+    disp(rad2deg(quat2eul( [ quat_pred(4), quat_pred(1:3)' ] )))
 
     %%% Biases random walk
-    % bias_a_pred = bias_a_prev + zvk.sigma_beta_acc*randn;
-    % bias_g_pred = bias_g_prev + zvk.sigma_beta_g*randn;
     bias_a_pred = bias_a_prev;
     bias_g_pred = bias_g_prev;
     
@@ -90,6 +90,6 @@ function [x_pred, P_pred] = predictorZVK( x_prev, P_prev, sf_b_measure, om_b_m, 
     GAMMA = (PHI*G);
 
   
-    P_pred = PHI * P_prev * PHI'+ GAMMA * zvk.Q * dt * GAMMA';
+    P_pred = PHI * P_prev * PHI'+ GAMMA * zvk.Q * GAMMA';
     
 end

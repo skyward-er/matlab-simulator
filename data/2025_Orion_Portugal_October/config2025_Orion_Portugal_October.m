@@ -150,10 +150,10 @@ settings.nas.Qq              =   [(settings.nas.sigma_w^2*settings.nas.dt_k+(1/3
 % settings.zvk.J2 = 1.082636e-3;
 
 % Estimated noise standard deviations
-settings.zvk.sigma_gyro         = 1e1;     % [rad/s]   gyroscope variance               NAS
-settings.zvk.sigma_beta_g       = 1e-5;     % [rad/s]   gyroscope bias variance         NAS
-settings.zvk.sigma_acc          = 5e0;     % [m/s^2]   accelerometer variance           NAS
-settings.zvk.sigma_beta_acc     = 5e-4;     % [m/s^2]   accelerometer bias variance     BOH
+settings.zvk.sigma_gyro         = 5e-4;     % [rad/s]   gyroscope variance
+settings.zvk.sigma_beta_g       = 1e-8;     % [rad/s]   gyroscope bias variance
+settings.zvk.sigma_acc          = 5e-2;     % [m/s^2]   accelerometer variance
+settings.zvk.sigma_beta_acc     = 1e-6;     % [m/s^2]   accelerometer bias variance
 settings.zvk.sigma_mag          = 3;       % [mgauss]  magnetometer variance            NAS = 10?????   mentre sito STM di 3mGs RMS noise
 
 % Process noise covariance matrix Q
@@ -166,11 +166,11 @@ settings.zvk.Q = diag([
 
 % Initial state covariance matrix P
 settings.zvk.P0 = diag([
-    1e-4 * ones(1,3),...   % small-angle errors [rad]
-    1e-5 * ones(1,3),...   % velocity uncertainty [m/s]
-    1e-4 * ones(1,3),...   % position uncertainty [m]
-    0.1  * ones(1,3),...   % accelerometer bias [m/s^2]
-    0.01 * ones(1,3)...    % gyroscope bias [rad/s]
+    deg2rad(0.05)^2 * ones(1,3),...   % small-angle errors [rad]          2sigma = 0.5deg
+    1e-6 * ones(1,3),...   % velocity uncertainty [m/s]
+    1e-6 * ones(1,3),...   % position uncertainty [m]
+    (0.025)^2  * ones(1,3),...   % accelerometer bias [m/s^2]             2sigma = 0.05  -> (0.025)^2
+    (0.0025)^2 * ones(1,3)...    % gyroscope bias [rad/s]                 2sigma = 0.005 -> (0.0025)^2
 ]);
 
 % Measurement noise covariance matrix R
@@ -180,6 +180,8 @@ settings.zvk.R = [
     zeros(3),           zeros(3),           settings.zvk.sigma_acc^2 * eye(3),      zeros(3);                               % accelerometer as gravity observation [m/s^2]
     zeros(3),           zeros(3),           zeros(3),                               settings.zvk.sigma_mag^2 * eye(3)       % magnetometer correction
 ];
+
+% settings.zvk.R = settings.zvk.R(1:6,1:6);
 
 
 %% ADA TUNING PARAMETER

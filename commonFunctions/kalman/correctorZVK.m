@@ -33,9 +33,10 @@ function [x_new, P_new] = correctorZVK(x_pred, P_pred, a_b_m, om_b_m, mag_meas, 
     % Measurment matrix
     H_x = [zeros(3) eye(3)   zeros(3) zeros(3) zeros(3);
            zeros(3) zeros(3) zeros(3) zeros(3) -eye(3);
-           M        zeros(3) zeros(3) zeros(3) zeros(3);
+           M        zeros(3) zeros(3) eye(3) zeros(3);
            z_mat    zeros(3) zeros(3) zeros(3) zeros(3)];
 
+    % H_x = H_x(1:6,:);
 
     S = H_x * P_pred * H_x' + zvk.R;
 
@@ -43,6 +44,8 @@ function [x_new, P_new] = correctorZVK(x_pred, P_pred, a_b_m, om_b_m, mag_meas, 
 
 
     error = [zeros(6,1); g_meas; mag_meas'] - [v_pred; om_b_m'-bias_g_pred; g_est; z];
+
+    % error = [zeros(6,1); g_meas] - [v_pred; om_b_m'-bias_g_pred; g_est];
 
     update = K * error;
 
@@ -52,12 +55,7 @@ function [x_new, P_new] = correctorZVK(x_pred, P_pred, a_b_m, om_b_m, mag_meas, 
 
     quat_pred = x_pred(1:4);
 
-    % quat_error = [update(1:3)'/2, 1];
-    % 
-    % quat_error(4)*quat_pred(4) - quat_error(1:3)*quat_pred(1:3)'
     
-    % x_new(1:4) = [ (quat_pred(4)*quat_error(1:3) + quat_error(4)*quat_pred(1:3) - cross(quat_error(1:3),quat_pred(1:3)) )';
-    %               quat_error(4)*quat_pred(4) - quat_error(1:3)*quat_pred(1:3)' ];
 
 
     OM = [ quat_pred(4), -quat_pred(3),  quat_pred(2);
@@ -70,7 +68,7 @@ function [x_new, P_new] = correctorZVK(x_pred, P_pred, a_b_m, om_b_m, mag_meas, 
     x_new(1:4) = quat_star / norm(quat_star);
 
 
-    disp(rad2deg(quat2eul(x_new(1:4))))
+    disp(rad2deg(quat2eul( [x_new(4), x_new(1:3)] )))
 
     
     P_new = (eye(15) - K * H_x) * P_pred;
