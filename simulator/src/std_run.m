@@ -479,7 +479,6 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         close all
         zvk = sensorTot.zvk;
         run(strcat('initSensors', mission.name));
-        sensorSettings.accelerometer.offsetX*9.81/1e3
         bias_acc_x = sensorSettings.accelerometer.offsetX*9.81/1e3;
         bias_acc_y = sensorSettings.accelerometer.offsetY*9.81/1e3;
         bias_acc_z = sensorSettings.accelerometer.offsetZ*9.81/1e3;
@@ -490,37 +489,37 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         figure()
         subplot(3,1,1)
         plot(zvk.time,ones(1,length(zvk.time)).*bias_acc_x, 'k--',...
-             zvk.time,zvk.states(:,4), 'r', 'LineWidth',2);
+             zvk.time,zvk.states(:,7), 'r', 'LineWidth',2);
         legend('X','bias accelerometro x')
         subplot(3,1,2)
         plot(zvk.time,ones(1,length(zvk.time)).*bias_acc_y, 'k--',...
-             zvk.time,zvk.states(:,5), 'g','LineWidth',2);
+             zvk.time,zvk.states(:,8), 'g','LineWidth',2);
         legend('Y','bias accelerometro y')
         subplot(3,1,3)
         plot(zvk.time,ones(1,length(zvk.time)).*bias_acc_z, 'k--',...
-             zvk.time,zvk.states(:,6),'b', 'LineWidth',2);
+             zvk.time,zvk.states(:,9),'b', 'LineWidth',2);
         legend('Z','bias acceleromtro z')
         
-        figure()
-        subplot(3,1,1)
-        plot(zvk.time,ones(1,length(zvk.time)).*bias_gyro_x,'k--',...
-             zvk.time,zvk.states(:,7), 'r', 'LineWidth',2);
-        legend('X','bias gyro x')
-        subplot(3,1,2)
-        plot(zvk.time,ones(1,length(zvk.time)).*bias_gyro_y, 'k--',...
-             zvk.time,zvk.states(:,8), 'g','LineWidth',2);
-        legend('Y','bias gyro y')
-        subplot(3,1,3)
-        plot(zvk.time,ones(1,length(zvk.time)).*bias_gyro_z, 'k--',...
-             zvk.time,zvk.states(:,9), 'b','LineWidth',2);
-        legend('Z','bias gyro z')
+        % figure()
+        % subplot(3,1,1)
+        % plot(zvk.time,ones(1,length(zvk.time)).*bias_gyro_x,'k--',...
+        %      zvk.time,zvk.states(:,7), 'r', 'LineWidth',2);
+        % legend('X','bias gyro x')
+        % subplot(3,1,2)
+        % plot(zvk.time,ones(1,length(zvk.time)).*bias_gyro_y, 'k--',...
+        %      zvk.time,zvk.states(:,8), 'g','LineWidth',2);
+        % legend('Y','bias gyro y')
+        % subplot(3,1,3)
+        % plot(zvk.time,ones(1,length(zvk.time)).*bias_gyro_z, 'k--',...
+        %      zvk.time,zvk.states(:,9), 'b','LineWidth',2);
+        % legend('Z','bias gyro z')
 
 
-        estimated_bias_acc = zvk.states(end,4:6);
-        estimated_bias_acc_sigma = sqrt( diag(zvk.P(4:6, 4:6, end))' ); 
+        estimated_bias_acc = zvk.states(end,7:9);
+        estimated_bias_acc_sigma = sqrt( diag(zvk.P(7:9, 7:9, end))' ); 
         
-        estimated_bias_gyro = zvk.states(end,7:9);
-        estimated_bias_gyro_sigma = sqrt( diag(zvk.P(7:9, 7:9, end))' );
+        % estimated_bias_gyro = zvk.states(end,7:9);
+        % estimated_bias_gyro_sigma = sqrt( diag(zvk.P(7:9, 7:9, end))' );
 
 
         disp("estimated_bias_acc")
@@ -529,11 +528,11 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         disp("estimated_bias_acc_sigma")
         disp(estimated_bias_acc_sigma)
 
-        disp("estimated_bias_gyro")
-        disp(estimated_bias_gyro)
-
-        disp("estimated_bias_gyro_sigma")
-        disp(estimated_bias_gyro_sigma)
+        % disp("estimated_bias_gyro")
+        % disp(estimated_bias_gyro)
+        % 
+        % disp("estimated_bias_gyro_sigma")
+        % disp(estimated_bias_gyro_sigma)
 
 
         % [a,b,c] = quat2angle( [ zvk.states(:,4) zvk.states(:,1:3) ] );
@@ -561,22 +560,22 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         
                 
         
-        acc_m = sensorTot.imu.accelerometer_measures;
-        gyro_m = sensorTot.imu.gyro_measures;
-        mag_m = sensorTot.imu.magnetometer_measures;
-
-        cov(acc_m)
-        cov(gyro_m)
-        cov(mag_m)
-
-
-        figure()
-        hold on
-        title('Accelerometro misure')
-        plot(acc_m(:,1))
-        plot(acc_m(:,2))
-        plot(acc_m(:,3))
-        legend('x','y','z')
+        % acc_m = sensorTot.imu.accelerometer_measures;
+        % gyro_m = sensorTot.imu.gyro_measures;
+        % mag_m = sensorTot.imu.magnetometer_measures;
+        % 
+        % cov(acc_m)
+        % cov(gyro_m)
+        % cov(mag_m)
+        % 
+        % 
+        % figure()
+        % hold on
+        % title('Accelerometro misure')
+        % plot(acc_m(:,1))
+        % plot(acc_m(:,2))
+        % plot(acc_m(:,3))
+        % legend('x','y','z')
 
         pause(1e6)
 

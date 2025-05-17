@@ -201,9 +201,10 @@ Q0 = Q0';
 
 sensorData.zvk.quat = [Q0(2:4); Q0(1)];
 
-bias_gyro_guess = [0.5, 0.5, 0.5]';
-bias_acc_guess = [0.005, 0.005, 0.005]';
-sensorData.zvk.states = [V0; bias_gyro_guess; bias_acc_guess]';
+bias_acc_guess = [10, 10, 10]';
+% bias_gyro_guess = [0.05, 0.05, 0.05]';
+
+sensorData.zvk.states = [V0; zeros(3,1); bias_acc_guess]';
 
 % if settings.scenario ~="descent"
 %     sensorData.zvk.states(10) = -environment.z0;

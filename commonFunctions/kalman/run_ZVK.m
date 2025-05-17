@@ -5,7 +5,7 @@ function [sensorData, sensorTot] = run_ZVK(Tf, sensorData, sensorTot, settings, 
 t_zvk = sensorTot.zvk.time(end):1/settings.frequencies.ZVKFrequency:Tf;
 
 % preallocate update
-x =   zeros(length(t_zvk),9);        % Pre-allocation of pos, vel, quaternion and biases     [3v 3beta_a 3beta_g]
+x =   zeros(length(t_zvk),9);        % Pre-allocation of pos, vel, quaternion and biases     [3v 3a 3beta_a]
 % note that covariance has one state less because error state has  3 small
 % deviation angles instead of quaternions
 P =   zeros(9,9,length(t_zvk));
