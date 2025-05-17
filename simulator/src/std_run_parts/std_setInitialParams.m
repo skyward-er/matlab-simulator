@@ -194,15 +194,22 @@ settings.nas.mag_freq = settings.frequencies.NASFrequency/settings.nas.mag_decim
 
 % if settings.flagNAS || settings.electronics  ??????
 
-% sensorData.zvk.states = [Q0(2:4); Q0(1); V0; X0; [-0.05; 0.1; -0.05]; [-0.005; 0; 0.007]]';
-% sensorData.zvk.states = [Q0(2:4); Q0(1); V0; X0; [-0.25; 0.20; 0.10]; 0*ones(3,1)]';
-sensorData.zvk.states = [Q0(2:4); Q0(1); V0; X0; 0*ones(6,1)]';
+small = [1 0.5*deg2rad([0 5 0]) ];
+Q0 = quatmultiply(Q0', small);
+rad2deg(quat2eul(Q0))
+Q0 = Q0';
 
-if settings.scenario ~="descent"
-    sensorData.zvk.states(10) = -environment.z0;
-else
-    sensorData.zvk.states(10) = -settings.z_final-environment.z0;
-end
+sensorData.zvk.quat = [Q0(2:4); Q0(1)];
+
+bias_gyro_guess = [0.5, 0.5, 0.5]';
+bias_acc_guess = [0.005, 0.005, 0.005]';
+sensorData.zvk.states = [V0; bias_gyro_guess; bias_acc_guess]';
+
+% if settings.scenario ~="descent"
+%     sensorData.zvk.states(10) = -environment.z0;
+% else
+%     sensorData.zvk.states(10) = -settings.z_final-environment.z0;
+% end
 sensorData.zvk.P = settings.zvk.P0;
 
 
@@ -254,6 +261,7 @@ sensorTot.mea.time                              =   0;
 
 sensorTot.zvk.time                              =   0;
 sensorTot.zvk.states                            =   sensorData.zvk.states;
+sensorTot.zvk.quat                              =   sensorData.zvk.quat;
 sensorTot.zvk.P                                 =   sensorData.zvk.P;
 
 

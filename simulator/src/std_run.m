@@ -150,7 +150,7 @@ else
 end
 
 if ~settings.montecarlo
-    time_on_ground = 50; % [s] - How much time the rockets stays on ramp before launch
+    time_on_ground = 10; % [s] - How much time the rockets stays on ramp before launch
 else
     time_on_ground = 0; % [s] - If montecarlo the rocket starts immediately
 end
@@ -490,43 +490,37 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         figure()
         subplot(3,1,1)
         plot(zvk.time,ones(1,length(zvk.time)).*bias_acc_x, 'k--',...
-             zvk.time,zvk.states(:,11), 'r', 'LineWidth',2);
+             zvk.time,zvk.states(:,4), 'r', 'LineWidth',2);
         legend('X','bias accelerometro x')
         subplot(3,1,2)
         plot(zvk.time,ones(1,length(zvk.time)).*bias_acc_y, 'k--',...
-             zvk.time,zvk.states(:,12), 'g','LineWidth',2);
+             zvk.time,zvk.states(:,5), 'g','LineWidth',2);
         legend('Y','bias accelerometro y')
         subplot(3,1,3)
         plot(zvk.time,ones(1,length(zvk.time)).*bias_acc_z, 'k--',...
-             zvk.time,zvk.states(:,13),'b', 'LineWidth',2);
+             zvk.time,zvk.states(:,6),'b', 'LineWidth',2);
         legend('Z','bias acceleromtro z')
         
         figure()
         subplot(3,1,1)
         plot(zvk.time,ones(1,length(zvk.time)).*bias_gyro_x,'k--',...
-             zvk.time,zvk.states(:,14), 'r', 'LineWidth',2);
+             zvk.time,zvk.states(:,7), 'r', 'LineWidth',2);
         legend('X','bias gyro x')
         subplot(3,1,2)
         plot(zvk.time,ones(1,length(zvk.time)).*bias_gyro_y, 'k--',...
-             zvk.time,zvk.states(:,15), 'g','LineWidth',2);
+             zvk.time,zvk.states(:,8), 'g','LineWidth',2);
         legend('Y','bias gyro y')
         subplot(3,1,3)
         plot(zvk.time,ones(1,length(zvk.time)).*bias_gyro_z, 'k--',...
-             zvk.time,zvk.states(:,16), 'b','LineWidth',2);
+             zvk.time,zvk.states(:,9), 'b','LineWidth',2);
         legend('Z','bias gyro z')
 
-        % media_acc = sum(zvk.states(:,11:13))/length(zvk.time);
-        % error_acc = media_acc - [bias_acc_x bias_acc_y bias_acc_z]
-        % 
-        % media_gyro = sum(zvk.states(:,14:16))/length(zvk.time);
-        % error_gyro = media_gyro - [bias_gyro_x bias_gyro_y bias_gyro_z]
 
-
-        estimated_bias_acc = zvk.states(end,11:13);
-        estimated_bias_acc_sigma = sqrt( diag(zvk.P(10:12, 10:12, end))' ); 
+        estimated_bias_acc = zvk.states(end,4:6);
+        estimated_bias_acc_sigma = sqrt( diag(zvk.P(4:6, 4:6, end))' ); 
         
-        estimated_bias_gyro = zvk.states(end,14:16);
-        estimated_bias_gyro_sigma = sqrt( diag(zvk.P(13:15, 13:15, end))' );
+        estimated_bias_gyro = zvk.states(end,7:9);
+        estimated_bias_gyro_sigma = sqrt( diag(zvk.P(7:9, 7:9, end))' );
 
 
         disp("estimated_bias_acc")
@@ -542,58 +536,50 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         disp(estimated_bias_gyro_sigma)
 
 
-
-
-        
-        
-        
-        
-        [a,b,c] = quat2angle(zvk.states(:,1:4));
-        a = wrapTo2Pi(a);
-        
-        a = rad2deg(a);
-        b = rad2deg(b);
-        c = rad2deg(c);
-        
-        figure()
-        subplot(3,1,1)
-        hold on
-        plot(zvk.time,a)
-        yline(a(1))
-        subplot(3,1,2)
-        hold on
-        plot(zvk.time,b)
-        yline(b(1))
-        subplot(3,1,3)
-        hold on
-        plot(zvk.time,c)
-        yline(c(1))
-        
-        
-        
-        quat_init = zvk.states(1,1:4);
-        quat_end = zvk.states(end,1:4);
-        
-        disp("quaternions")
-        disp(quat_init)
-        disp(quat_end )
-        
-        disp("euler angles")
-        disp(rad2deg(quat2eul(quat_init)))
-        disp(rad2deg(quat2eul(quat_end)))
-        
-        
-        % A_init   = [quat_init(1)^2 - quat_init(2)^2 - quat_init(3)^2 + quat_init(4)^2,               2*(quat_init(1)*quat_init(2) + quat_init(3)*quat_init(4)),                 2*(quat_init(1)*quat_init(3) - quat_init(2)*quat_init(4));
-        %      2*(quat_init(1)*quat_init(2) - quat_init(3)*quat_init(4)),      -quat_init(1)^2 + quat_init(2)^2 - quat_init(3)^2 + quat_init(4)^2,                2*(quat_init(2)*quat_init(3) + quat_init(1)*quat_init(4)) ;
-        %      2*(quat_init(1)*quat_init(3) + quat_init(2)*quat_init(4)),               2*(quat_init(2)*quat_init(3) - quat_init(1)*quat_init(4)),       -quat_init(1)^2 - quat_init(2)^2 + quat_init(3)^2 + quat_init(4)^2];
+        % [a,b,c] = quat2angle( [ zvk.states(:,4) zvk.states(:,1:3) ] );
+        % a = wrapTo2Pi(a);
         % 
-        % A_end   = [quat_end(1)^2 - quat_end(2)^2 - quat_end(3)^2 + quat_end(4)^2,               2*(quat_end(1)*quat_end(2) + quat_end(3)*quat_end(4)),                 2*(quat_end(1)*quat_end(3) - quat_end(2)*quat_end(4));
-        %      2*(quat_end(1)*quat_end(2) - quat_end(3)*quat_end(4)),      -quat_end(1)^2 + quat_end(2)^2 - quat_end(3)^2 + quat_end(4)^2,                2*(quat_end(2)*quat_end(3) + quat_end(1)*quat_end(4)) ;
-        %      2*(quat_end(1)*quat_end(3) + quat_end(2)*quat_end(4)),               2*(quat_end(2)*quat_end(3) - quat_end(1)*quat_end(4)),       -quat_end(1)^2 - quat_end(2)^2 + quat_end(3)^2 + quat_end(4)^2];
-        % disp(A_end-A_init)
+        % a = rad2deg(a);
+        % b = rad2deg(b);
+        % c = rad2deg(c);
+        % 
+        % figure()
+        % subplot(3,1,1)
+        % hold on
+        % plot(zvk.time,a)
+        % yline(133)
+        % subplot(3,1,2)
+        % hold on
+        % plot(zvk.time,b)
+        % yline(85)
+        % subplot(3,1,3)
+        % hold on
+        % plot(zvk.time,c)
+        % yline(0)
         
         
+        
+                
+        
+        acc_m = sensorTot.imu.accelerometer_measures;
+        gyro_m = sensorTot.imu.gyro_measures;
+        mag_m = sensorTot.imu.magnetometer_measures;
+
+        cov(acc_m)
+        cov(gyro_m)
+        cov(mag_m)
+
+
+        figure()
+        hold on
+        title('Accelerometro misure')
+        plot(acc_m(:,1))
+        plot(acc_m(:,2))
+        plot(acc_m(:,3))
+        legend('x','y','z')
+
         pause(1e6)
+
 
     end
 

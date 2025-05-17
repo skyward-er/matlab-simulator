@@ -5,10 +5,10 @@ function [sensorData, sensorTot] = run_ZVK(Tf, sensorData, sensorTot, settings, 
 t_zvk = sensorTot.zvk.time(end):1/settings.frequencies.ZVKFrequency:Tf;
 
 % preallocate update
-x =   zeros(length(t_zvk),16);        % Pre-allocation of pos, vel, quaternion and biases     [4quat 3v 3r 3beta_a 3beta_g]
+x =   zeros(length(t_zvk),9);        % Pre-allocation of pos, vel, quaternion and biases     [3v 3beta_a 3beta_g]
 % note that covariance has one state less because error state has  3 small
 % deviation angles instead of quaternions
-P =   zeros(15,15,length(t_zvk));
+P =   zeros(9,9,length(t_zvk));
 
 
 % first update
@@ -34,14 +34,14 @@ if length(t_zvk) > 1
         a_b_m = sensorTot.imu.accelerometer_measures(index_imu,:);
         om_b_m = sensorTot.imu.gyro_measures(index_imu,:);
 
-        [x(ii,:), P(:,:,ii)] = predictorZVK( x(ii-1,:), P(:,:,ii-1), a_b_m, om_b_m, dt_k, settings.zvk);
+        [x(ii,:), P(:,:,ii)] = predictorZVK( x(ii-1,:), P(:,:,ii-1), sensorTot.zvk.quat, a_b_m, om_b_m, dt_k, settings.zvk);
 
 
         
         mag_meas = sensorTot.imu.magnetometer_measures(index_imu,:);
         
         %%% Correction
-        [x(ii,:), P(:,:,ii)] = correctorZVK( x(ii,:), P(:,:,ii), a_b_m, om_b_m, mag_meas, mag_NED, settings.zvk);
+        [x(ii,:), P(:,:,ii)] = correctorZVK( x(ii,:), P(:,:,ii), sensorTot.zvk.quat, a_b_m, om_b_m, mag_meas, mag_NED, settings.zvk);
 
        
         
@@ -51,8 +51,8 @@ if length(t_zvk) > 1
     sensorData.zvk.P = P;
     sensorData.zvk.time = t_zvk;
 
-    sensorTot.zvk.P(1:15, 1:15, sensorTot.zvk.n_old:sensorTot.zvk.n_old + size(sensorData.zvk.P,3)-2 )   = sensorData.zvk.P(:,:,2:end);
-    sensorTot.zvk.states(sensorTot.zvk.n_old:sensorTot.zvk.n_old + size(sensorData.zvk.states,1)-2, 1:16 )  = sensorData.zvk.states(2:end,:); % ZVK output
+    sensorTot.zvk.P(1:9, 1:9, sensorTot.zvk.n_old:sensorTot.zvk.n_old + size(sensorData.zvk.P,3)-2 )   = sensorData.zvk.P(:,:,2:end);
+    sensorTot.zvk.states(sensorTot.zvk.n_old:sensorTot.zvk.n_old + size(sensorData.zvk.states,1)-2, 1:9 )  = sensorData.zvk.states(2:end,:); % ZVK output
     sensorTot.zvk.time( sensorTot.zvk.n_old : sensorTot.zvk.n_old+size(sensorData.zvk.states,1)-2 )    = sensorData.zvk.time(2:end); % ZVK time output
     % sensorTot.zvk.time(:)
     sensorTot.zvk.n_old = sensorTot.zvk.n_old + size(sensorData.zvk.states,1)-1;
