@@ -1,35 +1,39 @@
-function [x,P] = predictor_zvk(x_,P_,dt,Q)
-v_  = x_(1:3)';
-a_  = x_(4:6)';
-bias_a_ = x_(7:9)';
+function [x,P] = predictor_zvk(x_old,P_old,dt,Q)
 
-theta_  = x_(10:12)';
-om_ = x_(13:15)';
-bias_g_ = x_(16:18)';
-
-
-%%% Prediciton accelerometer
-v  =  v_ + dt * a_;
-a  =  a_;
-bias_a =  bias_a_;
-
-%%% Prediction gyro
-theta  =  theta_ + dt * om_;
-om =  om_;
-bias_g =  bias_g_;
-
-
-% Assemble predicted global state
-x = [v; a; bias_a; theta; om; bias_g]';
-
-
-%%% Covariance prediction
-A = eye(18);
-A(1:3, 4:6) = dt*eye(3);% v / acc
-A(10:12, 13:15) = dt*eye(3);% theta / om
-
-
-P = A * P_ * A' + Q;
+    v_old               = x_old(1:3)';
+    a_old               = x_old(4:6)';
+    bias_a_main_old     = x_old(7:9)';
+    bias_a_payload_old  = x_old(10:12)';
+    
+    theta_old           = x_old(13:15)';
+    om_old              = x_old(16:18)';
+    bias_g_main_old     = x_old(19:21)';
+    bias_g_payload_old  = x_old(22:24)';
+    
+    
+    %%% Prediciton accelerometer
+    v_pred              = v_old + dt * a_old;
+    a_pred              = a_old;
+    bias_a_main_pred    = bias_a_main_old;
+    bias_a_payload_pred = bias_a_payload_old;
+    
+    %%% Prediction gyro
+    theta_pred          = theta_old + dt * om_old;
+    om_pred             = om_old;
+    bias_g_main_pred    = bias_g_main_old;
+    bias_g_payload_pred = bias_g_payload_old;
+    
+    
+    % Assemble predicted global state
+    x = [v_pred; a_pred; bias_a_main_pred; bias_a_payload_pred; theta_pred; om_pred; bias_g_main_pred; bias_g_payload_pred]';
+    
+    %%% Covariance prediction
+    A = eye(24);
+    A(1:3, 4:6) = dt*eye(3);        % v / acc
+    A(13:15, 16:18) = dt*eye(3);    % theta / om
+    
+    
+    P = A * P_old * A' + Q;
 
 end
 
