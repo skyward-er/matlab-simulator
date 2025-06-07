@@ -1,23 +1,29 @@
+%% ZVK simulator
+% Author: Guglielmo Gualdana
+% Co-Author: Alessandro Cartocci
+% Skyward Experimental Rocketry | GNC Dept | gnc??@kywarder.eu
+% email: guglielmo.gualdana@skywarder.eu, alessandro.cartocci@skywarder.eu
+% Release date: tbd
+%
+
 %% Load variables
 clear variables;
 close all;
 clc;
 
-
-addpath(genpath("logs"))
-
-
 IMU_main = table2array(readtable("main_Boardcore_IMUDataEUROC")); % [tempo*e-6 acc_x acc_y acc_z w_x,w_y,w_z]
 
-dt = mean(diff(IMU_main(:,1)));
+dt = mean(diff(IMU_main(:,1))); %Only for plotting
 
-idxend_main = find(IMU_main(:,2)>20,1,'first');
-idxend_main = round(idxend_main - 5e6/dt);
+% Last usefull Index estimation
+idx_end_main = find(IMU_main(:,2)>20,1,'first');
+idx_end_main = round(idx_end_main - 5e6/dt);
 
-time_acc_main    = IMU_main(1:idxend_main,1)*1e-6;
-acc_main         = IMU_main(1:idxend_main,2:4);
-time_gyr_main    = IMU_main(1:idxend_main,5)*1e-6;
-gyr_main         = IMU_main(1:idxend_main,6:8);
+%Plotting misure IMU main
+time_acc_main    = IMU_main(1:idx_end_main,1)*1e-6;
+acc_main         = IMU_main(1:idx_end_main,2:4);
+time_gyr_main    = IMU_main(1:idx_end_main,5)*1e-6;
+gyr_main         = IMU_main(1:idx_end_main,6:8);
 
 figure()
 subplot(2,1,1)
@@ -44,15 +50,17 @@ legend
 IMU_payload = table2array(readtable("payload_Boardcore_IMUDataEUROC")); % [tempo*e-6 acc_x acc_y acc_z w_x,w_y,w_z]
 
 
-dt = mean(diff(IMU_payload(:,1)));
+dt = mean(diff(IMU_payload(:,1))); %Only for plotting
 
-idxend_payload = find(IMU_payload(:,2)>20,1,'first');
-idxend_payload = round(idxend_payload - 5e6/dt);
+% Last usefull Index estimation
+idx_end_payload = find(IMU_payload(:,2)>20,1,'first');
+idx_end_payload = round(idx_end_payload - 5e6/dt);
 
-time_acc_payload    = IMU_payload(1:idxend_payload,1)*1e-6;
-acc_payload         = IMU_payload(1:idxend_payload,2:4);
-time_gyr_payload    = IMU_payload(1:idxend_payload,5)*1e-6;
-gyr_payload         = IMU_payload(1:idxend_payload,6:8);
+% Plotting IMU Payload
+time_acc_payload    = IMU_payload(1:idx_end_payload,1)*1e-6;
+acc_payload         = IMU_payload(1:idx_end_payload,2:4);
+time_gyr_payload    = IMU_payload(1:idx_end_payload,5)*1e-6;
+gyr_payload         = IMU_payload(1:idx_end_payload,6:8);
 
 figure()
 subplot(2,1,1)
@@ -73,20 +81,23 @@ plot(time_gyr_payload, gyr_payload(:,2), 'DisplayName','y');
 plot(time_gyr_payload, gyr_payload(:,3), 'DisplayName','z');
 legend
 
-
+% % Imput data's CSV
+% input_ZVK_main = array2table(IMU_main(:,1:8),    'VariableNames', {'time_acc_main', 'acc_x_main', 'acc_y_main', 'acc_z_main', 'time_gyro_main', 'gyro_x_main', 'gyro_y_main', 'gyro_z_main'});
+% input_ZVK_payload = array2table(IMU_payload(:,1:8), 'VariableNames', {'time_acc_payload', 'acc_x_payload', 'acc_y_payload', 'acc_z_payload', 'time_gyro_payload', 'gyro_x_payload', 'gyro_y_payload', 'gyro_z_payload'});
+% writetable(input_ZVK_main, 'input_ZVK_main.csv');
+% writetable(input_ZVK_payload, 'input_ZVK_payload.csv');
 
 
 %% Initial params
-x0 = zeros(1,24);
-% vel, acc, bias_acc_main, bias_acc_payload, theta, omega, bias_gyro_main, bias_gyro_payoad
+x0 = zeros(1,24); % vel, acc, bias_acc_main, bias_acc_payload, theta, omega, bias_gyro_main, bias_gyro_payoad
 
 % Estimated noise standard deviations
-sigma_gyro         = 5e-3;     % [rad/s]   gyroscope std
+sigma_gyro         = 5e-3;     % [rad/s]   gyroscope std(standard deviation)
 sigma_beta_g       = 1e-5;     % [rad/s]   gyroscope bias std
 sigma_acc          = 4e-2;     % [m/s^2]   accelerometer std
 sigma_beta_acc     = 1e-5;     % [m/s^2]   accelerometer bias std
 
-Q = diag([
+zvk.Q = diag([
             (1e-6)^2                            * ones(3,1);    % vel
             (1e-6)^2                            * ones(3,1);    % acceleration
             sigma_beta_acc^2                    * ones(3,1);    % bias accelerometer
@@ -112,19 +123,22 @@ P0 = diag([
 
 
 % Measurement noise covariance matrix R
-R_fake      = diag([
+zvk.R_fake      = diag([
                 (1e-6)^2                        * ones(3,1);        % FAKE zero velocity [m/s]
                 (1e-6)^2                        * ones(3,1);        % FAKE angle [rad]
             ]);
-R_acc       = diag( sigma_acc^2 * ones(3,1));   % accelerometer [m/s^2]
-R_gyro      = diag(sigma_gyro^2 * ones(3,1));   % angular velocity [rad/s]
+zvk.R_acc       = diag( sigma_acc^2 * ones(3,1));   % accelerometer [m/s^2]
+zvk.R_gyro      = diag(sigma_gyro^2 * ones(3,1));   % angular velocity [rad/s]
 
-
+% zvk.quaternions 
 Q0 = angle2quat(133*pi/180, 85*pi/180, 0*pi/180, 'ZYX')';
+
+% % zvk.quaternion error simulations
 % error = [1 0.5*deg2rad([0 0 0]) ];
-% Q0 = quatmultiply(Q0', error);
+% Q0 = zvk.quatmultiply(Q0', error);
 %Q0 = Q0';
-quat = [Q0(2:4); Q0(1)];
+
+zvk.quat = [Q0(2:4); Q0(1)];
 
 % load("Ksave");
 
@@ -132,15 +146,17 @@ quat = [Q0(2:4); Q0(1)];
 x = x0;
 P = P0;
 
-%% SIMU_mainlation
+%time vector generation
+t_IMU_main      = IMU_main(1:idx_end_main,1);
+t_IMU_payload   = IMU_payload(1:idx_end_payload,1);
 
-t_IMU_main      = IMU_main(1:idxend_main,1);
-t_IMU_payload   = IMU_payload(1:idxend_payload,1);
+% Start index
 ii = 2;
 
 ZVK_freq = 50; %[Hz]
 ZVK_sampling_time = 1/ZVK_freq*1e6;
 
+% Last sample initializzation
 last_t = t_IMU_main(1);
 
 t_start = t_IMU_main(1);
@@ -148,45 +164,49 @@ t_end   = t_IMU_main(end);
 
 ZVK_time = [];
 
+%% SIMULATION
+tic
+
 for t = t_start:ZVK_sampling_time:t_end
-
-    %%% Prediction
+    
     dt = (t-last_t)*1e-6;
-    [x(ii,:), P(:,:,ii)] = predictor_zvk( x(ii-1,:), P(:,:,ii-1), dt, Q);
 
-
-    %%% Correction
-    % FAKE
-    [x(ii,[1:3,13:15]), P([1:3,13:15],[1:3,13:15],ii)] = corrector_zvk( x(ii,[1:3,13:15]), P([1:3,13:15],[1:3,13:15],ii), quat, R_fake);
-
-
-    % MAIN
+    % MAIN measures
     index_imu = sum(t >= t_IMU_main);
     IMU_main_measurment = IMU_main(index_imu,[2:4 6:8]);
-    acc_meas = IMU_main_measurment(1:3);
-    omeg_meas = IMU_main_measurment(4:6);
+    acc_meas_m = IMU_main_measurment(1:3);
+    omeg_meas_m = IMU_main_measurment(4:6);
     
-    [x(ii,[4:6,7:9]), P([4:6,7:9],[4:6,7:9],ii)]                = corrector_zvk_acc(  x(ii,[4:6,7:9]),      P([4:6,7:9],[4:6,7:9],ii),          quat, acc_meas, R_acc);
-    [x(ii,[16:18,19:21]), P([16:18,19:21],[16:18,19:21],ii)]    = corrector_zvk_gyro( x(ii,[16:18,19:21]),  P([16:18,19:21],[16:18,19:21],ii),  quat, omeg_meas, R_gyro);
-    
-    % PAYLOAD
+    % PAYLOAD measures
     index_imu = sum(t >= t_IMU_payload);
     IMU_payload_measurment = IMU_payload(index_imu,[2:4 6:8]);
-    acc_meas = IMU_payload_measurment(1:3);
-    omeg_meas = IMU_payload_measurment(4:6);
+    acc_meas_p = IMU_payload_measurment(1:3);
+    omeg_meas_p = IMU_payload_measurment(4:6);
 
-    [x(ii,[4:6,10:12]), P([4:6,10:12],[4:6,10:12],ii)]          = corrector_zvk_acc(  x(ii,[4:6,10:12]),    P([4:6,10:12],[4:6,10:12],ii),      quat, acc_meas, R_acc);
-    [x(ii,[16:18,22:24]), P([16:18,22:24],[16:18,22:24],ii)]    = corrector_zvk_gyro( x(ii,[16:18,22:24]),  P([16:18,22:24],[16:18,22:24],ii),  quat, omeg_meas, R_gyro);
+    %%% ZVK(PALLE)
+    [x(ii,:), P(:,:,ii)] = run_zvk(x(ii-1,:), P(:,:,ii-1), dt, acc_meas_m, omeg_meas_m, acc_meas_p, omeg_meas_p, zvk);
     
-
     ii = ii+1;
     last_t = t;
 
     ZVK_time = [ZVK_time, t];
+    disp(t/t_end*100)
 end
-x = x(2:end,:);
+x = x(2:end,:); %only for plotting reasons
 
+toc
 
+%% Output data's CSV
+output_ZVK = array2table([ZVK_time, x], 'VariableNames', {'ZVK timestamp', ...
+                         'vel_x', 'vel_y', 'vel_z', ...
+                         'acc_x', 'acc_y', 'acc_z', ...
+                         'bias_acc_main_x', 'bias_acc_main_y', 'bias_acc_main_z', ...
+                         'bias_acc_payload_x', 'bias_acc_payload_y', 'bias_acc_payload_z', ...
+                         'theta_x', 'theta_y', 'theta_z', ...
+                         'angular_vel_x', 'angular_vel_y', 'angular_vel_z', ...
+                         'bias_gyro_main_x', 'bias_gyro_main_y', 'bias_gyro_main_z', ...
+                         'bias_gyro_payload_x', 'bias_gyro_payload_y', 'bias_gyro_payload_z'});
+writetable(output_ZVK, 'output_ZVK.csv');
 
 %%
 % clearvars
@@ -388,11 +408,3 @@ figure(); title('Bias Gyro payload')
 %         legend('omega z')
 %         xlabel('time [s]'); ylabel('rad/s');grid on
 
-
-
-
-
-
-% %%
-% Ksave = K(:,:,end);
-% save("Ksave")
