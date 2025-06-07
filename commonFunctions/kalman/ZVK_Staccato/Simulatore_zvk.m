@@ -120,7 +120,7 @@ P0 = diag([
         (1e-3)^2    * ones(3,1)     % gyro bias main [rad/s]
         (1e-3)^2    * ones(3,1)     % gyro bias payload [rad/s]
         ]);
-
+            
 
 % Measurement noise covariance matrix R
 zvk.R_fake      = diag([

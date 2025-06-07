@@ -1,4 +1,4 @@
-function [x,P,K] = corrector_zvk_gyro(x,P,quat,om_meas,R)
+function [x,P,K] = corrector_zvk_gyro(x,P,om_meas,R)
 
     % Author: Guglielmo Gualdana
     % Co-Author: Alessandro Cartocci
@@ -19,8 +19,6 @@ function [x,P,K] = corrector_zvk_gyro(x,P,quat,om_meas,R)
     
               -P_prev:    6x6 MATRIX OF PREVIOUS COVARIANCE OF STATE
 
-              -quat:      QUATERNION IN RAMP; 1x4; [q;q0] format
-
               -om_meas:   MEASUREMENT OF ANGULAR VELOCITY AT TIME t 3x1
              
               -R:         COVARIANCE MATRIX OF MEASUREMENTS NOISE 6x6
@@ -34,16 +32,7 @@ function [x,P,K] = corrector_zvk_gyro(x,P,quat,om_meas,R)
     %}
     om      = x(1:3)';
     bias_g  = x(4:6)';
-    
-
-    A   = [quat(1)^2 - quat(2)^2 - quat(3)^2 + quat(4)^2,           2*(quat(1)*quat(2) + quat(3)*quat(4)),                 2*(quat(1)*quat(3) - quat(2)*quat(4));
-           2*(quat(1)*quat(2) - quat(3)*quat(4)),      -quat(1)^2 + quat(2)^2 - quat(3)^2 + quat(4)^2,                2*(quat(2)*quat(3) + quat(1)*quat(4)) ;
-           2*(quat(1)*quat(3) + quat(2)*quat(4)),               2*(quat(2)*quat(3) - quat(1)*quat(4)),       -quat(1)^2 - quat(2)^2 + quat(3)^2 + quat(4)^2];
-                                                %Rotation of the acceleration 
-                                                %from body axis to inertial frame 
-                                                %to use the inertial equations of motion                                                
-
-    
+                                         
     % Measurment matrix
     H =   [eye(3)   eye(3)];
     

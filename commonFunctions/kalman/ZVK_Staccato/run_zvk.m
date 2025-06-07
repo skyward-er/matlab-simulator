@@ -61,11 +61,11 @@ For more information check the zero velocity kalman report
 
     % MAIN
     [x([4:6,7:9]), P([4:6,7:9],[4:6,7:9])]                = corrector_zvk_acc( x([4:6,7:9]),      P([4:6,7:9],[4:6,7:9]),          zvk.quat, acc_meas_m, zvk.R_acc);
-    [x([16:18,19:21]), P([16:18,19:21],[16:18,19:21])]    = corrector_zvk_gyro(x([16:18,19:21]),  P([16:18,19:21],[16:18,19:21]),  zvk.quat, omeg_meas_m, zvk.R_gyro);
+    [x([16:18,19:21]), P([16:18,19:21],[16:18,19:21])]    = corrector_zvk_gyro(x([16:18,19:21]),  P([16:18,19:21],[16:18,19:21]), omeg_meas_m, zvk.R_gyro);
 
     % PAYLOAD
     [x([4:6,10:12]), P([4:6,10:12],[4:6,10:12])]          = corrector_zvk_acc( x([4:6,10:12]),    P([4:6,10:12],[4:6,10:12]),      zvk.quat, acc_meas_p, zvk.R_acc);
-    [x([16:18,22:24]), P([16:18,22:24],[16:18,22:24])]    = corrector_zvk_gyro(x([16:18,22:24]),  P([16:18,22:24],[16:18,22:24]),  zvk.quat, omeg_meas_p, zvk.R_gyro);
+    [x([16:18,22:24]), P([16:18,22:24],[16:18,22:24])]    = corrector_zvk_gyro(x([16:18,22:24]),  P([16:18,22:24],[16:18,22:24]), omeg_meas_p, zvk.R_gyro);
     
 end
 
