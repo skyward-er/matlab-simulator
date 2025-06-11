@@ -1,4 +1,4 @@
-function [x,P, y_res] = correctionPitot_pressureRatio(x_pred,P_pred,Pd,P,sigma_p,omega)
+function [x,P,y_res,NIS] = correctionPitot_pressureRatio(x_pred,P_pred,Pd,P,sigma_p,omega)
 
 threshold      =   10e-11;
 x = x_pred;
@@ -41,3 +41,8 @@ else
 end
 
 y_res = x(6);
+
+NIS = y_res'/S*y_res;
+
+end
+

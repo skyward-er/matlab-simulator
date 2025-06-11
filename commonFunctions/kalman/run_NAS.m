@@ -158,10 +158,11 @@ if length(t_nas) > 1
 
             index_GPS   =  sum(t_nas(ii) >= t_gpstemp);
             if index_GPS~=sensorTot.gps.lastindex
-                [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionGPS(x_lin(ii,:),...
+                [x_lin(ii,:),P_lin(:,:,ii),~,NIS_GPS]     = correctionGPS(x_lin(ii,:),...
                     P_lin(:,:,ii),sensorTot.gps.position_measures(index_GPS,1:2),...
                     sensorTot.gps.velocity_measures(index_GPS,1:2),nas.sigma_GPS,...
                     fix, environment.lat0, environment.lon0,nas.GPS.a,nas.GPS.b);
+                sensorTot.nas.NIS_GPS{index_GPS} = NIS_GPS;
             end
             sensorTot.gps.lastindex = index_GPS;
         end
@@ -170,7 +171,8 @@ if length(t_nas) > 1
         % barometer
 
         index_bar   =  sum(t_nas(ii) >= t_barotemp);
-        [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometer(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar),nas.sigma_baro,nas.baro,environment.z0);
+        [x_lin(ii,:),P_lin(:,:,ii),~,NIS_baro]     = correctionBarometer(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar),nas.sigma_baro,nas.baro,environment.z0);
+        sensorTot.nas.NIS_baro{index_bar} = NIS_baro;
 
         % magnetometer
 
@@ -189,7 +191,8 @@ if length(t_nas) > 1
                     timestampPitotCorrection = t_nas;
                     % [x_lin(ii,:),P_lin(4:6,4:6,ii),~] = correctionPitot_pressures(x_lin(ii,:),P_lin(4:6,4:6,ii),sensorTot.pitot.total_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot,xq(ii,1:4),nas.Mach_max);
                     % [x_lin(ii,:),P_lin(4:6,4:6,ii),~] = correctionPitot_airspeed(x_lin(ii,:),P_lin(4:6,4:6,ii),sensorTot.pitot.airspeed(index_pit,:),nas.sigma_pitot2,settings.OMEGA);
-                    [x_lin(ii,:),P_lin(:,:,ii),~] = correctionPitot_pressureRatio(x_lin(ii,:), P_lin(1:6,1:6),sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot2,environment.omega);
+                    [x_lin(ii,:),P_lin(:,:,ii),~,NIS_pitot] = correctionPitot_pressureRatio(x_lin(ii,:), P_lin(1:6,1:6),sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot2,environment.omega);
+                    sensorTot.nas.NIS_pitot{index_pit} = NIS_pitot;
                 end
             end
             sensorTot.pitot.lastindex = index_pit;
@@ -226,5 +229,11 @@ if length(t_nas) > 1
     sensorTot.nas.timestampPitotCorrection(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.timestampPitotCorrection(2:end); % NAS time output
     sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1)-1;
 
+    try
+        sizeP = size(P_c,1);
+        sensorTot.nas.P(1:sizeP,1:sizeP,size(sensorTot.nas.P,3)+1) = P_c(:,:,1);
+    catch
+        sensorTot.nas.P = P_c;
+    end
 end
 end

@@ -1,4 +1,4 @@
-function [x,P,y_res] = correctionGPS(x_pred,P_pred,pGPS,vGPS,sigma_GPS, fix, lat0, lon0, a, b)
+function [x,P,y_res,NIS] = correctionGPS(x_pred,P_pred,pGPS,vGPS,sigma_GPS, fix, lat0, lon0, a, b)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
@@ -94,6 +94,8 @@ end
 z_corr         =   [x(1);x(2);x(4);x(5)];                %Corrected output expectation
 
 y_res          =    [pGPS';vGPS'] - z_corr;
-end
 
+NIS = y_res'/S*y_res;
+
+end
 

@@ -1,4 +1,4 @@
-function [x,P,y_res] = correctionBarometer(x_pred,P_pred,p_meas,sigma_baro, params, refAltitude)
+function [x,P,y_res,NIS] = correctionBarometer(x_pred,P_pred,p_meas,sigma_baro, params, refAltitude)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
@@ -79,5 +79,7 @@ alt_new = -x_pred(3);
 p_corr         =   computeAtmosphericData   (alt_new);                          %Corrected output expectation
 
 y_res          =   p_meas - p_corr;
+
+NIS = y_res'/S*y_res;
 
 end

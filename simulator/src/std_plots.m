@@ -386,6 +386,52 @@ legend
 xlabel("Time [s]"), ylabel("-Altitude AGL [m]")
 drawnow
 
+% NEES and NIS:
+new_real = interp1(simOutput.t, simOutput.Y(:,[1:6 10:13]), simOutput.sensors.nas.time, 'linear');
+new_V_ned = interp1(simOutput.t, v_ned, simOutput.sensors.nas.time, 'linear');
+new_real(:,4:6) = new_V_ned;
+
+new_NAS = simOutput.sensors.nas.states(:,1:10);
+new_NAS(:,3) = new_NAS(:,3) + environment.z0;
+
+NAS_error = new_real(:,1:6) - new_NAS(:,1:6);
+NAS_P = simOutput.sensors.nas.P(1:6,1:6,:);
+
+NEES.x = zeros(1,length(NAS_error));
+NEES.v = zeros(1,length(NAS_error));
+for ii = 1:length(NAS_error)
+    NEES.x(ii) = NAS_error(ii,1:3)/NAS_P(1:3,1:3,ii)*NAS_error(ii,1:3)';
+    NEES.v(ii) = NAS_error(ii,4:6)/NAS_P(4:6,4:6,ii)*NAS_error(ii,4:6)';
+end
+
+figures.NAS_NEES = figure('Name', 'NAS: NEES');
+title("NAS: NEES")
+hold on, grid on
+plot(simOutput.sensors.nas.time,NEES.x, DisplayName="Position")
+plot(simOutput.sensors.nas.time,NEES.v, DisplayName="Velocity")
+xlabel("Time [s]"), ylabel("Value [-]")
+legend(Location="best")
+
+% NIS
+NIS_GPS = cell2mat(simOutput.sensors.nas.NIS_GPS);
+NIS_baro = cell2mat(simOutput.sensors.nas.NIS_baro);
+NIS_pitot = cell2mat(simOutput.sensors.nas.NIS_pitot);
+
+figures.NAS_NIS = figure('Name', 'NAS: NIS');
+sgtitle("NAS: NIS")
+hold on, grid on
+subplot(3,1,1)
+plot(NIS_GPS, DisplayName="GPS")
+ylabel("Value [-]"), legend(Location="best")
+subplot(3,1,2)
+plot(NIS_baro, DisplayName="Baro")
+ylabel("Value [-]"), legend(Location="best")
+subplot(3,1,3)
+plot(NIS_pitot, DisplayName="Pitot")
+ylabel("Value [-]"), legend(Location="best")
+xlabel("Time [s]"), ylabel("Value [-]")
+
+
 %% euler angles
 eul_NAS = quat2eul(simOutput.sensors.nas.states(:,[10,7:9]));
 eul_NAS = flip(eul_NAS,2);
