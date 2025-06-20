@@ -17,7 +17,8 @@ end
 
 %% Navigation system (NAS)
 if settings.flagNAS && settings.dataNoise
-    [sensorData, sensorTot, settings.nas]   =  run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings, environment,stochNas);
+    % [sensorData, sensorTot, settings.nas]   =  run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings, environment);
+    [sensorData, sensorTot, settings.nas]   =  run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings, environment, stochNas);
 
 
 
@@ -97,10 +98,12 @@ if flagAeroBrakes && settings.flagNAS && settings.control && ...
         ap_ref_old = ap_ref_new;
         settings.quat = [sensorTot.nas.states(end, [10,7:9])];
         [~,settings.pitch,~] = quat2angle(settings.quat,'ZYX');
-        [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old,environment,dt,stochABK_alg,stochABK_curve); % "simulated" airbrakes because otherwise are run by the HIL.
+        [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old,environment,dt,int_error,stochABK_alg,stochABK_curve); % "simulated" airbrakes because otherwise are run by the HIL.
+        % [ap_ref_new,contSettings] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old,environment,int_error,dt); % "simulated" airbrakes because otherwise are run by the HIL.
     end
 else
     ap_ref_new = 0;
+    int_error = 0;
 end
 
 

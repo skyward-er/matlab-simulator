@@ -18,7 +18,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %% Number of complete run
 
-n_run = 1:7;
+n_run = 12:22;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -142,7 +142,7 @@ for idx_scheduler = n_run
             settings_mont.PHI = stoch.PHI_rail(i);
 
             settings_mont.stochNas = stoch.NAS(i);
-            settings_mont.stochABK_curve = stoch.ABK_curve(i);
+            settings_mont.stochABK_curve = stoch.ABK_curve(i,:);
             settings_mont.stochABK_alg = stoch.ABK_alg(i);
     
             if isfield(stoch, 'State')
@@ -167,6 +167,7 @@ for idx_scheduler = n_run
             [simOutput] = std_run(settings,contSettings,rocket_vec{i},environment,mission,settings_mont);
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STD_RUN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             save_thrust{i} = simOutput;
+            save_thrust{i}.ARB.K_vals = stoch.ABK_curve(i,:);
     
         end
     

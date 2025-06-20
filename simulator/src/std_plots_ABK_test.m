@@ -1,14 +1,14 @@
-function std_plots_MEA_test(simOutput, settings,contSettings,mission,rocket,environment)
+function std_plots_ABK_test(simOutput, settings,contSettings,mission,rocket,environment)
 
 if ~exist("report_images\"+mission.name,"dir")
     mkdir("report_images\"+mission.name)
 end
 
 %% post process data
-eul = quat2eul(simOutput.Y(:,10:13));
-eul = flip(eul,2);
-eul = unwrap(eul);
-eul = rad2deg(eul);
+% eul = quat2eul(simOutput.Y(:,10:13));
+% eul = flip(eul,2);
+% eul = unwrap(eul);
+% eul = rad2deg(eul);
 
 % ODE velocity rotated in ned frame
 if strcmp(settings.scenario, "controlled ascent")
@@ -109,6 +109,50 @@ plot( -simOutput.Y(:, 3), simOutput.Y(:, 14),'g','DisplayName','arb')
 legend
 xlabel("Altitude AGL [m]")
 drawnow
+
+%%
+
+ref = 0.2;
+% 
+% figure, hold on, grid on, title("ABK test")
+% plot(contSettings.reference.Z, contSettings.reference.Vz(:,1),'r','DisplayName','ref min')
+% plot(contSettings.reference.Z, contSettings.reference.Vz(:,2),'k','DisplayName','ref max')
+% new_val = contSettings.reference.Vz(:,1) + (contSettings.reference.Vz(:,2)-contSettings.reference.Vz(:,1))*ref;
+% plot(contSettings.reference.Z, new_val,'k','DisplayName',strcat("ref: ",num2str(ref)))
+% legend(Location="northeast")
+
+%%
+
+% new_Z = linspace(contSettings.reference.Z(1),contSettings.reference.Z(end),length(simOutput.Y(:, 3)));
+% new_Vz1 = interp1(contSettings.reference.Z, contSettings.reference.Vz(:,1), new_Z);
+% new_Vz2 = interp1(contSettings.reference.Z, contSettings.reference.Vz(:,2), new_Z);
+% new_val = new_Vz1 + (new_Vz2-new_Vz1)*ref;
+% figure, hold on, grid on, title("ABK test")
+% plot(new_Z, new_Vz1,'r','DisplayName','ref min')
+% plot(new_Z, new_Vz2,'k','DisplayName','ref max')
+% plot( -simOutput.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
+% plot(new_Z, new_val,'k','DisplayName',strcat("ref: ",num2str(ref)))
+
+%%
+
+% new_Z = linspace(contSettings.reference.Z(1),contSettings.reference.Z(end),length(simOutput.Y(:, 3)));
+% new_Z = linspace(simOutput.Y(1, 3),simOutput.Y(end, 3),length(simOutput.Y(:, 3)));
+new_Vz1 = interp1(contSettings.reference.Z, contSettings.reference.Vz(:,1), -simOutput.Y(:, 3));
+new_Vz2 = interp1(contSettings.reference.Z, contSettings.reference.Vz(:,2), -simOutput.Y(:, 3));
+new_val = new_Vz1 + (new_Vz2-new_Vz1)*ref;
+
+figure, hold on, grid on, title("ABK test")
+plot(-simOutput.Y(:, 3), new_Vz1-new_val,'r','DisplayName','ref min')
+plot(-simOutput.Y(:, 3), new_Vz2-new_val,'k','DisplayName','ref max')
+plot( -simOutput.Y(:, 3), -v_ned(:,3)-new_val,'b','DisplayName','Traj')
+% plot( -simOutput.sensors.nas.states(:,3)-environment.z0,  -simOutput.sensors.nas.states(:,6)-new_val','m--','DisplayName','NAS')
+
+yyaxis right
+plot( -simOutput.Y(:, 3), simOutput.Y(:, 14),'g','DisplayName','arb')
+
+
+
+%%
 
 % %% quaternions
 % figures.EulerAngles = figure('Name','Euler angles');

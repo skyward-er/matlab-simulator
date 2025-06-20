@@ -1,4 +1,5 @@
-function [alpha0,contSettings] = control_Interp_PID(z,Vz,settings,contSettings,alpha0_old,dt,stochABK_alg,stochABK_curve)
+% function [alpha0,contSettings] = control_Interp_PID(z,Vz,settings,contSettings,alpha0_old,int_error,dt)
+function [alpha0,contSettings] = control_Interp_PID(z,Vz,settings,contSettings,alpha0_old,dt,int_error,stochABK_alg,stochABK_curve)
 
 % HELP
 %
@@ -68,11 +69,21 @@ else
             % elseif percentage > 1
             %     percentage = 1;
             % end
+            % stochABK_alg = 2;
             if stochABK_alg == 2
-                ref = stochABK_curve;
+                ref = 0.2;
                 error = current_position - ref;
                 prev_error = alpha0_old - ref;
-                percentage = 1.2*error + 0.01*prev_error/dt + ref;
+                int_error = int_error + error*dt;
+
+                kp = stochABK_curve(1);
+                ki = stochABK_curve(2);
+                kd = stochABK_curve(3);
+                % kp = 3;
+                % ki = 500;
+                % kd = 0.008;
+
+                percentage = kp*error + kd*prev_error/dt + ki*int_error + ref;
                 if percentage < 0
                     percentage = 0;
                 elseif percentage > 1
