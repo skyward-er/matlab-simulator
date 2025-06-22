@@ -1,4 +1,4 @@
-function [x,P,y_res] = correctionPitot_new(x_pred,P_pred,p_dyn,p_stat,sigmma_ps, sigma_pd, params)
+function [x,P,y_res] = correctionPitot(x_pred,P_pred,p_dyn,p_stat,sigmma_ps, sigma_pd, params)
 
 
 %-----------DESCRIPTION OF FUNCTION:------------------
@@ -17,7 +17,7 @@ function [x,P,y_res] = correctionPitot_new(x_pred,P_pred,p_dyn,p_stat,sigmma_ps,
 %           -x_pred:    1x13 VECTOR OF PREDICTED VALUES --> STATES OF INTEREST ARE:
 %                      [d, v_n, v_e, v_d, q_x, q_y, q_z, q_w]     
 %
-%           -P_pred:    13x13 MATRIX OF PREDICTED COVARIANCE OF STATE
+%           -P_pred:    12x12 MATRIX OF PREDICTED COVARIANCE OF STATE
 %           -p_dyn:     MEASUREMENT OF DYNAMIC PRESSURE FROM PITOT AT TIME T --> 1x1
 %           -p_stat:    MEASUREMENT OF STATIC PRESSURE FROM PITOT AT TIME T --> 1x1
 %           -sigmma_ps: VARIANCE OF THE STATIC PRESSURE
@@ -27,7 +27,7 @@ function [x,P,y_res] = correctionPitot_new(x_pred,P_pred,p_dyn,p_stat,sigmma_ps,
 %       -OUTPUTS:
 %           -x_es:      STATE ESTIMATION CORRECTED AT T. VECTOR WITH 13 COLUMNS
 %           -P:         MATRIX OF VARIANCE OF THE STATE AT T, CORRECTED--> IS A
-%                       13 x 13 matrix
+%                       12 x 12 matrix
 %           -y_res:     VECTOR OF DIFFERENCES BETWEEN THE CORRECTED ESTIMATION
 %                       OF THE OUTPUT AND THE MEASSURE; ONLY FOR CHECKING
 %                       --> 1x1
@@ -51,19 +51,24 @@ v = x_pred(4:6)'; % Velocity Vector NED
 
 % Temperature and Temperature Derivative Term
 T = t0 + lambda * d;
-dt = [0, 0, -lambda/(t0+lambda*d)^2, zeros(1, 10)]; % Derivative of 1/T wrt states
+dt = [0, 0, -lambda/(t0+lambda*d)^2, zeros(1, 9)]; % Derivative of 1/T wrt states
 
 % Static Presure Derivative
 dps = g0*p0/(R*t0) * (1+ lambda*d/t0)^(g0/(lambda*R)-1); % Derivative of Static Pressure wrt states
-dps = [zeros(1, 2), dps, zeros(1, 10)]; % Static Pressure Derivative Vector (First row of H matrix)
+dps = [zeros(1, 2), dps, zeros(1, 9)]; % Static Pressure Derivative Vector (First row of H matrix)
 
 % Inertial Velocity Derivative Terms
 rot = [qw^2+qx^2-qy^2-qz^2, 2*(qx*qy+qw*qz), 2*(qx*qz-qw*qy)]; % Rotation Vector from NED to Body Frame
-drotation = 2*[qx, -qy, -qz, qw; ...
+dquaternions = [qw, -qz, qy; ...
+       qz,  qw, -qx; ...
+      -qy,  qx,  qw; ...
+       -qx,  qy,   qw]; % Derivative of Quaternions wrt states (error angles)
+dorientation = [qx, -qy, -qz, qw; ...
        qy,  qx,  qw, qz; ...
-       qz,  -qw,  qx, -qy]; % Derivative of Rotation Vector from NED to Body Frame wrt states
+       qz,  -qw,  qx, -qy]; % Derivative of Rotation Vector from NED to Body Frame wrt quaternions
+drotation = dorientation*dquaternions;
 drotation = [zeros(3, 6), drotation, zeros(3, 3)]'; % Derivative of Rotation Vector from NED to Body Frame wrt states
-dstates = [zeros(3, 3), eye(3), zeros(3, 7)]; % Derivative of Velocity wrt states
+dstates = [zeros(3, 3), eye(3), zeros(3, 6)]; % Derivative of Velocity wrt states
 
 % Body Velocity Derivative Term
 vb = rot * v; % X Velocity in Body Frame
@@ -97,17 +102,16 @@ Ps_estimated = p0 * (1 + lambda * d / t0)^(g0 / (lambda * R_thermo)); % Estimate
 Pd_estimated = p_stat *((1+(gamma-1)/2 * vb(1)^2 / (gamma * R_thermo * T))^(gamma/(gamma-1))-1); % Estimated Dynamic Pressure
 
 if any(isnan(H))
-    H = zeros(2,13);
+    H = zeros(2,12);
 end
 S           =   H*P_pred*H'+R;                      %Matrix necessary for the correction factor
 
 if cond(S) > threshold
 
     e       =   [p_stat-Ps_estimated, p_dyn-Pd_estimated]'; %Measurement residual vector
-    K       =   P_pred*H'/S;                        %Kalman correction factor % K must be non dimensional
+    K       =  ( P_pred*H')'/S;                        %Kalman correction factor % K must be non dimensional
 
-    x       =   x_pred + (K*e)';
-(eye(13) - K*H)
+    x([3, 6])    =   x_pred([3, 6]) +(K*e)';
     P       =   (eye(13) - K*H)*P_pred;          %Corrector step of the state covariance
 else
     x       =   x_pred;
