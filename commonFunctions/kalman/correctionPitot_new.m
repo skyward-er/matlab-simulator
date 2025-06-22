@@ -43,7 +43,7 @@ qx = x_pred(7); % Quaternions
 qy = x_pred(8); % Quaternions
 qz = x_pred(9); % Quaternions
 qw = x_pred(10); % Quaternions
-v = x_pred(4:6); % Velocity Vector NED
+v = x_pred(4:6)'; % Velocity Vector NED
 
 
 % Temperature and Temperature Derivative Term
@@ -64,13 +64,13 @@ dstates = [zeros(3, 6), eye(3), zeros(3, 4)]; % Derivative of Velocity wrt state
 
 % Body Velocity Derivative Term
 vb = rot * v; % X Velocity in Body Frame
-dv = drotation*v + rot*dstates; % Derivative of Velocity in Body Frame wrt states
+dv = drotation*v + (rot*dstates)'; % Derivative of Velocity in Body Frame wrt states
 
 % Alpha Term Derivative
-alpha = (1 + (gamma-1)/2 * vb(1)^2 / (gamma * R * T)); % Alpha Term
-dalpha_vel = 2*vb(1)*dv(1)*(gamma-1)/(2*gamma*R*T); % Velocity Derivative Alpha Term
+alpha = (1 + (gamma-1)/2 * vb^2 / (gamma * R * T)); % Alpha Term
+dalpha_vel = 2*vb*dv*(gamma-1)/(2*gamma*R*T); % Velocity Derivative Alpha Term
 dalpha_temp = dt*(gamma-1)*vb^2/(2*gamma*R); % Temperature Derivative Alpha Term
-dalpha = dalpha_vel + dalpha_temp; % Derivative of Alpha wrt states
+dalpha = dalpha_vel' + dalpha_temp; % Derivative of Alpha wrt states
 
 % Beta Term Derivative
 beta = alpha^(gamma/(gamma-1)); % Beta Term
@@ -86,11 +86,12 @@ dpd = dpt - dps; % Derivative of Dynamic Pressure wrt states
 H = [dps; dpd]; % H matrix for the Kalman Filter
 
 % Covariance Matrix of the Measurement Noise
+R_thermo = R;
 R           =   [sigmma_ps^2, 0; 0, sigma_pd^2]; % covariance matrix of the measurement noise
 
 % Estimated Measurements
-Ps_estimated = p0 * (1 + lambda * d / t0)^(g0 / (lambda * R)); % Estimated Static Pressure
-Pd_estimated = ps *((1+(gamma-1)/2 * vb(1)^2 / (gamma * R * T))^(gamma/(gamma-1))-1); % Estimated Dynamic Pressure
+Ps_estimated = p0 * (1 + lambda * d / t0)^(g0 / (lambda * R_thermo)); % Estimated Static Pressure
+Pd_estimated = p_stat *((1+(gamma-1)/2 * vb(1)^2 / (gamma * R_thermo * T))^(gamma/(gamma-1))-1); % Estimated Dynamic Pressure
 
 if any(isnan(H))
     H = zeros(2,13);
