@@ -29,56 +29,68 @@ function [x,P,y_res] = correctionPitot_new(x_pred,P_pred,p_dyn,p_stat,sigmma_ps,
 %                       OF THE OUTPUT AND THE MEASSURE; ONLY FOR CHECKING
 %                       --> 1x1
 %---------------------------------------------------------------------------
+
+% Useful Variables
 threshold      =   10e-11;
 gamma = 1.4;
 p0 = params.refPressure;
 t0 = params.refTemperature;
 lambda = params.a;
 g0 = 9.80665; % m/s^2
-R = 287.05; % J/(kg*K)
-h = -x_pred(3); % altitude from down state
-qx = x_pred(7);
-qy = x_pred(8);
-qz = x_pred(9);
-qw = x_pred(10);
+R = 287.05; % J/(kg*K) 
+d = x_pred(3); % Down Coordinate (Altitude)
+qx = x_pred(7); % Quaternions
+qy = x_pred(8); % Quaternions
+qz = x_pred(9); % Quaternions
+qw = x_pred(10); % Quaternions
+v = x_pred(4:6); % Velocity Vector NED
 
-% Temperature and Temperature Derivative
-T = t0 - lambda * h;
-dt = [0, 0, lambda, zeros(1, 10)]; 
 
-% Static Pressure matrix H
-dpsz = p0*(1-lambda/t0*h)^(g0/(lambda*R)-1);
-dps = [zeros(1, 2), dpsz, zeros(1, 10)];
-h = (t0/lambda - t0/lambda*(p_stat/p0)^(R*lambda/g0)); % Measured Altitude
+% Temperature and Temperature Derivative Term
+T = t0 + lambda * d;
+dt = [0, 0, -lambda/(t0+lambda*d)^2, zeros(1, 10)]; % Derivative of 1/T wrt states
 
-% Dynamic Pressure matrix H
-DCM = quat2dcm (x_pred(7:10));
-V_body =  DCM * x_pred(4:6)'; % velocity in body frame
-R1 = [qw^2+qx^2-qy^2-qz^2, 2*(qx*qy+qw*qz), 2*(qx*qz-qw*qy)];
-dvned = zeros(3, 13);
-dvned(:, 4:6) = eye(3);
-R1  = R1* dvned;
-dr = zeros(3, 13);
-dr(:, 7:10) = 2*[qx, -qy, -qz, qw; ...
-               qy,  qx,  qw, qz; ...
-               qz,  qw,  qx, -qy];
-dvb = dr' * x_pred(4:6)' +R1'; % velocity derivative in body frame
+% Static Presure Derivative
+dps = g0*p0/(R*t0) * (1+ lambda*d/t0)^(g0/(lambda*R)-1); % Derivative of Static Pressure wrt states
+dps = [zeros(1, 2), dps, zeros(1, 10)]; % Static Pressure Derivative Vector (First row of H matrix)
 
-M2 = 2/(gamma-1) * ( (p0/p_dyn)^(( gamma-1 )/gamma) -1 ); 
-v_pitot = sqrt(M2* gamma * R* T); % Measured Velocity 
+% Inertial Velocity Derivative Terms
+rot = [qw^2+qx^2-qy^2-qz^2, 2*(qx*qy+qw*qz), 2*(qx*qz-qw*qy)]; % Rotation Vector from NED to Body Frame
+drotation = 2*[qx, -qy, -qz, qw; ...
+       qy,  qx,  qw, qz; ...
+       qz,  -qw,  qx, -qy]; % Derivative of Rotation Vector from NED to Body Frame wrt states
+drotation = [zeros(3, 6), drotation, zeros(3, 3)]'; % Derivative of Rotation Vector from NED to Body Frame wrt states
+dstates = [zeros(3, 6), eye(3), zeros(3, 4)]; % Derivative of Velocity wrt states
 
-alpha = (1+(gamma-1)/2*V_body(1)^2/((gamma*R*T)));
-beta =alpha^(gamma/(gamma-1));
+% Body Velocity Derivative Term
+vb = rot * v; % X Velocity in Body Frame
+dv = drotation*v + rot*dstates; % Derivative of Velocity in Body Frame wrt states
 
-dbeta =  alpha^(1/(gamma-1))/(2*R*T^2) *(2*dvb * V_body(1)*T -V_body(1)^2 *dt');
-dpt = dps' * beta + dbeta * p_stat;
-dpd = dpt' - dps;
+% Alpha Term Derivative
+alpha = (1 + (gamma-1)/2 * vb(1)^2 / (gamma * R * T)); % Alpha Term
+dalpha_vel = 2*vb(1)*dv(1)*(gamma-1)/(2*gamma*R*T); % Velocity Derivative Alpha Term
+dalpha_temp = dt*(gamma-1)*vb^2/(2*gamma*R); % Temperature Derivative Alpha Term
+dalpha = dalpha_vel + dalpha_temp; % Derivative of Alpha wrt states
 
-% Assmebly of matrix H
-H = [dps; dpd];
+% Beta Term Derivative
+beta = alpha^(gamma/(gamma-1)); % Beta Term
+dbeta = gamma/(gamma-1) * alpha^(1/(gamma-1)-1) * dalpha; % Derivative of Beta wrt states
 
-% compute covariance
+% Total Pressure Derivative
+dpt =dps * beta + dbeta * p_stat; % Derivative of Total Pressure wrt states
+
+% Dynamic Pressure Derivative
+dpd = dpt - dps; % Derivative of Dynamic Pressure wrt states
+
+% Matrix H Assembly
+H = [dps; dpd]; % H matrix for the Kalman Filter
+
+% Covariance Matrix of the Measurement Noise
 R           =   [sigmma_ps^2, 0; 0, sigma_pd^2]; % covariance matrix of the measurement noise
+
+% Estimated Measurements
+Ps_estimated = p0 * (1 + lambda * d / t0)^(g0 / (lambda * R)); % Estimated Static Pressure
+Pd_estimated = ps *((1+(gamma-1)/2 * vb(1)^2 / (gamma * R * T))^(gamma/(gamma-1))-1); % Estimated Dynamic Pressure
 
 if any(isnan(H))
     H = zeros(2,13);
@@ -87,10 +99,10 @@ S           =   H*P_pred*H'+R;                      %Matrix necessary for the co
 
 if cond(S) > threshold
 
-    e       =   [-h - x_pred(3), -v_pitot - x_pred(6)];
+    e       =   [p_stat-Ps_estimated, p_dyn-Pd_estimated]'; %Measurement residual vector
     K       =   P_pred*H'/S;                        %Kalman correction factor % K must be non dimensional
 
-    x(4:6)       =   x_pred([3, 6]) + (K*e)';
+    x       =   x_pred + (K*e)';
 
     P       =   (eye(3) - K*H)*P_pred;          %Corrector step of the state covariance
 else
