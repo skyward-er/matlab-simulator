@@ -109,9 +109,11 @@ S           =   H*P_pred*H'+R;                      %Matrix necessary for the co
 if cond(S) > threshold
 
     e       =   [p_stat-Ps_estimated, p_dyn-Pd_estimated]'; %Measurement residual vector
-    K       =  ( P_pred*H')'/S;                        %Kalman correction factor % K must be non dimensional
+    K       =  ( P_pred*H')/S;                        %Kalman gain 
+    
+    correction = (K*e)';                               %Kalman Correction Factor
 
-    x([3, 6])    =   x_pred([3, 6]) +(K*e)';
+    x    =   x_pred +correction;
     P       =   (eye(13) - K*H)*P_pred;          %Corrector step of the state covariance
 else
     x       =   x_pred;
