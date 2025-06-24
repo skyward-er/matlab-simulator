@@ -111,7 +111,10 @@ if cond(S) > threshold
     e       =   [p_stat-Ps_estimated, p_dyn-Pd_estimated]'; %Measurement residual vector
     K       =  ( P_pred*H')/S;                        %Kalman gain 
     
-    correction = (K*e)';                               %Kalman Correction Factor
+    states_correction = (K*e)';                               %Kalman Correction Factor on MEKF States
+
+    quat_correction = [0.5*states_correction(7:9), sqrt(1-0.25*states_correction(7:9)*states_correction(7:9)')]; % scalar last quaternions correction
+    correction = [states_correction(1:6), quat_correction, states_correction(10:12)]; % Correction vector for the states
 
     x    =   x_pred +correction;
     P       =   (eye(13) - K*H)*P_pred;          %Corrector step of the state covariance
