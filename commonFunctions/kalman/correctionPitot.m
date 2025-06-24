@@ -99,7 +99,8 @@ R           =   [sigmma_ps^2, 0; 0, sigma_pd^2]; % covariance matrix of the meas
 
 % Estimated Measurements
 Ps_estimated = p0 * (1 + lambda * d / t0)^(g0 / (lambda * R_thermo)); % Estimated Static Pressure
-Pd_estimated = p_stat *((1+(gamma-1)/2 * vb(1)^2 / (gamma * R_thermo * (t0+lambda*d)))^(gamma/(gamma-1))-1); % Estimated Dynamic Pressure
+M2=  vb^2 / (gamma * R_thermo * T);
+Pd_estimated =  p_stat *((1+(gamma-1)/2 *M2)^(gamma/(gamma-1))-1); % Estimated Dynamic Pressure
 
 if any(isnan(H))
     H = zeros(2,12);
@@ -123,6 +124,6 @@ else
     P       =   P_pred;
 end
 
-y_res = x([3, 6])+[h, v_pitot];
+%y_res = x([3, 6])+[h, v_pitot];
 
 end
