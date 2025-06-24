@@ -99,7 +99,7 @@ R           =   [sigmma_ps^2, 0; 0, sigma_pd^2]; % covariance matrix of the meas
 
 % Estimated Measurements
 Ps_estimated = p0 * (1 + lambda * d / t0)^(g0 / (lambda * R_thermo)); % Estimated Static Pressure
-Pd_estimated = p_stat *((1+(gamma-1)/2 * vb(1)^2 / (gamma * R_thermo * T))^(gamma/(gamma-1))-1); % Estimated Dynamic Pressure
+Pd_estimated = p_stat *((1+(gamma-1)/2 * vb(1)^2 / (gamma * R_thermo * (t0+lambda*d)))^(gamma/(gamma-1))-1); % Estimated Dynamic Pressure
 
 if any(isnan(H))
     H = zeros(2,12);
@@ -117,7 +117,7 @@ if cond(S) > threshold
     correction = [states_correction(1:6), quat_correction, states_correction(10:12)]; % Correction vector for the states
 
     x    =   x_pred +correction;
-    P       =   (eye(13) - K*H)*P_pred;          %Corrector step of the state covariance
+    P       =   (eye(12) - K*H)*P_pred;          %Corrector step of the state covariance
 else
     x       =   x_pred;
     P       =   P_pred;
