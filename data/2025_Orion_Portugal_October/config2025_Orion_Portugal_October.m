@@ -107,11 +107,10 @@ settings.nas.v_thr         =   2.5;                                         % Ve
 settings.nas.count_thr     =   5;                                           % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.nas.counter       =   0;
 
-settings.nas.baro.a = 0.0065;
+settings.nas.baro.a = 0.0065;                                               % [K/m] temperature gradient Lambda
 settings.nas.baro.n = 5.255933;
 [settings.nas.baro.refTemperature,~,settings.nas.baro.refPressure] = computeAtmosphericData(0);
-settings.nas.stopPitotAltitude = 800;
-settings.nas.PitotThreshold = 50;                                       %[m/s]
+settings.nas.PitotThreshold = 0.22;                                         % Minimum Mach for pitot update 
 
 settings.nas.t_nas         =   -1;                                          % Apogee detection timestamp
 settings.nas.flag_apo      =   false;                                       % True when the apogee is detected
