@@ -194,17 +194,22 @@ if length(t_nas) > 1
                     if settings.nas.pitot_correction
                         P_c (:, :, ii) = [P_lin(:, :, ii), zeros(6, 6); zeros(6, 6), P_q(:, :, ii)];
                         [x(ii, :), P_c(:,:,ii)] = correctionPitot([x_lin(ii, :), xq(ii, :)],P_c(:, :, ii), sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot_static, nas.sigma_pitot_dynamic,nas.baro);
+                        pitot_flag = 1; % New Pitot Correction applied
                     else
                         [x_lin(ii,:),P_lin(4:6,4:6,ii),~] = correctionPitot_pressureRatio(x_lin(ii,:), P_lin(1:6,1:6),sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot2,environment.omega);
-                        x(ii,:) = [x_lin(ii,:),xq(ii,:)];
-                        P_c(1:6,1:6,ii)   = P_lin(:,:,ii);
-                        P_c(7:12,7:12,ii) = P_q(:,:,ii);
+                        pitot_flag = 0; % Legacy Pitot Correction applied
                     end
                 end
             end
             sensorTot.pitot.lastindex = index_pit;
         end
 
+        % Matrices Update if legacy or no pitot correction was applied
+        if ~exist("pitot_flag", "var") || ~pitot_flag % If no pitot correction was applied
+            x(ii,:) = [x_lin(ii,:),xq(ii,:)];
+            P_c(1:6,1:6,ii)   = P_lin(:,:,ii);
+            P_c(7:12,7:12,ii) = P_q(:,:,ii);
+        end
 
         if nas.flag_apo  == false
             if -x(ii,6) < nas.v_thr && -x(ii,3) > 100
