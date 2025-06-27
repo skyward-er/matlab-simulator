@@ -188,19 +188,23 @@ if length(t_nas) > 1
             if index_pit~=sensorTot.pitot.lastindex
                 if sensorTot.pitot.Mach(index_pit, :) >= settings.nas.PitotThreshold
                     timestampPitotCorrection = t_nas;
+                    % Legacy Corrections
                     % [x_lin(ii,:),P_lin(4:6,4:6,ii),~] = correctionPitot_pressures(x_lin(ii,:),P_lin(4:6,4:6,ii),sensorTot.pitot.total_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot,xq(ii,1:4),nas.Mach_max);
                     % [x_lin(ii,:),P_lin(4:6,4:6,ii),~] = correctionPitot_airspeed(x_lin(ii,:),P_lin(4:6,4:6,ii),sensorTot.pitot.airspeed(index_pit,:),nas.sigma_pitot2,settings.OMEGA);
-                    % [x_lin(ii,:),P_lin(:,:,ii),~] = correctionPitot_pressureRatio(x_lin(ii,:), P_lin(1:6,1:6),sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot2,environment.omega);
-                    P_c (:, :, ii) = [P_lin(:, :, ii), zeros(6, 6); zeros(6, 6), P_q(:, :, ii)];
-                    [x(ii, :), P_c(:,:,ii)] = correctionPitot([x_lin(ii, :), xq(ii, :)],P_c(:, :, ii), sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot_static, nas.sigma_pitot_dynamic,nas.baro);
+                    if settings.nas.pitot_correction
+                        P_c (:, :, ii) = [P_lin(:, :, ii), zeros(6, 6); zeros(6, 6), P_q(:, :, ii)];
+                        [x(ii, :), P_c(:,:,ii)] = correctionPitot([x_lin(ii, :), xq(ii, :)],P_c(:, :, ii), sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot_static, nas.sigma_pitot_dynamic,nas.baro);
+                    else
+                        [x_lin(ii,:),P_lin(4:6,4:6,ii),~] = correctionPitot_pressureRatio(x_lin(ii,:), P_lin(1:6,1:6),sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot2,environment.omega);
+                        x(ii,:) = [x_lin(ii,:),xq(ii,:)];
+                        P_c(1:6,1:6,ii)   = P_lin(:,:,ii);
+                        P_c(7:12,7:12,ii) = P_q(:,:,ii);
+                    end
                 end
             end
             sensorTot.pitot.lastindex = index_pit;
         end
 
-        x(ii,:) = [x_lin(ii,:),xq(ii,:)];
-        P_c(1:6,1:6,ii)   = P_lin(:,:,ii);
-        P_c(7:12,7:12,ii) = P_q(:,:,ii);
 
         if nas.flag_apo  == false
             if -x(ii,6) < nas.v_thr && -x(ii,3) > 100
