@@ -455,7 +455,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
 
     % simulate sensor acquisition
     if settings.dataNoise
-        [sensorData, sensorTot] = acquisition_Sys(sensorData, sensorSettings, sensorTot, t0, mission);
+        [sensorData, sensorTot] = acquisition_Sys(sensorData, sensorSettings, sensorTot, t0, mission, settings.second_imu);
     end
 
     %% subsystems

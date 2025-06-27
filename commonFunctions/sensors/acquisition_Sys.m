@@ -1,4 +1,4 @@
-function [sensorData, sensorTot] = acquisition_Sys(sensorData, sensorSettings, sensorTot, t, mission)
+function [sensorData, sensorTot] = acquisition_Sys(sensorData, sensorSettings, sensorTot, t, mission, second_imu)
 %{
 Routine to simulate the data acquisition from the sensors, that use the
 class sensors in: "skyward-matlab-control-simulator\sensors"
@@ -114,6 +114,34 @@ if isfield(sensorData.accelerometer,'time')
         sensorTot.imu.magnetometer_measures(sensorTot.imu.n_old:sensorTot.imu.n_old + size(sensorData.magnetometer.measures,1) - 2,:)     = sensorData.magnetometer.measures(2:end,:) ;
         sensorTot.imu.time(sensorTot.imu.n_old:sensorTot.imu.n_old + size(sensorData.accelerometer.measures,1) - 2,1)   =  sensorData.accelerometer.time(2:end);
         sensorTot.imu.n_old = sensorTot.imu.n_old + size(sensorData.accelerometer.measures,1)-1;
+    end
+end
+
+% Simulate second imu if present
+if second_imu
+    if isfield(sensorData.accelerometer_1,'time')
+        for ii=1:length(sensorData.accelerometer.time)
+            [sensorData.accelerometer_1.measures(ii,1),sensorData.accelerometer_1.measures(ii,2),sensorData.accelerometer_1.measures(ii,3)] =      ...
+                sensorSettings.accelerometer.sens(...
+                sensorData.accelerometer_1.measures(ii,1)*1000/9.81,...
+                sensorData.accelerometer_1.measures(ii,2)*1000/9.81,...
+                sensorData.accelerometer_1.measures(ii,3)*1000/9.81,...
+                14.8500, t);
+            [sensorData.gyro_1.measures(ii,1),sensorData.gyro_1.measures(ii,2),sensorData.gyro_1.measures(ii,3)]   =      ...
+                sensorSettings.gyroscope.sens( ...
+                sensorData.gyro_1.measures(ii,1)*1000*360/2/pi,...
+                sensorData.gyro_1.measures(ii,2)*1000*360/2/pi,...
+                sensorData.gyro_1.measures(ii,3)*1000*360/2/pi,...
+                14.8500, t);
+            sensorData.accelerometer_1.measures(ii,:) = sensorData.accelerometer_1.measures(ii,:)*9.81/1000;
+            sensorData.gyro_1.measures(ii,:)  = sensorData.gyro_1.measures(ii,:)*2*pi/360/1000;
+        end
+        if length(sensorData.accelerometer_1.time)>1
+            sensorTot.imu_1.accelerometer_measures(sensorTot.imu_1.n_old:sensorTot.imu_1.n_old + size(sensorData.accelerometer_1.measures,1) - 2,:) = sensorData.accelerometer_1.measures(2:end,:) ;
+            sensorTot.imu_1.gyro_measures(sensorTot.imu_1.n_old:sensorTot.imu_1.n_old + size(sensorData.gyro_1.measures,1) - 2,:)   = sensorData.gyro_1.measures(2:end,:) ;
+            sensorTot.imu_1.time(sensorTot.imu_1.n_old:sensorTot.imu_1.n_old + size(sensorData.accelerometer_1.measures,1) - 2,1)   =  sensorData.accelerometer_1.time(2:end);
+            sensorTot.imu_1.n_old = sensorTot.imu_1.n_old + size(sensorData.accelerometer_1.measures,1)-1;
+        end
     end
 end
 

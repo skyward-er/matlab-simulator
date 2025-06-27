@@ -23,6 +23,31 @@ legend("Accelerometer", "Real");
 xlabel("Time [s]"), ylabel("$a_Z$ [g]")
 drawnow
 
+%% Second accelerometer if present
+if settings.second_imu
+    figure('Name', "Second accelerometer measurements")
+    subplot(3,1,1)
+    plot(simOutput.sensors.imu_1.time, simOutput.sensors.imu_1.accelerometer_measures(:,1)./9.81);
+    hold on, grid on
+    plot(simOutput.t, simOutput.recall.accelerations_body(:,1)./9.81);
+    legend("Accelerometer", "Real");
+    title("Acceleration BODY", 'Interpreter','latex');
+    ylabel("$a_X$ [g]")
+    subplot(3,1,2)
+    plot(simOutput.sensors.imu_1.time, simOutput.sensors.imu_1.accelerometer_measures(:,2)./9.81);
+    hold on, grid on
+    plot(simOutput.t, simOutput.recall.accelerations_body(:,2)./9.81);
+    legend("Accelerometer", "Real");
+    ylabel("$a_Y$ [g]")
+    subplot(3,1,3)
+    plot(simOutput.sensors.imu_1.time, simOutput.sensors.imu_1.accelerometer_measures(:,3)./9.81);
+    hold on, grid on
+    plot(simOutput.t, simOutput.recall.accelerations_body(:,3)./9.81);
+    legend("Accelerometer", "Real");
+    xlabel("Time [s]"), ylabel("$a_Z$ [g]")
+    drawnow
+end
+
 %% Gyroscope measurements
 figure('Name', "Gyroscope measurements")
 subplot(3,1,1)
@@ -45,6 +70,32 @@ plot(simOutput.t, simOutput.Y(:,9));
 legend("Gyroscope", "Real");
 xlabel("Time [s]"), ylabel("$\omega_Z$ $[rad/s]$")
 drawnow
+
+%% Second gyroscope if present
+
+if settings.second_imu
+    figure('Name', "Second gyroscope measurements")
+    subplot(3,1,1)
+    plot(simOutput.sensors.imu_1.time, simOutput.sensors.imu_1.gyro_measures(:,1));
+    hold on, grid on
+    plot(simOutput.t, simOutput.Y(:,7));
+    legend("Gyroscope", "Real");
+    title("$\omega$ BODY");
+    ylabel("$\omega_X$ $[rad/s]$")
+    subplot(3,1,2)
+    plot(simOutput.sensors.imu_1.time, simOutput.sensors.imu_1.gyro_measures(:,2));
+    hold on, grid on
+    plot(simOutput.t, simOutput.Y(:,8));
+    legend("Gyroscope", "Real");
+    ylabel("$\omega_Y$ $[rad/s]$")
+    subplot(3,1,3)
+    plot(simOutput.sensors.imu_1.time, simOutput.sensors.imu_1.gyro_measures(:,3));
+    hold on, grid on
+    plot(simOutput.t, simOutput.Y(:,9));
+    legend("Gyroscope", "Real");
+    xlabel("Time [s]"), ylabel("$\omega_Z$ $[rad/s]$")
+    drawnow
+end
 
 %% Magnetometer measurements
 std_magneticField;

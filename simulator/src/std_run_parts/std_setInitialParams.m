@@ -4,6 +4,11 @@ integration initialization script- setting initial condition before control phas
 
 %}
 
+%% Check if second_imu should be present
+
+if ~isfield(settings, "second_imu")
+    settings.second_imu = 0;
+end
 
 %% kalman initialization
 if not(settings.scenario == "descent")
@@ -25,11 +30,20 @@ settings.ada.flagOpenPara =  false;                 % True when the main parachu
 %% Initialization of sensor measurement time
 control_freq = settings.frequencies.controlFrequency;
 
-sensorData.accelerometer.t0 = initSensorT0...
+sensorData.accelerometer_0.t0 = initSensorT0...
     (control_freq ,settings.frequencies.accelerometerFrequency);
 
-sensorData.gyro.t0 = initSensorT0...
+sensorData.gyro_0.t0 = initSensorT0...
     (control_freq,settings.frequencies.gyroFrequency);
+
+% Second imu, if present
+if settings.second_imu
+    sensorData.accelerometer_1.t0 = initSensorT0...
+        (control_freq ,settings.frequencies.accelerometerFrequency);
+    sensorData.gyro_1.t0 = initSensorT0...
+        (control_freq,settings.frequencies.gyroFrequency);
+
+end
 
 sensorData.magnetometer.t0 = initSensorT0...
     (control_freq,settings.frequencies.magnetometerFrequency);
@@ -265,6 +279,14 @@ sensorTot.mea.n_old                 =   2;
 sensorTot.sfd.n_old                 =   2;
 sensorTot.gps.lastindex             =   0;
 sensorTot.pitot.lastindex           =   0;
+
+% if mission is 2025 or newer, enable second imu
+if settings.second_imu
+    sensorTot.imu_1.accelerometer_measures          =   [0, 0, 0];
+    sensorTot.imu_1.gyro_measures                   =   [0, 0, 0];
+    sensorTot.imu_1.time                =   0;
+    sensorTot.imu_1.n_old               =   2;
+end
 
 % initialization params
 flagFlight = false;

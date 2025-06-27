@@ -20,6 +20,9 @@ settings.launchDate = [2024 9 14];
 warning("Launch date set to 2024 as wrldmagm does not support 2025 launch date")
 settings.HREmot = true;
 
+%% Enable second imu
+settings.second_imu = true;
+
 %% TRAJECTORY GENERATION PARAMETERS
 settings.Vz_final = 0;
 settings.z_final  = 1100;

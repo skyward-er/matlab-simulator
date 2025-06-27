@@ -38,6 +38,22 @@ end
 if any(isnan(sensorData.accelerometer.measures))
     error('accelerometer measure is nan')
 end
+
+%% Second accelerometer if mission is 2025 or newer
+
+if settings.second_imu
+    sensorData.accelerometer_1.time = (sensorTot.imu.time(end):1/freq.accelerometerFrequency:Tf(end))';
+    sensorData.accelerometer_1.measures = zeros(size(sensorData.accelerometer_1.time,1),3);
+    sensorData.accelerometer_1.measures(1,:) = sensorTot.imu.accelerometer_measures(end,:);
+    if length(sensorData.accelerometer_1.time)>1
+        sensorData.accelerometer_1.measures(2:end, :) = interp1(settings.parout.partial_time,settings.parout.acc,sensorData.accelerometer_1.time(2:end));
+    end
+    % check for nan
+    if any(isnan(sensorData.accelerometer_1.measures))
+        error('accelerometer measure is nan')
+    end
+end
+
 %% gyro
 sensorData.gyro.time = (sensorTot.imu.time(end):1/freq.gyroFrequency:Tf(end))';
 sensorData.gyro.measures = zeros(size(sensorData.gyro.time,1),3);
@@ -49,6 +65,22 @@ end
 if any(isnan(sensorData.gyro.measures))
     error('gyro measure is nan')
 end
+
+%% Second gyro if mission is 2025 or newer
+
+if settings.second_imu
+    sensorData.gyro_1.time = (sensorTot.imu.time(end):1/freq.gyroFrequency:Tf(end))';
+    sensorData.gyro_1.measures = zeros(size(sensorData.gyro_1.time,1),3);
+    sensorData.gyro_1.measures(1,:) = sensorTot.imu.gyro_measures(end,:);
+    if length(sensorData.gyro_1.time)>1
+        sensorData.gyro_1.measures(2:end,:) = interp1(Tf,Y(:, 7:9),sensorData.gyro_1.time(2:end));
+    end
+    % check for nan
+    if any(isnan(sensorData.gyro_1.measures))
+        error('gyro measure is nan')
+    end
+end
+
 %% magnetometer
 sensorData.magnetometer.time = (sensorTot.imu.time(end):1/freq.magnetometerFrequency:Tf(end))';
 sensorData.magnetometer.measures = zeros(size(sensorData.magnetometer.time,1),3)*100;
