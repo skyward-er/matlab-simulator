@@ -18,7 +18,13 @@ else
     sensorData.kalman.vz = -settings.Vz_final;                                                   % Vertical velocity
     sensorData.kalman.z  = -settings.z_final;
 end    
-    % Altitude
+
+%% Pitot correction
+
+if ~isfield(settings.nas, "pitot_correction")
+    settings.nas.pitot_correction = false;
+end
+    
 
 %% ADA Initialization
 
