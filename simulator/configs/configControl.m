@@ -138,4 +138,4 @@ contSettings.N_prediction_threshold = 5;
 
 %% Identification settings for algorithms
 rocket.airbrakes.identification = settings.identification;
-rocket.parachutes{2,2}.controlParams.identification = settings.identification;
+rocket.parachutes(2,2).controlParams.identification = settings.identification;

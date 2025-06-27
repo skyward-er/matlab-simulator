@@ -468,8 +468,8 @@ for alg_index = 4
             if (settings.scenario == "descent" || settings.scenario == "full flight") && settings.parafoil
                 fprintf(fid,'PARAFOIL \n\n');
                 fprintf(fid,'Guidance approach %s \n',contSettings.payload.guidance_alg);
-                fprintf(fid,'PID proportional gain %s \n',rocket.parachutes{2,2}.controlParams.Kp);
-                fprintf(fid,'PID integral gain %s \n',rocket.parachutes{2,2}.controlParams.Ki);
+                fprintf(fid,'PID proportional gain %s \n',rocket.parachutes(2,2).controlParams.Kp);
+                fprintf(fid,'PID integral gain %s \n',rocket.parachutes(2,2).controlParams.Ki);
                 fprintf(fid,'Opening altitude %s \n', num2str(settings.ada.para.z_cut));
             end
             fprintf(fid,'MASS: \n\n');

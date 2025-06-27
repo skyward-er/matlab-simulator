@@ -530,7 +530,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
         t_change_ref_ABK = t1 + settings.servo.delay;
     end
     if t1-t_last_prf_control >= 1/settings.frequencies.prfFrequency - 1e-6
-        t_change_ref_PRF = t1 + rocket.parachutes{2,2}.controlParams.deltaA_delay;
+        t_change_ref_PRF = t1 + rocket.parachutes(2,2).controlParams.deltaA_delay;
     end
     % assemble total state
     [n, ~] = size(Yf);
