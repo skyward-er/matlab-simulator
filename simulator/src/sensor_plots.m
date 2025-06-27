@@ -24,7 +24,7 @@ xlabel("Time [s]"), ylabel("$a_Z$ [g]")
 drawnow
 
 %% Second accelerometer if present
-if settings.second_imu
+if isfield(settings, 'second_imu') && settings.second_imu
     figure('Name', "Second accelerometer measurements")
     subplot(3,1,1)
     plot(simOutput.sensors.imu_1.time, simOutput.sensors.imu_1.accelerometer_measures(:,1)./9.81);
@@ -73,7 +73,7 @@ drawnow
 
 %% Second gyroscope if present
 
-if settings.second_imu
+if isfield(settings, 'second_imu') && settings.second_imu
     figure('Name', "Second gyroscope measurements")
     subplot(3,1,1)
     plot(simOutput.sensors.imu_1.time, simOutput.sensors.imu_1.gyro_measures(:,1));
