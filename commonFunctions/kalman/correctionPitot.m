@@ -113,6 +113,7 @@ if cond(S) > threshold
 
     quat_correction = [0.5*states_correction(7:9), sqrt(1-0.25*states_correction(7:9)*states_correction(7:9)')]; % scalar last quaternions correction
     quat_correction = quatProd(quat_correction', x_pred(7:10)')';
+    quat_correction = quat_correction/norm(quat_correction);
 
     correction = [states_correction(1:6), quat_correction, states_correction(10:12)]; % Correction vector for the states
 
