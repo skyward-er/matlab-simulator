@@ -115,7 +115,8 @@ if cond(S) > threshold
     quat_correction = quatProd(quat_correction', x_pred(7:10)')';
     quat_correction = quat_correction/norm(quat_correction);
 
-    correction = [states_correction(1:6), quat_correction, states_correction(10:12)]; % Correction vector for the states
+    %correction = [states_correction(1:6), quat_correction, states_correction(10:12)]; % Correction vector for the states
+    correction = [states_correction(1:6), zeros(1, 4), states_correction(10:12)]; 
 
     x    =   x_pred +correction;
     P       =   (eye(12) - K*H)*P_pred;                 %Corrector step of the state covariance
