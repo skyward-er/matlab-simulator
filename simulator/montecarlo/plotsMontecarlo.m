@@ -89,6 +89,20 @@ ylabel('Number of apogees in the same interval')
 title('Cumulative apogee time')
 legend
 
+%% PLOT COMPARISON BETWEEN NAS ERROR WITH AND WITHOUT PITOT
+
+montFigures.nas_error_comparison = figure('Color','white','Name','NAS error comparison','Units','Normalized','WindowState','maximized');
+hold on; grid on;
+boxplot([nas.error', nas.error_no_pitot'], 'Labels', {'With Pitot', 'Without Pitot'});
+ylabel('Error [m]');
+title('Comparison of NAS error with and without Pitot');
+
+montFigures.nas_error_comparison = figure('Color','white','Name','NAS error comparison','Units','Normalized','WindowState','maximized');
+hold on; grid on;
+boxplot([nas.error', nas.error_no_pitot'], 'Labels', {'With Pitot', 'Without Pitot'});
+ylabel('Error [m]');
+title('Comparison of NAS error with and without Pitot');
+
 %% PLOT COMPARISON BETWEEN RUN_ADA AND MAJORITY VOTING ADA
 
 if contSettings.run_old_ada
