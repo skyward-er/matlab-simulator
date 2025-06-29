@@ -114,7 +114,7 @@ if mod(dt/dt_ode,1)~= 0
     error('Control frequency and integration time step are not compatible')
 end
 std_setInitialParams;
-
+sensorData.nasp=sensorData.nas;
 rocket.massNoMotor = rocket.massNoMotor + settings.mass_offset;
 
 %% SENSORS INIT

@@ -301,3 +301,6 @@ flagAeroBrakes = false;
 flagApogee = false;
 flagPara1 = false;
 flagPara2 = false;
+
+% Pitot try
+sensorTot.nasp=sensorTot.nas;
