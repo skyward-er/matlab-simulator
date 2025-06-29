@@ -620,6 +620,9 @@ if settings.scenario ~= "descent"
     struct_out.sensors.mea.mass_offset = settings.mass_offset;
     struct_out.sensors.mea.true_mass_at_shutdown = dataRecall.true_mass(lastAscentIndex-10);
 end
+struct_out.sensors.nas.errorPitot = mean(abs(sensorTot.nasp.error), 1); 
+struct_out.sensors.nas.errornoPitot = mean(abs(sensorTot.nas.error), 1);
+
 % apogee
 struct_out.apogee.time = Tf(idx_apo);
 struct_out.apogee.time_ada = t_ada;

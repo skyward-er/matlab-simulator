@@ -17,11 +17,12 @@ end
 
 %% Navigation system (NAS)
 if settings.flagNAS && settings.dataNoise
-    [sensorDatap, sensorTotp, settings.nasp]   =  run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings, environment, 1);
-    [sensorData, sensorTot, settings.nas]   =  run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings, environment, 0);
+    [sensorDatap, sensorTotp, settings.nasp]   =  run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings, environment, 1, Yf);
+    [sensorData, sensorTot, settings.nas]   =  run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings, environment, 0, Yf);
     sensorData.nasp = sensorDatap.nasp;
     sensorTot.nasp=sensorTotp.nasp;
     clear sensorDatap sensorTotp settings.nasp
+   
 
 
 

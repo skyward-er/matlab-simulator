@@ -1,4 +1,4 @@
-function [sensorData,sensorTot,nas] = run_NAS(Tf, mag_NED,sensorData,sensorTot,settings, environment, pitot)
+function [sensorData,sensorTot,nas] = run_NAS(Tf, mag_NED,sensorData,sensorTot,settings, environment, pitot, realStates)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
@@ -239,6 +239,14 @@ if length(t_nas) > 1
         end
 
     end
+    realDCM = quat2dcm(realStates(end, 10:13));
+    realVel = realDCM'*realStates(end, 4:6)';
+    altitudeBias = 160;
+    nasError(1:3) = realStates(end, 1:3) - x(end, 1:3);
+    nasError(4:6) = realVel'-x(end, 4:6);
+    nasError(7:10) = realStates(end, [11 12 13 10]) - x(end, 7:10);
+    nasError(3) = nasError(3) - altitudeBias;
+
 
     if ~pitot
         sensorData.nas.states= x;
@@ -248,6 +256,9 @@ if length(t_nas) > 1
         sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2,:)  = sensorData.nas.states(2:end,:); % NAS output
         sensorTot.nas.time(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.time(2:end); % NAS time output
         sensorTot.nas.timestampPitotCorrection(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.timestampPitotCorrection(2:end); % NAS time output
+        if settings.flagAscent
+            sensorTot.nas.error(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2, :) = ones(size(sensorData.nas.states(:,1),1)-1, 10).*nasError;
+        end
         sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1)-1;
     else 
         sensorData.nasp.states= x;
@@ -257,6 +268,9 @@ if length(t_nas) > 1
         sensorTot.nasp.states(sensorTot.nasp.n_old:sensorTot.nasp.n_old + size(sensorData.nasp.states(:,1),1)-2,:)  = sensorData.nasp.states(2:end,:); % NAS output
         sensorTot.nasp.time(sensorTot.nasp.n_old:sensorTot.nasp.n_old + size(sensorData.nasp.states(:,1),1)-2)    = sensorData.nasp.time(2:end); % NAS time output
         sensorTot.nasp.timestampPitotCorrection(sensorTot.nasp.n_old:sensorTot.nasp.n_old + size(sensorData.nasp.states(:,1),1)-2)    = sensorData.nasp.timestampPitotCorrection(2:end); % NAS time output
+        if settings.flagAscent
+            sensorTot.nasp.error(sensorTot.nasp.n_old:sensorTot.nasp.n_old + size(sensorData.nasp.states(:,1),1)-2, :) = ones(size(sensorData.nasp.states(:,1),1)-1, 10).*nasError;
+        end
         sensorTot.nasp.n_old = sensorTot.nasp.n_old + size(sensorData.nasp.states,1)-1;
     end
 end
