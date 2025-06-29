@@ -1,4 +1,4 @@
-function [sensorData,sensorTot,nas] = run_NAS(Tf, mag_NED,sensorData,sensorTot,settings, environment)
+function [sensorData,sensorTot,nas] = run_NAS(Tf, mag_NED,sensorData,sensorTot,settings, environment, pitot)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
@@ -101,7 +101,11 @@ For more information check the navigation system report
 nas = settings.nas;
 
 % recall nas time
-t_nas       =   sensorTot.nas.time(end):1/settings.frequencies.NASFrequency:Tf;
+if pitot
+    t_nas       =   sensorTot.nasp.time(end):1/settings.frequencies.NASFrequency:Tf;
+else
+    t_nas       =   sensorTot.nas.time(end):1/settings.frequencies.NASFrequency:Tf;
+end
 
 % initialize update
 x_lin       =   zeros(length(t_nas),6);         % Pre-allocation of corrected estimation
@@ -113,13 +117,24 @@ P_lin       =   zeros(6,6,length(t_nas));       % Pre-allocation of the covarian
 P_q         =   zeros(6,6,length(t_nas));
 
 % initialize first update
-x_lin(1,:)  =   sensorData.nas.states(end,1:6);                 % Allocation of the initial value
-xq(1,:)     =   sensorData.nas.states(end,7:13);
-x(1,:)      =   [x_lin(1,:),xq(1,:)];
+if pitot
+    x_lin(1,:)  =   sensorData.nasp.states(end,1:6);                 % Allocation of the initial value
+    xq(1,:)     =   sensorData.nasp.states(end,7:13);
+    x(1,:)      =   [x_lin(1,:),xq(1,:)];
 
-P_lin(:,:,1)=   sensorData.nas.P(1:6,1:6,end);
-P_q(:,:,1)  =   sensorData.nas.P(7:12,7:12,end);
-P_c(:,:,1)  =   sensorData.nas.P(:,:,end);
+    P_lin(:,:,1)=   sensorData.nasp.P(1:6,1:6,end);
+    P_q(:,:,1)  =   sensorData.nasp.P(7:12,7:12,end);
+    P_c(:,:,1)  =   sensorData.nasp.P(:,:,end);
+
+else
+    x_lin(1,:)  =   sensorData.nas.states(end,1:6);                 % Allocation of the initial value
+    xq(1,:)     =   sensorData.nas.states(end,7:13);
+    x(1,:)      =   [x_lin(1,:),xq(1,:)];
+
+    P_lin(:,:,1)=   sensorData.nas.P(1:6,1:6,end);
+    P_q(:,:,1)  =   sensorData.nas.P(7:12,7:12,end);
+    P_c(:,:,1)  =   sensorData.nas.P(:,:,end);
+end
 
 % check gps fix
 [fix, nsat] =   gpsFix(sensorData.accelerometer.measures);
@@ -191,7 +206,7 @@ if length(t_nas) > 1
                     % Legacy Corrections
                     % [x_lin(ii,:),P_lin(4:6,4:6,ii),~] = correctionPitot_pressures(x_lin(ii,:),P_lin(4:6,4:6,ii),sensorTot.pitot.total_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot,xq(ii,1:4),nas.Mach_max);
                     % [x_lin(ii,:),P_lin(4:6,4:6,ii),~] = correctionPitot_airspeed(x_lin(ii,:),P_lin(4:6,4:6,ii),sensorTot.pitot.airspeed(index_pit,:),nas.sigma_pitot2,settings.OMEGA);
-                    if settings.nas.pitot_correction
+                    if settings.nas.pitot_correction && pitot
                         P_c (:, :, ii) = [P_lin(:, :, ii), zeros(6, 6); zeros(6, 6), P_q(:, :, ii)];
                         [x(ii, :), P_c(:,:,ii)] = correctionPitot([x_lin(ii, :), xq(ii, :)],P_c(:, :, ii), sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot_static, nas.sigma_pitot_dynamic,nas.baro);
                         pitot_flag = 1; % New Pitot Correction applied
@@ -225,17 +240,24 @@ if length(t_nas) > 1
 
     end
 
-    sensorData.nas.states= x;
-    sensorData.nas.P = P_c;
-    sensorData.nas.time = t_nas;
-    sensorData.nas.timestampPitotCorrection = timestampPitotCorrection;
-    if abs(sensorData.nas.states(1,3)) >nas.stopPitotAltitude
-        nas.flagStopPitotCorrection = true;
+    if ~pitot
+        sensorData.nas.states= x;
+        sensorData.nas.P = P_c;
+        sensorData.nas.time = t_nas;
+        sensorData.nas.timestampPitotCorrection = timestampPitotCorrection;
+        sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2,:)  = sensorData.nas.states(2:end,:); % NAS output
+        sensorTot.nas.time(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.time(2:end); % NAS time output
+        sensorTot.nas.timestampPitotCorrection(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.timestampPitotCorrection(2:end); % NAS time output
+        sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1)-1;
+    else 
+        sensorData.nasp.states= x;
+        sensorData.nasp.P = P_c;
+        sensorData.nasp.time = t_nas;
+        sensorData.nasp.timestampPitotCorrection = timestampPitotCorrection;
+        sensorTot.nasp.states(sensorTot.nasp.n_old:sensorTot.nasp.n_old + size(sensorData.nasp.states(:,1),1)-2,:)  = sensorData.nasp.states(2:end,:); % NAS output
+        sensorTot.nasp.time(sensorTot.nasp.n_old:sensorTot.nasp.n_old + size(sensorData.nasp.states(:,1),1)-2)    = sensorData.nasp.time(2:end); % NAS time output
+        sensorTot.nasp.timestampPitotCorrection(sensorTot.nasp.n_old:sensorTot.nasp.n_old + size(sensorData.nasp.states(:,1),1)-2)    = sensorData.nasp.timestampPitotCorrection(2:end); % NAS time output
+        sensorTot.nasp.n_old = sensorTot.nasp.n_old + size(sensorData.nasp.states,1)-1;
     end
-    sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2,:)  = sensorData.nas.states(2:end,:); % NAS output
-    sensorTot.nas.time(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.time(2:end); % NAS time output
-    sensorTot.nas.timestampPitotCorrection(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.timestampPitotCorrection(2:end); % NAS time output
-    sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1)-1;
-
 end
 end
