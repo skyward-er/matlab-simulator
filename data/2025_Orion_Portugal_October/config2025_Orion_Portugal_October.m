@@ -97,6 +97,8 @@ settings.nas.sigma_w       =   10;                                          % [r
 settings.nas.sigma_beta    =   1e-4;                                        % [rad/s]   estimated gyroscope bias variance;
 settings.nas.sigma_pitot_static   =   50;                                   % [Pa]   estimated static pressure variance
 settings.nas.sigma_pitot_dynamic  =   50;                                   % [Pa]   estimated dynamic pressure variance
+settings.nas.sigma_pitot   =   20^2;                                        % Legacy pitot variance
+settings.nas.sigma_pitot2  =   0.1;                                         % Legacy pitot variance  
 settings.nas.sigma_acc     =   0.05;                                        % [m/s^2]
 settings.nas.P             = 0.01*eye(12);
 
