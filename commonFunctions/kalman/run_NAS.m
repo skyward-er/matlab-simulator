@@ -211,7 +211,7 @@ if length(t_nas) > 1
                         [x(ii, :), P_c(:,:,ii)] = correctionPitot([x_lin(ii, :), xq(ii, :)],P_c(:, :, ii), sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot_static, nas.sigma_pitot_dynamic,nas.baro);
                         pitot_flag = 1; % New Pitot Correction applied
                     else
-                        [x_lin(ii,:),P_lin(:,:,ii),~] = correctionPitot_pressureRatio(x_lin(ii,:), P_lin(1:6,1:6),sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot2,environment.omega);
+                        % [x_lin(ii,:),P_lin(:,:,ii),~] = correctionPitot_pressureRatio(x_lin(ii,:), P_lin(1:6,1:6),sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot2,environment.omega);
                         pitot_flag = 0; % Legacy Pitot Correction applied
                     end
                 end

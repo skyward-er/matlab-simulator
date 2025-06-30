@@ -48,10 +48,10 @@ v = x_pred(4:6)';                                       % Velocity Vector NED
 
 % Temperature and Temperature Derivative Term
 T = t0 + lambda * d;
-dt = [0, 0, -lambda/(t0+lambda*d)^2, zeros(1, 9)];      % Derivative of 1/T wrt states
+dt = [0, 0, - lambda/(t0+lambda*d)^2, zeros(1, 9)];      % Derivative of 1/T wrt states
 
 % Static Pressure Derivative
-dps = g0*p0/(R*t0) * (1+ lambda*d/t0)^(g0/(lambda*R)-1); % Derivative of Static Pressure wrt states
+dps = g0*p0/(R*t0) * (1- lambda*d/t0)^(-g0/(lambda*R)-1); % Derivative of Static Pressure wrt states
 dps = [zeros(1, 2), dps, zeros(1, 9)];                  % Static Pressure Derivative Vector (First row of H matrix)
 
 % Inertial Velocity Derivative Terms
@@ -71,6 +71,11 @@ dstates = [zeros(3, 3), eye(3), zeros(3, 6)];           % Derivative of Velocity
 vb = rot * v;                                           % X Velocity in Body Frame
 dv = drotation*v + (rot*dstates)';                      % Derivative of Velocity in Body Frame wrt states
 
+% Estimated Measurements
+Ps_estimated = p0 * (1 + lambda * d / t0)^(g0 / (lambda * R)); % Estimated Static Pressure
+M2=  vb^2 / (gamma * R * T);
+Pd_estimated =  Ps_estimated *((1+(gamma-1)/2 *M2)^(gamma/(gamma-1))-1); % Estimated Dynamic Pressure
+
 % Alpha Term Derivative
 alpha = (1 + (gamma-1)/2 * vb^2 / (gamma * R * T));     % Alpha Term
 dalpha_vel = 2*vb*dv*(gamma-1)/(2*gamma*R*T);           % Velocity Derivative Alpha Term
@@ -82,7 +87,7 @@ beta = alpha^(gamma/(gamma-1)); % Beta Term
 dbeta = gamma/(gamma-1) * alpha^(1/(gamma-1)-1) * dalpha; % Derivative of Beta wrt states
 
 % Total Pressure Derivative
-dpt =dps * beta + dbeta * p_stat;                       % Derivative of Total Pressure wrt states
+dpt =dps * beta + dbeta * Ps_estimated;                       % Derivative of Total Pressure wrt states
 
 % Dynamic Pressure Derivative
 dpd = dpt - dps;                                        % Derivative of Dynamic Pressure wrt states
@@ -91,13 +96,7 @@ dpd = dpt - dps;                                        % Derivative of Dynamic 
 H = [dps; dpd];                                         % H matrix for the Kalman Filter
 
 % Covariance Matrix of the Measurement Noise
-R_thermo = R;
 R           =   [sigma_ps^2, 0; 0, sigma_pd^2];         % covariance matrix of the measurement noise
-
-% Estimated Measurements
-Ps_estimated = p0 * (1 + lambda * d / t0)^(g0 / (lambda * R_thermo)); % Estimated Static Pressure
-M2=  vb^2 / (gamma * R_thermo * T);
-Pd_estimated =  p_stat *((1+(gamma-1)/2 *M2)^(gamma/(gamma-1))-1); % Estimated Dynamic Pressure
 
 if any(isnan(H))
     H = zeros(2,12);
@@ -105,7 +104,6 @@ end
 S           =   H*P_pred*H'+R;                          % Matrix necessary for the correction factor
 
 if cond(S) > threshold
-
     e       =   [p_stat-Ps_estimated, p_dyn-Pd_estimated]'; %Measurement residual vector
     K       =  ( P_pred*H')/S;                          %Kalman gain 
     
