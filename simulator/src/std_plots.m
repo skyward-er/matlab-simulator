@@ -386,6 +386,37 @@ legend
 xlabel("Time [s]"), ylabel("-Altitude AGL [m]")
 drawnow
 
+%% NAS Error
+error = simOutput.sensors.nas.error;
+timeError = simOutput.sensors.nas.time(1:length(error)); 
+
+figures.ErrrNAS = figure('Name', 'NAS Error');
+
+subplot(3, 1, 1)
+plot(timeError,error(:, 1)','DisplayName','N [m]');
+hold on; grid on;
+plot(timeError,error(:, 2)',DisplayName','E [m]');
+plot(timeError,error(:, 3)','DisplayName','D [m]');
+legend
+ylabel("Error [m]")
+
+subplot(3, 1, 2)
+plot(timeError,error(:, 4)','DisplayName','V_n [m/s]');
+hold on; grid on;
+plot(timeError,error(:, 5)','DisplayName','V_e [m/s]');
+plot(timeError,error(:, 6)','DisplayName','V_d [m/s]');
+legend
+ylabel("Error [m/s]")
+
+subplot(3, 1, 3)
+plot(timeError,error(:, 7)','DisplayName','qx []');
+hold on; grid on;
+plot(timeError,error(:, 8)','DisplayName','qy []');
+plot(timeError,error(:, 9)','DisplayName','qz []');
+plot(timeError,error(:, 10)','DisplayName','qw []');
+legend
+drawnow
+
 %% euler angles
 eul_NAS = quat2eul(simOutput.sensors.nas.states(:,[10,7:9]));
 eul_NAS = flip(eul_NAS,2);
