@@ -13,7 +13,7 @@ end
 %% kalman initialization
 if not(settings.scenario == "descent")
     sensorData.kalman.vz = 0;                                                   % Vertical velocity
-    sensorData.kalman.z  = -environment.z0;
+    sensorData.kalman.z  = 0;
 else 
     sensorData.kalman.vz = -settings.Vz_final;                                                   % Vertical velocity
     sensorData.kalman.z  = -settings.z_final;
@@ -191,11 +191,11 @@ end
 if settings.flagNAS || settings.electronics
     % initialize states of the NAS 
     sensorData.nas.states = [X0; V0; Q0(2:4); Q0(1);0;0;0]';
-    if settings.scenario ~="descent"
-        sensorData.nas.states(3) = -environment.z0;
-    else
-        sensorData.nas.states(3) = -settings.z_final-environment.z0;
-    end
+    % if settings.scenario ~="descent"
+    %     sensorData.nas.states(3) = 0;
+    % else
+    %     sensorData.nas.states(3) = -settings.z_final-environment.z0;
+    % end
     sensorData.nas.P = settings.nas.P;
 end
 sensorData.nas.time = 0;

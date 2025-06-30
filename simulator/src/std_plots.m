@@ -140,7 +140,7 @@ if ~settings.electronics
     end
 end
 plot( -simOutput.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
-plot( -simOutput.sensors.nas.states(:,3)-environment.z0,  -simOutput.sensors.nas.states(:,6),'m--','DisplayName','NAS')
+plot( -simOutput.sensors.nas.states(:,3),  -simOutput.sensors.nas.states(:,6),'m--','DisplayName','NAS')
 % plot( structIn.ADA(:,4),  structIn.ADA(:,5),'b','DisplayName','ADA z')
 yyaxis right
 plot( -simOutput.Y(:, 3), simOutput.Y(:, 14),'g','DisplayName','arb')
@@ -232,7 +232,7 @@ end
 figures.trajectory = figure('Name', 'Trajectory','ToolBar','auto');
 plot3(simOutput.Y(1:end-10, 2), simOutput.Y(1:end-10, 1), -simOutput.Y(1:end-10, 3),'DisplayName','True trajectory');
 hold on; grid on;
-plot3(simOutput.sensors.nas.states(1:end-10, 2), simOutput.sensors.nas.states(1:end-10, 1), -simOutput.sensors.nas.states(1:end-10, 3)-environment.z0,'DisplayName','NAS trajectory');
+plot3(simOutput.sensors.nas.states(1:end-10, 2), simOutput.sensors.nas.states(1:end-10, 1), -simOutput.sensors.nas.states(1:end-10, 3),'DisplayName','NAS trajectory');
 
 if not(settings.scenario == "descent")
     plot3(simOutput.ARB.openingPosition(2),simOutput.ARB.openingPosition(1),simOutput.ARB.openingPosition(3),'ko','DisplayName','Airbrake deployment')
@@ -364,7 +364,7 @@ end
 drawnow
 
 %% check consistency of NAS:
-altitude = simOutput.sensors.nas.states(:,3)+environment.z0;
+altitude = simOutput.sensors.nas.states(:,3);
 v_int_NAS = 0;
 v_int_simulation = 0;
 for i = 2:length(simOutput.sensors.nas.states(:,6))

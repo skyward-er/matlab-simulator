@@ -115,7 +115,7 @@ if ~settings.flagAscent && settings.parafoil
             contSettings.flagFirstControlPRF = false;
             if contSettings.payload.guidance_alg == "t-approach"
                 pos_est = sensorData.nas.states(end,1:3);
-                pos_est(3) = -pos_est(3)-environment.z0;
+                pos_est(3) = -pos_est(3);
                 [contSettings.payload.EMC,contSettings.payload.M1,contSettings.payload.M2] = setEMCpoints(pos_est,settings.payload.target,contSettings.payload);
             end
         end
@@ -140,7 +140,7 @@ if ~settings.flagAscent && settings.parafoil
             deltaA_ref_old = deltaA_ref_new;
             t_last_prf_control = t1;
             pos_est = sensorData.nas.states(end,1:3);
-            pos_est(3) = -pos_est(3)-environment.z0;
+            pos_est(3) = -pos_est(3);
 
             [deltaA_ref_new,contSettings] = run_parafoilGuidance(pos_est, sensorData.nas.states(end,4:5), wind_est, ...
                 settings.payload.target, contSettings, rocket.parachutes(2,2).controlParams);

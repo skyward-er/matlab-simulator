@@ -40,7 +40,7 @@ refTemperature = params.refTemperature;
 a = params.a;
 n = params.n;
 
-alt = -x_pred(3);
+alt = -x_pred(3) + refAltitude;
 [~, ~, y_hat] = computeAtmosphericData(alt);
 
 threshold      =   10e-11;
@@ -48,10 +48,6 @@ H              =   sparse(1,6);                %Pre-allocation of gradient
                                                 %of the output function
 R              =   sigma_baro^2;
 
-% For the OBSW
-% H(3) = (refPressure*a*n*((a*(x_pred(3) - refAltitude))/refTemperature + 1).^(n - 1))/refTemperature;  %Update of the matrix H 
-
-% As z0 is already considered in x_pred(3) we do not need refAltitude
 H(3) = (refPressure*a*n*((a*(x_pred(3)))/refTemperature + 1).^(n - 1))/refTemperature;  %Update of the matrix H 
 
 S              =   H*P_pred*H'+R;                %Matrix necessary for the correction factor

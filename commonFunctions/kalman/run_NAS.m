@@ -201,7 +201,7 @@ if length(t_nas) > 1
         P_c(7:12,7:12,ii) = P_q(:,:,ii);
 
         if nas.flag_apo  == false
-            if -x(ii,6) < nas.v_thr && -x(ii,3) > 100 + environment.z0
+            if -x(ii,6) < nas.v_thr && -x(ii,3) > 100
                 nas.counter = nas.counter + 1;
             else
                 nas.counter = 0;
@@ -218,7 +218,7 @@ if length(t_nas) > 1
     sensorData.nas.P = P_c;
     sensorData.nas.time = t_nas;
     sensorData.nas.timestampPitotCorrection = timestampPitotCorrection;
-    if abs(sensorData.nas.states(1,3)) >nas.stopPitotAltitude+ environment.z0
+    if abs(sensorData.nas.states(1,3)) >nas.stopPitotAltitude
         nas.flagStopPitotCorrection = true;
     end
     sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2,:)  = sensorData.nas.states(2:end,:); % NAS output

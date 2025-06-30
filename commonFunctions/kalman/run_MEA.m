@@ -124,7 +124,7 @@ for ii = 2:length(t_mea)
         vz_pred = -vz_nas(ii);
     end
 
-    predicted_apogee(ii) = z_pred-environment.z0 + 1./(2.*( 0.5.*rho .* CD * rocket.crossSection ./ mass))...
+    predicted_apogee(ii) = z_pred + 1./(2.*( 0.5.*rho .* CD * rocket.crossSection ./ mass))...
         .* log(1 + (vz_pred.^2 .* (0.5 .* rho .* CD .* rocket.crossSection) ./ mass) ./ 9.81 );
 
     % retrieve NAS data

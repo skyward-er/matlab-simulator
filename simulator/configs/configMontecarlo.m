@@ -35,7 +35,7 @@ if settings.montecarlo
             mu_t = 1;                         % thrust_percentage mean value
 
             thrust_percentage = normrnd(mu_t,sigma_t,N_sim,1);       %generate normally distributed values ( [0.8 1.20] = 3sigma) % serve il toolbox
-            stoch.thrust = thrust_percentage*rocket.motor.thrust;                  % thrust - the notation used creates a matrix where each row is the expThrust multiplied by one coefficient in the thrust percentage array
+            stoch.thrust = thrust_percentage*rocket.motor.thrust';                  % thrust - the notation used creates a matrix where each row is the expThrust multiplied by one coefficient in the thrust percentage array
 
 
             %%% in questo modo però il burning time rimane fissato perchè è
@@ -49,7 +49,7 @@ if settings.montecarlo
             stoch.Kt = normrnd(mu_Kt, sigma_Kt, N_sim, 1);
 
             impulse_uncertainty = normrnd(1,1.67/100,N_sim,1);
-            stoch.expTime = diag(impulse_uncertainty)*((1./thrust_percentage) * rocket.motor.time);          % burning time - same notation as thrust here
+            stoch.expTime = diag(impulse_uncertainty)*((1./thrust_percentage) * rocket.motor.time');          % burning time - same notation as thrust here
 
             for ii = 1:N_sim
                 if stoch.expTime(ii, end) <= rocket.motor.time(end)
