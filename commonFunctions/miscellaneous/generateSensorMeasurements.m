@@ -158,7 +158,7 @@ if isfield(freq, 'pitotFrequency')
     sensorData.pitot.temperature(1) = sensorTot.pitot.temperature(end);
     if length(sensorData.pitot.time)>1
         TfPitot =  round(Tf*1e4)/1e4;
-        z = -interp1(TfPitot,Y(:,3),sensorData.pitot.time(2:end));
+        z = -interp1(TfPitot,Y(:,3),sensorData.pitot.time(2:end)) + environment.z0;
         v = interp1(TfPitot,Y(:,4),sensorData.pitot.time(2:end));
         Q = interp1(TfPitot,Y(:,10:13),sensorData.pitot.time(2:end));
         wind_body = quatrotate(Q,wind);
