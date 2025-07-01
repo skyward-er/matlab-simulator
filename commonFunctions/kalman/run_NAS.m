@@ -226,11 +226,10 @@ if length(t_nas) > 1
     % Error Analysis
     realDCM = quat2dcm(realStates(ii, 10:13));
     realVel = realDCM'*realStates(ii, 4:6)';
-    altitudeBias = 160;
     nasError(1:3) = realStates(ii, 1:3) - x(ii, 1:3);
     nasError(4:6) = realVel'-x(end, 4:6);
     nasError(7:10) = realStates(ii, [11 12 13 10]) - x(ii, 7:10);
-    nasError(3) = nasError(3) - altitudeBias;
+    nasError(3) = nasError(3) - environment.z0; % Correct for the ground altitude
 
     sensorData.nas.states= x;
     sensorData.nas.P = P_c;
