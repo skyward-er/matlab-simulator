@@ -231,10 +231,6 @@ if length(t_nas) > 1
     nasError(4:6) = realVel'-x(end, 4:6);
     nasError(7:10) = realStates(ii, [11 12 13 10]) - x(ii, 7:10);
     nasError(3) = nasError(3) - altitudeBias;
-    if all(nasError==0)
-        nasError = NaN*ones(1,10);
-    end
-
 
     sensorData.nas.states= x;
     sensorData.nas.P = P_c;

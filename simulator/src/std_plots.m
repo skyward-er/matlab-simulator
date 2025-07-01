@@ -388,14 +388,16 @@ drawnow
 
 %% NAS Error
 error = simOutput.sensors.nas.error;
+error(all(error ==0, 2), :) = NaN; % remove rows with all zeros
 timeError = simOutput.sensors.nas.time(1:length(error)); 
+warning('off','all')
 
-figures.ErrrNAS = figure('Name', 'NAS Error');
-
+figures.ErrNAS = figure('Name', 'NAS Ascent Error');
+sgtitle("NAS Error Analysis")
 subplot(3, 1, 1)
 plot(timeError,error(:, 1)','DisplayName','N [m]');
 hold on; grid on;
-plot(timeError,error(:, 2)',DisplayName','E [m]');
+plot(timeError,error(:, 2)','DisplayName','E [m]');
 plot(timeError,error(:, 3)','DisplayName','D [m]');
 legend
 ylabel("Error [m]")
@@ -414,8 +416,25 @@ hold on; grid on;
 plot(timeError,error(:, 8)','DisplayName','qy []');
 plot(timeError,error(:, 9)','DisplayName','qz []');
 plot(timeError,error(:, 10)','DisplayName','qw []');
+ylabel("Error []")
 legend
 drawnow
+warning('on','all')
+
+% Box Plot
+figures.ErrNASBox = figure('Name', 'NAS Ascent Error BoxPlot');
+sgtitle("NAS Error Box Plot")
+subplot(3, 1, 1)
+boxplot((error(:, 1:3)),'Labels',{'N [m]','E [m]','D [m]'}, "orientation","horizontal")
+ylabel("Error [m]")
+subplot(3, 1, 2)
+boxplot((error(:, 4:6)),'Labels',{'V_n [m/s]','V_e [m/s]','V_d [m/s]'}, "orientation","horizontal")
+ylabel("Error [m/s]")
+subplot(3, 1, 3)
+boxplot((error(:, 7:10)),'Labels',{'qx []','qy []','qz []','qw []'}, "orientation","horizontal")
+ylabel("Error []")
+drawnow
+warning('on','all')
 
 %% euler angles
 eul_NAS = quat2eul(simOutput.sensors.nas.states(:,[10,7:9]));

@@ -95,10 +95,10 @@ settings.nas.sigma_mag     =   10;                                          % [m
 settings.nas.sigma_GPS     =   sqrt(diag([0.002 0.002 0.01/30 0.01/30]));   % [millideg m/s]     estimated GPS variance. position from test, velocity from datasheet
 settings.nas.sigma_w       =   10;                                          % [rad/s]   estimated gyroscope variance;
 settings.nas.sigma_beta    =   1e-4;                                        % [rad/s]   estimated gyroscope bias variance;
-settings.nas.sigma_pitot_static   =   50;                                   % [Pa]   estimated static pressure variance
-settings.nas.sigma_pitot_dynamic  =   50;                                   % [Pa]   estimated dynamic pressure variance
-settings.nas.sigma_pitot   =   20;                                        % Legacy pitot variance
-settings.nas.sigma_pitot2  =   0.01;                                          % Legacy pitot variance  
+settings.nas.sigma_pitot_static   =   75;                                   % [Pa]   estimated static pressure variance
+settings.nas.sigma_pitot_dynamic  =   75;                                   % [Pa]   estimated dynamic pressure variance
+settings.nas.sigma_pitot   =   20;                                          % Legacy pitot variance
+settings.nas.sigma_pitot2  =   0.01;                                        % Legacy pitot variance  
 settings.nas.sigma_acc     =   0.05;                                        % [m/s^2]
 settings.nas.P             = 0.01*eye(12);
 
@@ -113,7 +113,7 @@ settings.nas.counter       =   0;
 settings.nas.baro.a = 0.0065;                                               % [K/m] temperature gradient Lambda
 settings.nas.baro.n = 5.255933;
 [settings.nas.baro.refTemperature,~,settings.nas.baro.refPressure] = computeAtmosphericData(0);
-settings.nas.PitotThreshold = 0.22;                                         % Minimum Mach for pitot update 
+settings.nas.PitotThreshold = 0.35;                                         % Minimum Mach for pitot update 
 
 settings.nas.t_nas         =   -1;                                          % Apogee detection timestamp
 settings.nas.flag_apo      =   false;                                       % True when the apogee is detected
