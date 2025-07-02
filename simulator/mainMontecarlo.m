@@ -168,8 +168,7 @@ for alg_index = 4
         apogee.radius(i) = save_thrust{i}.apogee.radius;
 
         % NAS error
-        nas.error(i, :) = save_thrust{i}.sensors.nas.errorPitot;
-        nas.error_no_pitot(i, :) = save_thrust{i}.sensors.nas.errornoPitot;
+        nas.error(i, :) = mean(abs(save_thrust{i}.sensors.nas.errorPitot), 1);
 
         % horizontal speed at apogee
         idx_apo = save_thrust{i}.apogee.idx;
