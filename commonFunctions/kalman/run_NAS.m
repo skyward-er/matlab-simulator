@@ -197,7 +197,7 @@ if length(t_nas) > 1
                     if settings.nas.pitot_correction 
                         P_c (:, :, ii) = [P_lin(:, :, ii), zeros(6, 6); zeros(6, 6), P_q(:, :, ii)];
                      %   [x_lin(ii, :), P_lin(:,:,ii)] = correctionPitot([x_lin(ii, :), xq(ii, :)],P_lin(:, :, ii), sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot_static, nas.sigma_pitot_dynamic,nas.baro);
-                        [x_lin(ii, :), P_lin(:,:,ii)] = correctionPitotQuat([x_lin(ii, :), xq(ii, :)],P_c(:, :, ii), sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot_static, nas.sigma_pitot_dynamic,nas.baro);
+                        [x_lin(ii, :), P_lin(:,:,ii)] = correctionPitotQuat([x_lin(ii, :), xq(ii, :)],P_c(:, :, ii), sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot_static, nas.sigma_pitot_dynamic,nas.baro, environment.z0);
                     end
                 end
             end

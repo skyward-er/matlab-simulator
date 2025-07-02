@@ -1,4 +1,4 @@
-function [x,P, y_res] = correctionPitotQuat(x_pred,P_pred,p_dyn,p_stat,sigma_ps, sigma_pd, params)
+function [x,P, y_res] = correctionPitotQuat(x_pred,P_pred,p_dyn,p_stat,sigma_ps, sigma_pd, params, z0)
 
 
 %-----------DESCRIPTION OF FUNCTION:------------------
@@ -21,6 +21,7 @@ function [x,P, y_res] = correctionPitotQuat(x_pred,P_pred,p_dyn,p_stat,sigma_ps,
 %           -sigma_ps:  VARIANCE OF THE STATIC PRESSURE --> 1x1
 %           -sigma_pd:  VARIANCE OF THE DYNAMIC PRESSURE --> 1x1
 %           -params:    STRUCTURE WITH ISA PARAMETERS
+%           -z0:            ALTITUDE OFFSET FROM MSL TO AGL
 %
 %       -OUTPUTS:
 %           -x_es:      STATE ESTIMATION CORRECTED AT T --> 1x13
@@ -38,7 +39,7 @@ t0 = params.refTemperature;
 lambda = params.a;
 g0 = 9.80665;                                           % m/s^2
 R = 287.05;                                             % J/(kg*K) 
-d = x_pred(3);                                          % Down Coordinate (Altitude)
+d = x_pred(3)-z0;                                          % Down Coordinate (Altitude)
 qx = x_pred(7);                                         % Quaternion
 qy = x_pred(8);                                         % Quaternion
 qz = x_pred(9);                                         % Quaternion
