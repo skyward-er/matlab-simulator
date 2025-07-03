@@ -90,7 +90,7 @@ if ~exist("../commonFunctions/graphics/general-utilities/","dir")
     warning('To export file you need to download the repository, read the README file in the folder')
 end
  std_plots(simOutput,settings,contSettings,mission,environment)
-% sensor_plots(simOutput, environment, rocket, settings);
+ sensor_plots(simOutput, environment, rocket, settings);
 % report_plots(simOutput,settings,contSettings)
 
 %% state visualiser
