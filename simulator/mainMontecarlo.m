@@ -168,8 +168,7 @@ for alg_index = 4
         apogee.radius(i) = save_thrust{i}.apogee.radius;
 
         % NAS error
-        nas.error(i, :) = mean(abs(save_thrust{i}.sensors.nas.errorPitot), 1);
-
+        nas.error(i, :) = mean(abs(save_thrust{i}.sensors.nas.error), 1);
         % horizontal speed at apogee
         idx_apo = save_thrust{i}.apogee.idx;
         apogee.horizontalSpeed(i) = norm(save_thrust{i}.apogee.velocity_ned(1:2)); % this is in body frame, but as the last point is the apogee we should have only  horizontal velocity, so all the components must be taken
