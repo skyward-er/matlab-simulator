@@ -101,7 +101,7 @@ sensorSettings.accelerometer.offsetX               =   0;                       
 sensorSettings.accelerometer.offsetY               =   0;                           % +-90 in mg
 sensorSettings.accelerometer.offsetZ               =   0;                           % +-90 in mg
 sensorSettings.accelerometer.walkDiffusionCoef     =   0;                           % guess
-sensorSettings.accelerometer.dt                    =   0.01;                        % sampling time
+sensorSettings.accelerometer.dt                    =   0.01;                        % sampling time - ODR 416 Hz 
 
 sensorSettings.accelerometer.update(Orion_Temp_sensor_vect, "main_Boardcore_LSM6DSRXData.csv", 1);
 
@@ -115,7 +115,7 @@ sensorSettings.gyroscope.offsetX               =   0;                           
 sensorSettings.gyroscope.offsetY               =   0;                               % +-30e3 in mdps
 sensorSettings.gyroscope.offsetZ               =   0;                               % +-30e3 in mdps
 sensorSettings.gyroscope.walkDiffusionCoef     =   1;                               % guess
-sensorSettings.gyroscope.dt                    =   0.01;                            % sampling time
+sensorSettings.gyroscope.dt                    =   0.01;                            % sampling time - ODR 416 Hz
 sensorSettings.gyroscope.transMatrix           =   diag([1 1 1]);                   % axis transformation
 
 sensorSettings.gyroscope.update(Orion_Temp_sensor_vect, "main_Boardcore_LSM6DSRXData.csv", 2);
@@ -125,14 +125,14 @@ if settings.second_imu
 
     % NOTE: acceleration in mg
     sensorSettings.accelerometer_1 = Sensor3D();
-    sensorSettings.accelerometer_1.maxMeasurementRange   =   16000;                       % 2000, 4000, 8000, 16000 in mg
-    sensorSettings.accelerometer_1.minMeasurementRange   =   -16000;                      % -2000, -4000, -8000, -16000 in mg
+    sensorSettings.accelerometer_1.maxMeasurementRange   =   4000;                        % 2000, 4000, 8000, 16000 in mg
+    sensorSettings.accelerometer_1.minMeasurementRange   =   -4000;                       % -2000, -4000, -8000, -16000 in mg
     sensorSettings.accelerometer_1.bit                   =   16;
     sensorSettings.accelerometer_1.offsetX               =   0;                           % +-90 in mg
     sensorSettings.accelerometer_1.offsetY               =   0;                           % +-90 in mg
     sensorSettings.accelerometer_1.offsetZ               =   0;                           % +-90 in mg
     sensorSettings.accelerometer_1.walkDiffusionCoef     =   0;                           % guess
-    sensorSettings.accelerometer_1.dt                    =   0.01;                        % sampling time
+    sensorSettings.accelerometer_1.dt                    =   0.01;                        % sampling time - ODR 104 Hz
 
     sensorSettings.accelerometer_1.update(Orion_Temp_sensor_vect, "main_Boardcore_LSM6DSRXData.csv", 1);
 end
@@ -141,14 +141,14 @@ if settings.second_imu
 
         % NOTE: angular rate in mdps
         sensorSettings.gyroscope_1 = Sensor3D();
-        sensorSettings.gyroscope_1.maxMeasurementRange   =   245e3;                           % 245e3, 500e3, 2000e3 in mdps
-        sensorSettings.gyroscope_1.minMeasurementRange   =   -245e3;                          % -245e3, -500e3, -2000e3 in mdps
+        sensorSettings.gyroscope_1.maxMeasurementRange   =   1e4;                             % 245e3, 500e3, 2000e3 in mdps
+        sensorSettings.gyroscope_1.minMeasurementRange   =   -1e4;                            % -245e3, -500e3, -2000e3 in mdps
         sensorSettings.gyroscope_1.bit                   =   16;
         sensorSettings.gyroscope_1.offsetX               =   0;                               % +-30e3 in mdps
         sensorSettings.gyroscope_1.offsetY               =   0;                               % +-30e3 in mdps
         sensorSettings.gyroscope_1.offsetZ               =   0;                               % +-30e3 in mdps
         sensorSettings.gyroscope_1.walkDiffusionCoef     =   1;                               % guess
-        sensorSettings.gyroscope_1.dt                    =   0.01;                            % sampling time
+        sensorSettings.gyroscope_1.dt                    =   0.01;                            % sampling time - ODR 104 Hz
         sensorSettings.gyroscope_1.transMatrix           =   diag([1 1 1]);                   % axis transformation
 
         sensorSettings.gyroscope_1.update(Orion_Temp_sensor_vect, "main_Boardcore_LSM6DSRXData.csv", 2);
