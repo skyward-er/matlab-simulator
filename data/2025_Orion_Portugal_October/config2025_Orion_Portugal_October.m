@@ -114,6 +114,7 @@ settings.nas.baro.a = 0.0065;                                               % [K
 settings.nas.baro.n = 5.255933;
 [settings.nas.baro.refTemperature,~,settings.nas.baro.refPressure] = computeAtmosphericData(0);
 settings.nas.PitotThreshold = 0.35;                                         % Minimum Mach for pitot update 
+settings.nas.baro.gasConstant = 287.05;                                          % Dry Air Specific Gas Constant [J/(kg*K)] 
 
 settings.nas.t_nas         =   -1;                                          % Apogee detection timestamp
 settings.nas.flag_apo      =   false;                                       % True when the apogee is detected

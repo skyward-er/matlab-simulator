@@ -1,4 +1,4 @@
-function [sensorData,sensorTot,nas] = run_NAS(Tf, mag_NED,sensorData,sensorTot,settings, environment,  realStates)
+function [sensorData,sensorTot,nas] = run_NAS(Tf, mag_NED,sensorData,sensorTot,settings, environment)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
@@ -197,7 +197,7 @@ if length(t_nas) > 1
                     if settings.nas.pitot_correction 
                         P_c (:, :, ii) = [P_lin(:, :, ii), zeros(6, 6); zeros(6, 6), P_q(:, :, ii)];
                      %   [x_lin(ii, :), P_lin(:,:,ii)] = correctionPitot([x_lin(ii, :), xq(ii, :)],P_lin(:, :, ii), sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot_static, nas.sigma_pitot_dynamic,nas.baro);
-                        [x_lin(ii, :), P_lin(:,:,ii)] = correctionPitotQuat([x_lin(ii, :), xq(ii, :)],P_c(:, :, ii), sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot_static, nas.sigma_pitot_dynamic,nas.baro, environment.z0);
+                        [x_lin(ii, :), P_lin(:,:,ii)] = correctionPitotQuat([x_lin(ii, :), xq(ii, :)],P_c(:, :, ii), sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot_static, nas.sigma_pitot_dynamic,nas.baro, environment);
                     end
                 end
             end
@@ -223,13 +223,6 @@ if length(t_nas) > 1
 
     end
 
-    % Error Analysis
-    realDCM = quat2dcm(realStates(ii, 10:13));
-    realVel = realDCM'*realStates(ii, 4:6)';
-    nasError(1:3) = realStates(ii, 1:3) - x(ii, 1:3);
-    nasError(4:6) = realVel'-x(end, 4:6);
-    nasError(7:10) = realStates(ii, [11 12 13 10]) - x(ii, 7:10);
-
     sensorData.nas.states= x;
     sensorData.nas.P = P_c;
     sensorData.nas.time = t_nas;
@@ -237,9 +230,6 @@ if length(t_nas) > 1
     sensorTot.nas.states(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2,:)  = sensorData.nas.states(2:end,:); % NAS output
     sensorTot.nas.time(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.time(2:end); % NAS time output
     sensorTot.nas.timestampPitotCorrection(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.timestampPitotCorrection(2:end); % NAS time output
-    if settings.flagAscent
-        sensorTot.nas.error(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2, :) = ones(size(sensorData.nas.states(:,1),1)-1, 10).*nasError;
-    end
     sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1)-1;
 
 end

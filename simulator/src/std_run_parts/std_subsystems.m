@@ -17,10 +17,11 @@ end
 
 %% Navigation system (NAS)
 if settings.flagNAS && settings.dataNoise
-    [sensorData, sensorTot, settings.nas]   =  run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings, environment, Yf);
+    [sensorData, sensorTot, settings.nas]   =  run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings, environment);
 
-
-
+    if settings.flagAscent
+        [sensorTot] = errorNAS (Yf, sensorData, sensorTot);
+    end
 
     %%%%%%%%%%%%%%%%%% DA RIVEDERE L'UTILIZZO DI QUESTE VARIABILI ASSOLUTAMENTE %%%%%%%%%%%%%%%%%%%%%%%%
     sensorData.kalman.z  =  sensorTot.nas.states(end, 3);
