@@ -1,4 +1,4 @@
-function [x,P, y_res] = correctionPitot(x_pred,P_pred,p_dyn,p_stat,sigma_ps, sigma_pd, params, z0)
+function [x,P, y_res] = correctionPitot(x_pred,P_pred,p_dyn,p_stat,sigma_ps, sigma_pd, params, environment)
 
 
 %-----------DESCRIPTION OF FUNCTION:------------------
@@ -32,19 +32,18 @@ function [x,P, y_res] = correctionPitot(x_pred,P_pred,p_dyn,p_stat,sigma_ps, sig
 %---------------------------------------------------------------------------
 
 % Useful Variables
-threshold      =   10e-11;
-gamma = 1.4;
-p0 = params.refPressure;
-t0 = params.refTemperature;
-lambda = params.a;
-g0 = 9.80665;                                           % m/s^2
-R = 287.05;                                             % J/(kg*K) 
-d = x_pred(3)-z0;                                          % Down Coordinate (Altitude)
-qx = x_pred(7);                                         % Quaternion
-qy = x_pred(8);                                         % Quaternion
-qz = x_pred(9);                                         % Quaternion
-qw = x_pred(10);                                        % Scalar Quaternion 
-v = x_pred(4:6)';                                       % Velocity Vector NED
+gamma = environment.gamma;                              % Specific Heat Ratio []
+p0 = params.refPressure;                                % ISA Reference Pressure [Pa]
+t0 = params.refTemperature;                             % ISA Reference Temperature [K]
+lambda = params.a;                                      % ISA Temperature Gradient [K/m]
+g0 = environment.g0;                                    % ISA Gravity Constant [m/s^2]
+R = params.gasConstant;                                 % Specific Gas Constant [J/(kg*K)]
+d = x_pred(3)-environment.z0;                           % Down Coordinate (Altitude) [m]
+qx = x_pred(7);                                         % Quaternion []
+qy = x_pred(8);                                         % Quaternion []
+qz = x_pred(9);                                         % Quaternion []
+qw = x_pred(10);                                        % Scalar Quaternion [] 
+v = x_pred(4:6)';                                       % Velocity Vector NED [m/s]
 
 
 % Temperature and Temperature Derivative Term
@@ -94,7 +93,7 @@ if any(isnan(H))
 end
 S           =   H*P_pred*H'+R;                          % Matrix necessary for the correction factor
 
-if cond(S) > threshold
+if cond(S) > 1e-11
     e       =   [p_stat-Ps_estimated, p_dyn-Pd_estimated]'; %Measurement residual vector
     K       =  ( P_pred*H')/S;                          %Kalman gain 
     

@@ -1,3 +1,4 @@
+function [sensorTot] = errorNAS(realStates, sensorData, sensorTot)
 %%% NAS ERROR COMPUTATION %%% 
 %
 % ------------------------------------------------------------------------
@@ -29,8 +30,6 @@
 %
 % sensorTot = Struct with updated NAS error field
 
-function [sensorTot] = errorNAS(realStates, sensorData, sensorTot)
-
 %% Error Preallocation
 index =  2 : length(sensorData.nas.time);
 nasError = zeros(index(end)-1, 10); 
@@ -48,7 +47,3 @@ end
 i_0 = sensorTot.nas.n_old - size(sensorData.nas.states,1)+1;
 i_f = i_0 +  size(sensorData.nas.states(:, 1), 1) -2;
 sensorTot.nas.error(i_0:i_f, :) = nasError;
-
-
-
-
