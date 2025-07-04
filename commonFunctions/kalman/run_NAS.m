@@ -144,13 +144,13 @@ if length(t_nas) > 1
     % IMU Data Selection
     if settings.second_imu && (settings.shutdown || ~settings.flagAscent)
 
-        % Use the precision IMU in power ascent
+        % Use the precision IMU when available not in power ascent
         accelerometerMeasures = sensorTot.imu_1.accelerometer_measures;
         gyroscopeMeasures = sensorTot.imu_1.gyro_measures;
 
     else
 
-        % Use the standard IMU if not in power ascent or if the second IMU is not available
+        % Use the standard IMU if in power ascent or if the second IMU is not available
         accelerometerMeasures = sensorTot.imu.accelerometer_measures;
         gyroscopeMeasures = sensorTot.imu.gyro_measures;
 
