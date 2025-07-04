@@ -108,8 +108,8 @@ sensorSettings.accelerometer.update(Orion_Temp_sensor_vect, "main_Boardcore_LSM6
 %% initial gyroscope sensor from LSM6DSRX_0
 % NOTE: angular rate in mdps
 sensorSettings.gyroscope = Sensor3D();
-sensorSettings.gyroscope.maxMeasurementRange   =   245e3;                           % 245e3, 500e3, 2000e3 in mdps
-sensorSettings.gyroscope.minMeasurementRange   =   -245e3;                          % -245e3, -500e3, -2000e3 in mdps
+sensorSettings.gyroscope.maxMeasurementRange   =   2000e3;                          % 125e3, 250e3, 500e3, 1000e3, 2000e3, 4000e3 dps in mdps
+sensorSettings.gyroscope.minMeasurementRange   =   -2000e3;                         % -125e3, -250e3, -500e3, -1000e3, -2000e3, -4000e3 dps in mdps
 sensorSettings.gyroscope.bit                   =   16;
 sensorSettings.gyroscope.offsetX               =   0;                               % +-30e3 in mdps
 sensorSettings.gyroscope.offsetY               =   0;                               % +-30e3 in mdps
@@ -141,8 +141,8 @@ if settings.second_imu
 
         % NOTE: angular rate in mdps
         sensorSettings.gyroscope_1 = Sensor3D();
-        sensorSettings.gyroscope_1.maxMeasurementRange   =   1e4;                             % 245e3, 500e3, 2000e3 in mdps
-        sensorSettings.gyroscope_1.minMeasurementRange   =   -1e4;                            % -245e3, -500e3, -2000e3 in mdps
+        sensorSettings.gyroscope_1.maxMeasurementRange   =   1000e3;                          % 125e3, 250e3, 500e3, 1000e3, 2000e3, 4000e3 dps in mdps
+        sensorSettings.gyroscope_1.minMeasurementRange   =   -1000e3;                         % -125e3, -250e3, -500e3, -1000e3, -2000e3, -4000e3 dps in mdps
         sensorSettings.gyroscope_1.bit                   =   16;
         sensorSettings.gyroscope_1.offsetX               =   0;                               % +-30e3 in mdps
         sensorSettings.gyroscope_1.offsetY               =   0;                               % +-30e3 in mdps
