@@ -18,7 +18,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %% Number of complete run
 
-n_run = 12:22;
+n_run = 12:21;
+savePlots = 1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -27,10 +28,10 @@ for idx_scheduler = n_run
 
     if ~exist('flagSubmodulesUpdated','var') % every first time you use the simulator checks for updates, then stops doing it (note: if you clear all vars it starts doing it)
         close all; clc;
-        clearvars -except n_run idx_scheduler
+        clearvars -except n_run idx_scheduler savePlots
     else
         close all; clc;
-        clearvars -except flagSubmodulesUpdated n_run idx_scheduler
+        clearvars -except flagSubmodulesUpdated n_run idx_scheduler savePlots
     end
 
     %% recall the first part of the MAIN script
@@ -358,8 +359,10 @@ for idx_scheduler = n_run
     
         %% PLOTS
     
-        plotsMontecarlo;
-        
+        if savePlots
+            plotsMontecarlo;
+        end
+
         %% SAVE
         % save plots
         saveDate = replace(string(datetime),":","_");
@@ -400,7 +403,9 @@ for idx_scheduler = n_run
             if ~exist(folder(i),"dir")
                 mkdir(folder(i))
             end
-            save(folder(i)+"\montecarloFigures",'montFigures')
+            if savePlots
+                save(folder(i)+"\montecarloFigures",'montFigures')
+            end
             
             save(folder(i)+"\saveThrust.mat","save_thrust","apogee","N_sim","settings","thrust_percentage","stoch") % add "save_thrust", > 2GB for 1000 sim
     

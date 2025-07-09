@@ -69,6 +69,7 @@ else
             % elseif percentage > 1
             %     percentage = 1;
             % end
+
             % stochABK_alg = 2;
             if stochABK_alg == 2
                 ref = 0.2;
@@ -82,6 +83,9 @@ else
                 % kp = 3;
                 % ki = 500;
                 % kd = 0.008;
+                % kp = 5; % boom
+                % ki = 500;
+                % kd = 0.1;
 
                 percentage = kp*error + kd*prev_error/dt + ki*int_error + ref;
                 if percentage < 0
