@@ -150,6 +150,73 @@ plot( -simOutput.Y(:, 3), -v_ned(:,3)-new_val,'b','DisplayName','Traj')
 yyaxis right
 plot( -simOutput.Y(:, 3), simOutput.Y(:, 14),'g','DisplayName','arb')
 
+abk_start_idx = nnz(~simOutput.Y(:, 14));
+
+error_sum = -v_ned(abk_start_idx:end,3)-new_val(abk_start_idx:end);
+error_sum = error_sum(~isnan(-v_ned(abk_start_idx:end,3)-new_val(abk_start_idx:end)));
+% figure
+% plot(error_sum)
+
+figure
+plot(error_sum(1:round(length(error_sum)/2)))
+hold on
+plot(error_sum,'--r')
+error_sum_half = sum(abs(error_sum(1:round(length(error_sum)/2))));
+
+figure
+plot(error_sum(1:round(length(error_sum)/2)))
+
+% dt = 0.01;
+% derivative = diff(error_sum(1:round(length(error_sum)/2)))./dt;
+% derivative = diff(error_sum)./dt;
+% Y_plot = -simOutput.Y(abk_start_idx:end, 3);
+% Y_plot = Y_plot(~isnan(-v_ned(abk_start_idx:end,3)-new_val(abk_start_idx:end)));
+% figure
+% plot(Y_plot(1:end-1), derivative)
+% hold on
+% plot( -simOutput.Y(abk_start_idx:end, 3), simOutput.Y(abk_start_idx:end, 14),'g','DisplayName','arb')
+% 
+% sum_deri = sum(abs(derivative));
+
+
+
+dt = 0.01;
+abk = simOutput.Y(abk_start_idx:end, 14);
+derivative = diff(abk)./dt;
+Y_plot = -simOutput.Y(abk_start_idx:end, 3);
+
+figure
+plot(Y_plot(1:end-1), derivative)
+hold on
+plot(Y_plot, abk,'g','DisplayName','arb')
+
+settle = abs(movmean(derivative,10)) <= 1e-1;
+settle = double(settle);
+for ii = 1:length(settle)
+    if abs(abk(ii) - 1.1717) < 0.01
+        temp_val = 1;
+    elseif abs(abk(ii) - 0) < 0.01
+        temp_val = -1;
+    else
+        temp_val = 0;
+    end
+    settle(ii) = settle(ii) * temp_val;
+end
+idx_settle = sum(-simOutput.Y(abk_start_idx:end, 3) < 2900);
+plot(Y_plot(1:idx_settle), settle(1:idx_settle))
+% plot(Y_plot(1:idx_settle-1), diff(settle(1:idx_settle)), '--m')
+
+saturations = sum(abs(diff(settle(1:idx_settle))))/2;
+
+sum_deri = sum(abs(derivative));
+
+fprintf("Sum error half = %f\n", error_sum_half)
+fprintf("Sum derivative half = %f\n", sum_deri)
+fprintf("Saturations = %i\n", saturations)
+
+
+
+% pause(1)
 
 
 %%
