@@ -1,20 +1,22 @@
-%% Boh
-clc
+%% Data analysis - MC for ABK
+clc, clear
+close all
+
 graphics
+
+load('C:\Users\stebe\Desktop\saveThrust.mat')
 
 
 %% Data loading (one file - manual)
-idx = 5;
-
-data = save_thrust{idx};
-contSettings = data.contSettings;
-
-Y_out = data.Y;
+% idx = 5;
+% 
+% data = save_thrust{idx};
+% contSettings = data.contSettings;
+% 
+% Y_out = data.Y;
 
 ref = 0.2;
 dt = 0.1;
-
-
 
 
 %% post process data complete
@@ -80,7 +82,7 @@ for jj = 1:totSim
     end
     idx_settle = sum(-Y_out(abk_start_idx:end, 3) < 2900);
     
-    saturations = sum(abs(diff(settle(1:idx_settle))))/2;
+    saturations = ceil(sum(abs(diff(settle(1:idx_settle))))/2);
     
     sum_deri = sum(abs(derivative));
     
@@ -105,15 +107,19 @@ for kk = 1:numel(fieldnames(vect))-1
         case 1
             vector_analyzed = vect.error_sum_half;
             title("Error sum (half)")
+            fprintf("error_sum_half:\n")
         case 2
             vector_analyzed = vect.sum_deri;
             title("Error sum derivative")
+            fprintf("sum_deri:\n")
         case 3
             vector_analyzed = vect.saturations;
             title("Saturations")
+            fprintf("saturations:\n")
         case 4
             vector_analyzed = vect.apogee;
             title("Apogee")
+            fprintf("apogee:\n")
     end
     
     maxErr = max(vector_analyzed);
@@ -228,7 +234,7 @@ plot(Y_plot(1:idx_settle), settle(1:idx_settle), DisplayName="Settling")
 % plot(Y_plot(1:idx_settle-1), diff(settle(1:idx_settle)), '--m')
 legend(Location="best")
 
-saturations = sum(abs(diff(settle(1:idx_settle))))/2;
+saturations = ceil(sum(abs(diff(settle(1:idx_settle))))/2);
 
 sum_deri = sum(abs(derivative));
 
@@ -347,7 +353,6 @@ fprintf("Saturations = %i\n", saturations)
 % fprintf("Sum error half = %f\n", error_sum_half)
 % fprintf("Sum derivative half = %f\n", sum_deri)
 % fprintf("Saturations = %i\n", saturations)
-
 
 
 %% Functions
