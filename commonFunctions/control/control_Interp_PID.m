@@ -68,7 +68,7 @@ else
 
             kp = 1;
             ki = 100;
-            kd = 0.01;
+            kd = 0.002;
 
             percentage = kp*error + kd*prev_error/dt + ki*int_error + ref;
             if percentage < 0
