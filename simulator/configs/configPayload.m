@@ -37,8 +37,8 @@ payload.simParam.incControl = true;
 % payload.simParam.WES0 = environment.wind; % Windspeed considered in the subtraction
 
 % P and PI controller
-rocket.parachutes(2,2).controlParams.Kp = 0.4;
-rocket.parachutes(2,2).controlParams.Ki = 0.08;
+rocket.parachutes(2,2).controlParams.Kp = 0.045;
+rocket.parachutes(2,2).controlParams.Ki = 0.0025;
 rocket.parachutes(2,2).controlParams.uMax = 0.1;
 rocket.parachutes(2,2).controlParams.uMin = -0.1;
 rocket.parachutes(2,2).controlParams.deltaA_tau = 0.4; % [s], absolutely arbitrary value
