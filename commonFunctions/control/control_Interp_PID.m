@@ -1,4 +1,4 @@
-function [alpha0,contSettings] = control_Interp_PID(z,Vz,settings,contSettings,alpha0_old,int_error,dt)
+function [alpha0,int_error,contSettings] = control_Interp_PID(z,Vz,settings,contSettings,alpha0_old,int_error,dt)
 
 % HELP
 %
@@ -66,9 +66,9 @@ else
             prev_error = alpha0_old - ref;
             int_error = int_error + error*dt;
 
-            kp = 1;
-            ki = 100;
-            kd = 0.002;
+            kp = 2;
+            ki = 1.5;
+            kd = 0.05;
 
             percentage = kp*error + kd*prev_error/dt + ki*int_error + ref;
             if percentage < 0
