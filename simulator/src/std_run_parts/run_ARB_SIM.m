@@ -28,13 +28,15 @@ OUTPUT:
 
 switch true % set this value in configControl.m
 
-    case strcmp(contSettings.algorithm,'interp') || strcmp(contSettings.algorithm,'complete')
-        % help in the function
-
-        % [ap_ref_new,contSettings] = control_Interp(-sensorData.kalman.z,-sensorData.kalman.vz,settings,contSettings,ap_ref_old); % cambiare nome alla funzione tra le altre cose
+    case strcmp(contSettings.algorithm,'interp_PID') || strcmp(contSettings.algorithm,'complete')
         [ap_ref_new,int_error_new,contSettings] = control_Interp_PID(-sensorData.kalman.z,-sensorData.kalman.vz,settings,contSettings,ap_ref_old,int_error,dt);
         varargout{1} = int_error_new;
 
+    case strcmp(contSettings.algorithm,'interp')
+        % help in the function
+
+        [ap_ref_new,contSettings] = control_Interp(-sensorData.kalman.z,-sensorData.kalman.vz,settings,contSettings,ap_ref_old); % cambiare nome alla funzione tra le altre cose
+        
     case strcmp (contSettings.algorithm,'shooting')
         % shooting algorithm:
 

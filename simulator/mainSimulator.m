@@ -8,7 +8,7 @@ REVISIONS:
 - 0     xx/xx/xxxx, Release,    Ruben Di Battista
 - 1     16/04/2021, update,     Alessandro Del Duca
 
-- 2     07/04/2022, update,     Davide Rosato, AFD Departmwent
+- 2     07/04/2022, update,     Davide Rosato, AFD Department
                     Compatibility with common functions folder
 
 - 3     15/04/2022, update,     Marco Marchesi, SCS department
