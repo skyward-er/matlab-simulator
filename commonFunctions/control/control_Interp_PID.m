@@ -60,25 +60,24 @@ else
     switch contSettings.interpType
         case 'linear'
             current_position = (Vz-V_extrema(1))/(V_extrema(2)-V_extrema(1)); % percentage = 0 if completely on trajectory 1, percentage = 1 if completely on trajectory 2
-    
-            ref = contSettings.ABK.PID_ref;
-            error = current_position - ref;
-            prev_error = alpha0_old - ref;
-            int_error = int_error + error*dt;
-
-            kp = contSettings.ABK.PID_coeffs(1);
-            ki = contSettings.ABK.PID_coeffs(2);
-            kd = contSettings.ABK.PID_coeffs(3);
-
-            percentage = kp*error + kd*prev_error/dt + ki*int_error + ref;
-            if percentage < 0
-                percentage = 0;
-            elseif percentage > 1
-                percentage = 1;
-            end
         case 'sinusoidal'
-            percentage = 0.5+0.5*cos(-pi+pi*(Vz-V_extrema(1))/(V_extrema(2)-V_extrema(1))); % same as choice 1, but with a sinusoidal approach
-            int_error = 0;
+            current_position = 0.5+0.5*cos(-pi+pi*(Vz-V_extrema(1))/(V_extrema(2)-V_extrema(1))); % same as choice 1, but with a sinusoidal approach
+    end
+
+    ref = contSettings.ABK.PID_ref;
+    error = current_position - ref;
+    prev_error = alpha0_old - ref;
+    int_error = int_error + error*dt;
+
+    kp = contSettings.ABK.PID_coeffs(1);
+    ki = contSettings.ABK.PID_coeffs(2);
+    kd = contSettings.ABK.PID_coeffs(3);
+
+    percentage = kp*error + kd*prev_error/dt + ki*int_error + ref;
+    if percentage < 0
+        percentage = 0;
+    elseif percentage > 1
+        percentage = 1;
     end
 end
 
