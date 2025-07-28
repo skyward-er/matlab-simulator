@@ -75,7 +75,7 @@ for jj = 1:totSim
         end
         settle(ii) = settle(ii) * temp_val;
     end
-    idx_settle = sum(-Y_out(abk_start_idx:end, 3) < 2900);
+    idx_settle = sum(-Y_out(abk_start_idx:end, 3) < contSettings.criticalAltitude);
     
     saturations = ceil(sum(abs(diff(settle(1:idx_settle))))/2);
     

@@ -1,4 +1,4 @@
-function [ap_ref_new,contSettings,varargout] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old,int_error,dt,environment)
+function [ap_ref_new,contSettings,varargout] = run_ARB_SIM(sensorData,settings,contSettings,ap_ref_old,int_error,environment)
 
 
 %% HELP:
@@ -29,7 +29,7 @@ OUTPUT:
 switch true % set this value in configControl.m
 
     case strcmp(contSettings.algorithm,'interp_PID') || strcmp(contSettings.algorithm,'complete')
-        [ap_ref_new,int_error_new,contSettings] = control_Interp_PID(-sensorData.kalman.z,-sensorData.kalman.vz,settings,contSettings,ap_ref_old,int_error,dt);
+        [ap_ref_new,int_error_new,contSettings] = control_Interp_PID(-sensorData.kalman.z,-sensorData.kalman.vz,settings,contSettings,ap_ref_old,int_error);
         varargout{1} = int_error_new;
 
     case strcmp(contSettings.algorithm,'interp')

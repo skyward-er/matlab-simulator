@@ -127,7 +127,7 @@ if contSettings.run_old_ada
     drawnow
 end
 
-%% reference
+%% ABK
 figures.NASABKRef = figure('Name', 'NAS vs ABK reference');
 yyaxis left
 hold on
@@ -142,10 +142,74 @@ end
 plot( -simOutput.Y(:, 3), -v_ned(:,3),'b','DisplayName','Traj')
 plot( -simOutput.sensors.nas.states(:,3),  -simOutput.sensors.nas.states(:,6),'m--','DisplayName','NAS')
 % plot( structIn.ADA(:,4),  structIn.ADA(:,5),'b','DisplayName','ADA z')
+xlabel("Altitude AGL [m]"), ylabel("Velocity [m/s]")
 yyaxis right
 plot( -simOutput.Y(:, 3), simOutput.Y(:, 14),'g','DisplayName','arb')
 legend
-xlabel("Altitude AGL [m]")
+ylabel("ABK servo angle [rad]")
+drawnow
+
+ref = contSettings.ABK.PID_ref;
+new_Vz1 = interp1(contSettings.reference.Z, contSettings.reference.Vz(:,1), -simOutput.Y(:, 3));
+new_Vz2 = interp1(contSettings.reference.Z, contSettings.reference.Vz(:,2), -simOutput.Y(:, 3));
+new_val = new_Vz1 + (new_Vz2-new_Vz1)*ref;
+
+figures.NASABKRef2 = figure('Name', 'NAS vs ABK reference (ref POV)');
+yyaxis left
+hold on, grid on
+title('NAS vs ABK reference (ref POV)');
+plot(-simOutput.Y(:, 3), new_Vz1-new_val,'r','DisplayName','ref min')
+plot(-simOutput.Y(:, 3), new_Vz2-new_val,'k','DisplayName','ref max')
+plot( -simOutput.Y(:, 3), -v_ned(:,3)-new_val,'b','DisplayName','Traj')
+xlabel("Altitude AGL [m]"), ylabel("Relative velocity (wrt ref) [m/s]")
+yyaxis right
+plot( -simOutput.Y(:, 3), simOutput.Y(:, 14),'g','DisplayName','arb')
+ylabel("ABK servo angle [rad]")
+legend(Location="best")
+drawnow
+
+abk_start_idx = nnz(~simOutput.Y(:, 14));
+
+% error_sum = -v_ned(abk_start_idx:end,3)-new_val(abk_start_idx:end);
+% error_sum = error_sum(~isnan(-v_ned(abk_start_idx:end,3)-new_val(abk_start_idx:end)));
+% figures.ABK_error = figure('Name', 'ABK error wrt ref');
+% hold on, grid on
+% title('ABK error wrt ref');
+% plot(error_sum(1:round(length(error_sum)/2)), HandleVisibility="off")
+% plot(error_sum,'--r', DisplayName="Error")
+% xlabel("Relative altitude wrt ABK activation [m]"), ylabel("Error [m/s]")
+% legend(Location="best")
+% drawnow
+
+ABK_dt = 1/settings.frequencies.arbFrequency;
+abk = simOutput.Y(abk_start_idx:end, 14);
+derivative = diff(abk)./ABK_dt;
+Y_plot = -simOutput.Y(abk_start_idx:end, 3);
+
+settle = abs(movmean(derivative,10)) <= 1e-1;
+settle = double(settle);
+for ii = 1:length(settle)
+    if abs(abk(ii) - 1.1717) < 0.01
+        temp_val = 1;
+    elseif abs(abk(ii) - 0) < 0.01
+        temp_val = -1;
+    else
+        temp_val = 0;
+    end
+    settle(ii) = settle(ii) * temp_val;
+end
+idx_settle = sum(-simOutput.Y(abk_start_idx:end, 3) < contSettings.criticalAltitude);
+
+figures.NASABKRef2 = figure('Name', 'ABK derivative');
+hold on, grid on
+title('ABK derivative');
+plot(Y_plot, abk,'g', DisplayName="ABK")
+xlabel("Altitude AGL [m]"), ylabel("ABK servo angle [rad]")
+yyaxis right
+plot(Y_plot(1:end-1), derivative, linewidth=0.6, DisplayName="ABK derivative")
+plot(Y_plot(1:idx_settle), settle(1:idx_settle), 'b', DisplayName="Settling")
+ylabel("ABK servo angular velocity [rad/s]")
+legend(Location="best")
 drawnow
 
 %% quaternions

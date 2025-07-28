@@ -1,4 +1,4 @@
-function [alpha0,int_error,contSettings] = control_Interp_PID(z,Vz,settings,contSettings,alpha0_old,int_error,dt)
+function [alpha0,int_error,contSettings] = control_Interp_PID(z,Vz,settings,contSettings,alpha0_old,int_error)
 
 % HELP
 %
@@ -13,17 +13,21 @@ function [alpha0,int_error,contSettings] = control_Interp_PID(z,Vz,settings,cont
 % min extension) and decides how much to open with an
 % interpolation at fixed altitude of the actual velocity
 % w.r.t. the two references.
+% 
+% PID controller has been added to guide the interpolator
 
 % INPUTS:
-% z:        measured altitude
-% V:        speed (vector of two components)
-% settings: structure with data of the rocket and other simulation
-%           parameters
+% z:            measured altitude
+% V:            speed (vector of two components)
+% settings:     structure with data of the rocket and other simulation
+%               parameters
 % contSettings: structure with control configuration parameters
-% alpha_0_old: old commanded ABK angle, used in the filtering action
+% alpha_0_old:  old commanded ABK angle, used in the filtering action
+% int_error:    integral error (updated at each step)
 %
 % OUTPUTS:
-% alpha0:   commanded angle for the ABK controller
+% alpha0:       commanded angle for the ABK controller
+% int_error
 % contSettings: control configuration parameters updated
 
 %% retrieve data
@@ -63,6 +67,8 @@ else
         case 'sinusoidal'
             current_position = 0.5+0.5*cos(-pi+pi*(Vz-V_extrema(1))/(V_extrema(2)-V_extrema(1))); % same as choice 1, but with a sinusoidal approach
     end
+
+    dt = 1/settings.frequencies.arbFrequency;
 
     ref = contSettings.ABK.PID_ref;
     error = current_position - ref;
