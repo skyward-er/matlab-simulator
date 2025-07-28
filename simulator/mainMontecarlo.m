@@ -78,11 +78,6 @@ end
 flagSaveOffline = input('Do you want to save the results offline? (y/n): ','s');
 flagSaveOnline = input('Do you want to save the resuts online? (oneDrive) (y/n): ','s');
 
-if flagSaveOnline == "yes" || flagSaveOnline == "y"
-    computer = input('Who is running the simulation? ("Marco" or "Giuseppe" or "Hpe" or whatever): ','s');
-end
-
-
 
 %% MONTECARLO ANALYSIS
 
@@ -375,12 +370,11 @@ for alg_index = 4
 
     end
     if flagSaveOnline == "yes" || flagSaveOnline == "y"
-        if computer == "Marco" || computer == "marco"
-            folder = [folder ; "C:\Users\marco\OneDrive - Politecnico di Milano\SKYWARD\AIR BRAKES\MONTECARLO E TUNING\"+mission.name+"\"+conf.scenario+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"_"+simulationType_thrust+"_"+saveDate]; % online
-        end
-        if computer == "Max" || computer == "max"
-            folder = [folder ; "C:\Users\Max\OneDrive - Politecnico di Milano\SKYWARD\AIR BRAKES\MONTECARLO E TUNING\"+mission.name+"\"+conf.scenario+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"_"+simulationType_thrust+"_"+saveDate]; % online
-        end
+        currentDir = pwd;
+        usr = split(currentDir,'\');
+        usr = usr{3};
+        OneDrivePath = strcat("C:\Users\",usr,"\OneDrive - Politecnico di Milano\SKYWARD\matlab-simulator-results\");
+        folder = [folder ; OneDrivePath+mission.name+"\"+conf.scenario+"\"+contSettings.algorithm+"\"+num2str(N_sim)+"_"+simulationType_thrust+"_"+saveDate]; % online
     end
 
     if flagSaveOffline == "yes" || flagSaveOnline == "yes" || flagSaveOffline == "y" || flagSaveOnline == "y"
