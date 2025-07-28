@@ -18,7 +18,15 @@ if settings.montecarlo
     simulationType_thrust = "gaussian";  % "gaussian", "exterme"
     displayIter = true; % set to false if you don't want to see the iteration number (maybe if you want to run Montecarlos on hpe)
 
+    %% Algorithms stoch
+    % ABK
+    PID_vals = [2 1.5 0.05];
+    PID_ref = 0.2;
 
+    stoch.ABK_curve(:,1) = PID_vals(1)*ones(N_sim,1);
+    stoch.ABK_curve(:,2) = PID_vals(2)*ones(N_sim,1);
+    stoch.ABK_curve(:,3) = PID_vals(3)*ones(N_sim,1);
+    stoch.ABK_ref = PID_ref*ones(1, N_sim);
 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

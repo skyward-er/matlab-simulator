@@ -119,10 +119,12 @@ for alg_index = 4
         settings_mont = settings_mont_init;
         settings_mont.motor.expThrust = stoch.thrust(i,:);                      % initialize the thrust vector of the current simulation (parfor purposes)
         settings_mont.motor.expTime = stoch.expTime(i,:);                     % initialize the time vector for thrust of the current simulation (parfor purposes)
-        settings_mont.motor.K = stoch.Kt(i,:);                  % 
+        settings_mont.motor.K = stoch.Kt(i,:);
         settings_mont.mass_offset = stoch.mass_offset(i);
         settings_mont.OMEGA = stoch.OMEGA_rail(i);
         settings_mont.PHI = stoch.PHI_rail(i);
+        settings_mont.ABK.PID_coeffs = stoch.ABK_curve(i, :);
+        settings_mont.ABK.PID_ref = stoch.ABK_ref(i);
 
         if isfield(stoch, 'State')
             settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
@@ -146,6 +148,8 @@ for alg_index = 4
         [simOutput] = std_run(settings,contSettings,rocket_vec{i},environment,mission,settings_mont);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STD_RUN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         save_thrust{i} = simOutput;
+        save_thrust{i}.ARB.K_vals = stoch.ABK_curve(i,:);
+        save_thrust{i}.ARB.ref = stoch.ABK_ref(i);
 
     end
 

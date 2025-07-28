@@ -50,6 +50,8 @@ if nargin > 5
     settings.motor.K = settings_mont.motor.K;
     rocket.coefficients.total = settings_mont.Coeffs;
     wind = settings_mont.wind;
+    contSettings.ABK.PID_coeffs = settings_mont.ABK.PID_coeffs;
+    contSettings.ABK.PID_ref = settings_mont.ABK.PID_ref;
 
     if isfield(settings_mont, 'State')
         rocket.coefficients.state.xcgTime = settings_mont.State.xcgTime;
