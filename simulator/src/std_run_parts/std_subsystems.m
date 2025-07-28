@@ -103,6 +103,7 @@ if flagAeroBrakes && settings.flagNAS && settings.control && ...
     end
 else
     ap_ref_new = 0;
+    contSettings.ABK.saturation = false;
     int_error = 0;
 end
 
