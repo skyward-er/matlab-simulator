@@ -73,18 +73,17 @@ else
     ref = contSettings.ABK.PID_ref;
     error = current_position - ref;
     prev_error = alpha0_old - ref;
-    int_error = int_error + error*dt;
+    if contSettings.ABK.saturation == false
+        int_error = int_error + error*dt;
+    end
 
     kp = contSettings.ABK.PID_coeffs(1);
     ki = contSettings.ABK.PID_coeffs(2);
     kd = contSettings.ABK.PID_coeffs(3);
-
+    
     percentage = kp*error + kd*prev_error/dt + ki*int_error + ref;
-    if percentage < 0
-        percentage = 0;
-    elseif percentage > 1
-        percentage = 1;
-    end
+
+    [percentage,contSettings.ABK.saturation] = Saturation(percentage,0,1);
 end
 
 alpha0_base = settings.servo.minAngle* (1-percentage) + settings.servo.maxAngle * percentage;
