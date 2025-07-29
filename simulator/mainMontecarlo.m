@@ -341,7 +341,7 @@ for alg_index = 4
     
     %% SAVE
     % save plots
-    saveDate = replace(string(datetime),":","_");
+    saveDate = replace(string(datetime('now','TimeZone','local')),":","_");
     saveDate = replace(saveDate," ","__");
     saveDate = replace(saveDate,"-","_");
     folder = [];

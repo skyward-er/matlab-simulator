@@ -376,7 +376,7 @@ for idx_scheduler = n_run
 
         %% SAVE
         % save plots
-        saveDate = replace(string(datetime),":","_");
+        saveDate = replace(string(datetime('now','TimeZone','local')),":","_");
         saveDate = replace(saveDate," ","__");
         saveDate = replace(saveDate,"-","_");
         folder = [];
@@ -604,5 +604,5 @@ end
 clear, clc
 close all
 
-fprintf("[" + string(datetime("now")) + "] Simulation finished\n")
+fprintf("[" + string(datetime('now','TimeZone','local')) + "] Simulation finished\n")
 
