@@ -155,6 +155,7 @@ for idx_scheduler = n_run
 
             settings_mont.ABK.PID_coeffs = stoch.ABK_curve(i, :);
             settings_mont.ABK.PID_ref = stoch.ABK_ref(i);
+            settings_mont.NAS.mult = stoch.NAS_mult(i);
     
             if isfield(stoch, 'State')
                 settings_mont.State.xcgTime = stoch.State.xcgTime(:,i);                 % initialize the baricenter position time vector
@@ -180,6 +181,7 @@ for idx_scheduler = n_run
             save_thrust{i} = simOutput;
             save_thrust{i}.ARB.K_vals = stoch.ABK_curve(i,:);
             save_thrust{i}.ARB.ref = stoch.ABK_ref(i);
+            save_thrust{i}.NAS.mult = stoch.NAS_mult(i);
     
         end
     

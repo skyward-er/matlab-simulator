@@ -86,6 +86,9 @@ end
 contSettings.ABK.PID_coeffs = [2 1.5 0.05];
 contSettings.ABK.PID_ref = 0.2;
 
+% NAS uncertainty (overwritten if Montecarlo sim is performed)
+contSettings.NAS.mult = 1;
+
 % flag initialization
 contSettings.flagFirstControlABK = true;                                       % if it is the first iter the control action is not filtered, then the filter acts
 contSettings.flagFirstControlPRF = true;

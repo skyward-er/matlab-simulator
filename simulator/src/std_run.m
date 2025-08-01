@@ -52,6 +52,7 @@ if nargin > 5
     wind = settings_mont.wind;
     contSettings.ABK.PID_coeffs = settings_mont.ABK.PID_coeffs;
     contSettings.ABK.PID_ref = settings_mont.ABK.PID_ref;
+    contSettings.NAS.mult = settings_mont.NAS.mult;
 
     if isfield(settings_mont, 'State')
         rocket.coefficients.state.xcgTime = settings_mont.State.xcgTime;

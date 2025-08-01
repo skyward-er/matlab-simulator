@@ -21,6 +21,9 @@ if settings.montecarlo
         stoch.ABK_curve(:,3) = randi([0 1000], 1, N_sim)*1e-4;
         stoch.ABK_ref = ones(1, N_sim)*0.2;
 
+        %%% NAS
+        stoch.NAS_mult = ones(1, N_sim);
+
     elseif idx_scheduler == 2
 
         configMontecarlo;
@@ -30,6 +33,9 @@ if settings.montecarlo
         stoch.ABK_curve(:,2) = randi([0 10000], 1, N_sim)*1e-4;
         stoch.ABK_curve(:,3) = randi([0 1000], 1, N_sim)*1e-4;
         stoch.ABK_ref = ones(1, N_sim)*0.5;
+
+        %%% NAS
+        stoch.NAS_mult = ones(1, N_sim);
 
     elseif idx_scheduler == 3
 
@@ -41,6 +47,9 @@ if settings.montecarlo
         stoch.ABK_curve(:,3) = 0.05*ones(N_sim,1);
         stoch.ABK_ref = ones(1, N_sim)*0.2;
 
+        %%% NAS
+        stoch.NAS_mult = ones(1, N_sim);
+
     elseif idx_scheduler == 4
 
         configMontecarlo;
@@ -50,6 +59,9 @@ if settings.montecarlo
         stoch.ABK_curve(:,2) = 1.5*ones(N_sim,1);
         stoch.ABK_curve(:,3) = 0.05*ones(N_sim,1);
         stoch.ABK_ref = ones(1, N_sim)*0.5;
+
+        %%% NAS
+        stoch.NAS_mult = ones(1, N_sim);
 
     end
 

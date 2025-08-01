@@ -144,8 +144,8 @@ for i = floor(linspace(1,N_sim,5))
     hold on; grid on;
 end
 title('Control action')
-xlabel('Time (s)')
-ylabel('Servo angle \alpha (rad)')
+xlabel('Time [s]')
+ylabel('Servo angle $\alpha$ [rad]')
 legend(contSettings.algorithm);
 
 %% PLOT APOGEE wrt THRUST
@@ -155,8 +155,8 @@ scatter(thrust_percentage,apogee.altitude,'.')
 yline(settings.z_final-10,'r--')
 yline(settings.z_final+10,'r--')
 title('Apogee w.r.t. thrust')
-xlabel('Thrust percentage w.r.t. nominal (%)')
-ylabel('Apogee (m)')
+xlabel('Thrust percentage w.r.t. nominal [\%]')
+ylabel('Apogee [m]')
 xlim([min(thrust_percentage)-0.05 max(thrust_percentage)+0.05])
 ylim([min(apogee.altitude)-20 max(apogee.altitude)+20])
 legend(contSettings.algorithm);
@@ -299,7 +299,7 @@ subplot(2,2,3)
 hold on; grid on;
 plot3(rad2deg(wind_el),thrust_percentage*100,apogee.altitude','.')
 xlabel('Wind elevation [deg]')
-ylabel('Thrust percentage [%]')
+ylabel('Thrust percentage [\%]')
 zlabel('Apogee')
 % zlim([settings.z_final-200,settings.z_final+200])
 view(30,20)
