@@ -28,6 +28,9 @@ if settings.montecarlo
     stoch.ABK_curve(:,3) = PID_vals(3)*ones(N_sim,1);
     stoch.ABK_ref = PID_ref*ones(1, N_sim);
 
+    % NAS
+    stoch.NAS_mult = ones(N_sim,1);
+
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

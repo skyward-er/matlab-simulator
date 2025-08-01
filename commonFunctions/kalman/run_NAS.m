@@ -1,4 +1,4 @@
-function [sensorData,sensorTot,nas] = run_NAS(Tf, mag_NED,sensorData,sensorTot,settings, environment)
+function [sensorData,sensorTot,nas] = run_NAS(Tf, mag_NED,sensorData,sensorTot,settings,contSettings, environment)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
@@ -247,5 +247,7 @@ if length(t_nas) > 1
     sensorTot.nas.timestampPitotCorrection(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.timestampPitotCorrection(2:end); % NAS time output
     sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1)-1;
 
+    % For over/under-estimating
+    sensorTot.nas.states(end,6) = sensorTot.nas.states(end,6)*contSettings.NAS.mult;
 end
 end
