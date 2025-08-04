@@ -121,7 +121,7 @@ sensorSettings.gyroscope.transMatrix           =   diag([1 1 1]);               
 sensorSettings.gyroscope.update(Orion_Temp_sensor_vect, "main_Boardcore_LSM6DSRXData.csv", 2);
 
 %% enable second accelerometer (6 dof imu - LSM6DSRX_1) if two imus are present
-if isfield(settings, "second_imu") && second_imu
+if settings.second_imu
 
     % NOTE: acceleration in mg
     sensorSettings.accelerometer_1 = Sensor3D();
@@ -137,7 +137,7 @@ if isfield(settings, "second_imu") && second_imu
     sensorSettings.accelerometer_1.update(Orion_Temp_sensor_vect, "main_Boardcore_LSM6DSRXData.csv", 1);
 end
 %% enable second gyroscope sensor (from LSM6DSRX_1) if two imus are present
-if isfield(settings, "second_imu") && second_imu
+if settings.second_imu
 
         % NOTE: angular rate in mdps
         sensorSettings.gyroscope_1 = Sensor3D();
