@@ -200,6 +200,10 @@ for ii = 1:length(settle)
 end
 idx_settle = sum(-simOutput.Y(abk_start_idx:end, 3) < contSettings.criticalAltitude);
 
+if idx_settle > length(settle)
+    idx_settle = length(settle);
+end
+
 figures.NASABKRef2 = figure('Name', 'ABK derivative');
 hold on, grid on
 title('ABK derivative');
