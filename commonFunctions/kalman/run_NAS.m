@@ -141,21 +141,36 @@ if length(t_nas) > 1
     t_imutemp  = [sensorTot.imu.time];
     t_pittemp  = [sensorTot.pitot.time];
 
+    % IMU Data Selection
+    if settings.second_imu && (settings.shutdown || ~settings.flagAscent)
+
+        % Use the precision IMU when available not in power ascent
+        accelerometerMeasures = sensorTot.imu_1.accelerometer_measures;
+        gyroscopeMeasures = sensorTot.imu_1.gyro_measures;
+
+    else
+
+        % Use the standard IMU if in power ascent or if the second IMU is not available
+        accelerometerMeasures = sensorTot.imu.accelerometer_measures;
+        gyroscopeMeasures = sensorTot.imu.gyro_measures;
+
+    end
+
     for ii=2:length(t_nas)
 
         %% Prediction part
 
         index_imu   =  sum(t_nas(ii) >= t_imutemp);
         [x_lin(ii,:),~,P_lin(:,:,ii)] = predictorLinear2(x_lin(ii-1,:),P_lin(:,:,ii-1),...
-            dt_k,sensorTot.imu.accelerometer_measures(index_imu,:),xq(ii-1,1:4),nas.QLinear);
+            dt_k,accelerometerMeasures(index_imu,:),xq(ii-1,1:4),nas.QLinear);
 
         [xq(ii,:),P_q(:,:,ii)]       = predictorQuat(xq(ii-1,:),P_q(:,:,ii-1),...
-            sensorTot.imu.gyro_measures(index_imu,:),dt_k,nas.Qq);
+            gyroscopeMeasures(index_imu,:),dt_k,nas.Qq);
 
         %% Corrections
         %gps
 
-        if norm(sensorTot.imu.accelerometer_measures(index_imu,:)) < 34 % around 3.5g
+        if norm(accelerometerMeasures(index_imu,:)) < 34 % around 3.5g
 
             index_GPS   =  sum(t_nas(ii) >= t_gpstemp);
             if index_GPS~=sensorTot.gps.lastindex
