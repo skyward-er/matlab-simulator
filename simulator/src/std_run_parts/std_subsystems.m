@@ -15,21 +15,36 @@ if settings.flagADA && settings.dataNoise
     [sensorData, sensorTot, settings.ada, flagApogee, flagOpenPara] = run_Majority_ADA(Tf, contSettings.ADA_N_instances, settings.ada, settings.frequencies.ADAFrequency, sensorData, sensorTot, currentState, engineT0);
 end
 
-%% Navigation system (NAS)
-if settings.flagNAS && settings.dataNoise
-    [sensorData, sensorTot, settings.nas]   =  run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings, environment);
+%% Navigation and Attitude system (NAS)
 
-    if settings.flagAscent
-        [sensorTot] = errorNAS (Yf, sensorData, sensorTot);
-    end
+switch settings.flagNAS
+    case 1 % NAS 1.0, MEKF 
 
-    %%%%%%%%%%%%%%%%%% DA RIVEDERE L'UTILIZZO DI QUESTE VARIABILI ASSOLUTAMENTE %%%%%%%%%%%%%%%%%%%%%%%%
-    sensorData.kalman.z  =  sensorTot.nas.states(end, 3);
-    sensorData.kalman.x  =  sensorTot.nas.states(end, 2);
-    sensorData.kalman.y  =  sensorTot.nas.states(end, 1);
-    sensorData.kalman.vx =  sensorTot.nas.states(end, 4);   % north
-    sensorData.kalman.vy =  sensorTot.nas.states(end, 5);   % east
-    sensorData.kalman.vz =  sensorTot.nas.states(end, 6);   % down
+        if settings.dataNoise
+            [sensorData, sensorTot, settings.nas]   =  run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings, environment);
+
+            if settings.flagAscent
+                [sensorTot] = errorNAS (Yf, sensorData, sensorTot);
+            end
+
+            %%%%%%%%%%%%%%%%%% DA RIVEDERE L'UTILIZZO DI QUESTE VARIABILI ASSOLUTAMENTE %%%%%%%%%%%%%%%%%%%%%%%%
+            sensorData.kalman.z  =  sensorTot.nas.states(end, 3);
+            sensorData.kalman.x  =  sensorTot.nas.states(end, 2);
+            sensorData.kalman.y  =  sensorTot.nas.states(end, 1);
+            sensorData.kalman.vx =  sensorTot.nas.states(end, 4);   % north
+            sensorData.kalman.vy =  sensorTot.nas.states(end, 5);   % east
+            sensorData.kalman.vz =  sensorTot.nas.states(end, 6);   % down
+        end
+
+        % Here to test and confront with the old NAS - Propagator
+        nasStates = run_NASII(sensorData, settings, environment);
+
+    case 2 % NAS 2.0, INERTIAL PROPAGATOR
+
+        
+
+    case 3 % NAS 2.0, UKF
+
 end
 
 %% Engine Control algorithm
