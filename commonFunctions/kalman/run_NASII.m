@@ -1,4 +1,4 @@
-function nasStates = run_NASII(sensorData, settings, environment, nasStates)
+function nasStates = run_NASII(sensorData, settings, nasStates)
 
 %%% NAS II - INERTIAL PROPAGATOR %%% 
 %
@@ -26,8 +26,6 @@ function nasStates = run_NASII(sensorData, settings, environment, nasStates)
 %
 % settings              = Struct containing the settings of the algorithm
 %
-% environment           = Struct containing the environment data and parameters
-%
 % nasStates             = Vector containing the states estimated by the NAS II algorithm at the previous time step
 % 
 % OUTPUTS:
@@ -41,32 +39,54 @@ function nasStates = run_NASII(sensorData, settings, environment, nasStates)
 %                        - Quaternion
 % ------------------------------------------------------------------------
 
-%% Propagation of the linear states 
+switch settings.NASII.scheme
+    case 'default'
+        % Default scheme, as used in the previous version of the algorithm
+        %% Propagation of the linear states 
 
-% Body Acceleration
-nasStates(4:6) = sensorData.imuVN100.acceleration;                      % Body Acceleration [m/s^2]
+        % Body Acceleration
+        nasStates(4:6) = sensorData.imuVN100.acceleration;                      % Body Acceleration [m/s^2]
 
-% Rotation of body acceleration to NED frame
-Cbn = quat2dcm(nasStates(16:19));                                       % Rotation matrix from body to NED frame
-nasStates(1:3) = Cbn * sensorData.imuVN100.acceleration;                % NED Acceleration [m/s^2]
+        % Rotation of body acceleration to NED frame
+        Cbn = quat2dcm(nasStates(16:19));                                       % Rotation matrix from body to NED frame
+        nasStates(1:3) = Cbn * nasStates(4:6);                                  % NED Acceleration [m/s^2]
 
-% Velocity Propagation
-nasStates(7:9) = nasStates(7:9) + settings.NASII.dt * nasStates(1:3);   % NED Velocity [m/s]
+        % Velocity Propagation
+        nasStates(7:9) = nasStates(7:9) + settings.NASII.dt * nasStates(1:3);   % NED Velocity [m/s]
 
-% Position Propagation
-nasStates(10:12) = nasStates(10:12) + settings.NASII.dt * nasStates(7:9) + 0.5 * settings.NASII.dt^2 * nasStates(1:3); % NED Position [m]
+        % Position Propagation
+        nasStates(10:12) = nasStates(10:12) + settings.NASII.dt * nasStates(7:9) + 0.5 * settings.NASII.dt^2 * nasStates(1:3); % NED Position [m]
 
-%% Propagation of the angular states
+        %% Propagation of the angular states
 
-% Angular Velocity
-nasStates(13:15) = sensorData.imuVN100.gyro;                            % Angular Velocity [rad/s]
+        % Angular Velocity
+        nasStates(13:15) = sensorData.imuVN100.gyro;                            % Angular Velocity [rad/s]
 
-% Quaternion Propagation
-omega = [0 -nasStates(13) -nasStates(14) -nasStates(15);
-         nasStates(13) 0 nasStates(15) -nasStates(14);
-         nasStates(14) -nasStates(15) 0 nasStates(13);
-         nasStates(15) nasStates(14) -nasStates(13) 0];                  % Omega matrix [rad/s]
+        % Quaternion Propagation
+        omega = [0 -nasStates(13) -nasStates(14) -nasStates(15);
+                nasStates(13) 0 nasStates(15) -nasStates(14);
+                nasStates(14) -nasStates(15) 0 nasStates(13);
+                nasStates(15) nasStates(14) -nasStates(13) 0];                  % Omega matrix [rad/s]
 
-nasStates(16:19) = nasStates(16:19) + 0.5 * settings.NASII.dt * omega * nasStates(16:19); % Quaternion [q0, q1, q2, q3]
+        nasStates(16:19) = nasStates(16:19) + 0.5 * settings.NASII.dt * omega * nasStates(16:19); % Quaternion [q0, q1, q2, q3]
+        nasStates(16:19) = nasStates(16:19) / norm(nasStates(16:19));         % Normalization of the quaternion
 
+    case 'alternative'
+        % Alternative propagation (more accurate but more computationally expensive)
+        
+
+        % Define the quaternion state as a function of time
+        q = nasStates(16:19);
+        omega = nasStates(13:15);
+
+        % Use a numerical integration method (e.g., Runge-Kutta) to propagate the quaternion
+        % over the time step dt.
+        k1 = 0.5 * quatmultiply(q, [0; omega]);
+        k2 = 0.5 * quatmultiply(q + dt/2 * k1, [0; omega]);
+        k3 = 0.5 * quatmultiply(q + dt/2 * k2, [0; omega]);
+        k4 = 0.5 * quatmultiply(q + dt * k3, [0; omega]);
+        q = q + dt/6 * (k1 + 2*k2 + 2*k3 + k4);
+        nasStates(16:19) = q / norm(q);  % Normalize the quaternion
+
+    end
 end
