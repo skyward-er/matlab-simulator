@@ -36,31 +36,38 @@ function nasStates = run_NASII(sensorData, settings, nasStates)
 %                        - NED Velocity
 %                        - NED Position
 %                        - Angular Velocity
-%                        - Quaternion
+%                        - Quaternions (Scalar last)
 % ------------------------------------------------------------------------
 
+% Quaternion Inversion to Scalar First Convention
+nasStates(16:19) = [nasStates(19); -nasStates(16:18)];                  % Quaternion [q0, q1, q2, q3]
+
+%% Propagation of the linear states 
+
+% Body Acceleration
+nasStates(4:6) = sensorData.imuVN100.acceleration;                      % Body Acceleration [m/s^2]
+
+% Rotation of body acceleration to NED frame
+Cbn = quat2dcm(nasStates(16:19));                                       % Rotation matrix from body to NED frame
+nasStates(1:3) = Cbn * nasStates(4:6);                                  % NED Acceleration [m/s^2]
+
+% Velocity Propagation
+nasStates(7:9) = nasStates(7:9) + settings.NASII.dt * nasStates(1:3);   % NED Velocity [m/s]
+
+% Position Propagation
+nasStates(10:12) = nasStates(10:12) + settings.NASII.dt * nasStates(7:9) + 0.5 * settings.NASII.dt^2 * nasStates(1:3); % NED Position [m]
+
+%% Propagation of the angular states
+
+% Angular Velocity
+nasStates(13:15) = sensorData.imuVN100.gyro;                            % Angular Velocity [rad/s] 
+
 switch settings.NASII.scheme
-    case 'default'
-        % Default scheme, as used in the previous version of the algorithm
-        %% Propagation of the linear states 
 
-        % Body Acceleration
-        nasStates(4:6) = sensorData.imuVN100.acceleration;                      % Body Acceleration [m/s^2]
+    case 'default' % Previous propagation (less accurate but less computationally expensive)
 
-        % Rotation of body acceleration to NED frame
-        Cbn = quat2dcm(nasStates(16:19));                                       % Rotation matrix from body to NED frame
-        nasStates(1:3) = Cbn * nasStates(4:6);                                  % NED Acceleration [m/s^2]
-
-        % Velocity Propagation
-        nasStates(7:9) = nasStates(7:9) + settings.NASII.dt * nasStates(1:3);   % NED Velocity [m/s]
-
-        % Position Propagation
-        nasStates(10:12) = nasStates(10:12) + settings.NASII.dt * nasStates(7:9) + 0.5 * settings.NASII.dt^2 * nasStates(1:3); % NED Position [m]
-
-        %% Propagation of the angular states
-
-        % Angular Velocity
-        nasStates(13:15) = sensorData.imuVN100.gyro;                            % Angular Velocity [rad/s]
+        % Quaternion inversion back to scalar last convention
+        nasStates(16:19) = [nasStates(16:18); nasStates(19)];                   % Quaternion [q1, q2, q3, q0]
 
         % Quaternion Propagation
         omega = [0 -nasStates(13) -nasStates(14) -nasStates(15);
@@ -69,24 +76,20 @@ switch settings.NASII.scheme
                 nasStates(15) nasStates(14) -nasStates(13) 0];                  % Omega matrix [rad/s]
 
         nasStates(16:19) = nasStates(16:19) + 0.5 * settings.NASII.dt * omega * nasStates(16:19); % Quaternion [q0, q1, q2, q3]
-        nasStates(16:19) = nasStates(16:19) / norm(nasStates(16:19));         % Normalization of the quaternion
+        nasStates(16:19) = nasStates(16:19) / norm(nasStates(16:19));           % Normalization of the quaternion
 
-    case 'alternative'
-        % Alternative propagation (more accurate but more computationally expensive)
-        
+    case 'alternative' % Alternative propagation (more accurate but more computationally expensive) - Exponential map
 
-        % Define the quaternion state as a function of time
-        q = nasStates(16:19);
-        omega = nasStates(13:15);
-
-        % Use a numerical integration method (e.g., Runge-Kutta) to propagate the quaternion
-        % over the time step dt.
-        k1 = 0.5 * quatmultiply(q, [0; omega]);
-        k2 = 0.5 * quatmultiply(q + dt/2 * k1, [0; omega]);
-        k3 = 0.5 * quatmultiply(q + dt/2 * k2, [0; omega]);
-        k4 = 0.5 * quatmultiply(q + dt * k3, [0; omega]);
-        q = q + dt/6 * (k1 + 2*k2 + 2*k3 + k4);
-        nasStates(16:19) = q / norm(q);  % Normalize the quaternion
-
+        theta = norm(nasStates(13:15)) * settings.NASII.dt;                     % Rotation angle [rad]
+    if theta > 0
+        axis = nasStates(13:15) / norm(nasStates(13:15));                       % Rotation axis
+        dq = [cos(theta/2); sin(theta/2) * axis];                               % Delta quaternion [q0, q1, q2, q3]
+    else
+        dq = [1; 0; 0; 0];                                                      % Identity quaternion
     end
+        nasStates(16:19) = quatmultiply(nasStates(16:19)', dq')';               % Updated quaternion
+        nasStates(16:19) = nasStates([17:19 16]);                               % Quaternion inversion back to scalar last convention [q1, q2, q3, q0]
+
+end
+
 end
