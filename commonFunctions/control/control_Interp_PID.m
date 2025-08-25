@@ -72,7 +72,7 @@ else
 
     ref = contSettings.ABK.PID_ref;
     error = current_position - ref;
-    prev_error = alpha0_old - ref;
+    prev_error = alpha0_old/settings.servo.maxAngle - ref;
     if contSettings.ABK.saturation == false
         int_error = int_error + error*dt;
     end
