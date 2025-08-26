@@ -22,7 +22,7 @@ configFlags;
 %% Mission parameters
 mission = Mission(true, 'changeMatlabPath', true);
 rocket = Rocket(mission);
-environment = Environment(mission, rocket.motor);
+environment = Environment(mission);
 
 %% 3) LOAD DATAPATH
 configPath;
