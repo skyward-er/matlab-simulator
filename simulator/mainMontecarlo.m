@@ -107,7 +107,7 @@ for alg_index = 4
     wind_el = zeros(N_sim,1);
     wind_az = zeros(N_sim,1);
     t_shutdown.value = zeros(N_sim,1);
-    motor_K = settings.motor.K;
+    motor_K = rocket.motor.Kt;
 
     parfor i = 1:N_sim
         rocket_vec{i} = rocket;

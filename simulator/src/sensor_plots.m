@@ -215,7 +215,7 @@ drawnow
 if length(simOutput.sensors.mea.time) > 1
     dt = 1/settings.frequencies.controlFrequency;
     idx_t0 = sum(simOutput.t <= (simOutput.state_lastTimes(1)-dt));
-    P_cc_real = interp1(rocket.motor.time, rocket.motor.thrust, simOutput.t(idx_t0:end)-(simOutput.state_lastTimes(1)-dt))/settings.motor.K;
+    P_cc_real = interp1(rocket.motor.time, rocket.motor.thrust, simOutput.t(idx_t0:end)-(simOutput.state_lastTimes(1)-dt))/rocket.motor.Kt;
     P_cc_real = [zeros(idx_t0-1,1); P_cc_real];
 
     cut_idx = sum(simOutput.sensors.comb_chamber.time <= simOutput.state_lastTimes(2)+5);

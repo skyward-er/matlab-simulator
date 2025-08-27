@@ -181,7 +181,7 @@ if (contains(mission.name,'2023') || contains(mission.name,'2024') || contains(m
     sensorData.chamberPressure.measures = zeros(size(sensorData.chamberPressure.time,1),1);
     sensorData.chamberPressure.measures(1) = sensorTot.comb_chamber.measures(end);
     if length(sensorData.chamberPressure.time) >1
-        sensorData.chamberPressure.measures(2:end)= interp1(rocket.motor.time, rocket.motor.thrust,sensorData.chamberPressure.time(2:end)-engineT0)/settings.motor.K;
+        sensorData.chamberPressure.measures(2:end)= interp1(rocket.motor.time, rocket.motor.thrust,sensorData.chamberPressure.time(2:end)-engineT0)/rocket.motor.Kt;
     end
 else
     sensorData.chamberPressure.time = (sensorTot.comb_chamber.time(end):1/freq.chamberPressureFrequency:Tf(end))';
