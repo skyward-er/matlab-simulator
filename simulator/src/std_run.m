@@ -40,30 +40,11 @@ Revision date: 11/04/2022
 
 %}
 
-if nargin > 5
+if nargin > 6
     settings_mont = varargin{1};
-    rocket.motor.thrust = settings_mont.motor.expThrust;
-    rocket.motor.time = settings_mont.motor.expTime;
-    rocket.motor.cutoffTime = rocket.motor.time(end);
-    % rocket.motor.time(end) = settings_mont.tb;
-    settings.mass_offset = settings_mont.mass_offset;
-    settings.motor.K = settings_mont.motor.K;
-    rocket.coefficients.total = settings_mont.Coeffs;
-    wind = settings_mont.wind;
     contSettings.ABK.PID_coeffs = settings_mont.ABK.PID_coeffs;
     contSettings.ABK.PID_ref = settings_mont.ABK.PID_ref;
     contSettings.NAS.mult = settings_mont.NAS.mult;
-
-    if isfield(settings_mont, 'State')
-        rocket.coefficients.state.xcgTime = settings_mont.State.xcgTime;
-    end
-    environment.omega = settings_mont.OMEGA;
-    environment.phi = settings_mont.PHI;
-end
-
-if ~exist("wind", "var")
-    % If the wind was not already defined, generate new one
-    wind = Wind(mission);
 end
 
 if settings.electronics % global variables slow down a bit the comunication over thread, we don't need these for montecarlo analysis
@@ -117,7 +98,6 @@ if mod(dt/dt_ode,1)~= 0
     error('Control frequency and integration time step are not compatible')
 end
 std_setInitialParams;
-rocket.massNoMotor = rocket.massNoMotor + settings.mass_offset;
 
 %% SENSORS INIT
 run(strcat('initSensors', mission.name));
@@ -618,7 +598,7 @@ struct_out.sensors.ada.t_apogee = settings.ada.t_ada;
 struct_out.sensors.ada.t_para = settings.ada.t_para;
 struct_out.sensors.nas.t_apogee = settings.nas.t_nas;
 if settings.scenario ~= "descent"
-    struct_out.sensors.mea.mass_offset = settings.mass_offset;
+    % struct_out.sensors.mea.mass_offset = settings.mass_offset;
     struct_out.sensors.mea.true_mass_at_shutdown = dataRecall.true_mass(lastAscentIndex-10);
 end
 struct_out.sensors.nas.error = sensorTot.nas.error;
