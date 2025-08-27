@@ -114,7 +114,7 @@ contSettings.flagCorrectWithPitch = false;
 
 %% ENGINE CONTROL
 % these need to be updated after every static fire test
-settings.motor.K = settings.mea.K_t;
+rocket.motor.Kt = settings.mea.K_t;
 
 % contSettings.Engine_model_Kgain = [0.237322102194205;0.242208876758461;-0.000686466033197479];
 
