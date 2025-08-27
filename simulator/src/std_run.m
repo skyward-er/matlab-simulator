@@ -1,4 +1,4 @@
-function [struct_out] = std_run(settings, contSettings, rocket, environment, mission, varargin)
+function [struct_out] = std_run(settings, contSettings, rocket, environment, wind, mission, varargin)
 %{
 
 STD_RUN_BALLISTIC - This function runs a standard ballistic (non-stochastic) simulation
@@ -606,11 +606,10 @@ struct_out.t = Tf;
 struct_out.Y = Yf;
 % struct_out.flags = settings.flagMatr;
 struct_out.state_lastTimes = state_lastTime;
-% wind
-% struct_out.wind.Mag = wind.magnitude(1);
-% struct_out.wind.Az =  wind.azimuth(1);
-% % struct_out.wind.El =  wind.El(1);
-% struct_out.wind.Vel = [uw, vw, ww];
+
+% Save classes data
+struct_out.rocket = rocket;
+struct_out.environment = environment;
 struct_out.wind = wind;
 
 % sensors (ADA, NAS, MEA, SFD, and all sensor data are stored here)

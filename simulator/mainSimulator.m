@@ -83,7 +83,7 @@ end
 % Y = State = ( x y z | u v w | p q r | q0 q1 q2 q3 | thetax thetay thetaz | ap_ref ) also for Ya,Yf corresponding to T
 
 %% simulation:
-[simOutput] = std_run(settings,contSettings,rocket,environment,mission);
+[simOutput] = std_run(settings,contSettings,rocket,environment,wind,mission);
 
 %% state visualiser
 % animateOrientation(simOutput.Y(:,11),simOutput.Y(:,12),simOutput.Y(:,13),simOutput.Y(:,10),simOutput.t)
