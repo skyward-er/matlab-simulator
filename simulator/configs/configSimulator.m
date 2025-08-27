@@ -23,6 +23,7 @@ configFlags;
 mission = Mission(true, 'changeMatlabPath', true);
 rocket = Rocket(mission);
 environment = Environment(mission);
+wind = Wind(mission);
 
 %% 3) LOAD DATAPATH
 configPath;
@@ -40,25 +41,22 @@ end
 %% 8) PLOTS?
 configPlots;
 
-%% 9) MONTECARLO?
-configMontecarlo;
-
-%% 10) CONTROL
+%% 9) CONTROL
 configControl;
 
-%% 11) CONTROL PARAMETERS
+%% 10) CONTROL PARAMETERS
 configControlParams;
 
-%% 12) SENSOR FAULT GENERATION
+%% 11) SENSOR FAULT GENERATION
 configFaults;
 
-%% 13) PARAFOIL DATA
+%% 12) PARAFOIL DATA
 configPayload;
 
 if conf.script ~= "trajectory generation"
-    %% 14) REFERENCES
+    %% 13) REFERENCES
     configReferences;
-    %% 15) SPECIAL CONDITIONS?
+    %% 14) SPECIAL CONDITIONS?
     %     config_SpecialConditions;
 end
 
