@@ -64,6 +64,7 @@ flagSaveOffline = input('Do you want to save the results offline? (y/n): ','s');
 
 N_sim = sensitivity.n;
 displayIter = sensitivity.displayIter;
+scenario = settings.scenario;
 
 settings_mont_init = struct();
 
@@ -90,7 +91,7 @@ parfor ii = 1:N_sim
     settings_mont.NAS.mult = control_sensitivity.NAS_mult(ii);
 
     if displayIter == true
-        fprintf("simulation = " + num2str(ii) + " of " + num2str(N_sim) + ", algorithm: " + contSettings.algorithm +", scenario: "+ settings.scenario +"\n");
+        fprintf("simulation = " + num2str(ii) + " of " + num2str(N_sim) + ", algorithm: " + contSettings.algorithm +", scenario: "+ scenario +"\n");
     end
 
     [simOutput] = std_run(settings,contSettings,rocket,environment,wind,mission,settings_mont);
@@ -297,7 +298,7 @@ end
     fprintf(fid, 'ALGORITHMS\n\n');
     fprintf(fid,'Engine shut-down control frequency: %d Hz \n',settings.frequencies.controlFrequency);
     fprintf(fid,'Airbrakes control frequency: %d Hz \n',settings.frequencies.arbFrequency );
-    fprintf(fid,'Maximum Mach number below which the airbrakes control algorithm starts: %.3f \n\n',rocket.airbrakes.maxMach);
+    fprintf(fid,'Maximum Mach number below which the airbrakes control algorithm starts: %.3f \n\n',rocketRef.airbrakes.maxMach);
     fprintf(fid,'Filter coefficient: %.3f \n', contSettings.filter_coeff);
     fprintf(fid,'Target for engine shutdown: %d \n',settings.mea.z_shutdown);
     if contSettings.algorithm == "interp_PID" || contSettings.algorithm == "complete"
@@ -315,8 +316,8 @@ end
     if (settings.scenario == "descent" || settings.scenario == "full flight") && settings.parafoil
         fprintf(fid,'PARAFOIL \n\n');
         fprintf(fid,'Guidance approach %s \n',contSettings.payload.guidance_alg);
-        fprintf(fid,'PID proportional gain %s \n',rocket.parachutes(2,2).controlParams.Kp);
-        fprintf(fid,'PID integral gain %s \n',rocket.parachutes(2,2).controlParams.Ki);
+        fprintf(fid,'PID proportional gain %s \n',rocketRef.parachutes(2,2).controlParams.Kp);
+        fprintf(fid,'PID integral gain %s \n',rocketRef.parachutes(2,2).controlParams.Ki);
         fprintf(fid,'Opening altitude %s \n', num2str(settings.ada.para.z_cut));
     end
 

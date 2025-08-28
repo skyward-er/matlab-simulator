@@ -26,7 +26,7 @@ contSettings.coeffs = data.coeffs;
 % Set this flag to true to also run the old version of the ada (the one
 % implemented in run_ADA). Useful to compare the results between old and
 % new implementation
-contSettings.run_old_ada = true;
+contSettings.run_old_ada = false;
 % Number of instances to be run
 contSettings.ADA_N_instances = 3;
 
