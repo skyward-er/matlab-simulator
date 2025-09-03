@@ -26,12 +26,8 @@ z_nas(1) = sensorData.nas.states(end,3);
 vnorm_nas(1) = norm(sensorData.nas.states(end,4:6));
 vz_nas(1) = -sensorData.nas.states(end,6);
 
- if settings.flagFlightRef
-     coeffs = contSettings.coeff_Cd;
- else
-     coeffs = contSettings.coeffs;
- end
-
+coeffs = contSettings.coeffs;
+ 
 
 for ii = 2:length(t_mea)
     index_chambPress = sum(t_mea(ii) >= t_chambPress);

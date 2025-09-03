@@ -11,13 +11,6 @@ All the parameters are stored in the "contSetting" structure.
  %}
 
 %% LOAD CD COEFFICIENTS
-if ~exist(strcat(mission.dataPath, '/CAinterpCoeffsCFD.mat'), "file") && settings.flagFlightRef
-    error("CAInterpCoeffsCFD.mat is not present!\n%s", "Unable to use the CFD data");
-end
-if settings.flagFlightRef
-    data = load(strcat(mission.dataPath, '/CAinterpCoeffsCFD'));
-    contSettings.coeff_Cd = data.coeffs;
-end
 data = load(strcat(mission.dataPath, '/CAinterpCoeffs'));
 contSettings.coeffs = data.coeffs;
 
