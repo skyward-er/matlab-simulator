@@ -189,3 +189,4 @@ settings.mea.t_lower_shadowmode  = 0;                                       % mi
 settings.mea.t_higher_shadowmode = 10;                                      % maximum burning time
 settings.shutdownValveDelay      = 0.3;                                     % time from the shut down command to the actual valve closure
 settings.mea.cd_correction_factor = 1;
+settings.mea.mass_interval = [25; 36];

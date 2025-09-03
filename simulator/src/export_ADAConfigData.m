@@ -1,0 +1,26 @@
+%{
+export configuration files for ADA algorithm (for our friends of software development)
+%}
+
+folder = "ConfigData/ADAConfig";
+if ~exist(ConDataPath+"/"+folder,"dir")
+    mkdir(ConDataPath+"/"+folder)
+end
+
+% first file: configuration parameters
+configADA_export_table = table;
+configValues = [settings.frequencies.ADAFrequency,settings.ada.shadowmode*1e3, ...
+    settings.ada.v_thr+2.5, settings.ada.count_thr, ...
+    settings.ada.z_cut, settings.ada.altitude_confidence_thr, ...
+    settings.ada.Q(1,1), settings.ada.Q(2,2),settings.ada.Q(3,3), settings.ada.R, ...
+    settings.ada.P0(1,1), 101250, 288.15];
+configADAvarNames = {'ADA_FREQUENCY','ADA_SHADOWMODE',...
+    'APOGEE_VERTICAL_SPEED_TARGET', 'APOGEE_N_SAMPLES', ...
+    'DEPLOYMENT_ALTITUDE_TARGET ', 'DEPLOYMENT_N_SAMPLES', ...
+    'ADA_Q_11', 'ADA_Q_22','ADA_Q_33','ADA_R', ...
+    'ADA_P0', 'mslPressure','mslTemperature'};
+for i = 1:size(configValues,2)
+    configADA_export_table(1,i) = table(configValues(1,i));
+end
+configADA_export_table.Properties.VariableNames = configADAvarNames;
+writetable(configADA_export_table,ConDataPath+"/"+folder+"/ADA_configADA_"+mission.name+".csv")
