@@ -2,7 +2,7 @@ function [sensorData,sensorTot,settings,contSettings,rocket] = run_MTR_SIM...
     (sensorData,sensorTot,settings,contSettings,T1, engineT0,dt_ode,rocket,environment, mission)
 
 % impose valve position
-if T1 < rocket.motor.cutoffTime
+if T1-engineT0 < rocket.motor.cutoffTime
     u = 1;
 else
     u = 0;
@@ -79,9 +79,10 @@ else
     settings.expMengineCut = settings.parout.m(end) - (rocket.massNoMotor + rocket.motor.mass(end));
     if T1 - engineT0 > rocket.motor.cutoffTime
         settings.shutdown = true;
-        [settings,rocket] = settingsEngineCut(settings, engineT0, rocket);
-        settings.quatCut = [sensorTot.nas.states(end, 10) sensorTot.nas.states(end, 7:9)];
-        [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
+        settings.expShutdown = true;
+        settings.t_shutdown = T1;
+        rocket.motor.cutoffTime  = settings.t_shutdown + settings.shutdownValveDelay - engineT0;
+        settings.expTimeEngineCut = settings.t_shutdown;
     end
     settings.counter_shutdown = 0;
 end

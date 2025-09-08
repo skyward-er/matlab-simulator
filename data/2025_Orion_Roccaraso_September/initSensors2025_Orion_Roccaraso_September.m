@@ -42,7 +42,7 @@ sensorSettings.barometer2.maxMeasurementRange   =   1000;                   % 11
 sensorSettings.barometer2.minMeasurementRange   =   0;                      % 300, 10 in mbar
 sensorSettings.barometer2.bit                   =   24;                     % adc on rocket is 24 bits 
 sensorSettings.barometer2.fault_time = -1;          % if negative it will be generated at random between a max and a min value
-sensorSettings.barometer2.max_fault_time = 60;      % max seconds to wait before possible fault
+sensorSettings.barometer2.max_fault_time = 24;      % max seconds to wait before possible fault
 sensorSettings.barometer2.min_fault_time = 6;       % min seconds to wait before possible fault
 
 % fault generation
@@ -101,7 +101,7 @@ sensorSettings.accelerometer.offsetX               =   0;                       
 sensorSettings.accelerometer.offsetY               =   0;                           % +-90 in mg
 sensorSettings.accelerometer.offsetZ               =   0;                           % +-90 in mg
 sensorSettings.accelerometer.walkDiffusionCoef     =   0;                           % guess
-sensorSettings.accelerometer.dt                    =   0.01;                        % sampling time - ODR 416 Hz
+sensorSettings.accelerometer.dt                    =   0.01;                        % sampling time - ODR 416 Hz 
 
 sensorSettings.accelerometer.update(Orion_Temp_sensor_vect, "main_Boardcore_LSM6DSRXData.csv", 1);
 
@@ -115,8 +115,8 @@ sensorSettings.gyroscope.offsetX               =   0;                           
 sensorSettings.gyroscope.offsetY               =   0;                               % +-30e3 in mdps
 sensorSettings.gyroscope.offsetZ               =   0;                               % +-30e3 in mdps
 sensorSettings.gyroscope.walkDiffusionCoef     =   1;                               % guess
-sensorSettings.gyroscope.dt                    =   0.01;                            % sampling time
-sensorSettings.gyroscope.transMatrix           =   diag([1 1 1]);                   % axis transformation - ODR 416 Hz
+sensorSettings.gyroscope.dt                    =   0.01;                            % sampling time - ODR 416 Hz
+sensorSettings.gyroscope.transMatrix           =   diag([1 1 1]);                   % axis transformation
 
 sensorSettings.gyroscope.update(Orion_Temp_sensor_vect, "main_Boardcore_LSM6DSRXData.csv", 2);
 
