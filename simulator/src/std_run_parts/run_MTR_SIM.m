@@ -29,7 +29,7 @@ if sensorTot.mea.prediction(end) >= settings.mea.z_shutdown
             settings.expTimeEngineCut = settings.t_shutdown;
         end
 
-
+                
     end
 
     % if settings.expShutdown
@@ -52,6 +52,9 @@ if sensorTot.mea.prediction(end) >= settings.mea.z_shutdown
     settings.expMengineCut = settings.parout.m(end) - (rocket.massNoMotor + rocket.motor.mass(end));
     if T1 - engineT0 > rocket.motor.cutoffTime
         settings.shutdown = true;
+        settings.t_shutdown = T1;
+        settings.expTimeEngineCut = T1;
+        settings.expShutdown = true;
         % rocket.updateCutoff;
         % [settings, rocket] = settingsEngineCut(settings, engineT0, rocket);
         % settings.quatCut = [sensorTot.nas.states(end, 10) sensorTot.nas.states(end, 7:9)];
@@ -66,6 +69,7 @@ else
     if ~settings.expShutdown && T1-engineT0 >= settings.mea.t_higher_shadowmode
         settings.expShutdown = true;
         settings.t_shutdown = T1;
+        settings.expTimeEngineCut = T1;
         rocket.motor.cutoffTime  = settings.t_shutdown + settings.shutdownValveDelay - engineT0;
         settings.expTimeEngineCut = settings.t_shutdown;
     end
