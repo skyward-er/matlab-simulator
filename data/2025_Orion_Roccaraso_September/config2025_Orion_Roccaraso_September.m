@@ -26,7 +26,7 @@ settings.nas.pitot_correction = true; % Enable Pitot Correction in NAS
 
 %% TRAJECTORY GENERATION PARAMETERS
 settings.Vz_final = 0;
-settings.z_final  = 1100;
+settings.z_final  = 1300;
 settings.Vx_final = 0;
 settings.x_final  = 500;
 settings.Vy_final = 0;
@@ -183,8 +183,9 @@ settings.mea.R                   = 0.36;
 settings.mea.P0_mat = diag([0 0 0.36^2]);
 
 % shut down prediction altitude
-settings.mea.z_shutdown          = 800;                                    % [m] target apogee prediction for shutdown
+settings.mea.z_shutdown          = 1000;                                    % [m] target apogee prediction for shutdown
 settings.mea.t_lower_shadowmode  = 2;                                       % minimunm burning time
-settings.mea.t_higher_shadowmode = 10;                                      % maximum burning time
+settings.mea.t_higher_shadowmode = 2.75;                                      % maximum burning time
 settings.shutdownValveDelay      = 0.3;                                     % time from the shut down command to the actual valve closure
 settings.mea.cd_correction_factor = 1;
+settings.mea.mass_interval = [25; 36];

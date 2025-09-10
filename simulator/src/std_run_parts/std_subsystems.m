@@ -45,17 +45,12 @@ if (contains(mission.name,'2023') || contains(mission.name,'2024') || contains(m
                 (sensorData,sensorTot,settings,contSettings,t1, engineT0,dt_ode,rocket,environment, mission);
             sensorTot.mea.t_shutdown = settings.t_shutdown;
 
-            if  Tf(end)-engineT0 >= rocket.motor.time(end)
+            if  Tf(end)-engineT0 >= rocket.motor.cutoffTime
                 settings.expShutdown = true;
                 settings.shutdown = true;
-                settings.t_shutdown = rocket.motor.time(end);
-                rocket.motor.cutoffTime = settings.t_shutdown;
+                settings.t_shutdown = rocket.motor.cutoffTime+engineT0;
                 settings.expTimeEngineCut = settings.t_shutdown;
-                % settings.expMengineCut = settings.parout.m(end) - settings.ms;
-                % settings = settingsEngineCut(settings);
-                settings.quatCut = [sensorTot.nas.states(end,10) sensorTot.nas.states(end, 7:9)]; % why do we take the nas ones and not the simulation ones?
-                [~,settings.pitchCut,~] = quat2angle(settings.quatCut,'ZYX');
-                sensorTot.mea.t_shutdown = settings.t_shutdown; % to pass the value out of the std_run to the structOut
+                sensorTot.mea.t_shutdown = settings.t_shutdown; %
             end
         end
 
@@ -74,12 +69,11 @@ else
     end
 end
 
-
 %% ARB Control algorithm
 
 if flagAeroBrakes && settings.flagNAS && settings.control && ...
         ~( strcmp(contSettings.algorithm,'NoControl') || strcmp(contSettings.algorithm,'engine')) && ...
-        mach < rocket.airbrakes.maxMach && Tf(end) > settings.expTimeEngineCut + contSettings.ABK_shutdown_delay
+        mach < rocket.airbrakes.maxMach && Tf(end) > rocket.motor.cutoffTime + engineT0 + contSettings.ABK_shutdown_delay
 
     if (contains(mission.name,'2023') || contains(mission.name,'2024') || contains(mission.name, '2025')) && contSettings.traj_choice == 1 && settings.expShutdown
         if ~strcmp(contSettings.algorithm,'complete')

@@ -251,7 +251,7 @@ sensorTot.nas.error                             =   zeros(1, 10);
 sensorTot.nas.timestampPitotCorrection          =   nan;
 sensorTot.nas.timestampMagnetometerCorrection   =   0;
 sensorTot.mea.pressure                          =   0; %it's a differential pressure sensor
-sensorTot.mea.mass                              =   rocket.motor.mass(1);
+sensorTot.mea.mass                              =   rocket.mass(1);
 sensorTot.mea.prediction                        =   0;
 sensorTot.mea.time                              =   0;
 

@@ -236,8 +236,8 @@ switch mission.name
      
         contSettings.traj_choice = 1; % if 1 performs trajectory choice, if zero it doesn't
         N_mass = 2;     % number of references to generate
-        mass_min = 26;   % [kg] min mass for trajectory choice
-        mass_max = 29;   % [kg] max mass for trajectory choice
+        mass_min = 29;   % [kg] min mass for trajectory choice
+        mass_max = 33;   % [kg] max mass for trajectory choice
         contSettings.dmass = (mass_max-mass_min)/(N_mass-1);
         contSettings.masses_vec = mass_min:contSettings.dmass:mass_max; % masses vector for trajectory generation and choice
         
@@ -256,9 +256,9 @@ switch mission.name
         % linear filter with altitude
         contSettings.filter_coeff0 = 0.75; % starting value, then linear decrease until max Altitude
         contSettings.filterMinAltitude = 400;
-        contSettings.filterMaxAltitude = 1000;
+        contSettings.filterMaxAltitude = 1100;
         % set altitude at which open to max
-        contSettings.criticalAltitude = 970;
+        contSettings.criticalAltitude = 1200;
        
         % interpolation algorithm 
         contSettings.N_forward = 0; % how many steps in advance have to check on speed to interpolate
