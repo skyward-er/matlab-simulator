@@ -538,7 +538,7 @@ while settings.flagStopIntegration && n_old < nmax                          % St
 
     if not(settings.montecarlo)
         if settings.flagAscent
-            fprintf("z: %4.4f, z_est: %4.4f, ap_ref: %4.4f, ap_ode:  %4.4f\n", (-Yf(end,3)+environment.z0), -sensorData.kalman.z+environment.z0, ap_ref_new, Yf(end,14))
+            fprintf("z: %4.4f, z_est: %4.4f, perc_ref: %4.4f, perc_ode:  %4.4f\n", (-Yf(end,3)+environment.z0), -sensorData.kalman.z+environment.z0, ap_ref_new./settings.servo.maxAngle, Yf(end,14)./settings.servo.maxAngle)
             % disp("z: " + (-Yf(end,3)+environment.z0) +", z_est: " + -sensorData.kalman.z + ", ap_ref: " + ap_ref_new + ", ap_ode: " + Yf(end,14)); %  + ", quatNorm: "+ vecnorm(Yf(end,10:13))
         elseif currentState == availableStates.payload_descent
             fprintf("z: %4.4f, z_est: %4.4f, deltaA_ref: %4.4f, deltaA_ode:  %4.4f\n", (-Yf(end,3)+environment.z0), -sensorData.kalman.z+environment.z0, deltaA_ref_new, Yf(end,15))

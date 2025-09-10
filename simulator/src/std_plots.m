@@ -144,9 +144,9 @@ plot( -simOutput.sensors.nas.states(:,3),  -simOutput.sensors.nas.states(:,6),'m
 % plot( structIn.ADA(:,4),  structIn.ADA(:,5),'b','DisplayName','ADA z')
 xlabel("Altitude AGL [m]"), ylabel("Velocity [m/s]")
 yyaxis right
-plot( -simOutput.Y(:, 3), simOutput.Y(:, 14),'g','DisplayName','arb')
+plot( -simOutput.Y(:, 3), simOutput.Y(:, 14)./settings.servo.maxAngle,'g','DisplayName','arb')
 legend
-ylabel("ABK servo angle [rad]")
+ylabel("ABK percentage [\%]")
 drawnow
 
 ref = contSettings.ABK.PID_ref;
@@ -163,8 +163,8 @@ plot(-simOutput.Y(:, 3), new_Vz2-new_val,'k','DisplayName','ref max')
 plot( -simOutput.Y(:, 3), -v_ned(:,3)-new_val,'b','DisplayName','Traj')
 xlabel("Altitude AGL [m]"), ylabel("Relative velocity (wrt ref) [m/s]")
 yyaxis right
-plot( -simOutput.Y(:, 3), simOutput.Y(:, 14),'g','DisplayName','arb')
-ylabel("ABK servo angle [rad]")
+plot( -simOutput.Y(:, 3), simOutput.Y(:, 14)./settings.servo.maxAngle,'g','DisplayName','arb')
+ylabel("ABK percentage [\%]")
 legend(Location="best")
 drawnow
 
