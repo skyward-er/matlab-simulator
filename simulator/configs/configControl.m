@@ -69,11 +69,11 @@ contSettings.filter_coeff = 0.5;                                            % se
 
 % delay from motor shutdown to air brakes opening:
 contSettings.ABK_shutdown_delay = 0.3; % [s] time between engine shutdown command and ABK phase
-if contains(mission.name, "Roccaraso")
-    contSettings.ABK_shadowmode = 1.5; % [s]
-else
-    contSettings.ABK_shadowmode = 3.8; % [s]
-end
+% if contains(mission.name, "Roccaraso")
+%     contSettings.ABK_shadowmode = 1.5; % [s]
+% else
+%     contSettings.ABK_shadowmode = 3.8; % [s]
+% end
 
 % ABK control_PID values (overwritten if Montecarlo sim is performed)
 % contSettings.ABK.PID_coeffs = [2 1.5 0.05];
@@ -124,15 +124,15 @@ contSettings.payload.I = 0;
 contSettings.payload.deltaA_0 = 0;
 
 %% WES
-contSettings.WES.wind_est = [0,0];
-contSettings.WES.A = [];
-contSettings.WES.b = [];
-contSettings.WES.V_mean = [0,0];
-contSettings.WES.V2_mean = 0;
-contSettings.WES.N = 0;
-% contSettings.WES.V_h_i = 0; % it is not used in the simulation, what is
-% it?
-contSettings.WES.state = 1;
+% contSettings.WES.wind_est = [0,0];
+% contSettings.WES.A = [];
+% contSettings.WES.b = [];
+% contSettings.WES.V_mean = [0,0];
+% contSettings.WES.V2_mean = 0;
+% contSettings.WES.N = 0;
+% % contSettings.WES.V_h_i = 0; % it is not used in the simulation, what is
+% % it?
+% contSettings.WES.state = 1;
  
 %% MEA and shutdown
 contSettings.N_prediction_threshold = 5;

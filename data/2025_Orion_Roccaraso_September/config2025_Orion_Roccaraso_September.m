@@ -16,7 +16,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 %}
 
-settings.launchDate = [2024 9 14];
+settings.launchDate = [2024 9 15];
 warning("Launch date set to 2024 as wrldmagm does not support 2025 launch date")
 settings.HREmot = true;
 
@@ -188,4 +188,4 @@ settings.mea.t_lower_shadowmode  = 1.9;                                       % 
 settings.mea.t_higher_shadowmode = 2.75;                                      % maximum burning time
 settings.shutdownValveDelay      = 0.3;                                     % time from the shut down command to the actual valve closure
 settings.mea.cd_correction_factor = 1;
-settings.mea.mass_interval = [25; 36];
+settings.mea.mass_interval = [29; 34];

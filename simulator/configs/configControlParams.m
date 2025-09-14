@@ -237,7 +237,7 @@ switch mission.name
         contSettings.traj_choice = 1; % if 1 performs trajectory choice, if zero it doesn't
         N_mass = 2;     % number of references to generate
         mass_min = 29;   % [kg] min mass for trajectory choice
-        mass_max = 35;   % [kg] max mass for trajectory choice
+        mass_max = 34;   % [kg] max mass for trajectory choice
         contSettings.dmass = (mass_max-mass_min)/(N_mass-1);
         contSettings.masses_vec = mass_min:contSettings.dmass:mass_max; % masses vector for trajectory generation and choice
         
