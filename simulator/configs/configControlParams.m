@@ -258,7 +258,7 @@ switch mission.name
         contSettings.filterMinAltitude = 400;
         contSettings.filterMaxAltitude = 1000;
         % set altitude at which open to max
-        contSettings.criticalAltitude = 1100;
+        contSettings.criticalAltitude = 1150;
        
         % interpolation algorithm 
         contSettings.N_forward = 0; % how many steps in advance have to check on speed to interpolate
