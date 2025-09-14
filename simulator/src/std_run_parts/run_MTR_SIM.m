@@ -13,13 +13,9 @@ function [sensorData,sensorTot,settings,contSettings,rocket] = run_MTR_SIM...
     end
     [sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1,engineT0,environment,rocket, mission);
 
-    if T1-engineT0 <= settings.mea.t_lower_shadowmode
-        return
-    end
-
     if sensorTot.mea.prediction(end) >= settings.mea.z_shutdown
         settings.mea.counter_shutdown = settings.mea.counter_shutdown + 1*floor(settings.frequencies.MEAFrequency/settings.frequencies.controlFrequency); % the last multiplication is to take into account the frequency difference
-        if ~settings.expShutdown
+        if ~settings.expShutdown && (T1-engineT0) > settings.mea.t_lower_shadowmode
             if  settings.mea.counter_shutdown > contSettings.N_prediction_threshold % threshold set in configControl
                 settings.expShutdown = true;
                 settings.t_shutdown = T1;
