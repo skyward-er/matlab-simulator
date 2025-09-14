@@ -68,7 +68,7 @@ contSettings.rate_limiter      =    60/0.13;                                % da
 contSettings.filter_coeff = 0.5;                                            % set this value to 1 to ignore filtering action
 
 % delay from motor shutdown to air brakes opening:
-contSettings.ABK_shutdown_delay = 0.5; % [s] time between engine shutdown command and ABK phase
+contSettings.ABK_shutdown_delay = 0.3; % [s] time between engine shutdown command and ABK phase
 if contains(mission.name, "Roccaraso")
     contSettings.ABK_shadowmode = 1.5; % [s]
 else
