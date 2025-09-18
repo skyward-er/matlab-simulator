@@ -206,8 +206,6 @@ settings.nas.mag_freq = settings.frequencies.NASFrequency/settings.nas.mag_decim
 
 %% ZVK initial
 
-% if settings.flagNAS || settings.electronics  ??????
-
 % small = [1 deg2rad([0.005 -0.005 0.005]) ];
 % 
 % Q0 = quatmultiply(Q0', small);
@@ -216,15 +214,8 @@ settings.nas.mag_freq = settings.frequencies.NASFrequency/settings.nas.mag_decim
 % 
 % Q0 = Q0';
 
-% sensorData.zvk.states = [Q0(2:4); Q0(1); V0; X0; [-0.05; 0.1; -0.05]; [-0.005; 0; 0.007]]';
-% sensorData.zvk.states = [Q0(2:4); Q0(1); V0; X0; [-0.25; 0.20; 0.10]; 0*ones(3,1)]';
-sensorData.zvk.states = [Q0(2:4); Q0(1); V0; X0; 0*ones(6,1)]';
+sensorData.zvk.states = zeros(1,24); %  STATES: [ v, acc, bias_acc_main, bias_acc_payload, theta, omega, bias_gyro_main, bias_gyro_payload]
 
-if settings.scenario ~="descent"
-    sensorData.zvk.states(10) = -environment.z0;
-else
-    sensorData.zvk.states(10) = -settings.z_final-environment.z0;
-end
 sensorData.zvk.P = settings.zvk.P0;
 
 

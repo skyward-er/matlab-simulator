@@ -1,95 +1,67 @@
-function [x_pred, P_pred] = predictorZVK( x_prev, P_prev, sf_b_measure, om_b_m, dt, zvk)
+function [x,P] = predictorZVK(x_prev,P_prev,dt,Q)
     
-    quat_prev   = x_prev(1:4)';
-    v_prev      = x_prev(5:7)';
-    r_prev      = x_prev(8:10)';
-    bias_a_prev = x_prev(11:13)';
-    bias_g_prev = x_prev(14:16)';
-
-
-    %%% Position - Velocity prediciton
-    A   = [quat_prev(1)^2 - quat_prev(2)^2 - quat_prev(3)^2 + quat_prev(4)^2,               2*(quat_prev(1)*quat_prev(2) + quat_prev(3)*quat_prev(4)),                 2*(quat_prev(1)*quat_prev(3) - quat_prev(2)*quat_prev(4));
-                 2*(quat_prev(1)*quat_prev(2) - quat_prev(3)*quat_prev(4)),      -quat_prev(1)^2 + quat_prev(2)^2 - quat_prev(3)^2 + quat_prev(4)^2,                2*(quat_prev(2)*quat_prev(3) + quat_prev(1)*quat_prev(4)) ;
-                 2*(quat_prev(1)*quat_prev(3) + quat_prev(2)*quat_prev(4)),               2*(quat_prev(2)*quat_prev(3) - quat_prev(1)*quat_prev(4)),       -quat_prev(1)^2 - quat_prev(2)^2 + quat_prev(3)^2 + quat_prev(4)^2];
-
-
-    sf_b = (sf_b_measure' - bias_a_prev);   % measured specific force, corrected bias.
-
-    a_i     =   A'*sf_b + [0;0;9.81];   % acceleration in inertial frame: correct bias, rotate body to NED and add gravitayional acc
-
-    % Pos pred ned
-    r_pred  =  r_prev + dt*v_prev;
-    % Vel pred ned
-    v_pred  =  v_prev + dt*a_i;
-    % % Vel pred body
-    % v_pred_body  =  ( A*v_pred)')';                 % NED to body
+    % Author: Guglielmo Gualdana
+    % Co-Author: Alessandro Cartocci
+    % Skyward Experimental Rocketry | GNC Dept | gnc??@kywarder.eu
+    % email: guglielmo.gualdana@skywarder.eu, alessandro.cartocci@skywarder.eu
+    % Release date: tbd
+    %
     
+    %{
+    -----------DESCRIPTION OF FUNCTION:------------------
+    STATE SPACE ESTIMATOR (PREDICTION STEP) 
+    THE DYNAMIC SYSTEM DESCRIPTION IS:
+          x' = Ax + w           A IS THE TRANSITION MATRIX
+                                  w is process noise --> Q IS ITS COVARIANCE
 
-    %%% Attitude prediction
-    om_b       = om_b_m' - bias_g_prev;          % in body
+          -INPUTS:
+              -x_prev:    1x24 VECTOR OF PREVIOUS VALUES
     
-    omega_mat   = [ 0           -om_b(3)   om_b(2);
-                    om_b(3)    0           -om_b(1);
-                    -om_b(2)  om_b(1)     0;];
+              -P_prev:    24x24 MATRIX OF PREVIOUS COVARIANCE OF STATE
 
-    Omega       = [ -omega_mat  om_b;
-                    -om_b'      0];
+              -dt:        TIME STEP
+             
+              -Q:         COVARIANCE MATRIX OF PROCESS NOISE
     
-    quat_pred  = (eye(4) + 0.5*Omega*dt) * quat_prev;
-    quat_pred = quat_pred / norm(quat_pred);
+          -OUTPUTS:
+              -x:         A PRIORI STATE ESTIMATION 1x24
+              -P:         A PRIORI MATRIX OF VARIANCE ESTIMATION 24x24
+    ---------------------------------------------------------------------------
 
-
-    disp(rad2deg(quat2eul( [ quat_pred(4), quat_pred(1:3)' ] )))
-
-    %%% Biases random walk
-    bias_a_pred = bias_a_prev;
-    bias_g_pred = bias_g_prev;
+    %}
+    v_prev               = x_prev(1:3)';
+    a_prev               = x_prev(4:6)';
+    bias_a_main_prev     = x_prev(7:9)';
+    bias_a_payload_prev  = x_prev(10:12)';
+    
+    theta_prev           = x_prev(13:15)';
+    om_prev              = x_prev(16:18)';
+    bias_g_main_prev     = x_prev(19:21)';
+    bias_g_payload_prev  = x_prev(22:24)';
+    
+    
+    %%% Prediciton accelerometer
+    v_pred              = v_prev + dt * a_prev;
+    a_pred              = a_prev;
+    bias_a_main_pred    = bias_a_main_prev;
+    bias_a_payload_pred = bias_a_payload_prev;
+    
+    %%% Prediction gyro
+    theta_pred          = theta_prev + dt * om_prev;
+    om_pred             = om_prev;
+    bias_g_main_pred    = bias_g_main_prev;
+    bias_g_payload_pred = bias_g_payload_prev;
+    
     
     % Assemble predicted global state
-    x_pred = [quat_pred; v_pred; r_pred; bias_a_pred; bias_g_pred]';
-
-
-
-    %%% Covariance prediction
-
-    F11 = -omega_mat;                               % phi_dot / phi
-    F15 = -eye(3);                                  % phi_dot / bias_gyro
-    F21 = -A * [ 0          -sf_b(3)     sf_b(2);   % v_dot / phi
-                sf_b(3)     0          -sf_b(1);
-               -sf_b(2)     sf_b(1)     0;];
-    F23 = zeros(3);                                 % v_dot / r  ->  GRAVITÀ che dipende da r: OFF
-    F24 = -A;                                       % v_dot / bias_acc
-    F32 = eye(3);                                   % r_dot / v
-
-
-    F = sparse(15,15);
-    F(1:3,1:3)      = F11;
-    F(1:3,13:15)    = F15;
-    F(4:6,1:3)      = F21;
-    F(4:6,7:9)      = F23;
-    F(4:6,10:12)    = F24;
-    F(7:9,4:6)      = F32;
-
-    PHI = expm(F * dt);
-    % PHI = eye(15) + F*dt;
-
-
-
-    G_phi       = -eye(3);
-    G_v         = [-A, eye(3)];
-    G_beta_a    = eye(3);
-    G_beta_g    = eye(3);
-
-    G = sparse(15,12);
-    G(1:3,1:3)      = G_phi;
-    G(4:6,7:12)     = G_v;
-    G(10:12,10:12)  = G_beta_a;
-    G(13:15,4:6)    = G_beta_g;
-
- 
-    GAMMA = (PHI*G);
-
-  
-    P_pred = PHI * P_prev * PHI'+ GAMMA * zvk.Q * GAMMA';
+    x = [v_pred; a_pred; bias_a_main_pred; bias_a_payload_pred; theta_pred; om_pred; bias_g_main_pred; bias_g_payload_pred]';
     
+    %%% Covariance prediction
+    A = eye(24); % Transition matrix
+    A(1:3, 4:6) = dt*eye(3);        % d_v / d_acc derivative
+    A(13:15, 16:18) = dt*eye(3);    % d_theta / d_om
+    
+    
+    P = A * P_prev * A' + Q;
+
 end
