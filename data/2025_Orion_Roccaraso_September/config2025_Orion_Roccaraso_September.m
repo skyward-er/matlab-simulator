@@ -185,7 +185,7 @@ settings.mea.P0_mat = diag([0 0 0.36^2]);
 % shut down prediction altitude
 settings.mea.z_shutdown          = 1050;                                    % [m] target apogee prediction for shutdown
 settings.mea.t_lower_shadowmode  = 1.9;                                       % minimunm burning time
-settings.mea.t_higher_shadowmode = 2.75;                                      % maximum burning time
+settings.mea.t_higher_shadowmode = 2.6;                                      % maximum burning time
 settings.shutdownValveDelay      = 0.3;                                     % time from the shut down command to the actual valve closure
 settings.mea.cd_correction_factor = 1;
 settings.mea.mass_interval = [29; 34];
