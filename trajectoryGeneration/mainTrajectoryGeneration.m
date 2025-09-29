@@ -95,12 +95,8 @@ settings.constWind = [uw, vw, ww];
 Z_initial = 0;
 
 %% INTERPOLATED CA
-if settings.flagFlightRef
-    coeffsCA = load(strcat(commonPath, '/missions/', mission.name, '/data/CAinterpCoeffsCFD.mat'));
-else
-    coeffsCA = load(strcat(commonPath, '/missions/', mission.name, '/data/CAinterpCoeffs.mat'));
-end
 
+coeffsCA = load(strcat(commonPath, '/missions/', mission.name, '/data/CAinterpCoeffs.mat'));
 
 %% NEEDED PARAMETERS
 

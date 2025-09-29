@@ -15,7 +15,7 @@ sensitivity = settings_sens.sensitivity;
 
 % Algorithms settings
 % ABK
-PID_vals = [2 1.5 0.05];
+PID_vals = [0.8 1 0.03];
 PID_ref = 0.2;
 
 control_sensitivity.ABK_curve(:,1) = PID_vals(1)*ones(sensitivity.n,1);

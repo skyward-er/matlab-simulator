@@ -107,8 +107,8 @@ for ii = 2:length(t_mea)
     end
 
     %propagate apogee
-    CD = settings.CD_correction_shutDown*getDrag(vz_nas(ii), -z_nas(ii), 0, coeffs); % coeffs potrebbe essere settings.coeffs
-    [~,~,~,rho] = computeAtmosphericData(-z_nas(ii));
+    CD = settings.CD_correction_shutDown*getDrag(vz_nas(ii), -z_nas(ii)+environment.z0, 0, coeffs); % coeffs potrebbe essere settings.coeffs
+    [~,~,~,rho] = computeAtmosphericData(-z_nas(ii)+environment.z0);
 
     propagation_steps = 0;%contSettings.N_prediction_threshold - settings.mea.counter_shutdown;
     if propagation_steps >=1
@@ -122,12 +122,6 @@ for ii = 2:length(t_mea)
 
     predicted_apogee(ii) = z_pred + 1./(2.*( 0.5.*rho .* CD * rocket.crossSection ./ mass))...
         .* log(1 + (vz_pred.^2 .* (0.5 .* rho .* CD .* rocket.crossSection) ./ mass) ./ 9.81 );
-
-    % retrieve NAS data
-    index_NAS = sum(t_mea(ii) >= t_nas);
-    z_nas(ii,1) = sensorTot.nas.states(index_NAS,3);
-    vnorm_nas(ii,1) = norm(sensorTot.nas.states(index_NAS,4:6));
-    vz_nas(ii,1) = sensorTot.nas.states(index_NAS,6);
 end
 % pressure estimation
 estimated_pressure = C*x';
