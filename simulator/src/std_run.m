@@ -58,7 +58,7 @@ end
 
 if settings.scenario ~= "descent"
     % Attitude
-    Q0 = angle2quat(environment.phi, environment.omega, 0*pi/180, 'ZYX')';
+    Q0 = angle2quat(environment.phi, environment.omega, 180*pi/180, 'ZYX')';
     % State
     X0 = [0; 0; 0];                                                             % Position initial condition
     V0 = [0; 0; 0];                                                             % Velocity initial condition
