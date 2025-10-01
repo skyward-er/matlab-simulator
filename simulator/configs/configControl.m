@@ -68,16 +68,16 @@ contSettings.rate_limiter      =    60/0.13;                                % da
 contSettings.filter_coeff = 0.5;                                            % set this value to 1 to ignore filtering action
 
 % delay from motor shutdown to air brakes opening:
-contSettings.ABK_shutdown_delay = 0.45; % [s] time between engine shutdown command and ABK phase
-% if contains(mission.name, "Roccaraso")
-%     contSettings.ABK_shadowmode = 1.5; % [s]
-% else
-%     contSettings.ABK_shadowmode = 3.8; % [s]
-% end
+
+if contains(mission.name, "Roccaraso")
+    contSettings.ABK_shutdown_delay = 0.3; % [s] time between engine shutdown command and ABK phase
+else
+    contSettings.ABK_shutdown_delay = 0.5; % [s] time between engine shutdown command and ABK phase
+end
 
 % ABK control_PID values (overwritten if Montecarlo sim is performed)
-% contSettings.ABK.PID_coeffs = [2 1.5 0.05];
-contSettings.ABK.PID_coeffs = [0.8 1 0.03];
+contSettings.ABK.PID_coeffs = [2 1.5 0.05];
+% contSettings.ABK.PID_coeffs = [0.8 1 0.03];
 contSettings.ABK.PID_ref = 0.2;
 
 % NAS uncertainty (overwritten if Montecarlo sim is performed)

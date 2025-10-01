@@ -90,16 +90,18 @@ settings.servo.maxAngle = fix(settings.servo.maxAngle*1e9)/1e9; % to avoid compu
 
 %% NAS TUNING PARAMETERS
 settings.nas.dt_k          =   0.02;                                        % [s]        nas time step
-settings.nas.sigma_baro    =   50;                                          % [Pa]   estimated barometer variance    
-settings.nas.sigma_mag     =   10;                                          % [mgauss] estimated magnetometer variance    
-settings.nas.sigma_GPS     =   sqrt(diag([0.002 0.002 0.01/30 0.01/30]));   % [millideg m/s]     estimated GPS variance. position from test, velocity from datasheet
-settings.nas.sigma_w       =   10;                                          % [rad/s]   estimated gyroscope variance;
 settings.nas.sigma_beta    =   1e-4;                                        % [rad/s]   estimated gyroscope bias variance;
-settings.nas.sigma_pitot_static   =   75;                                   % [Pa]   estimated static pressure variance
-settings.nas.sigma_pitot_dynamic  =   75;                                   % [Pa]   estimated dynamic pressure variance
-settings.nas.sigma_pitot   =   20;                                          % Legacy pitot variance
-settings.nas.sigma_pitot2  =   0.01;                                        % Legacy pitot variance  
-settings.nas.sigma_acc     =   0.05;                                        % [m/s^2]
+settings.nas.sigma_w       =   0.0031;                                      % [rad/s]   estimated gyroscope variance;
+settings.nas.sigma_acc     =   0.035;                                       % [m/s^2]
+settings.nas.sigma_mag     =   0.0038;                                      % [muT] estimated magnetometer variance 
+settings.nas.sigma_GPS     =   sqrt(diag([0.0179 0.0179 0.0996 0.0996]));   % [millideg m/s]     estimated GPS variance. position from test, velocity from datasheet
+settings.nas.sigma_baro    =   68;                                          % [Pa]   estimated barometer variance       
+settings.nas.sigma_pos     =   0.02;                                        
+settings.nas.sigma_vel     =   0.01;
+settings.nas.sigma_pitot_static   =   25;                                   % [Pa]   estimated static pressure variance
+settings.nas.sigma_pitot_dynamic  =   25;                                   % [Pa]   estimated dynamic pressure variance
+% settings.nas.sigma_pitot   =   20;                                          % Legacy pitot variance
+% settings.nas.sigma_pitot2  =   0.01;                                        % Legacy pitot variance  
 settings.nas.P             = 0.01*eye(12);
 
 settings.nas.Mach_max = 0.9;                                                % max mach number expected for the mission (for nas with pitot update purposes)
@@ -127,17 +129,12 @@ settings.nas.ned_mag       = wrldmagm(-settings.nas.z0,settings.nas.lat0,setting
 settings.nas.mag_decimate  = 50;                            % Perform mag correction once every 50 steps (1Hz)
 
 % for attitude correction with accelerometer in obsw
-settings.nas.acc1g_confidence = 0.5;            %[to verify]
+settings.nas.acc1g_confidence = 0.5;
 settings.nas.acc1g_samples = 20;
 
 % Process noise covariance matrix for the linear dynamics
-settings.nas.QLinear       =   0.005*...
-                                 [4       0       0        0        0       0;
-                                  0       4       0        0        0       0;
-                                  0       0       4        0        0       0;
-                                  0       0       0        2        0       0;
-                                  0       0       0        0        2       0;
-                                  0       0       0        0        0       2];
+settings.nas.QLinear       =   [eye(3)*settings.nas.sigma_pos zeros(3); 
+                                zeros(3) eye(3)*settings.nas.sigma_vel];
 
 % Process noise covariance matrix for the quaternion dynamics
 settings.nas.Qq              =   [(settings.nas.sigma_w^2*settings.nas.dt_k+(1/3)*settings.nas.sigma_beta^2*settings.nas.dt_k^3)*eye(3)          0.5*settings.nas.sigma_beta^2*settings.nas.dt_k^2*eye(3);
@@ -185,8 +182,8 @@ settings.mea.P0_mat = diag([0 0 0.36^2]);
 
 % shut down prediction altitude
 settings.mea.z_shutdown          = 3000;                                    % [m] target apogee prediction for shutdown
-settings.mea.t_lower_shadowmode  = 0;                                       % minimunm burning time
-settings.mea.t_higher_shadowmode = 10;                                      % maximum burning time
+settings.mea.t_lower_shadowmode  = 4;                                       % minimunm burning time
+settings.mea.t_higher_shadowmode = 5;                                      % maximum burning time
 settings.shutdownValveDelay      = 0.3;                                     % time from the shut down command to the actual valve closure
 settings.mea.cd_correction_factor = 1;
 settings.mea.mass_interval = [25; 36];
