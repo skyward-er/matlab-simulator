@@ -156,23 +156,23 @@ end
 contSettings.reference.deltaZ = 10;
 heights = (0:contSettings.reference.deltaZ:settings.z_final)';
 
-if contains(mission.name, '2025') || contains(mission.name,'2024') || contains(mission.name,'2023')
+% if contains(mission.name, '2025') || contains(mission.name,'2024') || contains(mission.name,'2023')
+% 
+%     V_rescale = cell( size(reference.altitude_ref,1),size(reference.altitude_ref,2) );
+%     for j = 1 : size(reference.altitude_ref,2)
+%         for i = 1:size(reference.altitude_ref,1)
+%             V_rescale{i,j} = interp1(reference.altitude_ref{i,j},reference.vz_ref{i,j},heights);
+%         end
+%     end
+% 
+% else
+% 
+%     V_rescale = zeros(length(heights),size(reference.altitude_ref,1));
+%     for ii = 1:size(reference.altitude_ref,1)
+%         V_rescale(:,ii) = interp1(reference.altitude_ref{ii},reference.vz_ref{ii},heights);
+%     end
+% end
 
-    V_rescale = cell( size(reference.altitude_ref,1),size(reference.altitude_ref,2) );
-    for j = 1 : size(reference.altitude_ref,2)
-        for i = 1:size(reference.altitude_ref,1)
-            V_rescale{i,j} = interp1(reference.altitude_ref{i,j},reference.vz_ref{i,j},heights);
-        end
-    end
-
-else
-
-    V_rescale = zeros(length(heights),size(reference.altitude_ref,1));
-    for ii = 1:size(reference.altitude_ref,1)
-        V_rescale(:,ii) = interp1(reference.altitude_ref{ii},reference.vz_ref{ii},heights);
-    end
-end
-
-contSettings.reference.Vz = V_rescale;
-contSettings.reference.Z = heights;
+contSettings.reference.Vz = reference.vz_ref;
+contSettings.reference.Z = trajectories_saving{1,1}.Z_ref;
 
