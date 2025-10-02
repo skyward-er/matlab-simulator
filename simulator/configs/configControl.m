@@ -76,8 +76,7 @@ else
 end
 
 % ABK control_PID values (overwritten if Montecarlo sim is performed)
-contSettings.ABK.PID_coeffs = [2 1.5 0.05];
-% contSettings.ABK.PID_coeffs = [0.8 1 0.03];
+contSettings.ABK.PID_coeffs = [1 0.5 0.03];
 contSettings.ABK.PID_ref = 0.2;
 
 % NAS uncertainty (overwritten if Montecarlo sim is performed)

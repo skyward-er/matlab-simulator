@@ -79,6 +79,8 @@ rocketRef = rocket;
 envRef = environment;
 windRef = wind;
 
+pw = PoolWaitbar(N_sim, strcat(num2str(N_sim), ' Simulations'));
+
 parfor ii = 1:N_sim
     rocket = rocketRef;
     environment = envRef;
@@ -90,9 +92,10 @@ parfor ii = 1:N_sim
     settings_mont.ABK.PID_ref = control_sensitivity.ABK_ref(ii);
     settings_mont.NAS.mult = control_sensitivity.NAS_mult(ii);
 
-    if displayIter == true
-        fprintf("simulation = " + num2str(ii) + " of " + num2str(N_sim) + ", algorithm: " + contSettings.algorithm +", scenario: "+ scenario +"\n");
-    end
+    % if displayIter == true
+    %     fprintf("simulation = " + num2str(ii) + " of " + num2str(N_sim) + ", algorithm: " + contSettings.algorithm +", scenario: "+ scenario +"\n");
+    % end
+    increment(pw);
 
     [simOutput] = std_run(settings,contSettings,rocket,environment,wind,mission,settings_mont);
     save_thrust{ii} = simOutput;
@@ -101,6 +104,8 @@ parfor ii = 1:N_sim
     save_thrust{ii}.NAS.mult = control_sensitivity.NAS_mult(ii);
 
 end
+
+delete(pw)
 
 %% Retrieve parameters
 
@@ -112,6 +117,8 @@ N_ApogeeWithinTarget_10 = 0;
 N_ApogeeWithinTarget_50 = 0;
 N_landings_within50m = 0;
 N_landings_within150m = 0;
+
+pw = PoolWaitbar(N_sim, 'Post-processing');
 
 for ii = 1:N_sim
     % apogee
@@ -177,7 +184,9 @@ for ii = 1:N_sim
         N_landings_within50m = NaN; % save how many apogees sit in the +-50 m from target
         N_landings_within150m = NaN; % save how many apogees sit in the +-50 m from target
     end
+    increment(pw);
 end
+delete(pw)
 
 % merit parameters
 apogee.altitude_mean = mean(apogee.altitude);
