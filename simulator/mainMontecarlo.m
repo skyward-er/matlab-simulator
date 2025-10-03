@@ -386,7 +386,7 @@ for alg_index = 4
             end
             save(folder(i)+"\montecarloFigures",'montFigures')
             
-            save(folder(i)+"\saveThrust.mat","save_thrust","apogee","N_sim","settings","thrust_percentage","stoch") % add "save_thrust", > 2GB for 1000 sim
+            save(folder(i)+"\saveThrust.mat","save_thrust","apogee","N_sim","settings","thrust_percentage","stoch", "-v7.3") % add "save_thrust", > 2GB for 1000 sim
 
             % Save results.txt
             fid = fopen( folder(i)+"\"+contSettings.algorithm+"Results"+saveDate+".txt", 'wt' );  % CAMBIA IL NOME

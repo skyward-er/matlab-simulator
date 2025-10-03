@@ -41,6 +41,8 @@ else
     clearvars -except flagSubmodulesUpdated
 end
 
+rng default
+
 %% path loading
 restoredefaultpath;
 filePath = fileparts(mfilename('fullpath'));
