@@ -1,5 +1,5 @@
 function [sensorData,sensorTot,settings,contSettings,rocket] = run_MTR_SIM...
-        (sensorData,sensorTot,settings,contSettings,T1, engineT0,dt_ode,rocket,environment, mission)
+        (sensorData,sensorTot,settings,contSettings,T1, engineT0,dt,rocket,environment, mission)
 
     % impose valve position
     if T1-engineT0 <= rocket.motor.cutoffTime
@@ -8,7 +8,7 @@ function [sensorData,sensorTot,settings,contSettings,rocket] = run_MTR_SIM...
         u = 0;
     end
     if ~settings.flagMEAInit
-        sensorTot.mea.time = T1-dt_ode;
+        sensorTot.mea.time = T1-dt;
         settings.flagMEAInit =  true;
     end
     [sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1,engineT0,environment,rocket, mission);

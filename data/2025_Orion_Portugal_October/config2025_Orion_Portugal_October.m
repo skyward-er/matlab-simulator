@@ -99,7 +99,7 @@ settings.nas.sigma_baro    =   68;                                          % [P
 settings.nas.sigma_pos     =   0.02;                                        
 settings.nas.sigma_vel     =   0.01;
 settings.nas.sigma_pitot_static   =   25;                                   % [Pa]   estimated static pressure variance
-settings.nas.sigma_pitot_dynamic  =   25;                                   % [Pa]   estimated dynamic pressure variance
+settings.nas.sigma_pitot_dynamic  =   75;                                   % [Pa]   estimated dynamic pressure variance
 % settings.nas.sigma_pitot   =   20;                                          % Legacy pitot variance
 % settings.nas.sigma_pitot2  =   0.01;                                        % Legacy pitot variance  
 settings.nas.P             = 0.01*eye(12);
@@ -158,7 +158,7 @@ settings.ada.x0          =  [settings.ada.p_ref, settings.ada.v0, settings.ada.a
 settings.ada.v_thr       =   0;                                             % Velocity threshold for the detected apogee
 settings.ada.count_thr   =   5;                                             % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.ada.altitude_confidence_thr = 5;                                   % If the ada recognizes altitude_confidence_thr samples under parachute cutting altitude, it sends the command
-settings.ada.shadowmode = 18;
+settings.ada.shadowmode = 12;
 
 if ~settings.parafoil
     settings.ada.z_cut  = rocket.parachutes(1,1).finalAltitude;

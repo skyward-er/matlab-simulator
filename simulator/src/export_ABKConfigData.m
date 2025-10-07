@@ -15,7 +15,7 @@ end
 % first column - heights;
 % next N_mass columns - vertical velocity with closed air brakes;
 % next N_mass columns - vertical velocity with open air brakes;
-reference_export = zeros(size(contSettings.reference.Z,1),1+2*size(contSettings.reference.Vz,2));
+reference_export = zeros(size(contSettings.reference.Z,2),1+2*size(contSettings.reference.Vz,2));
 reference_export(:,1) = contSettings.reference.Z;
 varNames{1,1} = 'Heights';
 for i = 1:size(contSettings.reference.Vz,1)
@@ -33,7 +33,7 @@ for i = 1:size(reference_export,2)
     reference_export_table(:,i) = table(reference_export(:,i));
 end
 reference_export_table.Properties.VariableNames = varNames;
-writetable(reference_export_table,ConDataPath+"/"+folder+"/ABK_reference_trajctories.csv")
+writetable(reference_export_table,ConDataPath+"/"+folder+"/ABK_reference_trajectories.csv")
 
 % second file: configuration for the air brakes
 configABK_export_table = table;
