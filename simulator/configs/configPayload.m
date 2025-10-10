@@ -59,7 +59,7 @@ M2 = zeros(1, 2);
 
 if contSettings.payload.guidance_alg == "t-approach"
     % define the position of EMC: in line with the target
-    contSettings.payload.mult_EMC   = 1.2;               % How far from target is EMC (between 1 and 1.2)
-    contSettings.payload.d = 20;
+    contSettings.payload.mult_EMC   = 1.1;               % How far from target is EMC (between 1 and 1.2)
+    contSettings.payload.d = 30;
     
 end
