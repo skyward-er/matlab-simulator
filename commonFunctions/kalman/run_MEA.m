@@ -1,150 +1,108 @@
-function [sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1,engineT0,environment,rocket, mission)
+function [sensorData, sensorTot] = run_MEA(sensorData, sensorTot, settings, contSettings, u, environment, rocket)
+%{
+    Common units:
+    - length    [m];
+    - time      [s];
+    - area      [m^2];
+    - velocity  [m/s];
+    - pressure  [bar];
+    - mass      [kg]
+%}
+
+%% Modified
+
+% --- Engine identification state-space matrices ---
+A = settings.mea.engine_model_A1(1:2,1:2);  % A = settings.mea.engine_model_A1; Substitute after changing MEA settings
+B = settings.mea.engine_model_B1(1:2);      % B = settings.mea.engine_model_B1; Substitute after changing MEA settings
+C = settings.mea.engine_model_C1(1:2);      % C = settings.mea.engine_model_C1; Substitute after changing MEA settings
 
 
-% mass estimation
-A = settings.mea.engine_model_A1;
-B = settings.mea.engine_model_B1;
-C = settings.mea.engine_model_C1;
+% --- MEA time ---
+t_mea = sensorTot.mea.time(end);
+dt_mea = 1/settings.frequencies.MEAFrequency;
 
-% define time array for mea algorithm
-t_mea = sensorTot.mea.time(end):1/settings.frequencies.MEAFrequency:T1;
 
-% define time array for sensors
-t_chambPress = sensorTot.comb_chamber.time;%(sensorTot.comb_chamber.time >= T1);
-t_nas = sensorTot.nas.time;%(sensorTot.nas.time>= T1); % we need also nas to estimate cd etc
-t_imu = sensorTot.imu.time;
+% --- PT and NAS last logs ---
+lastlog_chambPress = find(sensorTot.comb_chamber.time <= t_mea, 1, 'last'); % Index PT
+chambPress = sensorTot.comb_chamber.measures(lastlog_chambPress);           % Pressure
 
-% initialise state update
-x(1,:) = sensorData.mea.x(end,:);
-P(:,:,1) = sensorData.mea.P(:,:,end);
-P_acc(:,:,1) = sensorData.mea.P_acc(:,:,end);
-predicted_apogee = 0;
-z_nas = zeros(length(t_mea), 1);
-vnorm_nas = zeros(length(t_mea), 1);
-vz_nas = zeros(length(t_mea), 1);
-z_nas(1) = sensorData.nas.states(end,3);
-vnorm_nas(1) = norm(sensorData.nas.states(end,4:6));
-vz_nas(1) = -sensorData.nas.states(end,6);
+lastlog_nas = find(sensorTot.nas.time <= t_mea, 1, 'last');                 % Index NAS
+z_nas = -sensorTot.nas.states(lastlog_nas, 3);                              % Altitude
+vz_nas = -sensorTot.nas.states(lastlog_nas, 6);                             % Vertical velocity
 
-coeffs = contSettings.coeffs;
- 
 
-for ii = 2:length(t_mea)
-    index_chambPress = sum(t_mea(ii) >= t_chambPress);
-    index_imu = sum(t_mea(ii) >= t_imu);
-    index_nas = sum(t_mea(ii) >= t_nas);
+% --- Constants --- !Hardcode in settings!
+c_star = 1567;      % Characteristic velocity
+r_t = 15.8*1e-3;    % Nozzle throat radius
+A_t = pi*r_t^2;     % Nozzle throat area
+mass_max = settings.mea.mass_interval(2);
+mass_min = settings.mea.mass_interval(1);
+coeffs = contSettings.coeffs;   % MSA stuff for aerodynamics
 
-    z_nas(ii,1) = sensorTot.nas.states(index_nas,3);
-    vnorm_nas(ii,1) = norm(sensorTot.nas.states(index_nas,4:6));
-    vz_nas(ii,1) = -sensorTot.nas.states(index_nas,6);
 
-    % prediction
-    x(ii,:) = (A*x(ii-1,:)' + B*u)'; % x is a row but to apply matrix product we need it column, therefore the transpositions
-    P(:,:,ii) = A*P(:,:,ii-1)*A' + settings.mea.Q;
+% --- PT correction ---
+% States initialisation (last state)
+x = sensorTot.mea.state(:,end);     % Engine state
+P = sensorTot.mea.P(:,:,end);       % State estimation error covariance matrix for Kalman
+mass = sensorTot.mea.mass;          % To be taken from loadcell value somehow
 
-    % barometer correction
-    if sensorTot.comb_chamber.measures(index_chambPress)  > 1
-        S = C*P(:,:,ii)*C' + settings.mea.R;
-        if ~det(S)<1e-3
-            K = P(:,:,ii)*C' / S; % if you want to try with constant gain [0.267161;-0.10199;-0.000205604 ];
-            P(:,:,ii) = (eye(3)-K*C)*P(:,:,ii);
-            x(ii,:) = x(ii,:)' + K* (sensorTot.comb_chamber.measures(index_chambPress) -  C * x(ii,:)'); % /1000 to have the measure in bar
-        end
-    end
-    %accelerometer correction (not for 2023)
-    if contains(mission.name, '2024')
-        K_t = settings.mea.K_t;
-        alpha = settings.mea.alpha;
-        c = settings.mea.c;
-        P_0 = settings.mea.P0;
-        acc_threshold = settings.mea.acc_threshold;
-        vel_threshold = settings.mea.vel_threshold;
-        mass_max = settings.mea.mass_interval(2);
-        mass_min = settings.mea.mass_interval(1);
+% Prediction
+x_pred = A*x + B*u;
+P_pred = A*P*A' + settings.mea.Q(1:2,1:2);
+    % P_pred = A*P*A' + settings.mea.Q; Substitute after changing MEA settings
 
-        if norm(sensorTot.imu.accelerometer_measures(index_imu, :)) > acc_threshold...
-                && vz_nas(ii) > vel_threshold
-
-            cd = 1*getDrag(vz_nas(ii), -z_nas(ii), 0, coeffs); %add correction shut_down??
-            [~,~,P_e, rho] = computeAtmosphericData(-z_nas(ii));
-            q = 0.5*rho*vz_nas(ii)^2; %dynamic pressure
-            F_a = q*rocket.crossSection*cd;       %aerodynamic force
-
-            if  -z_nas(ii,1)> 800
-                F_s = (P_0-P_e)*rocket.motor.ae;
-            else
-                F_s = 0;
-            end
-
-            y_est = (K_t * C*x(ii, :)' + F_s)/x(ii,3)  - F_a/x(ii, 3);
-            H = [K_t*C(1)/x(ii, 3), ...
-                K_t*C(2)/x(ii, 3),...
-                -( K_t*C*x(ii,:)'+ F_s - F_a)/x(ii, 3)^2];
-
-            R2 = (alpha*q + c);
-
-            S = H*P(:,:,ii)*H' + R2;
-
-            if ~det(S)<1e-3
-                K = P(:,:,ii)*H' / S;
-                P(:,:,ii) = (eye(3)-K*H)*P(:,:,ii);
-                x(ii,:) = x(ii,:)' + K.*(sensorTot.imu.accelerometer_measures(index_imu, 1) - y_est);
-            end
-
-        end
-        
-        % use only reasonable masses to predict the apogee
-        if x(ii,3) > mass_max
-            mass = mass_max;
-        elseif x(ii,3) < mass_min
-            mass = mass_min;
-        else
-            mass = x(ii,3);
-        end
-
-    else
-        mass = x(ii,3);
-    end
-
-    %propagate apogee
-    CD = settings.CD_correction_shutDown*getDrag(vz_nas(ii), -z_nas(ii)+environment.z0, 0, coeffs); % coeffs potrebbe essere settings.coeffs
-    [~,~,~,rho] = computeAtmosphericData(-z_nas(ii)+environment.z0);
-
-    propagation_steps = 0;%contSettings.N_prediction_threshold - settings.mea.counter_shutdown;
-    if propagation_steps >=1
-        [z_pred, vz_pred] = PropagateState(-z_nas(ii),-vz_nas(ii), ...
-            K_t .* sensorTot.comb_chamber.measures(index_chambPress), ...
-            rocket.crossSection, CD, rho,x(ii, 3), 0.02, propagation_steps);
-    else
-        z_pred = -z_nas(ii);
-        vz_pred = -vz_nas(ii);
-    end
-
-    predicted_apogee(ii) = z_pred + 1./(2.*( 0.5.*rho .* CD * rocket.crossSection ./ mass))...
-        .* log(1 + (vz_pred.^2 .* (0.5 .* rho .* CD .* rocket.crossSection) ./ mass) ./ 9.81 );
+% Correction
+S = C*P_pred*C' + settings.mea.R;
+if rcond(S) > 1e-3 % Check numerical conditioning of the matrix
+    K = P_pred*C' / S;                                                      % Kalman gain
+    e = chambPress - C*x_pred;                                              % Error
+    x = x_pred + K*e;                                                       % Update state
+    P = (eye(2) - K*C)*P_pred*(eye(2) - K*C)' + K*settings.mea.R*K';        % Update P
+else
+    x = x_pred;
+    P = P_pred;
 end
-% pressure estimation
-estimated_pressure = C*x';
 
-% mass estimation
-estimated_mass = x(:,3);
+chambPress_est = C * x;
 
 
-% update local state
-sensorData.mea.time = t_mea;
-sensorData.mea.x = x;
-sensorData.mea.P = P;
-sensorData.mea.P_acc = P_acc;
-sensorData.mea.predicted_apogee = predicted_apogee;
-sensorData.mea.estimated_mass = estimated_mass;
-sensorData.mea.estimated_pressure = estimated_pressure;
+% --- Mass estimation ---
+m_dot = chambPress_est * 10^5 * A_t / c_star;   % Mass flow rate (the factor 10^5 is used to convert [bar] -> [Pa])
+mass = mass - m_dot*dt_mea;                     % Mass update
 
-% update total state
-sensorTot.mea.pressure(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-2) = sensorData.mea.estimated_pressure(2:end);
-sensorTot.mea.mass(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-2) = sensorData.mea.estimated_mass(2:end);
-sensorTot.mea.prediction(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-2) = sensorData.mea.predicted_apogee(2:end);
-sensorTot.mea.time(sensorTot.mea.n_old:sensorTot.mea.n_old + size(sensorData.mea.x(:,1),1)-2) = sensorData.mea.time(2:end);
-sensorTot.mea.n_old = sensorTot.mea.n_old + size(sensorData.mea.x,1) -1;
+% Feasibility check of the mass
+if mass > mass_max
+    mass = mass_max;
+elseif mass < mass_min
+    mass = mass_min;
+end
 
+
+%% UNMODIFIED
+
+% Apogee prediction
+CD = settings.CD_correction_shutDown*getDrag(vz_nas, -z_nas+environment.z0, 0, coeffs); % coeffs potrebbe essere settings.coeffs
+[~,~,~,rho] = computeAtmosphericData(-z_nas+environment.z0);
+
+propagation_steps = 0;%contSettings.N_prediction_threshold - settings.mea.counter_shutdown;
+if propagation_steps >=1
+    % [z_pred, vz_pred] = PropagateState(-z_nas,-vz_nas, ...
+    %     K_t .* chambPress_est, rocket.crossSection, CD, rho, mass, 0.02, propagation_steps);
+else
+    z_pred = z_nas;
+    vz_pred = vz_nas;
+end
+
+predicted_apogee = z_pred + 1./(2.*( 0.5.*rho .* CD * rocket.crossSection ./ mass))...
+    .* log(1 + (vz_pred.^2 .* (0.5 .* rho .* CD .* rocket.crossSection) ./ mass) ./ 9.81 );
+
+
+% Update outputs
+sensorTot.mea.state(:, end+1) = x;
+sensorTot.mea.P(:, :, end+1) = P;
+sensorTot.mea.pressure(end + 1) = chambPress_est;
+sensorTot.mea.mass = mass;
+sensorTot.mea.prediction(end + 1) = predicted_apogee;
+sensorTot.mea.time(end + 1) = t_mea + dt_mea;
 
 end

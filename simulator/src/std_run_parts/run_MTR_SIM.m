@@ -1,5 +1,5 @@
 function [sensorData,sensorTot,settings,contSettings,rocket] = run_MTR_SIM...
-        (sensorData,sensorTot,settings,contSettings,T1, engineT0,dt,rocket,environment, mission)
+        (sensorData,sensorTot,settings,contSettings,T1, engineT0,rocket,environment)
 
     % impose valve position
     if T1-engineT0 <= rocket.motor.cutoffTime
@@ -8,10 +8,15 @@ function [sensorData,sensorTot,settings,contSettings,rocket] = run_MTR_SIM...
         u = 0;
     end
     if ~settings.flagMEAInit
-        sensorTot.mea.time = T1-dt;
+        sensorTot.mea.time = T1 - 1/settings.frequencies.controlFrequency;
+        sensorTot.mea.state = sensorData.mea.x(1:2)';
+        sensorTot.mea.P = sensorData.mea.P(1:2,1:2);
         settings.flagMEAInit =  true;
     end
-    [sensorData,sensorTot] = run_MEA(sensorData,sensorTot,settings,contSettings,u,T1,engineT0,environment,rocket, mission);
+    
+    if T1 >= sensorTot.mea.time(end) + 1/settings.frequencies.MEAFrequency
+        [sensorData, sensorTot] = run_MEA(sensorData, sensorTot, settings, contSettings, u, environment, rocket);
+    end
 
     if sensorTot.mea.prediction(end) >= settings.mea.z_shutdown
         settings.mea.counter_shutdown = settings.mea.counter_shutdown + 1*floor(settings.frequencies.MEAFrequency/settings.frequencies.controlFrequency); % the last multiplication is to take into account the frequency difference
