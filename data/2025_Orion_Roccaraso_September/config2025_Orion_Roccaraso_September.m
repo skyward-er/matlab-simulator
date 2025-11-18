@@ -108,11 +108,25 @@ settings.nas.v_thr         =   2.5;                                         % Ve
 settings.nas.count_thr     =   5;                                           % If the apogee is detected count_thr time, the algorithm will return the apogee event
 settings.nas.counter       =   0;
 
-settings.nas.baro.a = 0.0065;                                               % [K/m] temperature gradient Lambda
-settings.nas.baro.n = 5.255933;
-[settings.nas.baro.refTemperature,~,settings.nas.baro.refPressure] = computeAtmosphericData(0);
-settings.nas.PitotThreshold = 0.35;                                         % Minimum Mach for pitot update 
-settings.nas.baro.gasConstant = 287.05;                                          % Dry Air Specific Gas Constant [J/(kg*K)] 
+% computeAtmosphericData parameters
+settings.nas.atmo_data.g0      = 9.80665;
+settings.nas.atmo_data.gamma   = 1.4;
+settings.nas.atmo_data.beta    = 1.458e-6;
+settings.nas.atmo_data.S       = 110.4;
+settings.nas.atmo_data.R       = 287.0531;
+settings.nas.atmo_data.L       = 0.0065;
+settings.nas.atmo_data.hts     = 11000;
+settings.nas.atmo_data.htp     = 20000;
+settings.nas.atmo_data.rho0    = 1.225;
+settings.nas.atmo_data.P0      = 101325;
+settings.nas.atmo_data.T0      = 288.15;
+settings.nas.atmo_data.H0      = 0;
+
+settings.nas.baro.a             = 0.0065;                                               % [K/m] temperature gradient Lambda
+settings.nas.baro.n             = 5.255933;
+[settings.nas.baro.refTemperature,~,settings.nas.baro.refPressure] = computeAtmosphericData(0, settings.nas.atmo_data);
+settings.nas.PitotThreshold     = 0.35;                                         % Minimum Mach for pitot update 
+settings.nas.baro.gasConstant   = 287.05;                                     % Dry Air Specific Gas Constant [J/(kg*K)] 
 
 settings.nas.t_nas         =   -1;                                      % Apogee detection timestamp
 settings.nas.flag_apo      =   false;                                   % True when the apogee is detected

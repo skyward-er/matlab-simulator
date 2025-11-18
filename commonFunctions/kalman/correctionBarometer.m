@@ -1,4 +1,4 @@
-function [x,P,y_res] = correctionBarometer(x_pred,P_pred,p_meas,sigma_baro, params, refAltitude)
+function [x,P,y_res] = correctionBarometer(x_pred,P_pred,p_meas, nas, environment)
 
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
@@ -35,13 +35,23 @@ function [x,P,y_res] = correctionBarometer(x_pred,P_pred,p_meas,sigma_baro, para
 %                       --> 1x1
 %---------------------------------------------------------------------------
 
+if isfield(nas, 'atmo_data')
+    atmo_data = nas.atmo_data;
+else
+    atmo_data = double.empty;
+end
+
+sigma_baro  = nas.sigma_baro;
+params = nas.baro;
+refAltitude = environment.z0;
 refPressure =  params.refPressure;
 refTemperature = params.refTemperature;
 a = params.a;
 n = params.n;
 
+
 alt = -x_pred(3) + refAltitude;
-[~, ~, y_hat] = computeAtmosphericData(alt);
+[~, ~, y_hat] = computeAtmosphericData(alt, atmo_data);
 
 threshold      =   10e-11;
 H              =   sparse(1,6);                %Pre-allocation of gradient 
@@ -72,7 +82,7 @@ end
 % % % end
 
 alt_new = -x_pred(3);
-p_corr         =   computeAtmosphericData   (alt_new);                          %Corrected output expectation
+p_corr         =   computeAtmosphericData   (alt_new, atmo_data);                          %Corrected output expectation
 
 y_res          =   p_meas - p_corr;
 

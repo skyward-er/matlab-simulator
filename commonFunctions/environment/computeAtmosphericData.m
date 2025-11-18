@@ -1,4 +1,4 @@
-function [T, a, P, rho, nu] = computeAtmosphericData(h)
+function [T, a, P, rho, nu] = computeAtmosphericData(h, conf)
 
 % This function implements the mathematical representation of the 
 % International Standard Atmosphere values for ambient temperature, 
@@ -10,6 +10,7 @@ function [T, a, P, rho, nu] = computeAtmosphericData(h)
 % 
 % Inputs:
 %   h         : Numeric array of M-by-N values of geopotential heights in meters.
+%   param     : [optional] Parameters used by the function
 % 
 % Outputs:
 %   T         : Numeric array of M-by-N values of temperatures in kelvin.
@@ -19,23 +20,37 @@ function [T, a, P, rho, nu] = computeAtmosphericData(h)
 %   nu        : Numeric array of M-by-N values of kinematic viscosities in meters squared per
 %               second.
 
-g0 = 9.80665;
-gamma = 1.4;
-beta =1.458e-6;
-S = 110.4;
-R = 287.0531;
-L = 0.0065;
-hts = 11000;
-htp = 20000;
-rho0 = 1.225;
-P0 = 101325;
-T0 = 288.15;
-H0 = 0;
+if exist('conf', 'var') && ~isempty(conf)        
+    g0      = conf.g0;
+    gamma   = conf.gamma;
+    beta    = conf.beta;
+    S       = conf.S;
+    R       = conf.R;
+    L       = conf.L;
+    hts     = conf.hts;
+    htp     = conf.htp;
+    rho0    = conf.rho0;
+    P0      = conf.P0;
+    T0      = conf.T0;
+    H0      = conf.H0;
+else % use default config
+    g0      = 9.80665;
+    gamma   = 1.4;
+    beta    = 1.458e-6;
+    S       = 110.4;
+    R       = 287.0531;
+    L       = 0.0065;
+    hts     = 11000;
+    htp     = 20000;
+    rho0    = 1.225;
+    P0      = 101325;
+    T0      = 288.15;
+    H0      = 0;
+end
 
 h(h > htp) = htp;
 h(h < H0) = H0;
 hGrThHTS = (h > hts);
-
 h_tmp = h;
 h_tmp(hGrThHTS) = hts;
 
