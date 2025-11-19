@@ -26,7 +26,7 @@ settings.nas.flag.flag_linear_propagation   = true;
 settings.nas.flag.flag_attitude_propagation = true;
 settings.nas.flag.flag_baro_correction      = true;
 settings.nas.flag.flag_gps_correction       = true;
-settings.nas.flag.flag_pitot_correction     = true;
+settings.nas.flag.flag_pitot_correction     = false;
 
 %% TRAJECTORY GENERATION PARAMETERS
 settings.Vz_final = 0;
