@@ -17,8 +17,9 @@ end
 
 %% Navigation system (NAS)
 if settings.flagNAS && settings.dataNoise
-    [sensorData, sensorTot, settings.nas]   =  run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings, contSettings, environment);
-
+    % [sensorData, sensorTot, settings.nas]   =   run_NAS(t1,  XYZ0*0.01, sensorData, sensorTot, settings, contSettings, environment);
+    [sensorData, sensorTot, settings.nas]   =  run_NAS2(t1,  XYZ0*0.01, sensorData, sensorTot, settings, environment);
+    
     if settings.flagAscent
         [sensorTot] = errorNAS (Yf, sensorData, sensorTot);
     end

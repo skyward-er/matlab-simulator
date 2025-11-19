@@ -20,9 +20,13 @@ settings.launchDate = [2024 9 15];
 warning("Launch date set to 2024 as wrldmagm does not support 2025 launch date")
 settings.HREmot = true;
 
-%% Enable Second IMU and Pitot Correction
+%% Enable Second IMU and Flag Correction/Propagation
 settings.second_imu = true;
-settings.nas.pitot_correction = true; % Enable Pitot Correction in NAS
+settings.nas.flag.flag_linear_propagation   = true;
+settings.nas.flag.flag_attitude_propagation = true;
+settings.nas.flag.flag_baro_correction      = true;
+settings.nas.flag.flag_gps_correction       = true;
+settings.nas.flag.flag_pitot_correction     = true;
 
 %% TRAJECTORY GENERATION PARAMETERS
 settings.Vz_final = 0;
