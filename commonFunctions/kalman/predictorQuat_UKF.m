@@ -5,6 +5,19 @@ function [x_pred,P_pred, sigma]=predictorQuat_UKF(x,P,w,dt,Q)
 % email: domenico.acierno@skywarder.eu
 % Release date: 12/11/2025
 
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+
 %-----------DESCRIPTION OF FUNCTION:------------------
 
 %STATE SPACE ESTIMATOR (PREDICTION STEP) FOR ATTITUDE DYNAMICS
@@ -86,6 +99,9 @@ end
 
 % I cannot use baricentric mean, given that quaternions are not part of a
 % vectorial space but are points of homogeneous riemannian manifold
+
+% either an iterative method or an eig-related one can be used
+% however, both of them make the algorithm too heavy to be run online
 
 % CANNOT USE!!!
 % q = propagated_point_matrix*weights;

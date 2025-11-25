@@ -121,6 +121,10 @@ P_c         =   zeros(12,12,length(t_nas));
 P_lin       =   zeros(6,6,length(t_nas));       % Pre-allocation of the covariance matrix
 P_q         =   zeros(6,6,length(t_nas));
 
+euler       =   zeros(length(t_nas),3);         % Pre-allocation of euler angles
+eulerSetID       =   zeros(length(t_nas));      % Pre-allocation of euler angles ID history
+
+
 % initialize first update
 x_lin(1,:)  =   sensorData.nas.states(end,1:6);                 % Allocation of the initial value
 xq(1,:)     =   sensorData.nas.states(end,7:13);
@@ -169,19 +173,35 @@ if length(t_nas) > 1
         %% Prediction part
 
         index_imu   =  sum(t_nas(ii) >= t_imutemp);
+
+        % OLD NAS
         %[x_lin(ii,:),~,P_lin(:,:,ii)] = predictorLinear2(x_lin(ii-1,:),P_lin(:,:,ii-1),...
         %    dt_k,accelerometerMeasures(index_imu,:),xq(ii-1,1:4),nas.QLinear);
 
         %[xq(ii,:),P_q(:,:,ii)]       = predictorQuat(xq(ii-1,:),P_q(:,:,ii-1),...
         %    gyroscopeMeasures(index_imu,:),dt_k,nas.Qq);
+
         [x_lin(ii,:),~,P_lin(:,:,ii)] = predictorLinear2_UKF(x_lin(ii-1,:),P_lin(:,:,ii-1),...
             dt_k,accelerometerMeasures(index_imu,:),xq(ii-1,1:4),nas.QLinear);
 
-        [xq(ii,:),P_q(:,:,ii)]       = predictorQuat_UKF(xq(ii-1,:),P_q(:,:,ii-1),...
-            gyroscopeMeasures(index_imu,:),dt_k,nas.Qq);
+        % SCRUBBED: Use of quaternions in the unscented transform
+        % [xq(ii,:),P_q(:,:,ii)]       = predictorQuat_UKF(xq(ii-1,:),P_q(:,:,ii-1),...
+        %     gyroscopeMeasures(index_imu,:),dt_k,nas.Qq);
+
+        % P_q is not in actual quaternion-form, I can still use its
+        % components by converting them in Euler form within the function
+
+        % TO DO: predictor non deve riconverire da quat ad euler ma deve
+        % utilizzare lo storico Euler
+        [xq(ii,:),P_q(:,:,ii), euler(ii,:), eulerSetID(ii)] = predictorEuler_UKF(xq(ii-1,:),P_q(:,:,ii-1),...
+            gyroscopeMeasures(index_imu,:),dt_k,nas.Qq, euler(ii-1,:), eulerSetID(ii-1));
+        
+        
 
         %% Corrections
         %gps
+
+
 
         if norm(accelerometerMeasures(index_imu,:)) < 34 % around 3.5g
 
@@ -232,6 +252,7 @@ if length(t_nas) > 1
             sensorTot.pitot.lastindex = index_pit;
         end
 
+
         % Matrices Update
         x(ii,:) = [x_lin(ii,:),xq(ii,:)];
         P_c(1:6,1:6,ii)   = P_lin(:,:,ii);
@@ -259,6 +280,12 @@ if length(t_nas) > 1
     sensorTot.nas.time(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.time(2:end); % NAS time output
     sensorTot.nas.timestampPitotCorrection(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2)    = sensorData.nas.timestampPitotCorrection(2:end); % NAS time output
     sensorTot.nas.n_old = sensorTot.nas.n_old + size(sensorData.nas.states,1)-1;
+    
+    %%%%
+    sensorData.nas.euler = euler; % Auxiliary Euler angles
+    sensorData.nas.eulerSetID = eulerSetID; % Euler Set id: 313 or 212 or 131 
+    sensorTot.nas.euler(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2,:) = sensorData.nas.euler(2:end,:);    % Auxiliary Euler angles
+    sensorTot.nas.eulerSetID(sensorTot.nas.n_old:sensorTot.nas.n_old + size(sensorData.nas.states(:,1),1)-2) = sensorData.nas.euler(2:end,:); % Auxiliary Euler angles ID
 
     % For over/under-estimating
     sensorTot.nas.states(end,6) = sensorTot.nas.states(end,6)*contSettings.NAS.mult;
