@@ -12,6 +12,6 @@ sigmapts(:, 2:end) = x + [dist, -dist];
 %% Weights Computation
 weights = zeros(1, 2*n+1);
 weights(1) = k/(n+k);
-weights(2:end) = 0.5*(n+k);
+weights(2:end) = 0.5/(n+k);
 
 end

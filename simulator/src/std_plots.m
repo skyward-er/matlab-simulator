@@ -391,6 +391,31 @@ if settings.flagExportPLOTS == true
 end
 drawnow
 
+%% Position NED w.r.t time againts NAS
+figures.position_NED = figure('Name', 'Position NED','ToolBar','auto');
+
+subplot(3,1,1)
+plot(simOutput.t, simOutput.Y(:,1), 'DisplayName', '$Sim$'); hold on; grid on;
+plot(simOutput.sensors.nas.time, simOutput.sensors.nas.states(:, 1),'DisplayName','$est$')
+ylabel('$X_{north}$ [m]');
+legend
+
+subplot(3,1,2)
+plot(simOutput.t, simOutput.Y(:,2), 'DisplayName', '$Sim$'); hold on; grid on;
+plot(simOutput.sensors.nas.time, simOutput.sensors.nas.states(:, 2),'DisplayName','$est$')
+ylabel('$X_{est}$ [m]');
+legend
+
+subplot(3,1,3)
+plot(simOutput.t, -simOutput.Y(:,3), 'DisplayName', '$Sim$'); hold on; grid on;
+plot(simOutput.sensors.nas.time, -simOutput.sensors.nas.states(:, 3),'DisplayName','$est$')
+ylabel('$X_{up}$ [m]');
+xlabel('Time [s]');
+legend
+
+sgtitle('Position NED');
+drawnow
+
 %% Velocities NED w.r.t. time against NAS
 figures.velocities_NED = figure('Name', 'Velocities NED','ToolBar','auto');
 %

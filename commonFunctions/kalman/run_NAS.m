@@ -186,7 +186,9 @@ if length(t_nas) > 1
         % barometer
 
         index_bar   =  sum(t_nas(ii) >= t_barotemp);
-        [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometer(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar),nas.sigma_baro,nas.baro,environment.z0);
+        % [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometer(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar),nas.sigma_baro,nas.baro,environment.z0);
+        [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometerUKF(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar), ...
+                                                        nas.sigma_baro,nas.baro, environment.z0);
 
         % magnetometer
 
