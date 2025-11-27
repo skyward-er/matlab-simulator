@@ -69,7 +69,7 @@ ew = q_prev(3)/sin(phi/2);
 E_mat = [0 ew -ev eu; -ew 0 eu ev; ev -eu 0 ew; -eu -ev -ew 0];
 
 %PROPAGATION FUNCTION   
-f = @(x) (eye(4)*cos(phi/2) + E*sin(phi/2))*x;
+f = @(x) (eye(4)*cos(phi/2) + E_mat*sin(phi/2))*x;
 
 % W contains relative rotations in EAEA form (Euler Axis Euler Angle)
 W = chol(P_prev)*sqrt(UKF.n + UKF.w);   % W matrix for sigma points calculation
@@ -103,7 +103,7 @@ end
 % either an iterative method or an eig-related one can be used
 % however, both of them make the algorithm too heavy to be run online
 
-% CANNOT USE!!!
+% CANNOT USE!!! QUATERNIONS ARE NOT PART OF A VECTORIAL SPACE!
 % q = propagated_point_matrix*weights;
 % q = q/norm(q);
 % P = zeros(size(q_prev), size(q_prev));
