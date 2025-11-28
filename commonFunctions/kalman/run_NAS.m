@@ -174,10 +174,17 @@ if length(t_nas) > 1
 
             index_GPS   =  sum(t_nas(ii) >= t_gpstemp);
             if index_GPS~=sensorTot.gps.lastindex
-                [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionGPS(x_lin(ii,:),...
+                
+                % [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionGPS(x_lin(ii,:),...
+                %     P_lin(:,:,ii),sensorTot.gps.position_measures(index_GPS,1:2),...
+                %     sensorTot.gps.velocity_measures(index_GPS,1:2),nas.sigma_GPS,...
+                %     fix, environment.lat0, environment.lon0,nas.GPS.a,nas.GPS.b);
+
+                [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionGPSUKF(x_lin(ii,:),...
                     P_lin(:,:,ii),sensorTot.gps.position_measures(index_GPS,1:2),...
                     sensorTot.gps.velocity_measures(index_GPS,1:2),nas.sigma_GPS,...
                     fix, environment.lat0, environment.lon0,nas.GPS.a,nas.GPS.b);
+
             end
             sensorTot.gps.lastindex = index_GPS;
         end
@@ -186,9 +193,9 @@ if length(t_nas) > 1
         % barometer
 
         index_bar   =  sum(t_nas(ii) >= t_barotemp);
-        % [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometer(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar),nas.sigma_baro,nas.baro,environment.z0);
-        [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometerUKF(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar), ...
-                                                        nas.sigma_baro,nas.baro, environment.z0);
+        [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometer(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar),nas.sigma_baro,nas.baro,environment.z0);
+        % [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometerUKF(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar), ...
+        %                                                 nas.sigma_baro,nas.baro, environment.z0);
 
         % magnetometer
 
