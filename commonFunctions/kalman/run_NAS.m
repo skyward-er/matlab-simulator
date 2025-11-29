@@ -3,7 +3,7 @@ function [sensorData,sensorTot,nas] = run_NAS(Tf, mag_NED,sensorData,sensorTot,s
 % Author: Alejandro Montero
 % Co-Author: Alessandro Del Duca
 % Skyward Experimental Rocketry | ELC-SCS Dept | electronics@kywarder.eu
-% email: alejandro.montero@skywarder.eu, alessandro.delduca@skywarder.eu
+% email: alejandro.meontero@skywarder.eu, alessandro.delduca@skywarder.eu
 % Release date: 01/03/2021
 %
 
@@ -161,7 +161,9 @@ if length(t_nas) > 1
         %% Prediction part
 
         index_imu   =  sum(t_nas(ii) >= t_imutemp);
-        [x_lin(ii,:),~,P_lin(:,:,ii)] = predictorLinear2(x_lin(ii-1,:),P_lin(:,:,ii-1),...
+        % [x_lin(ii,:),~,P_lin(:,:,ii)] = predictorLinear2(x_lin(ii-1,:),P_lin(:,:,ii-1),...
+        %     dt_k,accelerometerMeasures(index_imu,:),xq(ii-1,1:4),nas.QLinear);
+        [x_lin(ii,:),~,P_lin(:,:,ii)] = predictorLinear2_UKF(x_lin(ii-1,:),P_lin(:,:,ii-1),...
             dt_k,accelerometerMeasures(index_imu,:),xq(ii-1,1:4),nas.QLinear);
 
         [xq(ii,:),P_q(:,:,ii)]       = predictorQuat(xq(ii-1,:),P_q(:,:,ii-1),...
@@ -193,9 +195,9 @@ if length(t_nas) > 1
         % barometer
 
         index_bar   =  sum(t_nas(ii) >= t_barotemp);
-        [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometer(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar),nas.sigma_baro,nas.baro,environment.z0);
-        % [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometerUKF(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar), ...
-        %                                                 nas.sigma_baro,nas.baro, environment.z0);
+        % [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometer(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar),nas.sigma_baro,nas.baro,environment.z0);
+        [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometerUKF(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar), ...
+                                                        nas.sigma_baro,nas.baro, environment.z0);
 
         % magnetometer
 

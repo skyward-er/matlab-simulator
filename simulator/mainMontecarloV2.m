@@ -63,6 +63,7 @@ flagSaveOffline = input('Do you want to save the results offline? (y/n): ','s');
 %% Run simulations
 
 N_sim = sensitivity.n;
+
 displayIter = sensitivity.displayIter;
 scenario = settings.scenario;
 
@@ -102,7 +103,7 @@ parfor ii = 1:N_sim
     save_thrust{ii}.ARB.K_vals = control_sensitivity.ABK_curve(ii,:);
     save_thrust{ii}.ARB.ref = control_sensitivity.ABK_ref(ii);
     save_thrust{ii}.NAS.mult = control_sensitivity.NAS_mult(ii);
-
+    ii
 end
 
 delete(pw)
@@ -128,7 +129,8 @@ for ii = 1:N_sim
     apogee.radius(ii) = save_thrust{ii}.apogee.radius;
 
     % NAS error
-    nas.error(ii, :) = mean(abs(save_thrust{ii}.sensors.nas.error), 1);
+    nas.error_mean(ii, :) = mean(abs(save_thrust{ii}.sensors.nas.error), 1);
+    nas.error_max(ii, :) = max(abs(save_thrust{ii}.sensors.nas.error));
     % horizontal speed at apogee
     idx_apo = save_thrust{ii}.apogee.idx;
     apogee.horizontalSpeed(ii) = norm(save_thrust{ii}.apogee.velocity_ned(1:2)); % this is in body frame, but as the last point is the apogee we should have only  horizontal velocity, so all the components must be taken

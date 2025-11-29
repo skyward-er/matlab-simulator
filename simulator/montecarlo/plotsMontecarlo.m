@@ -426,6 +426,39 @@ title('Parafoil trajectories')
 % title('vnorm')
 % hold on;
 % yline(mean(apogee.horizontalSpeedX),'--',['Mean = ',num2str(mean(apogee.horizontalSpeed))])
+%% NAS Error
+figure(Name='NAS Position Error');
+for ii = 1:N_sim
+    subplot(3, 1, 1)
+    scatter(nas.error_mean(ii, 1), ii, 10, 'filled', 'b'); hold on;
+    scatter(nas.error_mean(ii, 1) + nas.error_max(ii, 1), ii, 10, 'filled', 'r');
+    scatter(nas.error_mean(ii, 1) - nas.error_max(ii, 1), ii, 10, 'filled', 'r');
+    
+    subplot(3, 1, 2)
+    scatter(nas.error_mean(ii, 2), ii, 10, 'filled', 'b'); hold on;
+    scatter(nas.error_mean(ii, 2) + nas.error_max(ii, 2), ii, 10, 'filled', 'r');
+    scatter(nas.error_mean(ii, 2) - nas.error_max(ii, 2), ii, 10, 'filled', 'r');
+
+    subplot(3, 1, 3)
+    scatter(nas.error_mean(ii, 3), ii, 10, 'filled', 'b'); hold on;
+    scatter(nas.error_mean(ii, 3) + nas.error_max(ii, 3), ii, 10, 'filled', 'r');
+    scatter(nas.error_mean(ii, 3) - nas.error_max(ii, 3), ii, 10, 'filled', 'r');
+end
+
+subplot(3, 1, 1);
+ylabel('N sim')
+xlabel('error')
+title('North position error')
+
+subplot(3, 1, 2);
+ylabel('N sim')
+xlabel('error')
+title('East position error')
+
+subplot(3, 1, 3);
+ylabel('N sim')
+xlabel('error')
+title('Down position error')
 
 %% functions
 function drawCircle(center,radius,name,varargin)

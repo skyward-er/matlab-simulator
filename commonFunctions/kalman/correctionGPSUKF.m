@@ -15,7 +15,7 @@ GPS_meas            = [1e3*pGPS, vGPS]';
 x_pred              = reshape(x_pred, [], 1);
 
 %% Propagate Sigma Points
-[sigma, w]      = GenSigmaPoints(x_pred, P_pred, n, 1-n);
+[sigma, w]      = GenSigmaPoints(x_pred, P_pred, n, 3-n);
 GPS_pts(1, :)   = sigma(1, :)/a + lat0;
 GPS_pts(2, :)   = sigma(2, :)./(b*cosd(GPS_pts(1,:))) + lon0;
 GPS_pts(1:2, :) = 1e3*GPS_pts(1:2, :);
@@ -41,7 +41,6 @@ if flag_square_root
 else
     %% Classic Implementation of the UKF
     Pyy             =   (GPS_pts - GPS_hat)*diag(w)*(GPS_pts - GPS_hat)' + R;
-    Pxy             =   (sigma - x_pred )*diag(w)*(GPS_pts - GPS_hat)';
     if cond(Pyy) > threshold
         K               = Pxy/Pyy;
         x               = x_pred + K*(GPS_meas - GPS_hat);   
