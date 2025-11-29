@@ -1,4 +1,4 @@
-function [P_measured, t] = run_PT(P_real, t_all)
+function [P_measured, t] = run_PT_model(P_real, t_all)
 
 % Sensor's characteristics
 frequency = 50;

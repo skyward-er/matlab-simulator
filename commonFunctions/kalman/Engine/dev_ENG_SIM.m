@@ -5,7 +5,7 @@ rng('shuffle')
 
 
 %% Extract data
-plots = true; % plots = true to display plots, plots = false to hide
+plots = false; % plots = true to display plots, plots = false to hide
 addpath("LOGS")
 window = 50;
 
@@ -93,10 +93,10 @@ end
 
 
 %% Engine simulation
-c_star = 1567;      % Characteristic velocity
-r_t = 15.8*1e-3;    % Nozzle throat radius
-A_t = pi*r_t^2;     % Nozzle throat area
-m0 = 35;            % Initial mass
+c_star = 1567;      % Characteristic velocity [m/s]
+r_t = 15.8*1e-3;    % Nozzle throat radius [m]
+A_t = pi*r_t^2;     % Nozzle throat area [m^2]
+m0 = 35;            % Initial mass [kg]
 
 m_dot = A_t * P_gen * 1e5 ./ c_star; % Mass flow rate
 mass = m0*ones(n_gen, l_all);
@@ -104,7 +104,7 @@ mass = mass - cumtrapz(t_all, m_dot, 2);
 
 
 %% PT simulation
-[P_measured, t_PT] = run_PT(P_gen, t_all);
+[P_measured, t_PT] = run_PT_model(P_gen, t_all);
 
 
 %% MEA simulation
@@ -118,7 +118,7 @@ for k = 1:n_gen
     stateMEA.mass = m0;
 
     for ii = 1 : size(P_measured, 2)
-        stateMEA = run_MEA(stateMEA, P_measured(k, ii));
+        stateMEA = run_MEA_test(stateMEA, P_measured(k, ii));
     end
 
     mass_MEA(k, :) = stateMEA.mass;
@@ -141,3 +141,7 @@ if plots
         legend()
     end
 end
+
+%% Running MC sim
+[mass_true_mc, mass_MEA_mc, P_MEA_mc, ics_mc, t_PT] = run_monte_carlo(c_star, A_t, m0, P_gen, P_measured, t_all, n_gen, l_all, mass_MEA);
+%mc_plots(mass_true_mc, mass_MEA_mc, ics_mc,t_all, t_PT);

@@ -1,4 +1,4 @@
-function [stateMEA] = run_MEA_test(stateMEA, P_meas)
+function [stateMEA] = run_MEA_test_mc(stateMEA, P_meas, c_star, A_t)
 %{
     Common units:
     - length    [m];
@@ -23,9 +23,11 @@ dt_mea = 1/50;
 
 
 % --- Constants ---
-c_star = 1567;      % Characteristic velocity
-r_t = 15.8*1e-3;    % Nozzle throat radius
-A_t = pi*r_t^2;     % Nozzle throat area
+%c_star = 1567;      % Characteristic velocity
+%r_t = 15.8*1e-3;    % Nozzle throat radius
+%A_t = pi*r_t^2;     % Nozzle throat area
+
+% updated mass feasibility checks
 mass_max = 50;
 mass_min = 20;
 
