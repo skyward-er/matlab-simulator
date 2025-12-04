@@ -142,7 +142,7 @@ if settings.launchWindow
     launchWindow;
     launchFlag = false;
 else
-    launchFlag = true;
+    launchFlag = false;
 end
 
 
@@ -599,7 +599,7 @@ struct_out.sensors.ada.t_para = settings.ada.t_para;
 struct_out.sensors.nas.t_apogee = settings.nas.t_nas;
 if settings.scenario ~= "descent"
     % struct_out.sensors.mea.mass_offset = settings.mass_offset;
-    struct_out.sensors.mea.true_mass_at_shutdown = dataRecall.true_mass(lastAscentIndex-10);
+    struct_out.sensors.mea.true_mass_at_shutdown = dataRecall.true_mass(end-10);
 end
 struct_out.sensors.nas.error = sensorTot.nas.error;
 

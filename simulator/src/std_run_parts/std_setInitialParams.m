@@ -218,6 +218,7 @@ sensorData.mea.time = 0;
 sensorData.mea.estimated_mass = rocket.mass(1);
 sensorData.mea.estimated_pressure = 0;
 sensorData.mea.predicted_apogee = 0;
+sensorTot.mea.t_shutdown = -1;
 settings.t_shutdown = Inf;
 settings.mea.counter_shutdown = 0;
 settings.flagMEAInit = false;
