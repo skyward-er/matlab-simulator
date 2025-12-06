@@ -460,6 +460,49 @@ ylabel('N sim')
 xlabel('error')
 title('Down position error')
 
+figure(Name='NAS Quaternion Error');
+for ii = 1:N_sim
+    subplot(4, 1, 1)
+    scatter(nas.error_mean(ii, 7), ii, 10, 'filled', 'b'); hold on;
+    scatter(nas.error_max(ii, 7), ii, 10, 'filled', 'r');
+    scatter(-nas.error_max(ii, 7), ii, 10, 'filled', 'r');
+    
+    subplot(4, 1, 2)
+    scatter(nas.error_mean(ii, 8), ii, 10, 'filled', 'b'); hold on;
+    scatter(nas.error_max(ii, 8), ii, 10, 'filled', 'r');
+    scatter(-nas.error_max(ii, 8), ii, 10, 'filled', 'r');
+
+    subplot(4, 1, 3)
+    scatter(nas.error_mean(ii, 9), ii, 10, 'filled', 'b'); hold on;
+    scatter(nas.error_max(ii, 9), ii, 10, 'filled', 'r');
+    scatter(-nas.error_max(ii, 9), ii, 10, 'filled', 'r');
+
+    subplot(4, 1, 4)
+    scatter(nas.error_mean(ii, 10), ii, 10, 'filled', 'b'); hold on;
+    scatter(nas.error_max(ii, 10), ii, 10, 'filled', 'r');
+    scatter(-nas.error_max(ii, 10), ii, 10, 'filled', 'r');
+end
+
+subplot(4, 1, 1);
+ylabel('N sim')
+xlabel('error')
+title('qx')
+
+subplot(4, 1, 2);
+ylabel('N sim')
+xlabel('error')
+title('qy')
+
+subplot(4, 1, 3);
+ylabel('N sim')
+xlabel('error')
+title('qz')
+
+subplot(4, 1, 4);
+ylabel('N sim')
+xlabel('error')
+title('qw')
+
 %% functions
 function drawCircle(center,radius,name,varargin)
     
