@@ -171,7 +171,7 @@ if length(t_nas) > 1
         % [xq(ii,:),P_q(:,:,ii)]       = predictorQuat(xq(ii-1,:),P_q(:,:,ii-1),...
         %     gyroscopeMeasures(index_imu,:),dt_k,nas.Qq);
 
-        [xq(ii,:),P_q(:,:,ii)]       = predictorQuat_UKF(xq(ii-1,:),P_q(:,:,ii-1),...
+        [xq(ii,:),P_q(:,:,ii)]       = predictorQuat_UKF3(xq(ii-1,:),P_q(:,:,ii-1),...
             gyroscopeMeasures(index_imu,:),dt_k,nas.Qq);
 
         %% Corrections
@@ -200,9 +200,9 @@ if length(t_nas) > 1
         % barometer
 
         index_bar   =  sum(t_nas(ii) >= t_barotemp);
-        % [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometer(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar),nas.sigma_baro,nas.baro,environment.z0);
-        [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometerUKF_SR(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar), ...
-                                                        nas.sigma_baro,nas.baro, environment.z0);
+        [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometer(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar),nas.sigma_baro,nas.baro,environment.z0);
+        %[x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometerUKF_SR(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar), ...
+        %                                                 nas.sigma_baro,nas.baro, environment.z0);
 
         % magnetometer
 
