@@ -1,5 +1,19 @@
 function [euler,eulerSetID] = eulerCheck(euler,eulerSetID)
 
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+
+
 exclusion_zone = deg2rad(10);
 
 

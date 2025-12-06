@@ -184,17 +184,15 @@ if length(t_nas) > 1
         [x_lin(ii,:),~,P_lin(:,:,ii)] = predictorLinear2_UKF(x_lin(ii-1,:),P_lin(:,:,ii-1),...
             dt_k,accelerometerMeasures(index_imu,:),xq(ii-1,1:4),nas.QLinear);
 
-        % SCRUBBED: Use of quaternions in the unscented transform
-        % [xq(ii,:),P_q(:,:,ii)]       = predictorQuat_UKF(xq(ii-1,:),P_q(:,:,ii-1),...
-        %     gyroscopeMeasures(index_imu,:),dt_k,nas.Qq);
+        [xq(ii,:),P_q(:,:,ii)]        = predictorQuat_UKF(xq(ii-1,:),P_q(:,:,ii-1),...
+            gyroscopeMeasures(index_imu,:),dt_k,nas.Qq);
 
         % P_q is not in actual quaternion-form, I can still use its
         % components by converting them in Euler form within the function
 
-        % TO DO: predictor non deve riconverire da quat ad euler ma deve
-        % utilizzare lo storico Euler
-        [xq(ii,:),P_q(:,:,ii), euler(ii,:), eulerSetID(ii)] = predictorEuler_UKF(xq(ii-1,:),P_q(:,:,ii-1),...
-            gyroscopeMeasures(index_imu,:),dt_k,nas.Qq, euler(ii-1,:), eulerSetID(ii-1));
+        % SCRUBBED - Euler Angle version
+        % [xq(ii,:),P_q(:,:,ii), euler(ii,:), eulerSetID(ii)] = predictorEuler_UKF(xq(ii-1,:),P_q(:,:,ii-1),...
+        %     gyroscopeMeasures(index_imu,:),dt_k,nas.Qq, euler(ii-1,:), eulerSetID(ii-1));
         
         
 

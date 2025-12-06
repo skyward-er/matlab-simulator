@@ -103,7 +103,6 @@ parfor ii = 1:N_sim
     save_thrust{ii}.ARB.K_vals = control_sensitivity.ABK_curve(ii,:);
     save_thrust{ii}.ARB.ref = control_sensitivity.ABK_ref(ii);
     save_thrust{ii}.NAS.mult = control_sensitivity.NAS_mult(ii);
-    ii
 end
 
 delete(pw)

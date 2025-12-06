@@ -23,6 +23,7 @@ GPS_hat         = GPS_pts*w';
 %% Correction
 R       =   sigma_GPS^2.*[1 1 max(30,abs(vGPS))];
 Pxy     =   (sigma - x_pred )*diag(w)*(GPS_pts - GPS_hat)';
+
 [~, Skf_t]      = qr( (sqrt(w(2:end)).*(sigma(:, 2:end) - x_pred))', "econ" );
 Skf_t           = chol(Skf_t'*Skf_t + w(1)*(sigma(:, 1) - x_pred)*(sigma(:, 1) - x_pred)');
 [~,Szf_t]       = qr( [sqrt(w(2:end)).*(GPS_pts(:,2:end) - GPS_hat), sqrt(R)]', "econ" );

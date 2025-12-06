@@ -5,23 +5,10 @@ function [x_pred,P_pred, sigma]=predictorQuat_UKF(x,P,w,dt,Q)
 % email: domenico.acierno@skywarder.eu
 % Release date: 12/11/2025
 
-% SCRUBBED
-% SCRUBBED
-% SCRUBBED
-% SCRUBBED
-% SCRUBBED
-% SCRUBBED
-% SCRUBBED
-% SCRUBBED
-% SCRUBBED
-% SCRUBBED
-% SCRUBBED
-% SCRUBBED
-
 %-----------DESCRIPTION OF FUNCTION:------------------
 
-%STATE SPACE ESTIMATOR (PREDICTION STEP) FOR ATTITUDE DYNAMICS
-%THE DYNAMIC SYSTEM DESCRIPTION IS:
+% STATE SPACE ESTIMATOR (PREDICTION STEP) FOR ATTITUDE DYNAMICS
+% THE DYNAMIC SYSTEM DESCRIPTION IS:
 %
 %       x' = f(x,u) + w         F=df/dx --> F IS THE GRADIENT OF f
 %                                           EVALUATED AT EACH ESTIMATION 
@@ -58,20 +45,18 @@ beta_prev   = x(5:7);                                 %Definition of the previou
 
 omega       = w - beta_prev;                          %Computation of real w (no bias)
 
-% equivalent euler axis - euler angle form of the rotation
-phi = 2*acos(q_prev(4));
-eu = q_prev(1)/sin(phi/2); 
-ev = q_prev(2)/sin(phi/2); 
-ew = q_prev(3)/sin(phi/2);
+% % equivalent euler axis - euler angle form of the rotation
+% phi = 2*acos(q_prev(4));
+% eu = q_prev(1)/sin(phi/2); 
+% ev = q_prev(2)/sin(phi/2); 
+% ew = q_prev(3)/sin(phi/2);
+% %COMPUTATION OF PROPAGATION MATRIX FOR QUATERNION.
+% E_mat = [0 ew -ev eu; -ew 0 eu ev; ev -eu 0 ew; -eu -ev -ew 0];
+% %PROPAGATION FUNCTION   
+% f = @(x) (eye(4)*cos(phi/2) + E_mat*sin(phi/2))*x;
 
 
-%COMPUTATION OF PROPAGATION MATRIX FOR QUATERNION.
-E_mat = [0 ew -ev eu; -ew 0 eu ev; ev -eu 0 ew; -eu -ev -ew 0];
-
-%PROPAGATION FUNCTION   
-f = @(x) (eye(4)*cos(phi/2) + E_mat*sin(phi/2))*x;
-
-% W contains relative rotations in EAEA form (Euler Axis Euler Angle)
+% W contains relative rotations 
 W = chol(P_prev)*sqrt(UKF.n + UKF.w);   % W matrix for sigma points calculation
 weights = zeros(2*size(q_prev)+1,1);    % pre allocation of weights vector
 
@@ -117,8 +102,9 @@ end
 %                  zeros(3,3)   eye(3)];
 % P_pred = P + G*Q*G';
 
-x_pred(1:4) = q_pred';
 
+
+x_pred(1:4) = q_pred';
 x_pred(5:7) = beta_prev;
 
 end

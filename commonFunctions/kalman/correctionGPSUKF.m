@@ -24,6 +24,7 @@ GPS_hat         = GPS_pts*w';
 %% Correction
 R       =   sigma_GPS^2.*[1 1 max(30,abs(vGPS))];
 Pxy     =   (sigma - x_pred )*diag(w)*(GPS_pts - GPS_hat)';
+
 Pyy             =   (GPS_pts - GPS_hat)*diag(w)*(GPS_pts - GPS_hat)' + R;
 if cond(Pyy) > threshold
     K               = Pxy/Pyy;

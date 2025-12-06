@@ -161,17 +161,12 @@ if length(t_nas) > 1
         %% Prediction part
 
         index_imu   =  sum(t_nas(ii) >= t_imutemp);
-
-        % [x_lin(ii,:),~,P_lin(:,:,ii)] = predictorLinear2(x_lin(ii-1,:),P_lin(:,:,ii-1),...
+        [x_lin(ii,:),~,P_lin(:,:,ii)] = predictorLinear2(x_lin(ii-1,:),P_lin(:,:,ii-1),...
+            dt_k,accelerometerMeasures(index_imu,:),xq(ii-1,1:4),nas.QLinear);
+        % [x_lin(ii,:),~,P_lin(:,:,ii)] = predictorLinear2_UKF(x_lin(ii-1,:),P_lin(:,:,ii-1),...
         %     dt_k,accelerometerMeasures(index_imu,:),xq(ii-1,1:4),nas.QLinear);
 
-        [x_lin(ii,:),~,P_lin(:,:,ii)] = predictorLinear2_UKF(x_lin(ii-1,:),P_lin(:,:,ii-1),...
-            dt_k,accelerometerMeasures(index_imu,:),xq(ii-1,1:4),nas.QLinear);
-
-        % [xq(ii,:),P_q(:,:,ii)]       = predictorQuat(xq(ii-1,:),P_q(:,:,ii-1),...
-        %     gyroscopeMeasures(index_imu,:),dt_k,nas.Qq);
-
-        [xq(ii,:),P_q(:,:,ii)]       = predictorQuat_UKF3(xq(ii-1,:),P_q(:,:,ii-1),...
+        [xq(ii,:),P_q(:,:,ii)]       = predictorQuat(xq(ii-1,:),P_q(:,:,ii-1),...
             gyroscopeMeasures(index_imu,:),dt_k,nas.Qq);
 
         %% Corrections
@@ -182,15 +177,15 @@ if length(t_nas) > 1
             index_GPS   =  sum(t_nas(ii) >= t_gpstemp);
             if index_GPS~=sensorTot.gps.lastindex
                 
-                % [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionGPS(x_lin(ii,:),...
-                %     P_lin(:,:,ii),sensorTot.gps.position_measures(index_GPS,1:2),...
-                %     sensorTot.gps.velocity_measures(index_GPS,1:2),nas.sigma_GPS,...
-                %     fix, environment.lat0, environment.lon0,nas.GPS.a,nas.GPS.b);
-
-                [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionGPSUKF_SR(x_lin(ii,:),...
+                [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionGPS(x_lin(ii,:),...
                     P_lin(:,:,ii),sensorTot.gps.position_measures(index_GPS,1:2),...
                     sensorTot.gps.velocity_measures(index_GPS,1:2),nas.sigma_GPS,...
                     fix, environment.lat0, environment.lon0,nas.GPS.a,nas.GPS.b);
+
+                % [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionGPSUKF_SR(x_lin(ii,:),...
+                %     P_lin(:,:,ii),sensorTot.gps.position_measures(index_GPS,1:2),...
+                %     sensorTot.gps.velocity_measures(index_GPS,1:2),nas.sigma_GPS,...
+                %     fix, environment.lat0, environment.lon0,nas.GPS.a,nas.GPS.b);
 
             end
             sensorTot.gps.lastindex = index_GPS;
@@ -200,9 +195,9 @@ if length(t_nas) > 1
         % barometer
 
         index_bar   =  sum(t_nas(ii) >= t_barotemp);
-        % [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometer(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar),nas.sigma_baro,nas.baro,environment.z0);
-        [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometerUKF_SR(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar), ...
-                                                        nas.sigma_baro,nas.baro, environment.z0);
+        [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometer(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar),nas.sigma_baro,nas.baro,environment.z0);
+        % [x_lin(ii,:),P_lin(:,:,ii),~]     = correctionBarometerUKF_SR(x_lin(ii,:),P_lin(:,:,ii),sensorTot.barometer.pressure_measures(index_bar), ...
+        %                                                 nas.sigma_baro,nas.baro, environment.z0);
 
         % magnetometer
 
@@ -228,7 +223,7 @@ if length(t_nas) > 1
                     if settings.nas.pitot_correction 
                         P_c (:, :, ii) = [P_lin(:, :, ii), zeros(6, 6); zeros(6, 6), P_q(:, :, ii)];
                      %   [x_lin(ii, :), P_lin(:,:,ii)] = correctionPitot([x_lin(ii, :), xq(ii, :)],P_lin(:, :, ii), sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot_static, nas.sigma_pitot_dynamic,nas.baro);
-                         [x_lin(ii, :), P_lin(:,:,ii)] = correctionPitotQuat([x_lin(ii, :), xq(ii, :)],P_c(:, :, ii), sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot_static, nas.sigma_pitot_dynamic,nas.baro, environment);
+                        [x_lin(ii, :), P_lin(:,:,ii)] = correctionPitotQuat([x_lin(ii, :), xq(ii, :)],P_c(:, :, ii), sensorTot.pitot.dynamic_pressure(index_pit,:),sensorTot.pitot.static_pressure(index_pit,:),nas.sigma_pitot_static, nas.sigma_pitot_dynamic,nas.baro, environment);
                     end
                 end
             end

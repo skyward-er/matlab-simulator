@@ -75,7 +75,7 @@ P = zeros(length(x_prev), length(x_prev));
 for i = 1:2*length(x_prev)+1
     % modified state error covariance matrix, to avoid unphysical
     % negative eigenvalues
-    P = P + weights(i)*(propagated_point_matrix(:,i) - propagated_point_matrix(:,1))*(propagated_point_matrix(:,i) - propagated_point_matrix(:,1))';
+    P = P + weights(i)*(propagated_point_matrix(:,i) - x)*(propagated_point_matrix(:,i) - x)';
 end
 
 P = P + Q;

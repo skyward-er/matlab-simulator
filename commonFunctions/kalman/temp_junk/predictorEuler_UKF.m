@@ -1,4 +1,17 @@
-function [x_pred, P_pred, euler, eulerSetID]=predictorEuler_UKF(x,P,w,dt,Q, euler, eulerSetID)
+function [x_pred, P_pred, euler, eulerSetID]=predictorEuler_UKF(x,P,w,dt,Q, euler, eulerSetID)s
+
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
+% SCRUBBED
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % WIP NOTES:
