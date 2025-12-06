@@ -1,4 +1,4 @@
-function [x_pred,P_pred]=predictorQuat_UKF3(x,P,w,dt,Q)
+function [x_pred,P_pred]=predictorQuat_UKF(x,P,w,dt,Q)
 
 % Author: Domenico Raffaele Acierno
 % Skyward Experimental Rocketry | GNC Dept 
