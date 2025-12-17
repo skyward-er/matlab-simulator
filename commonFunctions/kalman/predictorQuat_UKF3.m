@@ -125,6 +125,7 @@ end
 
 x_pred(1:4) = qtrial;
 x_pred(5:7) = beta_prev;
+x_pred      = reshape(x_pred, size(x, 1), []);
 
 P2 = P;
 P = zeros(3,3);

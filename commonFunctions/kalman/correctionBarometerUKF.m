@@ -2,6 +2,7 @@ function [x,P,y_res] = correctionBarometerUKF(x_pred,P_pred, p_meas, sigma_baro,
 
 %% Define Parameters
 threshold       = 10e-11;
+x_shape         = size(x_pred);
 x_pred          = reshape(x_pred, [], 1);
 
 %% Propagate Sigma Points
@@ -28,6 +29,7 @@ else
     y_res           = -1;
 end
 
-
+%%% Reshape to same input shape
+x = reshape(x, x_shape(1), []);
 
 end

@@ -11,6 +11,7 @@ end
 threshold           = 10e-11;
 n                   = length(x_pred);
 GPS_meas            = [1e3*pGPS, vGPS]';
+x_shape             = size(x_pred);
 x_pred              = reshape(x_pred, [], 1);
 
 %% Propagate Sigma Points
@@ -37,5 +38,9 @@ else
     P               = P_pred;
     y_res           = -1;
 end
+
+%%% Reshape to the same input shape
+x               = reshape(x, x_shape(1), []);
+y_res           = reshape(y_res, x_shape(1), []);
 
 end

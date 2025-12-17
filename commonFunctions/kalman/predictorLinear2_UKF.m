@@ -80,4 +80,7 @@ end
 
 P = P + Q;
 
+%%% Reshape to same input shape
+x = reshape(x, size(x_prev, 1), []);
+
 end

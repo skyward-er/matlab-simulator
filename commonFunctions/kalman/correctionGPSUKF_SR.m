@@ -10,6 +10,7 @@ end
 %% Data used
 n                   = length(x_pred);
 GPS_meas            = [1e3*pGPS, vGPS]';
+x_shape             = size(x_pred);
 x_pred              = reshape(x_pred, [], 1);
 
 %% Propagate Sigma Points
@@ -35,4 +36,9 @@ x               = x_pred + K*(GPS_meas - GPS_hat);
 P               = Skf_t'*Skf_t + -U*diag(ones(size(U, 2),1))*U';
 y_res           = GPS_meas - GPS_hat;
 % da vedere se tenere o no! Semanticamente le ho cambiato significato
+
+%%% Reshape to the same input shape
+x               = reshape(x, x_shape(1), []);
+y_res           = reshape(y_res, x_shape(1), []);
+
 end

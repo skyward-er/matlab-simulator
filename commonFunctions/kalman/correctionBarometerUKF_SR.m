@@ -2,6 +2,7 @@ function [x,P,y_res] = correctionBarometerUKF_SR(x_pred,P_pred, p_meas, sigma_ba
 
 %% Data used
 n                   = length(x_pred);
+x_shape             = size(x_pred);
 x_pred              = reshape(x_pred, [], 1);
 
 %% Propagate Sigma Points
@@ -22,4 +23,7 @@ U               = K*Szf_t';
 x               = x_pred + K*(p_meas - pz_hat);
 P               = Skf_t'*Skf_t + -U*diag(ones(size(U, 2),1))*U';
 y_res           = -1;
+
+%%% Reshape to same input shape
+x               = reshape(x, x_shape(1), []);
 end
