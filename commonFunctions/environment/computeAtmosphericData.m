@@ -34,6 +34,8 @@ if exist('conf', 'var') && ~isempty(conf)
     T0      = conf.T0;
     H0      = conf.H0;
 else % use default config
+    warning("computeAtmosphericData is using ITS OWN " + ...
+        "defaults values declared INSIDE THE FUNCTION")
     g0      = 9.80665;
     gamma   = 1.4;
     beta    = 1.458e-6;
